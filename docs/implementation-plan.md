@@ -10,11 +10,29 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-09): 핵심 user Glance owned DownloadImageRecord.** 고정 Source26파일·86 AST·26계약에서 raw constructor→필수 metadata fetch→새 private ID binary GET→buffer/writer/file/stream 네 모드와 raw checksum 전체 흐름을 확인했습니다. 기존 capture·Record 응답 투영·고정 GET·복사·Gophercloud fixture를 재사용해 Service/Connection과 concrete 옵션을 구현 중이며 테스트·Python/Go 비교 문서를 병행합니다. 이번 Download1행은 최종 검증 전까지 unresolved이며 전체290/3,362를 유지합니다. 현대 public `create_image`20파일 전체 graph·기존12계약도 계속 추적합니다.
+**현재 단계 (2026-10-09): 핵심 user Glance owned ImageRecord download 검증 완료.** public `download_image`의 full raw constructor·필수 metadata fetch·fetched private ID binary GET·file/writer/buffer/stream 네 모드·raw checksum/factory의 전체 finite26계약을 닫아 전체291/3,362입니다. Stage/Import/Upload/Download4개 public 데이터 workflow를 완료했습니다. 다음은 현대 public `create_image`의20파일 전체 graph·기존12계약이며, 공통 metadata 생성이나 leaf import만으로 완료하지 않습니다. Source에 없는 initial-ID equality·binary206 거부·최종 GET·binary Record translation·stream 자동 검증을 합성하지 않습니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord upload1개, 전체289→290(+1)·핵심215→216/2,292·Glance53→54/120.** `Service.UploadImageRecord`와 `Connection`의 같은 facade가 전체 raw constructor·65필드 descriptor view·metadata 생성/응답 변환·borrowed data·기본 total-size 추론·signed size·한 번의 binary PUT를 처리합니다. 명시 formal formats는 Python truthiness로 precheck하고 이후 hook/properties의 raw overrides에 재검사를 넣지 않습니다. name·형식·visibility 기본값·필수 Reader·strict enum을 추가하지 않으며 nil Data는 빈 PUT입니다. 초기/최종 GET·PUT 응답 translation·status gate·checksum·Task/Swift/import·wait·rollback·자동 삭제는 없습니다. [Python/Go 비교·독립 main](../image/image-record-upload.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-upload-완료)에 concrete10옵션·Record/Metadata/Uploaded와 후행 실패를 설명했습니다.
+**최신 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
+
+새28그룹197사례 + 기존385그룹2736 = **집중 race413그룹2933사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 download/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/native Download/Record/Connection fixture, private capture·descriptor projection·prepared fetch·fixed request/native retry·borrowed writer chunk-copy·response body guard 엔진을 재사용했습니다. 별도 HTTP fixture 서버나 builder/interface 확장 책임을 추가하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
+
+Download 전용 감사의 pinned Source16Python+10Glance파일·86 AST spans·26개 새 계약을 검토했습니다. 다른551 reviews와 legacy `DownloadTo`10계약·18개 test refs·기존 API profile·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,712·go_mapping291·review unresolved260·unsupported1이며 catalog unresolved3,070에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 뜻하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-download-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 Source audit SHA256 `4a9a0de7f6dc62d094191acbb93dbcff7c2cc6e4dbf123a66f8ec4afeecc5102`입니다.
+
+중간 계획 `ad82f1ee`·defaults/hash/license `76fcb99a`·workflow 공개 API `01423c67`를 의미 있는 작은 commit으로 main에 push했습니다. 테스트·사용 문서·최종 판정은 각각 별도 작은 commit으로 관리합니다. 이 download 단위의 정확한 revision 원격 설치·main2·라이선스16개 일치 결과는 후속 root 검증으로 기록합니다.
+
+Resource raw map/JSON과 owned private Record는 option callback 전에 snapshot하고 declared65필드·properties/current location을 project합니다. valid metadata object는 sparse overlay/clean하며 fetched id가 바뀌면 후속 binary target에도 적용합니다. invalid JSON syntax는 pending state와 실제 metadata receipt/header를 보존하고 valid nonobject·descriptor·fetched identity 오류는 binary 전에 멈춥니다. public view/Wire/self/file 수정은 target을 바꾸지 않으며 이전 private borrowed data도 새 binary payload로 대체하지 않습니다.
+
+hash fields는 type=None raw JSON이므로 algorithm과 expected의 Python truthiness를 유지합니다. truthy primary pair에서만 PythonString algorithm으로 factory를 한 번 호출하고 unsupported sentinel은 SDK MD5로 metadata checksum/actual Content-MD5 fallback을 선택합니다. 그 밖의 factory 오류나 nil hash는 binary 접수 뒤 소비 전에 visible합니다. 기본16 algorithm의 MD5/SHA1/SHA2/truncation/SHA3/BLAKE2/SHAKE·대소문자/명시 alias를 지원하고 임의 OpenSSL registry를 완료로 주장하지 않습니다. BLAKE2 x/crypto v0.55.0·indirect x/sys v0.47.0의 BSD-3-Clause 원문2개를 추가해 배포 라이선스/고지는16개 파일이며, 기존14개 원격 기록은 당시 증거로 유지합니다.
+
+소비 후 exact lowercase hex와 raw expected를 비교하며 nonstring truthy expected는 full transfer 뒤 mismatch입니다. SHAKE는 stream-only 선택에 성공하지만 consumed mode는 전체 copy 후 length-required 오류를 반환합니다. EOF+successful write일 때만 Complete/Actual을 기록하고 Close-only 오류는 완료 proof를 보존합니다. stream-only의 BytesWritten/Complete/Verified는 caller 소비 뒤에도 자동 갱신하지 않습니다. exact Algorithm md5의 raw ContentMD5/CompatibilityHeader만 Source header 교체를 project하며 실제 binary Header는 독립 보존합니다.
+
+Output/path는 Stream보다 우선하고 borrowed writer는 Seek/Truncate/Flush/Close하지 않습니다. SDK Filename은 fetch→binary GET→hash 선택 뒤 os.Create/close하며 partial 파일을 지우지 않습니다. buffer는 전체 owned bytes와 실패시 partial bytes를 반환하고 기본 memory cap을 추가하지 않습니다. chunk는1byte..64MiB로 제한하며 ordered preference의 empty/comma/control/repeats는 valid UTF8이면 한 query 값으로 encode합니다. actual200..399/206/204를 받아들이고 Go native400..599 오류는 Source binary의 quiet raw HTTP 응답과 명시적으로 구분합니다. safe prebody native retry/reauth·live auth를 유지하고 accepted body 소비를 재시작하지 않습니다.
+
+Stage/Import/Upload/Download4개 public 데이터 workflow의 finite owned graph를 완료했습니다. 기존 public Stage28/Import28/Upload30 계약과 현대 public `create_image`20파일 전체 graph·12계약은 보존합니다. 다음은 현대 whole create의 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup 전체 분기입니다. 별도 cloud download wrapper와 SDK-R1/C1/S1을 lower Download 완료에 포함하지 않습니다.
+
+**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord upload1개, 전체289→290(+1)·핵심215→216/2,292·Glance53→54/120.** `Service.UploadImageRecord`와 `Connection`의 같은 facade가 전체 raw constructor·65필드 descriptor view·metadata 생성/응답 변환·borrowed data·기본 total-size 추론·signed size·한 번의 binary PUT를 처리합니다. 명시 formal formats는 Python truthiness로 precheck하고 이후 hook/properties의 raw overrides에 재검사를 넣지 않습니다. name·형식·visibility 기본값·필수 Reader·strict enum을 추가하지 않으며 nil Data는 빈 PUT입니다. 초기/최종 GET·PUT 응답 translation·status gate·checksum·Task/Swift/import·wait·rollback·자동 삭제는 없습니다. [Python/Go 비교·독립 main](../image/image-record-upload.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-upload-완료)에 concrete10옵션·Record/Metadata/Uploaded와 후행 실패를 설명했습니다.
 
 새23그룹151사례 + 기존344그룹2480 = **집중 race367그룹2631사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 upload/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,148개 SHA256 `c36b09fce4c592dbc54b9ef68d2c62bb1182a9790e2236611816e5617c3c84f2`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 taskCore/Record/Connection/HTTP fault/native upload/guard fixture, JSON snapshot·descriptor projection·raw property flattening·response transport·Stage size inference·shared binary 엔진을 재사용했습니다. metadata 생성은 공통 private 기반으로 구성하며 별도 HTTP 서버/전송 엔진이나 builder를 요구하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
 
@@ -30,7 +48,7 @@ Upload 전용 감사의 pinned Source26파일·67 AST spans·20개 새 계약을
 
 PUT는 opaque 접수여서 생성 Record의 current/original/dirty·ImportMethods·status·location·Metadata/Wire/Envelope를 바꾸지 않습니다. ID/seek/read/transport/HTTP 실패도 생성 Record/Metadata를 보존하고 Uploaded는 실제 accepted PUT 증거만 유지합니다. 고정 Source metadata는 HTTP 오류를 raise하지만 Image.upload PUT는 별도 translate/raise 없이 raw 응답을 반환합니다. Go native400..599 오류와 accepted200..399·physical Read/Close/context/source 부분 receipt 정책은 명시적 차이입니다. 같은 공개 metadata 입력의 public visibility/foreign owner admin 분기와 ordinary member/user·community 분기는 서버가 판단합니다.
 
-Stage/Import/Upload3개 public graph를 완료했고 whole Download1행·기존10계약은 unresolved입니다. 다음은 private Resource/data flow를 포함한 whole `DownloadImageRecord`, 그 뒤 현대 public `create_image`20파일 전체 graph·기존12계약입니다. shared private metadata 생성 기반이나 이 deprecated upload만으로 현대 create의 file/name inference·duplicate/hash·config/vendor·Swift/SLO/task·wait/cleanup 분기를 완료로 판정하지 않습니다.
+앞선 upload 단위 당시 Stage/Import/Upload3개 public graph를 완료하고 whole Download1행·기존10계약을 unresolved로 유지했습니다. 후속 Download는 위의 owned 완료 단위에서 닫았으며 현재 Stage/Import/Upload/Download4개 finite public graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved이며 공통 metadata 생성·deprecated upload만으로 file/name inference·duplicate/hash·config/vendor·Swift/SLO/task·wait/cleanup 분기를 완료하지 않습니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord import1개, 전체288→289(+1)·핵심214→215/2,292·Glance52→53/120.** `Service.ImportImageRecord`와 `Connection`의 같은 facade가 supplied private Image의65 descriptor·cached format truthiness·Method/URI/remote/root flag JSON presence·SDK-owned literal/raw/Attributes/Record Store 선택을 처리하고 한 번의 logical import POST를 제출합니다. ordinary user의 glance-direct/web-download/glance-download3분기와 같은 함수의 exact copy-image admin 분기를 함께 구현했습니다. literal ID는 cached format이 없어 HTTP 전에 실패하며 초기 GET·name lookup·method/store discovery·stage·task·완료 wait·cleanup을 넣지 않습니다. [Python/Go 비교·독립 main](../image/image-record-import.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-import-완료)에 concrete16옵션·Store2변환 함수·원시 JSON·pending Body·opaque 부분 ACK를 기록했습니다.
 
@@ -48,7 +66,7 @@ Source Import는 `_translate_response`나 `raise_from_response`를 호출하지 
 
 첫 집중 검사의3개 실패는 retry fixture가 MoreHeaders map을 통째로 바꾸며 보호된 selected store header까지 삭제하여 guard가 올바르게 거부한 결과였습니다. X-Retry를 기존 map에 추가하도록 fixture를 수정하고 store header 제거가 두 번째 dispatch 전에 503 원인과 ErrInvalidOption을 보존하는 회귀 사례를 추가했습니다. 구현은 바꾸지 않았으며 실패한 initial JSON/source를 남겨두고 위 PASS 수치는 final run만 집계합니다.
 
-앞선 import 단위 당시 Stage/Import2행을 완료했고 upload/download2행·기존20계약을 unresolved로 유지했습니다. 후속 Upload는 위의 owned 완료 단위에서 닫았으며 현재 Download1행·기존10계약이 unresolved입니다. deprecated upload에는 final fetch/PUT response translation/public filename 인자가 없으며 이 분기를 추가하지 않았습니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved입니다.
+앞선 import 단위 당시 Stage/Import2행을 완료했고 upload/download2행·기존20계약을 unresolved로 유지했습니다. 후속 Upload/Download는 위의 owned 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. deprecated upload에는 final fetch/PUT response translation/public filename 인자가 없어 이 분기를 추가하지 않았습니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved입니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord staging1개, 전체287→288(+1)·핵심213→214/2,292·Glance51→52/120.** `Service.StageImageRecord`와 `Connection`의 같은 facade가 cached private queued seed·filename/borrowed data·기본 전체 길이 추론·signed Size·한 번의 binary PUT·header-only translation·필수 seeded metadata GET을 처리합니다. literal ID는 cached queued 상태가 없어 IO·HTTP 전에 실패하며 자동 초기 GET·이름 lookup을 넣지 않습니다. [Python/Go 비교·독립 main](../image/image-record-stage.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-staging-완료)에 concrete6옵션·상태 순서·size optout·pending Body·부분 receipt와 데이터 수명을 기록했습니다.
 
@@ -64,7 +82,7 @@ Source `Image.stage`는 `_translate_response(has_body=False)`를 호출하므로
 
 borrowed data는 SDK가 닫거나 복제하지 않고 같은 참조를 반환 Record·owned Update·property helper·Wait를 거쳐 보존합니다. nil data는 retained private data 또는 empty PUT을 사용합니다. SDK-owned Filename은 queued 이후 열어 필수 final GET까지 유지하고 모든 return 경로에서 닫으며 closed-file fallback 참조를 제거합니다. 기본 io.Seeker total-size 추론·current cursor 복구, end seek 실패 뒤 best-effort 추가 restore, signed int64(0/negative 포함)·explicit size/optout의 noSeek는 명시한 Go lifecycle/representation 경계입니다. Python bool/arbitrary integer/data truthiness·임의 mutable Resource/Adapter/session과 blocking Read/custom transport 내부 replay는 broader runtime 범위로 남깁니다.
 
-앞선 staging 단위 당시4개 public 데이터 workflow의13Python+10Glance파일/66 AST 감사에서 Stage1행을 닫고 complete Import를 다음 단위로 선정했습니다. 후속 Import/Upload도 위 완료 단위에서 닫았으며 현재 Download1행·기존10계약이 unresolved입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 유지합니다. 이 staging 단위의 exact revision 원격 설치·main2·라이선스14개 일치 결과는 검증했습니다.
+앞선 staging 단위 당시4개 public 데이터 workflow의13Python+10Glance파일/66 AST 감사에서 Stage1행을 닫고 complete Import를 다음 단위로 선정했습니다. 후속 Import/Upload/Download도 위 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved입니다. 이 staging 단위의 exact revision 원격 설치·main2·라이선스14개 일치 결과는 검증했습니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 속성 helper1개, 전체286→287(+1)·핵심212→213/2,292·Glance50→51/120.** `Service.UpdateImagePropertiesRecord`와 `Connection`의 같은 facade가 cached properties copy·ordered kwargs·kernel/ramdisk 전체 목록 검색·int/raw/string 변환·raw meta overlay·canonical backing 비교·공통 owned Update commit을 처리합니다. Source의 bool을 `Updated`로 보존하므로 True가 PATCH 전송을 뜻하지 않고 False는 Update를 생략합니다. literal ID에는 자동 GET을 넣지 않으며 truthy 참조 검색 뒤 missing properties copy가 실패하는 Source 순서도 유지합니다. [Python/Go 비교·독립 main](../image/image-record-properties.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-속성-helper-완료)에 concrete 옵션·no-op/pending·부분 오류와 JSON/Unicode/control 경계를 기록했습니다.
 
@@ -76,7 +94,7 @@ borrowed data는 SDK가 닫거나 복제하지 않고 같은 참조를 반환 Re
 
 정확한 문서·판정 revision `48d6ef15374db885ca1d02bf2e4bb7b052e8135e`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009010239-48d6ef15374d`·get/build exit0이며 속성 helper/설치 main **2개**를 빌드했습니다. 원격 Go source2,123개 SHA256 `dc7351eaadb7b5a1402fabf4dc3bf15636747813a20cc716bbf7514344f91d50`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-properties-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
 
-데이터 workflow Source 감사 `/private/tmp/go-openstacksdk-image-data-workflows-source-audit.json`의 SHA256은 `2af47c35353e44463f2d33125fafb5ed8a49714769b993fdbc3039817de107c0`입니다. 당시13개 pinned Python 파일과10개 pinned Glance 파일의66 AST로4개 선언·기존44계약을 unresolved로 추적했습니다. 이후 Stage/Import/Upload를 위 owned 완료 단위에서 닫았고 현재 Download1개·기존10계약이 unresolved입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved이며 metadata POST나 deprecated upload만으로 닫지 않습니다. 이 앞선 속성 helper 단위의 exact revision 원격 설치·라이선스14개 일치 결과는 검증했습니다.
+데이터 workflow Source 감사 `/private/tmp/go-openstacksdk-image-data-workflows-source-audit.json`의 SHA256은 `2af47c35353e44463f2d33125fafb5ed8a49714769b993fdbc3039817de107c0`입니다. 당시13개 pinned Python 파일과10개 pinned Glance 파일의66 AST로4개 선언·기존44계약을 unresolved로 추적했습니다. 이후 Stage/Import/Upload/Download를 위 owned 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 계속 unresolved이며 metadata POST나 deprecated upload만으로 닫지 않습니다. 이 앞선 속성 helper 단위의 exact revision 원격 설치·라이선스14개 일치 결과는 검증했습니다.
 
 **앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 비활성화·재활성화2개, 전체284→286(+2)·핵심210→212/2,292·Glance48→50/120.** `Connection`과 `Service`가 private current ID·concrete header 옵션·현재 location의65필드 preparation과 독립 local Record/actual ACK를 제공합니다. 추가 GET·discovery·wait 없이 고정 POST를 보내며 pending raw Body·이전 fetch receipt를 보존하고 local status를 합성하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-actions.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-비활성화재활성화-완료)에 사용법과 명시적인 HTTP 오류 정책 차이를 기록했습니다.
 
@@ -316,11 +334,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 290 (8.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 291 (8.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,071 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 3,070 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 552 | 아직 개별 기록 없는 선언 2,810 |
-| 기록한 부분·전체 계약 | 3,686 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 3,712 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -363,6 +381,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Glance owned ImageRecord download | 290 → 291 (+1) | 새28그룹197·집중413그룹2933·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; finite download 완료·exact revision 원격 설치 검증 후속 |
 | Glance owned ImageRecord upload | 289 → 290 (+1) | 새23그룹151·집중367그룹2631·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
 | Glance owned ImageRecord import | 288 → 289 (+1) | 새24그룹199·집중324그룹2428·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `8c616a27` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
 | Glance owned ImageRecord staging | 287 → 288 (+1) | 새20그룹104·집중244그룹1817·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `046b489d` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
@@ -382,12 +401,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 216 / 2,292 | 9.4% | 162 | 1,913 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 217 / 2,292 | 9.5% | 161 | 1,913 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 290 / 3,362 | 8.6% | 261 | 2,810 | 1 |
+| 전체 | 291 / 3,362 | 8.7% | 260 | 2,810 | 1 |
 
 **핵심 서비스**
 
@@ -397,7 +416,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 54 / 120 | 27 | 39 | 0 |
+| Image / Glance | 55 / 120 | 26 | 39 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -523,11 +542,12 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance owned ImageRecord download | pinned Source16Python+10Glance파일/86 AST·26필수 계약·ordinary user/deactivated admin 전체 검토 완료 | full raw/owned constructor·mandatory fetch/private ID·file/writer/buffer/stream·afterGET checksum/factory·Service/Connection 완료 | 새28그룹197·집중413그룹2933·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·download/설치 main2개 외부 local build PASS | **신규1행 go_mapping·291/3,362**; noFinalGET·raw expected/opaque binary/partial bytes 보존 | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; exact revision 원격 main2·라이선스16 검증 후속·다음 현대 whole create_image |
 | Glance owned ImageRecord upload | pinned Source26파일/67 AST·20필수 계약·ordinary user/admin metadata 전체 검토 완료 | raw private constructor·metadata POST/translation·borrowed data·signed/inferred size·one PUT·Service/Connection 완료 | 새23그룹151·집중367그룹2631·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·upload/설치 main2개 외부 local build PASS | **신규1행 go_mapping·290/3,362**; noGET·noPUTtranslate·Record/Metadata/Uploaded 보존 | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` 원격 main2·라이선스14 PASS·다음 whole Download |
 | Glance owned ImageRecord import | pinned Source14Python+10Glance파일/74 AST·16필수 계약·ordinary3/copy-image admin 전체 검토 완료 | private format·raw Method/URI/remote/flags·literal/raw/Attributes/Record store·guarded POST·Service/Connection 완료 | 새24그룹199·집중324그룹2428·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·import/설치 main2개 외부 local build PASS | **신규1행 go_mapping·289/3,362**; noGET·pending/opaque ACK·모든 store JSON 보존 | 공통/API/검증/문서/판정 작은 commit push 완료; `8c616a27` 원격 main2·라이선스14 PASS·다음 whole Upload |
 | Glance owned ImageRecord staging | pinned Source14Python+10Glance파일/72 AST·16필수 계약·modify_image user 정책 검토 완료 | private queued·filename/data·default signed-size inference·shared PUT/header/fetch·Service/Connection 완료 | 새20그룹104·집중244그룹1817·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·staging/설치 main2개 외부 local build PASS | **신규1행 go_mapping·288/3,362**; literal ID noGET·pending Body/actual receipt 보존 | shared/API/검증/문서/판정 작은 commit push 완료; `046b489d` 원격 main2·라이선스14 PASS·다음 complete owned Import |
 | Glance owned ImageRecord 속성 helper | pinned Source11파일/40 AST·18필수 계약·ordinary user/admin 필드 확인 완료 | ordered kwargs/meta·full-list resolver·shared prepared Update·Service/Connection 완료 | 새20그룹128·집중176그룹1339·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·속성/설치 main2개 외부 local build PASS | **신규1행 go_mapping·287/3,362**; bool/noHTTP·literal copy failure 보존 | finite public helper 완료; exact revision 원격 설치·main2·라이선스14 PASS·R1/C1/S1 추적 |
-| Glance owned stage/import/upload/download 전체 Source 감사 | pinned Python13+Glance10파일/66 AST·SHA 2af47c35 유지; Stage72/Import74/Upload67 AST 추가 검토 완료 | Stage/Import/Upload owned public graph 완료; whole Download private Resource/data flow 다음 | 완료3행 검증 완료; Download는 기존 fixture/transfer/record 엔진 재사용 | Stage/Import/Upload guide 완료; Download 전체 graph 문서 후속 | **Stage/Import/Upload3행 go_mapping·Download1행 unresolved·기존10계약 보존**; 감사만으로 추가 수 증가 없음 | 현대 public create20파일12계약 unresolved; metadata 기반·deprecated upload만으로 완료하지 않음 |
+| Glance owned stage/import/upload/download 전체 Source 감사 | pinned Python13+Glance10파일/66 AST·SHA 2af47c35 유지; Stage72/Import74/Upload67/Download86 AST 추가 검토 완료 | Stage/Import/Upload/Download4개 finite owned public graph 완료 | 4행 실제 gate 완료; 기존 fixture/transfer/private Record/response 엔진 재사용 | 네 owned guide·독립 main 완료 | **4행 go_mapping·legacy44계약과 original refs 보존**; Source 감사만으로 수 증가 없음 | 현대 public create20파일12계약 unresolved; metadata·deprecated upload/leaf import만으로 완료하지 않음 |
 | Glance owned ImageRecord Deactivate/Reactivate | pinned Source8파일/22 AST·project member 정책·Source silentHTTP 오류 확인 완료 | 공통 preparation 재사용·Service/Connection2메서드 완료 | 새12그룹81·집중156그룹1211·전체45 package PASS; 생성 drift0 | Python/Go 비교·main2개 외부 build PASS | **신규2행 go_mapping·286/3,362**; Source 오류 정책 차이 명시 | 7850ddfb·9e718050·8d4e89f3 push 완료; 전체 R1/C1/S1 계속 추적 |
 | Glance owned ImageRecord Delete whole/store + native Delete | pinned Proxy/Store/Resource·native·whole user/store admin 검토 완료 | owned API·공통 strict identity·native ABI 보존/작은 commit push | 집중144그룹1130·전체45 package PASS; 생성 drift0 | Python/Go·native 가이드·main2개 외부 build PASS | **신규2행 go_mapping·284/3,362** | finite owned/native profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned MemberRecord Get/Add/Update/Remove | pinned proxy·Member7 Body/URI·policy 검토 완료 | guarded 옵션·fresh 요청·4개 Connection binding 완료/commit push | 집중60그룹847·전체45 package gate PASS; 생성 drift0 | Python 비교·owner/recipient·main2개 외부 build PASS | **신규3행 go_mapping·조회 중복 없음·282/3,362** | named immutable profile 완료; R1/C1/S1 계속 추적 |
