@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native images.List](#glance-native-imageslist-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance native images.Create](#glance-native-imagescreate-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는307입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는308입니다.
+
+## Glance native images.Create 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** 기존 generated `API.Create`가 고정 BuildRequestBody 직렬화(required name·omitempty·pointer false), 선언 key를 덮어쓰는 Properties 병합, 충돌을 거부하는 `WithCreateField` 확장, 기본201과 공통 응답 projection을 따르는지 검증했습니다. 구현 변경은 없으며 [native 생성 가이드](../image/v2/images/create.md)를 추가했습니다.
+
+새 집중 계약 테스트2그룹13사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·2계약을 추가해 reviews568·contracts3,792·go_mapping308입니다. 테스트 `4c96f116`·가이드/판정 `0b04de99`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Glance native images.List 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance native `images.List`1개, 전체306→307(+1)·핵심232→233/2,292·Glance69→70/120.** 기존 generated `API.List`가 고정 ToImageListQuery와 확장 query, ServiceURL로 재기준화한 next link, 빈 페이지 종료, 본문 없는 204의 native EOF, 뒤 페이지 오류와 조기 중단을 그대로 따르는지 검증했습니다. 고정 `BuildQueryString`이 int64 `SizeMin/SizeMax`를 query에서 빠뜨리는 native 동작을 확인했고, SDK는 이를 바꾸지 않고 `WithListQuery` 대체 방법을 [native 목록 가이드](../image/v2/images/list.md)에 적었습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.List`1개, 전체306→307(+1)·핵심232→233/2,292·Glance69→70/120.** 기존 generated `API.List`가 고정 ToImageListQuery와 확장 query, ServiceURL로 재기준화한 next link, 빈 페이지 종료, 본문 없는 204의 native EOF, 뒤 페이지 오류와 조기 중단을 그대로 따르는지 검증했습니다. 고정 `BuildQueryString`이 int64 `SizeMin/SizeMax`를 query에서 빠뜨리는 native 동작을 확인했고, SDK는 이를 바꾸지 않고 `WithListQuery` 대체 방법을 [native 목록 가이드](../image/v2/images/list.md)에 적었습니다.
 
 새 집중 계약 테스트2그룹8사례가 race로 통과했고 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·2계약을 추가해 reviews567·contracts3,790·go_mapping307입니다. 테스트 `139ecc29`·가이드/판정 `3778942c`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
