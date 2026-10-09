@@ -403,3 +403,118 @@ func TestCloudImageRecordGetByIDIsStrictLiteralGet(t *testing.T) {
 		t.Fatal("delegated operation is renamed, not nested", err)
 	}
 }
+
+func TestCloudImageRecordExcludeMembershipOrderAndValues(t *testing.T) {
+	const page = `{"images":[` +
+		`{"id":"gone","name":"ubuntu-gone","status":"deleted"},` +
+		`{"id":"u1","name":"ubuntu-22-test","status":"active"},` +
+		`{"id":"u2","name":["ubuntu-24","test"],"status":"active"},` +
+		`{"id":"u3","name":{"test":1},"status":"active"},` +
+		`{"id":"u4","name":"ubuntu-24","status":"active"},` +
+		`{"id":7,"name":null,"status":"active"}]}`
+	calls := 0
+	service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
+		if req.URL.RawQuery != "" || req.Header.Get("X-Cloud") != "header" {
+			t.Fatal(req.URL, req.Header)
+		}
+		return taskCoreJSON(req, 200, page)
+	})
+	ctx := context.Background()
+	header := WithImageRecordQueryHeader("X-Cloud", "header")
+	for _, test := range []struct {
+		name, pattern, exclude, id string
+	}{
+		{"empty exclude returns first non-deleted search row", "ubuntu*", "", "u1"},
+		{"substring skips string name", "ubuntu*", "test", "u4"},
+		{"list name uses element equality", "u2", "ubuntu", "u2"},
+		{"list name element match is skipped", "u[23]", "test", ""},
+		{"dictionary name uses key membership", "u3", "tes", "u3"},
+		{"deleted rows are not candidates", "ubuntu-gone", "", ""},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			calls = 0
+			result, err := service.GetImageRecordExclude(ctx, test.pattern, test.exclude, header)
+			if err != nil || calls != 1 || len(result.Inventory) != 6 {
+				t.Fatal(result, err, calls)
+			}
+			if test.id == "" {
+				if result.Image != nil || result.Value != nil {
+					t.Fatal(result)
+				}
+				return
+			}
+			if result.Image == nil || imageRecordText(result.Image, "id") != test.id || !strings.Contains(string(result.Value), `"id":"`+test.id+`"`) {
+				t.Fatal(result, string(result.Value))
+			}
+		})
+	}
+	t.Run("name and id return raw selected values", func(t *testing.T) {
+		name, err := service.GetImageRecordName(ctx, "u2", "", header)
+		if err != nil || string(name.Value) != `["ubuntu-24","test"]` || imageRecordText(name.Image, "id") != "u2" {
+			t.Fatal(name, err)
+		}
+		id, err := service.GetImageRecordID(ctx, "ubuntu-24", "", header)
+		if err != nil || string(id.Value) != `"u4"` {
+			t.Fatal(id, err)
+		}
+		// The identifier phase matches str(7) and a null name is a present value.
+		name, err = service.GetImageRecordName(ctx, "7", "", header)
+		if err != nil || string(name.Value) != "null" || name.Image == nil {
+			t.Fatal(name, err)
+		}
+		id, err = service.GetImageRecordID(ctx, "7", "", header)
+		if err != nil || string(id.Value) != "7" {
+			t.Fatal(id, err)
+		}
+		missing, err := service.GetImageRecordID(ctx, "absent", "", header)
+		if err != nil || missing.Value != nil || missing.Image != nil || len(missing.Inventory) != 6 {
+			t.Fatal(missing, err)
+		}
+	})
+	t.Run("reached non-container name is a type error with receipt", func(t *testing.T) {
+		result, err := service.GetImageRecordName(ctx, "7", "x", header)
+		var response *resource.ResponseError
+		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &response) || string(response.Body) != page || result.Image != nil || result.Value != nil || len(result.Inventory) != 6 {
+			t.Fatal(result, err)
+		}
+	})
+	t.Run("unreached non-container name is not inspected", func(t *testing.T) {
+		result, err := service.GetImageRecordID(ctx, "*", "nothing", header)
+		if err != nil || string(result.Value) != `"u1"` {
+			t.Fatal(result, err)
+		}
+	})
+}
+
+func TestCloudImageRecordExcludeArgumentsFailBeforeHTTP(t *testing.T) {
+	calls := 0
+	service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
+		t.Fatal("unexpected request", req.URL)
+		return nil
+	})
+	ctx := context.Background()
+	for name, call := range map[string]func() error{
+		"exclude rejects filters": func() error {
+			_, err := service.GetImageRecordExclude(ctx, "", "", WithImageRecordQueryFilters(json.RawMessage(`{}`)))
+			return err
+		},
+		"name rejects show_all": func() error {
+			_, err := service.GetImageRecordName(ctx, "", "", WithImageRecordQueryShowAll(true))
+			return err
+		},
+		"id rejects filter_deleted": func() error {
+			_, err := service.GetImageRecordID(ctx, "", "", WithImageRecordQueryFilterDeleted(false))
+			return err
+		},
+		"invalid UTF-8 exclude": func() error {
+			_, err := service.GetImageRecordID(ctx, "", "\xff")
+			return err
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			if err := call(); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+				t.Fatal(err, calls)
+			}
+		})
+	}
+}
