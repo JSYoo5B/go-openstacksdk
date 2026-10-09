@@ -22,7 +22,8 @@
   해당 데이터의 Unicode-3.0 조건과 저작권을 보존합니다.
 - **Go 의존성:** Gophercloud v2.15.0과 yaml.v2 v2.4.0은 모듈 의존성입니다.
   Gophercloud의 generator 테스트용 source 발췌·변형도 고지 범위에 포함합니다.
-  해당 테스트 파일마다 원본 범위·저작권·로컬 변경 고지를 보존합니다.
+  원본 발췌를 담은 테스트 파일에 원본 범위·저작권·로컬 변경 고지를 보존합니다.
+  이를 호출하거나 조합하는 테스트는 해당 고지가 있는 fixture 정의를 사용합니다.
   원본 라이선스를 보관하며 YAML의 실제 upstream `NOTICE`도 그대로 포함합니다.
   YAML의 Go 구현에는 Apache-2.0, libyaml에서 포팅한 여덟 파일에는 원래 MIT 조건이
   적용되므로 Kirill Simonov의 저작권과 별도 `LICENSE.libyaml` 원문도 보존합니다.
