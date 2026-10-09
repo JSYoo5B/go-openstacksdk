@@ -46062,6 +46062,50 @@
         "The owned profile requires paired Unicode JSON name strings for exclude membership, while Python str also admits lone surrogates. Headers are a Go extension for every request; filters and list controls are absent from the Source signature and fail before HTTP."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/wait_for_image",
+      "source_fingerprint": "9b268175b3acc236e278bfeac4ad6974c8b45a9f4acf3bc5a5fc3bca3182c797",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.WaitForCloudImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitUnlimited",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudWaitPollInterval"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForCloudImageRecord reads only the supplied record's string id and ignores its cached status. Each iteration repeats the owned Proxy find_image lookup with ignore_missing true and shared headers/location: a missing image, case-different status, null or non-string status keeps polling, exact active returns that record and exact error returns FailedStateError with the last actual receipt.",
+          "tests": [
+            "image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitPollsFindUntilExactActive",
+            "image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitFailuresKeepLastRecord"
+          ]
+        },
+        {
+          "behavior": "The iterate_timeout policy defaults to 3600 seconds and a two-second interval, checks the deadline before each lookup, expires zero or negative timeouts before HTTP and supports unlimited waiting. Timeout, error state and caller cancellation during the sleep return Lookups and the last found record with its receipt; a terminal find error stops polling immediately.",
+          "tests": [
+            "image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitFailuresKeepLastRecord"
+          ]
+        },
+        {
+          "behavior": "Nil, numeric or blank ids, nil options, nonpositive poll intervals and contradictory unlimited/timeout options fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_wait_test.go:TestCloudImageRecordWaitInputFailsBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python accepts any mapping with an id and raises ResourceTimeout or SDKException; Go accepts an owned ImageRecord with a nonblank string id and returns ImageRecordCloudWaitResult with context.DeadlineExceeded or FailedStateError plus the last actual receipt.",
+        "The fixed two-second Python interval is the default; a positive PollInterval and request headers are Go extensions. An in-flight lookup is not cancelled by the wait deadline, matching iterate_timeout, while caller context cancellation is observed during sleeps."
+      ],
+      "remaining": []
     }
   ]
 }

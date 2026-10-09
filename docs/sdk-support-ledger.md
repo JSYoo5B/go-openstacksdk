@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 exclude·이름·ID 조회](#glance-cloud-이미지-exclude이름id-조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 대기](#glance-cloud-이미지-대기-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는299입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는300입니다.
+
+## Glance Cloud 이미지 대기 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud `wait_for_image`1개, 전체299→300(+1)·핵심225→226/2,292·Glance63→64/120.** `Service.WaitForCloudImageRecord`가 전달 record의 문자열 id로 Proxy find(ignore_missing true)를 반복합니다. 정확한 `"active"`는 성공, 정확한 `"error"`는 `FailedStateError`이며 찾지 못한 경우와 그 밖의 status는 계속 기다립니다. 기본 timeout3600초·간격2초, 조회 전 deadline 확인, 0 이하 timeout의 HTTP 없는 만료와 무제한 대기는 `iterate_timeout`을 따릅니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-대기)에 lower 비교를 쓰는 `WaitForImageRecordStatus`와의 차이를 설명합니다.
+
+새 집중 테스트3그룹14사례가 race로 통과했고 시간 의존 그룹은20회 반복 실행했습니다. 전체 `make check`의 race **45개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새1행·3계약을 추가해 reviews560·contracts3,769·go_mapping300·catalog unresolved3,061입니다. 공개 API `eb3a1c38`·테스트 `2771798b`·가이드 `78d2a6e3`를 push했습니다. Cloud `delete_image`·`download_image`·`create_image`·`update_image_properties`와 공통 SDK-R1/C1/S1은 계속 추적합니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Glance Cloud 이미지 exclude·이름·ID 조회 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 exclude helper3개, 전체296→299(+3)·핵심222→225/2,292·Glance60→63/120.** `Service.GetImageRecordExclude`·`GetImageRecordName`·`GetImageRecordID`가 Cloud의 `get_image_exclude`·`get_image_name`·`get_image_id`에 대응합니다. 세 함수는 앞 단위의 필터 없는 `search_images` inventory를 그대로 사용하고 행 순서대로 Python `exclude not in image.name`을 평가합니다. [Python/Go 비교](../image/image-record-cloud.md#exclude-선택과-이름id-반환)에 반환 값과 오류 경계를 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 exclude helper3개, 전체296→299(+3)·핵심222→225/2,292·Glance60→63/120.** `Service.GetImageRecordExclude`·`GetImageRecordName`·`GetImageRecordID`가 Cloud의 `get_image_exclude`·`get_image_name`·`get_image_id`에 대응합니다. 세 함수는 앞 단위의 필터 없는 `search_images` inventory를 그대로 사용하고 행 순서대로 Python `exclude not in image.name`을 평가합니다. [Python/Go 비교](../image/image-record-cloud.md#exclude-선택과-이름id-반환)에 반환 값과 오류 경계를 설명합니다.
 
 exclude 멤버십은 name이 문자열이면 부분 문자열, 배열이면 문자열 원소 동등 비교, 객체면 key 멤버십입니다. 도달한 null·숫자·bool name은 Python TypeError에 대응하는 입력 오류이며 그 행의 목록 응답 증거와 Inventory를 보존합니다. 선택 뒤의 행은 검사하지 않습니다. 결과 Value는 각각 선택 행의 declared view, raw name, raw id이며 선택된 null name은 결과 없음과 구별합니다.
 
