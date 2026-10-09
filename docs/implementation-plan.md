@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 단계 (2026-10-09): 핵심 user Glance owned Deactivate/Reactivate 구현·검증·문서·판정 완료.** 두 기본 경로는 project member를 허용합니다. Go의 명시적 오류 반환과 Source 기본 HTTP 오류 억제의 차이를 검증·문서화했으며 후속 핵심 user의 property helper·upload/stage/import/download와 전체 create workflow 범위를 계속 구현합니다.
+**현재 구현 (2026-10-09): 핵심 user Glance owned 이미지 속성 helper.** 고정 Source11파일/40 AST의 전체 흐름과18개 필수 계약을 확인했습니다. kernel/ramdisk는 기존 전체 목록 pager·deleted 제외·first exact/glob 필터를 재사용하며 자동 detail GET이나 중복 오류를 추가하지 않습니다. kwargs int/raw/string 변환 뒤 meta overlay·canonical backing 비교·cached property copy·공통 owned Update의 bool/no-op/pending/receipt를 함께 구현합니다. Service/Connection·concrete 옵션·테스트·Python 비교 문서를 병행 작성 중이며 판정은 unresolved, 전체286/3,362를 유지합니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
@@ -455,6 +455,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance owned ImageRecord 속성 helper | pinned Source11파일/40 AST·18필수 계약·ordinary user/admin 필드 확인 완료 | ordered kwargs/meta·full-list resolver·공통 Update 재사용 구현 중 | 기존 HTTP/fault fixture의 helper 회귀 작성 중 | Python 비교·독립 main 작성 중 | **1행 unresolved·286/3,362** | Source 감사 완료; 전체 helper 구현·검증 진행 |
 | Glance owned ImageRecord Deactivate/Reactivate | pinned Source8파일/22 AST·project member 정책·Source silentHTTP 오류 확인 완료 | 공통 preparation 재사용·Service/Connection2메서드 완료 | 새12그룹81·집중156그룹1211·전체45 package PASS; 생성 drift0 | Python/Go 비교·main2개 외부 build PASS | **신규2행 go_mapping·286/3,362**; Source 오류 정책 차이 명시 | 7850ddfb·9e718050·8d4e89f3 push 완료; 전체 R1/C1/S1 계속 추적 |
 | Glance owned ImageRecord Delete whole/store + native Delete | pinned Proxy/Store/Resource·native·whole user/store admin 검토 완료 | owned API·공통 strict identity·native ABI 보존/작은 commit push | 집중144그룹1130·전체45 package PASS; 생성 drift0 | Python/Go·native 가이드·main2개 외부 build PASS | **신규2행 go_mapping·284/3,362** | finite owned/native profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned MemberRecord Get/Add/Update/Remove | pinned proxy·Member7 Body/URI·policy 검토 완료 | guarded 옵션·fresh 요청·4개 Connection binding 완료/commit push | 집중60그룹847·전체45 package gate PASS; 생성 drift0 | Python 비교·owner/recipient·main2개 외부 build PASS | **신규3행 go_mapping·조회 중복 없음·282/3,362** | named immutable profile 완료; R1/C1/S1 계속 추적 |
