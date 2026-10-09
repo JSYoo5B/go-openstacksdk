@@ -4,13 +4,27 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance 현대 ImageRecord create](#glance-현대-imagerecord-create-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance Cloud 이미지 목록·검색·조회](#glance-cloud-이미지-목록검색조회-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는292입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는296입니다.
+
+## Glance Cloud 이미지 목록·검색·조회 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 조회 helper4개, 전체292→296(+4)·핵심218→222/2,292·Glance56→60/120.** `Service.AllCloudImageRecords`·`SearchImageRecords`·`GetCloudImageRecord`·`GetImageRecordByID`가 고정 Cloud의 `list_images`·`search_images`·`get_image`·`get_image_by_id`에 대응합니다. 기존 owned ImageRecord 목록·Find·literal Get 엔진과 Connection location, 공통 `cloudfilter.Select`·`First`를 재사용하며 별도 pager나 HTTP 엔진을 추가하지 않았습니다. 기본 정책상 이미지 조회·목록은 project reader 범위이므로 [권한 근거](glance-policy-priorities.md#이미지-조회목록검색의-기본-정책)에 따라 핵심 user에 배치합니다. [Python/Go 비교·독립 main](../image/image-record-cloud.md)에 함수별 concrete 옵션과 부분 결과를 설명합니다.
+
+`list_images`는 기본 목록 전체를 eager 수집하고 Python `status.lower()`가 `deleted`인 행을 제외합니다. `show_all`은 `filter_deleted`를 끄고 `member_status=all`만 추가합니다. status 검사는 필터가 켜졌을 때만 수행하며 문자열이 아니면 해당 목록 응답 증거와 함께 실패하고 소비한 Inventory를 보존합니다. `search_images`는 인자 없는 `list_images`를 끝낸 뒤 이름/ID exact-or-fnmatch와 dictionary 또는 JMESPath 선택을 적용합니다. dictionary는 Image의 선언65필드와 location을 검사하므로 선언된 null 필드는 일치할 수 있고 미선언 최상위 key는 입력 오류입니다.
+
+`get_image`는 `filters is not None`으로 경로를 고릅니다. 생략·JSON null은 ignore_missing=true인 owned Find 경로이고 Cloud deleted 필터가 없습니다. falsey를 포함한 그 밖의 값은 검색 경로이며 truthiness·`len`·index0 선택을 적용하고 둘 이상이면 `ErrAmbiguous`를 감싼 `ImageRecordSelectionError`입니다. falsey 필터를 무필터 Find로 바꾸는 Cloud `get_flavor`와 다른 Source 분기입니다. `get_image_by_id`는 strict literal GET 한 번이며 native404를 nil로 바꾸지 않고 operation 이름만 Cloud 함수로 표시합니다.
+
+기존 property helper의 kernel/ramdisk 이름 검색이 쓰던 목록·deleted 필터 코드를 공통 inventory 함수로 옮겨 같은 receipt·guard를 공유합니다. 새 집중 테스트9그룹50사례(image8·Connection1)와 기존 property/list/find/get 테스트가 race로 통과했습니다. 전체 `make check`의 license·vet·race **45개 실제 test package**·pinned parity·progress·gofmt도 exit0입니다. 가이드의 독립 main은 외부 local-replace consumer로 빌드했습니다. 판정 JSON에 새4행·13계약을 추가해 reviews556·contracts3,754·go_mapping296·catalog unresolved3,065·미검토2,806·unsupported1·supported0입니다. 다른 reviews·catalog·source pins/fingerprint는 바꾸지 않았습니다.
+
+Python deprecated warning, mutable Resource 동일성, adapter cache·session·임의 transport와 v1 image proxy는 판정 범위가 아닙니다. 같은 mixin의 `get_image_exclude`·`get_image_name`·`get_image_id`·`wait_for_image`·`delete_image`·`download_image`·`create_image`·`update_image_properties`는 별도 미검토 행이며 공통 SDK-R1/C1/S1과 전체 목표는 active입니다. 실제 OpenStack/Python 인증·호출은 실행하지 않았습니다.
+
+공통 inventory `0b0b69c4`·공개 API `3d2dc80f`·집중 테스트 `2d4c0a2f`·Connection 테스트 `77474a48`·가이드 `73e2e078`를 작은 의미 단위로 main에 push했습니다.
 
 ## Glance 현대 ImageRecord create 완료
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
+**앞선 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
 
 새87그룹361사례 + 기존2,445그룹19,800사례 = **집중 race11개 package·2,532그룹20,161사례**가 PASS했습니다. 전체 `make check`의 license 원문12개·pinned Go 의존성4개·vet·race **45개 실제 test package**·pinned parity·progress·gofmt가 통과했고 실제 재생성1회 Go drift0입니다. Go source2,184개 SHA256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection/Swift fixtures, find/property/metadata/size/REST/native response와 Swift 파일/SLO 엔진을 재사용했습니다.
 

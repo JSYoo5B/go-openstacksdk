@@ -45739,6 +45739,188 @@
         "Generated request.Wrap adds inspectable Delete/images OperationError context around the exact upstream ExtractErr cause. This is a documented Go wrapper addition, so the native declaration is go_mapping rather than a claim of identical error objects or Python SDK parity."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/list_images",
+      "source_fingerprint": "4360949087da58136cbeb5cbd91a4325d4c60faec4db0ac94853eecf5feb3dcf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.AllCloudImageRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "AllCloudImageRecords eagerly consumes the complete default owned image list once, keeps every consumed row in Inventory and removes rows whose Python-lowered string status equals deleted unless FilterDeleted is false. Value is the completed JSON array of kept declared views, [] for an empty result, and Images aligns with it.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordListDeletedFilterShowAllAndLocation"
+          ]
+        },
+        {
+          "behavior": "ShowAll true overrides filter_deleted before the v2 query choice and adds only member_status=all; explicit false keeps the query-free default. The shared Connection location is projected into every Resource while actual Wire location is retained.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordListDeletedFilterShowAllAndLocation",
+            "connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "With the status filter enabled a null, numeric or array status fails with the actual list-page ResponseError and retains Inventory through the failing row without completed Value/Images; disabled filtering never inspects status. A late native page failure retains consumed Inventory.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordListStatusAndPageFailuresKeepPartialInventory"
+          ]
+        },
+        {
+          "behavior": "Present filters, including explicit null or malformed JSON, invalid headers and nil options fail before HTTP; nil clears an earlier filter. A cancelling option stops later callbacks and HTTP while retaining the caller cause.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP",
+            "image/image_record_cloud_test.go:TestCloudImageRecordOptionsCancelBeforeLaterCallbacks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-records.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns connected mutable v1/v2 Image Resource objects and emits deprecation warnings; Go returns independently owned ImageRecord views with actual Wire/Envelope/header/status evidence, concrete per-helper options and no warnings. No Resource identity, adapter cache, session or arbitrary transport parity is claimed.",
+        "Headers are a Go extension applied to every request of the logical call. Arguments that the pinned Cloud declaration does not have are rejected before HTTP instead of becoming Python TypeError, and option callbacks run once with context/source checks between them.",
+        "The Go image Service is Glance v2 only, so supports_version(image, '2') is always the v2 branch. This owned profile requires paired Unicode JSON status strings; Python str.lower() also accepts lone surrogates."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/search_images",
+      "source_fingerprint": "8bfeb0f0ff43edb1d41ca71db414d352fa6006446b8142c848fcd0da95d7c618",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.SearchImageRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "SearchImageRecords completes the default list_images inventory, including the deleted-status filter and no member query, before the shared Cloud identifier exact-or-fnmatch phase. No name or filter is forwarded as a server query or Proxy Body filter; deleted rows are never selectable.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions",
+            "connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Ordered dictionary filters inspect the 65 declared Image fields plus location, including nested location dictionaries; declared null attributes match while an unknown top-level key is a local error after inventory with retained Inventory. Falsey filters keep the identifier selection.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions"
+          ]
+        },
+        {
+          "behavior": "A JSON string filter runs the shared JMESPath engine on the selected views and returns arbitrary JSON in Value without inventing Images. Show_all/filter_deleted arguments, malformed filters and nil options fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordSearchSelectionAndExpressions",
+            "image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-records.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns connected mutable v1/v2 Image Resource objects and emits deprecation warnings; Go returns independently owned ImageRecord views with actual Wire/Envelope/header/status evidence, concrete per-helper options and no warnings. No Resource identity, adapter cache, session or arbitrary transport parity is claimed.",
+        "Headers are a Go extension applied to every request of the logical call. Arguments that the pinned Cloud declaration does not have are rejected before HTTP instead of becoming Python TypeError, and option callbacks run once with context/source checks between them.",
+        "Python logs and ignores bad fnmatch patterns and raises AttributeError for unknown filter keys; Go uses the shared cloudfilter identifier and mapping contracts and returns an invalid-option error carrying the local cause."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/get_image",
+      "source_fingerprint": "572a1bc13ccd75af5d83dbe3ca75505948313db34b38ccc8489b9d83e39dc6c8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetCloudImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilters",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryExpression",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Omitted or JSON-null filters delegate to the owned Proxy find_image engine with ignore_missing true: literal GET, clean 400/403/404 fallback to the visible and hidden name lists, no Cloud deleted-status filter, nil Value/Image when missing and terminal native errors. Value is the found declared view.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordGetFindPathAndMissing",
+            "connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Every other filter value, including falsey JSON, uses search_images and then Python truthiness, len and index-0 selection. More than one element, including string code-point length, is ImageRecordSelectionError wrapping ErrAmbiguous; objects have no index 0; a selected JSON null or empty result is missing; Image is set only for one ordinary selected row while expression values stay raw.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordGetFilteredSelection",
+            "connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Filter_deleted/show_all arguments and an invalid find identity fail before HTTP.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-records.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns connected mutable v1/v2 Image Resource objects and emits deprecation warnings; Go returns independently owned ImageRecord views with actual Wire/Envelope/header/status evidence, concrete per-helper options and no warnings. No Resource identity, adapter cache, session or arbitrary transport parity is claimed.",
+        "Headers are a Go extension applied to every request of the logical call. Arguments that the pinned Cloud declaration does not have are rejected before HTTP instead of becoming Python TypeError, and option callbacks run once with context/source checks between them.",
+        "The find path validates nonblank control-free identities like FindImageRecord. Unlike Cloud get_flavor, falsey non-null filters select the search path because the pinned source tests filters is not None."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/get_image_by_id",
+      "source_fingerprint": "972f379a05919948bb6052c39d4d2865082e6f49a0b9b8a3bee71abbf8b268dd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordByID",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeader",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetImageRecordByID delegates to one strict literal GetImageRecord without query, Find fallback, missing-as-nil or deleted filtering; native 404 remains an error named GetImageRecordByID without nesting the delegated operation, and the Connection location is projected.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordGetByIDIsStrictLiteralGet",
+            "connection_image_cloud_records_test.go:TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Only headers are accepted. Filters, show_all, blank IDs and nil options fail before HTTP, and each option runs as one checked Get option so cancellation stops later callbacks.",
+          "tests": [
+            "image/image_record_cloud_test.go:TestCloudImageRecordArgumentsFailBeforeHTTP",
+            "image/image_record_cloud_test.go:TestCloudImageRecordOptionsCancelBeforeLaterCallbacks"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-records.md",
+        "image/README.md"
+      ],
+      "differences": [
+        "Python returns connected mutable v1/v2 Image Resource objects and emits deprecation warnings; Go returns independently owned ImageRecord views with actual Wire/Envelope/header/status evidence, concrete per-helper options and no warnings. No Resource identity, adapter cache, session or arbitrary transport parity is claimed.",
+        "Headers are a Go extension applied to every request of the logical call. Arguments that the pinned Cloud declaration does not have are rejected before HTTP instead of becoming Python TypeError, and option callbacks run once with context/source checks between them.",
+        "Go accepts a literal string ID only and rejects blank, dot-segment and control identities before HTTP; it does not accept a Resource seed or Attributes like the Proxy GetImageRecord request."
+      ],
+      "remaining": []
     }
   ]
 }

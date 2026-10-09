@@ -10,11 +10,15 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-09): Glance 현대 이미지 생성 전체 검증·판정 완료.** 전체292/3,362·핵심218/2,292·Glance56/120입니다. 다음 범위는 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서·설치 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
+**현재 구현 (2026-10-10): Glance Cloud 이미지 목록·검색·조회4개 검증·판정 완료.** 전체296/3,362·핵심222/2,292·Glance60/120입니다. 다음 범위는 같은 Cloud mixin의 `get_image_exclude`·`get_image_name`·`get_image_id`와 `wait_for_image` 등 핵심 user의 남은 Glance/cloud helper이며 user→admin→후속 user→후속 admin 순서를 유지합니다. cache/Task의 개별 기능은 서버 정책에 따라 해당 단계에서 처리합니다. 세부 구현·테스트·문서 검증과 계약 판정은 아래 최신 완료 단위 및 자동 집계를 기준으로 확인합니다.
+
+**최신 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 조회 helper4개, 전체292→296(+4)·핵심218→222/2,292·Glance56→60/120.** `Service.AllCloudImageRecords`·`SearchImageRecords`·`GetCloudImageRecord`·`GetImageRecordByID`가 Cloud의 `list_images`·`search_images`·`get_image`·`get_image_by_id`를 기존 owned 목록·Find·literal Get 엔진과 공통 Cloud 필터로 제공합니다. deleted status 제외·`show_all`의 member query, `get_image`의 `filters is not None` 분기와 truthiness·`len`·index0 선택, strict by-ID GET을 검증했습니다. property helper의 이름 검색도 같은 inventory 함수를 공유합니다. [Python/Go 비교·독립 main](../image/image-record-cloud.md)과 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 옵션과 부분 결과를 설명합니다.
+
+새 집중 테스트9그룹50사례와 기존 image record 테스트가 race로 통과했고 전체 `make check`(race 45개 실제 test package·parity·progress·gofmt)와 가이드 main의 외부 local-replace build를 확인했습니다. 판정 JSON은 reviews556·contracts3,754·go_mapping296입니다. 공통 inventory `0b0b69c4`·공개 API `3d2dc80f`·테스트 `2d4c0a2f`/`77474a48`·가이드 `73e2e078`를 작은 commit으로 main에 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 `create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
 
-**최신 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
+**앞선 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
 
 새87그룹361사례 + 기존2,445그룹19,800사례 = **집중 race11개 package·2,532그룹20,161사례**가 PASS했습니다. 전체 `make check`의 license 원문12개·pinned Go 의존성4개·vet·race **45개 실제 test package**·pinned parity·progress·gofmt가 통과했고 실제 재생성1회 Go drift0입니다. Go source2,184개 SHA256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection/Swift fixtures, find/property/metadata/size/REST/native response와 Swift 파일/SLO 엔진을 재사용했습니다.
 
@@ -348,11 +352,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 292 (8.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 296 (8.8%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,069 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 552 | 아직 개별 기록 없는 선언 2,810 |
-| 기록한 부분·전체 계약 | 3,742 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,065 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 556 | 아직 개별 기록 없는 선언 2,806 |
+| 기록한 부분·전체 계약 | 3,754 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -395,6 +399,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Glance Cloud 이미지 목록·검색·조회 | 292 → 296 (+4) | 새9그룹50·image 전체 race·전체 `make check`·외부 main1개 build PASS | `0b0b69c4`·`3d2dc80f`·`2d4c0a2f`·`77474a48`·`73e2e078` push 완료 |
 | Glance owned ImageRecord download | 290 → 291 (+1) | 새28그룹197·집중413그룹2933·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; `a4688f1b` exact revision 원격 get/build·main2·라이선스16 PASS; 작은 commit/push 완료 |
 | Glance owned ImageRecord upload | 289 → 290 (+1) | 새23그룹151·집중367그룹2631·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
 | Glance owned ImageRecord import | 288 → 289 (+1) | 새24그룹199·집중324그룹2428·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `8c616a27` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
@@ -415,12 +420,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 218 / 2,292 | 9.5% | 160 | 1,913 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 222 / 2,292 | 9.7% | 160 | 1,909 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 292 / 3,362 | 8.7% | 259 | 2,810 | 1 |
+| 전체 | 296 / 3,362 | 8.8% | 259 | 2,806 | 1 |
 
 **핵심 서비스**
 
@@ -430,7 +435,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Compute / Nova | 45 / 333 | 21 | 267 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
-| Image / Glance | 56 / 120 | 25 | 39 | 0 |
+| Image / Glance | 60 / 120 | 25 | 35 | 0 |
 | Block Storage / Cinder | 66 / 480 | 28 | 386 | 0 |
 | Key Manager / Barbican | 14 / 67 | 10 | 43 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
@@ -552,10 +557,11 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 ## 현재 작업 현황
 
-아래는 2026-10-09까지의 완료 단위와 다음 작업입니다. 각 행의 판정은 해당 선언의 구현·테스트·문서 근거이며, 전체 Resource/session 등 다른 선언의 목표는 계속 추적합니다. 착수와 단계 전환 때 이 표·집계·검증 기록을 함께 갱신합니다.
+아래는 2026-10-10까지의 완료 단위와 다음 작업입니다. 각 행의 판정은 해당 선언의 구현·테스트·문서 근거이며, 전체 Resource/session 등 다른 선언의 목표는 계속 추적합니다. 착수와 단계 전환 때 이 표·집계·검증 기록을 함께 갱신합니다.
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance Cloud 이미지 목록·검색·조회 | pinned Cloud `_image.py` 4함수·`_utils._filter_list`·Glance get/list 기본 정책 검토 완료 | 공통 list_images inventory·Cloud 옵션·All/Search/Get/ByID Service API 완료 | 새9그룹50·image 전체 race·전체 `make check` PASS | Python 비교·독립 main 외부 local build PASS | **신규4행 go_mapping·296/3,362** | 작은 commit5개 push 완료; 다음 get_image_exclude/name/id·wait_for_image |
 | Glance owned ImageRecord download | pinned Source16Python+10Glance파일/86 AST·26필수 계약·ordinary user/deactivated admin 전체 검토 완료 | full raw/owned constructor·mandatory fetch/private ID·file/writer/buffer/stream·afterGET checksum/factory·Service/Connection 완료 | 새28그룹197·집중413그룹2933·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·download/설치 main2개 외부 local build PASS | **신규1행 go_mapping·291/3,362**; noFinalGET·raw expected/opaque binary/partial bytes 보존 | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; `a4688f1b` 원격 main2·라이선스16 PASS·다음 현대 whole create_image |
 | Glance owned ImageRecord upload | pinned Source26파일/67 AST·20필수 계약·ordinary user/admin metadata 전체 검토 완료 | raw private constructor·metadata POST/translation·borrowed data·signed/inferred size·one PUT·Service/Connection 완료 | 새23그룹151·집중367그룹2631·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·upload/설치 main2개 외부 local build PASS | **신규1행 go_mapping·290/3,362**; noGET·noPUTtranslate·Record/Metadata/Uploaded 보존 | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` 원격 main2·라이선스14 PASS·다음 whole Download |
 | Glance owned ImageRecord import | pinned Source14Python+10Glance파일/74 AST·16필수 계약·ordinary3/copy-image admin 전체 검토 완료 | private format·raw Method/URI/remote/flags·literal/raw/Attributes/Record store·guarded POST·Service/Connection 완료 | 새24그룹199·집중324그룹2428·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·import/설치 main2개 외부 local build PASS | **신규1행 go_mapping·289/3,362**; noGET·pending/opaque ACK·모든 store JSON 보존 | 공통/API/검증/문서/판정 작은 commit push 완료; `8c616a27` 원격 main2·라이선스14 PASS·다음 whole Upload |
