@@ -46,7 +46,7 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 // callbacks, authentication and accepted read/Close failures. Its nil-guard
 // form retains DoJSON's existing behavior.
 func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, nil, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, nil, nil, codes...)
 }
 
 // DoJSONGuardedHeaders additionally fixes operation-owned headers through native
@@ -54,10 +54,18 @@ func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 // Neutron revision, not for ordinary caller headers whose source precedence and
 // retry policy are intentionally retained by DoJSONGuarded.
 func DoJSONGuardedHeaders(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, nil, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, nil, nil, codes...)
 }
 
-func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, cleanRetryRejections []int, codes ...int) (*Response, error) {
+// RequestHeaderPolicy fixes selected header values and required absence across
+// native retry hooks and physical attempts. Ordinary headers keep native policy.
+// Absent headers are checked case-insensitively without emitting empty values.
+type RequestHeaderPolicy struct {
+	Values map[string]string
+	Absent []string
+}
+
+func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, absentHeaders []string, cleanRetryRejections []int, codes ...int) (*Response, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -80,6 +88,7 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 		return nil, fmt.Errorf("%w: explicit success codes are required", resource.ErrInvalidOption)
 	}
 	expectedCodes := append([]int(nil), codes...)
+	expectedAbsent := slices.Clone(absentHeaders)
 	var expectedHeaders map[string]string
 	if fixedHeaders {
 		expectedHeaders = maps.Clone(headers)
@@ -100,13 +109,13 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 	if err != nil {
 		return nil, responseContextError(ctx, err)
 	}
-	if len(expectedHeaders) != 0 {
-		client.HTTPClient.Transport = ownedHeaderTransport{base: client.HTTPClient.Transport, expected: maps.Clone(expectedHeaders)}
+	if len(expectedHeaders) != 0 || len(expectedAbsent) != 0 {
+		client.HTTPClient.Transport = ownedHeaderTransport{base: client.HTTPClient.Transport, expected: maps.Clone(expectedHeaders), absent: slices.Clone(expectedAbsent)}
 	}
 	if retry := client.ProviderClient.RetryFunc; retry != nil {
 		client.ProviderClient.RetryFunc = func(ctx context.Context, method, endpoint string, options *gophercloud.RequestOpts, original error, count uint) error {
 			callbackErr := retry(ctx, method, endpoint, options, original, count)
-			ownershipErr := responseRequestOwnership(options, expectedBody, expectedHeaders)
+			ownershipErr := responseRequestOwnership(options, expectedBody, expectedHeaders, expectedAbsent)
 			sourceErr := checkSource()
 			if ownershipErr != nil || sourceErr != nil {
 				return responseContextError(ctx, joinResponseErrors(original, callbackErr, ownershipErr, sourceErr))
@@ -168,11 +177,11 @@ func (e *statusPolicyError) TerminalSDKFailure() bool { return true }
 
 // responseRequestOwnership checks serialized bytes, not interface identity.
 // A nil expected body means no request body; an explicit JSON null has bytes.
-func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte, headers map[string]string) error {
+func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte, headers map[string]string, absent []string) error {
 	invalid := func() error {
 		return fmt.Errorf("%w: retry changes SDK request headers, JSON request or response body ownership", resource.ErrInvalidOption)
 	}
-	if options == nil || !ownedRequestHeaders(options.MoreHeaders, headers) {
+	if options == nil || !ownedRequestHeaders(options.MoreHeaders, headers, absent) {
 		return invalid()
 	}
 	changed := !options.KeepResponseBody || options.JSONResponse != nil || options.RawBody != nil
@@ -198,15 +207,22 @@ func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte,
 
 // Only headers supplied by the SDK operation are fixed. Native service/version
 // headers and the caller's unrelated retry headers retain their existing policy.
-func ownedRequestHeaders(actual, expected map[string]string) bool {
+func ownedRequestHeaders(actual, expected map[string]string, absent []string) bool {
 	headers := make(http.Header, len(actual))
 	for key, value := range actual {
 		headers.Add(key, value)
 	}
-	return ownedWireHeaders(headers, expected)
+	return ownedWireHeaders(headers, expected, absent)
 }
 
-func ownedWireHeaders(actual http.Header, expected map[string]string) bool {
+func ownedWireHeaders(actual http.Header, expected map[string]string, absent []string) bool {
+	for _, key := range absent {
+		for actualKey := range actual {
+			if strings.EqualFold(actualKey, key) {
+				return false
+			}
+		}
+	}
 	for key, value := range expected {
 		values := actual.Values(key)
 		if len(values) != 1 || values[0] != value {
@@ -219,10 +235,11 @@ func ownedWireHeaders(actual http.Header, expected map[string]string) bool {
 type ownedHeaderTransport struct {
 	base     http.RoundTripper
 	expected map[string]string
+	absent   []string
 }
 
 func (t ownedHeaderTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	if !ownedWireHeaders(request.Header, t.expected) {
+	if !ownedWireHeaders(request.Header, t.expected, t.absent) {
 		return nil, fmt.Errorf("%w: request changes SDK-owned headers", resource.ErrInvalidOption)
 	}
 	return t.base.RoundTrip(request)
