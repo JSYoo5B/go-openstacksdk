@@ -125,10 +125,13 @@ func (b *objectCreateRequestBody) Read(data []byte) (int, error) {
 func (b *objectCreateRequestBody) Close() error {
 	b.mu.Lock()
 	defer b.mu.Unlock()
-	err := b.p.note(b.ctx)
+	// Closing the response normally cancels http.Client's request timer before
+	// the SDK releases these request views. Observe the caller/source scope so
+	// that automatic cancellation does not turn an accepted upload into failure.
+	err := b.p.note(b.p.metadata.ctx)
 	b.physical.add(err, true)
 	b.closed = true
-	guardErr := b.p.note(b.ctx)
+	guardErr := b.p.note(b.p.metadata.ctx)
 	b.physical.add(guardErr, true)
 	return joinMetadataErrors(err, guardErr)
 }

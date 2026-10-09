@@ -212,7 +212,7 @@ func (p *preparedImageRecordCreateWorkflow) createSwiftService() (*objectapi.Ser
 			source.Endpoint != endpoint || source.ResourceBase != base || source.Type != kind || source.Microversion != version {
 			current = uploadInvalid("image task object-store service binding changed")
 		}
-		_, validationErr := imageCreateSwiftSourceHeaders(ctx, source)
+		_, validationErr := imageCreateSwiftSourceHeaders(p.ctx, source)
 		mu.Lock()
 		defer mu.Unlock()
 		observed = errors.Join(observed, current, validationErr)

@@ -22,7 +22,8 @@ type preparedImageRecord struct {
 }
 
 // Capture fixed routing, provider, service bindings, headers and an outer guard
-// before caller data or location/options callbacks can run. Failure is sticky.
+// before caller data or location/options callbacks can run. Source and caller
+// failures are sticky; a native request context owns only its own deadline.
 func (s *Service) captureImageRecord(ctx context.Context) (*preparedImageRecord, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
@@ -48,9 +49,11 @@ func (s *Service) captureImageRecord(ctx context.Context) (*preparedImageRecord,
 			binding = uploadInvalid("image record service binding changed")
 		}
 		if outer != nil {
-			ancestor = outer(checkCtx)
+			ancestor = outer(ctx)
 		}
-		fresh := errors.Join(source.check(checkCtx), binding, ancestor)
+		// Request-owned timeouts must not poison the parent workflow guard.
+		// Genuine source drift and caller cancellation still remain sticky.
+		fresh := errors.Join(source.check(ctx), binding, ancestor)
 		// Upload reads can overlap response handling. Do not race the sticky
 		// cause, or hold its lock while invoking an ancestor callback.
 		observedMu.Lock()
