@@ -68,6 +68,13 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).DeactivateImageRecord
+    _ = (*sdk.Connection).ReactivateImageRecord
+    _ = (*image.Service).DeactivateImageRecord
+    _ = (*image.Service).ReactivateImageRecord
+    _ = image.ImageRecordActionRequest{ID: "literal-image-id"}
+    _ = image.WithImageRecordActionOpts(image.ImageRecordActionOpts{})
+    _ = image.WithImageRecordActionHeader("X-Trace", "record-action")
     _ = (*sdk.Connection).DeleteImageRecord
     _ = (*image.Service).DeleteImageRecord
     _ = (*images.API).Delete
