@@ -46328,6 +46328,44 @@
         "Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/images.Get",
+      "source_fingerprint": "bb34d1464db40d4592c8893b39d1cb21b60df1d864d2e03d55612b353288af98",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Generated API.Get retains the exact RawClient and sends one GET to native ServiceURL(ResourceBase or Endpoint, images, raw id) with a nil body, default Accept, service MoreHeaders, microversion and live token. Empty IDs, slashes and query delimiters are forwarded without validation or escaping.",
+          "tests": [
+            "image/v2/images/get_contracts_test.go:TestNativeImageGetRoutesHeadersAndNativeProjection"
+          ]
+        },
+        {
+          "behavior": "A 200 response uses the pinned Extract header merge and Image.UnmarshalJSON: import methods and store IDs are trimmed and comma split without empty fields, numeric size becomes int64 and null size zero, undeclared keys except self/size/header keys become Properties with the body properties string retained, and times decode to time.Time.",
+          "tests": [
+            "image/v2/images/get_contracts_test.go:TestNativeImageGetRoutesHeadersAndNativeProjection"
+          ]
+        },
+        {
+          "behavior": "Only 200 is accepted; other statuses keep the native ErrUnexpectedResponseCode with Expected [200] as the direct cause of a Get/images OperationError without an owned receipt. Decode errors keep native partial Extract results, and caller cancellation stays inspectable.",
+          "tests": [
+            "image/v2/images/get_contracts_test.go:TestNativeImageGetStrictStatusAndDecodeErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/images/get.md",
+        "image/v2/images/README.md"
+      ],
+      "differences": [
+        "This declaration maps Gophercloud native Get only; it is not Python get_image parity, owned GetImageRecord descriptor/location projection or Cloud get_image_by_id behavior.",
+        "The SDK adds only request.Wrap operation context; native URL construction, status policy, retries, reauthentication and partial Extract results are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
