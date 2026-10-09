@@ -98,6 +98,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 `UploadImageRecord`는 Connection·Image Service에서 raw metadata 생성·owned ImageRecord 변환·borrowed reader 전송을 연결합니다. [레코드 업로드의 Python/Go 비교·독립 main](image/image-record-upload.md)에 명시 형식·constructor/properties 순서·기본 total-size 추론·signed size·단계별 실제 응답과 PUT 뒤 조회 없는 반환을 설명합니다.
 
+`DownloadImageRecord`는 Connection·Image Service에서 ID·owned Record·raw Resource를 받아 필수 metadata 조회 후 file/writer/buffer/stream으로 다운로드합니다. [레코드 다운로드의 Python/Go 비교·독립 main](image/image-record-download.md)에 fetched private identity·binary 응답·기본 hash registry와 함수 factory·부분 bytes·caller stream Close를 설명합니다.
+
 [Glance 직접 업로드](image/upload-image.md)는 concrete 옵션, 메타데이터 생성과 바이너리 전송의 단계별 응답, caller 스트림 소유권과 Python 사용법 비교를 제공합니다.
 
 [Swift 계정 메타데이터](objectstorage/v1/accounts/README.md)는 concrete 옵션과 nullable 카운터, 조회·설정·삭제의 실제 응답 및 Python 사용법 비교를 제공합니다.

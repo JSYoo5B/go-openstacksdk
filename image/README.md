@@ -11,6 +11,7 @@ Glance v2 이미지의 조회, iterator, 삭제, 상태 대기와 메타데이�
 | `conn.image.images(status="active")` | `service.Images.List(ctx, resource.WithStatus("active"))` |
 | `conn.image.delete_image(id)` | `service.DeleteImage(ctx, resource.ID(id))`; [삭제 옵션·결과 비교](delete.md) |
 | `conn.image.delete_image(id, store="archive")` | `service.DeleteImage(ctx, resource.ID(id), image.WithDeleteImageStore("archive"))` |
+| `conn.image.download_image(record_or_id, output=path_or_file, stream=False)` | `service.DownloadImageRecord(ctx, image.ImageRecordDownloadRequest{ID: id, Filename: path}, ...)`; [owned 네 모드·checksum 비교](image-record-download.md) |
 | `conn.image.download_image(id, output=file)` | `service.DownloadTo(ctx, resource.ID(id), writer, ...)`; [다운로드 옵션·결과 비교](download.md) |
 | `conn.image.create_image(name, data=data, use_import=False, allow_duplicates=True)` | `service.Upload(ctx, image.UploadImageRequest{Name: name, Data: reader}, ...)` |
 | `conn.create_image(..., wait=True, timeout=300)` | 업로드 호출에 `image.WithWait(resource.WithTimeout(5*time.Minute))` 추가 |
@@ -186,6 +187,8 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 `service.StageImageRecord`와 `conn.StageImageRecord`는 queued SDK Record의 private state를 유지하고 filename 또는 borrowed reader를 한 번 staging한 뒤 필수 metadata GET을 수행합니다. [owned staging 비교·독립 main](image-record-stage.md)은 literal ID의 queued seed 실패·명시적 GET, 기본 total-size 추론·signed size·optout, owned file close·borrowed data 유지와 partial receipt를 설명합니다. 아래 `StageImage/StageKnownImage`의 native typed profile과 구분해서 사용합니다.
 
 `service.API.ImageData.StageImage(ctx, ref, data, options...)`는 queued 이미지를 확인하고 `io.Reader`를 한 번 전송한 뒤 최신 이미지를 조회합니다. `StageKnownImage`는 이미 보유한 native Image의 ID/status를 복사해 첫 조회를 생략합니다. [Staging 사용법](v2/imagedata/README.md)은 선택적 크기 헤더, caller의 Reader 소유권, 실제 PUT204 접수와 후속 GET200 결과·부분 실패를 설명합니다. staged 데이터의 import 제출과 active 상태 대기는 이어서 선택할 수 있습니다.
+
+`service.DownloadImageRecord`와 `conn.DownloadImageRecord`는 ID·owned Record·raw constructor Resource의 필수 metadata fetch 뒤 file/writer/buffer/stream을 처리합니다. [owned 다운로드 비교·독립 main](image-record-download.md)에 sparse overlay의 private ID·after-GET hash 선택·registry/factory·200..399 응답·부분 오류·borrowed writer와 caller stream Close를 설명합니다. 기본 memory에는 전체 크기 cap이 없으며 stream-only는 자동 checksum proof를 만들지 않습니다.
 
 `service.DownloadTo(ctx, ref, writer, options...)`는 fresh metadata를 먼저 조회하고 기본 1MiB chunk로 writer에 전송하며 가능한 checksum을 검사합니다. [다운로드 사용법](download.md)은 저장소 우선순위·hash 우선순위·caller의 writer 소유권과 실제 metadata/binary 응답·바이트 수·부분 오류를 설명합니다. 기존 raw `service.API.ImageData.Download`를 사용할 때는 반환된 Body를 직접 닫습니다.
 

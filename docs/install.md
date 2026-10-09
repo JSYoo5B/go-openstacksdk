@@ -80,6 +80,27 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).DownloadImageRecord
+    _ = (*image.Service).DownloadImageRecord
+    _ = image.ImageRecordDownloadRequest{}
+    _ = image.ImageRecordDownloadResult{}
+    _ = image.ImageRecordDownloadResponse{}
+    _ = image.ImageRecordDownloadChecksum{}
+    _ = image.ImageRecordDownloadOpts{}
+    _ = image.ImageRecordDownloadOption(nil)
+    _ = image.ImageRecordDownloadHashFactory(nil)
+    _ = image.ImageRecordDownloadChecksumMismatchError{}
+    _ = image.WithImageRecordDownloadOpts
+    _ = image.WithImageRecordDownloadStream
+    _ = image.WithImageRecordDownloadChunkSize
+    _ = image.WithImageRecordDownloadStorePreferences
+    _ = image.WithImageRecordDownloadChecksumVerification
+    _ = image.WithImageRecordDownloadHashFactory
+    _ = image.WithImageRecordDownloadHeader
+    _ = image.WithImageRecordDownloadHeaders
+    _ = image.ErrImageRecordDownloadHashUnsupported
+    _ = image.ErrImageRecordDownloadHashLengthRequired
+    _ = image.ErrChecksumMismatch
     _ = (*sdk.Connection).UploadImageRecord
     _ = (*image.Service).UploadImageRecord
     _ = image.ImageRecordUploadRequest{}
