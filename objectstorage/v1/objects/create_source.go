@@ -12,12 +12,17 @@ import (
 
 type objectCreateSource struct {
 	data []byte
-	file *os.File
-	path string
-	size int64
+	// Only the concrete image-import profile borrows a single-attempt reader.
+	reader io.Reader
+	file   *os.File
+	path   string
+	size   int64
 }
 
 func (s *objectCreateSource) section(offset, size int64) io.Reader {
+	if s.reader != nil {
+		return s.reader
+	}
 	if s.file != nil {
 		return io.NewSectionReader(s.file, offset, size)
 	}

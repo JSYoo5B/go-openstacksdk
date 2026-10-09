@@ -13,7 +13,8 @@ import (
 )
 
 type preparedCreateObject struct {
-	metadata *preparedMetadata
+	metadata    *preparedMetadata
+	imageImport bool
 	// Optional immutable policy is used by scoped HEAD waiters. Existing
 	// create/stale operations retain their original header policy.
 	headerPolicy func(map[string]string) error
@@ -29,7 +30,15 @@ func (a *API) captureCreateObject(ctx context.Context, container, object string)
 	if _, err := validateCreateObjectHeaders(base.source.MoreHeaders); err != nil {
 		return nil, metadataContextError(ctx, err)
 	}
-	return &preparedCreateObject{metadata: base}, nil
+	p := &preparedCreateObject{metadata: base}
+	if profile, _ := ctx.Value(imageImportObjectProfileKey{}).(bool); profile {
+		p.imageImport = true
+		base.extraSource = validateImageImportObjectSourceHeaders
+	}
+	if err := p.guard(ctx); err != nil {
+		return nil, err
+	}
+	return p, nil
 }
 func validateCreateObjectHeaders(headers map[string]string) (map[string]string, error) {
 	owned, err := validateMetadataHeaders(headers)
@@ -138,11 +147,12 @@ func (p *preparedCreateObject) finishCreate(ctx context.Context, cfg *CreateObje
 	if err == nil {
 		cfg.Metadata, err = metadataInput(cfg.Metadata)()
 	}
-	if err == nil {
-		err = validateObjectCreateDigest(cfg.MD5, 32)
-	}
-	if err == nil {
-		err = validateObjectCreateDigest(cfg.SHA256, 64)
+	if err == nil && p.imageImport {
+		if !metadataFieldValue(cfg.MD5) || !metadataFieldValue(cfg.SHA256) {
+			err = metadataInvalid("invalid image import object hash header value")
+		}
+	} else if err == nil {
+		err = joinMetadataErrors(validateObjectCreateDigest(cfg.MD5, 32), validateObjectCreateDigest(cfg.SHA256, 64))
 	}
 	if err == nil && cfg.SegmentSize != nil && *cfg.SegmentSize < 0 {
 		err = metadataInvalid("negative object segment size")

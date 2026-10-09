@@ -88,7 +88,7 @@ func (p *preparedCreateObject) segmentRound(ctx context.Context, result *CreateO
 				segment.Ambiguous = segment.Ambiguous || out.ambiguous
 				response := out.phase.Acknowledgement
 				if out.err == nil && response != nil {
-					if response.StatusCode == http.StatusAccepted {
+					if response.StatusCode == http.StatusAccepted && !p.imageImport {
 						segment.Ambiguous = true
 						out.err = objectCreateResponseError(response, &ObjectCreateUnconfirmedSegmentError{Name: segment.Name})
 					} else {

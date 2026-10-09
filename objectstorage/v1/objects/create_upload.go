@@ -23,6 +23,7 @@ import (
 type objectCreatePayload struct {
 	source       *objectCreateSource
 	offset, size int64
+	borrowed     bool
 }
 type objectCreateOutcome struct {
 	phase            *ObjectCreatePhaseResult
@@ -173,7 +174,7 @@ func (x *objectCreateExchange) forcedHeader(name string) bool {
 	return (name == "etag" && (x.role == "segment" || x.role == "slo" || x.role == "dlo")) || (name == "if-none-match" && x.role == "segment") || (name == "accept" && x.role == "slo")
 }
 func (x *objectCreateExchange) ownedHeader(name string) bool {
-	return strings.HasPrefix(name, "x-object-meta-") || name == "x-object-manifest" || (name == "content-type" && x.role == "directory-marker")
+	return strings.HasPrefix(name, "x-object-meta-") || name == "x-object-manifest" || (name == "content-type" && x.role == "directory-marker") || (x.p.imageImport && x.method == http.MethodPut && (name == "content-type" || name == "x-delete-after"))
 }
 func (x *objectCreateExchange) headers(values map[string]string, requireOwned bool) error {
 	seen := make(map[string]string, len(values))
@@ -353,7 +354,11 @@ func (x *objectCreateExchange) roundTrip(transport http.RoundTripper, req *http.
 		// its 307/308 decision before invoking CheckRedirect. Its initial
 		// bytes.Reader carrier already supplies GetBody even if send forks it.
 		x.force(req)
-		req.GetBody = func() (io.ReadCloser, error) { return x.body(req.Context(), record), nil }
+		if x.payload.borrowed {
+			req.GetBody = nil
+		} else {
+			req.GetBody = func() (io.ReadCloser, error) { return x.body(req.Context(), record), nil }
+		}
 	}
 	copy := req.Clone(req.Context())
 	x.force(copy)
@@ -362,7 +367,11 @@ func (x *objectCreateExchange) roundTrip(transport http.RoundTripper, req *http.
 			_ = req.Body.Close()
 		}
 		copy.Body = x.body(req.Context(), record)
-		copy.GetBody = func() (io.ReadCloser, error) { return x.body(req.Context(), record), nil }
+		if x.payload.borrowed {
+			copy.GetBody = nil
+		} else {
+			copy.GetBody = func() (io.ReadCloser, error) { return x.body(req.Context(), record), nil }
+		}
 	}
 	wire, err := transport.RoundTrip(copy)
 	if wire != nil {
@@ -389,11 +398,14 @@ func (x *objectCreateExchange) roundTrip(transport http.RoundTripper, req *http.
 
 func (p *preparedCreateObject) exchange(ctx context.Context, method, target, role string, payload *objectCreatePayload, headers map[string]string, logical int, codes ...int) objectCreateOutcome {
 	out := objectCreateOutcome{phase: &ObjectCreatePhaseResult{}}
+	if p.imageImport {
+		codes = imageImportObjectCodes(codes)
+	}
 	if err := joinMetadataErrors(p.guard(ctx), rest.ValidateTarget(p.metadata.client, target)); err != nil {
 		out.err = err
 		return out
 	}
-	client, err := fixedrequest.New(p.metadata.client, method, target)
+	client, err := fixedrequest.NewGuarded(p.metadata.client, method, target, p.guard)
 	if err != nil {
 		out.err = err
 		return out
@@ -489,6 +501,13 @@ func (p *preparedCreateObject) exchange(ctx context.Context, method, target, rol
 		}
 		return nil
 	}
+	if payload != nil && payload.borrowed {
+		// An ordinary caller reader has no immutable replay source. Never invoke
+		// a retry, backoff, reauthentication or redirect callback for this PUT.
+		provider.RetryFunc, provider.RetryBackoffFunc, provider.ReauthFunc = nil, nil, nil
+		provider.MaxBackoffRetries = 0
+		provider.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	}
 	wire, nativeErr := client.Request(ctx, method, target, x.options)
 	accepted := wire != nil && nativeErr == nil && slices.Contains(codes, wire.StatusCode)
 	if accepted {
@@ -538,7 +557,7 @@ func (p *preparedCreateObject) exchange(ctx context.Context, method, target, rol
 	x.mu.Lock()
 	terminal := x.terminal
 	x.mu.Unlock()
-	out.retry = out.err != nil && !terminal && !finalDirty && guardErr == nil && (x.role != "segment" || finalResponse == nil || finalResponse.StatusCode != http.StatusPreconditionFailed)
+	out.retry = (payload == nil || !payload.borrowed) && out.err != nil && !terminal && !finalDirty && guardErr == nil && (x.role != "segment" || finalResponse == nil || finalResponse.StatusCode != http.StatusPreconditionFailed)
 	return out
 }
 
