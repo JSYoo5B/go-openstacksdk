@@ -56,6 +56,20 @@ ported from libyaml C sources: `apic.go`, `emitterc.go`, `parserc.go`, `readerc.
 the original MIT copyright and permission terms; the Apache project license does
 not replace them.
 
+## Go extended libraries: BLAKE2 and CPU capability dependencies
+
+- Sources: [golang.org/x/crypto v0.55.0](https://cs.opensource.google/go/x/crypto/+/v0.55.0:),
+  [golang.org/x/sys v0.47.0](https://cs.opensource.google/go/x/sys/+/v0.47.0:).
+- License: BSD-3-Clause; copyright 2009 The Go Authors.
+- Exact originals: [x/crypto LICENSE](licenses/golang-x-crypto-v0.55.0-LICENSE)
+  and [x/sys LICENSE](licenses/golang-x-sys-v0.47.0-LICENSE).
+- Scope: direct BLAKE2b/BLAKE2s hash implementations used by owned image
+  download defaults, and their indirect CPU capability support.
+
+These libraries are imported as pinned Go modules, not copied into this
+repository. Their original source and binary redistribution notices remain
+applicable alongside the SDK's Apache-2.0 contribution license.
+
 ## go-jmespath v0.4.0: adapted source fork
 
 - Source: [jmespath/go-jmespath v0.4.0](https://github.com/jmespath/go-jmespath/tree/v0.4.0).

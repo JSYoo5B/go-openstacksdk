@@ -46,3 +46,8 @@ go-openstacksdk is an independent project. It is not affiliated with or
 endorsed by the OpenInfra Foundation, OpenStackSDK, or Gophercloud projects.
 This notice does not grant rights to upstream trademarks or imply approval
 of the project name by an upstream rights holder.
+
+Owned image download imports BLAKE2 from golang.org/x/crypto v0.55.0 and
+CPU capability support from golang.org/x/sys v0.47.0. Copyright 2009 The Go
+Authors; their BSD-3-Clause terms are preserved in licenses/ and
+THIRD_PARTY_NOTICES.md. No implementation source is copied into this SDK.

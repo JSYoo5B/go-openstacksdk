@@ -17,6 +17,8 @@ third-party code and data retain their respective terms.
 | [python-3.14.8-LICENSE](python-3.14.8-LICENSE) | [CPython v3.14.8](https://github.com/python/cpython/blob/v3.14.8/LICENSE), exact audited installed runtime file | `b0e25a78cffb43f4d92de8b61ccfa1f1f98ecbc22330b54b5251e7b6ba010231` |
 | [unicode-LICENSE](unicode-LICENSE) | [Official Unicode License V3](https://www.unicode.org/license.txt), retrieved 2026-10-08 | `e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96` |
 | [jmespath-py-v1.0.1-LICENSE](jmespath-py-v1.0.1-LICENSE) | [jmespath.py 1.0.1](https://github.com/jmespath/jmespath.py/blob/1.0.1/LICENSE.txt) | `66b313cce80ed0623fc7db3f24863a0c80fd83eb341a46b57864158ae74faa56` |
+| [golang-x-crypto-v0.55.0-LICENSE](golang-x-crypto-v0.55.0-LICENSE) | [golang.org/x/crypto v0.55.0](https://cs.opensource.google/go/x/crypto/+/v0.55.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
+| [golang-x-sys-v0.47.0-LICENSE](golang-x-sys-v0.47.0-LICENSE) | [golang.org/x/sys v0.47.0](https://cs.opensource.google/go/x/sys/+/v0.47.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
 
 Gophercloud and yaml originals were copied from the pinned module cache;
 OpenStackSDK and go-jmespath originals were copied from their pinned reference
@@ -36,3 +38,7 @@ The Unicode license is the official retrieved text, which currently carries
 Copyright © 1991–2026 Unicode, Inc. The [UCD 16.0.0 source notice](https://www.unicode.org/Public/16.0.0/ucd/ReadMe.txt)
 separately attributes the 2024 data release. The README and NOTICE preserve that
 data attribution without editing the upstream license text.
+
+The golang.org/x/crypto and golang.org/x/sys BSD-3-Clause originals were copied
+verbatim from the pinned module cache. They cover imported BLAKE2 and its CPU
+capability dependency; no implementation source is copied into this SDK.

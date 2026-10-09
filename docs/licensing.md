@@ -26,6 +26,10 @@
   원본 라이선스를 보관하며 YAML의 실제 upstream `NOTICE`도 그대로 포함합니다.
   YAML의 Go 구현에는 Apache-2.0, libyaml에서 포팅한 여덟 파일에는 원래 MIT 조건이
   적용되므로 Kirill Simonov의 저작권과 별도 `LICENSE.libyaml` 원문도 보존합니다.
+- **다운로드 해시 의존성:** `golang.org/x/crypto` v0.55.0의 BLAKE2b/BLAKE2s와
+  간접 의존성 `golang.org/x/sys` v0.47.0의 CPU 기능 지원을 사용합니다.
+  두 모듈의 BSD-3-Clause 원문과 The Go Authors 저작권을 보존합니다.
+  Go 구현을 SDK에 복사하지 않으며 기존 Go 1.25 최소 버전은 유지합니다.
 - **비교·추출 기준:** 고정 OpenStackSDK 소스에서 공개 선언과 리소스 metadata를
   추출합니다. Python과 jmespath.py는 동작 비교용이며 SDK runtime에 포함하지 않습니다.
   고정 버전·출처·참조 결과의 범위는 통합 고지 문서에 구분해 기록합니다.
