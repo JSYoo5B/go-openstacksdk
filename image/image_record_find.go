@@ -125,6 +125,16 @@ func (s *Service) FindImageRecord(ctx context.Context, nameOrID string, options 
 	if err != nil {
 		return fail(err)
 	}
+	result, err := findPreparedImageRecord(p, nameOrID, policy, parameters)
+	if err != nil {
+		return fail(err)
+	}
+	return result, nil
+}
+
+// Compound image creation uses the same complete discovery engine with the
+// original source, location and headers captured for the whole workflow.
+func findPreparedImageRecord(p *preparedImageRecord, nameOrID string, policy FindImageRecordOpts, parameters imageRecordListParameters) (*ImageRecord, error) {
 	get := func(readCtx context.Context, identity string) (*ImageRecord, error) {
 		response, err := rest.DoJSONGuardedRejections(readCtx, p.client, p.check, http.MethodGet, imageRecordEndpoint(p, identity), nil, nil, rest.RejectionPolicy{Codes: []int{http.StatusBadRequest, http.StatusForbidden, http.StatusNotFound}, PreserveCleanRetry: true}, imageRecordCodes()...)
 		if err != nil {
@@ -154,8 +164,5 @@ func (s *Service) FindImageRecord(ctx context.Context, nameOrID string, options 
 		},
 	})
 	result, err := collection.FindIdentity(p.ctx, nameOrID, resource.WithIdentityFindOptions(resource.IdentityFindOpts{Query: parameters.query, IgnoreMissing: policy.IgnoreMissing}))
-	if err = errors.Join(err, p.check(p.ctx)); err != nil {
-		return fail(err)
-	}
-	return result, nil
+	return result, errors.Join(err, p.check(p.ctx))
 }

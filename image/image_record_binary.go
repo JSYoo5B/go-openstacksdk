@@ -19,6 +19,17 @@ func imageRecordDataOnce(p *preparedImageRecord, endpoint string, data io.Reader
 }
 
 func imageDataOnce(ctx context.Context, source *gophercloud.ServiceClient, check func(context.Context) error, endpoint string, data io.Reader, size *int64, codes []int) (*rest.Response, error) {
+	var header *string
+	if size != nil {
+		value := strconv.FormatInt(*size, 10)
+		header = &value
+	}
+	return imageDataOnceSizeHeader(ctx, source, check, endpoint, data, header, codes)
+}
+
+// Modern creation retains Source's signed/raw size string (including bool).
+// Existing callers keep their int64 profile through the adapter above.
+func imageDataOnceSizeHeader(ctx context.Context, source *gophercloud.ServiceClient, check func(context.Context) error, endpoint string, data io.Reader, size *string, codes []int) (*rest.Response, error) {
 	checkSource := func() error {
 		if check != nil {
 			return check(ctx)
@@ -51,7 +62,7 @@ func imageDataOnce(ctx context.Context, source *gophercloud.ServiceClient, check
 	}
 	client.MoreHeaders["Content-Type"], client.MoreHeaders["Accept"] = "application/octet-stream", ""
 	if size != nil {
-		client.MoreHeaders["X-OpenStack-Image-Size"] = strconv.FormatInt(*size, 10)
+		client.MoreHeaders["X-OpenStack-Image-Size"] = *size
 	}
 	var faults rest.RejectedResponseFaults
 	parent := client.HTTPClient.Transport
