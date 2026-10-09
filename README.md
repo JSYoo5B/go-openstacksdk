@@ -84,6 +84,8 @@ Cinder snapshot은 `conn.ListVolumeSnapshots`, `SearchVolumeSnapshots`, `GetVolu
 
 [Native Image PATCH의 Python/Go 비교·독립 main](image/v2/images/update.md)은 전체 Connection과 `API.Images.Update`의9종 concrete patch·기본200·nil/empty·partial Extract를 설명합니다.
 
+`DeleteImageRecord`는 Connection·Image Service에서 owned ID/Record와 concrete store·missing 옵션으로 삭제합니다. [레코드 삭제 비교·독립 main](image/image-record-delete.md)은 whole Record+ACK와 store ACK-only, private identity·opaque 응답 및 whole user/store admin 분기를 설명합니다. [native 이미지 삭제](image/v2/images/delete.md)는 `API.Images.Delete`의 error-only·기본202/204·raw ID·Read/Close와 재시도 정책을 설명합니다.
+
 [Glance 이미지 수정](image/update.md)은 순서가 있는 concrete 패치와 속성 upsert, 값·삭제 구분 및 Python Resource 사용법 비교를 제공합니다.
 
 [Glance 직접 업로드](image/upload-image.md)는 concrete 옵션, 메타데이터 생성과 바이너리 전송의 단계별 응답, caller 스트림 소유권과 Python 사용법 비교를 제공합니다.

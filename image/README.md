@@ -181,6 +181,8 @@ Task는 `service.API.Tasks.WaitForTask(ctx, resource.ID(id), options...)` 또는
 
 `service.DeleteImage(ctx, ref, options...)`는 ID 조회 없이 전체 이미지 또는 선택한 저장소 복사본을 삭제합니다. Name은 기존 정확한 이름 조회로 해석하며 기본 미존재는 `nil, nil`입니다. [삭제 사용법](delete.md)은 concrete 옵션, 실제204 응답 원문·헤더·상태와 응답 처리 오류, 저장소의 마지막 복사본 정책을 설명합니다. 기존 `Images.Delete`와 native `API.Images.Delete`는 계속 사용할 수 있습니다.
 
+`service.DeleteImageRecord`와 `conn.DeleteImageRecord`는 literal ID 또는 SDK ImageRecord의 private identity를 받아 전체 이미지와 특정 store 삭제를 처리합니다. [owned 삭제 비교·독립 main](image-record-delete.md)은 whole Record+ACK와 store ACK-only, opaque200..399·기본 missing·whole user/store admin 분기를 설명합니다. [native 삭제 가이드](v2/images/delete.md)는 `API.Images.Delete`의 error-only·기본202/204·raw ID와 native Read/Close·재시도 경계를 설명합니다.
+
 `service.API.ServiceInfo.ListStores/AllStores(ctx, options...)`는 기본 저장소 목록과 선택적 상세 목록을 읽고, `GetImportInfo(ctx)`는 현재 서버의 import 방식을 조회합니다. [ServiceInfo 사용법](v2/serviceinfo/README.md)은 Python 대응·concrete 옵션·실제 응답 증거·목록 제어를 설명합니다. discovery 결과로 import 실행을 자동 제한하거나 캐시하지 않습니다.
 
 `ServiceInfo.GetImportInfoRecord/ListStoreRecords/AllStoreRecords`는 import와 기본 stores의 declared Resource·Wire·응답 증거를 구분하고 descriptor 변환·현재 location·공통 페이지·로컬 Body 조건을 처리합니다. [레코드 사용법과 독립 main](v2/serviceinfo/records.md)은 concrete 옵션·explicit zero limit·부분 결과와 후속 admin 상세 목록의 범위를 설명합니다.

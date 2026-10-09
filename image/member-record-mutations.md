@@ -144,6 +144,8 @@ Connection 메서드는 공유 Image Service로 위임합니다. `conn.Image(ctx
 
 멤버 ID는 공백만 있는 값·비 UTF-8·제어 문자·정확한 `.`/`..`를 거부합니다. slash·percent·Unicode·query·backslash는 literal 값으로 받아 멤버 경로의 한 segment로 한 번 이스케이프합니다. 이는 기존 typed API의 safe segment 검증과 구분됩니다.
 
+요청 identity로 읽는 raw JSON 문자열은 unpaired UTF-16 surrogate escape(예: `"\uD800"`)를 거부합니다. valid pair `"\uD83D\uDE00"`, 실제 U+FFFD와 `"\uFFFD"`, literal backslash-u 문자열 `"\\ud800"`는 각각의 정상 값을 보존합니다. `encoding/json`의 replacement character 치환으로 다른 ID를 선택하지 않으며, 이 규칙은 일반 Body descriptor 변환과 구분됩니다.
+
 부모 `resource.Ref`는 매번 명시합니다. `resource.ID(imageID)`는 부모 lookup을 하지 않으며, `resource.Name(imageName)`은 기존 image 이름 resolver를 사용하는 Go 확장입니다. 멤버 ID를 프로젝트 이름으로 조회하거나 입력 Record에서 부모를 복구하지 않습니다. 고정 Python `remove_member(member, image=None)`도 `_get_id(image)`를 직접 전달하며 멤버의 부모를 복원하지 않으므로, Go는 부모 없는 입력을 요청 전에 거부합니다. 명시적인 부모 Name lookup을 제외하면 이 네 메서드에 추가 GET·목록 검색이 없습니다.
 
 Get은 기존 `ImageMemberOption`의 `WithImageMemberOpts/Header/Headers`를 사용합니다. Add/Update는 `ImageMemberRecordWriteOpts{Headers map[string]string; Attributes []resource.ListOption}`와 다음 helper를 사용합니다.

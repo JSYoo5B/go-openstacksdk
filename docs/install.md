@@ -52,6 +52,7 @@ import (
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
     "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
@@ -65,6 +66,12 @@ import (
 )
 
 func main() {
+    _ = (*sdk.Connection).DeleteImageRecord
+    _ = (*image.Service).DeleteImageRecord
+    _ = (*images.API).Delete
+    _ = image.ImageRecordDeleteRequest{ID: "literal-image-id"}
+    _ = image.WithImageRecordDeleteStoreID("store-id")
+    _ = image.WithImageRecordDeleteIgnoreMissing(false)
     _ = (*sdk.Connection).GetImageMemberRecord
     _ = (*sdk.Connection).AddImageMemberRecord
     _ = (*sdk.Connection).UpdateImageMemberRecord
