@@ -1,6 +1,6 @@
 # Cloud 이미지 목록·검색·조회: Python과 Go
 
-`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
+`conn.Image(ctx)`의 `AllCloudImageRecords`, `SearchImageRecords`, `GetCloudImageRecord`, `GetImageRecordByID`는 고정 openstacksdk Cloud 계층의 `list_images`, `search_images`, `get_image`, `get_image_by_id`에 대응합니다. `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID`는 같은 검색 결과를 쓰는 `get_image_exclude`, `get_image_name`, `get_image_id`에 대응합니다. SDK가 기존 [ImageRecord 조회·목록·Find](image-records.md) 엔진과 Connection location, 공통 Cloud 필터를 조합하므로 애플리케이션이 builder interface나 페이지 순회를 구현하지 않아도 됩니다. Proxy 계층의 lazy `ListImageRecords`, `FindImageRecord`, `GetImageRecord`는 그대로 유지합니다.
 
 | 고정 openstacksdk | Go | 실제 기본값과 순서 |
 |---|---|---|
@@ -8,6 +8,9 @@
 | `conn.search_images(name_or_id=None, filters=None)` | `service.SearchImageRecords(ctx, nameOrID, options...)` | 기본 `list_images`를 끝낸 뒤 이름/ID glob과 dictionary 또는 JMESPath 선택 |
 | `conn.get_image(name_or_id, filters=None)` | `service.GetCloudImageRecord(ctx, nameOrID, options...)` | filters가 None이면 Proxy `find_image`, 그 밖에는 검색 후 truthiness·`len`·`[0]` |
 | `conn.get_image_by_id(id)` | `service.GetImageRecordByID(ctx, id, options...)` | literal GET 한 번; 404는 nil이 아닌 원래 오류 |
+| `conn.get_image_exclude(name_or_id, exclude)` | `service.GetImageRecordExclude(ctx, nameOrID, exclude, options...)` | `search_images(name_or_id)` 순서대로 name에 exclude가 없는 첫 행 |
+| `conn.get_image_name(image_id, exclude=None)` | `service.GetImageRecordName(ctx, imageID, exclude, options...)` | 위 선택 행의 raw `name` |
+| `conn.get_image_id(image_name, exclude=None)` | `service.GetImageRecordID(ctx, imageName, exclude, options...)` | 위 선택 행의 raw `id` |
 
 `show_all=True`이면 Source가 `filter_deleted`를 False로 덮어쓴 뒤 v2 query `member_status=all`을 추가합니다. Go Service는 Glance v2 전용이므로 `supports_version(image, '2')` 분기는 항상 v2 경로입니다. `search_images`와 `get_image`의 검색 경로는 `list_images()`를 인자 없이 호출하므로 항상 deleted 필터를 적용하고 `member_status`를 보내지 않습니다. 이름이나 Cloud 필터는 목록 query나 Proxy의 Body 필터로 먼저 보내지 않습니다.
 
@@ -147,6 +150,7 @@ error와 결과가 함께 오면 예제는 부분 증거를 출력한 뒤 error�
 | `SearchImageRecords` | `WithImageRecordQueryFilters`, `WithImageRecordQueryExpression`, header | 필터 없음 |
 | `GetCloudImageRecord` | `WithImageRecordQueryFilters`, `WithImageRecordQueryExpression`, header | 필터 없음이면 Proxy find |
 | `GetImageRecordByID` | header | 없음 |
+| `GetImageRecordExclude`, `GetImageRecordName`, `GetImageRecordID` | header | 기본 `search_images` |
 
 `WithImageRecordQueryFilters(nil)`은 필터를 비우고 `json.RawMessage("null")`은 명시 null을 보존합니다. 목록 함수는 명시 null도 present 필터로 보고 거부합니다. `get_image`에서 명시 null은 Python None과 같으므로 Find 경로입니다. `WithImageRecordQueryExpression(expression)`은 JSON 문자열 필터를 만들고 JMESPath로 실행합니다. 옵션 bytes와 header는 SDK가 소유 복사하며, callback은 logical call마다 한 번 실행하고 callback 사이마다 context와 source binding을 확인합니다. header는 Python 함수에 없는 Go 확장으로 한 logical call의 모든 요청에 적용합니다.
 
@@ -162,8 +166,16 @@ deleted 필터가 켜져 있으면 Source의 `image.status.lower()`처럼 status
 
 `GetImageRecordByID`는 `GetImageRecord(ImageRecordRequest{ID: id})`에 위임합니다. Find fallback이나 missing-as-nil이 없고 native 오류를 그대로 반환하며 operation 이름만 `GetImageRecordByID`로 표시합니다. 빈 ID, 공백, `.`/`..`, control 문자는 HTTP 전에 거부합니다.
 
+## exclude 선택과 이름·ID 반환
+
+세 helper는 필터 없는 `search_images(name_or_id)`를 먼저 끝냅니다. 그래서 deleted 행은 후보가 아니고 빈 nameOrID는 전체 목록을 뜻합니다. exclude가 빈 문자열이면 Python의 None이나 빈 문자열처럼 첫 행을 반환합니다. 그렇지 않으면 행 순서대로 Python `exclude not in image.name`을 평가해 처음 통과한 행을 고르고, 그 뒤 행은 검사하지 않습니다.
+
+`in`의 의미는 name의 JSON 형태를 따릅니다. 문자열은 부분 문자열, 배열은 문자열 원소의 동등 비교, 객체는 key 멤버십입니다. null, 숫자, bool name에 도달하면 Python TypeError에 대응해 그 행의 실제 목록 응답 증거를 담은 입력 오류를 반환하고 Inventory를 보존합니다. 이 Go profile은 lone surrogate가 없는 Unicode JSON 문자열을 요구합니다.
+
+결과는 `CloudImageRecordResult`입니다. 선택한 행이 없으면 Image와 Value가 nil이며 Python의 None에 해당합니다. `GetImageRecordExclude`의 Value는 선택 행의 declared view이고 `GetImageRecordName`과 `GetImageRecordID`의 Value는 그 행의 raw `name`, `id` JSON입니다. Python은 None name과 결과 없음을 구별하지 못하지만 Go는 선택된 null name을 Value `null`과 non-nil Image로 구별합니다. 식별자 단계는 숫자 ID도 문자열 표현으로 비교합니다.
+
 ## 남은 범위와 근거
 
-Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `get_image_exclude`, `get_image_name`, `get_image_id`, `wait_for_image`, `delete_image`, `download_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
+Python의 deprecated warning, mutable Resource와 Munch 객체 동일성, adapter cache·session·임의 transport는 Go concrete 옵션과 소유 record로 대체하며 동등성을 주장하지 않습니다. `wait_for_image`, `delete_image`, `download_image`, Cloud `create_image`, `update_image_properties`는 별도 단위입니다. 실제 이미지 가시성·member 상태·deleted 행 노출과 권한은 서버가 판단합니다.
 
-고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
+고정 소스는 [Cloud list_images·search_images·get_image·get_image_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L84-L166), [get_image_exclude·get_image_name·get_image_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_image.py#L221-L246)와 [_filter_list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py#L43-L145)입니다. 테스트와 지원 판정은 [판정대장](../docs/sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 기록합니다.
