@@ -18,9 +18,9 @@
 
 Pinned Source20파일·103 AST spans를 독립 재확인하고 새30계약을 기존 legacy CreateAndImport12계약·32개 ordered refs 뒤에 추가했습니다. 다른551 reviews·catalog·source pins/fingerprint는 그대로입니다. reviews552·contracts3,742·go_mapping292·review unresolved259·catalog unresolved3,069·미검토2,810·unsupported1·supported0입니다. 공통 SDK-R1/C1/S1과 standalone Swift/Task 행은 미해결이며 전체 목표는 active입니다. 유한 JSON/source-fixed 전체 생성 graph의 Go mapping을 완료했고, 임의 Python Resource/Adapter/session 동등성이나 실제 OpenStack/Python 인증·호출을 판정하지 않았습니다.
 
-생성·설치 문서의 독립 main2개를 외부 local-replace consumer로 빌드하고, push한 정확한 revision `dbbac08b66c13a9e1a5de2c1eb1653e1a8389f2e`을 새 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009045305-dbbac08b66c1`·get/build exit0이며 원격 Go2,184개와 라이선스·고지·대응표17개 파일이 로컬 검증 bytes와 같습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-create-{focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer,remote-consumer}.json`과 source audit/independent source revalidation입니다.
+생성·설치 문서의 독립 main2개를 외부 local-replace consumer로 빌드하고, push한 최종 문서·판정 revision `890454fbf6269f0e3c67219a8a616fcbe8d5b4cc`을 새 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009045950-890454fbf626`·get/build exit0이며 원격 Go2,184개·API 판정/catalog·라이선스·고지·대응표17개 파일이 로컬 최종 검증 bytes와 같습니다. 배포 판정에도 whole create42계약이 포함됩니다. 근거는 `/private/tmp/go-openstacksdk-image-record-create-{focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer,remote-consumer}.json`과 source audit/independent source revalidation입니다.
 
-타이머 수정 `5669f1af`·전체 연결 `99e1331c`·공통 guard `d8c67e13`·preface/connection 테스트 `a51ceb80`·direct/admin 테스트 `261ca8fa`·Swift/deadline 테스트 `e58aea99`·비교 문서 `dbbac08b`를 작은 의미 단위로 main에 push했습니다.
+타이머 수정 `5669f1af`·전체 연결 `99e1331c`·공통 guard `d8c67e13`·preface/connection 테스트 `a51ceb80`·direct/admin 테스트 `261ca8fa`·Swift/deadline 테스트 `e58aea99`·비교 문서 `dbbac08b`·최종 판정 `890454fb`를 작은 의미 단위로 main에 push했습니다.
 
 ## Glance owned ImageRecord download 완료
 

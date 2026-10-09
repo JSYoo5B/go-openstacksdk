@@ -1,6 +1,6 @@
 # 외부 Go 프로젝트에서 사용하기
 
-2026-10-09 최신 설치 검증: 이름 변경과 라이선스 자동 점검을 포함한 정확한 revision `a6b944ae6fdc6f98a90942345ca5e2cd519ba2b3`을 외부 프로젝트에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261009041345-a6b944ae6fdc`이며 설치·download 문서 main 두 개의 get/build가 통과했습니다. Go 소스 2,173개와 라이선스·고지·대응표 17개 파일이 로컬 검증 트리와 byte-identical입니다. 아래 기본 설치 명령은 이 revision을 사용합니다. 전체 이미지 생성 흐름은 진행 중이며 API 집계는291/3,362를 유지합니다.
+2026-10-09 최신 설치 검증: 현대 Glance CreateImageRecord 전체 구현·최종 판정 revision `890454fbf6269f0e3c67219a8a616fcbe8d5b4cc`을 외부 프로젝트에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261009045950-890454fbf626`이며 생성·설치 문서 main 두 개의 get/build가 통과했습니다. Go 소스 2,184개, API 판정·catalog와 라이선스·고지·대응표 17개 파일이 로컬 최종 검증본과 byte-identical입니다. 아래 기본 설치 명령은 이 revision을 사용합니다. 완료 집계는292/3,362이며 공통 SDK-R1/C1/S1은 계속 추적합니다.
 
 2026-10-09 최신 Glance owned 이미지 download: 정확한 문서·판정 revision `a4688f1b4cf4ae8aa26896629a0321965054840d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009033426-a4688f1b4cf4`·get/build exit0이며 download/설치 main **2개**를 빌드했습니다. 원격 Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **16개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-download-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는291/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 당시 기본 설치 명령은 이 revision을 사용했습니다.
 
@@ -56,7 +56,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@a6b944ae6fdc6f98a90942345ca5e2cd519ba2b3
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@890454fbf6269f0e3c67219a8a616fcbe8d5b4cc
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
