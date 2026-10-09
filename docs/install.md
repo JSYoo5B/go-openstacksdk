@@ -1,6 +1,8 @@
 # 외부 Go 프로젝트에서 사용하기
 
-2026-10-09 최신 Glance owned 비활성화·재활성화: 정확한 문서·판정 revision `f65e5be7321b6c98cbefc79d3c10fcb012ebbc76`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009002558-f65e5be7321b`·get/build exit0이며 액션/설치 main **2개**를 빌드했습니다. 원격 Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-actions-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는286/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 기본 설치 명령은 이 revision을 사용합니다.
+2026-10-09 최신 Glance owned 이미지 속성 helper: 정확한 문서·판정 revision `48d6ef15374db885ca1d02bf2e4bb7b052e8135e`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009010239-48d6ef15374d`·get/build exit0이며 속성 helper/설치 main **2개**를 빌드했습니다. 원격 Go source2,123개 SHA256 `dc7351eaadb7b5a1402fabf4dc3bf15636747813a20cc716bbf7514344f91d50`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-properties-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는287/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 기본 설치 명령은 이 revision을 사용합니다.
+
+2026-10-09 앞선 Glance owned 비활성화·재활성화: 정확한 문서·판정 revision `f65e5be7321b6c98cbefc79d3c10fcb012ebbc76`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009002558-f65e5be7321b`·get/build exit0이며 액션/설치 main **2개**를 빌드했습니다. 원격 Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-actions-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는286/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 당시 기본 설치 명령은 이 revision을 사용했습니다.
 
 2026-10-09 앞선 Glance owned 전체·store 삭제 및 native Delete: 정확한 문서·판정 revision `cdddf468c1df9375684acf21575b23a45deb3efa`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009000252-cdddf468c1df`·get/build exit0이며 삭제/설치 main **2개**를 빌드했습니다. 원격 Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-delete-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는284/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 당시 기본 설치 명령은 이 revision을 사용했습니다.
 
@@ -44,7 +46,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@f65e5be7321b6c98cbefc79d3c10fcb012ebbc76
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@48d6ef15374db885ca1d02bf2e4bb7b052e8135e
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.
