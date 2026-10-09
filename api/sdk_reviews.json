@@ -46281,6 +46281,53 @@
         "The pinned Proxy accepts wait and timeout but never reads them, so Go omits them. Python sends any configured image_format value; Go requires a string or null configuration and a nonblank string image_id."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:cloud/_image/ImageCloudMixin/create_image",
+      "source_fingerprint": "5024a1132f3bce9816dd53ddec0f031d06abbfce9ffb0089bac0d1b6631a2ca3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CreateCloudImageRecord",
+        "github.com/JSYoo5B/go-openstacksdk/image.PrepareImageRecordCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCreateOpts"
+      ],
+      "contracts": [
+        {
+          "behavior": "Without a volume CreateCloudImageRecord runs the owned CreateImageRecord graph with one prepared option snapshot and returns its Record when wait is falsey; with a volume it maps truthy allow_duplicates to force and Python-falsey container/disk formats to the Cinder Proxy defaults before CreateVolumeImageRecord.",
+          "tests": [
+            "connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait",
+            "connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight"
+          ]
+        },
+        {
+          "behavior": "A truthy wait repeats Cloud get_image on the created id: missing images keep polling, a found status other than exact queued or saving, including null, is returned, and WaitLookups/WaitLast keep the evidence.",
+          "tests": [
+            "connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait"
+          ]
+        },
+        {
+          "behavior": "The iterate_timeout deadline uses the raw create timeout (default 3600 seconds, null unlimited); on timeout the image is deleted through Cloud delete_image with wait and the DeadlineExceeded error keeps the cleanup result and created record.",
+          "tests": [
+            "connection_cloud_image_create_test.go:TestConnectionCloudImageCreateBranchesAndWait"
+          ]
+        },
+        {
+          "behavior": "Truthy non-string volume formats, non-numeric timeouts with wait, nil options and negative poll intervals fail before HTTP.",
+          "tests": [
+            "connection_cloud_image_create_test.go:TestConnectionCloudImageCreateVolumeBodyAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/image-record-cloud.md",
+        "image/image-record-create.md",
+        "blockstorage/volume-upload-image.md"
+      ],
+      "differences": [
+        "Python returns an Image or None and raises ResourceTimeout or the cleanup exception; Go returns CloudImageCreateResult with Created, Volume, wait and Cleanup evidence and joins the timeout with any cleanup failure.",
+        "Python keyword arguments become the concrete ImageRecordCreateOption values; the volume is a literal VolumeID and PollInterval is a Go extension for the Cloud wait and its cleanup."
+      ],
+      "remaining": []
     }
   ]
 }
