@@ -10,6 +10,10 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
+**현재 구현 (2026-10-09): 핵심 user Glance owned Deactivate/Reactivate 두 액션.** 기본 정책은 두 경로 모두 project member를 허용합니다. Source는 SDK Image의 현재 속성과 location을 재투영하고 ImportMethods를 reset하지만 POST 응답을 Image로 translate하거나 status를 바꾸지 않습니다. Go는 독립 local Record와 실제 opaque ACK를 분리합니다. Source Proxy의 기본 raise_exc=False는 HTTP4xx에도 None을 반환하지만, Go는 공통 native HTTP 오류를 반환하는 명시적 차이를 둡니다. Service/Connection 구현과 삭제 공통 seed·projection 재사용을 마쳤고 기존 fixture로 집중 회귀를 작성하고 있습니다. 두 선언은 unresolved이며 전체284/3,362를 유지합니다.
+
+`create_image`는 메타데이터 생성만으로 완료할 수 없습니다. 고정 Source20개 파일의 전체 graph를 확인했고 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup을 후속 구현 범위로 유지합니다. 감사 근거는 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`이며 기존12개 계약과 unresolved 판정을 보존합니다. 같은 함수의 admin 분기는 서버 기본 정책과 함께 추적합니다.
+
 **최신 API 완료 (2026-10-09): Glance owned ImageRecord 전체·store 삭제와 별도 native Delete, 전체282→284(+2)·핵심208→210/2,292·Glance46→48/120.** 전체 삭제는 고정 Glance 정책의 user 경로이고 store location 삭제는 admin 경로이며 단일 Python proxy 선언을 한 번만 집계합니다. `DeleteImageRecord`는 private current ID·concrete 옵션·whole Record+actual ACK 또는 store ACK를 제공하고 pending Body를 clean하지 않습니다. native `API.Images.Delete`는 error-only·기본202/204·raw ID 전달 정책을 별도 검증했습니다. [Python/Go 비교·독립 main](../image/image-record-delete.md), [native 가이드](../image/v2/images/delete.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-삭제와-native-delete-완료)에 사용법과 범위를 설명합니다.
 
 새28그룹195사례 + 기존116그룹935 = **집중 race144그룹1130사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 삭제/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다.
@@ -440,6 +444,7 @@ user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습�
 
 | 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
 |---|---|---|---|---|---|---|
+| Glance owned ImageRecord Deactivate/Reactivate | pinned Source8파일/22 AST·기본user 정책·silentHTTP 오류 확인 완료 | 공통 mutation seed/projection 재사용·Service/Connection 구현 완료 | 기존HTTP/fault fixture의 액션 회귀 작성 중 | Python/Go 비교·독립 main 작성 중 | **2행 unresolved·284/3,362** | Source/구현 완료; 집중·전체 검증 대기 |
 | Glance owned ImageRecord Delete whole/store + native Delete | pinned Proxy/Store/Resource·native·whole user/store admin 검토 완료 | owned API·공통 strict identity·native ABI 보존/작은 commit push | 집중144그룹1130·전체45 package PASS; 생성 drift0 | Python/Go·native 가이드·main2개 외부 build PASS | **신규2행 go_mapping·284/3,362** | finite owned/native profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned MemberRecord Get/Add/Update/Remove | pinned proxy·Member7 Body/URI·policy 검토 완료 | guarded 옵션·fresh 요청·4개 Connection binding 완료/commit push | 집중60그룹847·전체45 package gate PASS; 생성 drift0 | Python 비교·owner/recipient·main2개 외부 build PASS | **신규3행 go_mapping·조회 중복 없음·282/3,362** | named immutable profile 완료; R1/C1/S1 계속 추적 |
 | Glance owned ImageRecord update | pinned Proxy·raw component·commit·response 8개 Source 검토 완료 | **ID/Record·sticky dirty·no-op·wire/properties·공통 diff·baseline 갱신 완료** | 새25그룹165·집중73그룹540·전체45 package·재생성 drift0 PASS | Python 비교·독립 main2개 외부 local build PASS | **go_mapping1행·전체279/3,362**; R1/C1/S1 별도 추적 | 엔진 dc837814·API c7a79ea0·테스트8178fb38·가이드f768f498 push 완료; 판정 c068cace push 완료; 최종 metadata·원격 main2개·Go SHA/라이선스14개 일치 PASS |
