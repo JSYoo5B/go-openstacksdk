@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance `add_image_location` 보완 구현 중.** 직전 완료 집계는 전체318/3,362·핵심244/2,292·Glance81/120입니다. 고정 Python `Resource.create`와 대조해 실제 누락 두 가지를 보완합니다. accepted status를 202 전용에서 Python `raise_from_response`와 같은 200..399로 넓히고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON 응답은 Python `body.pop`처럼 오류입니다. 202 전용을 가정한 기존 테스트를 새 계약으로 고쳤고 다음은 새 동작의 집중 테스트·가이드·판정입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Glance `add_image_location` 보완 구현 중.** 직전 완료 집계는 전체318/3,362·핵심244/2,292·Glance81/120입니다. 고정 Python `Resource.create`와 대조해 실제 누락 두 가지를 보완합니다. accepted status를 202 전용에서 Python `raise_from_response`와 같은 200..399로 넓히고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON 응답은 Python `body.pop`처럼 오류입니다. 202 전용을 가정한 기존 테스트를 새 계약으로 고치고 새 동작의 집중 테스트를 추가했으며 다음은 가이드·판정입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance native `imagedata` 3개, 전체315→318(+3)·핵심241→244/2,292·Glance78→81/120.** generated `Upload/Stage/Download`의 경로·status·stream 소유권 계약을 고정했습니다. [imagedata 가이드](../image/v2/imagedata/README.md#native-uploadstagedownload)와 [검증 기록](sdk-support-ledger.md#glance-native-imagedata-완료)에 설명합니다. 새2그룹7사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `2d318e7d`·`b7927fdb`를 push했습니다.
 
@@ -425,7 +425,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 새 계약으로 수정 PASS, 새 집중 테스트 진행 중 | 대기 | 대기 | 구현 push; 다음 집중 테스트 |
+| Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새 집중 테스트 PASS | 진행 중 | 진행 중 | `a382f17c`·테스트 push; 다음 가이드·판정 |
 | Glance native imagedata 3개 | pinned Gophercloud v2.15.0 imagedata requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹7·전체 `make check` PASS | native 절 추가 | **신규3행 go_mapping·318/3,362** | 작은 commit2개 push 완료; 다음 add_image_location 재검토 |
 | Glance native imageimport 2개 | pinned Gophercloud v2.15.0 imageimport requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹11·전체 `make check` PASS | native 절 추가 | **신규2행 go_mapping·315/3,362** | 작은 commit2개 push 완료; 다음 native imagedata |
 | Glance native members 5개 | pinned Gophercloud v2.15.0 members requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹24·전체 `make check` PASS | native 멤버 가이드 추가 | **신규5행 go_mapping·313/3,362** | 작은 commit2개 push 완료; 다음 native imageimport |
