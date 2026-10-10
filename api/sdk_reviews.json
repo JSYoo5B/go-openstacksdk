@@ -66010,6 +66010,847 @@
       "remaining": [
         "Go deletion waiters exist only for the ResourceProviders and ResourceClasses collections; Python can wait for inventories, traits and other fetchable placement Resources to return 404, which Go cannot."
       ]
+    },
+    {
+      "operation": "python:identity/v2/extensions",
+      "source_fingerprint": "1db402a777e668102332824f48e0cd4112df615143502ab6f7bd82cb1edf4935",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends one GET extensions and yields the rows of extensions.values with alias, name, namespace, updated, description and links, matching the custom Python Extension.list.",
+          "tests": [
+            "identity/v2/extensions/python_parity_test.go:TestPythonExtensionListAndGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python Extension.list reads response JSON without status checking; the Go pager accepts only 200, 204 and 300 and returns other statuses as errors.",
+        "Go yields the Gophercloud common Extension model, where Python updated_at is the Updated string; Python yields Extension Resources."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/get_extension",
+      "source_fingerprint": "77321e1fc9bdc26d9f97fefaddf09c6c94366d88f26d56f575ba753624bda140",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get(alias) sends GET extensions/{alias}, unwraps the extension envelope and returns a 404 error where Python raises NotFoundException.",
+          "tests": [
+            "identity/v2/extensions/python_parity_test.go:TestPythonExtensionListAndGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts an alias string or Extension Resource; Go accepts only the alias string.",
+        "Python accepts any status below 400; the native Get accepts only 200 and returns nil without error when the extension envelope is missing."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/create_role",
+      "source_fingerprint": "49cce5d4853719b458a8f23da8e73273f38106bdc0088b5230efd4e7947c3d8e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends POST OS-KSADM/roles with a role envelope."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/delete_role",
+      "source_fingerprint": "20e8a4cae983514274c7557ff002e31a9129b45e008086d3e85bd297a2c8e42b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends DELETE OS-KSADM/roles/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/find_role",
+      "source_fingerprint": "250e4ba0daadf869b7ef456f5fa89e6113aaf27901f289ed079cec91668fd3aa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Without a role GET, Go cannot send the first Resource.find request GET OS-KSADM/roles/{name_or_id}, and roles has no resource.Collection Find."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/get_role",
+      "source_fingerprint": "18f2152a2088a45dcd156ca993f0bdb1972457686d7e28bca67ac9d4d241cb1a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends GET OS-KSADM/roles/{id}."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/update_role",
+      "source_fingerprint": "5ed04f1ec5ce654a9f679d14f59f172dcb51c1b4cc249e9bc7b97aacc6c30e95",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends PUT OS-KSADM/roles/{id} with the dirty role attributes including id."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/roles",
+      "source_fingerprint": "67d456384e93b41bb4e797f85722b7af1fcfe90e30685cf89435e39c971909f5",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the same single GET OS-KSADM/roles as Python roles() without arguments and decodes id, name and description, but does not follow roles_links.",
+          "tests": [
+            "identity/v2/roles/python_parity_test.go:TestPythonRoleListDefaultRequest"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Go returns native Role values decoded without JSON tags; Python returns Role Resources with is_enabled converted by BoolStr."
+      ],
+      "remaining": [
+        "roles.API.List accepts no query, so Python limit and marker query parameters cannot be sent.",
+        "roles.API.List stops after one page and never follows roles_links rel=next or the limit-driven marker requests that Python Resource.list sends.",
+        "Go has no local filtering for Role Body attributes passed through **query."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/create_tenant",
+      "source_fingerprint": "dda63db4b444d64a88798385447dd1aea801db3c88dbb5743a381233deedf26c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST tenants with the {\"tenant\": {...}} envelope, the request Python create_tenant sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes keyword Resource attributes and returns a mutable Resource; Go takes typed CreateOpts and returns the native Gophercloud model pointer.",
+        "tenants.CreateOpts.Name is required, so Go rejects before HTTP the nameless {\"tenant\": {}} request Python would send; Python attrs map to Name, Description and Enabled."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/delete_tenant",
+      "source_fingerprint": "10da23c1c92d5b794fe2f90a7cae81564b1b9f7e7df667d4f056c6e6a4625468",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE tenants/{id}, succeeds on 404 like the Python ignore_missing=True default, and WithMissingError returns resource.ErrNotFound like ignore_missing=False.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/find_tenant",
+      "source_fingerprint": "555b19d9b1c3b6cf9b1e3c8402e41a44f0162b006ae72f89b1ebcdb8970e5035",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) followed on nil by Find(resource.Name(x)) sends GET tenants/{x} and then the unfiltered tenants list, returns the ID or unique name match, nil when missing with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantFindIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the list fallback in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller must continue to the name lookup after a 400 or 403 error.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "The Go name lookup follows tenants_links like Python's list fallback.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/get_tenant",
+      "source_fingerprint": "3aadc7819689593fc5ce8cc0765217e6b6e0b340d22d69908e833666962d4d73",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET tenants/{id}, the request Python get_tenant sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/tenants",
+      "source_fingerprint": "b932e36e45738c66c90dfbe23a646ab30451f346639b30df310bbe0643860887",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET tenants, follows tenants_links rel=next and sends ListOpts limit and marker as query, but stops when a limited page has no next link.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "When limit is set and no next link is returned, Python Resource.list keeps requesting with marker set to the last ID until an empty page; the Go pager follows only tenants_links.",
+        "Python prefers a top-level links key when present; the Go pager reads only tenants_links.",
+        "Python applies Body attributes such as description and is_enabled from **query as local filters; the tenants collection supports only name filtering locally."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/update_tenant",
+      "source_fingerprint": "3331a4d3eed556e242aaf8e50aa5ab4f2357c567cd929a4ce4184700974ebb10",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT tenants/{id} with the {\"tenant\": {...}} envelope including the id that Proxy._update leaves dirty when given WithUpdateField(\"id\", id), the request Python update_tenant sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Go UpdateOpts omits an empty name and nil pointers and WithUpdateField cannot override typed fields, so Python name=\"\" or description=None values cannot be sent.",
+        "The id body key is added explicitly with tenants.WithUpdateField; Keystone ignores it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/create_user",
+      "source_fingerprint": "c82c48ef539668d67bc58a8022f5b0ad51cfc9394c6d18ff1bc95a04d71ec5cd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST users with the {\"user\": {...}} envelope, the request Python create_user sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes keyword Resource attributes and returns a mutable Resource; Go takes typed CreateOpts and returns the native Gophercloud model pointer.",
+        "users.CreateOpts needs Name or Username, so Go rejects before HTTP a Python create_user without a name; Go can also send username and tenantId, which Python drops as unknown attributes."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/delete_user",
+      "source_fingerprint": "20d768ec24d20a2320092554403d370de6c2e5ea8ce84eb663d9ed1994f1afa1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE users/{id}, succeeds on 404 like the Python ignore_missing=True default, and WithMissingError returns resource.ErrNotFound like ignore_missing=False.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/find_user",
+      "source_fingerprint": "8a5815c292e3271c11ee93a4c7acca2ac96c41ea5c3252383bccc54c9bc600a5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) followed on nil by Find(resource.Name(x)) sends GET users/{x} and then the unfiltered users list, returns the ID or unique name match, nil when missing with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserFindIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the list fallback in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller must continue to the name lookup after a 400 or 403 error.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "The Go name lookup reads a single GET users page and does not follow users_links, which Python's list fallback would follow.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/get_user",
+      "source_fingerprint": "38688e3c38ce6b1f6ae010f5be93d9e81194c0ed65b5a5ae4722ea3fb48628c0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET users/{id}, the request Python get_user sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "The native User model reads only tenant_id from responses and matches other fields case-insensitively without JSON tags."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/users",
+      "source_fingerprint": "ffe9a74877a396f9fdf388fc1e33ea7dc0c32d209c54662be0ba62a8933b367e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the same single GET users as Python users() without arguments, does not follow users_links, and the users collection rejects query options with resource.ErrUnsupported before HTTP.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserListSinglePage"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "users.API.List accepts no query, so Python limit and marker query parameters cannot be sent.",
+        "users.API.List never follows users_links rel=next or the limit-driven marker requests that Python Resource.list sends.",
+        "Go has no local filtering for User Body attributes such as email or is_enabled passed through **query."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/update_user",
+      "source_fingerprint": "ba7e6f8fb936ae4b8bf82ba32f928de02f1549fa3acb8a5738b74417c287a3a0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT users/{id} with the {\"user\": {...}} envelope including the id that Proxy._update leaves dirty when given WithUpdateField(\"id\", id), the request Python update_user sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v2/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v2/native-calls.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Go UpdateOpts omits empty strings and nil pointers and WithUpdateField cannot override typed fields, so Python empty or None attribute values cannot be sent.",
+        "The id body key is added explicitly with users.WithUpdateField; Keystone ignores it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v2/wait_for_status",
+      "source_fingerprint": "317e12346c1634c252d0486d72bc2a9df95a16a06f4086761c9b4da7edb8e434",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait"
+      ],
+      "contracts": [
+        {
+          "behavior": "Tenant and User WaitFor without a status attribute fail with resource.ErrUnsupported before HTTP, like the Python AttributeError for a missing status attribute.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantWaitHelpers",
+            "identity/v2/users/python_parity_test.go:TestPythonUserWaitHelpers"
+          ]
+        },
+        {
+          "behavior": "Tenant WaitFor with WithStatusAttribute(\"name\") compares the selected string field case-insensitively after a GET of the fixed ID.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantWaitHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait."
+      ],
+      "remaining": [
+        "Python accepts Role and Extension Resources as well; roles and extensions have no Go wait helper.",
+        "Python returns the given Resource without HTTP when its cached attribute already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
+      ]
+    },
+    {
+      "operation": "python:identity/v2/wait_for_delete",
+      "source_fingerprint": "d59d436b847121b4ac8647e9faf085e2621043c9b61bae24306d583a5fcbf49e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+      ],
+      "contracts": [
+        {
+          "behavior": "Tenant and User WaitForDeletion with WithTimeout(120s) repeat GET on the fixed ID until 404, report progress 0 after each nonterminal observation and then succeed.",
+          "tests": [
+            "identity/v2/tenants/python_parity_test.go:TestPythonTenantWaitHelpers",
+            "identity/v2/users/python_parity_test.go:TestPythonUserWaitHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/python-parity.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout while the identity v2 Proxy default is wait=120; resource.WithTimeout reproduces it."
+      ],
+      "remaining": [
+        "Python accepts Role and Extension Resources as well; roles and extensions have no Go deletion wait.",
+        "Python returns the original Resource on deletion; Go returns only an error."
+      ]
+    },
+    {
+      "operation": "python:image/v1/create_image",
+      "source_fingerprint": "219a71237005e9d1987ddb967200761dd414ab902195349762b512104db35807",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python creates the image with POST /images after cloud-layer duplicate, checksum and vendor-agent handling, uploads data with PUT /images/{id} and deletes the image after a failed upload."
+      ]
+    },
+    {
+      "operation": "python:image/v1/delete_image",
+      "source_fingerprint": "55b50c777b9da5a1b295c3013d12203e170b4b1cd1c8835f2122335f72e735a8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends DELETE /images/{id} with ignore_missing=True by default."
+      ]
+    },
+    {
+      "operation": "python:image/v1/download_image",
+      "source_fingerprint": "96e8d68ccf9768cc86aa1fd21d4f8f6529eb9deeac5abdcc559a2aeb52653b11",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python fetches GET /images/{id} metadata, downloads GET /images/{id}/file and validates the checksum."
+      ]
+    },
+    {
+      "operation": "python:image/v1/find_image",
+      "source_fingerprint": "6b24cd876fb1feb9e6377a0743901f7e64e63ab4777cd1241ed5b86ecb89885c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends GET /images/{name_or_id} and on 404 lists GET /images/detail with the name query."
+      ]
+    },
+    {
+      "operation": "python:image/v1/get_image",
+      "source_fingerprint": "ed189c97fbda10e5882a62ef19ae1bacb23479500660e2edbbab9f46d4154382",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends GET /images/{id}."
+      ]
+    },
+    {
+      "operation": "python:image/v1/images",
+      "source_fingerprint": "e3a32e99b5ac955c40ff507954183f756cd886555b25b42655d9cc669cc9f4d3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python lists GET /images/detail with name, container_format, disk_format, status, size_min, size_max, limit and marker query parameters and follows images_links."
+      ]
+    },
+    {
+      "operation": "python:image/v1/update_image",
+      "source_fingerprint": "95e97db50a7fe3df41f1554088d84e94e8a1ccdf13a3becb4c95d97382d57eb4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends PUT /images/{id} with the image envelope."
+      ]
+    },
+    {
+      "operation": "python:image/v1/update_image_properties",
+      "source_fingerprint": "3a894f951bf89ff7ce60b182007c6437519694411452ff354c630931468a7ad4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python reads the image and sends a body-less PUT /images/{id} carrying changed values as x-image-meta-* headers."
+      ]
+    },
+    {
+      "operation": "python:image/v1/upload_image",
+      "source_fingerprint": "d6d518a94d69b23f867b68822d75cce77938d5602d331be0ea31ad156cd08ecb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python warns that the method is deprecated and sends POST /images with the image envelope."
+      ]
+    },
+    {
+      "operation": "python:image/v1/wait_for_delete",
+      "source_fingerprint": "d692225199b90f14d6b9717d6bd88fc9022908e091facc07de10a7e9734f9a66",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python polls the v1 Image Resource fetch until NotFoundException with a 120 second default wait."
+      ]
+    },
+    {
+      "operation": "python:image/v1/wait_for_status",
+      "source_fingerprint": "058c2a2ff61aaa6f014930e7e54488d297b132ee35568610d29954d9a0c692a2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "image/python-v1-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python polls the v1 Image Resource fetch until the target status."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/update_container",
+      "source_fingerprint": "21c229ef5a401ee5ae8db1c1e421b9c753fd2b0d8414d3380649e83d9126c35e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "keymanager/v1/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python Proxy._update commits the Resource with PUT /containers/{id} and an unwrapped JSON object of dirty attributes including id, accepting any status below 400 and merging a response body; the keymanager/v1/containers package has no Go API that sends this PUT."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/update_order",
+      "source_fingerprint": "2bb4907b3517969b0310e0a51a1a93943937ec61ae5da29cacb9b5b0f3a29acc",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "keymanager/v1/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python Proxy._update commits the Resource with PUT /orders/{id} and an unwrapped JSON object of dirty attributes including id, accepting any status below 400 and merging a response body; the keymanager/v1/orders package has no Go API that sends this PUT."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/update_secret",
+      "source_fingerprint": "fb178306a3ac2cb75f70dddc67a42a63577eb1d141b139aaf301dbe149ff3132",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.New",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "secrets.API.Update sends PUT secrets/{id} with the raw payload as body and UpdateOpts.ContentType as the Content-Type header, accepts only 204 and turns 200 into an error.",
+          "tests": [
+            "keymanager/v1/secrets/python_parity_test.go:TestPythonSecretUpdateSendsRawPayload"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/python-parity.md"
+      ],
+      "differences": [
+        "secrets.API.Update is Barbican's payload upload; it returns only an error rather than a Secret."
+      ],
+      "remaining": [
+        "Python update_secret commits the Secret Resource with PUT /secrets/{id} and a JSON object of dirty attributes including id; Go has no API that sends that JSON body.",
+        "Python accepts any status below 400 and returns the updated Secret Resource; secrets.API.Update accepts only 204 and returns no model."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/wait_for_status",
+      "source_fingerprint": "f3626f05d17c637a4c27b35913bc154a870dfbda114255d0cac3c12172bb032a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+      ],
+      "contracts": [
+        {
+          "behavior": "Order WaitFor with WithUnlimitedWait and WithFailureStates(\"ERROR\") repeats GET orders/{id}, returns on a case-insensitive target match, fails with resource.FailedStateError only for ERROR, keeps polling through other error-like states and reports progress 0 after each nonterminal observation.",
+          "tests": [
+            "keymanager/v1/orders/python_parity_test.go:TestPythonOrderWaitForStatus"
+          ]
+        },
+        {
+          "behavior": "WithStatusAttribute selects another string field and WithTimeout ends the wait with an error wrapping context.DeadlineExceeded.",
+          "tests": [
+            "keymanager/v1/orders/python_parity_test.go:TestPythonOrderWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/python-parity.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout and a failure predicate matching error prefixes, fail or failed suffixes and killed; Python waits forever with failures=['ERROR'], which Go reproduces with WithUnlimitedWait and WithFailureStates(\"ERROR\").",
+        "Python coerces interval=0 to 0.1 seconds; Go WithPollInterval accepts only positive durations.",
+        "Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError."
+      ],
+      "remaining": [
+        "Python accepts any key manager Resource; Go waits exist only for containers, orders and secrets, not for secret stores, ACLs, consumers or quotas.",
+        "Python Secret waits use the custom Secret.fetch, which can also GET the payload; Go secrets WaitFor polls only the metadata GET.",
+        "Python returns the given Resource without HTTP when its cached status already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
+      ]
+    },
+    {
+      "operation": "python:key_manager/v1/wait_for_delete",
+      "source_fingerprint": "12b5236c88386c16eb45caa568ce5445169c67d480136ff84254c71140a27730",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval"
+      ],
+      "contracts": [
+        {
+          "behavior": "Order WaitForDeletion with WithTimeout(120s) repeats GET orders/{id} until 404 and then succeeds.",
+          "tests": [
+            "keymanager/v1/orders/python_parity_test.go:TestPythonOrderWaitForDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/python-parity.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout while the key manager Proxy default is wait=120; resource.WithTimeout reproduces it."
+      ],
+      "remaining": [
+        "Python accepts any key manager Resource; Go deletion waits exist only for containers, orders and secrets.",
+        "Python returns the original Resource on deletion; Go returns only an error."
+      ]
     }
   ]
 }
