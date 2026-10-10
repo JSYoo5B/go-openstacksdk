@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Neutron native tap mirror 5개 검증·판정 완료로 Neutron 사용자 extension의 native 호출을 마무리했습니다.** 전체570/3,362·핵심496/2,292·Network182/758입니다. 다음은 Cinder native 사용자 호출입니다. segments·network IP availability·agents·BGP·BGPVPN처럼 기본 정책이 관리자 전용인 Neutron extension은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Neutron 사용자 extension native 호출 완료, Cinder v3 native volumes CRUD·목록·대기 6개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계576).** 판정 전 기준은 전체570/3,362·핵심496/2,292·Block Storage67/480입니다. 생성의 202 고정 status와 최상위 scheduler hint, 상세 목록의 Python dict 모양 metadata 필터, `volume` key 직접 decode와 시간대 없는 시각 형식, 1초 간격 `WaitForStatus`를 검증했습니다. 다음은 gate·대장이고, 그 뒤 v3 volume 사용자 action(attach·detach·reserve·connection·extend·upload·bootable·retype·reimage)으로 이어갑니다. force delete·reset status·unmanage처럼 기본 정책이 관리자 전용인 action은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Neutron native tap mirrors 5개, 전체565→570(+5)·핵심491→496/2,292·Network177→182/758.** tap mirror CRUD와 문자열 tunnel ID 방향 값의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#tap-mirror)와 [검증 기록](sdk-support-ledger.md#neutron-native-tap-mirrors-완료)에 설명합니다. 새2그룹과 하위 사례16, 전체 `make check`(race 89개 실제 test package)가 통과했고 `8270f33e`·`2923f276`을 push했습니다.
 
@@ -428,11 +428,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 570 (17.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 576 (17.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,791 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 827 | 아직 개별 기록 없는 선언 2,535 |
-| 기록한 부분·전체 계약 | 4,057 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,785 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 833 | 아직 개별 기록 없는 선언 2,529 |
+| 기록한 부분·전체 계약 | 4,063 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -475,6 +475,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Cinder v3 native volumes CRUD·List·WaitForStatus 6개 | pinned Gophercloud v2.15.0 volumes requests/results/util/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례21 PASS, 전체 gate 대기 | blockstorage/v3/native-volumes.md·생성 README 링크 | 신규6행 go_mapping 기록, gate 대기 | `5c2ebe50`·가이드·판정 push; 다음 gate·대장 |
 | Neutron native tap mirrors 5개 | pinned Gophercloud v2.15.0 tapmirrors requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례16·전체 `make check` PASS | native-crud.md tap mirror 절 | **5행 go_mapping·570/3,362** | 작은 commit2개 push 완료; 다음 Cinder native |
 | Neutron native VPNaaS 25개 | pinned Gophercloud v2.15.0 다섯 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새10그룹·하위 사례75·전체 `make check` PASS | native-crud.md VPNaaS 절 | **25행 go_mapping·565/3,362** | 작은 commit2개 push 완료; 다음 tap mirror |
 | Neutron native FWaaS v2 groups·policies·rules 19개 | pinned Gophercloud v2.15.0 세 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새7그룹·하위 사례62·전체 `make check` PASS | native-crud.md firewall 절 | **19행 go_mapping·540/3,362** | 작은 commit2개 push 완료; 다음 VPNaaS |
@@ -567,12 +568,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 496 / 2,292 | 21.6% | 157 | 1,638 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 502 / 2,292 | 21.9% | 157 | 1,632 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 570 / 3,362 | 17.0% | 256 | 2,535 | 1 |
+| 전체 | 576 / 3,362 | 17.1% | 256 | 2,529 | 1 |
 
 **핵심 서비스**
 
@@ -583,7 +584,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 182 / 758 | 43 | 533 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
-| Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
+| Block Storage / Cinder | 73 / 480 | 28 | 379 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
 
