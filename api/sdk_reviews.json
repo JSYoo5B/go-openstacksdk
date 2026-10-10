@@ -51354,6 +51354,322 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.Create",
+      "source_fingerprint": "86adc8d90428f4bd94e500a4f45a54b19424730d33b1ea91ec75ef4e4f6de5e9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"address_group\":{...}} to address-groups with extensions inside the envelope, sending an optional caller ID and an empty address list as [], rejects nil addresses before HTTP, decodes null description as empty and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.Get",
+      "source_fingerprint": "e197088c8d7d28e5147ca7275eff6cbb9dc6a6caaee931e69837c9f7504c9f7e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs address-groups/{raw id}, decodes the address_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.List",
+      "source_fingerprint": "ff87bf848cfc19ed50f04faac2a56982e8c1ba1c89ea575683103cfe4834de7d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs address-groups with ListOpts (repeated addresses query per value) and extension query values, follows address_groups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.Update",
+      "source_fingerprint": "d9f60c6e6fc5838ac1c847228c37df0992641012adb84fb8b3d024be7ae32af0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"address_group\":{...}} to address-groups/{id} sending explicit empty pointer name/description values with extensions inside the envelope, rejects a core-key extension collision before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.Delete",
+      "source_fingerprint": "08a62ede8d02f1b320e9b4556b7d081087b3f4e473da493226f5f3ec3e41dcf8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs address-groups/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.AddAddresses",
+      "source_fingerprint": "5f089db0b10c55031a916335da467d44a01a198767fe4be744b512fe59df7444",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.AddAddresses",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddAddressesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddAddressesField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddAddresses PUTs an envelope-free {\"addresses\":[...]} body with top-level extensions to address-groups/{id}/add_addresses, rejects nil addresses and an addresses extension before HTTP, decodes the address_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupAddressOperations",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/addressgroups.RemoveAddresses",
+      "source_fingerprint": "dcbe7a75ecf95471a031da9d6c117a536d9bacf6bef03b7ea23f4bc1caddb00d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.RemoveAddresses",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRemoveAddressesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRemoveAddressesField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveAddresses PUTs an envelope-free {\"addresses\":[...]} body (empty list as []) to address-groups/{id}/remove_addresses, rejects nil addresses before HTTP, decodes the address_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupAddressOperations",
+            "network/v2/extensions/security/addressgroups/native_contracts_test.go:TestNativeAddressGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/rbacpolicies.Create",
+      "source_fingerprint": "370f883de182916d47506cf030fdfc4e5ed89bc72e8205e5807b1ec979fb1463",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"rbac_policy\":{...}} to rbac-policies with extensions inside the envelope, rejects missing action/object_type/object_id/target_tenant and a core-key extension collision before HTTP, decodes the rbac_policy key and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/rbacpolicies.Get",
+      "source_fingerprint": "d29b0b3ada6a80d34d2fbba800ca85db442a6217b8f0f2ef22f8be3a219944c1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs rbac-policies/{raw id}, decodes the rbac_policy key returning a zero value for {} or null, wraps errors for a missing key beside other data or a non-object envelope, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/rbacpolicies.List",
+      "source_fingerprint": "c2aabf90e3c44f6c8bf75dead9d9c27c8d9b72398deee121009c23e2644ccb81",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs rbac-policies with ListOpts and extension query values, ignores the Neutron rbac_policies_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/rbacpolicies.Update",
+      "source_fingerprint": "ff9bd6cb4ebeb373ecd0624997b3d02d1666ea6680b9e4f659ac70c03eb026d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"rbac_policy\":{\"target_tenant\":...}} to rbac-policies/{id} with extensions inside the envelope, rejects an empty target_tenant and nil option before HTTP, and accepts only 200/201.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/rbacpolicies.Delete",
+      "source_fingerprint": "77f3e976aa7274c995fa6a57ea9625fca9479c7c76688dacd974f2d8b9430856",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs rbac-policies/{id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/rbacpolicies/native_contracts_test.go:TestNativeRBACPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
