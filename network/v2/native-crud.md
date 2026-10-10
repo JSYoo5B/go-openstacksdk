@@ -66,7 +66,7 @@ address scope의 `CreateOpts`도 필수 필드가 없습니다. `Name`과 `IPVer
 
 `service.Trunks`(`extensions/trunks`)의 generated `Create/Get/List/Delete`는 경로 `trunks`, envelope `trunk`을 쓰며 Create는 201·202, Get은 200, Delete는 202·204를 받습니다. `CreateOpts`의 `PortID`(부모 port)는 필수이고, `Subports`가 nil이면 `"sub_ports": []`로 바꿔 보냅니다. `AdminStateUp`은 pointer라 false도 보낼 수 있습니다. 응답 시각은 표준 RFC3339만 받아서 시간대 없는 `2006-01-02T15:04:05` 형식이면 decode 오류입니다.
 
-trunk 목록은 다른 Neutron 목록과 다르게 **첫 페이지만** 읽습니다. Gophercloud의 `TrunkPage`가 `trunks_links`를 읽는 `NextPageURL`을 정의하지 않아 서버가 next 링크를 주어도 따라가지 않습니다. 그래서 `Limit` 필드도 `ListOpts`에 없으며, 페이지가 나뉘는 배포에서는 `WithListQuery("limit", ...)`와 `marker`를 직접 다뤄야 합니다. `RevisionNumber` 필터는 문자열이라 `"0"`도 보냅니다.
+trunk 목록은 Neutron 형식의 next 링크를 따라가지 않아 실제로는 **첫 페이지만** 읽습니다. Gophercloud의 `TrunkPage`가 `NextPageURL`을 정의하지 않아 기본 linked page 규칙인 `{"links": {"next": "..."}}` 문자열만 다음 페이지로 보고, Neutron이 주는 `trunks_links` 배열은 읽지 않습니다. 그래서 `Limit` 필드도 `ListOpts`에 없으며, 페이지가 나뉘는 배포에서는 `WithListQuery("limit", ...)`와 `marker`를 직접 다뤄야 합니다. `RevisionNumber` 필터는 문자열이라 `"0"`도 보냅니다.
 
 | 메서드 | 요청 | 본문·응답 | 성공 status |
 |---|---|---|---|
@@ -81,3 +81,21 @@ subport 본문에는 envelope가 없어서 확장 필드는 `sub_ports` 옆 최�
 port forwarding `CreateOpts`에는 필수 검사가 없습니다. `InternalPortID`, `InternalIPAddress`, `Protocol`은 omitempty가 없어서 비어 있어도 `""`로 보내고, port와 port range 필드는 비어 있거나 0이면 생략합니다. `UpdateOpts`는 `Description`만 pointer라 빈 설명을 보낼 수 있고 나머지 빈 값은 생략합니다. 모두 비면 `{"port_forwarding": {}}`를 보냅니다.
 
 응답 decode는 `port_forwarding` key를 직접 찾습니다. 본문이 `{}`이거나 값이 null이면 오류 없이 빈 값을 돌려주고, 다른 key만 있거나 envelope가 객체가 아니면 오류입니다. 목록은 Gophercloud가 단수형 `port_forwarding_links`의 next 링크만 따라갑니다. Neutron이 복수형 `port_forwardings_links`로 링크를 주면 다음 페이지를 요청하지 않습니다.
+
+## QoS policy·rule·rule type
+
+`service.QoSPolicies`(`extensions/qos/policies`)의 generated `Create/Get/List/Delete`는 경로 `qos/policies`, envelope `policy`를 씁니다. Create는 201만 받고 Get은 200, Delete는 202·204를 받습니다. `CreateOpts`에는 필수 검사가 없으며 `Name`은 omitempty가 없어 빈 이름도 `""`로 보냅니다. `Shared`·`IsDefault`는 bool이라 false를 명시해 보낼 수 없습니다. 목록은 `policies_links`의 next href를 따라가고, `RevisionNumber` 필터는 pointer라 0도 보냅니다. 응답의 `rules`는 `[]map[string]any`로 그대로 decode하며 시각은 표준 RFC3339만 받습니다. policy 수정의 revision 조건은 [revision 조건 수정](revision-updates.md)을 참고합니다.
+
+`service.QoSRules`(`extensions/qos/rules`)는 bandwidth limit, DSCP marking, minimum bandwidth 세 rule에 같은 형태의 호출 다섯 개씩을 제공합니다. 경로는 `qos/policies/{policy}/bandwidth_limit_rules`·`dscp_marking_rules`·`minimum_bandwidth_rules`이고 envelope는 단수형(`bandwidth_limit_rule` 등)입니다.
+
+| 메서드 | 요청 | 성공 status |
+|---|---|---|
+| `Create{Kind}(ctx, policy, opts, options...)` | `POST qos/policies/{policy}/{collection}` | 201 |
+| `Get{Kind}(ctx, policy, id)` | `GET qos/policies/{policy}/{collection}/{id}` | 200 |
+| `Update{Kind}(ctx, policy, id, opts, options...)` | `PUT qos/policies/{policy}/{collection}/{id}` | 200 |
+| `Delete{Kind}(ctx, policy, id)` | `DELETE qos/policies/{policy}/{collection}/{id}` | 202, 204 |
+| `List{Kind}s(ctx, policy, options...)` | `GET qos/policies/{policy}/{collection}` | native pager 200, 204, 300 |
+
+생성 opts의 대표 값(`MaxKBps`, `DSCPMark`, `MinKBps`)은 omitempty가 없어서 0도 그대로 보내고, 유효성은 Neutron이 판정합니다. 수정 opts의 같은 값은 pointer라 nil이면 생략하고 0을 가리키면 0을 보냅니다. `Direction`은 문자열이라 비어 있으면 생략합니다. 모두 비면 빈 envelope를 보냅니다. rule 목록은 trunk와 같이 `NextPageURL`이 없어서 `*_links` 배열을 읽지 않고 `{"links": {"next": "..."}}` 문자열만 따라갑니다. 그래서 Neutron 응답에서는 첫 페이지만 반환합니다. 부모 policy를 이름이나 ID로 먼저 찾는 scope API는 [scoped resource](../../docs/scoped-resources.md)에 설명합니다.
+
+`service.QoSRuleTypes`(`extensions/qos/ruletypes`)의 `GetRuleType(ctx, name)`은 `GET qos/rule-types/{name}`을 보내고 200만 받습니다. `ListRuleTypes(ctx)`는 `GET qos/rule-types` 한 페이지만 읽으며 옵션이 없습니다. driver의 `parameter_values`는 범위 객체나 선택지 배열 같은 JSON 형태를 `any`로 그대로 둡니다.

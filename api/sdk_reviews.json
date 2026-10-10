@@ -50557,7 +50557,7 @@
       ],
       "contracts": [
         {
-          "behavior": "List GETs trunks with ListOpts (string revision_number including \"0\") and extension query values, reads only the first page because TrunkPage defines no trunks_links NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "behavior": "List GETs trunks with ListOpts (string revision_number including \"0\") and extension query values, ignores the Neutron trunks_links array and follows only a links.next string because TrunkPage defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
           "tests": [
             "network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkRoutesBodiesSinglePageAndDecode",
             "network/v2/extensions/trunks/native_contracts_test.go:TestNativeTrunkStrictStatusesDecodeAndPreflight"
@@ -50804,6 +50804,553 @@
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/policies.Create",
+      "source_fingerprint": "f28fcffd7d5162219276a524e78e6ea562b6193f697aa2aaa2dace43902af12f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"policy\":{...}} to qos/policies with extensions inside the envelope, always sending name and omitting false bool flags, rejects a core-key extension collision and nil option before HTTP, decodes rules as raw maps and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/policies.Get",
+      "source_fingerprint": "af75faea244db148f5ab284531e865005c7a23a808430c27fd9947203a299036",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs qos/policies/{raw id}, decodes the policy envelope with tags and raw rule maps, wraps a non-RFC3339 timestamp decode error and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/policies.List",
+      "source_fingerprint": "55884ed24be570c702d545d2c94d6340ae36e9cadce28f23a20f7b3563f4dfeb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs qos/policies with ListOpts (pointer revision_number including 0) and extension query values, follows policies_links next hrefs as received, decodes null rules/description as zero values, yields nothing for an empty page, reports a non-array policies decode error, io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/policies.Delete",
+      "source_fingerprint": "a39d4a15279cefcf95131f3be50ed1f2231bffb268d208919089d540162e1fa9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs qos/policies/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/qos/policies/native_contracts_test.go:TestNativeQoSPolicyStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.CreateBandwidthLimitRule",
+      "source_fingerprint": "c527b9f3f272402fab2f08e1602ee97bea059cdc0a629c7c7b82ba5cf6047d84",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateBandwidthLimitRule POSTs {\"bandwidth_limit_rule\":{...}} to qos/policies/{policy}/bandwidth_limit_rules, always sending max_kbps including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a max_kbps extension collision before HTTP, decodes the rule and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.GetBandwidthLimitRule",
+      "source_fingerprint": "2590dad0e41039a1e84491c375ba4c0f93778ce7b2d3e86c4564f495c61abbed",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetBandwidthLimitRule GETs qos/policies/{policy}/bandwidth_limit_rules/{id}, decodes the bandwidth_limit_rule envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.UpdateBandwidthLimitRule",
+      "source_fingerprint": "e93b2ba9a0531099adcc263a99391930595eb5bd4c79853432487922e248cc9e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateBandwidthLimitRule PUTs {\"bandwidth_limit_rule\":{...}} to qos/policies/{policy}/bandwidth_limit_rules/{id}, sending pointer MaxKBps/MaxBurstKBps values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.DeleteBandwidthLimitRule",
+      "source_fingerprint": "e54dac2e312fb321746b66edd23a7dc2c0710fd0881b65436dcd791dbb3e0fb1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteBandwidthLimitRule DELETEs qos/policies/{policy}/bandwidth_limit_rules/{id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.ListBandwidthLimitRules",
+      "source_fingerprint": "521a942645b63bcde4d266a5b488dffdb230d59c439c666a4402b5b84c6f9a49",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRules",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListBandwidthLimitRulesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListBandwidthLimitRulesQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListBandwidthLimitRules GETs qos/policies/{policy}/bandwidth_limit_rules with list options and extension query values, ignores the Neutron bandwidth_limit_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.CreateDSCPMarkingRule",
+      "source_fingerprint": "b487878dbd9859140ac16e74cb50ce4e39c1c7da1bc13c3c3fa0a6c1a84910dd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateDSCPMarkingRule POSTs {\"dscp_marking_rule\":{...}} to qos/policies/{policy}/dscp_marking_rules, always sending dscp_mark including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a dscp_mark extension collision before HTTP, decodes the rule and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.GetDSCPMarkingRule",
+      "source_fingerprint": "4c0bc085944ec7218aad9179153912a9042f409e41e189a542da86e99779fae9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetDSCPMarkingRule GETs qos/policies/{policy}/dscp_marking_rules/{id}, decodes the dscp_marking_rule envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.UpdateDSCPMarkingRule",
+      "source_fingerprint": "6e5b156778e4c8b23f21a3a47afb09ffcabe75fa5479f7d3be22b506dbd3e4a7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateDSCPMarkingRule PUTs {\"dscp_marking_rule\":{...}} to qos/policies/{policy}/dscp_marking_rules/{id}, sending pointer DSCPMark values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.DeleteDSCPMarkingRule",
+      "source_fingerprint": "417c30776f83a6d23faf3dde8e7ad478359e173e2f57393dbb593c30eedd9098",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteDSCPMarkingRule DELETEs qos/policies/{policy}/dscp_marking_rules/{id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.ListDSCPMarkingRules",
+      "source_fingerprint": "099b493255f35d8fa81c4a4401c8eeefcecb24f514c3d7ad89e3155984e07780",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRules",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListDSCPMarkingRulesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListDSCPMarkingRulesQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDSCPMarkingRules GETs qos/policies/{policy}/dscp_marking_rules with list options and extension query values, ignores the Neutron dscp_marking_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.CreateMinimumBandwidthRule",
+      "source_fingerprint": "3a198c908151c4ae7ee73ef27db3121902248a945d8b281ea26f9133614c196d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMinimumBandwidthRule POSTs {\"minimum_bandwidth_rule\":{...}} to qos/policies/{policy}/minimum_bandwidth_rules, always sending min_kbps including 0 and omitting empty optional fields, keeps extensions inside the envelope, rejects a min_kbps extension collision before HTTP, decodes the rule and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.GetMinimumBandwidthRule",
+      "source_fingerprint": "6bd588227fbf7b093d87dfee797f9dc52865c25aa3d2eded2c8bf2dc76b52226",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMinimumBandwidthRule GETs qos/policies/{policy}/minimum_bandwidth_rules/{id}, decodes the minimum_bandwidth_rule envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.UpdateMinimumBandwidthRule",
+      "source_fingerprint": "47eefdd10f6b5911f3d0aa88093c915dd61b0362d11c3e2fc230b7024e8b567f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMinimumBandwidthRule PUTs {\"minimum_bandwidth_rule\":{...}} to qos/policies/{policy}/minimum_bandwidth_rules/{id}, sending pointer MinKBps values including 0 and an empty envelope when nothing is set, keeps extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.DeleteMinimumBandwidthRule",
+      "source_fingerprint": "10700eba72dc51c11c2f25a8601bbeee6f10c48b5479cda7f6d0266b2c37d3dd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMinimumBandwidthRule DELETEs qos/policies/{policy}/minimum_bandwidth_rules/{id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/rules.ListMinimumBandwidthRules",
+      "source_fingerprint": "dfdebb38e286b6f483344d1e930dc7c0698f135fabd268c31e64b0c3beef74c5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListMinimumBandwidthRules",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListMinimumBandwidthRulesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithListMinimumBandwidthRulesQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListMinimumBandwidthRules GETs qos/policies/{policy}/minimum_bandwidth_rules with list options and extension query values, ignores the Neutron minimum_bandwidth_rules_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleRoutesBodiesAndDecode",
+            "network/v2/extensions/qos/rules/native_contracts_test.go:TestNativeQoSRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/ruletypes.GetRuleType",
+      "source_fingerprint": "d2f147c3e0bddeab459accb1ea6c4fcf0dd50cffd8f2bc620e51f83f623583ad",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.GetRuleType"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetRuleType GETs qos/rule-types/{name}, decodes the rule_type envelope with drivers and untyped parameter_values, wraps malformed or non-object envelope decode errors and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/qos/ruletypes/native_contracts_test.go:TestNativeQoSRuleTypeGetAndList",
+            "network/v2/extensions/qos/ruletypes/native_contracts_test.go:TestNativeQoSRuleTypeStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/ruletypes call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/qos/ruletypes.ListRuleTypes",
+      "source_fingerprint": "76b514ab9293aaf5f0f9b7f100670c0712ca20f558cdf23ea0db9cb453853117",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.ListRuleTypes"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRuleTypes GETs qos/rule-types as a single page without options or link following, decodes null drivers, yields nothing for an empty or missing rule_types list, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/qos/ruletypes/native_contracts_test.go:TestNativeQoSRuleTypeGetAndList",
+            "network/v2/extensions/qos/ruletypes/native_contracts_test.go:TestNativeQoSRuleTypeStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/qos/ruletypes call only; Python resource models, finders and waits are tracked separately.",
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
