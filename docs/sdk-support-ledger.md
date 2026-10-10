@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native volume type reads](#cinder-v3-native-volume-type-reads-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v2 native volume user calls](#cinder-v2-native-volume-user-calls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는620입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는639입니다.
+
+## Cinder v2 native volume user calls 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native volume 사용자 호출 19개, 전체620→639(+19)·핵심546→565/2,292·Block Storage117→136/480.** 고정 Gophercloud v2.15.0의 v2 volumes package는 v3과 거의 같아서 v3 계약 테스트 두 파일을 v2 경로로 옮겼습니다. v2만의 차이로 생성 `size`가 omitempty 없이 0도 전송되는 점, 없는 `BackupID`·`backup_id`·`volume_image_metadata`·bootable 필터를 고정했습니다. 판정 행은 검증한 v3 계약 문구를 재사용하고 v2 차이를 덧붙였습니다. force delete·reset status는 핵심 admin 단계로 둡니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 추가했습니다.
+
+이식한 계약 테스트6그룹(하위 사례84)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **97개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새19행을 추가해 reviews897·contracts4,127·go_mapping639입니다. 테스트 `9b322c9f`, 가이드 `9f69b50c`, 판정 `e36f2692`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v3 native volume type reads 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native volume type 조회 4개, 전체616→620(+4)·핵심542→546/2,292·Block Storage113→117/480.** 기존 generated 조회 메서드가 고정 Gophercloud v2.15.0의 경로·status·decode를 바꾸지 않는지 검증했습니다. 목록은 visibility가 비어 있으면 `is_public=None`을 항상 보내고, 페이지 링크는 단수형 `volume_type_links`에서만 읽습니다. `GetExtraSpec`은 envelope 없는 본문 전체를 문자열 map으로 돌려주며 문자열이 아닌 값은 decode 오류입니다. type 관리·extra spec 쓰기·암호화·접근 관리는 기본 정책상 관리자 호출이라 핵심 admin 단계로 둡니다. [Cinder v3 native volume type 조회](../blockstorage/v3/native-volume-types.md)를 새로 쓰고 생성 README 링크를 갱신했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native volume type 조회 4개, 전체616→620(+4)·핵심542→546/2,292·Block Storage113→117/480.** 기존 generated 조회 메서드가 고정 Gophercloud v2.15.0의 경로·status·decode를 바꾸지 않는지 검증했습니다. 목록은 visibility가 비어 있으면 `is_public=None`을 항상 보내고, 페이지 링크는 단수형 `volume_type_links`에서만 읽습니다. `GetExtraSpec`은 envelope 없는 본문 전체를 문자열 map으로 돌려주며 문자열이 아닌 값은 decode 오류입니다. type 관리·extra spec 쓰기·암호화·접근 관리는 기본 정책상 관리자 호출이라 핵심 admin 단계로 둡니다. [Cinder v3 native volume type 조회](../blockstorage/v3/native-volume-types.md)를 새로 쓰고 생성 README 링크를 갱신했습니다.
 
 새 집중 계약 테스트2그룹(하위 사례15)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **96개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새4행을 추가해 reviews878·contracts4,108·go_mapping620입니다. 테스트 `b1387189`, 가이드 `1f4d9da6`, 판정 `b6134317`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
