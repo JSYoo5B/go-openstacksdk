@@ -39,6 +39,8 @@ Neutron 9개 Update API의 `UpdateOpts.RevisionNumber`는 `If-Match: revision_nu
 
 `Networks`, `Subnets`, `Ports`의 native Create/Get/List/Delete 경로·본문·고정 status와 subnet gateway null, port value_specs 병합, `*_links` 순회는 [native 생성·조회·목록·삭제](native-crud.md)에 설명합니다.
 
+Neutron agent·segment·IP 사용량 관리자 호출과 router L3 agent 목록의 경로·status·페이지 규칙은 [Neutron native 관리자 호출](native-admin.md)에 설명합니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용

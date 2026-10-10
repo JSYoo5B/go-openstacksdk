@@ -55,6 +55,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 서버 ID를 직접 받는 native [서버 호출](servers/native.md), [서버 그룹](servergroups/README.md), [볼륨 연결](volumeattach/README.md), [인터페이스 연결](attachinterfaces/README.md), [extension](extensions/README.md), [사용량](usage/README.md), [보안 그룹 proxy](secgroups/README.md)는 Gophercloud 요청을 그대로 보내고 operation 문맥만 더합니다. 각 문서에 경로·본문·고정 status·단일 페이지 목록 계약을 정리합니다.
 
+Nova flavor 생성·수정·접근 권한·extra spec 관리와 서버 관리자 action의 native 호출 규칙은 [native 관리자 flavor·서버 호출](native-admin-flavors-servers.md)에 설명합니다.
+
 `InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.
 
 ## Go 사용
