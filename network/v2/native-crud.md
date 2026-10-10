@@ -61,3 +61,23 @@ subnet pool의 `CreateOpts`에는 필수 필드가 없습니다. `Name`과 `Pref
 prefix 두 호출의 본문에는 envelope가 없어서 확장 필드는 `prefixes` 옆 최상위에 붙습니다. `Prefixes`가 nil이면 `{}`를 보내고, 응답은 갱신 후 pool 전체의 prefix 목록(`[]string`)입니다. subnet pool 수정의 revision 조건은 [revision 조건 수정](revision-updates.md)을 참고합니다.
 
 address scope의 `CreateOpts`도 필수 필드가 없습니다. `Name`과 `IPVersion`은 항상 보내므로 0도 `"ip_version": 0`으로 나가고 유효성은 Neutron이 판정합니다. `UpdateOpts`의 `Name`·`Shared`는 pointer라 빈 이름과 false를 명시해 보낼 수 있고, 둘 다 nil이면 `{"address_scope": {}}`를 보냅니다. 응답의 null 이름이나 `shared`는 빈 값으로 decode하며 알 수 없는 필드는 무시합니다.
+
+## trunk·port forwarding
+
+`service.Trunks`(`extensions/trunks`)의 generated `Create/Get/List/Delete`는 경로 `trunks`, envelope `trunk`을 쓰며 Create는 201·202, Get은 200, Delete는 202·204를 받습니다. `CreateOpts`의 `PortID`(부모 port)는 필수이고, `Subports`가 nil이면 `"sub_ports": []`로 바꿔 보냅니다. `AdminStateUp`은 pointer라 false도 보낼 수 있습니다. 응답 시각은 표준 RFC3339만 받아서 시간대 없는 `2006-01-02T15:04:05` 형식이면 decode 오류입니다.
+
+trunk 목록은 다른 Neutron 목록과 다르게 **첫 페이지만** 읽습니다. Gophercloud의 `TrunkPage`가 `trunks_links`를 읽는 `NextPageURL`을 정의하지 않아 서버가 next 링크를 주어도 따라가지 않습니다. 그래서 `Limit` 필드도 `ListOpts`에 없으며, 페이지가 나뉘는 배포에서는 `WithListQuery("limit", ...)`와 `marker`를 직접 다뤄야 합니다. `RevisionNumber` 필터는 문자열이라 `"0"`도 보냅니다.
+
+| 메서드 | 요청 | 본문·응답 | 성공 status |
+|---|---|---|---|
+| `GetSubports(ctx, id)` | `GET trunks/{id}/get_subports` | 응답 `{"sub_ports": [...]}`를 `[]Subport`로 반환 | 200 |
+| `AddSubports(ctx, id, opts, options...)` | `PUT trunks/{id}/add_subports` | `{"sub_ports": [...]}`, 응답은 envelope 없는 trunk 객체 | 200 |
+| `RemoveSubports(ctx, id, opts, options...)` | `PUT trunks/{id}/remove_subports` | `{"sub_ports": [{"port_id": ...}]}`, 응답은 envelope 없는 trunk 객체 | 200 |
+
+subport 본문에는 envelope가 없어서 확장 필드는 `sub_ports` 옆 최상위에 붙습니다. `AddSubports`는 `Subports`가 nil이면 HTTP 전에 필수 입력 오류이고 빈 slice는 `[]`로 보냅니다. 각 `Subport`의 `PortID`와 `SegmentationType`도 필수입니다. 다만 `SegmentationID`의 0은 필수 검사를 통과해 그대로 보내므로 `inherit` 형식에 쓸 수 있습니다. `RemoveSubports`는 nil 목록을 `"sub_ports": null`로 보내며, 목록 안 `RemoveSubport`의 `PortID`가 비면 HTTP 전에 오류입니다. trunk 수정의 revision 조건은 [revision 조건 수정](revision-updates.md)을 참고합니다.
+
+`service.PortForwarding`(`extensions/layer3/portforwarding`)은 floating IP 아래 경로 `floatingips/{fip}/port_forwardings`를 씁니다. `Create(ctx, fip, opts, options...)`는 201·202, `Get(ctx, fip, id)`와 `Update(ctx, fip, id, opts, options...)`는 200, `Delete(ctx, fip, id)`는 202·204를 받으며 `List(ctx, fip, options...)`는 부모 floating IP ID를 첫 인자로 받습니다. envelope는 `port_forwarding`입니다.
+
+port forwarding `CreateOpts`에는 필수 검사가 없습니다. `InternalPortID`, `InternalIPAddress`, `Protocol`은 omitempty가 없어서 비어 있어도 `""`로 보내고, port와 port range 필드는 비어 있거나 0이면 생략합니다. `UpdateOpts`는 `Description`만 pointer라 빈 설명을 보낼 수 있고 나머지 빈 값은 생략합니다. 모두 비면 `{"port_forwarding": {}}`를 보냅니다.
+
+응답 decode는 `port_forwarding` key를 직접 찾습니다. 본문이 `{}`이거나 값이 null이면 오류 없이 빈 값을 돌려주고, 다른 key만 있거나 envelope가 객체가 아니면 오류입니다. 목록은 Gophercloud가 단수형 `port_forwarding_links`의 next 링크만 따라갑니다. Neutron이 복수형 `port_forwardings_links`로 링크를 주면 다음 페이지를 요청하지 않습니다.
