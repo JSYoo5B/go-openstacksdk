@@ -133,3 +133,20 @@ RBAC 응답 decode는 port forwarding과 같이 `rbac_policy` key를 직접 찾�
 `service.APIVersions`(`apiversions`)의 `ListVersions(ctx)`와 `ListVersionResources(ctx, version)`은 `ResourceBase`가 아니라 client `Endpoint`에서 버전 segment와 query를 잘라낸 root를 씁니다. `ListVersions`는 `GET {root}/`, `ListVersionResources`는 `GET {root}/{version}/`을 보내며 version 인자 끝의 slash는 하나로 정리합니다. 두 목록은 한 페이지만 읽고 링크를 따라가지 않습니다.
 
 `service.Extensions`(`extensions`)의 `List(ctx)`는 `GET extensions`를 한 페이지로 읽고, `Get(ctx, alias)`는 `GET extensions/{alias}`를 보내 200만 받습니다. 응답의 `updated`는 시각으로 바꾸지 않고 서버가 준 문자열 그대로 둡니다.
+
+## firewall group·policy·rule
+
+`service.FirewallGroups`, `service.FirewallPolicies`, `service.FirewallRules`(`extensions/fwaas_v2/...`)는 FWaaS v2 경로 `fwaas/firewall_groups`, `fwaas/firewall_policies`, `fwaas/firewall_rules`를 씁니다. envelope는 `firewall_group`, `firewall_policy`, `firewall_rule`입니다. 세 resource 모두 `Create`는 201·202, `Get`·`Update`는 200, `Delete`는 202·204를 받고, 목록은 각 `*_links`의 next href를 따라갑니다.
+
+group의 `AdminStateUp`·`Shared`는 pointer라 false를 보낼 수 있습니다. `UpdateOpts.Ports`는 slice pointer라 빈 slice를 가리키면 `"ports": []`로 모든 port를 뺍니다. 목록의 `Ports` 필터도 slice pointer이며 값마다 `ports=` query를 반복하고, 빈 slice는 생략합니다. `RemoveIngressPolicy(ctx, id)`와 `RemoveEgressPolicy(ctx, id)`는 별도 action 경로가 아니라 일반 수정 경로에 `{"firewall_group": {"ingress_firewall_policy_id": null}}`(egress도 같은 형태)을 보내 200만 받습니다.
+
+policy의 `FirewallRules`는 생성 때 비어 있으면 생략하고, 수정 때는 slice pointer라 빈 slice로 규칙을 모두 비울 수 있습니다. 규칙 순서는 두 action으로 바꿉니다.
+
+| 메서드 | 요청 | 본문 | 성공 status |
+|---|---|---|---|
+| `InsertRule(ctx, id, opts, options...)` | `PUT fwaas/firewall_policies/{id}/insert_rule` | `{"firewall_rule_id": ..., "insert_before"\|"insert_after": ...}` | 200 |
+| `RemoveRule(ctx, id, ruleID)` | `PUT fwaas/firewall_policies/{id}/remove_rule` | `{"firewall_rule_id": ...}` | 200 |
+
+`InsertRule`은 `ID`가 필수이고 `InsertBefore`와 `InsertAfter` 중 정확히 하나를 요구하며, 어긋나면 HTTP 전에 오류입니다. 본문에 envelope가 없어서 확장 필드는 최상위에 붙습니다. `RemoveRule`은 옵션이 없고 빈 rule ID도 그대로 보냅니다. 두 호출의 응답은 envelope 없는 policy 객체입니다.
+
+rule의 `Protocol`과 `Action`은 필수입니다. `Protocol`이 `ProtocolAny`(`"any"`)이면 `"protocol": null`로 바꿔 보내 모든 protocol을 뜻합니다. 수정 opts는 모든 필드가 pointer라 빈 문자열이나 false도 보낼 수 있습니다. 응답의 `firewall_policy_id`는 `[]string`으로만 decode하므로 서버가 문자열 하나를 주면 decode 오류입니다. null `protocol`은 빈 문자열입니다.

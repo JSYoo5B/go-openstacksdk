@@ -51922,6 +51922,501 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.Create",
+      "source_fingerprint": "cb57925bc6d0c196165547ab2f0effbae189b8eae33a93b75490ca8c16a55472",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"firewall_group\":{...}} to fwaas/firewall_groups with extensions inside the envelope, sending explicit false pointer flags and decoding null policy IDs as empty, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.Get",
+      "source_fingerprint": "5f83214790b011e75266edf4a9299335746db75674faed24ff13d8c1cd477c8d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs fwaas/firewall_groups/{raw id}, decodes the firewall_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.List",
+      "source_fingerprint": "308f15f5f929e19620c97ea54387ae3b3a3dfe022bf53a8f738959fa3bd5d649",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs fwaas/firewall_groups with ListOpts (repeated ports query per value) and extension query values, follows firewall_groups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.Update",
+      "source_fingerprint": "a3e5d67f8d8f71741d72b46f1dcaf467b2af0769bbaca9f4d572d97e2573bf09",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"firewall_group\":{...}} to fwaas/firewall_groups/{id} sending explicit empty pointer strings and an empty ports list as [] with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.Delete",
+      "source_fingerprint": "8f94cd479a0da466f7fa4db98c421d8b255085ac94272ff36be2e864760cc42c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs fwaas/firewall_groups/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.RemoveIngressPolicy",
+      "source_fingerprint": "53a04cc0cc1d919a69f97592fde99002418422b3254f077e5a1b8c7d2caec92c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveIngressPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveIngressPolicy PUTs {\"firewall_group\":{\"ingress_firewall_policy_id\":null}} to fwaas/firewall_groups/{id}, decodes the group and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/groups.RemoveEgressPolicy",
+      "source_fingerprint": "1a57a02ff42f2f4039f53b498d4246c69e2b785d58bd434eaec8dadff5a7fb69",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveEgressPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveEgressPolicy PUTs {\"firewall_group\":{\"egress_firewall_policy_id\":null}} to fwaas/firewall_groups/{id}, decodes the group and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/groups/native_contracts_test.go:TestNativeFirewallGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.Create",
+      "source_fingerprint": "3af78b27a7a6f999e6ee2b4729a061f333234113d72c93db7b6cd165293bc065",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"firewall_policy\":{...}} to fwaas/firewall_policies with extensions inside the envelope, sending explicit false audited/shared pointers and the rule list, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.Get",
+      "source_fingerprint": "58bdad606a97014491da0eb0360939a5ce02500bf77cf747db9aaaaacdd42920",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs fwaas/firewall_policies/{raw id}, decodes the firewall_policy envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.List",
+      "source_fingerprint": "14e4d7b4e55bedfaee5208ea4eeeb45eac9dbe67b2c1ea0804191e209a18e32b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs fwaas/firewall_policies with ListOpts and extension query values, follows firewall_policies_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.Update",
+      "source_fingerprint": "687c5166de49a4b0268d519f286880ffcac2f7480267d0c4d1646883a97c880f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"firewall_policy\":{...}} to fwaas/firewall_policies/{id} sending an empty firewall_rules list as [] and explicit false pointers with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.Delete",
+      "source_fingerprint": "3ddc3d285117127996047fb2044727f1066f76fe7f31b4f959cec7451ebf226f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs fwaas/firewall_policies/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.InsertRule",
+      "source_fingerprint": "72f66b9c70f7b2ae93ca944ab000e83290e32f83e6c9b6e0be003a2a4ae7a862",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.InsertRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "InsertRule PUTs an envelope-free {\"firewall_rule_id\":...,\"insert_before\"|\"insert_after\":...} body with top-level extensions to fwaas/firewall_policies/{id}/insert_rule, requires the rule ID and exactly one position before HTTP, rejects a firewall_rule_id extension, decodes the envelope-free policy and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRuleOperations",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/policies.RemoveRule",
+      "source_fingerprint": "689464dfaa85f51240587ead587631b213cc1c8ba92a9eaf0e214b5ec5147a2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.RemoveRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveRule PUTs {\"firewall_rule_id\":...} (including an empty ID) to fwaas/firewall_policies/{id}/remove_rule, decodes the envelope-free policy and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyRuleOperations",
+            "network/v2/extensions/fwaas_v2/policies/native_contracts_test.go:TestNativeFirewallPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/rules.Create",
+      "source_fingerprint": "dce31c7525ae600e78f9fdd886808edb7ac8cc996b1421fadeeaeee3a93854d3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"firewall_rule\":{...}} to fwaas/firewall_rules with extensions inside the envelope, requiring protocol and action, sending protocol any as null and explicit false enabled, decoding firewall_policy_id only as a list, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/rules.Get",
+      "source_fingerprint": "30f68390ac370dd3ec363dcda048a42c55a55a2b06d79e757672dbec28ffdc28",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs fwaas/firewall_rules/{raw id}, decodes the firewall_rule envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/rules.List",
+      "source_fingerprint": "003d5ae77eb48255ff8318b3da821c3efe99324fe364ae323deec213611732cd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs fwaas/firewall_rules with ListOpts and extension query values, follows firewall_rules_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/rules.Update",
+      "source_fingerprint": "e95f46446dcc6a22c2b63bab8483a82a66055de9d8498cf2567a598b01aa93f2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"firewall_rule\":{...}} to fwaas/firewall_rules/{id} sending explicit empty pointer strings with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/fwaas_v2/rules.Delete",
+      "source_fingerprint": "afaed98c96b3ebf31559483805a50a59c9d630aa7684d3908a2170cd21b8aa0e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs fwaas/firewall_rules/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/fwaas_v2/rules/native_contracts_test.go:TestNativeFirewallRuleStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
