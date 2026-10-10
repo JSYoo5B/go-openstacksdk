@@ -4,13 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone 잔여 native와 sdkgen 결함 3건](#keystone-잔여-native와-sdkgen-결함-3건-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 Python proxy 첫 병렬 묶음](#핵심-python-proxy-첫-병렬-묶음-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,011입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,103입니다.
+
+## 핵심 Python proxy 첫 병렬 묶음 완료
+
+**최신 API 완료 (2026-10-11): Cinder noauth·Swift swauth native 4개와 핵심 Python proxy 142개 판정, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** 핵심 서비스의 Gophercloud native 선언을 모두 검토하고, Python openstacksdk proxy 판정을 서비스별 병렬 묶음으로 시작했습니다. Python 판정은 고정 openstacksdk 소스에서 기본 인자로 보내는 요청을 읽고, 같은 요청을 공개 Go 호출이 만들 수 있을 때만 `go_mapping`으로 기록했습니다. 그렇지 않은 메서드는 무엇이 없는지 `remaining`에 남긴 unresolved입니다.
+
+- Cinder noauth·Swift swauth native 4개: noauth client 생성은 HTTP 없이 `user:project` token의 project를 endpoint에 붙입니다. swauth `NewObjectStorageV1`은 받은 token을 공유 ProviderClient에 직접 써서 같은 provider의 모든 client가 swauth token으로 바뀝니다. [noauth native client 생성](../blockstorage/noauth/README.md)과 [swauth native 호출](../objectstorage/v1/swauth/README.md)에 설명합니다. 테스트 `6a48e91f`, 새 4그룹입니다.
+- Placement Python 38개: 28개 `go_mapping`, 10개 unresolved입니다. Go는 resource마다 microversion을 협상하지 않고 client에 설정한 값을 보내며, find는 ID 조회 뒤 이름 조회의 두 호출로 재현합니다. allocation·inventory·trait 삭제 4개는 Python 기본 `ignore_missing=True`를 고를 수 없고, resource class 이름 변경, 반복 suffix `member_of`, consumer별 `mappings`, inventory 생성 경로, 일부 대기는 Go에 없습니다. [Python placement 대응](../placement/v1/python-parity.md)에 정리했습니다.
+- Keystone v2·Glance v1·Barbican 잔여 Python 38개: 12개 `go_mapping`, 26개 unresolved입니다. tenant·user CRUD와 find·삭제는 Go 호출로 재현하지만 update 본문의 `id`는 `WithUpdateField`로 넣어야 합니다. Keystone v2 role CRUD, Glance v1 전체, Barbican container·order 수정과 JSON secret 수정은 Go API가 없습니다. [Keystone v2 대응](../identity/v2/python-parity.md), [Glance v1 대응](../image/python-v1-parity.md), [Barbican 대응](../keymanager/v1/python-parity.md)에 정리했습니다.
+- Cinder v3 volume·snapshot·backup·attachment·transfer·type·QoS·AZ Python 66개: 48개 `go_mapping`, 18개 unresolved입니다. Python이 snapshot·backup action에 고정하는 microversion, force delete 본문, `types()`의 공개 type 기본값 같은 차이를 기록했습니다. find 계열 5개, backup metadata 4개, 요약 목록 3개, connector 확장과 `instance_uuid` 생략, 3.55 transfer 경로, encryption 부분 수정은 Go에서 재현할 수 없습니다. [Cinder v3 Python 대응](../blockstorage/v3/python-parity.md)에 정리했습니다.
+
+세 Python 묶음은 package별 `python_parity_test.go` 61그룹을 추가했고 race로 통과했습니다. 마지막 전체 gate의 race는 **155개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews1,418·contracts4,639·go_mapping1,103입니다. 판정은 `bb87cb7c`·`1287fd61`·`297994a7`·`307f0467`로 push했습니다. 실제 OpenStack 호출과 Python 실행은 하지 않았고, Python 요청은 고정 소스를 읽어 도출했습니다.
 
 ## Keystone 잔여 native와 sdkgen 결함 3건 완료
 
-**최신 API 완료 (2026-10-11): Keystone v2·OAuth1·EC2 token native 37개와 sdkgen 결함 수정 3건, 전체972→1,011(+39)·핵심898→937/2,292·Identity117→155/389·Placement32→33/71.** 두 묶음은 별도 worktree에서 동시에 검증했고, 그동안 앞선 단위에서 unresolved로 남긴 생성 결함을 sdkgen에서 고쳤습니다.
+**앞선 API 완료 (2026-10-11): Keystone v2·OAuth1·EC2 token native 37개와 sdkgen 결함 수정 3건, 전체972→1,011(+39)·핵심898→937/2,292·Identity117→155/389·Placement32→33/71.** 두 묶음은 별도 worktree에서 동시에 검증했고, 그동안 앞선 단위에서 unresolved로 남긴 생성 결함을 sdkgen에서 고쳤습니다.
 
 - Keystone v2.0 native 21개: extension·role·tenant·token·user 호출을 모두 `go_mapping`으로 기록했습니다. v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. password 방식 token 생성은 `TokenID`를 조용히 버리고, user 응답의 `tenantId`는 모델이 `tenant_id`만 읽어 비어 있습니다. [Keystone v2.0 native 호출](../identity/v2/native-calls.md)에 설명합니다. 테스트 `644321fa`, 새 10그룹(하위 사례63)입니다.
 - Keystone OAuth1·EC2 token native 16개: consumer CRUD, request token·authorize·access token 흐름, OAuth1·EC2·S3 token 생성 계약을 고정했습니다. 고정 nonce와 timestamp로 HMAC-SHA1 서명을 독립 계산해 비교하고, EC2 V4 서명은 upstream helper로 기대값을 만들었습니다. [native OAuth1·EC2 token 호출](../identity/v3/native-oauth1-ec2.md)에 설명합니다. 테스트 `72d7a83d`, 새 9그룹(하위 사례58)입니다.
