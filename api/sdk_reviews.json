@@ -51670,6 +51670,258 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.ReplaceAll",
+      "source_fingerprint": "e6ba37aefd046b183f2d32876999477c223b9ce72548dd8e8883542db7b96759",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.ReplaceAll",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.WithReplaceAllOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.WithReplaceAllField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReplaceAll PUTs an envelope-free {\"tags\":[...]} body (empty list as []) with top-level extensions to {type}/{id}/tags, rejects nil tags, a tags extension and nil option before HTTP, returns the tags list and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.List",
+      "source_fingerprint": "013becd2621d7578a76a0d8df20ef4312a8bd959f6de71defe3af3c77e51ccf3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs {type}/{id}/tags, returns the tags list and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.Add",
+      "source_fingerprint": "cf603d4ff4cb21d46bb6021853616f77de5c3a4eb9c22294010c613e6e8e027f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.Add"
+      ],
+      "contracts": [
+        {
+          "behavior": "Add PUTs a bodyless request to {type}/{id}/tags/{tag} with the resource type and tag unescaped and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.Delete",
+      "source_fingerprint": "c6df5dbf05d6f8fa1959cb9b1c05d23afeec3ae98ec453c6bad47296ed17e92c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs {type}/{id}/tags/{tag} and accepts only 204, rejecting 202.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.DeleteAll",
+      "source_fingerprint": "77abf15de2daaa5651a137b0da5e6da208b3722df099127dd3c5b8ce105b1e03",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.DeleteAll"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteAll DELETEs {type}/{id}/tags and accepts only 204, rejecting 202.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/attributestags.Confirm",
+      "source_fingerprint": "2bf7ea5fd54651f13477d0724ce7f41f59b28a43d0d7b5d76eb5bec19af4ef1b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/attributestags.API.Confirm"
+      ],
+      "contracts": [
+        {
+          "behavior": "Confirm GETs {type}/{id}/tags/{tag}, returns true for 204, false without error for 404, and false with the wrapped native status error otherwise.",
+          "tests": [
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagRoutesAndBodies",
+            "network/v2/extensions/attributestags/native_contracts_test.go:TestNativeAttributeTagStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/apiversions.ListVersions",
+      "source_fingerprint": "b2201f696fcd6912636c93ed0ba5008a3e616c0660549ef2a1e69e0775d9be26",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/apiversions.API.ListVersions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListVersions GETs the client Endpoint root with the version segment and query removed (ignoring ResourceBase), reads one page without link following, and reports io.EOF for a bodyless 204 and native page status errors.",
+          "tests": [
+            "network/v2/apiversions/native_contracts_test.go:TestNativeNetworkAPIVersionsUseTheUnversionedRoot",
+            "network/v2/apiversions/native_contracts_test.go:TestNativeNetworkAPIVersionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/apiversions call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/apiversions.ListVersionResources",
+      "source_fingerprint": "536a4f6b3b363049c47ef1ba2634839d558a9fc6a57751f984e5c05a08ccd207",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/apiversions.API.ListVersionResources"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListVersionResources GETs {endpoint root}/{version}/ with a trailing version slash trimmed, decodes name/collection resources from one page, and reports io.EOF for a bodyless 204 and native page status errors.",
+          "tests": [
+            "network/v2/apiversions/native_contracts_test.go:TestNativeNetworkAPIVersionsUseTheUnversionedRoot",
+            "network/v2/apiversions/native_contracts_test.go:TestNativeNetworkAPIVersionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/apiversions call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions.List",
+      "source_fingerprint": "24483ccf0946a08cf658747c1a2a4e7318b6507b5db12baad0ffcc13877e2201",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs extensions from ResourceBase as a single page without link following, yields nothing for an empty list, and reports io.EOF for a bodyless 204 and native page status errors.",
+          "tests": [
+            "network/v2/extensions/native_contracts_test.go:TestNativeNetworkExtensionsRoutesAndDecode",
+            "network/v2/extensions/native_contracts_test.go:TestNativeNetworkExtensionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions.Get",
+      "source_fingerprint": "e62ccdd13e7435433c438365d39eb3ab49c3cbbd8f2b72073fa6f4716f7db6c1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs extensions/{alias}, decodes the extension envelope keeping updated as the raw string and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/native_contracts_test.go:TestNativeNetworkExtensionsRoutesAndDecode",
+            "network/v2/extensions/native_contracts_test.go:TestNativeNetworkExtensionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

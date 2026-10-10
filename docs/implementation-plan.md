@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Neutron native address groups·RBAC policies 12개 검증·판정 완료.** 전체511/3,362·핵심437/2,292·Network123/758입니다. 다음은 attribute tags 6개와 Neutron API 버전·extension 조회 4개이며, 그 뒤 firewall·VPN·tap mirror 사용자 extension으로 이어갑니다. segments·network IP availability·agents·BGP처럼 기본 정책이 관리자 전용인 extension은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Neutron native address groups·RBAC policies 12개 검증·판정 완료, attribute tags·API 버전·extension 조회 10개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계521).** 판정 전 기준은 전체511/3,362·핵심437/2,292·Network123/758입니다. 태그 호출의 escape 없는 경로와 204 고정 삭제, `Confirm`의 404→false 변환, 버전 조회가 `ResourceBase` 대신 endpoint root를 쓰는 계약을 검증했습니다. 다음은 gate·대장이고, 그 뒤 firewall·VPN·tap mirror 사용자 extension으로 이어갑니다. segments·network IP availability·agents·BGP처럼 기본 정책이 관리자 전용인 extension은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Neutron native address groups·RBAC policies 12개, 전체499→511(+12)·핵심425→437/2,292·Network111→123/758.** address group CRUD와 주소 추가·제거, RBAC policy CRUD의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#address-grouprbac-policy)와 [검증 기록](sdk-support-ledger.md#neutron-native-address-groups-rbac-policies-완료)에 설명합니다. 새5그룹과 하위 사례40, 전체 `make check`(race 77개 실제 test package)가 통과했고 `bd07075c`·`18cb9c37`을 push했습니다.
 
@@ -420,11 +420,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 511 (15.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 521 (15.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,850 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 768 | 아직 개별 기록 없는 선언 2,594 |
-| 기록한 부분·전체 계약 | 3,998 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,840 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 778 | 아직 개별 기록 없는 선언 2,584 |
+| 기록한 부분·전체 계약 | 4,008 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -467,6 +467,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Neutron native attributestags·apiversions·extensions 10개 | pinned Gophercloud v2.15.0 세 package와 common extensions·BaseEndpoint 검토 완료 | 기존 generated facade 유지 | 새6그룹 PASS, 전체 gate 대기 | native-crud.md attribute tag·API 버전 절 | 신규10행 go_mapping 기록, gate 대기 | `f19a18d9`·가이드·판정 push; 다음 gate·대장 |
 | Neutron native addressgroups·rbacpolicies 12개 | pinned Gophercloud v2.15.0 두 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새5그룹·하위 사례40·전체 `make check` PASS | native-crud.md address group·RBAC 절 | **12행 go_mapping·511/3,362** | 작은 commit2개 push 완료; 다음 attribute tags·API 버전 |
 | Neutron native QoS policies·rules·ruletypes 21개 | pinned Gophercloud v2.15.0 세 package requests/results/urls와 Neutron 기본 QoS 정책 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례69·전체 `make check` PASS | native-crud.md QoS 절·trunk 목록 문구 정정 | **21행 go_mapping·499/3,362** | 작은 commit2개 push 완료; 다음 address group·RBAC |
 | Neutron native trunks·portforwarding 12개 | pinned Gophercloud v2.15.0 두 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새5그룹·하위 사례42·전체 `make check` PASS | native-crud.md trunk·port forwarding 절 | **12행 go_mapping·478/3,362** | 작은 commit2개 push 완료; 다음 QoS |
@@ -551,12 +552,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 437 / 2,292 | 19.1% | 157 | 1,697 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 447 / 2,292 | 19.5% | 157 | 1,687 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 511 / 3,362 | 15.2% | 256 | 2,594 | 1 |
+| 전체 | 521 / 3,362 | 15.5% | 256 | 2,584 | 1 |
 
 **핵심 서비스**
 
@@ -565,7 +566,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
 | Compute / Nova | 107 / 333 | 20 | 206 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
-| Network / Neutron | 123 / 758 | 43 | 592 | 0 |
+| Network / Neutron | 133 / 758 | 43 | 582 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |

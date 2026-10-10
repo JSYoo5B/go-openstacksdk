@@ -114,3 +114,22 @@ port forwarding `CreateOpts`에는 필수 검사가 없습니다. `InternalPortI
 `service.RBACPolicies`(`extensions/rbacpolicies`)는 경로 `rbac-policies`, envelope `rbac_policy`를 씁니다. Create는 201·202, Get은 200, Delete는 202·204를 받고 Update는 200과 201을 모두 성공으로 봅니다. `CreateOpts`의 `Action`·`ObjectType`·`ObjectID`·`TargetTenant`와 `UpdateOpts`의 `TargetTenant`는 필수라 비어 있으면 HTTP 전에 오류입니다. `TargetTenant`에는 모든 프로젝트를 뜻하는 `"*"`도 쓸 수 있습니다.
 
 RBAC 응답 decode는 port forwarding과 같이 `rbac_policy` key를 직접 찾습니다. 본문이 `{}`이거나 값이 null이면 오류 없이 빈 값을 돌려주고, 다른 key만 있거나 envelope가 객체가 아니면 오류입니다. RBAC 목록은 Gophercloud가 `NextPageURL`을 정의하지 않아 `rbac_policies_links` 배열을 읽지 않고 `{"links": {"next": "..."}}` 문자열만 따라갑니다. 그래서 Neutron 응답에서는 첫 페이지만 반환합니다.
+
+## attribute tag·API 버전·extension 조회
+
+`service.AttributeTags`(`extensions/attributestags`)는 모든 태그 지원 resource에 대해 `{resourceType}/{id}/tags` 경로를 씁니다. `resourceType`과 태그는 escape 없이 경로에 이어 붙이므로 `qos/policies`처럼 slash가 든 resource type을 그대로 쓸 수 있고, slash가 든 태그는 경로 segment가 늘어납니다.
+
+| 메서드 | 요청 | 결과 | 성공 status |
+|---|---|---|---|
+| `ReplaceAll(ctx, type, id, opts, options...)` | `PUT {type}/{id}/tags`, `{"tags": [...]}` | 서버의 태그 목록 | 200 |
+| `List(ctx, type, id)` | `GET {type}/{id}/tags` | 태그 목록 | 200 |
+| `Add(ctx, type, id, tag)` | `PUT {type}/{id}/tags/{tag}`, 본문 없음 | 없음 | 201 |
+| `Delete(ctx, type, id, tag)` | `DELETE {type}/{id}/tags/{tag}` | 없음 | 204 |
+| `DeleteAll(ctx, type, id)` | `DELETE {type}/{id}/tags` | 없음 | 204 |
+| `Confirm(ctx, type, id, tag)` | `GET {type}/{id}/tags/{tag}` | 존재 여부 | 204 |
+
+`ReplaceAll`의 `Tags`는 필수라 nil이면 HTTP 전에 오류이고, 빈 slice는 `{"tags": []}`로 보내 모든 태그를 지웁니다. 본문에 envelope가 없어서 확장 필드는 `tags` 옆 최상위에 붙습니다. 두 삭제 호출은 일반 DELETE와 달리 202를 받지 않습니다. `Confirm`은 404를 오류 없이 `false`로 바꾸고, 204는 `true`, 그 밖의 status는 `false`와 오류를 돌려줍니다.
+
+`service.APIVersions`(`apiversions`)의 `ListVersions(ctx)`와 `ListVersionResources(ctx, version)`은 `ResourceBase`가 아니라 client `Endpoint`에서 버전 segment와 query를 잘라낸 root를 씁니다. `ListVersions`는 `GET {root}/`, `ListVersionResources`는 `GET {root}/{version}/`을 보내며 version 인자 끝의 slash는 하나로 정리합니다. 두 목록은 한 페이지만 읽고 링크를 따라가지 않습니다.
+
+`service.Extensions`(`extensions`)의 `List(ctx)`는 `GET extensions`를 한 페이지로 읽고, `Get(ctx, alias)`는 `GET extensions/{alias}`를 보내 200만 받습니다. 응답의 `updated`는 시각으로 바꾸지 않고 서버가 준 문자열 그대로 둡니다.
