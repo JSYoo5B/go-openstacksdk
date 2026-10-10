@@ -4,13 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Swift native accounts containers](#swift-native-accounts-containers-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Swift native objects](#swift-native-objects-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는663입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는671입니다.
+
+## Swift native objects 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Swift native object 8개, 전체663→671(+8)·핵심589→597/2,292·Object Storage10→18/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·query·status를 바꾸지 않는지 검증했습니다. container와 object 이름을 각각 path escape하므로 object 이름의 slash는 `%2F`가 됩니다. COPY는 `Destination`을 앞의 두 slash로만 나눠 escape하고, 목록은 이름 없는 subdir 행의 값을 다음 marker로 씁니다. `Download`는 RFC1123 조건부 header를 보내고 호출자가 닫을 body를 돌려줍니다. `CreateTempURL`은 escape하지 않은 경로로 서명하고 key가 없으면 container, 그다음 계정 HEAD에서 찾으며, 옵션 오류 외의 오류는 native 그대로 돌려줍니다.
+
+native `Create`는 ETag를 계산해야 할 때 nil content reader를 읽다가 panic하고, `NoETag`는 소문자 key만 지워 명시 ETag를 남깁니다. panic이 SDK 오류로 바뀌지 않으므로 `Create`는 unresolved로 기록하고 guard를 별도 작업으로 분리했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md#object)에 object 절을 추가했습니다.
+
+새 집중 계약 테스트6그룹이 race로 통과했습니다. 전체 `make check`의 race는 **101개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 go_mapping 8행과 unresolved 1행을 추가해 reviews932·contracts4,162·go_mapping671입니다. 테스트 `d6db09fd`, 가이드 `cedebdf7`, 판정 `4d4678f2`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Swift native accounts containers 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Swift native 계정·container 8개, 전체655→663(+8)·핵심581→589/2,292·Object Storage2→10/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·status를 바꾸지 않는지 검증했습니다. 계정 두 호출과 container 목록·bulk delete는 `ResourceBase`가 아니라 정규화된 client endpoint를 쓰고, container 단건 호출은 이름을 path escape하며 비어 있거나 `/`가 든 이름을 HTTP 전에 거부합니다. typed bool header는 true일 때만, update pointer header는 빈 값과 false도 보냅니다. container 조회의 ACL은 쉼표로 나눈 값이라 header가 없으면 `[""]`이고, 목록은 마지막 이름을 marker로 다시 요청하는 Swift marker paging입니다. [Swift native 호출](../objectstorage/v1/native-calls.md)을 새로 쓰고 생성 README 링크를 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Swift native 계정·container 8개, 전체655→663(+8)·핵심581→589/2,292·Object Storage2→10/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·status를 바꾸지 않는지 검증했습니다. 계정 두 호출과 container 목록·bulk delete는 `ResourceBase`가 아니라 정규화된 client endpoint를 쓰고, container 단건 호출은 이름을 path escape하며 비어 있거나 `/`가 든 이름을 HTTP 전에 거부합니다. typed bool header는 true일 때만, update pointer header는 빈 값과 false도 보냅니다. container 조회의 ACL은 쉼표로 나눈 값이라 header가 없으면 `[""]`이고, 목록은 마지막 이름을 marker로 다시 요청하는 Swift marker paging입니다. [Swift native 호출](../objectstorage/v1/native-calls.md)을 새로 쓰고 생성 README 링크를 추가했습니다.
 
 새 집중 계약 테스트6그룹이 race로 통과했습니다. 두 package에는 기존 테스트가 있어 전체 `make check`의 race는 **101개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새8행을 추가해 reviews923·contracts4,153·go_mapping663입니다. 테스트 `8235ad2e`, 가이드 `639de41e`, 판정 `18435016`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
