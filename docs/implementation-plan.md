@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): 핵심 서비스 Python openstacksdk proxy 단계 진행 중. 전체1,165/3,362·핵심1,091/2,292, 전체 gate PASS.** 첫 병렬 묶음(Placement 38개, Keystone v2·Glance v1·Barbican 잔여 38개, Cinder v3 핵심 resource 66개)을 머지해 88개를 `go_mapping`, 54개를 unresolved로 판정했습니다. 이어서 Nova 서버 user 메서드 62개를 머지해 42개를 `go_mapping`, 이미지 proxy·고정 IP·backup 등 20개를 unresolved로 기록했고, Nova 관리자 메서드 52개는 23개 `go_mapping`, 29개 unresolved로 머지했습니다. 호출자가 404를 직접 걸러야 Python 기본 `ignore_missing=True`가 되는 Cinder 삭제 3개는 Placement·Nova와 같은 기준으로 unresolved로 바꿨습니다. 남은 핵심 Python 연산은 Keystone v3 proxy, Neutron proxy, Cinder v2 proxy와 v3 group·cluster 계열, 핵심 cloud mixin입니다. unresolved 사유가 반복되는 삭제 `ignore_missing` 미지원과 find fallback 부재는 묶음을 마친 뒤 공통 기능으로 보완할 후보입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
+**현재 구현 (2026-10-11): 핵심 서비스 Python openstacksdk proxy 단계 진행 중. 전체1,174/3,362·핵심1,100/2,292, 전체 gate PASS.** 첫 병렬 묶음(Placement 38개, Keystone v2·Glance v1·Barbican 잔여 38개, Cinder v3 핵심 resource 66개)을 머지해 88개를 `go_mapping`, 54개를 unresolved로 판정했습니다. 이어서 Nova 서버 user 메서드 62개를 머지해 42개를 `go_mapping`, 이미지 proxy·고정 IP·backup 등 20개를 unresolved로 기록했고, Nova 관리자 메서드 52개는 23개 `go_mapping`, 29개 unresolved로 머지했습니다. 호출자가 404를 직접 걸러야 Python 기본 `ignore_missing=True`가 되는 Cinder 삭제 3개는 Placement·Nova와 같은 기준으로 unresolved로 바꿨다가, 직접 삭제 호출에 Python 기본값 `ignore_missing=True`를 고르게 하는 `resource.IgnoreMissing`을 추가해 Placement·Cinder·Nova 삭제 9개를 `go_mapping`으로 판정했습니다. 남은 핵심 Python 연산은 Keystone v3 proxy, Neutron proxy, Cinder v2 proxy와 v3 group·cluster 계열, 핵심 cloud mixin입니다. unresolved 사유가 반복되는 find fallback 부재는 묶음을 마친 뒤 공통 기능으로 보완할 후보입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 Python proxy 첫 병렬 묶음 142개 판정과 noauth·swauth native 4개, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** Placement·Keystone v2·Glance v1·Barbican 잔여·Cinder v3 핵심 resource의 Python proxy 메서드를 판정해 88개를 `go_mapping`으로 기록하고, Go가 같은 요청을 만들 수 없는 54개는 사유와 함께 unresolved로 남겼습니다. [검증 기록](sdk-support-ledger.md#핵심-python-proxy-첫-병렬-묶음-완료)에 근거를 정리했습니다.
 
@@ -470,11 +470,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,165 (34.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,174 (34.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,196 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 미지원 | 2,187 / 1 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 1,532 | 아직 개별 기록 없는 선언 1,830 |
-| 기록한 부분·전체 계약 | 4,728 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 4,737 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -651,23 +651,23 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,091 / 2,292 | 47.6% | 267 | 933 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,100 / 2,292 | 48.0% | 258 | 933 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 1,165 / 3,362 | 34.7% | 366 | 1,830 | 1 |
+| 전체 | 1,174 / 3,362 | 34.9% | 357 | 1,830 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 167 / 389 | 15 | 207 | 0 |
-| Compute / Nova | 218 / 333 | 69 | 46 | 0 |
-| Placement | 61 / 71 | 10 | 0 | 0 |
+| Compute / Nova | 220 / 333 | 67 | 46 | 0 |
+| Placement | 65 / 71 | 6 | 0 | 0 |
 | Network / Neutron | 238 / 758 | 43 | 477 | 0 |
 | Image / Glance | 85 / 120 | 35 | 0 | 0 |
-| Block Storage / Cinder | 250 / 480 | 52 | 178 | 0 |
+| Block Storage / Cinder | 253 / 480 | 49 | 178 | 0 |
 | Key Manager / Barbican | 52 / 67 | 15 | 0 | 0 |
 | Object Storage / Swift | 20 / 74 | 28 | 25 | 1 |
 

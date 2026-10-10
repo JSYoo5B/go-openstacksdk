@@ -65091,9 +65091,10 @@
     {
       "operation": "python:placement/v1/delete_allocation",
       "source_fingerprint": "2f380d033c0dd07475d3ab1d9fa467d0675854b9078d72c050b1ab23e2954c91",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Delete"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -65107,17 +65108,23 @@
           "tests": [
             "placement/v1/allocations/python_parity_test.go:TestPythonAllocationDeleteMissing"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "placement/v1/allocations/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingAllocation"
+          ]
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
-        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; the allocations package has no resource collection Remove or ignore-missing option, so Go always returns the 404 and the default cannot be selected."
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -65520,9 +65527,10 @@
     {
       "operation": "python:placement/v1/delete_resource_provider_inventory",
       "source_fingerprint": "254527fa520491f8dacc0b0604cb6d23075578228544d5638b8e2cc38dc61fdc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventory"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventory",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -65530,16 +65538,22 @@
           "tests": [
             "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "placement/v1/resourceproviders/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingResourceProvider"
+          ]
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
-        "Python accepts an inventory Resource carrying resource_provider_id or the class name plus provider; Go takes both strings."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; DeleteInventory has no ignore-missing option or collection Remove, so Go cannot select that default."
+        "Python accepts an inventory Resource carrying resource_provider_id or the class name plus provider; Go takes both strings.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -65740,9 +65754,10 @@
     {
       "operation": "python:placement/v1/delete_trait",
       "source_fingerprint": "774eb698eac59164f58be05310028e13fd382ef9f0416fe9ba9c25a6320cee34",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Delete"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -65756,17 +65771,23 @@
           "tests": [
             "placement/v1/traits/python_parity_test.go:TestPythonTraitMissing"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "placement/v1/traits/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingTrait"
+          ]
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
-        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; the traits package has no collection Remove or ignore-missing option, so Go cannot select that default."
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -65879,9 +65900,10 @@
     {
       "operation": "python:placement/v1/delete_resource_provider_trait",
       "source_fingerprint": "fc0be885628863be901e4569a45d6a7baa161bae65e52e85247b7972fa4dcbc8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteTraits"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteTraits",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -65895,17 +65917,23 @@
           "tests": [
             "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "placement/v1/resourceproviders/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingResourceProvider"
+          ]
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
-        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; DeleteTraits has no ignore-missing option or collection Remove, so Go cannot select that default."
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -66934,14 +66962,15 @@
     {
       "operation": "python:block_storage/v3/delete_volume",
       "source_fingerprint": "76305bfa8070075671808497959804fe32d1e1b6e20df199b484ddf108dcdda4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Remove",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteQuery",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ForceDelete",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -66949,21 +66978,26 @@
           "tests": [
             "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "blockstorage/v3/volumes/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingVolume"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
         "At microversion 3.23 or later Python always sends cascade and force as query parameters; Remove sends none and relies on the same server defaults.",
-        "Remove cannot carry cascade or force, so with those options the caller uses Delete and drops a 404 with gophercloud.ResponseCodeIs to match ignore_missing=True.",
         "Python chooses the force action or query from microversion support; the Go caller chooses ForceDelete or the force query explicitly.",
         "ForceDelete sends {\"os-force_delete\": \"\"} where Python sends null.",
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
-        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
-      ],
-      "remaining": [
-        "With cascade or force, Remove cannot carry the query and the generated Delete has no ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete with query options is needed."
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -68211,10 +68245,11 @@
     {
       "operation": "python:block_storage/v3/delete_type_encryption",
       "source_fingerprint": "409faeb5552b3208db282ce261f0dc17b10ef50b570aeb374c21d281103e84ab",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteEncryption"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteEncryption",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -68222,17 +68257,22 @@
           "tests": [
             "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeEncryptionGetDeleteAndFullBodies"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "blockstorage/v3/volumetypes/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingTypeEncryption"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
-        "Python's ignore_missing=True drops a 404 from the DELETE; the Go caller drops it with gophercloud.ResponseCodeIs.",
-        "Python accepts either a TypeEncryption resource or volume_type and fetches the encryption itself; Go needs the type ID and encryption ID."
-      ],
-      "remaining": [
-        "The generated DeleteEncryption has no Remove or ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete is needed."
+        "Python accepts either a TypeEncryption resource or volume_type and fetches the encryption itself; Go needs the type ID and encryption ID.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -68369,13 +68409,14 @@
     {
       "operation": "python:block_storage/v3/delete_qos_spec",
       "source_fingerprint": "ce3c509bfb08b743a5e193083d9cf620fe357ef0f21bd66348113866508bbd5f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Remove",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -68384,18 +68425,23 @@
             "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests",
             "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSDeleteMissingPolicies"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "blockstorage/v3/qos/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingQoSSpec"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/python-parity.md",
+        "resource/README.md"
       ],
       "differences": [
         "Python always sends force=False; Remove sends no force query and relies on the same server default.",
-        "Remove cannot carry force, so with force=True the caller uses Delete and drops a 404 with gophercloud.ResponseCodeIs.",
-        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error."
-      ],
-      "remaining": [
-        "With force=True, Remove cannot carry the query and the generated Delete has no ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete with query options is needed."
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -70439,9 +70485,10 @@
     {
       "operation": "python:compute/v2/delete_flavor_extra_specs_property",
       "source_fingerprint": "1223a844a86991b7cd69a3c4b4fb6f650292f905bb7aa8e905aeeb79da3b3aa4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.DeleteExtraSpec"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.DeleteExtraSpec",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -70449,16 +70496,22 @@
           "tests": [
             "compute/v2/flavors/python_parity_test.go:TestPythonFlavorExtraSpecsWriteRequests"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "compute/v2/flavors/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingFlavorExtraSpec"
+          ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/python-parity-admin.md",
+        "resource/README.md"
       ],
       "differences": [
-        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; DeleteExtraSpec has no ignore-missing option or collection Remove, so Go cannot select that default."
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
@@ -70784,9 +70837,10 @@
     {
       "operation": "python:compute/v2/delete_service",
       "source_fingerprint": "96d7601b875b7ecd69ae848bdb784b6a43c199336a32699452e486d558077eb7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Delete"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -70794,16 +70848,22 @@
           "tests": [
             "compute/v2/services/python_parity_test.go:TestPythonComputeServiceDeleteReturnsMissingError"
           ]
+        },
+        {
+          "behavior": "Wrapping the direct delete in resource.IgnoreMissing turns a plain HTTP 404 into success like Python's default ignore_missing=True, keeps other failures such as 409 as errors, and leaves the DELETE request unchanged.",
+          "tests": [
+            "resource/missing_test.go:TestIgnoreMissingDropsOnlyPlain404",
+            "compute/v2/services/python_ignore_missing_test.go:TestPythonDeleteIgnoreMissingService"
+          ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/python-parity-admin.md",
+        "resource/README.md"
       ],
       "differences": [
-        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
-      ],
-      "remaining": [
-        "Python's default ignore_missing=True turns 404 into success; the services package has no collection Remove or ignore-missing option, so Go cannot select that default."
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.",
+        "Python ignore_missing=True is the default; Go selects it by wrapping the call in resource.IgnoreMissing, and the bare call returns the 404 like ignore_missing=False."
       ]
     },
     {
