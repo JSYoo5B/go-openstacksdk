@@ -53361,6 +53361,364 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.Attach",
+      "source_fingerprint": "81f0fb8d86051b47a7d776e465eeab36f8ec1a43f4199a525441de7212320b07",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Attach",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithAttachOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithAttachField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attach POSTs to volumes/{id}/action {\"os-attach\":{...}} with extensions inside the action object, rejects a core-key extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.BeginDetaching",
+      "source_fingerprint": "27aa8f7e23c93530602be40c7dfdfa39fc66d1895b74d646a8fe59db60456c94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.BeginDetaching"
+      ],
+      "contracts": [
+        {
+          "behavior": "BeginDetaching POSTs to volumes/{id}/action {\"os-begin_detaching\":{}} and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.Detach",
+      "source_fingerprint": "22bdcc9cc5b35f466ab1b7605d7eda2401d403ab4415f15ef081944fa29254f1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Detach",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDetachOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDetachField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Detach POSTs to volumes/{id}/action {\"os-detach\":{...}} (empty object without an attachment ID), rejects a nil option before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.Reserve",
+      "source_fingerprint": "8c78815799e9cff20e24dffd6fbdd580f6c2f7431058d1059f846c8bd08e48b1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Reserve"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reserve POSTs to volumes/{id}/action {\"os-reserve\":{}} and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.Unreserve",
+      "source_fingerprint": "658275436b296418f754725c9c3e1deadc7b8ae89d9491c3c492bc0728856443",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Unreserve"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unreserve POSTs to volumes/{id}/action {\"os-unreserve\":{}} and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.InitializeConnection",
+      "source_fingerprint": "abb68b67202d3ab1b89b5b37f29af02db45bcd16a8560b38bcca59786c7512e5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeConnection",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithInitializeConnectionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithInitializeConnectionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "InitializeConnection POSTs to volumes/{id}/action {\"os-initialize_connection\":{\"connector\":{...}}} with explicit false multipath and extensions beside connector, returns the raw connection_info map (nil without error when absent) and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.TerminateConnection",
+      "source_fingerprint": "f07feb8cafeea8d8be6779539eaa092f2d9e813dd22a1d7858c1582c9557ebdb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateConnection",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithTerminateConnectionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithTerminateConnectionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "TerminateConnection POSTs to volumes/{id}/action {\"os-terminate_connection\":{\"connector\":{...}}} and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.ExtendSize",
+      "source_fingerprint": "c55dbbd174e6a3d7ac1c109308ff5f97c923ec920756211864f204d1333846a4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ExtendSize",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithExtendSizeOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithExtendSizeField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ExtendSize POSTs to volumes/{id}/action {\"os-extend\":{\"new_size\":N}} sending a zero size because the native required tag does not reject integer zero, and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.UploadImage",
+      "source_fingerprint": "e00f37b88d47cf216d4bffc194946d6668a64b9fba67705c1ec1476e93253e94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.UploadImage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUploadImageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUploadImageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UploadImage POSTs to volumes/{id}/action {\"os-volume_upload_image\":{...}}, decodes VolumeImage with its volume type (zero value when the key is absent, error for zoned timestamps) and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.SetImageMetadata",
+      "source_fingerprint": "30dbad0a3b5da97e28361e952cb05e0c79bac76238bdad6771be7cbdf24781e0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetImageMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetImageMetadataOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetImageMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetImageMetadata POSTs to volumes/{id}/action {\"os-set_image_metadata\":{\"metadata\":...}} sending nil metadata as null and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.SetBootable",
+      "source_fingerprint": "98a7076a7ef0c3c533d21d3eff7fd0df7a25332f7245bcff6c41190675389654",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SetBootable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetBootableOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSetBootableField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetBootable POSTs to volumes/{id}/action {\"os-set_bootable\":{\"bootable\":...}} sending false explicitly and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.ChangeType",
+      "source_fingerprint": "8cc885aaa26186e1805a24b3eabe7fe5e9b1ba1cfe106071e3ecda817161ff0d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ChangeType",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithChangeTypeOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithChangeTypeField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangeType POSTs to volumes/{id}/action {\"os-retype\":{\"new_type\":...,\"migration_policy\":...}}, rejects an empty new type before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.ReImage",
+      "source_fingerprint": "4f49aab972d771e74af5ab4bc9600361d7fdefd085475e7657e7fdc2688a26a6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ReImage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithReImageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithReImageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReImage POSTs to volumes/{id}/action {\"os-reimage\":{\"image_id\":...,\"reimage_reserved\":...}} always sending both fields and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v3/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
