@@ -53903,6 +53903,186 @@
       "remaining": [
         "The native WaitForStatus dereferences a nil snapshot when Get returns no snapshot envelope; the generated facade does not guard this panic or turn it into an OperationError. Use WaitForState/WaitForAvailable until a guard exists."
       ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.Create",
+      "source_fingerprint": "92b5508baf8f5110123ed6b384b59cd91cf4153c2be43b79b71298216ab33d59",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"attachment\":{...}} to attachments with the caller microversion header, always sending volume_uuid and instance_uuid (empty included) with extensions inside the envelope, rejects a core-key extension collision before HTTP, decodes the attachment key and accepts only 200/202.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.Get",
+      "source_fingerprint": "9108caa7f0fef825ada2f840041348258291d8309410ed737345dceab97cf866",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs attachments/{raw id}, decodes the attachment key returning a zero value for {} or null, wraps missing-key and zoned timestamp decode errors, keeps connection_info raw and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.List",
+      "source_fingerprint": "de9ed11a713b451edbca76a68c83176be132e7397bffe5e51c808861f668a0f9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs attachments/detail with ListOpts (all_tenants included) and extension query values, ignores the Cinder attachments_links array and follows only a links.next string because the page defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.Update",
+      "source_fingerprint": "66bdf8b2d3598e496281338061b52bf5b99dd20f757a17be8d4cd819e6a5383e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"attachment\":{\"connector\":...}} to attachments/{id} sending a nil connector as null with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.Complete",
+      "source_fingerprint": "2eb546467435df6ed00db392a6340b399d3b75e8d1bf7eb9ae0fa7f9e0201a93",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Complete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Complete POSTs {\"os-complete\":null} to attachments/{id}/action and accepts only 204.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.Delete",
+      "source_fingerprint": "c642d771c241397443fddc69bc43c23b37b38da02fdc6137899fe677faff3785",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs attachments/{raw id} and accepts only 200, rejecting 202 and 204.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/attachments.WaitForStatus",
+      "source_fingerprint": "d122fd26761f7950fa29a8150053b38d4b0aecbedaa6a10ce65987ad7f4ffe1d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly, treats a missing envelope as an empty status and keeps polling until the caller deadline, and returns Get errors at once with operation context.",
+          "tests": [
+            "blockstorage/v3/attachments/native_contracts_test.go:TestNativeAttachmentWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-attachments.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling, decoding and caller-selected microversion headers are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
