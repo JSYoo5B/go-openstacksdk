@@ -49288,6 +49288,318 @@
         "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/networks.Create",
+      "source_fingerprint": "a88cb13ea76cb3a45501793433768b7ab0b320546047ffad4b2bddc16e462c71",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"network\":{...}} to networks with extensions inside the envelope, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode",
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/networks.Get",
+      "source_fingerprint": "a38f768f28bc3fc767d93debbcdbfcf6cacb86e2004276af504a0f4047e801bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs networks/{raw id}, decodes the network envelope and accepts only 200.",
+          "tests": [
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode",
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/networks.List",
+      "source_fingerprint": "48afcd7e5d646d4a4845caee15005ef2cc0dfecc04e74b5d94cad7e879197636",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs networks with ListOpts and extension query, follows networks_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode",
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/networks.Delete",
+      "source_fingerprint": "0cf4860791a8a172ab9a861765ab03d569585a2dd693e845aa9de39e49b149ea",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs networks/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkRoutesBodiesPagingAndDecode",
+            "network/v2/networks/native_contracts_test.go:TestNativeNetworkStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/subnets.Create",
+      "source_fingerprint": "986b6b0750046f79a3ad217d4e5c31b537646f5c9737a28e649e7c5241854051",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"subnet\":{...}} to subnets with extensions inside the envelope, requires network_id and sends an empty GatewayIP pointer as gateway_ip null, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode",
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/subnets.Get",
+      "source_fingerprint": "596372709398906b25cd1bffa1a0924280d5fed7e9ebaa2313cbbf72678504fd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs subnets/{raw id}, decodes the subnet envelope and accepts only 200.",
+          "tests": [
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode",
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/subnets.List",
+      "source_fingerprint": "e9023851ad7c0143be6e83af9d0eaff366307c866080fe84733fc07c8b47d5a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs subnets with ListOpts and extension query, follows subnets_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode",
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/subnets.Delete",
+      "source_fingerprint": "ed7b55837aa39a1b6bac08fac3ca317726e46e96bd603f33f1f0d967c79274a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs subnets/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetRoutesBodiesPagingAndDecode",
+            "network/v2/subnets/native_contracts_test.go:TestNativeSubnetStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/ports.Create",
+      "source_fingerprint": "91861f77ebbf2b98e3c1b61fbcf3f65820361b97a41ba85fe0c332022609c4ad",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"port\":{...}} to ports with extensions inside the envelope, requires network_id, flattens value_specs into the port while rejecting banned shared/tenant_id and overwriting keys, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode",
+            "network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/ports.Get",
+      "source_fingerprint": "8cb58c9a532cf9f78a55b9e37a673de939eec78fcdd32dddc1e46c45ba48e457",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs ports/{raw id}, decodes the port envelope and accepts only 200.",
+          "tests": [
+            "network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode",
+            "network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/ports.List",
+      "source_fingerprint": "a52e0dde9c12420d0f37b496a926a3e23c51082fe4edb3a978379d161e38356c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs ports with ListOpts and extension query, repeating fixed_ips conditions and security_groups keys, follows ports_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode",
+            "network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/ports.Delete",
+      "source_fingerprint": "df64280ad1906ab8d086513fc121d45ecf5c719b83ca22711485e0f45588fb9b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs ports/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/ports/native_contracts_test.go:TestNativePortRoutesBodiesPagingAndDecode",
+            "network/v2/ports/native_contracts_test.go:TestNativePortStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

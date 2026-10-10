@@ -37,6 +37,8 @@ Neutron 9개 Update API의 `UpdateOpts.RevisionNumber`는 `If-Match: revision_nu
 
 `Subnets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python 속성 이름을 서버 query 24개 또는 로컬 Body 9개로 자동 분류합니다. query의 wire 별칭을 포함한 30개 이름, bulk canonical 우선·최종값 검증·semantic 전체 교체/clear·JSON snapshot을 SDK가 처리합니다. raw query·명시 Body·page/name hint와 같은 target을 지정하면 HTTP 전에 오류이며, 알 수 없는 semantic 이름은 버립니다. 현재 이 분류는 Subnet에 연결되어 있고 [고정 Python AST manifest](../../api/openstacksdk/resources/network/v2/subnet.json)의 현재 소스 검증을 통과해야 생성됩니다. 전체 Resource/cache·상속 continuation/session·Proxy conflicting attrs·JMESPath 조건은 별도입니다. [Subnet 사용법](subnets/README.md)을 참고하세요.
 
+`Networks`, `Subnets`, `Ports`의 native Create/Get/List/Delete 경로·본문·고정 status와 subnet gateway null, port value_specs 병합, `*_links` 순회는 [native 생성·조회·목록·삭제](native-crud.md)에 설명합니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용
