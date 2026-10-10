@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native security groups rules floating IPs](#neutron-native-security-groups-rules-floating-ips-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native routers extra routes](#neutron-native-routers-extra-routes-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는444입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는455입니다.
+
+## Neutron native routers extra routes 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Neutron native routers·extraroutes 11개, 전체444→455(+11)·핵심370→381/2,292·Network56→67/758.** 기존 generated router `Create/Get/List/Delete`, interface 추가·제거, external gateway 추가·갱신·제거와 extra route 추가·제거가 고정 Gophercloud v2.15.0의 경로, envelope 없는 interface 본문과 subnet·port 배타 조건, `router` envelope 안 확장 필드, 200 고정 status를 바꾸지 않는지 검증했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#routerextra-route)에 router 절을 추가했습니다.
+
+새 집중 계약 테스트4그룹16사례가 race로 통과했습니다. 두 package의 첫 테스트라 전체 `make check`의 race는 **68개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새11행을 추가해 reviews712·contracts3,942·go_mapping455입니다. 테스트 `6db675ce`·가이드/판정 `ef10a720`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Neutron native security groups rules floating IPs 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Neutron native security groups·rules·floating IP 13개, 전체431→444(+13)·핵심357→370/2,292·Network43→56/758.** 기존 generated security group·rule·floating IP의 `Create/Get/List/Delete`와 rule `CreateBulk`가 고정 Gophercloud v2.15.0의 경로, envelope 안 확장 필드, 고정 status, 필수 입력, 0 port range 생략, 배열 bulk 본문, floating IP의 전체 옵션 교체·null decode를 바꾸지 않는지 검증했습니다. 기존 unresolved였던 floating IP Create를 native 계약 근거로 go_mapping으로 닫았습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#security-grouprulefloating-ip)에 절을 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Neutron native security groups·rules·floating IP 13개, 전체431→444(+13)·핵심357→370/2,292·Network43→56/758.** 기존 generated security group·rule·floating IP의 `Create/Get/List/Delete`와 rule `CreateBulk`가 고정 Gophercloud v2.15.0의 경로, envelope 안 확장 필드, 고정 status, 필수 입력, 0 port range 생략, 배열 bulk 본문, floating IP의 전체 옵션 교체·null decode를 바꾸지 않는지 검증했습니다. 기존 unresolved였던 floating IP Create를 native 계약 근거로 go_mapping으로 닫았습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#security-grouprulefloating-ip)에 절을 추가했습니다.
 
 새 집중 계약 테스트8그룹42사례가 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **66개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 floating IP Create 1행을 go_mapping으로 바꾸고 새12행을 추가해 reviews701·contracts3,931·go_mapping444입니다. 테스트 `62d7da9f`·가이드/판정 `0c6bda05`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
