@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Swift native 계정·container 8개 검증·판정 완료.** 전체663/3,362·핵심589/2,292·Object Storage10/74입니다. 다음은 Swift native object 호출 9개(생성·조회·다운로드·목록·복사·수정·삭제·bulk delete·temp URL)입니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Swift native 계정·container 8개 검증·판정 완료, object 9개 테스트·가이드·판정 완료(8개 go_mapping, `Create` 1개 unresolved), 전체 gate 진행 중(판정 반영 집계671).** 판정 전 기준은 전체663/3,362·핵심589/2,292·Object Storage10/74입니다. object 이름의 `%2F` escape, MD5 ETag 계산과 `NoETag`의 대소문자 결함, COPY destination 분할 escape, subdir marker paging, temp URL 서명과 key 조회 순서를 검증했습니다. native `Create`는 nil content에서 panic하므로 미완료로 두었습니다. 다음은 gate·대장이고, 그 뒤 Keystone 사용자 호출(token·application credential·credential·EC2·catalog·trust)로 이어갑니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Swift native 계정·container 8개, 전체655→663(+8)·핵심581→589/2,292·Object Storage2→10/74.** 계정 HEAD/POST와 container 생성·조회·수정·삭제·목록·bulk delete의 계약을 고정했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md)과 [검증 기록](sdk-support-ledger.md#swift-native-accounts-containers-완료)에 설명합니다. 새6그룹, 전체 `make check`(race 101개 실제 test package)가 통과했고 `8235ad2e`·`639de41e`·`18435016`을 push했습니다.
 
@@ -448,11 +448,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 663 (19.7%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 671 (20.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,698 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 923 | 아직 개별 기록 없는 선언 2,439 |
-| 기록한 부분·전체 계약 | 4,153 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,690 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 932 | 아직 개별 기록 없는 선언 2,430 |
+| 기록한 부분·전체 계약 | 4,162 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -495,6 +495,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Swift native objects 9개 | pinned Gophercloud v2.15.0 objects requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례2 PASS, 전체 gate 대기 | objectstorage/v1/native-calls.md object 절 | 신규8행 go_mapping·`Create` unresolved 기록, gate 대기 | `d6db09fd`·가이드·판정 push; 다음 gate·대장 |
 | Swift native accounts·containers 8개 | pinned Gophercloud v2.15.0 accounts·containers와 objectstorage/v1 이름 검사 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례3·전체 `make check` PASS | objectstorage/v1/native-calls.md·생성 README 링크 | **8행 go_mapping·663/3,362** | 작은 commit3개 push 완료; 다음 Swift objects |
 | Cinder v2 native snapshots·backups·transfers·AZ 18개 | pinned Gophercloud v2.15.0 v2/v3 차이와 backup Update 보정 범위 검토 완료 | 기존 generated facade 유지 | 새·이식 9그룹·하위 사례54·전체 `make check` PASS | blockstorage/v2/native-calls.md 절 추가 | **16행 go_mapping·655/3,362**, 2행 unresolved | 작은 commit3개 push 완료; snapshot 대기 guard는 별도 작업 |
 | Cinder v2 native volumes 사용자 호출 19개 | pinned Gophercloud v2.15.0 v2 volumes와 v3 차이 검토 완료 | 기존 generated facade 유지 | v3 테스트 이식 6그룹·하위 사례84·전체 `make check` PASS | blockstorage/v2/native-calls.md·생성 README 링크 | **19행 go_mapping·639/3,362** | 작은 commit3개 push 완료; 다음 v2 snapshots·backups 등 |
@@ -607,12 +608,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 589 / 2,292 | 25.7% | 160 | 1,542 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 597 / 2,292 | 26.0% | 161 | 1,533 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 663 / 3,362 | 19.7% | 259 | 2,439 | 1 |
+| 전체 | 671 / 3,362 | 20.0% | 260 | 2,430 | 1 |
 
 **핵심 서비스**
 
@@ -625,7 +626,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 152 / 480 | 31 | 297 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |
-| Object Storage / Swift | 10 / 74 | 27 | 36 | 1 |
+| Object Storage / Swift | 18 / 74 | 28 | 27 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 

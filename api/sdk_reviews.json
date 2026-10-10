@@ -55790,6 +55790,252 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Create",
+      "source_fingerprint": "635fdb0d503e5b769e088df5af1a47fc4dde7b9339cc7ce1afaaf770fc81a98a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create PUTs the path-escaped container/object (object slash as %2F) with the content, MD5 ETag computed when neither ETag nor NoETag is set, an explicit ETag kept even with NoETag, metadata/system headers and query values, rejects bad names and core-header collisions before HTTP, and accepts only 201/202; nil content needing an ETag panics in the native builder.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentPanics"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": [
+        "The native ToObjectCreateParams calls io.ReadAll on a nil Content reader when an ETag must be computed; the generated facade does not guard this panic or turn it into an OperationError."
+      ]
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Get",
+      "source_fingerprint": "199c8bc755219bf8500b00379b4d50e5258600974d629af900d09371e138841b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get HEADs the path-escaped object with X-Newest only when true and version-id/temp URL query values, decodes static-large-object bool and Unix delete-at headers, rejects empty names before HTTP and accepts only 200/204.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Download",
+      "source_fingerprint": "eb11ff5db52adacdd28707b2a9e2c99aff262de2e83ae7ab00f0b757b8409935",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Download",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDownloadHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Download GETs the path-escaped object with range, If-Match and RFC1123 conditional time headers plus query values, returns a caller-owned body with decoded headers (closing the body on header errors) and accepts only 200/206/304.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Update",
+      "source_fingerprint": "e868cbdb149becb941237a37419b13dec480f9322c41fa183508206cd8bbe122",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithUpdateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update POSTs to the path-escaped object with metadata, remove-metadata and explicit pointer empty/false/integer headers, rejects a nil option before HTTP and accepts only 201/202.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Delete",
+      "source_fingerprint": "e8ba68cf625cb0c3ae427fe65e83fd497586b2e78265115605712a1ff50b401a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs the path-escaped object with multipart-manifest/version-id query values and accepts only 202/204.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.Copy",
+      "source_fingerprint": "687eb2fed16d664f99d9bbcbb614f83bdef282ac0c06e4db20ab139e156ea089",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Copy",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCopyHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Copy sends COPY to the path-escaped object with a required Destination that must start with a slash and contain a container/object separator, path-escaping each of its first three split segments, sends version-id query values and accepts only 201.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectGetDownloadAndCopy",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.List",
+      "source_fingerprint": "90f1960e1d0ebefd6e01601335ae6496bc500916022448b1ccaa23cc0ca42efc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs the path-escaped container with JSON Accept/Content-Type headers, ListOpts (versions, delimiter) and extension query values, repeats with marker set to the last name or subdir until an empty page, and rejects a slash container name.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectListAndBulkDelete",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.BulkDelete",
+      "source_fingerprint": "389875fe0c67d825cd408e0132d9c306b4d0373c1b79d5433cec2c022cefcb97",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.BulkDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "BulkDelete POSTs escaped {container}/{object} lines as text/plain to the account Endpoint with ?bulk-delete=true, rejects a bad container or any empty object name before HTTP, decodes the counts and accepts only 200.",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectListAndBulkDelete",
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/objects.CreateTempURL",
+      "source_fingerprint": "65f356c244d3f1af7bd6c44355d30f1227393fdb323c1139f78c37328d107668",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateTempURL",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateTempURLOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateTempURL signs {method}\\n{expiry}\\n{unescaped path after Split} with HMAC SHA1 (default), SHA256 or SHA512 using the explicit key without HTTP or else the container then account temp URL key via HEAD, returns the escaped object URL with temp_url_sig and temp_url_expires, and returns native ErrTempURLKeyNotFound, ErrTempURLDigestNotValid and split errors unwrapped (only option errors carry operation context).",
+          "tests": [
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateTempURL"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/objects CreateTempURL call only; the SDK-owned GenerateTempURL and signing workflows are tracked separately.",
+        "The generated facade wraps only option errors; key lookup, digest and split errors are returned as native errors without OperationError."
+      ],
+      "remaining": []
     }
   ]
 }
