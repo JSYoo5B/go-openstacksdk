@@ -49917,6 +49917,292 @@
         "The SDK adds only request.Wrap operation context; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.Create",
+      "source_fingerprint": "52f1b927d09c1e27fa52de2792f3545f15deeae3c1fdb85f51e516852af25e63",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"router\":{...}} to routers with extensions inside the envelope, omitting empty fields while keeping explicit false pointers, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.Get",
+      "source_fingerprint": "9a7a372e9f7c274b35c0457e42c2ba6585edbccffdfb6bba8b71869b28e6a4fb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs routers/{raw id}, decodes the router envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.List",
+      "source_fingerprint": "685efd74a5742ea62e31288c32b79587a1eb536dfba50ec6a9a2e3c61a51fd7a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs routers with ListOpts and extension query, follows routers_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.Delete",
+      "source_fingerprint": "7e589ac858ec0a3aa72b9e31c001d3d51a6cd875586c34b97fbc3f4824c8701f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs routers/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.AddInterface",
+      "source_fingerprint": "b694034c1f759b2f3066d129ab6cf7cc761c710cd7d996149da136510280e3fc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddInterface",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddInterfaceOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddInterfaceField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddInterface PUTs routers/{id}/add_router_interface with an envelope-less subnet_id or port_id body (extensions beside it), requires exactly one of them before HTTP, decodes InterfaceInfo and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.RemoveInterface",
+      "source_fingerprint": "a3b936938ee4f83fdfbee1082d22982d1ae2be847e6bf1222004e56b8fd569d4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveInterface",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveInterfaceOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveInterfaceField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveInterface PUTs routers/{id}/remove_router_interface with subnet_id and/or port_id, requires at least one before HTTP, decodes InterfaceInfo and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.AddExternalGateways",
+      "source_fingerprint": "327a9411ee28e2dcef53e1268c84f35560eb09483e78cbc4d190a8108e4f1bf5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddExternalGateways",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddExternalGatewaysOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAddExternalGatewaysField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddExternalGateways PUTs {\"router\":{\"external_gateways\":[...]}} to routers/{id}/add_external_gateways with extensions inside the envelope, rejects nil gateways, a core-key collision or nil option before HTTP, decodes the router and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.UpdateExternalGateways",
+      "source_fingerprint": "f493fbfe725799aacd102fe2f635778bb4bfbf1013db56d6de99ae2bf801424c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateExternalGateways",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateExternalGatewaysOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateExternalGatewaysField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateExternalGateways PUTs {\"router\":{\"external_gateways\":[...]}} to routers/{id}/update_external_gateways, rejects nil gateways, a core-key collision or nil option before HTTP, decodes the router and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.RemoveExternalGateways",
+      "source_fingerprint": "f18f2cc85e27fa94d18348e3e38b52105fd2b14e4c7b7f21f9b8c4f96a9cb19f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveExternalGateways",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveExternalGatewaysOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRemoveExternalGatewaysField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveExternalGateways PUTs {\"router\":{\"external_gateways\":[...]}} to routers/{id}/remove_external_gateways sending an empty slice as [], rejects nil gateways before HTTP, decodes the router and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_contracts_test.go:TestNativeRouterInterfacesAndExternalGateways"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/extraroutes.Add",
+      "source_fingerprint": "92c21bcdeca45c06d6a2a3bd6af4bcccfac30bcf5f9f8a32043acf878d5ee384",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.API.Add",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithAddOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithAddField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Add PUTs {\"router\":{\"routes\":[...]}} to routers/{id}/add_extraroutes (nil routes as an empty router object) with extensions inside the envelope, rejects a routes collision or nil option before HTTP, decodes the router and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/extraroutes/native_contracts_test.go:TestNativeExtraRoutesAddRemoveBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/extraroutes.Remove",
+      "source_fingerprint": "6fecb26a2efcd290459362b757d74d2996a6565f2771fbbe194e7783c82e1477",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithRemoveOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/extraroutes.WithRemoveField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove PUTs {\"router\":{\"routes\":[...]}} to routers/{id}/remove_extraroutes, rejects nil options before HTTP, decodes the router and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/extraroutes/native_contracts_test.go:TestNativeExtraRoutesAddRemoveBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
