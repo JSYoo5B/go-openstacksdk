@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native secrets](#barbican-native-secrets-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native secret metadata](#barbican-native-secret-metadata-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는324입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는330입니다.
+
+## Barbican native secret metadata 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Barbican native secret metadata 6개, 전체324→330(+6)·핵심250→256/2,292·Key Manager19→25/67.** 기존 generated `GetMetadata/CreateMetadata/GetMetadatum/CreateMetadatum/UpdateMetadatum/DeleteMetadatum`의 raw 경로, `{"metadata": ...}`·key/value 본문, 고정 status(200·201·200·201·200·202/204), required key/value를 검증했습니다. typed metadata map은 일반 object envelope가 아니어서 `CreateMetadata`의 확장 필드가 `metadata` 옆에 추가되는 동작과 충돌 거부도 고정했습니다. 구현 변경은 없으며 [secrets README](../keymanager/v1/secrets/README.md#native-secret-metadata-calls)에 절을 추가했습니다.
+
+새 집중 계약 테스트2그룹32사례가 race로 통과했고 전체 `make check`의 race **47개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새6행·6계약을 추가해 reviews589·contracts3,814·go_mapping330입니다. 테스트 `9a6b9910`·가이드/판정 `17c5092a`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Barbican native secrets 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Barbican native `secrets` 5개, 전체319→324(+5)·핵심245→250/2,292·Key Manager14→19/67.** 기존 generated `Get/List/Create/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID 경로, RFC3339NoZ 시각과 null expiration, Create의 omitempty 본문·zone 없는 expiration·확장 필드, Update의 payload 본문·header 확장, 고정 status(200·201·204·202/204), body next link를 그대로 따르는 List를 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [secrets README](../keymanager/v1/secrets/README.md#native-get-list-create-update-and-delete)에 native 절을 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `secrets` 5개, 전체319→324(+5)·핵심245→250/2,292·Key Manager14→19/67.** 기존 generated `Get/List/Create/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID 경로, RFC3339NoZ 시각과 null expiration, Create의 omitempty 본문·zone 없는 expiration·확장 필드, Update의 payload 본문·header 확장, 고정 status(200·201·204·202/204), body next link를 그대로 따르는 List를 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [secrets README](../keymanager/v1/secrets/README.md#native-get-list-create-update-and-delete)에 native 절을 추가했습니다.
 
 새 집중 계약 테스트3그룹24사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **47개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새5행·5계약을 추가해 reviews583·contracts3,808·go_mapping324입니다. 테스트 `d1ac3545`·가이드/판정 `8e82d028`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
