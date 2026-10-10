@@ -20,7 +20,11 @@ import (
 type nativeTagTransport func(*http.Request) (*http.Response, error)
 
 func (transport nativeTagTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	return transport(req)
+	response, err := transport(req)
+	if response != nil && response.Request == nil {
+		response.Request = req
+	}
+	return response, err
 }
 
 func nativeTagWire(code int, body string) *http.Response {
