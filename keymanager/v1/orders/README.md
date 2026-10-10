@@ -33,3 +33,19 @@ keys already in the body. IDs are joined into the path without escaping.
 `next` link exactly as returned and stops on an empty page. Other statuses
 keep the native `gophercloud.ErrUnexpectedResponseCode`; the SDK adds only
 `resource.OperationError{Resource: "orders"}` context.
+
+## Python find (`FindIdentity`)
+
+`FindIdentity(ctx, identity, options...)` maps the pinned Python `find_order`
+proxy, which calls `Resource.find`. A safe identity first gets one strict
+metadata `Fetch`. After a clean 400, 403 or 404 the SDK lists every page
+without a name query (the resource maps no name filter) and matches rows by
+their literal `id`, which for a list row is the full `order_ref` reference, or by a
+string `name`. A bare UUID therefore matches only through the direct GET. One
+match is returned, two are `resource.ErrAmbiguous`, and none returns
+`nil, nil` unless `resource.WithIdentityFindIgnoreMissing(false)` asks for
+`resource.ErrNotFound`. Other statuses stop without the list. An identity that
+is not a safe path segment, such as a full reference, skips the direct GET.
+Query, details and project options are rejected because the Python call takes
+only `ignore_missing`.
+

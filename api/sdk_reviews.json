@@ -47638,6 +47638,70 @@
         "Headers are a Go extension; Python keyword attributes become the typed ACLInput, which requires read to be a JSON object and drops undeclared attributes like the Resource does."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/find_container",
+      "source_fingerprint": "04191b16d3a04350d998a982ad1e897d2104e5ad009bb7c24805601b0f5af487",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindIdentity performs one strict direct metadata Fetch for a safe identity and returns it; after a clean 400/403/404 it lists every page of containers without a name query and matches seedless rows by literal id (the full reference) or string name, returning one match, ErrAmbiguous for two, and nil,nil for none unless ignore_missing is false.",
+          "tests": [
+            "keymanager/v1/containers/find_test.go:TestContainerFindIdentityFollowsPythonFind"
+          ]
+        },
+        {
+          "behavior": "Other direct statuses stop without listing, unsafe path identities skip the direct GET, empty identities and query/details/project options fail before HTTP.",
+          "tests": [
+            "keymanager/v1/containers/find_test.go:TestContainerFindIdentityFollowsPythonFind"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Container Resource; Go returns the owned FetchedContainer projection with the actual response metadata. Resource session, cache and list controls beyond ignore_missing are tracked as SDK-R1/C1/S1.",
+        "Skipping the direct GET for identities that are not safe path segments is the shared Go finder policy; Python would first request the unescaped path and then list."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/find_order",
+      "source_fingerprint": "12bcc53f0402048c308c6771e20dfb875e227fbe395a4e11d95e59ecdbfb6f0b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindIdentity performs one strict direct metadata Fetch for a safe identity and returns it; after a clean 400/403/404 it lists every page of orders without a name query and matches seedless rows by literal id (the full reference) or string name, returning one match, ErrAmbiguous for two, and nil,nil for none unless ignore_missing is false.",
+          "tests": [
+            "keymanager/v1/orders/find_test.go:TestOrderFindIdentityFollowsPythonFind"
+          ]
+        },
+        {
+          "behavior": "Other direct statuses stop without listing, unsafe path identities skip the direct GET, empty identities and query/details/project options fail before HTTP.",
+          "tests": [
+            "keymanager/v1/orders/find_test.go:TestOrderFindIdentityFollowsPythonFind"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Order Resource; Go returns the owned FetchedOrder projection with the actual response metadata. Resource session, cache and list controls beyond ignore_missing are tracked as SDK-R1/C1/S1.",
+        "Skipping the direct GET for identities that are not safe path segments is the shared Go finder policy; Python would first request the unescaped path and then list."
+      ],
+      "remaining": []
     }
   ]
 }
