@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Neutron native VPNaaS 25개 검증·판정 완료, tap mirror 5개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계570).** 판정 전 기준은 전체565/3,362·핵심491/2,292·Network177/758입니다. tap mirror의 문자열 tunnel ID 방향 값과 항상 전송되는 생성 필드를 검증했습니다. 이 단위로 Neutron 사용자 extension의 native 호출을 마무리합니다. 다음은 gate·대장이고, 그 뒤 Cinder native 사용자 호출로 이어갑니다. segments·network IP availability·agents·BGP·BGPVPN처럼 기본 정책이 관리자 전용인 extension은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Neutron native tap mirror 5개 검증·판정 완료로 Neutron 사용자 extension의 native 호출을 마무리했습니다.** 전체570/3,362·핵심496/2,292·Network182/758입니다. 다음은 Cinder native 사용자 호출입니다. segments·network IP availability·agents·BGP·BGPVPN처럼 기본 정책이 관리자 전용인 Neutron extension은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
-**최신 API 완료 (2026-10-11): 핵심 user Neutron native VPNaaS 25개, 전체540→565(+25)·핵심466→491/2,292·Network152→177/758.** endpoint group·IKE policy·IPsec policy·VPN service·IPsec site connection의 CRUD 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#vpnaas)와 [검증 기록](sdk-support-ledger.md#neutron-native-vpnaas-완료)에 설명합니다. 새10그룹과 하위 사례75, 전체 `make check`(race 88개 실제 test package)가 통과했고 `a0acba52`·`d8bf1110`을 push했습니다.
+**최신 API 완료 (2026-10-11): 핵심 user Neutron native tap mirrors 5개, 전체565→570(+5)·핵심491→496/2,292·Network177→182/758.** tap mirror CRUD와 문자열 tunnel ID 방향 값의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#tap-mirror)와 [검증 기록](sdk-support-ledger.md#neutron-native-tap-mirrors-완료)에 설명합니다. 새2그룹과 하위 사례16, 전체 `make check`(race 89개 실제 test package)가 통과했고 `8270f33e`·`2923f276`을 push했습니다.
+
+**앞선 API 완료 (2026-10-11): 핵심 user Neutron native VPNaaS 25개, 전체540→565(+25)·핵심466→491/2,292·Network152→177/758.** endpoint group·IKE policy·IPsec policy·VPN service·IPsec site connection의 CRUD 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#vpnaas)와 [검증 기록](sdk-support-ledger.md#neutron-native-vpnaas-완료)에 설명합니다. 새10그룹과 하위 사례75, 전체 `make check`(race 88개 실제 test package)가 통과했고 `a0acba52`·`d8bf1110`을 push했습니다.
 
 **앞선 API 완료 (2026-10-11): 핵심 user Neutron native FWaaS v2 groups·policies·rules 19개, 전체521→540(+19)·핵심447→466/2,292·Network133→152/758.** firewall group·policy·rule CRUD와 group 정책 제거, policy 규칙 삽입·제거의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#firewall-grouppolicyrule)와 [검증 기록](sdk-support-ledger.md#neutron-native-fwaas-v2-groups-policies-rules-완료)에 설명합니다. 새7그룹과 하위 사례62, 전체 `make check`(race 83개 실제 test package)가 통과했고 `ddaa5995`·`1b79e5be`를 push했습니다.
 
@@ -473,7 +475,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Neutron native tap mirrors 5개 | pinned Gophercloud v2.15.0 tapmirrors requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례16 PASS, 전체 gate 대기 | native-crud.md tap mirror 절 | 신규5행 go_mapping 기록, gate 대기 | `8270f33e`·가이드·판정 push; 다음 gate·대장 |
+| Neutron native tap mirrors 5개 | pinned Gophercloud v2.15.0 tapmirrors requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례16·전체 `make check` PASS | native-crud.md tap mirror 절 | **5행 go_mapping·570/3,362** | 작은 commit2개 push 완료; 다음 Cinder native |
 | Neutron native VPNaaS 25개 | pinned Gophercloud v2.15.0 다섯 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새10그룹·하위 사례75·전체 `make check` PASS | native-crud.md VPNaaS 절 | **25행 go_mapping·565/3,362** | 작은 commit2개 push 완료; 다음 tap mirror |
 | Neutron native FWaaS v2 groups·policies·rules 19개 | pinned Gophercloud v2.15.0 세 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새7그룹·하위 사례62·전체 `make check` PASS | native-crud.md firewall 절 | **19행 go_mapping·540/3,362** | 작은 commit2개 push 완료; 다음 VPNaaS |
 | Neutron native attributestags·apiversions·extensions 10개 | pinned Gophercloud v2.15.0 세 package와 common extensions·BaseEndpoint 검토 완료 | 기존 generated facade 유지 | 새6그룹·전체 `make check` PASS | native-crud.md attribute tag·API 버전 절 | **10행 go_mapping·521/3,362** | 작은 commit2개 push 완료; 다음 firewall |
@@ -505,6 +507,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance native images.Create | pinned Gophercloud v2.15.0 Create·CreateOpts·ToImageCreateMap 검토 완료 | 기존 generated facade 유지 | 새2그룹13·전체 `make check` PASS | native 생성 가이드 추가 | **신규1행 go_mapping·308/3,362** | 작은 commit2개 push 완료; 다음 native members |
 | Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 새2그룹8·전체 `make check` PASS | native 목록 가이드 추가 | **신규1행 go_mapping·307/3,362** | 작은 commit2개 push 완료; 다음 native images.Create |
 | Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
+| Neutron native tap mirrors | 565 → 570 (+5) | 새2그룹16·전체 `make check`(89 package) PASS | `8270f33e`·`2923f276` push 완료 |
 | Neutron native VPNaaS | 540 → 565 (+25) | 새10그룹75·전체 `make check`(88 package) PASS | `a0acba52`·`d8bf1110` push 완료 |
 | Neutron native FWaaS v2 groups policies rules | 521 → 540 (+19) | 새7그룹62·전체 `make check`(83 package) PASS | `ddaa5995`·`1b79e5be` push 완료 |
 | Neutron native attribute tags API versions extensions | 511 → 521 (+10) | 새6그룹·전체 `make check`(80 package) PASS | `f19a18d9`·`9db4cc68` push 완료 |
