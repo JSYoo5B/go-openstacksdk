@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native containers](#barbican-native-containers-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native orders](#barbican-native-orders-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는339입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는343입니다.
+
+## Barbican native orders 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Barbican native `orders` 4개, 전체339→343(+4)·핵심265→269/2,292·Key Manager34→38/67.** 기존 generated orders `Get/List/Create/Delete`가 고정 Gophercloud v2.15.0의 raw 경로, 빈 값도 보내는 type·algorithm·bit_length·mode와 zone 없는 expiration, 고정 status(200·202·202/204), body next link 목록을 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [orders README](../keymanager/v1/orders/README.md)를 추가했습니다.
+
+새 집중 계약 테스트2그룹18사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **49개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새4행·4계약을 추가해 reviews602·contracts3,827·go_mapping343입니다. 테스트 `21c4e5e7`·가이드/판정 `72b6414f`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Barbican native containers 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Barbican native `containers` 9개, 전체330→339(+9)·핵심256→265/2,292·Key Manager25→34/67.** 기존 generated containers `Get/List/Create/Delete`와 `CreateConsumer/DeleteConsumer/ListConsumers/CreateSecretRef/DeleteSecretRef`가 고정 Gophercloud v2.15.0의 raw 경로, required type과 omitempty 없는 name, JSON 본문을 보내는 DELETE, 고정 status(200·201·202/204·200·200·201·204), body next link를 그대로 따르는 두 목록, container `ListOpts`를 재사용하는 ListConsumers를 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [containers README](../keymanager/v1/containers/README.md)를 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `containers` 9개, 전체330→339(+9)·핵심256→265/2,292·Key Manager25→34/67.** 기존 generated containers `Get/List/Create/Delete`와 `CreateConsumer/DeleteConsumer/ListConsumers/CreateSecretRef/DeleteSecretRef`가 고정 Gophercloud v2.15.0의 raw 경로, required type과 omitempty 없는 name, JSON 본문을 보내는 DELETE, 고정 status(200·201·202/204·200·200·201·204), body next link를 그대로 따르는 두 목록, container `ListOpts`를 재사용하는 ListConsumers를 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [containers README](../keymanager/v1/containers/README.md)를 추가했습니다.
 
 새 집중 계약 테스트3그룹39사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **48개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새9행·9계약을 추가해 reviews598·contracts3,823·go_mapping339입니다. 테스트 `6a22fbcb`·가이드/판정 `aaf53acc`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
