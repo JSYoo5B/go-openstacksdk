@@ -21,6 +21,8 @@ generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로
 
 사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다.
 
+trust와 사용자 본인의 접근 가능 project 목록·암호 변경 native 호출은 [native trust·사용자 본인 호출](native-trusts.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
