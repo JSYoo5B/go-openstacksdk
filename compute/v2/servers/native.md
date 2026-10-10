@@ -32,3 +32,33 @@
 
 Reset·Update는 `{"metadata": {...}}`, CreateMetadatum은 `{"meta": {...}}`를 보냅니다. `MetadatumOpts`는 정확히 한 쌍이어야 하며 그 key가 경로가 됩니다. 비어 있거나 두 쌍 이상이면 HTTP 전에 오류입니다. typed metadata map은 일반 object envelope가 아니므로 `With...Field` 확장 필드는 `metadata`/`meta` 옆 최상위에 붙고, 이미 있는 key와 겹치면 HTTP 전에 거부됩니다. 반환 map은 서버 응답이며 요청 값을 합성하지 않습니다. key는 escape 없이 경로에 이어 붙입니다.
 
+
+## 사용자 action
+
+모든 action은 `POST servers/{id}/action`으로 보내며 본문의 최상위 key가 action 이름입니다. 성공 status는 따로 적지 않은 경우 Gophercloud POST 기본값인 201, 202입니다.
+
+| 메서드 | 본문 | 성공 status | 반환 |
+|---|---|---|---|
+| `ChangeAdminPassword(ctx, id, newPassword)` | `{"changePassword": {"adminPass": ...}}` | 201, 202 | error |
+| `Reboot(ctx, id, opts, options...)` | `{"reboot": {"type": "SOFT"\|"HARD"}}` | 201, 202 | error |
+| `Rebuild(ctx, id, opts, options...)` | `{"rebuild": {...}}` | 201, 202 | 응답의 `server` |
+| `Resize(ctx, id, opts, options...)` | `{"resize": {"flavorRef": ...}}` | 201, 202 | error |
+| `ConfirmResize(ctx, id)` | `{"confirmResize": null}` | 201, 202, 204 | error |
+| `RevertResize(ctx, id)` | `{"revertResize": null}` | 201, 202 | error |
+| `CreateImage(ctx, id, opts, options...)` | `{"createImage": {"name": ..., "metadata": ...}}` | 202 | image ID |
+| `Rescue(ctx, id, opts, options...)` | `{"rescue": {"adminPass": ..., "rescue_image_ref": ...}}` | 200 | 응답의 `adminPass` |
+| `Unrescue(ctx, id)` | `{"unrescue": null}` | 201, 202 | error |
+| `Start`·`Stop(ctx, id)` | `{"os-start": null}`·`{"os-stop": null}` | 201, 202 | error |
+| `Pause`·`Unpause(ctx, id)` | `{"pause": null}`·`{"unpause": null}` | 201, 202 | error |
+| `Suspend`·`Resume(ctx, id)` | `{"suspend": null}`·`{"resume": null}` | 201, 202 | error |
+| `Lock`·`Unlock(ctx, id)` | `{"lock": null}`·`{"unlock": null}` | 201, 202 | error |
+| `Shelve`·`ShelveOffload(ctx, id)` | `{"shelve": null}`·`{"shelveOffload": null}` | 201, 202 | error |
+| `Unshelve(ctx, id, opts, options...)` | `{"unshelve": null}` 또는 `{"unshelve": {"availability_zone": ...}}` | 201, 202 | error |
+
+`Reboot`의 `Type`, `Resize`의 `FlavorRef`, `CreateImage`의 `Name`은 필수이며 비어 있으면 HTTP 전에 오류입니다. `Rebuild`·`Resize`의 `DiskConfig`는 `AUTO`나 `MANUAL`만 받고 다른 값은 HTTP 전에 거부합니다. `Rebuild`의 `imageRef`는 생략하지 않으므로 빈 `RebuildOpts`도 `{"rebuild": {"imageRef": ""}}`를 보냅니다.
+
+`With...Field` 확장 필드는 action 객체 안에 들어갑니다. 다만 `Unshelve`에 가용 영역을 주지 않으면 action 값이 null이라 확장 필드는 `unshelve` 옆 최상위에 붙습니다. 옵션 struct가 가진 key(예: `type`, `name`, `availability_zone`)와 같은 확장 필드나 nil 옵션은 HTTP 전에 거부됩니다.
+
+`CreateImage`는 응답의 `X-OpenStack-Nova-API-Version` header로 image ID 위치를 고릅니다. 2.45 미만이면 `Location` header 경로의 마지막 segment를, 2.45 이상이면 본문의 `image_id`를 돌려줍니다. 다만 2.45 이상에서 `Content-Type`이 정확히 `application/json`이 아니면 본문을 읽지 않으므로 오류 없이 빈 ID를 돌려줍니다. version header가 없거나 형식이 틀리거나, 2.45 미만에서 `Location`이 없거나 `/`이면 202를 받은 뒤에도 오류입니다. 이때 서버 쪽 image 생성 요청은 이미 접수됐을 수 있습니다.
+
+evacuate·force delete·live migrate·migrate·reset state·reset network·inject network info 같은 관리자 action은 이 절에서 다루지 않습니다.

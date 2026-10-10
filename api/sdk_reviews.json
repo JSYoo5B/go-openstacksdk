@@ -48007,6 +48007,525 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ChangeAdminPassword",
+      "source_fingerprint": "e5b4100385877fe87fe00192fa00ba3f180a679afae3f2a159c76bec6ecd709a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ChangeAdminPassword"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangeAdminPassword POSTs {\"changePassword\":{\"adminPass\":...}} to servers/{id}/action and accepts only the POST default 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Reboot",
+      "source_fingerprint": "e2cf83efc0daa69c8b0020639cde334cbf1d5eec3a0222ad322d4e93ba61a111",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Reboot",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebootOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebootField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reboot POSTs {\"reboot\":{\"type\":...}} with extensions inside the action object, rejects a missing type, a type extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Rebuild",
+      "source_fingerprint": "b740fb3511caab5effa82a280467a7cc4fb756748ba3897eb523ba22d0bd9a77",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebuildOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRebuildField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Rebuild POSTs {\"rebuild\":{...}} always including imageRef, validates DiskConfig before HTTP, decodes the response server and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Resize",
+      "source_fingerprint": "87c13ff226f0936bd1a8aaf3892f1fe163989432f39add580cbc29c5e6484a29",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Resize",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResizeOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResizeField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resize POSTs {\"resize\":{\"flavorRef\":...}} with optional OS-DCF:diskConfig, rejects a missing flavor or invalid DiskConfig before HTTP and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ConfirmResize",
+      "source_fingerprint": "78218e7509f472cedc79bafd3b45de33b9282161feef5b630b81ee607957dd9c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConfirmResize"
+      ],
+      "contracts": [
+        {
+          "behavior": "ConfirmResize POSTs {\"confirmResize\":null} and accepts only 201/202/204.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.RevertResize",
+      "source_fingerprint": "a376e10a758d5537d7ddfa09ab4e8d1a3d969ec5877cba9dce5e094083c4f5d2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.RevertResize"
+      ],
+      "contracts": [
+        {
+          "behavior": "RevertResize POSTs {\"revertResize\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.CreateImage",
+      "source_fingerprint": "9a12f29f22bae6692a67a960e4073b124f066b805b290cfb21283ee995bf9a07",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.CreateImage",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateImageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateImageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateImage POSTs {\"createImage\":{...}}, requires a name before HTTP, accepts only 202 and extracts the image ID from Location before microversion 2.45 or from a JSON body image_id from 2.45, returning an empty ID for a non-JSON body and an error after 202 for a missing or bad version header or Location.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerCreateImageIDByMicroversion",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Rescue",
+      "source_fingerprint": "d03c392e27e3ec998ce1633dce79fdcfdbbe9f6c57485d2b645d3c6187ce11b7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rescue",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRescueOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRescueField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Rescue POSTs {\"rescue\":{...}}, returns the response adminPass, rejects nil options before HTTP and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Unrescue",
+      "source_fingerprint": "8e714aa7d97666aeb3d7b2b2cb63da30ba3e26c2e0c4b4eb56cf995adfc711eb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Unrescue"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unrescue POSTs {\"unrescue\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Start",
+      "source_fingerprint": "7b08d15844164490a187a9470aaf37e250ad1af220145cf7181df09575a814c9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Start"
+      ],
+      "contracts": [
+        {
+          "behavior": "Start POSTs {\"os-start\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Stop",
+      "source_fingerprint": "faed8c9e2801541855b722033b6e03f4d689330db9aa312e8446c0ab4d26f6d6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Stop"
+      ],
+      "contracts": [
+        {
+          "behavior": "Stop POSTs {\"os-stop\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Pause",
+      "source_fingerprint": "a47b4553cc29f551e61d95297e9c755554b8b22e6746470c0a0fc3c4bef0e9fe",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Pause"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pause POSTs {\"pause\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Unpause",
+      "source_fingerprint": "8e38b57cfdfaf57cd017d8c2ec6e256f6167a07dab1d99a8730ea748476e5314",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Unpause"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unpause POSTs {\"unpause\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Suspend",
+      "source_fingerprint": "f2b74fe3c37140a3b71f4e5bed9b0f259132be9efbc54451997effbfc3e6507f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Suspend"
+      ],
+      "contracts": [
+        {
+          "behavior": "Suspend POSTs {\"suspend\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Resume",
+      "source_fingerprint": "771c77639a32b9159e865e80529584b2dae98a3fe86cd34da33740f33bf8830b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Resume"
+      ],
+      "contracts": [
+        {
+          "behavior": "Resume POSTs {\"resume\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Lock",
+      "source_fingerprint": "af39738020aa643ee2bd507b4f6573bd3933b00536e59735bdac99e7463cf8ef",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Lock"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lock POSTs {\"lock\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Unlock",
+      "source_fingerprint": "fbc5146116f88f13cb1f3c2c086a9efa64e9e4564e9ff3e6081c32e4ef799972",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Unlock"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unlock POSTs {\"unlock\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Shelve",
+      "source_fingerprint": "52be317c301654674d1d5a7a441ccb0770417f01759aa49332e1a8be7ae293a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Shelve"
+      ],
+      "contracts": [
+        {
+          "behavior": "Shelve POSTs {\"shelve\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ShelveOffload",
+      "source_fingerprint": "19689bb6265b429cbc8df77b9a69dd683ab383b3928269f03802ef4b52624c8f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ShelveOffload"
+      ],
+      "contracts": [
+        {
+          "behavior": "ShelveOffload POSTs {\"shelveOffload\":null} and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Unshelve",
+      "source_fingerprint": "d3777620ff5bd1089bae754345734e7fb0313f8ce8500a671bb81aa14424e850",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Unshelve",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUnshelveOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUnshelveField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unshelve POSTs {\"unshelve\":null} without an availability zone (extensions beside it) or {\"unshelve\":{\"availability_zone\":...}} (extensions inside), rejects an availability_zone extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsStrictStatuses",
+            "compute/v2/servers/native_action_contracts_test.go:TestNativeServerActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
