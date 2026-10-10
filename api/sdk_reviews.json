@@ -66851,6 +66851,1690 @@
         "Python accepts any key manager Resource; Go deletion waits exist only for containers, orders and secrets.",
         "Python returns the original Resource on deletion; Go returns only an error."
       ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_volume",
+      "source_fingerprint": "283e61bdcdc6ebe67d0ca12d1dec2e251fcf10e5568dc592dc942135791db9be",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Get sends GET volumes/{id} like Proxy._get and decodes name, size, multiattach, tenant, host and metadata.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_volume",
+      "source_fingerprint": "3f860929946b4bd11cf2e2985abb63d81f2796fd7bf99da523d65580a36580a4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithCreateHintOpts"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Create posts the volume envelope with wire names such as imageRef and multiattach and puts OS-SCH-HNT:scheduler_hints outside it, as Volume._prepare_request_body does.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python attribute names (image_id, source_volume_id, is_multiattach, scheduler_hints) become CreateOpts fields or WithCreateField wire keys and WithCreateHintOpts in Go.",
+        "Gophercloud validates scheduler hint fields such as same_host as UUIDs before sending; Python forwards the dict unchanged.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_volume",
+      "source_fingerprint": "60279a789c8c0c8f6f4009a3d9ef48ad603174f16dff4c2fae57d7df4125ece3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Update sends PUT volumes/{id} with only the supplied name and description in the volume envelope.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Attributes outside UpdateOpts need WithUpdateField with the wire key.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_volume",
+      "source_fingerprint": "76305bfa8070075671808497959804fe32d1e1b6e20df199b484ddf108dcdda4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithDeleteQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ForceDelete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove ignores 404 by default and WithMissingError reports NotFound; Delete with WithDeleteQuery reproduces Python's cascade=False&force=False (or True) query and ForceDelete posts os-force_delete for the pre-3.23 force path.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "At microversion 3.23 or later Python always sends cascade and force as query parameters; Remove sends none and relies on the same server defaults.",
+        "Remove cannot carry cascade or force, so with those options the caller uses Delete and drops a 404 with gophercloud.ResponseCodeIs to match ignore_missing=True.",
+        "Python chooses the force action or query from microversion support; the Go caller chooses ForceDelete or the force query explicitly.",
+        "ForceDelete sends {\"os-force_delete\": \"\"} where Python sends null.",
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/volumes",
+      "source_fingerprint": "dc1c5dc7595368bdb3b8ebee79563f93b2b3e187732d42550f339465393b2be5",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.List always requests volumes/detail, sends name, status and all_tenants=True as given and follows volumes_links.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeListDefaultUsesDetailRouteOnly"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
+        "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "volumes(details=False) sends GET /volumes (summary route); no public Go list call can request that route."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/init_volume_attachment",
+      "source_fingerprint": "90b5476b695ca0a4c6c87cb56802eaf740947f6cceebaacb256ea415baa2e956",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeConnection",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithInitializeConnectionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "InitializeConnection posts os-initialize_connection with the eight typed connector keys and returns connection_info; extension fields land beside connector, and replacing connector is rejected.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeConnectionActionsOnlyTypedConnectorKeys"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python forwards an arbitrary connector dict; Go InitializeConnectionOpts only has ip, host, initiator, wwpns, wwnns (string, not list), multipath, platform and os_type, and WithInitializeConnectionField cannot add keys inside connector, so os-brick keys such as nqn, uuid or do_local_attach cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/terminate_volume_attachment",
+      "source_fingerprint": "ec5610f2d87c2531facddf9214af25b54490484585edb72871288798438d3e9d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateConnection"
+      ],
+      "contracts": [
+        {
+          "behavior": "TerminateConnection posts os-terminate_connection with the typed connector keys.",
+          "tests": [
+            "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeConnectionActionsOnlyTypedConnectorKeys"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python forwards an arbitrary connector dict; Go TerminateConnectionOpts has only the eight typed keys with string wwnns and extension fields cannot be placed inside connector."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_snapshot",
+      "source_fingerprint": "5e97f69eb0343fe2f067c331e71139fed4cc8cd224bf3f9f426321db7e3cb979",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Get sends GET snapshots/{id} and decodes the extended progress and project attributes.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_snapshot",
+      "source_fingerprint": "88e98736120edf2438720827eb09d0bb62eaef8d809c14b0a8c20647a715267f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends one GET without list fallback and Find(resource.Name) lists snapshots/detail?name=..., so the two phases exist only as separate calls.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotFindHasNoIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python matches either ID or name in the fallback list; Go Find(Name) matches names only."
+      ],
+      "remaining": [
+        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
+        "Find(resource.Name) always uses snapshots/detail and cannot add all_tenants, so details=False and all_projects=True cannot be expressed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/snapshots",
+      "source_fingerprint": "358bdff75468998bcbc383704fee63dd4750a7cde17bb1718df9256a055cae13",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ListDetail",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDetail (details=True) and List (details=False) send the Python routes with name, volume_id, limit and all_tenants=True queries and follow snapshots_links.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotListDetailsAllProjectsAndQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
+        "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_snapshot",
+      "source_fingerprint": "5fff0a559c1686403c1f17bcdb1c524fe13561df6ec440b5aa960851f3ccd616",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Create posts the snapshot envelope with volume_id, name, description, force and metadata.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python is_forced=False is sent as \"force\": false; Go omits a false Force and the server default is the same.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_snapshot",
+      "source_fingerprint": "a2cf06f8bf86f6cceadfdd7223588cac046901b6b4cb2d1d1f9ccf5d11b07a11",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Update sends PUT snapshots/{id} with only the supplied fields.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_snapshot",
+      "source_fingerprint": "3533301b3946c7bf2901cafa6a4e05cc8e2f816453fd21d5255202334b0e7a9b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ForceDelete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove ignores 404, WithMissingError and plain Delete keep it, and ForceDelete posts os-force_delete for force=True.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotDeleteIgnoresMissingAndForceUsesAction"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "force=True posts os-force_delete with null and microversion 3.65 in Python; Go ForceDelete sends {} with the client microversion.",
+        "Python force=True does not apply ignore_missing; Go ForceDelete likewise returns the HTTP error.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/reset_snapshot_status",
+      "source_fingerprint": "18bc29cc01a4572c26060c1b70c96acdd56fcebed0797b95723cfa8a4818e68c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ResetStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus posts {\"os-reset_status\": {\"status\": ...}} to snapshots/{id}/action and sends microversion 3.65 when the client is set to it.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotStatusActionsWithPinnedMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Snapshot._action always sends microversion 3.65; Go sends the client microversion, so a client copy with Microversion 3.65 is needed for the same header.",
+        "Go returns only an error, matching Python's None."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/reset_snapshot",
+      "source_fingerprint": "58ccaffbed357b7a873d46da8a691e4178da5393deff5a300f5594031216c083",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ResetStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "The deprecated alias sends the same os-reset_status action as ResetStatus.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotStatusActionsWithPinnedMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python emits a RemovedInSDK50Warning before delegating; Go has no alias.",
+        "Snapshot._action always sends microversion 3.65; Go sends the client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/set_snapshot_status",
+      "source_fingerprint": "e718a813f40ad0b7c8c2c6276c1305b456f84950b3594c13152c73b7733f2567",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.UpdateStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateStatus posts os-update_snapshot_status with status and includes progress only when given.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotStatusActionsWithPinnedMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Snapshot._action always sends microversion 3.65; Go sends the client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/backups",
+      "source_fingerprint": "8a271097d1b6bfda2ad84e7a29b3ccd18637e735a90abeb4174c23993727611b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ListDetail",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListDetailQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDetail (details=True) and List (details=False) send the Python routes with name, status, volume_id and all_tenants=True queries and follow backups_links.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupListDetailsAndQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "ListDetailOpts has no typed name, status or volume_id filters; WithListDetailQuery adds them.",
+        "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
+        "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/get_backup",
+      "source_fingerprint": "00ef7335e700b387782053808aef7982b4216aefc2d79f8ec41054ac13a26d8b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Backups.Get sends GET backups/{id} and decodes incremental, project, object count, metadata and availability zone.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_backup",
+      "source_fingerprint": "8cddda87c02a89ecf384834fcf2c146ca0b225ec8c59251ca34b4f38bd34ea5d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends one GET without fallback and Find(resource.Name) lists backups/detail without a name query and matches locally.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupFindHasNoIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python's fallback list sends name=... to the server; Go Find(Name) lists every backup and compares names locally."
+      ],
+      "remaining": [
+        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
+        "Find(resource.Name) always uses backups/detail, so details=False cannot be expressed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/create_backup",
+      "source_fingerprint": "616379569258f8349e91603b085d3ae41f42ba57f514a90ee9cf84533bf7ca1a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Backups.Create posts the backup envelope with incremental (Python's renamed is_incremental), force, container, snapshot_id, metadata and availability_zone.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go omits false Force and Incremental values that Python would send explicitly; the server defaults are the same.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_backup",
+      "source_fingerprint": "53fdfcc909045afad768070eafdbff1106f7bf6938ce498d828bdb1678adaecd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Backups.Update sends PUT backups/{id} with only the supplied fields.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupGetCreateUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_backup",
+      "source_fingerprint": "8da9ac27ccb160f52199cb6a46e4e6bd50acfc2683be79417ca6a6e1a831b01a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ForceDelete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove ignores 404, WithMissingError and plain Delete keep it, and ForceDelete posts os-force_delete for force=True.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupDeleteForceAndResetAlias"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "force=True posts os-force_delete with null and microversion 3.64 in Python; Go ForceDelete sends {} with the client microversion.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/reset_backup",
+      "source_fingerprint": "7dfd249b4fb07ee70d7feca34cf7d66b8f1fc2016966867229178ee3d9df9de7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ResetBackupStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "The deprecated alias maps to ResetBackupStatus, which posts os-reset_status and forces microversion 3.64 like Backup._action.",
+          "tests": [
+            "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupDeleteForceAndResetAlias",
+            "blockstorage/backup_proxy_action_contract_test.go:TestResetVolumeBackupStatusForwardsEveryUTF8StringWithForcedMicroversionAndOpaqueAck"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python emits a RemovedInSDK50Warning and returns None; Go returns a ResetBackupStatusResult with the applied response and Completed flag."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/fetch_backup_metadata",
+      "source_fingerprint": "44366618ad521a9e7ed3242721117672c9493dc716038b7dcf53f9a1f6866387",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_backup_metadata",
+      "source_fingerprint": "568f7e2447af6c70a2f5973592c8e2c6dd1da8a668c6f77a9e23d3f63016b1ff",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python also emits a RemovedInSDK50Warning before delegating to fetch_backup_metadata."
+      ],
+      "remaining": [
+        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/set_backup_metadata",
+      "source_fingerprint": "a5642b88578610dbf4b7cf27834d987b53375a8821e59aa762d28325179e057d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_backup_metadata",
+      "source_fingerprint": "90645fff2c7de7eb341b7818e87543fd0e9aec7f53a8c479feaf2fa22c8b97eb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/create_attachment",
+      "source_fingerprint": "b19e8fc19dafe9d6316aabcba26b85e293daef52988dce82489898ac29d6b12a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attachments.Create posts volume_uuid, instance_uuid, connector and mode like Attachment._prepare_request_body when an instance is given; without one it still sends an empty instance_uuid and rejects an extension override.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python omits instance_uuid when no instance is given (reservation without a server); Go CreateOpts.InstanceUUID has no omitempty and is a core field, so the key cannot be omitted."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_attachment",
+      "source_fingerprint": "217ee485db644c826ee2e4775bdfd52ec0c1a30a8b3bd5d0d77a6a868c3ad7c8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attachments.Get sends GET attachments/{id} and decodes instance, volume_id, status and attach_mode.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python reads the mode attribute from a mode key while Go reads attach_mode.",
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/attachments",
+      "source_fingerprint": "743a222d57a5cd9837cd45e6bba0d711600442f065661ccb442ea9211b040bee",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attachments.List requests attachments/detail with the given query and stops after the first page even when attachments_links has a next link.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentListUsesDetailFirstPage"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured."
+      ],
+      "remaining": [
+        "Python lists GET /attachments (summary route), which Go cannot request.",
+        "Go does not follow attachments_links, so later pages that Python reads are lost."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_attachment",
+      "source_fingerprint": "b2db97a0c7f39b086656f24d531a315f98cfc7206031d89a0b8c79d24581afa6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attachments.Update sends PUT attachments/{id} with the connector envelope.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "UpdateOpts.Connector has no omitempty, so an update without connector sends \"connector\": null where Python omits the key.",
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/complete_attachment",
+      "source_fingerprint": "459d80b34cead07e9d70f9fa4ad958b2a1837918e8aae2e27a4319b313b7a58b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Complete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attachments.Complete posts os-complete to attachments/{id}/action.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python sends {\"os-complete\": \"<attachment id>\"}; Go sends {\"os-complete\": null}. The target comes from the URL in both.",
+        "Go accepts only 204.",
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_attachment",
+      "source_fingerprint": "1b87a2e50b88497e81aadae9077b9f18334ccc0e31a6dc80da5e2ff92f008c5c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove sends DELETE attachments/{id}, ignores 404 by default and reports NotFound with WithMissingError.",
+          "tests": [
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentCrudAndCompleteMatchProxyRequests",
+            "blockstorage/v3/attachments/python_parity_test.go:TestPythonAttachmentDeleteIgnoresMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Go Delete accepts only 200.",
+        "Attachments need microversion 3.27 or later; Python negotiates up to 3.71 while Go requires the client microversion to be configured."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_transfer",
+      "source_fingerprint": "ce62dee0ea11f57d1ab9199fcd6f6e49bfbb784d463e25bb5d1e5a7d6c629e09",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Transfers.Create posts volume_id and name to the legacy os-volume-transfer route; an extension field such as no_snapshots is added to that legacy request.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferCreateListAndFindGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python creates through /volume-transfers at microversion 3.55 so that no_snapshots is honored; Go cannot reach that route."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_transfer",
+      "source_fingerprint": "2b6a4723aa7407d55553cc5f198dcd27f69edc9fad51b47d3a604378dff08976",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Transfers.Get sends GET os-volume-transfer/{id} and decodes name, volume_id and created_at.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Go decodes created_at only without a time zone suffix.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/transfers",
+      "source_fingerprint": "042771d32fd5ee663eb9eba9deb3d306334501a9bdec7ea04eec7b2a5df8753f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Transfers.List requests os-volume-transfer/detail with all_tenants=True as given.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferCreateListAndFindGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string."
+      ],
+      "remaining": [
+        "transfers(details=False) uses the summary route, and with 3.55 Python lists /volume-transfers/detail; Go lists only os-volume-transfer/detail."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/find_transfer",
+      "source_fingerprint": "8da1d65a7b419c6c68c691b3e18cb40cf84c4a765f6411915ac2ffd1fba78c34",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends one legacy GET without fallback and Find(resource.Name) lists os-volume-transfer/detail and matches locally.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferCreateListAndFindGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Python's fallback lists /volume-transfers (summary) and matches ID or name; Go lists the legacy detail route and matches names only."
+      ],
+      "remaining": [
+        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/accept_transfer",
+      "source_fingerprint": "6ded2590252f56d6be209efadd158fa9b4b8057cfe9937e2a673a13972cf7dee",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Accept"
+      ],
+      "contracts": [
+        {
+          "behavior": "Transfers.Accept posts {\"accept\": {\"auth_key\": ...}} to os-volume-transfer/{id}/accept and returns the transfer from the response.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_transfer",
+      "source_fingerprint": "70b1768effc236464061a88db2e912a3d87ca0aebf175a2ef0289b29c8defe20",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove sends DELETE os-volume-transfer/{id}, ignores 404 by default and reports NotFound with WithMissingError.",
+          "tests": [
+            "blockstorage/v3/transfers/python_parity_test.go:TestPythonTransferGetAcceptDeleteUseLegacyRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go always uses the legacy /os-volume-transfer route, which Python uses only when microversion 3.55 is unavailable; with 3.55 Python uses /volume-transfers.",
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/get_type",
+      "source_fingerprint": "7d8e706ddcc0f9030da262a79af16f64e710badb520518d496229cee38a0ba5d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "VolumeTypes.Get sends GET types/{id} and decodes extra_specs, os-volume-type-access:is_public and qos_specs_id.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_type",
+      "source_fingerprint": "fa0aedf2ad4ef4ea1195173e606bdb6249a9e7a3399f2f3cb5d993e8cff56c4d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends GET types/{id} without is_public and without fallback; Find(resource.Name) lists types?is_public=None&name=....",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeFindHasNoIsPublicNoneFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python's fallback lists types?is_public=none without a name query and matches ID or name locally."
+      ],
+      "remaining": [
+        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
+        "Python adds is_public=none to both the GET and the list; Find cannot add that query."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/types",
+      "source_fingerprint": "f7fa7bdc4d59a8d7c0e8d309cecd4b885bd26f3edc4716c07f2687246d9efc21",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "VolumeTypes.List sends is_public=true with VisibilityPublic (Cinder's meaning of an absent is_public), is_public=None by default, and forwards is_public=none, all_tenants=True and sort.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeListVisibilityAndQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python types() sends no is_public, which Cinder treats as true; Go always sends is_public and defaults to None (public and private), so ListOpts{IsPublic: VisibilityPublic} is needed for Python's default result.",
+        "Go follows volume_type_links while Python continues by marker only when limit is given, so multi-page behavior can differ.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_type",
+      "source_fingerprint": "28a3641445cb6eb4cf20274d7974144815e4a9d88fa5f6b5e336bafc68249542",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "VolumeTypes.Create posts the volume_type envelope with name, description, extra_specs and os-volume-type-access:is_public.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_type",
+      "source_fingerprint": "2cb10c254c73ff800eaad304034222417ad539b832253e1ce98718b7008bad3a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "VolumeTypes.Update sends PUT types/{id} with only the supplied fields.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Python sends is_public under os-volume-type-access:is_public while Go UpdateOpts.IsPublic sends is_public; WithUpdateField reproduces the Python key.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_type",
+      "source_fingerprint": "43f6794a5560f78320a3e8dbf3ae5ccf7ae4aca8601c8ce25d5ace32f73f7bfd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove sends DELETE types/{id}, ignores 404 by default and reports NotFound with WithMissingError.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests",
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeDeleteIgnoresMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_type_extra_specs",
+      "source_fingerprint": "493a851747b4fbbc8bb0d36211666b87f68295f3bebaebb9b5030f8dd6e816a6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateExtraSpecs"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateExtraSpecs posts {\"extra_specs\": {...}} to types/{id}/extra_specs and returns the server's extra_specs map.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "With no attributes Python sends nothing and returns Type(extra_specs={}); Go CreateExtraSpecs posts an empty map.",
+        "Python returns a Type built from the ID and extra_specs; Go returns map[string]string.",
+        "Python raises ValueError for non-string values; Go's map[string]string enforces this at compile time."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_type_extra_specs",
+      "source_fingerprint": "ce1083d5f14023c4337db5fe8326e534ec15896e5100a00dfa9e5735e4bb6812",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteExtraSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "Calling DeleteExtraSpec per key sends one DELETE types/{id}/extra_specs/{key} per key in order.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeCrudAndExtraSpecsMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python loops internally over keys; the Go caller loops and stops at the first error like Python.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/get_type_access",
+      "source_fingerprint": "d54bcbae4a7c90e8e3a243756e2f37f0e211f200569171dbdb483b52d4c74100",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.ListAccesses"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccesses sends GET types/{id}/os-volume-type-access and yields volume_type_id/project_id pairs.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeAccessActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python returns the raw volume_type_access list of dicts; Go yields VolumeTypeAccess values with only VolumeTypeID and ProjectID."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/add_type_access",
+      "source_fingerprint": "e29cd1342c4e7e237d61926c5f1347904b424d7c1a7668aafd48445e9c20e409",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.AddAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddAccess posts {\"addProjectAccess\": {\"project\": ...}} to types/{id}/action.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeAccessActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Project object or ID; Go takes the project ID string.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/remove_type_access",
+      "source_fingerprint": "1ed11b20b94601389c106b35ff1713e931ff8609392ba836d8dd204d81fa77d0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.RemoveAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveAccess posts {\"removeProjectAccess\": {\"project\": ...}} to types/{id}/action.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeAccessActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Project object or ID; Go takes the project ID string.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/get_type_encryption",
+      "source_fingerprint": "29672e748c39da5e28852dd6a29a9b8395c8f6437b8d72ccd0d4f0a059313af7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetEncryption sends GET types/{id}/encryption and decodes the flat show body including encryption_id.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeEncryptionGetDeleteAndFullBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_type_encryption",
+      "source_fingerprint": "a29709f4b81f67b0ae104139aed929495493e4829b94dbfc75ea09579bb48f0c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateEncryption posts the encryption envelope but always includes cipher, key_size and control_location, sending \"\" and 0 for unset values.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeEncryptionGetDeleteAndFullBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python sends only the attributes given; Go CreateEncryptionOpts has no omitempty on cipher, key_size and control_location and they are core fields, so a partial create stores \"\" or 0 instead of leaving them unset."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_type_encryption",
+      "source_fingerprint": "fbcb4d3055c3da9d1ca53960ebbbb80a72335831ce9e8a4bb9d50e2bbb7cace6",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.UpdateEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateEncryption sends PUT types/{id}/encryption/{encryption_id} with all four encryption fields even when only key_size is set.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeEncryptionGetDeleteAndFullBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python sends only the dirty attributes; Go UpdateEncryptionOpts always sends key_size, provider, control_location and cipher, so a partial update overwrites the others and null values cannot be preserved."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_type_encryption",
+      "source_fingerprint": "409faeb5552b3208db282ce261f0dc17b10ef50b570aeb374c21d281103e84ab",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetEncryption followed by DeleteEncryption with its EncryptionID sends the same GET and DELETE types/{id}/encryption/{encryption_id}; DeleteEncryption keeps the 404 error.",
+          "tests": [
+            "blockstorage/v3/volumetypes/python_parity_test.go:TestPythonTypeEncryptionGetDeleteAndFullBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python's ignore_missing=True drops a 404 from the DELETE; the Go caller drops it with gophercloud.ResponseCodeIs.",
+        "Python accepts either a TypeEncryption resource or volume_type and fetches the encryption itself; Go needs the type ID and encryption ID."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/create_qos_spec",
+      "source_fingerprint": "542ff99249bb6d3c5f5902bce145f899fa11120caf254e0033d28641237f9d8b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "QoS.Create posts the qos_specs envelope with name, consumer and spec keys flattened, as Python's unknown body attributes are.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python spec keys are passed as extra keyword attributes; Go takes them in CreateOpts.Specs or WithCreateField.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/get_qos_spec",
+      "source_fingerprint": "9e5a23fcc53c869bd862ae1404631386bdb4ad5c6c378b6d6b2d007be6f75e7e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "QoS.Get sends GET qos-specs/{id} and decodes name, consumer and specs.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_qos_spec",
+      "source_fingerprint": "f36abee9c4e4ea9b232fc7cfd2bd793480a9034bcb9b94d7b39afe959d3c1344",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends one GET without fallback and Find(resource.Name) lists qos-specs without a query and matches names locally.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSFindHasNoIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python matches ID or name in the fallback list; Go Find(Name) matches names only."
+      ],
+      "remaining": [
+        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
+        "Python forwards **query to both the GET and the list; Find cannot add query parameters."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/qos_specs",
+      "source_fingerprint": "016a7de05d25efcc8604597893ceac85ddbb8a86965b6c7f3cf94b63ea4f35c6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "QoS.List sends qos-specs with the given limit and follows qos_specs_links.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/update_qos_spec",
+      "source_fingerprint": "e86ed69e4ab920fe5a0c6c570b7290c3ba6be56664919e2a43913a29ae25f87b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "QoS.Update sends PUT qos-specs/{id} with the flattened specs and returns the response qos_specs map.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Python returns a QoSSpec resource; Go returns map[string]string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_qos_spec",
+      "source_fingerprint": "ce3c509bfb08b743a5e193083d9cf620fe357ef0f21bd66348113866508bbd5f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete with WithDeleteQuery sends Python's force=False or force=True query; Remove ignores 404 and WithMissingError reports NotFound.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSCrudMatchesProxyRequests",
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSDeleteMissingPolicies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Python always sends force=False; Remove sends no force query and relies on the same server default.",
+        "Remove cannot carry force, so with force=True the caller uses Delete and drops a 404 with gophercloud.ResponseCodeIs.",
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/associate_qos_spec",
+      "source_fingerprint": "780c2582becafb46891907d98661f8ecc096c8e167e4e352fb526fceda2e9b9d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Associate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Associate sends GET qos-specs/{id}/associate?vol_type_id=....",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go rejects an empty volume type ID before sending.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/disassociate_qos_spec",
+      "source_fingerprint": "ef4e4da0f7ba48762374afb57bd74b50c8e167f0103829bd922748fde2bf183c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Disassociate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Disassociate sends GET qos-specs/{id}/disassociate?vol_type_id=....",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go rejects an empty volume type ID before sending.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/disassociate_all_qos_spec",
+      "source_fingerprint": "831c3d48535a9de818d169c4ccd3ec99931d6cd1b6aef1582777e38c8d81b223",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.DisassociateAll"
+      ],
+      "contracts": [
+        {
+          "behavior": "DisassociateAll sends GET qos-specs/{id}/disassociate_all.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/delete_qos_spec_metadata",
+      "source_fingerprint": "25e12b4aa48051e50571553996d26a2b98494248c1bf73586a1a77cb758c0202",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.DeleteKeys",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteKeysOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys sends PUT qos-specs/{id}/delete_keys with {\"keys\": [...]}.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Without WithDeleteKeysOptions Go sends {\"keys\": null}.",
+        "Go accepts only 202."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/qos_spec_associations",
+      "source_fingerprint": "e7788872d2082bf62531a9ac358ec1cce13a43ff40ecdfe1c44df8c12ef395f3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.ListAssociations"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssociations sends GET qos-specs/{id}/associations and yields association_type, id and name.",
+          "tests": [
+            "blockstorage/v3/qos/python_parity_test.go:TestPythonQoSAssociationsKeysAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go reads only the first page while Python would follow pagination links.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/availability_zones",
+      "source_fingerprint": "b4b087cd0780d12dac5645e6b5a799b7bd12665b3fa4cf2b0dafc6ebb1236f15",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/availabilityzones.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "AvailabilityZones.List sends one GET os-availability-zone and yields zoneName and zoneState.available.",
+          "tests": [
+            "blockstorage/v3/availabilityzones/python_parity_test.go:TestPythonZoneListMatchesProxyRequest"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md"
+      ],
+      "differences": [
+        "Go ZoneState decodes only available; Python keeps the whole zoneState dict.",
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
     }
   ]
 }
