@@ -45,3 +45,19 @@ floating IP의 `FloatingNetworkID`는 필수입니다. `Description`, `FloatingI
 | extraroutes `Add`·`Remove(ctx, id, opts, options...)` | `PUT routers/{id}/add_extraroutes`·`remove_extraroutes` | `{"router": {"routes": [...]}}` | 200 |
 
 interface 본문에는 envelope가 없어서 확장 필드는 `subnet_id`·`port_id` 옆 최상위에 붙습니다. `AddInterface`는 subnet과 port 중 정확히 하나, `RemoveInterface`는 하나 이상을 요구하며 어긋나면 HTTP 전에 오류입니다. interface 응답은 `InterfaceInfo`(router·subnet·port ID)입니다. external gateway 세 호출은 `ExternalGateways`가 nil이면 HTTP 전에 필수 입력 오류이고, 빈 slice는 `[]`로 보냅니다. extra route의 `Routes`가 nil이면 `{"router": {}}`를 보냅니다. gateway·extra route 호출의 확장 필드는 `router` envelope 안에 들어가고, 응답은 갱신된 `Router`입니다. router의 L3 agent 목록(`ListL3Agents`)은 관리자 호출이라 이 절에서 다루지 않습니다.
+
+## subnet pool·address scope
+
+`service.SubnetPools`(`extensions/subnetpools`)와 `service.AddressScopes`(`extensions/layer3/addressscopes`)의 generated `Create/Get/List/Delete`도 위 목록 규칙을 따릅니다. 경로는 `subnetpools`, `address-scopes`이고 envelope는 `subnetpool`, `address_scope`입니다. 두 `Create`는 Gophercloud가 성공 status를 201 하나로 좁혀서 202도 오류입니다. Get은 200, Delete는 202와 204를 받습니다.
+
+| 메서드 | 요청 | 본문 | 성공 status |
+|---|---|---|---|
+| subnetpools `AddPrefixes(ctx, id, opts, options...)` | `PUT subnetpools/{id}/add_prefixes` | `{"prefixes": [...]}` | 200 |
+| subnetpools `RemovePrefixes(ctx, id, opts, options...)` | `PUT subnetpools/{id}/remove_prefixes` | `{"prefixes": [...]}` | 200 |
+| addressscopes `Update(ctx, id, opts, options...)` | `PUT address-scopes/{id}` | `{"address_scope": {...}}` | 200 |
+
+subnet pool의 `CreateOpts`에는 필수 필드가 없습니다. `Name`과 `Prefixes`는 omitempty가 없어서 빈 이름은 `""`, nil prefix 목록은 `null`로 보냅니다. `Shared`·`IsDefault`는 bool이라 false를 명시해 보낼 수 없고 생략됩니다. 응답의 `default_prefixlen`·`min_prefixlen`·`max_prefixlen`은 숫자와 숫자 문자열(`"24"`)을 모두 받습니다. 세 값 중 하나라도 없거나 null이거나 숫자로 바꿀 수 없으면 native decoder가 오류를 내며, 이때 `Get`·`Create`는 오류와 함께 앞서 decode한 부분 값을 돌려줍니다. 응답의 null `address_scope_id`는 빈 문자열입니다.
+
+prefix 두 호출의 본문에는 envelope가 없어서 확장 필드는 `prefixes` 옆 최상위에 붙습니다. `Prefixes`가 nil이면 `{}`를 보내고, 응답은 갱신 후 pool 전체의 prefix 목록(`[]string`)입니다. subnet pool 수정의 revision 조건은 [revision 조건 수정](revision-updates.md)을 참고합니다.
+
+address scope의 `CreateOpts`도 필수 필드가 없습니다. `Name`과 `IPVersion`은 항상 보내므로 0도 `"ip_version": 0`으로 나가고 유효성은 Neutron이 판정합니다. `UpdateOpts`의 `Name`·`Shared`는 pointer라 빈 이름과 false를 명시해 보낼 수 있고, 둘 다 nil이면 `{"address_scope": {}}`를 보냅니다. 응답의 null 이름이나 `shared`는 빈 값으로 decode하며 알 수 없는 필드는 무시합니다.
