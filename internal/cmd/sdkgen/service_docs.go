@@ -166,6 +166,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("Keystone v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. extension·role·tenant·token·user native 호출의 요청 본문, 성공 status와 관리자 전용 호출은 [Keystone v2.0 native 호출](native-calls.md)에 설명합니다." + "\n\n")
 	case "placement/v1":
 		out.WriteString("resource provider·inventory·allocation·trait 등 native Placement 호출의 경로·본문·microversion header·성공 status는 [Placement native 호출](native-calls.md)에 정리했습니다.\n\n")
+		out.WriteString("openstacksdk placement Proxy 메서드와 Go 호출의 대응 및 차이는 [Python openstacksdk placement 대응](python-parity.md)에 정리했습니다." + "\n\n")
 	case "identity/v3":
 		out.WriteString("generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다." + "\n\n")
 		out.WriteString("사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다." + "\n\n")

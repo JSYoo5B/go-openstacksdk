@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 placement/v1 API를 하나의 인증된 서비스 객체�
 
 resource provider·inventory·allocation·trait 등 native Placement 호출의 경로·본문·microversion header·성공 status는 [Placement native 호출](native-calls.md)에 정리했습니다.
 
+openstacksdk placement Proxy 메서드와 Go 호출의 대응 및 차이는 [Python openstacksdk placement 대응](python-parity.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go
