@@ -48526,6 +48526,104 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ListAddresses",
+      "source_fingerprint": "58c84723c7bcfbc4b5e3a964d18f5400d5e574e31d44eb42f34841356667b0ec",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListAddresses"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAddresses GETs servers/{id}/ips once, yields the single addresses map, yields nothing for an empty map, surfaces io.EOF for a bodyless 204 and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "compute/v2/servers/native_address_console_contracts_test.go:TestNativeServerAddressesSinglePageStreams"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ListAddressesByNetwork",
+      "source_fingerprint": "9db05d61e2e4737f7b52398f0035647c92e22bc28eb9def7ce2c401e805ef784",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListAddressesByNetwork"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAddressesByNetwork GETs servers/{id}/ips/{raw network} once, yields the rows of the single top-level network key, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/servers/native_address_console_contracts_test.go:TestNativeServerAddressesSinglePageStreams"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ShowConsoleOutput",
+      "source_fingerprint": "5a42c6af0571f697cc6ceaa3d9d1a657db538409edf4041d9c419c7c8c63139a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ShowConsoleOutput",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithShowConsoleOutputOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithShowConsoleOutputField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ShowConsoleOutput POSTs {\"os-getConsoleOutput\":{...}} omitting a zero length, places extensions inside the action object, rejects a length collision or nil option before HTTP, returns the output string and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_address_console_contracts_test.go:TestNativeServerConsoleOutput"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.WaitForStatus",
+      "source_fingerprint": "539ba997b2834d684691552f667ca569d6504069270981244fc7f65eaf6a7f80",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForStatus GETs servers/{id} immediately and then once per second until the status matches exactly, treats ERROR as non-terminal, returns the context error on expiry and stops on the first GET error, all with operation context.",
+          "tests": [
+            "compute/v2/servers/native_address_console_contracts_test.go:TestNativeServerWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, polling and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

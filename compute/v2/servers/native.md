@@ -62,3 +62,18 @@ Reset·Update는 `{"metadata": {...}}`, CreateMetadatum은 `{"meta": {...}}`를 
 `CreateImage`는 응답의 `X-OpenStack-Nova-API-Version` header로 image ID 위치를 고릅니다. 2.45 미만이면 `Location` header 경로의 마지막 segment를, 2.45 이상이면 본문의 `image_id`를 돌려줍니다. 다만 2.45 이상에서 `Content-Type`이 정확히 `application/json`이 아니면 본문을 읽지 않으므로 오류 없이 빈 ID를 돌려줍니다. version header가 없거나 형식이 틀리거나, 2.45 미만에서 `Location`이 없거나 `/`이면 202를 받은 뒤에도 오류입니다. 이때 서버 쪽 image 생성 요청은 이미 접수됐을 수 있습니다.
 
 evacuate·force delete·live migrate·migrate·reset state·reset network·inject network info 같은 관리자 action은 이 절에서 다루지 않습니다.
+
+## 주소·console output·상태 대기
+
+| 메서드 | 요청 | 성공 status | 반환 |
+|---|---|---|---|
+| `ListAddresses(ctx, id)` | `GET servers/{id}/ips` | native pager 200, 204, 300 | 단일 페이지의 `addresses` map 하나 |
+| `ListAddressesByNetwork(ctx, id, network)` | `GET servers/{id}/ips/{network}` | native pager 200, 204, 300 | 그 network의 `Address` 행 |
+| `ShowConsoleOutput(ctx, id, opts, options...)` | `POST servers/{id}/action`, `{"os-getConsoleOutput": {...}}` | 200 | 응답의 `output` 문자열 |
+| `WaitForStatus(ctx, id, status)` | `GET servers/{id}` 반복 | 200, 203 | error |
+
+두 주소 목록은 다음 페이지가 없는 단일 페이지 stream입니다. 주소가 하나도 없으면 아무 값도 내보내지 않습니다. 본문 없는 204는 native pager가 JSON을 먼저 읽기 때문에 빈 목록이 아니라 `io.EOF` 오류 하나로 끝납니다. network별 응답은 최상위 key 하나를 network 이름으로 보고 그 배열을 꺼내므로, 최상위 key가 여럿이면 어느 배열을 고를지 정해져 있지 않습니다. 목록 오류는 operation 문맥 없이 native 오류 그대로 전달됩니다. network 이름은 escape 없이 경로에 이어 붙입니다.
+
+`ShowConsoleOutput`은 `Length`가 0이면 `{"os-getConsoleOutput": {}}`를 보내 전체 출력을 요청합니다. `WithShowConsoleOutputField` 확장 필드는 action 객체 안에 들어가며 `length`와 겹치거나 nil 옵션이면 HTTP 전에 거부됩니다.
+
+`WaitForStatus`는 첫 GET을 바로 보내고, 일치하지 않으면 1초마다 다시 조회합니다. 상태 문자열이 정확히 같을 때만 끝나므로 `ERROR`도 종료 조건이 아니며 context가 끝나면 그 오류를 돌려줍니다. GET 오류는 즉시 대기를 멈춥니다. Python `wait_for_server`의 실패 상태·간격·timeout 정책은 [서버 대기](../../../docs/service-waits.md)를 참고합니다.
