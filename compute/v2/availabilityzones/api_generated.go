@@ -33,7 +33,7 @@ func (a *API) List(ctx context.Context) iter.Seq2[*AvailabilityZone, error] {
 
 // ListDetail invokes the upstream API with library-owned builders and result handling.
 func (a *API) ListDetail(ctx context.Context) iter.Seq2[*AvailabilityZone, error] {
-	return resource.Stream(ctx, upstream.ListDetail(a.client), func(page pagination.Page) ([]AvailabilityZone, error) {
+	return resource.SinglePageStream(ctx, upstream.ListDetail(a.client), func(page pagination.Page) ([]AvailabilityZone, error) {
 		values, err := upstream.ExtractAvailabilityZones(page)
 		return []AvailabilityZone(values), err
 	})

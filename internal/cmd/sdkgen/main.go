@@ -197,11 +197,11 @@ func sdkPath(path string) string {
 	return strings.Join(parts, "/")
 }
 
-// singlePageObjectLists names pinned List calls whose page embeds
-// SinglePageBase without overriding its array-only IsEmpty. The compute
-// ListDetail call shares such a page but is an admin call reviewed separately.
+// singlePageObjectLists names pinned list calls whose page embeds
+// SinglePageBase without overriding its array-only IsEmpty.
 var singlePageObjectLists = map[string]bool{
 	"compute/v2/availabilityzones.List":           true,
+	"compute/v2/availabilityzones.ListDetail":     true,
 	"blockstorage/v2/availabilityzones.List":      true,
 	"blockstorage/v3/availabilityzones.List":      true,
 	"sharedfilesystems/v2/availabilityzones.List": true,
