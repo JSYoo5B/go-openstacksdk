@@ -54554,6 +54554,541 @@
         "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Create",
+      "source_fingerprint": "7225c922d9c8f0b58df312aff2be5653c04a81525ab1ede8ea0c23e20ecfe4da",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateHintOpts"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"volume\":{...}} to volumes (imageRef for ImageID) with extensions inside the envelope and non-empty scheduler hints as top-level OS-SCH-HNT:scheduler_hints, rejects non-UUID host/instance hints and core-key extension collisions before HTTP, decodes the volume key and accepts only 202. In v2 the size field has no omitempty, so zero is sent as \"size\":0 and the required tag does not reject it.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Get",
+      "source_fingerprint": "73bd9d16776fdc54b828adec43d0016495e8f3c9141157ec7bca393c5c286552",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs volumes/{raw id}, decodes the volume key returning a zero volume for {} or null, wraps missing-key, non-object and zoned (trailing Z) timestamp decode errors, keeps bootable as a string, and accepts only 200. The v2 Volume has no backup_id or volume_image_metadata fields.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.List",
+      "source_fingerprint": "ace7f04b62d108123cce89ca95883d1d8172a97b5a3e9d607b7551a201c670c2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs volumes/detail with ListOpts (Python-dict-like metadata string, all_tenants) and extension query values, follows volumes_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP. v2 ListOpts has no bootable filter.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Update",
+      "source_fingerprint": "9944f43152a6154979c16a3cb00d19246e1c087e68b7cf148a2317c02c2e5109",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"volume\":{...}} to volumes/{id} sending explicit empty pointer name/description and non-empty metadata with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Delete",
+      "source_fingerprint": "547eed6902679e8725b48c5369bfd98160b0eb8a4f89915f75fdd20f23c854c4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs volumes/{raw id} with cascade=true only when requested plus extension query values, rejects an empty query key before HTTP and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.WaitForStatus",
+      "source_fingerprint": "28661aeac7b3c8461de73742212a137c9d752f48b2cf48b5c115c7908419f3ce",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops only on the caller context deadline, wrapping both in operation context.",
+          "tests": [
+            "blockstorage/v2/volumes/native_crud_contracts_test.go:TestNativeVolumeWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Attach",
+      "source_fingerprint": "99b105272e48a273769a41bb5d3fab1027889717e78f69c294f7b81326ada1b7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Attach",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithAttachField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attach POSTs to volumes/{id}/action {\"os-attach\":{...}} with extensions inside the action object, rejects a core-key extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.BeginDetaching",
+      "source_fingerprint": "db23e1bfc7b14c694b66203c8fcec04f61352830bcb8f7638e376e3633142e37",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.BeginDetaching"
+      ],
+      "contracts": [
+        {
+          "behavior": "BeginDetaching POSTs to volumes/{id}/action {\"os-begin_detaching\":{}} and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Detach",
+      "source_fingerprint": "b0df7ca6780d8e105ab034b6d5881b7bb30c840762b214c30eae19f5d73bcb54",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Detach",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDetachField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Detach POSTs to volumes/{id}/action {\"os-detach\":{...}} (empty object without an attachment ID), rejects a nil option before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Reserve",
+      "source_fingerprint": "d3e11a49a2a8fd6cf1c96f70632cff88d4fe85d5e670453520d5737bbbe115c0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Reserve"
+      ],
+      "contracts": [
+        {
+          "behavior": "Reserve POSTs to volumes/{id}/action {\"os-reserve\":{}} and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.Unreserve",
+      "source_fingerprint": "c2a013c8c5c2117d9a0299e5d6ccd46964938425891930e963f1c42eb11475f1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Unreserve"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unreserve POSTs to volumes/{id}/action {\"os-unreserve\":{}} and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.InitializeConnection",
+      "source_fingerprint": "f0acffa6cad569f74a948408c005db7630cf8b0a9177d58b89792b70d9b709cb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.InitializeConnection",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithInitializeConnectionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "InitializeConnection POSTs to volumes/{id}/action {\"os-initialize_connection\":{\"connector\":{...}}} with explicit false multipath and extensions beside connector, returns the raw connection_info map (nil without error when absent) and accepts only 200/201/202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.TerminateConnection",
+      "source_fingerprint": "e3533108a45f5a01d20f04003a69f4207edbc65058b7ac40e28f0dba1ce79b28",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.TerminateConnection",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithTerminateConnectionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "TerminateConnection POSTs to volumes/{id}/action {\"os-terminate_connection\":{\"connector\":{...}}} and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.ExtendSize",
+      "source_fingerprint": "5ac5015f61e24f6c0d76c0f8439dae423a90c34aefe6d57125293fc3b9a3ffe3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ExtendSize",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithExtendSizeField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ExtendSize POSTs to volumes/{id}/action {\"os-extend\":{\"new_size\":N}} sending a zero size because the native required tag does not reject integer zero, and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.UploadImage",
+      "source_fingerprint": "449f1c7c8b86d7e8d991525ca04b9d645e87203880017c6b2773241ce892481d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.UploadImage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUploadImageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UploadImage POSTs to volumes/{id}/action {\"os-volume_upload_image\":{...}}, decodes VolumeImage with its volume type (zero value when the key is absent, error for zoned timestamps) and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.SetImageMetadata",
+      "source_fingerprint": "9676255999d4cb829989fcbb39a095bf64747e8f1c81343a6c23716aaffa497f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetImageMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetImageMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetImageMetadata POSTs to volumes/{id}/action {\"os-set_image_metadata\":{\"metadata\":...}} sending nil metadata as null and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.SetBootable",
+      "source_fingerprint": "ee2fb3fa21a8e9a9a2ed82d91b9654d9fb8ea557ed2c325147f4921b4df80ca1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetBootable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithSetBootableField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetBootable POSTs to volumes/{id}/action {\"os-set_bootable\":{\"bootable\":...}} sending false explicitly and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.ChangeType",
+      "source_fingerprint": "57200d729d901e5fa13f7d36e0667ef6d4ba4fac206fefa648f36e7b0727e8ae",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ChangeType",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithChangeTypeField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangeType POSTs to volumes/{id}/action {\"os-retype\":{\"new_type\":...,\"migration_policy\":...}}, rejects an empty new type before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.ReImage",
+      "source_fingerprint": "58ec50f5dafeead1528561f4daba72e690e4fd7aa67de9eb9306351f21032d8b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ReImage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithReImageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReImage POSTs to volumes/{id}/action {\"os-reimage\":{\"image_id\":...,\"reimage_reserved\":...}} always sending both fields and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionRoutesAndBodies",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionStrictStatuses",
+            "blockstorage/v2/volumes/native_action_contracts_test.go:TestNativeVolumeActionPreflightAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
