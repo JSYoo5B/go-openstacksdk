@@ -4,13 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native backups user calls](#cinder-v3-native-backups-user-calls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native transfers availability zones versions](#cinder-v3-native-transfers-availability-zones-versions-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는609입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는616입니다.
+
+## Cinder v3 native transfers availability zones versions 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native transfers·availability zone·API 버전 7개, 전체609→616(+7)·핵심535→542/2,292·Block Storage106→113/480.** volume transfer는 생성·수락 202 고정 status와 필수 volume ID·auth key, 상세 목록 경로, `transfer` key 직접 decode를 고정했습니다. 버전 목록은 `ResourceBase` 대신 endpoint root를 쓰고 Cinder의 300 응답을 성공으로 받습니다.
+
+availability zone 목록은 검증 중 생성 결함을 찾았습니다. Gophercloud의 Cinder v2/v3·Manila availability zone page는 `SinglePageBase`의 배열 전용 `IsEmpty`를 그대로 물려받아, generated facade가 page 단위로 순회하면 정상 객체 응답마다 `Expected []any` 오류를 냈습니다. Nova에만 있던 단일 페이지 추출 seam을 sdkgen의 명시 목록으로 바꿔 네 `List` 호출에 적용하고 재생성했으며, 생성기 테스트에 세 package 사례를 더했습니다. Nova의 관리자 `ListDetail`은 같은 page를 쓰지만 별도 admin 단계에서 검토합니다. [Cinder v3 native transfer·availability zone·버전 호출](../blockstorage/v3/native-transfers.md)을 새로 쓰고 생성 README 링크를 갱신했습니다.
+
+새 집중 계약 테스트6그룹(하위 사례18)과 생성기 3사례가 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **95개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새7행을 추가해 reviews874·contracts4,104·go_mapping616입니다. 생성기 수정 `b1cf94ad`, 테스트 `d1bd9856`·`64523f5b`, 가이드 `8e8f39d2`, 판정 `9ed94827`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v3 native backups user calls 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native backups 사용자 호출 7개, 전체602→609(+7)·핵심528→535/2,292·Block Storage99→106/480.** generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성과 restore는 202만 받고, 생성은 volume ID를 HTTP 전에 요구합니다. `List`와 `ListDetail`은 서로 다른 옵션 type을 각 경로로 보냅니다. native `Update`는 envelope 없는 본문을 만들지만 기존 SDK adapter가 `backup` envelope로 보정하므로 기존 Update 계약 테스트 3그룹과 새 status 검증을 함께 근거로 삼았습니다. 응답은 `backup` key를 직접 찾아 decode하고 시간대 있는 시각은 오류입니다. [Cinder v3 native backup 호출](../blockstorage/v3/native-backups.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 갱신했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native backups 사용자 호출 7개, 전체602→609(+7)·핵심528→535/2,292·Block Storage99→106/480.** generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성과 restore는 202만 받고, 생성은 volume ID를 HTTP 전에 요구합니다. `List`와 `ListDetail`은 서로 다른 옵션 type을 각 경로로 보냅니다. native `Update`는 envelope 없는 본문을 만들지만 기존 SDK adapter가 `backup` envelope로 보정하므로 기존 Update 계약 테스트 3그룹과 새 status 검증을 함께 근거로 삼았습니다. 응답은 `backup` key를 직접 찾아 decode하고 시간대 있는 시각은 오류입니다. [Cinder v3 native backup 호출](../blockstorage/v3/native-backups.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 갱신했습니다.
 
 새 집중 계약 테스트2그룹(하위 사례22)이 race로 통과했습니다. 전체 `make check`의 race는 **92개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새7행을 추가해 reviews867·contracts4,097·go_mapping609입니다. 테스트 `392dd692`, 가이드 `9c4e689a`, 판정 `a26a31c9`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
