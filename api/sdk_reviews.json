@@ -48776,6 +48776,314 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servergroups.Create",
+      "source_fingerprint": "fcde36c8ed233a01ecec3a50b09da9a0bf7c252ac3c4d5a37456ca305a593f27",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"server_group\":{...}} to os-server-groups omitting empty fields, places extensions inside the envelope, rejects a missing name, a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.",
+          "tests": [
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode",
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servergroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native servergroups call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servergroups.Get",
+      "source_fingerprint": "eec3ff50cbd2f769c1d903a9dc6e8c4e377cbc38bcbe8245db6ec60f3cf00a8f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-server-groups/{id} with the raw ID, decodes the server_group envelope and accepts only 200.",
+          "tests": [
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode",
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servergroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native servergroups call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servergroups.List",
+      "source_fingerprint": "82a66559401b420f241602dab77630e7a47511ff924e037ae4bfc3c91bb8d5fb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-server-groups with all_projects/limit/offset and extension query as one single page that ignores links, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode",
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servergroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native servergroups call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servergroups.Delete",
+      "source_fingerprint": "5750c0cb49f266b178b47a3c5a15f1b5193caba2b57f927f194e3e2f419000d0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs os-server-groups/{id} with the raw ID and accepts only 202/204.",
+          "tests": [
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsRoutesBodiesAndDecode",
+            "compute/v2/servergroups/native_contracts_test.go:TestNativeServerGroupsStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servergroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native servergroups call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/volumeattach.Create",
+      "source_fingerprint": "14f8cf7ec6ab54d5fc19a1f1380a6d646cf539872ab741ec05fa1a9f4eb1d3f0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"volumeAttachment\":{...}} to servers/{id}/os-volume_attachments omitting empty fields, places extensions inside the envelope, rejects a missing volumeId, a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.",
+          "tests": [
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachRoutesBodiesAndDecode",
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/volumeattach/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native volumeattach call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/volumeattach.Get",
+      "source_fingerprint": "5fe19b731aaf5d1d8090cebd7275583548db4db6fdb4815cb99fc9f089a0fa8d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs servers/{id}/os-volume_attachments/{volumeID} with the raw ID, decodes the volumeAttachment envelope and accepts only 200.",
+          "tests": [
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachRoutesBodiesAndDecode",
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/volumeattach/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native volumeattach call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/volumeattach.List",
+      "source_fingerprint": "53c00575a16e600d8d029fa6546fb4742aaf3625c13632da6de8aff8c81a5518",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs servers/{id}/os-volume_attachments as one single page that ignores links, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachRoutesBodiesAndDecode",
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/volumeattach/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native volumeattach call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/volumeattach.Delete",
+      "source_fingerprint": "a103b96904428eeb60492f58c864cb4fd48ac4621073bea8ea20afc93aa5dc7c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs servers/{id}/os-volume_attachments/{volumeID} with the raw ID and accepts only 202/204.",
+          "tests": [
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachRoutesBodiesAndDecode",
+            "compute/v2/volumeattach/native_contracts_test.go:TestNativeVolumeAttachStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/volumeattach/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native volumeattach call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/attachinterfaces.Create",
+      "source_fingerprint": "fed6a962219e88d26fdbca484a651435ce399b0cdee8fea636b708d09fefa5d9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"interfaceAttachment\":{...}} to servers/{id}/os-interface omitting empty fields, places extensions inside the envelope, rejects a core-key extension collision and a nil option before HTTP, decodes the response and accepts only 200.",
+          "tests": [
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesRoutesBodiesAndDecode",
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/attachinterfaces/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native attachinterfaces call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/attachinterfaces.Get",
+      "source_fingerprint": "4ef44f043371886ce1feb176b34a5a3b657542a78adaa0d179655252e3de4765",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs servers/{id}/os-interface/{portID} with the raw ID, decodes the interfaceAttachment envelope and accepts only 200.",
+          "tests": [
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesRoutesBodiesAndDecode",
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/attachinterfaces/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native attachinterfaces call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/attachinterfaces.List",
+      "source_fingerprint": "193bf4e364620e5824557ad47a1c898bbd34793a71a103f2be1a86e6fe73efe5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs servers/{id}/os-interface as one single page that ignores links, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesRoutesBodiesAndDecode",
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/attachinterfaces/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native attachinterfaces call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/attachinterfaces.Delete",
+      "source_fingerprint": "7ccbe912a1ef451db541b6042b5d4d6a2cbe1ad80106cb26bf0c0264fa40b97b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs servers/{id}/os-interface/{portID} with the raw ID and accepts only 202/204.",
+          "tests": [
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesRoutesBodiesAndDecode",
+            "compute/v2/attachinterfaces/native_contracts_test.go:TestNativeAttachInterfacesStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/attachinterfaces/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native attachinterfaces call only; Python compute resource parity and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
