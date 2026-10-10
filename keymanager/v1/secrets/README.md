@@ -178,3 +178,25 @@ stops on an empty `secrets` page and sends no further page after the caller
 stops. Other statuses keep the native `gophercloud.ErrUnexpectedResponseCode`;
 the SDK adds only `resource.OperationError{Resource: "secrets"}` context.
 
+## Native secret metadata calls
+
+The six native user-metadata calls use `secrets/{id}/metadata` and
+`secrets/{id}/metadata/{key}` with raw, unescaped path segments.
+
+| Method | Request | Accepted statuses | Result |
+|---|---|---|---|
+| `GetMetadata(ctx, secretID)` | `GET .../metadata` | 200 | the `metadata` map |
+| `CreateMetadata(ctx, secretID, opts, options...)` | `PUT .../metadata` with `{"metadata": opts}` | 201 | the whole response map, usually `metadata_ref` |
+| `GetMetadatum(ctx, secretID, key)` | `GET .../metadata/{key}` | 200 | `Metadatum{Key, Value}` |
+| `CreateMetadatum(ctx, secretID, opts, options...)` | `POST .../metadata` with `{"key", "value"}` | 201 | error only |
+| `UpdateMetadatum(ctx, secretID, opts, options...)` | `PUT .../metadata/{opts.Key}` with `{"key", "value"}` | 200 | the decoded response |
+| `DeleteMetadatum(ctx, secretID, key)` | `DELETE .../metadata/{key}` | 202, 204 | error only |
+
+`CreateMetadata` replaces every user-metadata entry. `MetadatumOpts` requires
+both `Key` and `Value` before HTTP. The `With...Field` extension options add
+JSON values but reject keys already in the body; because the typed metadata
+map is not a generic object envelope, a `CreateMetadata` extension is added
+beside `metadata` instead of inside it. Other statuses keep the native
+`gophercloud.ErrUnexpectedResponseCode` under `resource.OperationError`
+context.
+

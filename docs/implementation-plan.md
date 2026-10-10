@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Barbican native `secrets` 5개 검증·판정 완료, secret metadata 6개 계약 테스트 완료.** 전체324/3,362·핵심250/2,292·Key Manager19/67입니다. native `GetMetadata/CreateMetadata/GetMetadatum/CreateMetadatum/UpdateMetadatum/DeleteMetadatum`의 경로·본문·고정 status, required key/value, 확장 필드 위치(typed metadata map 옆에 추가)와 충돌 거부를 검증했습니다. 다음은 가이드·판정이며 이어서 containers·orders·acls를 진행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Barbican native `secrets` 5개 검증·판정 완료, secret metadata 6개 테스트·가이드·판정 완료, 전체 gate 진행 중.** 전체324/3,362·핵심250/2,292·Key Manager19/67입니다. native `GetMetadata/CreateMetadata/GetMetadatum/CreateMetadatum/UpdateMetadatum/DeleteMetadatum`의 경로·본문·고정 status, required key/value, 확장 필드 위치(typed metadata map 옆에 추가)와 충돌 거부를 검증했습니다. 테스트 `9a6b9910`와 가이드·판정을 push했고 판정 반영 집계는330입니다. 다음은 전체 gate·대장 기록이며 이어서 containers·orders·acls를 진행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Barbican native `secrets` 5개, 전체319→324(+5)·핵심245→250/2,292·Key Manager14→19/67.** generated secret 다섯 호출의 경로·본문·시각·고정 status·페이지 계약을 고정했습니다. [secrets README](../keymanager/v1/secrets/README.md#native-get-list-create-update-and-delete)와 [검증 기록](sdk-support-ledger.md#barbican-native-secrets-완료)에 설명합니다. 새3그룹24사례와 전체 `make check`(race 47개 실제 test package)가 통과했고 `d1ac3545`·`8e82d028`를 push했습니다.
 
@@ -382,11 +382,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 324 (9.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 330 (9.8%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,037 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 583 | 아직 개별 기록 없는 선언 2,779 |
-| 기록한 부분·전체 계약 | 3,808 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,031 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 589 | 아직 개별 기록 없는 선언 2,773 |
+| 기록한 부분·전체 계약 | 3,814 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -429,7 +429,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Barbican native secret metadata 6개 | pinned Gophercloud v2.15.0 secret metadata requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Barbican native secret metadata 6개 | pinned Gophercloud v2.15.0 secret metadata requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS, 전체 gate 대기 | native 절 추가 | 신규6행 go_mapping 기록, gate 대기 | `9a6b9910`·가이드·판정 push; 다음 gate·대장 |
 | Barbican native secrets 5개 | pinned Gophercloud v2.15.0 secrets requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹24·전체 `make check` PASS | native 절 추가 | **신규5행 go_mapping·324/3,362** | 작은 commit2개 push 완료; 다음 secret metadata |
 | Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새2그룹34·전체 `make check` PASS | location 가이드 갱신 | **unresolved→go_mapping·319/3,362** | 작은 commit3개 push 완료 |
 | Glance native imagedata 3개 | pinned Gophercloud v2.15.0 imagedata requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹7·전체 `make check` PASS | native 절 추가 | **신규3행 go_mapping·318/3,362** | 작은 commit2개 push 완료; 다음 add_image_location 재검토 |
@@ -474,12 +474,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 250 / 2,292 | 10.9% | 159 | 1,882 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 256 / 2,292 | 11.2% | 159 | 1,876 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 324 / 3,362 | 9.6% | 258 | 2,779 | 1 |
+| 전체 | 330 / 3,362 | 9.8% | 258 | 2,773 | 1 |
 
 **핵심 서비스**
 
@@ -491,7 +491,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
-| Key Manager / Barbican | 19 / 67 | 10 | 38 | 0 |
+| Key Manager / Barbican | 25 / 67 | 10 | 32 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**

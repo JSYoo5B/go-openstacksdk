@@ -46822,6 +46822,162 @@
         "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.GetMetadata",
+      "source_fingerprint": "3b8a623a4de15107c486ac5be27818787330caff56c1902b97882a6004128e4c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.GetMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadata GETs secrets/{raw id}/metadata, returns the decoded metadata map and accepts only 200; other statuses keep native errors under GetMetadata/secrets context.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.CreateMetadata",
+      "source_fingerprint": "bc48fd55e9e031eba3455f43b8130c9a0e2dd4bdbf68f4ffce94e66438748848",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.CreateMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateMetadataOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMetadata PUTs {\"metadata\": opts} replacing all entries, adds non-colliding extension fields beside metadata because the typed map is not a generic envelope, rejects a metadata key collision and nil options before HTTP, returns the whole response map and accepts only 201.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.GetMetadatum",
+      "source_fingerprint": "e53a6cf8b4d0e27def037231f298970c8ac69bf303db15512d34b312354bd507",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.GetMetadatum"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMetadatum GETs secrets/{id}/metadata/{raw key}, decodes Metadatum{Key, Value} and accepts only 200.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.CreateMetadatum",
+      "source_fingerprint": "63435d584c17875d20b95cc5542e9c666cbfa1fcee0a71872b48d00feb35cef2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.CreateMetadatum",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateMetadatumOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateMetadatumField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMetadatum POSTs the required key/value body to secrets/{id}/metadata, rejects missing key/value, key/value extension collisions and nil options before HTTP, returns error only and accepts only 201.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.UpdateMetadatum",
+      "source_fingerprint": "7f1cc7f48f51fe9eed41cba8f3df8848ea08462c854cda022586487762326e08",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.UpdateMetadatum",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateMetadatumOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateMetadatumField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMetadatum PUTs the required key/value body plus non-colliding extensions to secrets/{id}/metadata/{opts.Key}, returns the decoded server Metadatum and accepts only 200.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.DeleteMetadatum",
+      "source_fingerprint": "d744848ebe3b55ab84afb7c08d66209a28b4e490bae943f628a7869972ad66e2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.DeleteMetadatum"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMetadatum sends DELETE secrets/{id}/metadata/{raw key} and accepts the native default 202 and 204.",
+          "tests": [
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataRoutesBodiesAndDecode",
+            "keymanager/v1/secrets/native_metadata_contracts_test.go:TestNativeSecretMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret metadata call only; Python key_manager secret metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
