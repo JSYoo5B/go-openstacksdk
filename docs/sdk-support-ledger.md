@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native subnet pools address scopes trunks port forwarding](#neutron-native-subnet-pools-address-scopes-trunks-port-forwarding-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native QoS policies rules rule types](#neutron-native-qos-policies-rules-rule-types-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는478입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는499입니다.
+
+## Neutron native QoS policies rules rule types 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Neutron native QoS policies·rules·rule types 21개, 전체478→499(+21)·핵심404→425/2,292·Network90→111/758.** 고정 Neutron 기본 정책은 QoS policy·rule 쓰기를 project manager(`ADMIN_OR_PROJECT_MANAGER`, `ADMIN_OR_PARENT_OWNER_MANAGER`), rule type 조회를 `role:reader`로 둡니다. 그래서 QoS 전체를 핵심 user 단계로 분류했습니다. 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. policy와 rule의 Create는 201만 받고, rule 생성 값(`max_kbps`·`dscp_mark`·`min_kbps`)은 0도 보내며 수정 값은 pointer로 0을 명시할 수 있습니다. rule 목록은 Neutron의 `*_links` 배열을 읽지 않고 `links.next` 문자열만 따라가므로 실제 응답에서는 첫 페이지만 반환합니다. 같은 성질을 trunk 목록에서도 테스트로 고정하고 trunk 문구와 판정을 정정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#qos-policyrulerule-type)에 QoS 절을 추가했습니다.
+
+새 집중 계약 테스트6그룹(하위 사례69)이 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **75개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 전체 gate는 `python3.14`를 PATH 앞에 두고 실행했습니다. 판정 JSON은 새21행을 추가하고 trunk List 계약 문구를 정정해 reviews756·contracts3,986·go_mapping499입니다. 테스트 `a1765737`, 가이드/판정 `d1c4fbc7`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Neutron native subnet pools address scopes trunks port forwarding 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Neutron native subnetpools·address scopes 11개와 trunks·port forwarding 12개, 전체455→478(+23)·핵심381→404/2,292·Network67→90/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. subnet pool과 address scope의 Create는 201만 받고, subnet pool prefix 추가·제거와 trunk subport 추가·제거는 envelope 없는 본문에 확장 필드를 최상위로 붙입니다. subnet pool prefix 길이는 숫자와 숫자 문자열을 받으며 decode 실패 때 부분 값을 오류와 함께 돌려줍니다. trunk 목록은 next 링크를 읽지 않아 첫 페이지만 반환하고, port forwarding 목록은 단수형 `port_forwarding_links`만 따라갑니다. port forwarding 응답은 `{}`나 null envelope를 오류 없이 빈 값으로 decode합니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#subnet-pooladdress-scope)에 두 절을 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Neutron native subnetpools·address scopes 11개와 trunks·port forwarding 12개, 전체455→478(+23)·핵심381→404/2,292·Network67→90/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. subnet pool과 address scope의 Create는 201만 받고, subnet pool prefix 추가·제거와 trunk subport 추가·제거는 envelope 없는 본문에 확장 필드를 최상위로 붙입니다. subnet pool prefix 길이는 숫자와 숫자 문자열을 받으며 decode 실패 때 부분 값을 오류와 함께 돌려줍니다. trunk 목록은 next 링크를 읽지 않아 첫 페이지만 반환하고, port forwarding 목록은 단수형 `port_forwarding_links`만 따라갑니다. port forwarding 응답은 `{}`나 null envelope를 오류 없이 빈 값으로 decode합니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#subnet-pooladdress-scope)에 두 절을 추가했습니다.
 
 새 집중 계약 테스트11그룹(하위 사례85)이 race로 통과했습니다. 네 package의 첫 테스트라 전체 `make check`의 race는 **72개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새23행을 추가해 reviews735·contracts3,965·go_mapping478입니다. 테스트 `d9cc33af`·`cac35164`, 가이드/판정 `3e2053b1`·`245b5b26`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
