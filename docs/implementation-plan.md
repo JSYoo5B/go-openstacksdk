@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Glance `add_image_location` 검증·판정 완료.** 전체319/3,362·핵심245/2,292·Glance82/120입니다. 남은 Glance 행은 핵심 admin/service의 `image_locations`·`stores` 상세·cache·metadef 쓰기·Task 계열과 v1 image proxy입니다. 핵심 user의 남은 범위는 다음 착수 때 서비스별 미판정 행에서 다시 선정합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Barbican native `secrets` Get/List/Create/Update/Delete 계약 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체319/3,362·핵심245/2,292·Key Manager14/67입니다. Glance의 user 범위를 닫은 뒤 계획의 키 관리 흐름에 따라 Barbican native Gophercloud 32개(secrets·containers·orders·acls)를 순서대로 검증합니다. 이번 단위는 raw ID 경로, RFC3339NoZ 시각, Create의 omitempty 본문·expiration·확장 필드, Update의 payload 본문·header 확장, 고정 status(200·201·204·202/204), next link를 그대로 따르는 List를 검증했습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Glance `add_image_location`1개, 전체318→319(+1)·핵심244→245/2,292·Glance81→82/120.** Python `Resource.create`와 같은 200..399 acceptance와 ImageLocation view를 보완해 unresolved 판정을 닫았습니다. [location 가이드](../image/locations.md#add-결과의-imagelocation-view)와 [검증 기록](sdk-support-ledger.md#glance-add_image_location-완료)에 설명합니다. 새2그룹34사례·기존 테스트 수정과 전체 `make check`(race 46개 실제 test package)가 통과했고 `a382f17c`·`177f9f60`·`89b461a0`를 push했습니다.
 
@@ -427,6 +427,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Barbican native secrets 5개 | pinned Gophercloud v2.15.0 secrets requests/results/urls 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
 | Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새2그룹34·전체 `make check` PASS | location 가이드 갱신 | **unresolved→go_mapping·319/3,362** | 작은 commit3개 push 완료 |
 | Glance native imagedata 3개 | pinned Gophercloud v2.15.0 imagedata requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹7·전체 `make check` PASS | native 절 추가 | **신규3행 go_mapping·318/3,362** | 작은 commit2개 push 완료; 다음 add_image_location 재검토 |
 | Glance native imageimport 2개 | pinned Gophercloud v2.15.0 imageimport requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹11·전체 `make check` PASS | native 절 추가 | **신규2행 go_mapping·315/3,362** | 작은 commit2개 push 완료; 다음 native imagedata |
