@@ -62033,19 +62033,24 @@
     {
       "operation": "gophercloud:identity/v3/endpoints.List",
       "source_fingerprint": "727e5a656c687ffe47d7f0b2e007d8da8e7c5acc3c6c96ae3f320f45713ad357",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions"
       ],
       "contracts": [
         {
-          "behavior": "List GETs endpoints and follows the links.next string with native pager 200/204/300 handling, but because native List applies BuildQueryString to the generated builder instead of calling ToEndpointListParams, every typed filter and WithListQuery parameter is silently dropped while a nil option is still rejected before HTTP.",
+          "behavior": "List GETs endpoints with the interface, service_id and region_id filters copied from ListOpts onto the generated builder, because native List applies BuildQueryString to its argument instead of calling ToEndpointListParams; it follows the links.next string with native pager 200/204/300 handling, rejects raw query extensions and a nil option before HTTP, and the Resources collection maps query keys onto typed ListOpts and rejects unknown keys.",
           "tests": [
             "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
             "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight",
-            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointListFiltersDroppedByGeneratedBuilder"
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointListFiltersMatchNativeQuery"
+          ]
+        },
+        {
+          "behavior": "The sdkgen adapter copies q-tagged fields only for reviewed native calls that reflect their builder with BuildQueryString, disables query extensions for them, and fails generation for any unreviewed call of that shape.",
+          "tests": [
+            "internal/cmd/sdkgen/reflected_headers_test.go:TestReflectedQueryFieldsAreCopiedOnlyForReviewedLists"
           ]
         }
       ],
@@ -62054,10 +62059,7 @@
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
-        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
-      ],
-      "remaining": [
-        "The generated List passes a wrapper builder to native endpoints.List, which runs BuildQueryString on that value instead of ToEndpointListParams, so interface, service_id and region_id filters and WithListQuery are dropped; the facade must pass a plain ListOpts with the extension query merged before this can be a go_mapping."
+        "The SDK adds only request.Wrap operation context (not on list streams) and copies the native q fields onto its builder so native BuildQueryString sees them; raw query extensions are unsupported because the native call cannot send them, and native URL construction, OkCodes, paging and decoding are unchanged."
       ]
     },
     {
