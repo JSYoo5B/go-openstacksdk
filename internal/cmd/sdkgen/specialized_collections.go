@@ -89,6 +89,7 @@ var sdkOwnedCollections = []collectionRecord{
 	{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
 	{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"},
 	{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"},
+	{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls", Source: "sdk_owned", Model: "SecretACL", Kind: "secret_acl", Scope: "InSecret", Parent: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"},
 	{Package: "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions", Source: "sdk_owned", Model: "Subscription", Kind: "queue_subscription", Scope: "InQueue", Parent: "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues"},
 	{Package: "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets", Source: "sdk_owned", Model: "QuotaResource", Kind: "singleton", Scope: "InProject", Parent: "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"},
 	{Package: "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets", Source: "sdk_owned", Model: "QuotaClassResource", Kind: "named_singleton", Scope: "InClass"},

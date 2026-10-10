@@ -2166,6 +2166,17 @@
     "parent": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
   },
   {
+    "package": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls",
+    "source": "sdk_owned",
+    "model": "SecretACL",
+    "kind": "secret_acl",
+    "find": false,
+    "delete": false,
+    "wait": false,
+    "scope": "InSecret",
+    "parent": "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+  },
+  {
     "package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions",
     "source": "sdk_owned",
     "model": "Subscription",

@@ -60,6 +60,7 @@ _ = value
 | `Containers` | [containers](containers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Orders` | [orders](orders/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `Quotas` | [quotas](quotas/api.go) | `Get(ctx)`: 인증된 프로젝트 effective quota; `InProject(ctx, ID)`: Get·교체 Update·override Delete, 목록·Find·Wait 없음 |
+| `SecretACLs` | [secretacls](secretacls/api.go) | `InSecret(ctx, ref)`: Python secret ACL의 Get과 PUT Set·Update, ignore-missing Delete; 속성이 없으면 HTTP 없음, Resources·목록·Find·Wait 없음 |
 | `SecretConsumers` | [secretconsumers](secretconsumers/api.go) | `InSecret(ctx, ref)`: association Create·Delete와 offset List/All; 실제 secret 응답, consumer ID·Resources·Find·Wait 없음 |
 | `Secrets` | [secrets](secrets/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `SecretStores` | [secretstores](secretstores/api.go) | `List/All`, `GetGlobalDefault`, `GetPreferred`: 목록·두 고정 조회; Resources·CRUD·Find·Wait 없음 |

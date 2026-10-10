@@ -15,6 +15,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores", Source: "sdk_owned", Model: "SecretStore", Kind: "store_defaults"},
 		{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas", Source: "sdk_owned", Model: "Quota", Kind: "effective_project_quota", Scope: "InProject", Parent: "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"},
 		{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers", Source: "sdk_owned", Model: "Consumer", Kind: "secret_consumer", Scope: "InSecret", Parent: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"},
+		{Package: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls", Source: "sdk_owned", Model: "SecretACL", Kind: "secret_acl", Scope: "InSecret", Parent: "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"},
 	}
 	var actual []collectionRecord
 	for _, record := range sdkOwnedCollections {
@@ -45,7 +46,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	registry := read("keymanager/v1/service_generated.go")
-	for _, part := range []string{"SecretStores", "Quotas", "SecretConsumers", "Secrets", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers", "New(client)"} {
+	for _, part := range []string{"SecretStores", "Quotas", "SecretConsumers", "SecretACLs", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls", "Secrets", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas", "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers", "New(client)"} {
 		if !strings.Contains(registry, part) {
 			t.Fatalf("missing shared-client registry %q: %s", part, registry)
 		}
@@ -57,7 +58,7 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	docs := read("keymanager/v1/README.md")
-	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "SecretConsumers.InSecret", "consumer ID·Resources·Find·Wait 없음", "advertised offset next", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)", "Containers.Fetch(ctx", "Orders.Fetch(ctx", "metadata-fetch.md", "Containers.Remove", "Orders.Remove", "Secrets.Remove", "metadata-delete.md", "WithListFilter", "WithListFilters", "Containers.CreateRecord", "Orders.CreateRecord", "Secrets.CreateRecord", "WithCreateRecordAttribute", "metadata-create.md"} {
+	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "secretacls/api.go", "PUT Set·Update", "속성이 없으면 HTTP 없음", "SecretConsumers.InSecret", "consumer ID·Resources·Find·Wait 없음", "advertised offset next", "교체 PUT204", "초기화 DELETE204", "seeded Resource", "Resources·CRUD·Find·Wait 없음", "인증된 프로젝트 effective quota", "service.Secrets.Resources.List(ctx)", "Containers.Fetch(ctx", "Orders.Fetch(ctx", "metadata-fetch.md", "Containers.Remove", "Orders.Remove", "Secrets.Remove", "metadata-delete.md", "WithListFilter", "WithListFilters", "Containers.CreateRecord", "Orders.CreateRecord", "Secrets.CreateRecord", "WithCreateRecordAttribute", "metadata-create.md"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing documented actual capability %q: %s", part, docs)
 		}
