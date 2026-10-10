@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova native servers CRUD](#nova-native-servers-crud-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova native servers metadata](#nova-native-servers-metadata-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는363입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는369입니다.
+
+## Nova native servers metadata 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Nova native server metadata 6개, 전체363→369(+6)·핵심289→295/2,292·Compute51→57/333.** 기존 generated `Metadata/Metadatum/ResetMetadata/UpdateMetadata/CreateMetadatum/DeleteMetadatum`이 고정 Gophercloud v2.15.0의 경로, 전체 교체(PUT)와 병합(POST) 구분, `{"metadata": ...}`·`{"meta": ...}` 본문, 고정 status(200·202/204)를 바꾸지 않는지 검증했습니다. MetadatumOpts가 한 쌍만 허용하는 점과 typed metadata map 옆에 확장 필드가 붙는 점도 고정했습니다. [native 서버 호출](../compute/v2/servers/native.md#metadata)에 metadata 절을 추가했습니다.
+
+새 집중 계약 테스트2그룹25사례가 race로 통과했습니다. 전체 `make check`의 race는 52개 실제 test package이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새6행을 추가해 reviews627·contracts3,856·go_mapping369입니다. 테스트 `41f464e9`·가이드/판정 `51242330`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Nova native servers CRUD 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Nova native `servers` CRUD 6개, 전체357→363(+6)·핵심283→289/2,292·Compute45→51/333.** 기존 generated `Get/List/ListSimple/Create/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID 경로, `{"server": ...}` envelope 안의 확장 필드와 최상위 `os:scheduler_hints`, user_data base64·security group·networks·block device·personality 직렬화, 고정 status(200/203·200/202·200·202/204), `servers_links` next를 바꾸지 않는지 검증했습니다. 기존 unresolved였던 `servers.Create`는 남은 CreateOpts 필드와 microversion 경로를 보강해 go_mapping으로 닫았습니다. [native 서버 호출](../compute/v2/servers/native.md)을 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Nova native `servers` CRUD 6개, 전체357→363(+6)·핵심283→289/2,292·Compute45→51/333.** 기존 generated `Get/List/ListSimple/Create/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID 경로, `{"server": ...}` envelope 안의 확장 필드와 최상위 `os:scheduler_hints`, user_data base64·security group·networks·block device·personality 직렬화, 고정 status(200/203·200/202·200·202/204), `servers_links` next를 바꾸지 않는지 검증했습니다. 기존 unresolved였던 `servers.Create`는 남은 CreateOpts 필드와 microversion 경로를 보강해 go_mapping으로 닫았습니다. [native 서버 호출](../compute/v2/servers/native.md)을 추가했습니다.
 
 새 집중 계약 테스트4그룹29사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **52개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 Create 1행을 go_mapping으로 바꾸고 새5행을 추가해 reviews621·contracts3,850·go_mapping363입니다. 테스트 `9168bc58`·보강/가이드/판정 `4cadc4ff`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
