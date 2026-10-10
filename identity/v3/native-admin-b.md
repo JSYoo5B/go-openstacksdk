@@ -48,7 +48,7 @@
 
 endpoint 호출은 OkCodes를 지정하지 않아 생성은 POST 기본값, 수정은 PATCH 기본값을 따릅니다. 수정이 본문 없는 204를 받으면 오류 없이 nil endpoint를 돌려줍니다. `CreateOpts`의 `Availability`(`interface`), `URL`, `ServiceID`는 필수이고 `Enabled`는 pointer입니다. 응답의 `region_id`는 `RegionID`로 decode합니다. 이 패키지에는 `Extra`가 없습니다.
 
-`List`에는 해결하지 못한 차이가 있습니다. native `List`는 builder의 `ToEndpointListParams`를 부르지 않고 받은 값에 직접 `BuildQueryString`을 적용합니다. generated facade는 `ListOpts`를 감싼 builder를 넘기므로 `WithListOptions`의 `interface`·`service_id`·`region_id` 필터와 `WithListQuery`가 모두 조용히 사라지고 항상 전체 목록을 요청합니다. Gophercloud `endpoints.List`에 `ListOpts`를 직접 넘기면 필터가 정상으로 전송되므로, 필터가 필요하면 `RawClient()`로 native 함수를 호출해야 합니다.
+native `List`는 builder의 `ToEndpointListParams`를 부르지 않고 받은 값에 직접 `BuildQueryString`을 적용합니다. 그래서 생성 builder는 `ListOpts`의 `q` tag 필드인 `interface`·`service_id`·`region_id`를 자기 필드로 복사해 native query에 그대로 실립니다. native 호출이 다른 query를 보낼 방법이 없으므로 이 목록은 `WithListQuery`를 제공하지 않고, 설정에 남은 raw query 확장은 HTTP 전에 거부합니다. 공통 `Resources` 목록의 query key도 `ListOpts` 필드로 옮기며, 대응하는 필드가 없는 key는 지원하지 않는 필터 오류입니다.
 
 ## policy
 
