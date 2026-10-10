@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Barbican Python `find_container/find_order` 검증·판정 완료.** 전체357/3,362·핵심283/2,292·Key Manager52/67입니다. Barbican의 남은 Python 행은 generic `_update` commit의 `update_secret/update_container/update_order`, `wait_for_status/wait_for_delete`와 기존 unresolved 목록·consumer·quota·`find_secret` 행입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Nova native `servers` CRUD 6개 계약 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체357/3,362·핵심283/2,292·Compute45/333입니다. 처리량이 큰 핵심 서비스의 미검토 native Gophercloud 연산을 user 범위부터 진행하며, Nova servers 42개를 CRUD 6개 → metadata 6개 → user action → 주소·콘솔·대기 순으로 나누고 관리자 action(Evacuate·ForceDelete·LiveMigrate·Migrate·ResetState·ResetNetwork·InjectNetworkInfo)은 핵심 admin 단계로 둡니다. 이번 단위는 `Get/List/ListSimple/Create/Update/Delete`의 경로, `{"server": ...}` envelope 안의 확장 필드와 최상위 scheduler hints, user_data base64·security group·networks 직렬화, 고정 status(200/203·200/202·200·202/204), `servers_links` next를 검증했습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Barbican Python `find_container`·`find_order` 2개, 전체355→357(+2)·핵심281→283/2,292·Key Manager50→52/67.** 공통 `keymanagerread.FindIdentity`로 Python `Resource.find`의 직접 GET·fallback 목록·id/name 일치를 제공합니다. [검증 기록](sdk-support-ledger.md#barbican-python-find_containerfind_order-완료)에 설명합니다. 새2그룹8사례와 전체 `make check`(race 51개 실제 test package)가 통과했고 `0f187761`·`bceed143`·`582c7662`를 push했습니다.
 
@@ -441,6 +441,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Nova native servers CRUD 6개 | pinned Gophercloud v2.15.0 servers requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
 | Barbican Python find_container·find_order | pinned Python find/_get_one_match·Container/Order alternate id 검토 완료 | 공통 `keymanagerread.FindIdentity`·두 package FindIdentity 완료 | 새2그룹8·전체 `make check` PASS | README find 절 추가 | **신규2행 go_mapping·357/3,362** | 작은 commit3개 push 완료 |
 | Barbican Python secret ACL 4개 | pinned Python proxy·SecretACL Resource·commit/delete 검토 완료 | owned `secretacls` package·서비스 연결 완료 | 새3그룹15·전체 `make check` PASS | secretacls README 추가 | **신규4행 go_mapping·355/3,362** | 작은 commit3개 push 완료 |
 | Barbican native acls 8개 | pinned Gophercloud v2.15.0 acls requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹35·전체 `make check` PASS | acls README 추가 | **신규8행 go_mapping·351/3,362** | 작은 commit2개 push 완료; 다음 Python secret ACL |
