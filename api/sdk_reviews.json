@@ -64865,6 +64865,108 @@
         "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/noauth.NewBlockStorageNoAuthV2",
+      "source_fingerprint": "e83da24a9989d2692cdd6af4e0bf11aca911f444d14577a1c0c9b9fb6d23e807",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/noauth.API.NewBlockStorageNoAuthV2",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/noauth.WithNewBlockStorageNoAuthV2Options"
+      ],
+      "contracts": [
+        {
+          "behavior": "NewBlockStorageNoAuthV2 makes no HTTP request and returns a block-storage ServiceClient sharing the provider, whose endpoint is the normalized CinderEndpoint plus the project half of a user:project provider token and a trailing slash; a missing endpoint or a token without exactly one colon returns the native error without operation context, while a nil option is wrapped.",
+          "tests": [
+            "blockstorage/noauth/native_contracts_test.go:TestNativeNoAuthClientEndpointAndProvider"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/noauth/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/noauth constructor only; openstacksdk has no noauth Cinder constructor and Python connection-level auth is tracked separately.",
+        "The SDK adds only request.Wrap operation context for option errors; native endpoint construction and validation are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/noauth.NewBlockStorageNoAuthV3",
+      "source_fingerprint": "e637152b4d26095d3fb57d6777c0f5be9ebdd28d47657b84a8a997d9cc048b0a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/noauth.API.NewBlockStorageNoAuthV3",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/noauth.WithNewBlockStorageNoAuthV3Options"
+      ],
+      "contracts": [
+        {
+          "behavior": "NewBlockStorageNoAuthV3 makes no HTTP request and returns a block-storage ServiceClient sharing the provider, whose endpoint is the normalized CinderEndpoint plus the project half of a user:project provider token and a trailing slash; a missing endpoint or a token without exactly one colon returns the native error without operation context, while a nil option is wrapped.",
+          "tests": [
+            "blockstorage/noauth/native_contracts_test.go:TestNativeNoAuthClientEndpointAndProvider"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/noauth/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/noauth constructor only; openstacksdk has no noauth Cinder constructor and Python connection-level auth is tracked separately.",
+        "The SDK adds only request.Wrap operation context for option errors; native endpoint construction and validation are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/swauth.Auth",
+      "source_fingerprint": "1cbcf0bb3d9ae0e9ed6aa9671e879b32119e6503e1b9b4e92eef63a27674395a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.API.Auth",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.WithAuthOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.WithAuthHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Auth GETs auth/v1.0 under the provider IdentityBase with required X-Auth-User and X-Auth-Key headers plus the provider X-Auth-Token and extension headers, accepts only 200, and reads Token, StorageURL and CDNURL from the X-Auth-Token, X-Storage-Url and X-CDN-Management-Url response headers; missing credentials, core-header extensions and nil options fail before HTTP.",
+          "tests": [
+            "objectstorage/v1/swauth/native_contracts_test.go:TestNativeSwauthAuthHeadersAndResult",
+            "objectstorage/v1/swauth/native_contracts_test.go:TestNativeSwauthStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/swauth/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/swauth call only; openstacksdk relies on keystoneauth plugins for TempAuth and that parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented header extension merge; native URL construction, OkCodes and header decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:objectstorage/v1/swauth.NewObjectStorageV1",
+      "source_fingerprint": "74e9e21a1dc0376fe162688c7aa78dbc7a0237a6f059f2b6b5d779d813c8b0ae",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.API.NewObjectStorageV1",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth.WithNewObjectStorageV1Options"
+      ],
+      "contracts": [
+        {
+          "behavior": "NewObjectStorageV1 performs one swauth Auth request and returns a ServiceClient with an empty Type whose endpoint is the normalized X-Storage-Url, sharing the ProviderClient and writing the swauth token into its TokenID so every client on that provider switches token; native authentication and validation errors return without operation context and leave the token unchanged, while a nil option is wrapped.",
+          "tests": [
+            "objectstorage/v1/swauth/native_contracts_test.go:TestNativeSwauthNewObjectStorageV1SharesProviderToken"
+          ]
+        }
+      ],
+      "documentation": [
+        "objectstorage/v1/swauth/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native objectstorage/v1/swauth constructor only; openstacksdk relies on keystoneauth plugins for TempAuth and that parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context for option errors; the native shared-provider token write is preserved and documented."
+      ],
+      "remaining": []
     }
   ]
 }
