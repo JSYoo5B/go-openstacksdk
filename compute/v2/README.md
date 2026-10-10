@@ -45,6 +45,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `KeyPairs.CreateKeypair`는 nullable 속성·ID/name 별칭·입력/응답 병합과 ssh view 기본값을 처리합니다. `Servers.ConsoleURL`은6개 legacy action과 실제 console raw 값을 제공합니다. [Keypair·console의 Python/Go 비교](../keypairs-console.md)에 독립 main·alias/default·응답 정책을 설명합니다.
 
+서버 조회·action·metadata·tag·server group·interface·volume attachment의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다.
+
 `conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.
 
 `Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.
