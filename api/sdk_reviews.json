@@ -56044,16 +56044,16 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateField"
       ],
       "contracts": [
         {
-          "behavior": "Create POSTs {\"auth\":{\"identity\":...,\"scope\":...}} to auth/tokens for password (name+domain or user ID), token and application credential methods with project, domain or system scope, keeps extension fields in the auth object only, rejects nil options, no auth method and invalid extension headers before HTTP, reads the token ID from X-Subject-Token and RFC3339 expires_at, still sends the provider X-Auth-Token because native OmitHeaders runs before it is applied, and accepts only 201/202.",
+          "behavior": "Create POSTs {\"auth\":{\"identity\":...,\"scope\":...}} to auth/tokens for password (name+domain or user ID), token and application credential methods with project, domain or system scope, keeps extension fields in the auth object only, rejects nil options, no auth method and any header extension before HTTP because native Create never calls ToTokenV3HeadersMap, reads the token ID from X-Subject-Token and RFC3339 expires_at, still sends the provider X-Auth-Token because native OmitHeaders runs before it is applied, and accepts only 201/202.",
           "tests": [
             "identity/v3/tokens/native_contracts_test.go:TestNativeTokenCreateBodiesScopesAndSubjectHeader",
             "identity/v3/tokens/native_contracts_test.go:TestNativeTokenStatusesAndPreflight",
-            "internal/cmd/sdkgen/page_extractors_test.go:TestTokenScopeBuildersDelegateWithoutExtensionFields"
+            "internal/cmd/sdkgen/page_extractors_test.go:TestTokenScopeBuildersDelegateWithoutExtensionFields",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestUnreadBuilderMethodsDisableTheirExtensions"
           ]
         }
       ],
@@ -64813,20 +64813,20 @@
     {
       "operation": "gophercloud:identity/v3/ec2tokens.Create",
       "source_fingerprint": "d23ebe21feab78a09749b7ce742edf0f0fc6644cee5de74bd0de60ebb36e301f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateField",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateHeader"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateField"
       ],
       "contracts": [
         {
-          "behavior": "Create POSTs {\"credentials\":{...}} to ec2tokens sending an explicit signature with the non-omitempty fields as-is or computing an AWS V2 (HmacSHA1/HmacSHA256, dropping body_hash and headers) or V4 signature (adding X-Amz-Date and Authorization to the body headers, random body hash and current time when unset), removes token, keeps extensions inside credentials, requires non-nil options and access and rejects unsupported signature versions or methods and core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token without touching the ProviderClient token, while header extensions are silently dropped.",
+          "behavior": "Create POSTs {\"credentials\":{...}} to ec2tokens sending an explicit signature with the non-omitempty fields as-is or computing an AWS V2 (HmacSHA1/HmacSHA256, dropping body_hash and headers) or V4 signature (adding X-Amz-Date and Authorization to the body headers, random body hash and current time when unset), removes token, keeps extensions inside credentials, requires non-nil options and access and rejects unsupported signature versions or methods and core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token without touching the ProviderClient token, and rejects header extensions before HTTP because the native call never calls ToTokenV3HeadersMap.",
           "tests": [
             "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenBodiesSignaturesAndSubjectToken",
-            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsDropped",
-            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight"
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsRejected",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestUnreadBuilderMethodsDisableTheirExtensions"
           ]
         }
       ],
@@ -64836,28 +64836,25 @@
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
-      ],
-      "remaining": [
-        "WithCreateHeader and WithValidateS3TokenHeader are accepted but never sent because native ec2tokens.Create and ValidateS3Token do not call ToTokenV3HeadersMap; sdkgen should stop exposing header extensions for these operations before this mapping is accepted."
       ]
     },
     {
       "operation": "gophercloud:identity/v3/ec2tokens.ValidateS3Token",
       "source_fingerprint": "f9d65ecd672090bda3fad880cf560a38cbc9b10f7134ded7180b86a7e9ccb154",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.API.ValidateS3Token",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenField",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenHeader"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenField"
       ],
       "contracts": [
         {
-          "behavior": "ValidateS3Token POSTs {\"credentials\":{...}} to s3tokens keeping only access, signature, token (the V4 string to sign when computed) and extensions, base64-encoding []byte values, requires non-nil options and access and rejects core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token, while header extensions are silently dropped.",
+          "behavior": "ValidateS3Token POSTs {\"credentials\":{...}} to s3tokens keeping only access, signature, token (the V4 string to sign when computed) and extensions, base64-encoding []byte values, requires non-nil options and access and rejects core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token, and rejects header extensions before HTTP because the native call never calls ToTokenV3HeadersMap.",
           "tests": [
             "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenBodiesSignaturesAndSubjectToken",
-            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsDropped",
-            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight"
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsRejected",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestUnreadBuilderMethodsDisableTheirExtensions"
           ]
         }
       ],
@@ -64867,9 +64864,6 @@
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
-      ],
-      "remaining": [
-        "WithCreateHeader and WithValidateS3TokenHeader are accepted but never sent because native ec2tokens.Create and ValidateS3Token do not call ToTokenV3HeadersMap; sdkgen should stop exposing header extensions for these operations before this mapping is accepted."
       ]
     }
   ]
