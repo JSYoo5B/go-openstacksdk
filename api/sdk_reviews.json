@@ -64967,6 +64967,1049 @@
         "The SDK adds only request.Wrap operation context for option errors; the native shared-provider token write is preserved and documented."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/allocation_candidates",
+      "source_fingerprint": "d0bd4fdde3e02e658d9ae462689638d52dad8f173fd02206dce9dc871710a731",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.34 List sends GET allocation_candidates with repeated required and member_of, single resources, limit and group_policy, and suffixed resources1, required1, member_of1 and in_tree1, and decodes every allocation request with its mappings and the provider summaries.",
+          "tests": [
+            "placement/v1/allocationcandidates/python_parity_test.go:TestPythonAllocationCandidatesQueryAndCandidates"
+          ]
+        },
+        {
+          "behavior": "A suffixed member_of group holds one value and WithListQuery replaces it, so a repeated member_of1 key cannot be sent.",
+          "tests": [
+            "placement/v1/allocationcandidates/python_parity_test.go:TestPythonAllocationCandidatesSuffixedMemberOfIsSingle"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.34.",
+        "Python yields one AllocationCandidate per allocation request with provider_summaries reduced to that candidate's providers; Go yields the whole response once and the caller selects ProviderSummaries by the AllocationRequests[i].Allocations keys.",
+        "Go decodes only the 1.12+ response shape; Python also accepts the 1.10-1.11 list shape."
+      ],
+      "remaining": [
+        "Python forwards **query to requests, so a list value such as member_of1=['agg-4', 'agg-5'] becomes a repeated suffixed member_of key (valid from 1.24, below Python's 1.34); Go ResourceGroup.MemberOf is one string and WithListQuery replaces a key with one value, so no public Go option sends a repeated suffixed member_of or any other repeated key outside ListOpts."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/get_allocation",
+      "source_fingerprint": "21aa97e169e6db12d206060ee6403fc10410c2300ea06075c6530b660e4fbda5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.38 Get sends GET allocations/{consumer} and returns per-provider generation and resources, consumer_generation, consumer_type, project_id and user_id.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Go returns *Allocations with nil pointers for absent consumer fields instead of an Allocation Resource; HTTP errors stay native gophercloud errors instead of openstack.exceptions."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/update_allocation",
+      "source_fingerprint": "24d71a79d81edc1ffb73990330e0dabf79a8a50c1bff7ff7c5ad98fda5ecc3bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.38 Update sends PUT allocations/{consumer} with allocations, project_id, user_id, consumer_generation as null for a new consumer, and consumer_type.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python sends only the Body attributes passed in attrs; Go always sends allocations, project_id, user_id and consumer_generation and omits only an empty consumer_type. Placement 1.38 requires all five keys, so valid calls produce the same body.",
+        "Python returns the Allocation built from attrs; Go returns only an error because the 204 response has no body."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/create_allocations",
+      "source_fingerprint": "2058131d183e7a98ef01b5d0f50f7007b454e3e6e1de1c2cb17f4b2ad0c5dae7",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Manage",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.38 Manage sends POST allocations with each consumer's allocations, project_id, user_id, consumer_generation and consumer_type, and an empty non-nil allocations map clears a consumer.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls"
+          ]
+        },
+        {
+          "behavior": "With two consumers WithManageField places an extension such as mappings at the top level of the POST body instead of inside each consumer.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationManageExtensionPlacement"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
+        "A nil Go Allocations map is sent as null and rejected by placement, whereas Python sends the dict as given."
+      ],
+      "remaining": [
+        "Python posts the caller's dict unchanged, so per-consumer keys outside UpdateOpts (for example the 1.34 mappings field) reach every consumer; Go UpdateOpts has no such field and WithManageField puts an extension at the top level when there are zero or several consumers."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/delete_allocation",
+      "source_fingerprint": "2f380d033c0dd07475d3ab1d9fa467d0675854b9078d72c050b1ab23e2954c91",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.38 Delete sends DELETE allocations/{consumer} and succeeds on 204.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls"
+          ]
+        },
+        {
+          "behavior": "Delete reports HTTP 404 as a native gophercloud.ErrUnexpectedResponseCode.",
+          "tests": [
+            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationDeleteMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; the allocations package has no resource collection Remove or ignore-missing option, so Go always returns the 404 and the default cannot be selected."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/create_resource_class",
+      "source_fingerprint": "63c7925fa394f102835c543bb125f80a478d5b837c9b9e3005e0e749ff082277",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.2 Create sends POST resource_classes with {\"name\": ...} and accepts the bodyless 201.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
+        "Python returns a ResourceClass built from the attrs; Go returns only an error, and the 201 response carries no body.",
+        "Go requires a non-empty Name before HTTP; Python sends whatever Body attributes it was given."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/delete_resource_class",
+      "source_fingerprint": "c08650d9d9c137522e666edc8d5d45f611b7ae05604ea4bb4eb7b157fc7e216a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove ignores HTTP 404 by default like Python ignore_missing=True, resource.WithMissingError reports resource.ErrNotFound like ignore_missing=False, and both send one DELETE to the same path and microversion. The route is DELETE resource_classes/{name} at 1.2.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "API.Delete without the collection keeps the 404 as an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/update_resource_class",
+      "source_fingerprint": "ad7b621ed52e38b0ec1e68ee74177ef669ccf9d81cb5f197b49dc5029270f592",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT resource_classes/{name} without a body and treats the 200 response that placement 1.2 returns for a rename as an unexpected status.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassUpdateIsNotTheRenameCall"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2."
+      ],
+      "remaining": [
+        "Python commits PUT resource_classes/{name} at 1.2 with a JSON body ({} or {\"name\": new}) and decodes the 200 response, which renames the class; Go Update implements only the 1.7+ bodyless ensure-exists PUT accepting 201/204, so there is no Go call that sends the rename body."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/get_resource_class",
+      "source_fingerprint": "910157a37f08b68917a77fc49c54be40ee851aef958ac881c2955f2015a63155",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.2 Get sends GET resource_classes/{name} and returns the name; 404 stays a native error.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Go also returns links, which the Python Resource does not declare."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/resource_classes",
+      "source_fingerprint": "a4d41cbcc38b5aac59f23ab6755a02fe4aee83a7ce849deb678a241b04376f75",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithName"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.2 List and All send GET resource_classes without a query, and All with WithName filters the name locally after the same request.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
+        "Python drops unknown query keys, forwards limit and marker, and filters Body attributes such as name locally; Go List accepts no query and the collection rejects other query keys, but placement ignores limit and marker on this route."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/create_resource_provider",
+      "source_fingerprint": "fa092a8bbedeccf28415ad42089c2ebc09a8e66d1a98a333a95ff6857c597248",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 Create sends POST resource_providers with name, uuid and parent_provider_uuid and decodes the 200 provider body.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python id and parent_provider_id map to Go CreateOpts.UUID and ParentProviderUUID; Go always sends name, other Body keys need WithCreateField.",
+        "Go accepts only 200, matching the 1.20 Python negotiation; below 1.20 the bodyless 201 is an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/delete_resource_provider",
+      "source_fingerprint": "99f587055a135f56d498015091396f0d4d6d69b79b5dc1360d3f2353b86daec5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove ignores HTTP 404 by default like Python ignore_missing=True, resource.WithMissingError reports resource.ErrNotFound like ignore_missing=False, and both send one DELETE to the same path and microversion. The route is DELETE resource_providers/{id} at 1.20.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "API.Delete without the collection keeps the 404 as an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/update_resource_provider",
+      "source_fingerprint": "4f2eda6ec8a261ea721688b935e81852da0f03289cfed70441c06693fa7b9a78",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 Update sends PUT resource_providers/{id} with name, and an empty ParentProviderUUID pointer sends parent_provider_uuid null like parent_provider_id=None.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python skips the request when nothing is dirty; Go sends {} for empty UpdateOpts."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/get_resource_provider",
+      "source_fingerprint": "7bdd43169adef73baddf8d60580c89c054f3e46106b6b03624ed682adf0e7725",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 Get sends GET resource_providers/{id} and returns uuid, name, generation, parent, root and links; 404 stays a native error.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/find_resource_provider",
+      "source_fingerprint": "9540a7ec2e0632c02eb57340ad3ac0a2d441fcec8b39cc9e621bbfacea628100",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(ID) sends GET resource_providers/{value}; after a 404 with WithIgnoreMissing, or a 400 or 403 error, Find(Name) sends GET resource_providers?name={value} and returns the match or nil, reproducing Python's ID-then-name lookup with ignore_missing=True.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderFindIDThenName"
+          ]
+        },
+        {
+          "behavior": "Without WithIgnoreMissing both Find(ID) and Find(Name) return resource.ErrNotFound like ignore_missing=False.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderFindIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python performs the GET-then-list fallback in one call and also falls back on 400 and 403; Go needs two explicit Find calls and the caller decides to continue after 400 or 403.",
+        "Python defaults ignore_missing=True (deprecated toward False); Go Find defaults to the missing error and needs WithIgnoreMissing.",
+        "Go rejects ID references containing /, ?, #, % or whitespace before HTTP; such values go straight to the name lookup."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/resource_providers",
+      "source_fingerprint": "a9eedf40ca3e6af45aa34529387841e22e6d216d005e7c68df10032af0b80ba4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithName"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 List with ListOpts sends name, uuid, member_of, resources, in_tree and required as one value each, and no query when unset.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderProxyCRUD"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python maps id to uuid, drops unknown keys and filters other Body attributes locally; Go forwards extra keys with WithListQuery and leaves Body filtering to the caller except exact name via resource.WithName.",
+        "Repeated member_of or required keys (1.24+/1.39) cannot be sent from Go; Python can send them only after raising the session microversion above its 1.20 default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/fetch_resource_provider_aggregates",
+      "source_fingerprint": "76731ab74b06d9420b5bafa8ca8f121e42d9f028564a765a79a1952d2cb14e4e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetAggregates"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 GetAggregates sends GET resource_providers/{id}/aggregates and returns the aggregates with the generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python returns a ResourceProvider with only aggregates and generation filled; Go returns ResourceProviderAggregates with a generation pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/get_resource_provider_aggregates",
+      "source_fingerprint": "3121ff64fda95314cf8ac464662e5dcdc678340544ad7419c19a646cd010376c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetAggregates"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 GetAggregates sends GET resource_providers/{id}/aggregates and returns the aggregates with the generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python emits RemovedInSDK50Warning and delegates to fetch_resource_provider_aggregates; Go has a single non-deprecated GetAggregates.",
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/set_resource_provider_aggregates",
+      "source_fingerprint": "244efe1bc71b9dfeec41ce8298b50c965ea080e61f273c8523b5789f360b7751",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateAggregates"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 UpdateAggregates sends {\"aggregates\": [...], \"resource_provider_generation\": N}, an empty non-nil slice sends [], and the returned generation and aggregates are decoded.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        },
+        {
+          "behavior": "Below 1.19 UpdateAggregates sends the bare aggregate list and decodes no generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python reads the generation from the passed ResourceProvider and sends null for a bare ID; Go takes it in UpdateAggregatesOpts and omits a nil pointer. Placement rejects both.",
+        "Python aggregates default to []; a nil Go slice is sent as null.",
+        "Python stores the PUT response generation under resource_provider_generation, leaving generation unchanged; Go returns it in ResourceProviderGeneration."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/create_resource_provider_inventory",
+      "source_fingerprint": "6ef19d84e65a6beaea18bc5c4e890bfd2ca5e537db3244631dc9ab976860812a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python sends POST resource_providers/{id}/inventories without a microversion header and returns the 201 inventory body."
+      ],
+      "remaining": [
+        "Go has no call for POST resource_providers/{id}/inventories; UpdateInventory only replaces an existing class and UpdateInventories replaces every class, which are different requests."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/delete_resource_provider_inventory",
+      "source_fingerprint": "254527fa520491f8dacc0b0604cb6d23075578228544d5638b8e2cc38dc61fdc",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventory"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteInventory sends DELETE resource_providers/{id}/inventories/{class} without a microversion header, succeeds on 204 and reports 404 as a native error.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts an inventory Resource carrying resource_provider_id or the class name plus provider; Go takes both strings."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; DeleteInventory has no ignore-missing option or collection Remove, so Go cannot select that default."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/update_resource_provider_inventory",
+      "source_fingerprint": "722e0a962f65099dbf638edc30495a7e665022bace88e5e79dbd85cdf837c1cb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventory"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateInventory sends PUT resource_providers/{id}/inventories/{class} without a microversion header, with the generation and all six inventory fields, and decodes the new generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python sends only the attrs it was given plus resource_provider_generation and placement fills defaults; Go always sends all six fields including zeros, so the caller supplies placement's defaults for fields Python would omit.",
+        "Python sends resource_provider_generation null when not given; Go always sends the int. Go allocation_ratio is float32."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/get_resource_provider_inventory",
+      "source_fingerprint": "592c21914125e12e6ad972fe7c9016f16ca382fdc8372af319c0f072ecaccf15",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetInventory"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetInventory sends GET resource_providers/{id}/inventories/{class} without a microversion header and decodes the generation and inventory fields.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python keeps the class name in id; Go returns only the fields in the response.",
+        "Go allocation_ratio is float32."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/resource_provider_inventories",
+      "source_fingerprint": "a84e445d2b99171fbcc45fac9d1bad4dd9934b3effd608a14297fc91ba145e2a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetInventories"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetInventories sends GET resource_providers/{id}/inventories without a microversion header and returns every class with the provider generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python yields one ResourceProviderInventory per class and filters Body attribute query arguments locally; Go returns one map keyed by class and the caller filters.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/set_resource_provider_inventories",
+      "source_fingerprint": "5bad61b8a35d736c00a92121a2dda732233898b8316ad4afb91bd4b0ddb0e5e7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventories"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 UpdateInventories sends PUT resource_providers/{id}/inventories with the generation and class map, an empty non-nil map clears all inventories, and the new generation is decoded.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python uses ResourceProvider's 1.20.",
+        "Python inventory dicts may omit fields that placement defaults; Go Inventory always sends all six fields, so the caller supplies the defaults.",
+        "Python returns the ResourceProvider with the new generation; Go returns ResourceProviderInventories."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/delete_resource_provider_inventories",
+      "source_fingerprint": "1531e9f1e3319c7b66c651952d810d29f9d6d12ce600a0f8f413c7b466b23d72",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventories"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 DeleteInventories sends DELETE resource_providers/{id}/inventories and succeeds on 204.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderInventories"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python uses ResourceProvider's 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/fetch_resource_provider_usages",
+      "source_fingerprint": "89d640988e6e782ccf1c8dddf8ca6bc01684df511349f085ebb3f0a9d92573be",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetUsages"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.20 GetUsages sends GET resource_providers/{id}/usages and returns the usage counts.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python returns a ResourceProvider with usages filled; Go returns ResourceProviderUsage including the generation."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/resource_provider_allocations",
+      "source_fingerprint": "aebbe14aa434fb5f3ebe0716f34a6c7de0d34769a70fb6b5cb5a9ecaf1951a93",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetAllocations"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAllocations sends GET resource_providers/{id}/allocations without a microversion header and returns every consumer's resources with the generation.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python yields one ResourceProviderAllocation per consumer and filters Body attribute query arguments locally; Go returns one map keyed by consumer UUID.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/create_trait",
+      "source_fingerprint": "1129d667223441a244b7607f6af16928a8cceb457b28498c756e4e86b9a74e5e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 Create sends PUT traits/{name} and accepts 201.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python sends an empty JSON object body; Go sends no body, which placement ignores.",
+        "Python returns a Trait with the name; Go returns only an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/delete_trait",
+      "source_fingerprint": "774eb698eac59164f58be05310028e13fd382ef9f0416fe9ba9c25a6320cee34",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 Delete sends DELETE traits/{name} and succeeds on 204.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitProxyCalls"
+          ]
+        },
+        {
+          "behavior": "Delete reports HTTP 404 as a native gophercloud.ErrUnexpectedResponseCode.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; the traits package has no collection Remove or ignore-missing option, so Go cannot select that default."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/get_trait",
+      "source_fingerprint": "3d613557b31117bca1440642c0a316af5fd66154b534fe886fe84e96e7bfabae",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 Get sends GET traits/{name} and treats the bodyless 204 as success.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitProxyCalls"
+          ]
+        },
+        {
+          "behavior": "Get reports HTTP 404 as a native error like Python's NotFoundException.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string.",
+        "Python returns a Trait holding the requested name; Go returns only an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/traits",
+      "source_fingerprint": "27d20348a844b0e1bc9c5396b0122624439d086d14242d8f306b6ad267919ff9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 List sends GET traits with name and associated and yields each trait name string.",
+          "tests": [
+            "placement/v1/traits/python_parity_test.go:TestPythonTraitProxyCalls"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python sends only name and associated and passes values unchanged, so a Python bool is sent as True; Go encodes Associated as true or false and forwards extra keys via WithListQuery.",
+        "Python yields Trait Resources; Go yields *string names."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/get_resource_provider_trait",
+      "source_fingerprint": "65c21b3dad43e97e8dec105035374e45ec59c65ae8ca5e9d5479f00a4488d982",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetTraits"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 GetTraits sends GET resource_providers/{id}/traits and returns the generation and trait list.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/set_resource_provider_trait",
+      "source_fingerprint": "00d1341817e1b75c1bed74afa44d755ffbfe0c6671f8deed0bebed882c62f9ca",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateTraits"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 UpdateTraits sends PUT resource_providers/{id}/traits with the generation and traits, an empty non-nil slice sends [], and the new generation is decoded.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python requires a ResourceProviderTrait Resource carrying resource_provider_id and the generation; Go takes the provider ID and UpdateTraitsOpts.",
+        "A nil Go Traits slice is sent as null."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/delete_resource_provider_trait",
+      "source_fingerprint": "fc0be885628863be901e4569a45d6a7baa161bae65e52e85247b7972fa4dcbc8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteTraits"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.6 DeleteTraits sends DELETE resource_providers/{id}/traits and succeeds on 204.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        },
+        {
+          "behavior": "DeleteTraits reports HTTP 404 as a native gophercloud.ErrUnexpectedResponseCode.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderAggregatesUsagesAllocationsTraits"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID or name string."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; DeleteTraits has no ignore-missing option or collection Remove, so Go cannot select that default."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/usages",
+      "source_fingerprint": "f92206c1caddce11b4aa5f8324fddcdbde6b3d5ada44f717960896d1d52f97f0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.WithGetOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "At placement 1.38 Get sends GET usages with project_id and the optional user_id and consumer_type, omitting unset filters, and decodes usage per consumer type including consumer_count.",
+          "tests": [
+            "placement/v1/usages/python_parity_test.go:TestPythonUsagesProxyCall"
+          ]
+        },
+        {
+          "behavior": "Get does not decode the flat pre-1.38 usages shape.",
+          "tests": [
+            "placement/v1/usages/python_parity_test.go:TestPythonUsagesPre138ShapeIsNotDecoded"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
+        "Python yields one Usage per consumer type with consumer_count split out; Go returns one map whose ConsumerTypeUsage keeps consumer_count beside the resource classes.",
+        "Python also decodes the pre-1.38 flat shape when the server maximum is lower; Go Get fails there and RawClient with native ExtractPre138 is needed.",
+        "Go sends no project_id when ProjectID is empty; Python requires the argument."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:placement/v1/wait_for_status",
+      "source_fingerprint": "8e12798202582f6a06ca8d50568b8c127d9d0b9e6ec3812d543d33cd04acdedc",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResourceProviders.WaitFor with WithStatusAttribute(name) and WithFailureStates(ERROR) polls GET resource_providers/{id} case-insensitively until the target, returns resource.ErrFailedState on a failure value and context.DeadlineExceeded after WithTimeout.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderWaiters"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python accepts any Resource and attribute and returns immediately without HTTP when it already matches; Go waits by ID, always fetches first and returns the final model.",
+        "Python defaults to failures=['ERROR'], interval 2s and wait=None (unbounded); Go defaults to no failure states for placement, 2s and 5 minutes, adjustable with options."
+      ],
+      "remaining": [
+        "Go waiters exist only for the ResourceProviders and ResourceClasses collections; Python can wait on any fetchable placement Resource such as inventories, traits, provider traits and allocations, which have no Go waiter."
+      ]
+    },
+    {
+      "operation": "python:placement/v1/wait_for_delete",
+      "source_fingerprint": "eff2b38c9b43aced1a9efe82e9f6aed9a6cbc9a90788dcc1c1b19b03d3da20fa",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResourceProviders.WaitForDeletion polls GET resource_providers/{id} until 404 and returns context.DeadlineExceeded after WithTimeout.",
+          "tests": [
+            "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderWaiters"
+          ]
+        },
+        {
+          "behavior": "ResourceClasses.WaitForDeletion polls GET resource_classes/{name} until 404.",
+          "tests": [
+            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassWaitForDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/python-parity.md"
+      ],
+      "differences": [
+        "Python returns the original Resource; Go returns only an error.",
+        "Python defaults to interval 2s and wait 120s; Go defaults to 2s and 5 minutes, so WithTimeout(120*time.Second) matches."
+      ],
+      "remaining": [
+        "Go deletion waiters exist only for the ResourceProviders and ResourceClasses collections; Python can wait for inventories, traits and other fetchable placement Resources to return 404, which Go cannot."
+      ]
     }
   ]
 }
