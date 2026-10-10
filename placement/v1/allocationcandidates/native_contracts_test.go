@@ -58,8 +58,8 @@ func nativeACOperation(t *testing.T, err error, operation string) {
 	}
 }
 
-func nativeACCollect(api *allocationcandidates.API, options ...allocationcandidates.ListOption) ([]*allocationcandidates.AllocationCandidates110, []error) {
-	var values []*allocationcandidates.AllocationCandidates110
+func nativeACCollect(api *allocationcandidates.API, options ...allocationcandidates.ListOption) ([]*allocationcandidates.AllocationCandidates, []error) {
+	var values []*allocationcandidates.AllocationCandidates
 	var errs []error
 	for value, err := range api.List(context.Background(), options...) {
 		if err != nil {
@@ -71,11 +71,11 @@ func nativeACCollect(api *allocationcandidates.API, options ...allocationcandida
 	return values, errs
 }
 
-const nativeAC110Body = `{"allocation_requests":[{"allocations":[{"resource_provider":{"uuid":"rp-1"},"resources":{"VCPU":1,"MEMORY_MB":512}}]}],"provider_summaries":{"rp-1":{"resources":{"VCPU":{"capacity":8,"used":2}}}}}`
+const nativeACBody = `{"allocation_requests":[{"allocations":{"rp-1":{"resources":{"VCPU":1,"MEMORY_MB":512}}},"mappings":{"_NIC":["rp-1"]}}],"provider_summaries":{"rp-1":{"resources":{"VCPU":{"capacity":8,"used":2}},"traits":["CUSTOM_A"],"parent_provider_uuid":null,"root_provider_uuid":"rp-1"}}}`
 
 func TestNativeAllocationCandidatesQueryAndDecode(t *testing.T) {
 	var calls []nativeACCall
-	api := nativeACAPI(t, "1.10", &calls, func(*http.Request) *http.Response { return nativeACWire(200, nativeAC110Body) })
+	api := nativeACAPI(t, "1.39", &calls, func(*http.Request) *http.Response { return nativeACWire(200, nativeACBody) })
 	values, errs := nativeACCollect(api, allocationcandidates.WithListOptions(allocationcandidates.ListOpts{
 		Resources:    "VCPU:1,MEMORY_MB:512",
 		Required:     []string{"CUSTOM_A", "in:HW_CPU_X86_AVX,!CUSTOM_B"},
@@ -89,9 +89,10 @@ func TestNativeAllocationCandidatesQueryAndDecode(t *testing.T) {
 			"_NIC": {Resources: "NET_BW_EGR_KILOBIT_PER_SEC:10", Required: []string{"CUSTOM_PHYSNET", ""}, MemberOf: "agg-4", InTree: "nic-root"},
 		},
 	}), allocationcandidates.WithListQuery("extra", "1"))
-	// The 1.10-1.11 shape is the only one the facade decodes; one page yields one value.
-	if len(errs) != 0 || len(values) != 1 || values[0].AllocationRequests[0].Allocations[0].ResourceProvider.UUID != "rp-1" ||
-		values[0].AllocationRequests[0].Allocations[0].Resources["MEMORY_MB"] != 512 || values[0].ProviderSummaries["rp-1"].Resources["VCPU"].Capacity != 8 {
+	// The facade decodes the 1.12+ dictionary shape; one page yields one value.
+	if len(errs) != 0 || len(values) != 1 || values[0].AllocationRequests[0].Allocations["rp-1"].Resources["MEMORY_MB"] != 512 ||
+		(*values[0].AllocationRequests[0].Mappings)["_NIC"][0] != "rp-1" || values[0].ProviderSummaries["rp-1"].Resources["VCPU"].Capacity != 8 ||
+		(*values[0].ProviderSummaries["rp-1"].Traits)[0] != "CUSTOM_A" || values[0].ProviderSummaries["rp-1"].ParentProviderUUID != nil || *values[0].ProviderSummaries["rp-1"].RootProviderUUID != "rp-1" {
 		t.Fatal(values, errs)
 	}
 	// Lists are repeated keys, group keys get the suffix, empty group required entries are skipped, and the whole query is percent-encoded.
@@ -100,22 +101,22 @@ func TestNativeAllocationCandidatesQueryAndDecode(t *testing.T) {
 		"&required=CUSTOM_A&required=in%3AHW_CPU_X86_AVX%2C%21CUSTOM_B&required_NIC=CUSTOM_PHYSNET" +
 		"&resources=VCPU%3A1%2CMEMORY_MB%3A512&resources_NIC=NET_BW_EGR_KILOBIT_PER_SEC%3A10" +
 		"&root_required=CUSTOM_ROOT&same_subtree=_NIC&same_subtree=_PORT"
-	want := []nativeACCall{{http.MethodGet, "/placement/allocation_candidates", query, "", "placement 1.10"}}
+	want := []nativeACCall{{http.MethodGet, "/placement/allocation_candidates", query, "", "placement 1.39"}}
 	if !reflect.DeepEqual(calls, want) {
 		t.Fatalf("%+v", calls)
 	}
-	t.Run("1.12 dictionary allocations fail the generated decode", func(t *testing.T) {
+	t.Run("1.10 array allocations fail the generated decode", func(t *testing.T) {
 		var calls []nativeACCall
-		api := nativeACAPI(t, "1.39", &calls, func(*http.Request) *http.Response {
-			return nativeACWire(200, `{"allocation_requests":[{"allocations":{"rp-1":{"resources":{"VCPU":1}}},"mappings":{"":["rp-1"]}}],"provider_summaries":{"rp-1":{"resources":{"VCPU":{"capacity":8,"used":0}},"traits":[],"parent_provider_uuid":null,"root_provider_uuid":"rp-1"}}}`)
+		api := nativeACAPI(t, "1.10", &calls, func(*http.Request) *http.Response {
+			return nativeACWire(200, `{"allocation_requests":[{"allocations":[{"resource_provider":{"uuid":"rp-1"},"resources":{"VCPU":1}}]}],"provider_summaries":{"rp-1":{"resources":{"VCPU":{"capacity":8,"used":2}}}}}`)
 		})
-		// The generated List uses ExtractAllocationCandidates110 instead of the 1.12+ ExtractAllocationCandidates.
+		// 1.10 and 1.11 return allocations as an array; callers need native ExtractAllocationCandidates110.
 		values, errs := nativeACCollect(api, allocationcandidates.WithListOptions(allocationcandidates.ListOpts{Resources: "VCPU:1"}))
-		if len(values) != 0 || len(errs) != 1 || len(calls) != 1 || calls[0].version != "placement 1.39" {
+		if len(values) != 0 || len(errs) != 1 || len(calls) != 1 || calls[0].version != "placement 1.10" {
 			t.Fatal(values, errs, calls)
 		}
 		var typeErr *json.UnmarshalTypeError
-		if !errors.As(errs[0], &typeErr) || typeErr.Value != "object" {
+		if !errors.As(errs[0], &typeErr) || typeErr.Value != "array" {
 			t.Fatal(errs[0])
 		}
 	})
@@ -147,7 +148,7 @@ func TestNativeAllocationCandidatesStatusesAndPreflight(t *testing.T) {
 	})
 	t.Run("preflight", func(t *testing.T) {
 		var calls []nativeACCall
-		api := nativeACAPI(t, "1.10", &calls, func(*http.Request) *http.Response { return nativeACWire(200, nativeAC110Body) })
+		api := nativeACAPI(t, "1.39", &calls, func(*http.Request) *http.Response { return nativeACWire(200, nativeACBody) })
 		for name, options := range map[string][]allocationcandidates.ListOption{
 			"empty query key": {allocationcandidates.WithListQuery("", "x")},
 			"nil option":      {nil},

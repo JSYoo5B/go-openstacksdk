@@ -618,7 +618,13 @@ func extractorsByPage(pkg *types.Package, decls map[string]*ast.FuncDecl) map[st
 				case *ast.TypeAssertExpr:
 					if id, ok := node.Type.(*ast.Ident); ok {
 						previous := result[id.Name]
-						if previous == "" || pageExtractorDetail(sig.Results().At(0).Type()) >= pageExtractorDetail(pkg.Scope().Lookup(previous).Type().(*types.Signature).Results().At(0).Type()) {
+						switch {
+						case previous == "":
+							result[id.Name] = name
+						case microversionSuffix(name, previous):
+						case microversionSuffix(previous, name):
+							result[id.Name] = name
+						case pageExtractorDetail(sig.Results().At(0).Type()) >= pageExtractorDetail(pkg.Scope().Lookup(previous).Type().(*types.Signature).Results().At(0).Type()):
 							result[id.Name] = name
 						}
 					}
@@ -633,6 +639,14 @@ func extractorsByPage(pkg *types.Package, decls map[string]*ast.FuncDecl) map[st
 		visit(name)
 	}
 	return result
+}
+
+// Placement keeps older response shapes in extractors named after their
+// microversion, such as ExtractAllocationCandidates110. The unsuffixed
+// extractor reads the current shape and must win the page.
+func microversionSuffix(name, base string) bool {
+	suffix, ok := strings.CutPrefix(name, base)
+	return ok && suffix != "" && strings.Trim(suffix, "0123456789") == ""
 }
 
 // Swift exposes both full resource records and names from the same page. Do

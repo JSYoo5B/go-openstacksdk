@@ -122,3 +122,32 @@ func TestTokenScopeBuildersDelegateWithoutExtensionFields(t *testing.T) {
 		})
 	}
 }
+
+func TestPageExtractorPrefersUnsuffixedOverMicroversionSuffix(t *testing.T) {
+	pkg, decls := fixture(t, `package fixture
+type Page interface{}
+type Candidates struct{ Requests map[string]int }
+type Candidates110 struct{ Requests []int }
+type CapsuleBase struct{ Name string }
+type CapsuleV132 struct{ Name string; Host string }
+type CandidatesPage struct{}
+type CapsulePage struct{}
+func ExtractCandidates(r Page)(*Candidates,error){_ = r.(CandidatesPage);return nil,nil}
+func ExtractCandidates110(r Page)(*Candidates110,error){_ = r.(CandidatesPage);return nil,nil}
+func ExtractCapsulesBase(r Page)([]CapsuleBase,error){_ = r.(CapsulePage);return nil,nil}
+func ExtractCapsulesV132(r Page)([]CapsuleV132,error){_ = r.(CapsulePage);return nil,nil}
+`)
+	got := extractorsByPage(pkg, decls)
+	// A pure digit suffix names an older response shape; distinct names keep the detail rule.
+	if got["CandidatesPage"] != "ExtractCandidates" || got["CapsulePage"] != "ExtractCapsulesV132" {
+		t.Fatal(got)
+	}
+	for _, tc := range []struct {
+		name, base string
+		want       bool
+	}{{"ExtractCandidates110", "ExtractCandidates", true}, {"ExtractCandidates", "ExtractCandidates", false}, {"ExtractCapsulesV132", "ExtractCapsules", false}} {
+		if microversionSuffix(tc.name, tc.base) != tc.want {
+			t.Fatal(tc)
+		}
+	}
+}

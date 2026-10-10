@@ -54,23 +54,17 @@ func (b listOptsBuilder) ToAllocationCandidatesListQuery() (string, error) {
 }
 
 // List invokes the upstream API with library-owned builders and result handling.
-func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*AllocationCandidates110, error] {
+func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*AllocationCandidates, error] {
 	var opts ListOpts
 	cfg, err := request.Apply(opts, options...)
 	if err != nil {
 		err = request.Wrap("List", "allocationcandidates", err)
-		return func(yield func(*AllocationCandidates110, error) bool) {
-			var zero *AllocationCandidates110
-			yield(zero, err)
-		}
+		return func(yield func(*AllocationCandidates, error) bool) { var zero *AllocationCandidates; yield(zero, err) }
 	}
 	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
 		err = request.Wrap("List", "allocationcandidates", err)
-		return func(yield func(*AllocationCandidates110, error) bool) {
-			var zero *AllocationCandidates110
-			yield(zero, err)
-		}
+		return func(yield func(*AllocationCandidates, error) bool) { var zero *AllocationCandidates; yield(zero, err) }
 	}
 	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
-	return resource.StreamValues(ctx, upstream.List(a.client, _opts), upstream.ExtractAllocationCandidates110)
+	return resource.StreamValues(ctx, upstream.List(a.client, _opts), upstream.ExtractAllocationCandidates)
 }
