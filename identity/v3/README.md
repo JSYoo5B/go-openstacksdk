@@ -19,6 +19,8 @@ Gophercloud v2.15.0의 identity/v3 API를 하나의 인증된 서비스 객체�
 
 generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다.
 
+사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
