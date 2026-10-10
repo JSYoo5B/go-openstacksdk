@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Nova native servergroups·volumeattach·attachinterfaces 12개 검증·판정 완료, instanceactions·extensions·apiversions·usage 단일 tenant 8개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계419).** 전체411/3,362·핵심337/2,292·Compute99/333입니다. instance action 목록의 RFC3339 query와 zone 없는 시각 decode, extension 목록·조회와 HTTP 없는 ActionURL, version 경로를 잘라낸 apiversions root, usage의 offset 없는 start/end와 `tenant_usage_links` 순회를 검증했습니다. 다음은 gate·대장이고 이어서 Compute 관리자 호출(flavors 관리·aggregates·hypervisors·services·서버 관리자 action)입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Nova native Compute 조회 8개 검증·판정 완료로 Compute 사용자 native 호출 마무리, Neutron native networks·subnets·ports 12개 계약 테스트 완료.** 전체419/3,362·핵심345/2,292·Compute107/333입니다. Compute 관리자 호출은 핵심 admin 단계로 두고, 핵심 user 순서에 따라 Neutron으로 넘어갔습니다. 세 package의 Create/Get/List/Delete 경로, envelope 안 확장 필드, subnet의 빈 gateway null 변환, port value_specs 병합과 금지 key, fixed_ips 반복 query, `*_links` 순회와 두 시각 형식 decode를 검증했습니다. 다음은 가이드·판정이고 이어서 security groups·rules·floating IP·router입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
-**최신 API 완료 (2026-10-10): 핵심 user Nova native servergroups·volumeattach·attachinterfaces 12개, 전체399→411(+12)·핵심325→337/2,292·Compute87→99/333.** generated 서버 그룹·볼륨 연결·인터페이스 연결 열두 호출의 계약을 고정했습니다. 세 package README와 [검증 기록](sdk-support-ledger.md#nova-native-server-groups-and-attachments-완료)에 설명합니다. 새6그룹42사례와 전체 `make check`(race 56개 실제 test package)가 통과했고 `9d68e275`·`25cd3f8f`를 push했습니다.
+**최신 API 완료 (2026-10-10): 핵심 user Nova native instanceactions·extensions·apiversions·usage 단일 tenant 8개, 전체411→419(+8)·핵심337→345/2,292·Compute99→107/333.** generated Compute 조회 여덟 호출의 계약을 고정해 Compute의 사용자 native 호출을 마쳤습니다. 각 package README와 [검증 기록](sdk-support-ledger.md#nova-native-compute-read-apis-완료)에 설명합니다. 새8그룹30사례와 전체 `make check`(race 60개 실제 test package)가 통과했고 `21e37c94`·`6e2121d7`을 push했습니다.
+
+**앞선 API 완료 (2026-10-10): 핵심 user Nova native servergroups·volumeattach·attachinterfaces 12개, 전체399→411(+12)·핵심325→337/2,292·Compute87→99/333.** generated 서버 그룹·볼륨 연결·인터페이스 연결 열두 호출의 계약을 고정했습니다. 세 package README와 [검증 기록](sdk-support-ledger.md#nova-native-server-groups-and-attachments-완료)에 설명합니다. 새6그룹42사례와 전체 `make check`(race 56개 실제 test package)가 통과했고 `9d68e275`·`25cd3f8f`를 push했습니다.
 
 **앞선 API 완료 (2026-10-10): 핵심 user Nova native `tags` 6개, 전체393→399(+6)·핵심319→325/2,292·Compute81→87/333.** generated tag 여섯 호출의 계약을 고정했습니다. [tags README](../compute/v2/tags/README.md#native-서버-id-호출)와 [검증 기록](sdk-support-ledger.md#nova-native-tags-완료)에 설명합니다. 새2그룹26사례와 전체 `make check`(race 53개 실제 test package)가 통과했고 `741fb2dc`·`c2d19dfd`를 push했습니다.
 
@@ -453,7 +455,8 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Nova native instanceactions·extensions·apiversions·usage 단일 tenant 8개 | pinned Gophercloud v2.15.0 네 package requests/results 검토 완료 | 기존 generated facade 유지 | 새8그룹30 PASS, 전체 gate 대기 | README 3개 추가·instanceactions native 절 | 신규8행 go_mapping 기록, gate 대기 | `21e37c94`·가이드·판정 push; 다음 gate·대장 |
+| Neutron native networks·subnets·ports 12개 | pinned Gophercloud v2.15.0 세 package requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Nova native instanceactions·extensions·apiversions·usage 단일 tenant 8개 | pinned Gophercloud v2.15.0 네 package requests/results 검토 완료 | 기존 generated facade 유지 | 새8그룹30·전체 `make check` PASS | README 3개 추가·instanceactions native 절 | **8행 go_mapping·419/3,362** | 작은 commit2개 push 완료; 다음 Neutron 핵심 리소스 |
 | Nova native servergroups·volumeattach·attachinterfaces 12개 | pinned Gophercloud v2.15.0 세 package requests/results 검토 완료 | 기존 generated facade 유지 | 새6그룹42·전체 `make check` PASS | package README 3개·Compute 목차 | **12행 go_mapping·411/3,362** | 작은 commit2개 push 완료; 다음 조회 API 8개 |
 | Nova native tags 6개 | pinned Gophercloud v2.15.0 tags requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹26·전체 `make check` PASS | README native 절 | **6행 go_mapping·399/3,362** | 작은 commit2개 push 완료; 다음 servergroups·volumeattach·attachinterfaces |
 | Nova native servers 주소·console·대기 4개 | pinned Gophercloud v2.15.0 addresses·console output·WaitForStatus 검토 완료 | 기존 generated facade 유지 | 새3그룹14·전체 `make check` PASS | native.md 주소·console·대기 절 | **4행 go_mapping·393/3,362** | 작은 commit2개 push 완료; 다음 tags |
@@ -474,6 +477,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance native images.Create | pinned Gophercloud v2.15.0 Create·CreateOpts·ToImageCreateMap 검토 완료 | 기존 generated facade 유지 | 새2그룹13·전체 `make check` PASS | native 생성 가이드 추가 | **신규1행 go_mapping·308/3,362** | 작은 commit2개 push 완료; 다음 native members |
 | Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 새2그룹8·전체 `make check` PASS | native 목록 가이드 추가 | **신규1행 go_mapping·307/3,362** | 작은 commit2개 push 완료; 다음 native images.Create |
 | Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
+| Nova native compute read APIs | 411 → 419 (+8) | 새8그룹30·전체 `make check`(60 package) PASS | `21e37c94`·`6e2121d7` push 완료 |
 | Nova native server groups and attachments | 399 → 411 (+12) | 새6그룹42·전체 `make check`(56 package) PASS | `9d68e275`·`25cd3f8f` push 완료 |
 | Nova native tags | 393 → 399 (+6) | 새2그룹26·전체 `make check`(53 package) PASS | `741fb2dc`·`c2d19dfd` push 완료 |
 | Nova native servers addresses console wait | 389 → 393 (+4) | 새3그룹14·전체 `make check`(52 package) PASS | `17bc0b3b`·`a4fbadb8` push 완료 |
