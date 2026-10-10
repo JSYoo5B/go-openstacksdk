@@ -58723,6 +58723,2267 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/peers.Create",
+      "source_fingerprint": "6704e535e6ba2c6fab1fcd351d2951258e2750a273f6335b93ab263ca31ac881",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"bgp_peer\":{...}} to bgp-peers with no required field, always sending auth_type, name, peer_ip and remote_as and omitting only an empty password, merges extensions inside the envelope, rejects core-key extensions and nil options before HTTP, decodes the bgp_peer envelope, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerRoutesBodiesListAndDecode",
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/peers.Delete",
+      "source_fingerprint": "db375c5b00366028baec6ce1603160fe29f84f204154cb7a9e97510c340809f9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE bgp-peers/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerRoutesBodiesListAndDecode",
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/peers.Get",
+      "source_fingerprint": "8332c2103706d514791ece2687dc5de9caffcd44887bf706227c8a1a552fdd7b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs bgp-peers/{id}, decodes the bgp_peer envelope (an empty object or null envelope yields a zero value, while other keys, a non-object envelope or a string remote_as fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerRoutesBodiesListAndDecode",
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/peers.List",
+      "source_fingerprint": "5aa3353089a0959a03fd7d7d63844ff3e558f121137e5b438947c5485eab35b0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs bgp-peers once through a single-page pager that ignores bgp_peers_links and links.next and takes no query options, yields nothing for an empty page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerRoutesBodiesListAndDecode",
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/peers.Update",
+      "source_fingerprint": "bf0f4fa831ceb45a6723670ec93a0f5e88d46f8fa529446d119f23de19f151e0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"bgp_peer\":{...}} to bgp-peers/{id} omitting an empty name and password (so empty options send {\"bgp_peer\":{}}), merges extensions inside the envelope, rejects core-key extensions and nil options before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerRoutesBodiesListAndDecode",
+            "network/v2/extensions/bgp/peers/native_bgp_peers_test.go:TestNativeBGPPeerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.AddBGPPeer",
+      "source_fingerprint": "8952b2463dff471c5c742a125eb320a750ca433007e639d3eeef4a63220ac7f6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.AddBGPPeer",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithAddBGPPeerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithAddBGPPeerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddBGPPeer PUTs the envelope-free body {\"bgp_peer_id\":...} (an empty ID is sent) to bgp-speakers/{id}/add_bgp_peer with extensions at the top level, rejects core-key extensions before HTTP, decodes the whole response without an envelope into AddBGPPeerOpts (an enveloped response silently yields an empty ID, while an empty body or array fails), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.AddGatewayNetwork",
+      "source_fingerprint": "9eadf02edbb8d2281584300df906ed42cd704601171f9083e98855a24c732713",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.AddGatewayNetwork",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithAddGatewayNetworkOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithAddGatewayNetworkField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddGatewayNetwork PUTs the envelope-free body {\"network_id\":...} to bgp-speakers/{id}/add_gateway_network with extensions at the top level, rejects nil options before HTTP, decodes the whole response without an envelope into AddGatewayNetworkOpts (an empty body or array fails), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.Create",
+      "source_fingerprint": "9db457afa97bd5387c0319ade40aaedcc789aebe56734f5aa0929495f3984285",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"bgp_speaker\":{...}} to bgp-speakers with no required field, always sending name, ip_version, local_as as a string and both advertise flags and omitting only empty networks, merges extensions inside the envelope, rejects core-key extensions and nil options before HTTP, decodes the bgp_speaker envelope with an integer local_as, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.Delete",
+      "source_fingerprint": "b35dd9cc2bc519908a53d95e0b53904760c75660e2dbe7a0b64ff1d6f07baa23",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE bgp-speakers/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.Get",
+      "source_fingerprint": "e88f65077d26f179ec885c712c2449a17d91bf4fc0c05dae091a9be240a2a018",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs bgp-speakers/{id}, decodes the bgp_speaker envelope including networks and peers lists (an empty object or null envelope yields a zero value, while other keys, a non-object envelope or a string local_as fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.GetAdvertisedRoutes",
+      "source_fingerprint": "e15d5b22838ea71ce344ea162eef1bb4b75f35645ba5ab0158b4b2842c8971af",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.GetAdvertisedRoutes"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAdvertisedRoutes GETs bgp-speakers/{id}/get_advertised_routes once through a single-page pager that ignores links.next, decodes advertised_routes destination/next_hop rows, yields nothing for an empty page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.List",
+      "source_fingerprint": "eeccf0f795511c5dafe0620928933817917af359f0f6aaa5a46c5a341acc68b6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs bgp-speakers once through a single-page pager that ignores bgp_speakers_links and links.next and takes no query options, yields nothing for an empty page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.RemoveBGPPeer",
+      "source_fingerprint": "e4f69167aa34b1b0bb1f9a4370bf0dffd09f1ca84f800b0f8c426cab63b01d80",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.RemoveBGPPeer",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRemoveBGPPeerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRemoveBGPPeerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveBGPPeer PUTs the envelope-free body {\"bgp_peer_id\":...} to bgp-speakers/{id}/remove_bgp_peer with extensions at the top level, rejects core-key extensions before HTTP, never reads the response body, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.RemoveGatewayNetwork",
+      "source_fingerprint": "fe61d753c80f79c107f5be94bae41ec8f0e45aa030e8469e7286fde1123ddfe5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.RemoveGatewayNetwork",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRemoveGatewayNetworkOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithRemoveGatewayNetworkField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveGatewayNetwork PUTs the envelope-free body {\"network_id\":...} (an empty ID is sent) to bgp-speakers/{id}/remove_gateway_network with extensions at the top level, rejects core-key extensions before HTTP, never reads the response body, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgp/speakers.Update",
+      "source_fingerprint": "4442ae714d9cebeb9d4709e954873889f3eacc5189d72ba3c138f8a5accb2758",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"bgp_speaker\":{...}} to bgp-speakers/{id} omitting an empty name but always sending both advertise flags (a name-only update also sends false for them), merges extensions inside the envelope, rejects core-key extensions before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerRoutesBodiesActionsAndDecode",
+            "network/v2/extensions/bgp/speakers/native_bgp_speakers_test.go:TestNativeBGPSpeakerStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.Create",
+      "source_fingerprint": "5e893c45436bda2860459083bacd7dedc22eadde6f07398cf0ec8d3ed786fb3c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"bgpvpn\":{...}} to bgpvpn/bgpvpns with every field omitempty (empty options send {\"bgpvpn\":{}} and a zero local_pref or vni cannot be sent), merges extensions inside the envelope, rejects core-key extensions and nil options before HTTP, decodes the bgpvpn envelope with a null local_pref as nil, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.CreateNetworkAssociation",
+      "source_fingerprint": "ae44f7142dbdd56a6aa0f7254573eabc12ec141574d73472e0309b0bc8ab6481",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateNetworkAssociation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateNetworkAssociationOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateNetworkAssociationField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateNetworkAssociation POSTs {\"network_association\":{...}} to bgpvpn/bgpvpns/{id}/network_associations, requires network_id and rejects core-key extensions before HTTP, merges extensions inside the envelope, decodes the network_association envelope, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.CreatePortAssociation",
+      "source_fingerprint": "09dded721e5d9bcb111443621a9157c8e0f39ce5beb4b2515c5d0767d62b11f0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreatePortAssociation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreatePortAssociationOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreatePortAssociationField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreatePortAssociation POSTs {\"port_association\":{...}} with routes and an explicit advertise_fixed_ips to bgpvpn/bgpvpns/{id}/port_associations, requires port_id and each route type before HTTP, merges extensions inside the envelope, decodes the port_association envelope with route local_pref pointers, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.CreateRouterAssociation",
+      "source_fingerprint": "8b324d61dc6578680eed13e8ff3104af98d3847b5b0d59b490517e5a7c156f45",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateRouterAssociation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRouterAssociationOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRouterAssociationField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateRouterAssociation POSTs {\"router_association\":{...}} with an explicit advertise_extra_routes pointer to bgpvpn/bgpvpns/{id}/router_associations, requires router_id before HTTP, decodes the router_association envelope, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.Delete",
+      "source_fingerprint": "33548a2295510a1eab6c9480bd9c4dd21c8af88708a89258cc7818ef0e8b43b2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE bgpvpn/bgpvpns/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.DeleteNetworkAssociation",
+      "source_fingerprint": "5b0e3011380d7b90d6059ac32d866cba03d3f46aa255538a5f0f3a2a48b31804",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.DeleteNetworkAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteNetworkAssociation sends DELETE bgpvpn/bgpvpns/{id}/network_associations/{association} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.DeletePortAssociation",
+      "source_fingerprint": "2d00be55156679e8c12501aa8c392e841434a090827c3f047eced0efa4379736",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.DeletePortAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeletePortAssociation sends DELETE bgpvpn/bgpvpns/{id}/port_associations/{association} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.DeleteRouterAssociation",
+      "source_fingerprint": "a459a15904e7a611b953fbd536093cb29fecf9f1ab9aec1a7d52ab3e1a80c165",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.DeleteRouterAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteRouterAssociation sends DELETE bgpvpn/bgpvpns/{id}/router_associations/{association} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.Get",
+      "source_fingerprint": "bfd45095e280c126e97639618c392a7b10253ce2f8c9e219e09b679cf2c8e71f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs bgpvpn/bgpvpns/{id}, decodes the bgpvpn envelope (an empty object yields a zero value, while other keys or an array body fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.GetNetworkAssociation",
+      "source_fingerprint": "eaf96d5c5cb82984721204491782ec8ff6abdac3c010d252718a6b804cf365f2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetNetworkAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetNetworkAssociation GETs bgpvpn/bgpvpns/{id}/network_associations/{association}, decodes the network_association envelope (an empty object yields a zero value, while other keys or an array body fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.GetPortAssociation",
+      "source_fingerprint": "570d6978d60bb711b987cc34275c8a0dcd3291bff3197bec7506400318956909",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetPortAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetPortAssociation GETs bgpvpn/bgpvpns/{id}/port_associations/{association}, decodes the port_association envelope (an empty object yields a zero value, while other keys or an array body fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.GetRouterAssociation",
+      "source_fingerprint": "2435a631afa7df807b6a652deb3e681e3723f855c5a7ccdefda7e7019550f946",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetRouterAssociation"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetRouterAssociation GETs bgpvpn/bgpvpns/{id}/router_associations/{association}, decodes the router_association envelope (an empty object yields a zero value, while other keys or an array body fail with operation context), and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.List",
+      "source_fingerprint": "0f0c1be616b1ff75b63fb1128aa1cc6977ebfe2f266a65bb941e1cd5df61617d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs bgpvpn/bgpvpns with ListOpts (repeated fields and networks keys) and extension query values, ignores bgpvpns_links and links.next and pages only when the URL carries limit by re-requesting the current URL with marker set to the last ID until an empty page, yields nothing for an empty page, reports io.EOF for a JSON bodyless 204, ends cleanly on a 204 without content type, reports native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.ListNetworkAssociations",
+      "source_fingerprint": "36692527bf09fa774dac6d473a7862fc9f035b0be0bb2bc480ddc52b27ed2019",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListNetworkAssociations",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListNetworkAssociationsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListNetworkAssociationsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListNetworkAssociations GETs bgpvpn/bgpvpns/{id}/network_associations with limit and extension query values, pages by last-ID marker only when limit is present until an empty page, yields nothing for an empty page, reports io.EOF for a JSON bodyless 204 and a decode error for a 204 without content type because its IsEmpty does not check 204, reports native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.ListPortAssociations",
+      "source_fingerprint": "280a18b1f2c0ccef1c5cc91e5269a4835200469ff5825c70c82c8502f6d684bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListPortAssociations",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListPortAssociationsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListPortAssociationsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListPortAssociations GETs bgpvpn/bgpvpns/{id}/port_associations once when no limit is given, yields nothing for an empty page, reports io.EOF for a JSON bodyless 204 and a decode error for a 204 without content type because its IsEmpty does not check 204, reports native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.ListRouterAssociations",
+      "source_fingerprint": "81f79eef1dc5f5a07e010db8160cd856dc064033157781d18372cefcf0d67bc3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListRouterAssociations",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListRouterAssociationsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithListRouterAssociationsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRouterAssociations GETs bgpvpn/bgpvpns/{id}/router_associations with the fields query and reads only the first page when no limit is given, yields nothing for an empty page, reports io.EOF for a JSON bodyless 204 and a decode error for a 204 without content type because its IsEmpty does not check 204, reports native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.Update",
+      "source_fingerprint": "0df106304d7187014f11a3cdbdaa5ba01414a16f93d477fb21d1e38329f0186c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"bgpvpn\":{...}} to bgpvpn/bgpvpns/{id} with pointer fields so an empty name, an empty route target list and a zero local_pref are sent and all-nil options send {\"bgpvpn\":{}}, merges extensions inside the envelope, rejects core-key extensions before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.UpdatePortAssociation",
+      "source_fingerprint": "9b92b26b13ba5d77ed376274c5da8c757a1c9021ba117a7898250702209f068e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.UpdatePortAssociation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdatePortAssociationOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdatePortAssociationField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdatePortAssociation PUTs {\"port_association\":{...}} to bgpvpn/bgpvpns/{id}/port_associations/{association}, sends an empty routes list through the slice pointer, validates each route type before HTTP, merges extensions inside the envelope, rejects core-key extensions and nil options before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/bgpvpns.UpdateRouterAssociation",
+      "source_fingerprint": "bc9dbcd834d677d89ec26943d13847c7c9262ef9494d3dfda240784db2be5138",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.UpdateRouterAssociation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateRouterAssociationOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithUpdateRouterAssociationField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateRouterAssociation PUTs {\"router_association\":{...}} to bgpvpn/bgpvpns/{id}/router_associations/{association} with an explicit advertise_extra_routes pointer (all-nil options send {\"router_association\":{}}), merges extensions inside the envelope, rejects core-key extensions before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/bgpvpns/native_bgpvpns_test.go:TestNativeBGPVPNStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-bgp.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.Create",
+      "source_fingerprint": "337d90849b6ef1775b09ca6954b6174fce940140e7f90148fde79488d05d0ddc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs resource_providers with an unwrapped body that always sends name, omits empty uuid/parent_provider_uuid and merges root extensions (core-key collision or nil option fails before HTTP), sends the caller's OpenStack-API-Version placement header, accepts only 200 (so the pre-1.20 bodyless 201 is an error) and decodes the unwrapped provider.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python create_resource_provider attribute handling and microversion negotiation are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.Get",
+      "source_fingerprint": "f6565e820a0d08a21b84a2b2d1b933451017848bda6c9796f624ebc9675be4bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs resource_providers/{id} with the caller's placement microversion header, accepts only 200 and decodes the unwrapped provider, where {} or null yield a zero value and mistyped fields fail.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider and find_resource_provider lookup are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.List",
+      "source_fingerprint": "c7adf4faef2efd56ab89909e86711b34bc49b66410dc20096fce5b258d12d5c3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs resource_providers as one SinglePageBase page with name/uuid/member_of/resources/in_tree/required single-string filters percent-encoded (WithListQuery replaces a native key; ListOpts139 repeated keys are not reachable), yields the resource_providers rows, treats an empty or missing array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_providers query mapping, 1.39 repeated filters and generator behavior are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.Update",
+      "source_fingerprint": "efe155bac13c279ccf4a62aa2e6810418e1b5f7fb25cc4c265ea5cfb315c1ad7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs resource_providers/{id} with pointer name/parent_provider_uuid omitted when nil, rewrites an empty parent pointer to JSON null, rejects reserved-key extensions or nil options before HTTP, accepts only 200 and decodes the unwrapped provider.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python update_resource_provider attribute handling are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.Delete",
+      "source_fingerprint": "5bfa473883c39350e73dc2efbabe233077852de05fd72f4ee21d92363f81d042",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE resource_providers/{id} without a body and accepts the default 202 or 204.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider ignore_missing and wait_for_delete are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetUsages",
+      "source_fingerprint": "eabb3d0c6a58c38d6347ae4bf2030bd13179978511564043e33e5a8402bbff65",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetUsages"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetUsages GETs resource_providers/{id}/usages, accepts only 200 and decodes resource_provider_generation and the usages class map.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python fetch_resource_provider_usages are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetAllocations",
+      "source_fingerprint": "86f21e43ff7c1bf77dee4c5abed4d7b00382a33d188d460e2fd727c8934a83ab",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetAllocations"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAllocations GETs resource_providers/{id}/allocations, accepts only 200 and decodes resource_provider_generation and per-consumer resources.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_provider_allocations are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetInventories",
+      "source_fingerprint": "31f4c655a291c373649cf38aa6292149116c0defe3fc0ee79fe54fcacf7a8983",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetInventories"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetInventories GETs resource_providers/{id}/inventories, accepts only 200 and decodes resource_provider_generation and the per-class inventory map with a float32 allocation_ratio.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_provider_inventories are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.UpdateInventories",
+      "source_fingerprint": "972aceb36ba2e7463a3a9b0efcf648ac8b9047e4fda124dfc9321b8ac652cf46",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventories",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoriesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoriesField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateInventories PUTs resource_providers/{id}/inventories with {resource_provider_generation, inventories} where every inventory number including zero is sent, rejects reserved-key extensions before HTTP, accepts only 200 (a generation conflict 409 stays native) and decodes the inventories response.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_inventories are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.DeleteInventories",
+      "source_fingerprint": "635c6dd792c3c9162bc3597b4c7a56c7f89fdcaaec178921528c8dc686c5300d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventories"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteInventories sends DELETE resource_providers/{id}/inventories and accepts only 204.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_inventories are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetInventory",
+      "source_fingerprint": "31ee735267ff5dd308a59917488b9b4a9b096469fcc5d28056aa28642b570447",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetInventory"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetInventory GETs resource_providers/{id}/inventories/{class}, accepts only 200 and decodes the flattened inventory fields with resource_provider_generation.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_inventory are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.UpdateInventory",
+      "source_fingerprint": "1719d3e79cf342c261b168ad8cf8f2d5b124db6cc1ea2a2340ba38db79e6975a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateInventory",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoryOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateInventoryField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateInventory PUTs resource_providers/{id}/inventories/{class} with the embedded inventory fields flattened beside resource_provider_generation, treats those flattened keys as reserved for extensions, accepts only 200 and decodes the flattened inventory.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python create_resource_provider_inventory and update_resource_provider_inventory are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.DeleteInventory",
+      "source_fingerprint": "d837c966e3086a379329d6a0939c32d8a4a797065856c97dce399b1ec4277393",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteInventory"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteInventory sends DELETE resource_providers/{id}/inventories/{class} and accepts only 204.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_inventory are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetTraits",
+      "source_fingerprint": "91053386a7bd7416309f401a42f6989b21fb1525b76bd608bc4f62c2d7a733f5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetTraits"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetTraits GETs resource_providers/{id}/traits, accepts only 200 and decodes resource_provider_generation and the trait list.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.UpdateTraits",
+      "source_fingerprint": "10d624d6d00efff781f8786abb3e8a1a91911ce7bce2f5bf79e2b1e71d8f0fbb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateTraits",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateTraitsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateTraitsField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateTraits PUTs resource_providers/{id}/traits with {resource_provider_generation, traits} where nil traits are sent as null, rejects reserved-key extensions before HTTP, accepts only 200 and decodes the traits response.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.DeleteTraits",
+      "source_fingerprint": "10d46546cc4d837ae7326a6bd99a518cdb1131685a1019251b79ef90cd145a3a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.DeleteTraits"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteTraits sends DELETE resource_providers/{id}/traits and accepts only 204.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.GetAggregates",
+      "source_fingerprint": "1ee65dd01336b5b0aacef7b11f80c36bcd4ee551e60c131ae94dcb077a6c9ffb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.GetAggregates"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAggregates GETs resource_providers/{id}/aggregates, accepts only 200 and decodes the aggregate list with a pointer generation that is nil when absent.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_aggregates and fetch_resource_provider_aggregates are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceproviders.UpdateAggregates",
+      "source_fingerprint": "31c8058ab8e57ff7d10fa04f16983d8cf83cf48fa35ec24bd8dedfa59cfeab09",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.UpdateAggregates",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateAggregatesOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithUpdateAggregatesField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateAggregates PUTs resource_providers/{id}/aggregates with the {aggregates, resource_provider_generation} object when the client microversion is empty or minor >= 19 and with only the bare aggregates array (generation and extensions dropped, nil list sends no body) when minor < 19, fails before HTTP for an unparsable microversion such as latest, accepts only 200 and decodes the aggregates response.",
+          "tests": [
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersRoutesBodiesAndDecode",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersMicroversionAndAggregatesBody",
+            "placement/v1/resourceproviders/native_contracts_test.go:TestNativeResourceProvidersStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_aggregates are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceclasses.Create",
+      "source_fingerprint": "12c6dee88f7c524e3197cd68cdfed43a5163ebded04b12c355e589928dcc0218",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs resource_classes with {name} where an empty name fails the native required check before HTTP, merges root extensions with core-key protection, accepts only 201 and returns no value.",
+          "tests": [
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode",
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python create_resource_class are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceclasses.Get",
+      "source_fingerprint": "9b7b0d5046e69b5cc9068e960dd45229aa23ff7b653ce074ced27e0160874d2d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs resource_classes/{name}, accepts only 200 and decodes the unwrapped class with links, where {} or null yield a zero value.",
+          "tests": [
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode",
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python get_resource_class are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceclasses.List",
+      "source_fingerprint": "9ab966c85646d77274373ca2565a3e5047c8e2b42a0b9ba1a9cd677b74586624",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs resource_classes as one SinglePageBase page without query options, yields resource_classes rows, treats an empty array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.",
+          "tests": [
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode",
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python resource_classes generator are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceclasses.Update",
+      "source_fingerprint": "4483025a475ead791aa50e9a2a616b1434e8de6a5876bbb784bb1edb69c59486",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends a bodyless PUT resource_classes/{name} and accepts 201 or 204.",
+          "tests": [
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode",
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python update_resource_class are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/resourceclasses.Delete",
+      "source_fingerprint": "75384e6c83dbeedaa6ede385e4225cb8ea197e217f6d4657f5641f19ee6058a9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE resource_classes/{name} and accepts only 204.",
+          "tests": [
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesRoutesBodiesAndDecode",
+            "placement/v1/resourceclasses/native_contracts_test.go:TestNativeResourceClassesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python delete_resource_class are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/traits.Create",
+      "source_fingerprint": "bd818f36ed1246dacfb0f066a8c999d6b479b95400c566cba8f96820635fed92",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends a bodyless PUT traits/{name} and accepts 201 or 204.",
+          "tests": [
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsRoutesQueryAndDecode",
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/traits call only; Python create_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/traits.Get",
+      "source_fingerprint": "15e5344318beaecdd72de150d5e0c77442bd685272a71be602b93cb2170797de",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET traits/{name} as an existence check that accepts only 204 and returns no value.",
+          "tests": [
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsRoutesQueryAndDecode",
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/traits call only; Python get_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/traits.List",
+      "source_fingerprint": "c094395b875a130c87e72b23ce0a67d9f57de7efbeb95dfb0f1fa06475ab9b17",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs traits as one SinglePageBase page with name (startswith:/in: kept verbatim and percent-encoded) and a pointer associated filter that sends false, yields trait name strings, treats an empty array as no rows, returns the native pager error unwrapped for 404 and io.EOF for a bodyless 204.",
+          "tests": [
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsRoutesQueryAndDecode",
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/traits call only; Python traits generator are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/traits.Delete",
+      "source_fingerprint": "f5b8da204a419f9b54161603b40034ba103c1fdd87413e92b39f605ae9ac4188",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE traits/{name} and accepts only 204.",
+          "tests": [
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsRoutesQueryAndDecode",
+            "placement/v1/traits/native_contracts_test.go:TestNativeTraitsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/traits call only; Python delete_trait are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/allocations.Get",
+      "source_fingerprint": "bf5ebff29c3d09379cb4edb217be0b0008d5a41bcf8c01812939804375179546",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs allocations/{consumer}, accepts only 200 and decodes the unwrapped allocations with nil project_id/user_id/consumer_generation/consumer_type pointers when the consumer has no allocations.",
+          "tests": [
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode",
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/allocations call only; Python get_allocation are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/allocations.Update",
+      "source_fingerprint": "47b0998ea7791d199dce7c3666493a22f171c5e894291c53341ab1583dcf1de3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs allocations/{consumer} with an unwrapped body that always sends allocations, project_id, user_id and consumer_generation (nil as null for a new consumer) and omits empty consumer_type, rejects reserved-key extensions (even omitted ones) or nil options before HTTP, and accepts only 204 so a consumer generation 409 stays native.",
+          "tests": [
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode",
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/allocations call only; Python create_allocations and update_allocation are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/allocations.Manage",
+      "source_fingerprint": "dbf3c1ef390b6b66bf248667be1a821ea1c57de03bc4e7b9391e4db59e4a3bf8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Manage",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Manage POSTs allocations with the consumer-keyed UpdateOpts map serialized as is (nil map sends null), places extensions inside the only consumer when exactly one is present and at the root otherwise, and accepts only 204.",
+          "tests": [
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode",
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/allocations call only; Python batch allocation workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/allocations.Delete",
+      "source_fingerprint": "e34ca8ce0fa89d423f9cf08a65ce37d1f630b559bab64b409bdef76f384e5f3d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE allocations/{consumer} and accepts the default 202 or 204.",
+          "tests": [
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsRoutesBodiesAndDecode",
+            "placement/v1/allocations/native_contracts_test.go:TestNativeAllocationsStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/allocations call only; Python delete_allocation are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:placement/v1/allocationcandidates.List",
+      "source_fingerprint": "ac9a3a68988871ae30ca9d54bb54110d0569e21169967c65c303332d39317998",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs allocation_candidates with repeated required/member_of/same_subtree keys, single resources/in_tree/group_policy/limit/root_required values and suffixed resource group keys, all sorted and percent-encoded, yields one value per non-empty SinglePageBase page and decodes it only with the 1.10-1.11 ExtractAllocationCandidates110 array shape.",
+          "tests": [
+            "placement/v1/allocationcandidates/native_contracts_test.go:TestNativeAllocationCandidatesQueryAndDecode",
+            "placement/v1/allocationcandidates/native_contracts_test.go:TestNativeAllocationCandidatesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/allocationcandidates call only; Python allocation_candidates are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": [
+        "The generated List decodes with ExtractAllocationCandidates110, so every 1.12+ response whose allocations is a provider-keyed object fails with a JSON type error; sdkgen should select ExtractAllocationCandidates (or expose both shapes) before this maps the native call."
+      ]
+    },
+    {
+      "operation": "gophercloud:placement/v1/usages.Get",
+      "source_fingerprint": "1cba95f2afef93b79d887bc8a1afad84beaa73c9577f5f1d64804aed6d045558",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.WithGetOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/usages.WithGetQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs usages with project_id/user_id/consumer_type query values (an empty project_id is omitted because it has no required tag), accepts only 200 and decodes the 1.38+ consumer-type grouped usages with native Extract, so the flat 1.9-1.37 shape is a decode error.",
+          "tests": [
+            "placement/v1/usages/native_contracts_test.go:TestNativeUsagesQueryAndDecode",
+            "placement/v1/usages/native_contracts_test.go:TestNativeUsagesStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "placement/v1/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native placement/v1/usages call only; Python usages and the pre-1.38 ExtractPre138 shape are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/hypervisors.List",
+      "source_fingerprint": "5d52990282e4abdfe139a4b8c997c499b977102f1d69999c4775cef7ef71e809",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-hypervisors/detail with pointer limit, marker, hypervisor_hostname_pattern and with_servers (false still sent) plus extension query, follows hypervisors_links next, decodes mixed-microversion rows, fails the whole page on a row without hypervisor_version, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP. The hypervisor decoder turns integer (pre-2.53) or UUID ids into strings, accepts cpu_info as a JSON string (pre-2.28), an object or absent (2.88+), converts scientific-notation versions, and fails when id or hypervisor_version is missing or the envelope is null, while a body without the envelope yields a zero value.",
+          "tests": [
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode",
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/hypervisors.Get",
+      "source_fingerprint": "537fa7bcf052a29afb5c500884667662c92e9c8da6e9d8309a1f9a1c88a2f522",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-hypervisors/{id} without a query, accepts only 200 and decodes the hypervisor envelope. The hypervisor decoder turns integer (pre-2.53) or UUID ids into strings, accepts cpu_info as a JSON string (pre-2.28), an object or absent (2.88+), converts scientific-notation versions, and fails when id or hypervisor_version is missing or the envelope is null, while a body without the envelope yields a zero value.",
+          "tests": [
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode",
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/hypervisors.GetExt",
+      "source_fingerprint": "d6edf922db28b5f4b0238d73c347461cee7eb9979faf007d18d6b972fab92e1e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.GetExt",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithGetExtOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithGetExtQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetExt GETs os-hypervisors/{id} with the with_servers pointer query and extension query (none when unset), decodes the 2.53+ servers list or leaves it nil, accepts only 200 and rejects a nil option or empty query key before HTTP. The hypervisor decoder turns integer (pre-2.53) or UUID ids into strings, accepts cpu_info as a JSON string (pre-2.28), an object or absent (2.88+), converts scientific-notation versions, and fails when id or hypervisor_version is missing or the envelope is null, while a body without the envelope yields a zero value.",
+          "tests": [
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode",
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/hypervisors.GetStatistics",
+      "source_fingerprint": "72d451a4257f9dd5784a892b7ef826956e932737b61dc0a9559a53880017eda4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.GetStatistics"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetStatistics GETs os-hypervisors/statistics, decodes the hypervisor_statistics envelope into Statistics and accepts only 200.",
+          "tests": [
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode",
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/hypervisors.GetUptime",
+      "source_fingerprint": "3f173d6d6587ef468b88fa1d61804a5faa725e9b135ffe31475c39be88659e86",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.GetUptime"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetUptime GETs os-hypervisors/{id}/uptime, decodes the hypervisor envelope with an integer or string id into Uptime (a present object without id fails, a missing envelope yields a zero value) and accepts only 200.",
+          "tests": [
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorRoutesPagingAndDecode",
+            "compute/v2/hypervisors/native_contracts_test.go:TestNativeHypervisorStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.List",
+      "source_fingerprint": "335520f4d4a3995107a8496db8f94d00f296c1f65d1b5663ea4ce7d70150346f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-aggregates as one SinglePageBase page without following embedded links, decodes integer ids, 2.41 uuid, string metadata and zone-less timestamps, fails the page on a mistyped row, yields nothing for an empty or missing array, reports io.EOF for a bodyless 204 and native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.Create",
+      "source_fingerprint": "60801bf381711eac9bfe86aba3bc7bc6349366c7ba3b544132d10b546b8a2dd4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs os-aggregates with {\"aggregate\":{name, omitempty availability_zone, extensions}}, rejects an empty name, a nil option or an extension colliding with a core key (even an omitted availability_zone) before HTTP, accepts only 200 and returns a nil aggregate without error when the envelope is missing or null.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.Get",
+      "source_fingerprint": "e7681b0ff2c54c1cdde1f01f199ac176a43e99abceb353d1a7af7c9a90aa9cc8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-aggregates/{decimal id}, accepts only 200, decodes zone-less created/updated/deleted timestamps (a Z suffix fails, null or empty is zero) and string-only metadata, and returns nil without error for a missing or null envelope.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.Update",
+      "source_fingerprint": "41331c95f2f76b553a7776330d39cf514d3b463084c248683a0c94c28f3330c7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs os-aggregates/{id} with {\"aggregate\":{omitempty name/availability_zone, extensions}} (an empty UpdateOpts sends an empty object), rejects core-key extensions and nil options before HTTP and accepts only 200.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.Delete",
+      "source_fingerprint": "f00373dddc0474807ae58e219772801e1d432fda91c3aa00bb39e20d1ba31a8c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE os-aggregates/{id} and accepts only 200, so 202 and 204 are wrapped native unexpected-status errors.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.AddHost",
+      "source_fingerprint": "2ea13c5ef0ccf59f84ca7e3660a0745335ad4039680895e83e61df9066a64e56",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.AddHost",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithAddHostOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddHost POSTs os-aggregates/{id}/action with {\"add_host\":{\"host\":...}}, rejects an empty host or nil option before HTTP, offers no extension fields, accepts only 200 and decodes the aggregate envelope.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.RemoveHost",
+      "source_fingerprint": "f16338ec01bb61a8ec31bdf85055e87a0ce297b3c11604acc89da247767e6616",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.RemoveHost",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithRemoveHostOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveHost POSTs os-aggregates/{id}/action with {\"remove_host\":{\"host\":...}}, rejects an empty host before HTTP, accepts only 200 and decodes the aggregate envelope.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/aggregates.SetMetadata",
+      "source_fingerprint": "4631bb2054369174252c3414e29c55a3217bd03242535a304be163cc12e5583c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.SetMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithSetMetadataOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadata POSTs os-aggregates/{id}/action with {\"set_metadata\":{\"metadata\":{...}}} sending nil values as null deletions, rejects nil metadata before HTTP, accepts only 200 and decodes the aggregate envelope.",
+          "tests": [
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateRoutesBodiesAndDecode",
+            "compute/v2/aggregates/native_contracts_test.go:TestNativeAggregateStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/services.List",
+      "source_fingerprint": "448808fb77d21d4b30d94bb677678486ce1148bfba19b721f37bd699a250ab52",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-services with omitempty binary/host and extension query as one SinglePageBase page that ignores services_links, decodes integer or UUID ids as strings, fails the page on a row without id, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceRoutesBodiesAndDecode",
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/services.Update",
+      "source_fingerprint": "c4acd1244d68556ec74ace10391b149dcc889b354cba4f39ff273cb45b643769",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs os-services/{id} with an unwrapped body of omitempty status, disabled_reason and forced_down (false cannot be sent) plus root-level extensions, rejects core-key extensions (including forced_down) and nil options before HTTP, accepts only 200, and decodes the service envelope where a missing envelope is zero but a null or id-less object fails.",
+          "tests": [
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceRoutesBodiesAndDecode",
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/services.Delete",
+      "source_fingerprint": "481b095d626537c10b462a586bfee531742ad255a82f039c2e859646a26ae32a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE os-services/{id} and accepts only 204, so 200 and 202 are wrapped native unexpected-status errors.",
+          "tests": [
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceRoutesBodiesAndDecode",
+            "compute/v2/services/native_contracts_test.go:TestNativeComputeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/migrations.List",
+      "source_fingerprint": "319bc2bbf7ff7f87d89a19bf9afc5fab30a8bb8d1e9eae7e5a5144bc2a03b78c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-migrations with pointer filters (a zero limit is still sent), offset-preserving RFC3339 changes-since/changes-before and extension query, reads one SinglePageBase page without following 2.59 migrations_links, decodes int64 ids and zone-less timestamps, fails the page on bad rows, yields nothing for an empty or missing array, reports io.EOF for a bodyless 204 and native pager status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "compute/v2/migrations/native_contracts_test.go:TestNativeMigrationListQueryAndDecode",
+            "compute/v2/migrations/native_contracts_test.go:TestNativeMigrationListStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/migrations call only; Python Migration resource models and server migration helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/diagnostics.Get",
+      "source_fingerprint": "5a585d16115a37e4376b9928d2972643a725eb506a2673b5f628ddf9c75ef15d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/diagnostics.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs servers/{id}/diagnostics with default GET OkCodes (200 only), returns the whole body as map[string]any with float64 numbers for both pre-2.48 and 2.48+ shapes, returns a nil map for null and fails on a non-object body.",
+          "tests": [
+            "compute/v2/diagnostics/native_contracts_test.go:TestNativeServerDiagnosticsRouteDecodeAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/diagnostics call only; Python ServerDiagnostics resource models are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/availabilityzones.ListDetail",
+      "source_fingerprint": "ab3cf524efd2bd081de858f66408a8f9ddf64cf20f16b6b827600792bac5d347",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.API.ListDetail",
+        "github.com/JSYoo5B/go-openstacksdk/resource.SinglePageStream"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDetail GETs os-availability-zone/detail once through resource.SinglePageStream (AllPages bypasses SinglePageBase's array-only IsEmpty), decodes the full availabilityZoneInfo object page with nested host/service states and zone-less updated_at before publishing any row, ignores links, yields nothing for a missing or null array, and reports io.EOF for a bodyless 204 and native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/availabilityzones/native_detail_test.go:TestNativeAvailabilityZoneListDetailObjectPage",
+            "compute/v2/availabilityzones/native_detail_test.go:TestNativeAvailabilityZoneListDetailStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/availabilityzones call only; Python AvailabilityZone detail resource models and cloud zone helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/usage.AllTenants",
+      "source_fingerprint": "f4dfb9c47c400091c8cda2b89df975ced6c5fad6452bf5f0df8f808cd4855160",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.AllTenants",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "AllTenants GETs os-simple-tenant-usage with detailed=1 only when Detailed is true, offset-less wall-clock start/end, omitempty limit/marker and extension query, follows tenant_usages_links next, decodes TenantUsage rows with zone-less timestamps, yields nothing for an empty or missing array, reports io.EOF for a bodyless 204 and native pager status or decode errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "compute/v2/usage/native_all_tenants_test.go:TestNativeAllTenantsUsageQueryPagingAndDecode",
+            "compute/v2/usage/native_all_tenants_test.go:TestNativeAllTenantsUsageStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-infra.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/usage call only; Python Usage resource models and cloud usage helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
