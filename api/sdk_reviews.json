@@ -61715,6 +61715,1024 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/regions.Create",
+      "source_fingerprint": "258c1934b4aab9c2c1e568385918da590f0d7031e86d0c579397bd60d6c43f10",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"region\":{...}} to regions omitting empty fields (empty options send an empty envelope), spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra key collisions and nil options before HTTP, decodes Extra from an explicit extra object or unknown keys, and accepts only 201.",
+          "tests": [
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode",
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/regions.Get",
+      "source_fingerprint": "532b6747f672082389cd085665ff3b396aedd36b2752b12ee932a08a92e4cea6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs regions/{id}, decodes the region envelope with Extra from unknown keys where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode",
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/regions.List",
+      "source_fingerprint": "9d09eef9bcf703fa917ea13c9280c853ed93ab19b588d15aa4465e1c4c704371",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs regions with parent_region_id and WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode",
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/regions.Update",
+      "source_fingerprint": "8b85c9061cc6b581dfcdc8ce913faa44c1c4df1fe6c29f7be0587f139bc8e482",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"region\":{...}} to regions/{id} with the Description pointer able to send an empty string, no native Extra, WithUpdateField keys inside the envelope and core-key collisions or nil options rejected before HTTP, and accepts only 200.",
+          "tests": [
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode",
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/regions.Delete",
+      "source_fingerprint": "56ff1d301803b00323d5951150d367dc08638112e6b79a27cf433f428b34fb62",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE regions/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionRoutesBodiesPagingAndDecode",
+            "identity/v3/regions/native_contracts_test.go:TestNativeRegionStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/services.Create",
+      "source_fingerprint": "51a6cb87ebb4078367d893ff404242669568fc7560491f23370789662d494d15",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"service\":{...}} to services always sending type (an empty string included) and the Enabled pointer, spreads Extra and WithCreateField keys inside the envelope while rejecting core-tag or Extra collisions and nil options before HTTP, decodes Extra with unknown keys plus name and description copies unless an extra object is present, and accepts only 201.",
+          "tests": [
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode",
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/services.Get",
+      "source_fingerprint": "fe885b6aade2de62b505aa14d7c597bb25536366ff82cc897f2d7bb55a4b0be4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs services/{id}, decodes the service envelope where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode",
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/services.List",
+      "source_fingerprint": "9e01a04680cfaa533acc4a1a7feb69b250b04bea198ef3576402cf1af44b98b2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs services with type and name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode",
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/services.Update",
+      "source_fingerprint": "0a19ba509945bed232af3e307d291e0742c69523853e5551c2ae2c885a0bf251",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"service\":{...}} to services/{id} with Name, Description and Enabled pointers able to send empty or false values, Extra and WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.",
+          "tests": [
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode",
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/services.Delete",
+      "source_fingerprint": "a2396229ca2a88a6cfad28e59c57e56c2a96dfa8d6f4ff07c08deb72290b6da4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE services/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceRoutesBodiesPagingAndDecode",
+            "identity/v3/services/native_contracts_test.go:TestNativeServiceStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/endpoints.Create",
+      "source_fingerprint": "c9656e0cacea0333308ba190583aa989433e334543be0ceb884aade70419e92a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"endpoint\":{...}} to endpoints requiring interface, url and service_id, sending the Enabled pointer and WithCreateField keys inside the envelope, rejecting missing fields, core-key collisions and nil options before HTTP, decoding region_id, and accepting the POST default 201 or 202.",
+          "tests": [
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/endpoints.Get",
+      "source_fingerprint": "5701f49f10f900a004ee5b686ba35f6c793dce07c653d15e4c3cd8b2616b2933",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs endpoints/{id}, decodes the endpoint envelope where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/endpoints.List",
+      "source_fingerprint": "727e5a656c687ffe47d7f0b2e007d8da8e7c5acc3c6c96ae3f320f45713ad357",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs endpoints and follows the links.next string with native pager 200/204/300 handling, but because native List applies BuildQueryString to the generated builder instead of calling ToEndpointListParams, every typed filter and WithListQuery parameter is silently dropped while a nil option is still rejected before HTTP.",
+          "tests": [
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointListFiltersDroppedByGeneratedBuilder"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": [
+        "The generated List passes a wrapper builder to native endpoints.List, which runs BuildQueryString on that value instead of ToEndpointListParams, so interface, service_id and region_id filters and WithListQuery are dropped; the facade must pass a plain ListOpts with the extension query merged before this can be a go_mapping."
+      ]
+    },
+    {
+      "operation": "gophercloud:identity/v3/endpoints.Update",
+      "source_fingerprint": "f94e085f51b52df27e1e3da74f3f4f91279f4e7156d55ac6b3cecd55348585b1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"endpoint\":{...}} to endpoints/{id} omitting empty fields, sending the Enabled pointer and WithUpdateField keys inside the envelope, rejecting core-key collisions and nil options before HTTP, and accepts the PATCH default 200, 202 or 204 where a bodyless 204 returns a nil endpoint without an error.",
+          "tests": [
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/endpoints.Delete",
+      "source_fingerprint": "4ac8965e3b26ba4018d5bad24d84413a4b3ef6c772b48932acb2a55dcf6472d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE endpoints/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointRoutesBodiesPagingAndDecode",
+            "identity/v3/endpoints/native_contracts_test.go:TestNativeEndpointStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/policies.Create",
+      "source_fingerprint": "1741b3f415512741779e961ab71ad46191b05bf951818d3c8852472409e46a65",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"policy\":{...}} to policies requiring type and a non-nil blob (an empty slice sends \"\"), always sending blob as a string, rejecting a type over 255 characters with StringFieldLengthExceedsLimit, missing fields, a blob or core-tag extension collision and nil options before HTTP, spreading Extra inside the envelope, and accepts only 201.",
+          "tests": [
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode",
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/policies.Get",
+      "source_fingerprint": "fa4181fa824a702b295c09ff797a043596336f4f272584089b9fd77e9a4dd526",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs policies/{id}, decodes the policy envelope with Extra from unknown keys where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode",
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/policies.List",
+      "source_fingerprint": "3d9f7c476f0c6b315d24b3e00e794c64447e1398966a8cd4048e7a8c09f9004e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs policies with type, TYPE__COMPARATOR Filters (also leaking a \"-\" Python dict parameter from the q:\"-\" map) and WithListQuery parameters, returns an unwrapped InvalidListFilter before HTTP for a malformed filter key, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode",
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/policies.Update",
+      "source_fingerprint": "224fb48a96a5e41a02b14766898b61947b90dca4a8cbf48886402177eba936ff",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"policy\":{...}} to policies/{id} omitting an empty type and blob so a WithUpdateField blob is accepted, rejecting a type over 255 characters, core-key collisions and nil options before HTTP, spreading Extra inside the envelope, and accepts only 200.",
+          "tests": [
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode",
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/policies.Delete",
+      "source_fingerprint": "7f93630ca4c0b1e0cb4c4878455a9c522ecc606eab96547a231f1cd1729f9ea5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE policies/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyRoutesBodiesPagingAndDecode",
+            "identity/v3/policies/native_contracts_test.go:TestNativePolicyStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.BatchCreate",
+      "source_fingerprint": "b1803677c14e14a7d808b7202dc44a60e6360c1251be52fde6d976e6f1fa2d92",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.BatchCreate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithBatchCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithBatchCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "BatchCreate POSTs an envelope-free row array {\"limits\":[...]} to limits requiring service_id and resource_name per row (ErrMissingInput before HTTP), always sending resource_limit (0 included), sending an empty array for an empty or nil batch, placing WithBatchCreateField keys at the root beside limits and rejecting a limits key or nil option before HTTP, decodes the limits array (nil when absent), and accepts only 201.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.Get",
+      "source_fingerprint": "a266070c2d4189a016007a126e80f44439fb19b4a98ffd54d081c3eeff7bf597",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs limits/{id}, decodes the limit envelope where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.GetEnforcementModel",
+      "source_fingerprint": "660cbbcca7e84f54c2f6d84fd6b5ee5d2dec1414f6e29205958725f31f1ac4ae",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.GetEnforcementModel"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetEnforcementModel GETs limits/model, decodes the model envelope's name and description where a null model is nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.List",
+      "source_fingerprint": "344caad21a0e2388e57ca7ba535394431e5bceb31df2fc7e178e11a69233c725",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs limits with region_id, project_id, domain_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.Update",
+      "source_fingerprint": "d104b142b9d3d779ff78319ae0f0506d0f165983e3a97c3f5ef6c8318860f0f0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"limit\":{...}} to limits/{id} with Description and ResourceLimit pointers able to send \"\" and 0, WithUpdateField keys inside the envelope, core-key collisions rejected before HTTP, and accepts only 200.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/limits.Delete",
+      "source_fingerprint": "870050c0d9641e3ad5ba77b0984072368651996f63fe937654be56b495a39f90",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE limits/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/limits/native_contracts_test.go:TestNativeLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/registeredlimits.BatchCreate",
+      "source_fingerprint": "2c663ae5edd112b33db6fcf55442a1c9156b0366881518ae6bc63289f7dbcb19",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.BatchCreate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithBatchCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithBatchCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "BatchCreate POSTs an envelope-free row array {\"registered_limits\":[...]} to registered_limits requiring service_id and resource_name per row while the numeric required default_limit accepts and always sends 0, sending an empty array for an empty batch, placing WithBatchCreateField keys at the root and rejecting a registered_limits key or nil option before HTTP, decodes the array (nil when absent), and accepts only 201.",
+          "tests": [
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/registeredlimits.Get",
+      "source_fingerprint": "9cca17b3c1aeb63b595347d34c5a5588a87335b9716c2001ce65cc497e096899",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs registered_limits/{id}, decodes the registered_limit envelope where a {} or null envelope decodes to nil without an error, and accepts only 200.",
+          "tests": [
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/registeredlimits.List",
+      "source_fingerprint": "4fcae282718c9deb7e6d8659164c1627fa685f3c25eb64d0387368383205e078",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs registered_limits with region_id, service_id and resource_name filters plus WithListQuery parameters, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/registeredlimits.Update",
+      "source_fingerprint": "a1ca0fb845384d71378fde80634242f9d6da9525aa153c84c6cd88b28e69aac6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"registered_limit\":{...}} to registered_limits/{id} with Description and DefaultLimit pointers able to send \"\" and 0, optional region_id, service_id and resource_name, WithUpdateField keys inside the envelope, core-key collisions and nil options rejected before HTTP, and accepts only 200.",
+          "tests": [
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/registeredlimits.Delete",
+      "source_fingerprint": "ed7dd6809a69b3cc513bb6c3d9cedba4a085c7b31f572bfcbd9f8f11b07ce5d6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE registered_limits/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitRoutesBodiesPagingAndDecode",
+            "identity/v3/registeredlimits/native_contracts_test.go:TestNativeRegisteredLimitStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projectendpoints.Create",
+      "source_fingerprint": "2a9b8047bdf8db2d8e6e0c227394d3a1fc17ed1daa7a19d5b0bb73c60351d070",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends a bodyless PUT OS-EP-FILTER/projects/{project}/endpoints/{endpoint} and accepts only 204.",
+          "tests": [
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointRoutesPagingAndDecode",
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projectendpoints.Delete",
+      "source_fingerprint": "5e66cabecd4219a7cd10cf33a82a970ade4be460680a51b528e7072b4b9a3cd8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE OS-EP-FILTER/projects/{project}/endpoints/{endpoint} and accepts only 204, so 202 is an error.",
+          "tests": [
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointRoutesPagingAndDecode",
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projectendpoints.List",
+      "source_fingerprint": "2de6d093f8a06073c43c28ae3ebf1a636748e044ec246804026d066dd86c3960",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs OS-EP-FILTER/projects/{project}/endpoints without options, decodes id, interface, region, service_id and url, follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page, and yields the native error without request.Wrap context.",
+          "tests": [
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointRoutesPagingAndDecode",
+            "identity/v3/projectendpoints/native_contracts_test.go:TestNativeProjectEndpointStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/federation.CreateMapping",
+      "source_fingerprint": "b59792c23d111760e16908466dd30d480c3ac4272485ad1dd9f0a13bef7f3afe",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.CreateMapping",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithCreateMappingOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithCreateMappingField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMapping PUTs {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} sending null for nil rules and nil local/remote arrays and always sending remote type, omitting other empty rule fields, placing WithCreateMappingField keys inside the envelope while rejecting a rules key or nil option before HTTP, decodes the rule tree, and accepts only 201.",
+          "tests": [
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/federation.GetMapping",
+      "source_fingerprint": "02c4832cea56e1c80779b0225aaf0a0a33ae2b5bc14665d18dd8af570d2e8e61",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.GetMapping"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMapping GETs OS-FEDERATION/mappings/{id}, decodes the mapping envelope and rule tree where a {} or null envelope decodes to nil without an error and a malformed rule fails, and accepts only 200.",
+          "tests": [
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/federation.ListMappings",
+      "source_fingerprint": "c3b38297aaa456645a9a4288a6c31ad4166e6e409007a605b66e3a74980ab9a9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.ListMappings"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListMappings GETs OS-FEDERATION/mappings without options and follows the links.next string (null stops), accepts native pager 200/204/300 on the first page, returns io.EOF for a bodyless 204 and ends cleanly on an empty page.",
+          "tests": [
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/federation.UpdateMapping",
+      "source_fingerprint": "578f763fff74c07ffe81ad3fd7dede9f3553eaa4e0d8a88618eb620385d996ac",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.UpdateMapping",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithUpdateMappingOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithUpdateMappingField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMapping PATCHes {\"mapping\":{\"rules\":[...]}} to OS-FEDERATION/mappings/{id} with the same rule serialization as CreateMapping, WithUpdateMappingField keys inside the envelope, a rules key or nil option rejected before HTTP, and accepts only 200.",
+          "tests": [
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/federation.DeleteMapping",
+      "source_fingerprint": "61ed035ce2ba0f66e255b3d8f1a174f7314b63bb3dd3d97fd295ffad60b45acf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.DeleteMapping"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMapping sends DELETE OS-FEDERATION/mappings/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingRoutesBodiesPagingAndDecode",
+            "identity/v3/federation/native_contracts_test.go:TestNativeMappingStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-b.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
