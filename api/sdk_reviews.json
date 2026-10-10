@@ -56576,6 +56576,235 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.Create",
+      "source_fingerprint": "989b047885bb2b18fce0d5b68610cce83646d6201c2a71454fd8322a4716d234",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"trust\":{...}} to OS-TRUST/trusts always sending impersonation (false included), formatting expires_at with a literal Z and no UTC conversion, keeping roles and extensions inside the envelope, requires trustee and trustor user IDs and rejects a core-key collision before HTTP, decodes RFC3339 times and accepts only 201.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.Get",
+      "source_fingerprint": "8d56e2915271623846aa0c2b93cb94de1083be52f3ef95637893703cfede5537",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs OS-TRUST/trusts/{id}, decodes the trust with a null deleted_at as zero time and accepts only 200.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.List",
+      "source_fingerprint": "76f04aa8993561b36dcaa63019b5f91824e10ed10769a50102aa56ba51cb6357",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs OS-TRUST/trusts with trustor/trustee filters and extension query values, follows the Keystone links.next string until null and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.Delete",
+      "source_fingerprint": "ca0fc0b21ae66419e70b32bf2f65fc345b6cf3fc087dc9160389c76aa86c0e0a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs OS-TRUST/trusts/{id} and accepts only 202/204.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.ListRoles",
+      "source_fingerprint": "4340700932f5555124196621feea4b988022e71c0b2a48253e0ea38f70a21f9e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.ListRoles"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRoles GETs OS-TRUST/trusts/{id}/roles and follows the Keystone links.next string until null.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.GetRole",
+      "source_fingerprint": "d3decb34b7f16280a69df98bb464c0cdde72666a36969ff53d02c611095a8896",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.GetRole"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetRole GETs OS-TRUST/trusts/{id}/roles/{role}, decodes the role envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/trusts.CheckRole",
+      "source_fingerprint": "d1ca08dba025f43ae8927e70b7b151604233be7ae0f3edb7326cbcbe7fa38149",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts.API.CheckRole"
+      ],
+      "contracts": [
+        {
+          "behavior": "CheckRole HEADs OS-TRUST/trusts/{id}/roles/{role} and accepts only the native HEAD default 200.",
+          "tests": [
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustRoutesBodiesPagingAndDecode",
+            "identity/v3/trusts/native_contracts_test.go:TestNativeTrustStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.ListAvailable",
+      "source_fingerprint": "1e41fb4819b160b7e486638d5bd8ab9b4597ed0fc9fa0224a790aa457e88a33c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ListAvailable"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAvailable GETs auth/projects without options, follows the Keystone links.next string until null, yields nothing for an empty list and reports native page status errors.",
+          "tests": [
+            "identity/v3/projects/native_available_test.go:TestNativeProjectListAvailable"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.ChangePassword",
+      "source_fingerprint": "af1b7e3f4521b15b17cb5bbe7f2ae03e927eaa67a4ea2d3075df3e8db647d687",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ChangePassword",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithChangePasswordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithChangePasswordField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangePassword POSTs {\"user\":{\"original_password\":...,\"password\":...}} to users/{user}/password always sending both values (empty included) with extensions inside the envelope, rejects a core-key collision and nil option before HTTP, and accepts only 204.",
+          "tests": [
+            "identity/v3/projects/native_available_test.go:TestNativeUserChangePassword"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-trusts.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
