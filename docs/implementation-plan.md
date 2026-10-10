@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): 핵심 서비스 Python openstacksdk proxy 단계 진행 중. 전체1,103/3,362·핵심1,029/2,292, 전체 gate PASS.** 첫 병렬 묶음(Placement 38개, Keystone v2·Glance v1·Barbican 잔여 38개, Cinder v3 핵심 resource 66개)을 머지해 88개를 `go_mapping`, 54개를 unresolved로 판정했습니다. 남은 핵심 Python 연산은 Nova proxy, Keystone v3 proxy, Neutron proxy, Cinder v2 proxy와 v3 group·cluster 계열, 핵심 cloud mixin입니다. unresolved 사유가 반복되는 삭제 `ignore_missing` 미지원과 find fallback 부재는 묶음을 마친 뒤 공통 기능으로 보완할 후보입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
+**현재 구현 (2026-10-11): 핵심 서비스 Python openstacksdk proxy 단계 진행 중. 전체1,145/3,362·핵심1,071/2,292, 전체 gate PASS.** 첫 병렬 묶음(Placement 38개, Keystone v2·Glance v1·Barbican 잔여 38개, Cinder v3 핵심 resource 66개)을 머지해 88개를 `go_mapping`, 54개를 unresolved로 판정했습니다. 이어서 Nova 서버 user 메서드 62개를 머지해 42개를 `go_mapping`, 이미지 proxy·고정 IP·backup 등 20개를 unresolved로 기록했고, Nova 관리자 메서드 52개를 진행 중입니다. 남은 핵심 Python 연산은 Nova 관리자 proxy, Keystone v3 proxy, Neutron proxy, Cinder v2 proxy와 v3 group·cluster 계열, 핵심 cloud mixin입니다. unresolved 사유가 반복되는 삭제 `ignore_missing` 미지원과 find fallback 부재는 묶음을 마친 뒤 공통 기능으로 보완할 후보입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 Python proxy 첫 병렬 묶음 142개 판정과 noauth·swauth native 4개, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** Placement·Keystone v2·Glance v1·Barbican 잔여·Cinder v3 핵심 resource의 Python proxy 메서드를 판정해 88개를 `go_mapping`으로 기록하고, Go가 같은 요청을 만들 수 없는 54개는 사유와 함께 unresolved로 남겼습니다. [검증 기록](sdk-support-ledger.md#핵심-python-proxy-첫-병렬-묶음-완료)에 근거를 정리했습니다.
 
