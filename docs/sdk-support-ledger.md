@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native acls](#barbican-native-acls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican Python secret ACL](#barbican-python-secret-acl-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는351입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는355입니다.
+
+## Barbican Python secret ACL 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Barbican Python `get_secret_acl`·`set_secret_acl`·`update_secret_acl`·`delete_secret_acl` 4개, 전체351→355(+4)·핵심277→281/2,292·Key Manager46→50/67.** 새 SDK 소유 package `keymanager/v1/secretacls`의 `SecretACLs.InSecret(ctx, ref)`가 고정 Python `SecretACL` Resource의 동작을 제공합니다. Get은 400 미만 응답을 받아 JSON object의 `read`·`acl_ref`만 덮어쓰고, Set과 Update는 모두 `_update` commit의 PUT이며 선언 속성이 없으면 HTTP 없이 seed를 반환합니다. Delete는 기본으로 clean 404를 무시합니다. sdkgen 등록으로 `keymanager/v1` 서비스에 연결했고, 수동 수정으로 생겼던 `image/v2/README.md` 생성 drift도 생성기 원문을 고쳐 0으로 맞췄습니다. [secretacls README](../keymanager/v1/secretacls/README.md)에 Python/Go 비교를 설명합니다.
+
+새 집중 테스트3그룹15사례가 race로 통과했고 전체 `make check`의 race **51개 실제 test package**·parity·progress·gofmt가 exit0이며 재생성 결과가 커밋본과 같습니다. 판정 JSON에 새4행·4계약을 추가해 reviews614·contracts3,839·go_mapping355입니다. 구현 `d1e5b2b6`·테스트 `8374c556`·가이드/판정 `dc7c9ade`를 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Barbican native acls 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Barbican native `acls` 8개, 전체343→351(+8)·핵심269→277/2,292·Key Manager38→46/67.** 기존 generated acls의 secret/container별 Get·Set(PUT)·Update(PATCH)·Delete가 고정 Gophercloud v2.15.0의 raw 경로, required type을 key로 하는 본문과 nil users/project-access 생략, 모두 200인 고정 status, `acl_ref` 반환을 바꾸지 않는지 검증했습니다. ACL 형식이 하나면 본문이 단일 object envelope가 되어 공통 확장 병합이 확장 필드를 그 형식 객체 안에 넣고, 여러 형식이면 최상위에 두는 동작도 고정했습니다. 구현 변경은 없으며 [acls README](../keymanager/v1/acls/README.md)를 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `acls` 8개, 전체343→351(+8)·핵심269→277/2,292·Key Manager38→46/67.** 기존 generated acls의 secret/container별 Get·Set(PUT)·Update(PATCH)·Delete가 고정 Gophercloud v2.15.0의 raw 경로, required type을 key로 하는 본문과 nil users/project-access 생략, 모두 200인 고정 status, `acl_ref` 반환을 바꾸지 않는지 검증했습니다. ACL 형식이 하나면 본문이 단일 object envelope가 되어 공통 확장 병합이 확장 필드를 그 형식 객체 안에 넣고, 여러 형식이면 최상위에 두는 동작도 고정했습니다. 구현 변경은 없으며 [acls README](../keymanager/v1/acls/README.md)를 추가했습니다.
 
 새 집중 계약 테스트2그룹35사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **50개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새8행·8계약을 추가해 reviews610·contracts3,835·go_mapping351입니다. 테스트 `646e7a9b`·가이드/판정 `519fa5d9`를 push했습니다. Barbican native 32개는 모두 go_mapping입니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 

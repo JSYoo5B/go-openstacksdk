@@ -10,9 +10,11 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Barbican Python secret ACL 4개 owned API·테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계355).** 직전 완료 집계는 전체351/3,362·핵심277/2,292·Key Manager46/67입니다. 새 `keymanager/v1/secretacls` package의 `SecretACLs.InSecret(ctx, ref)`가 Get(400 미만 accepted, JSON object의 `read`·`acl_ref` overlay), PUT Set·Update(속성이 없으면 HTTP 없이 seed 반환), ignore-missing Delete를 제공하고 sdkgen 등록으로 서비스에 연결했습니다. 생성 문서 `image/v2/README.md`의 수동 수정으로 생긴 drift도 생성기 원문에 같은 문장을 넣어 0으로 맞췄습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Barbican Python secret ACL 4개 검증·판정 완료.** 전체355/3,362·핵심281/2,292·Key Manager50/67입니다. Barbican의 남은 Python 행은 generic `_update` commit을 쓰는 `update_secret/update_container/update_order`, `_find`의 `find_container/find_order`, `wait_for_status/wait_for_delete`와 기존 unresolved 목록·consumer·quota 행입니다. 다음 착수 시 기존 owned record 기반(Fetch·CreateRecord)과의 연결을 검토해 단위를 정합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
-**최신 API 완료 (2026-10-10): 핵심 user Barbican native `acls` 8개, 전체343→351(+8)·핵심269→277/2,292·Key Manager38→46/67.** generated ACL 여덟 호출의 경로·본문·status·확장 위치를 고정해 Barbican native 32개를 모두 닫았습니다. [acls README](../keymanager/v1/acls/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-acls-완료)에 설명합니다. 새2그룹35사례와 전체 `make check`(race 50개 실제 test package)가 통과했고 `646e7a9b`·`519fa5d9`를 push했습니다.
+**최신 API 완료 (2026-10-10): 핵심 user Barbican Python secret ACL 4개, 전체351→355(+4)·핵심277→281/2,292·Key Manager46→50/67.** 새 `secretacls` package가 Python `SecretACL`의 fetch·PUT commit·ignore-missing delete를 제공하고 sdkgen으로 서비스에 연결했습니다. [secretacls README](../keymanager/v1/secretacls/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-python-secret-acl-완료)에 설명합니다. 새3그룹15사례와 전체 `make check`(race 51개 실제 test package, 재생성 drift0)가 통과했고 `d1e5b2b6`·`8374c556`·`dc7c9ade`를 push했습니다.
+
+**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `acls` 8개, 전체343→351(+8)·핵심269→277/2,292·Key Manager38→46/67.** generated ACL 여덟 호출의 경로·본문·status·확장 위치를 고정해 Barbican native 32개를 모두 닫았습니다. [acls README](../keymanager/v1/acls/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-acls-완료)에 설명합니다. 새2그룹35사례와 전체 `make check`(race 50개 실제 test package)가 통과했고 `646e7a9b`·`519fa5d9`를 push했습니다.
 
 **앞선 API 완료 (2026-10-10): 핵심 user Barbican native `orders` 4개, 전체339→343(+4)·핵심265→269/2,292·Key Manager34→38/67.** generated order 네 호출의 경로·본문·status·페이지 계약을 고정했습니다. [orders README](../keymanager/v1/orders/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-orders-완료)에 설명합니다. 새2그룹18사례와 전체 `make check`(race 49개 실제 test package)가 통과했고 `21c4e5e7`·`72b6414f`를 push했습니다.
 
@@ -437,7 +439,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Barbican Python secret ACL 4개 | pinned Python proxy·SecretACL Resource·commit/delete 검토 완료 | owned `secretacls` package·서비스 연결 완료 | 집중 테스트 PASS, 전체 gate 대기 | secretacls README 추가 | 신규4행 go_mapping 기록, gate 대기 | `d1e5b2b6`·`8374c556`·가이드·판정 push; 다음 gate·대장 |
+| Barbican Python secret ACL 4개 | pinned Python proxy·SecretACL Resource·commit/delete 검토 완료 | owned `secretacls` package·서비스 연결 완료 | 새3그룹15·전체 `make check` PASS | secretacls README 추가 | **신규4행 go_mapping·355/3,362** | 작은 commit3개 push 완료 |
 | Barbican native acls 8개 | pinned Gophercloud v2.15.0 acls requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹35·전체 `make check` PASS | acls README 추가 | **신규8행 go_mapping·351/3,362** | 작은 commit2개 push 완료; 다음 Python secret ACL |
 | Barbican native orders 4개 | pinned Gophercloud v2.15.0 orders requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹18·전체 `make check` PASS | orders README 추가 | **신규4행 go_mapping·343/3,362** | 작은 commit2개 push 완료; 다음 native acls |
 | Barbican native containers 9개 | pinned Gophercloud v2.15.0 containers requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹39·전체 `make check` PASS | containers README 추가 | **신규9행 go_mapping·339/3,362** | 작은 commit2개 push 완료; 다음 native orders |
@@ -450,6 +452,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance native images.Create | pinned Gophercloud v2.15.0 Create·CreateOpts·ToImageCreateMap 검토 완료 | 기존 generated facade 유지 | 새2그룹13·전체 `make check` PASS | native 생성 가이드 추가 | **신규1행 go_mapping·308/3,362** | 작은 commit2개 push 완료; 다음 native members |
 | Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 새2그룹8·전체 `make check` PASS | native 목록 가이드 추가 | **신규1행 go_mapping·307/3,362** | 작은 commit2개 push 완료; 다음 native images.Create |
 | Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
+| Barbican Python secret ACL 4개 | 351 → 355 (+4) | 새3그룹15·전체 `make check`(51 package) PASS | `d1e5b2b6`·`8374c556`·`dc7c9ade` push 완료 |
 | Barbican native acls 8개 | 343 → 351 (+8) | 새2그룹35·전체 `make check`(50 package) PASS | `646e7a9b`·`519fa5d9` push 완료 |
 | Barbican native orders 4개 | 339 → 343 (+4) | 새2그룹18·전체 `make check`(49 package) PASS | `21c4e5e7`·`72b6414f` push 완료 |
 | Barbican native containers 9개 | 330 → 339 (+9) | 새3그룹39·전체 `make check`(48 package) PASS | `6a22fbcb`·`aaf53acc` push 완료 |
