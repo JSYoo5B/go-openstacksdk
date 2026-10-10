@@ -18,4 +18,17 @@
 
 Gophercloud native `Update`는 `name`·`description`·`metadata`를 envelope 없이 최상위에 보냅니다. Cinder는 `{"backup": {...}}`를 요구하므로 SDK adapter가 그 값을 `backup` 안으로 옮기고, 확장 필드도 같은 envelope 안에 넣습니다. 이 보정과 빈 metadata 처리는 [Backup 수정](backups/README.md#backup-수정과-metadata-전체-교체)에 설명합니다.
 
-응답은 `backup` key를 직접 찾아 `{}`·null을 빈 backup으로 돌려주고, 다른 key만 있으면 오류입니다. `metadata`는 map pointer라 null이면 nil이고, `availability_zone`도 pointer입니다. 생성·수정·데이터 시각은 시간대 없는 형식만 받아서 끝에 `Z`가 붙으면 decode 오류입니다. force delete, reset status, export·import record는 기본 정책상 관리자 호출이라 이 문서에서 다루지 않습니다.
+응답은 `backup` key를 직접 찾아 `{}`·null을 빈 backup으로 돌려주고, 다른 key만 있으면 오류입니다. `metadata`는 map pointer라 null이면 nil이고, `availability_zone`도 pointer입니다. 생성·수정·데이터 시각은 시간대 없는 형식만 받아서 끝에 `Z`가 붙으면 decode 오류입니다.
+
+## 관리자 호출
+
+기본 Cinder 정책상 관리자 호출인 네 메서드입니다.
+
+| 메서드 | 요청 | 성공 status |
+|---|---|---|
+| `Export(ctx, id)` | `GET backups/{id}/export_record` | 200 |
+| `Import(ctx, opts, options...)` | `POST backups/import_record`, `{"backup-record": {...}}` | 201 |
+| `ResetStatus(ctx, id, opts, options...)` | `POST backups/{id}/action`, `{"os-reset_status": {"status": ...}}` | 202 |
+| `ForceDelete(ctx, id)` | `POST backups/{id}/action`, `{"os-force_delete": {}}` | 202 |
+
+`Export`의 `BackupRecord.BackupURL`은 `[]byte`라 응답의 `backup_url` 문자열을 base64로 해석합니다. base64가 아니면 decode 오류이고, `backup-record` key가 없으면 빈 record를 돌려줍니다. `Import`는 같은 byte 값을 다시 base64 문자열로 보내고 응답 `backup` key의 ID·이름을 돌려줍니다. record 원문을 그대로 다루는 SDK 소유 호출은 [Backup 사용법](backups/README.md)의 `ExportRecord`·`ImportBackup`을 참고합니다.

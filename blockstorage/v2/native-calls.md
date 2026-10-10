@@ -23,4 +23,4 @@ v2 `List`는 요약 경로 `snapshots`를 **한 페이지로만** 읽습니다. 
 
 `service.Backups`(`blockstorage/v2/backups`)의 `Create`·`Get`·`List`·`ListDetail`·`RestoreFromBackup`·`Delete`, `service.Transfers`의 다섯 호출, `service.AvailabilityZones.List`는 v3과 같은 Gophercloud 구현을 v2 경로로 호출합니다. 계약은 [v3 backup 호출](../v3/native-backups.md)과 [v3 transfer·availability zone 호출](../v3/native-transfers.md)을 따르며, availability zone 목록도 v3과 같이 한 페이지를 바로 추출합니다.
 
-v2 backup `Update`는 v3과 다르게 SDK가 본문을 보정하지 않아 native의 envelope 없는 본문을 그대로 보냅니다. Cinder는 backup 수정을 microversion 3.9의 v3 API에서 추가했으므로 v2에서는 이 호출을 사용할 수 없고, 판정도 미완료로 둡니다.
+관리자 호출인 backup `Export`·`Import`·`ResetStatus`·`ForceDelete`도 [v3 관리자 호출](../v3/native-backups.md#관리자-호출)과 같습니다. v2 backup `Update`는 v3과 다르게 SDK가 본문을 보정하지 않아 native의 envelope 없는 본문을 그대로 보냅니다. Cinder는 backup 수정을 microversion 3.9의 v3 API에서 추가했으므로 v2에서는 이 호출을 사용할 수 없고, 판정도 미완료로 둡니다.
