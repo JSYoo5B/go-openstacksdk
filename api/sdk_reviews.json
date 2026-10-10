@@ -66934,7 +66934,7 @@
     {
       "operation": "python:block_storage/v3/delete_volume",
       "source_fingerprint": "76305bfa8070075671808497959804fe32d1e1b6e20df199b484ddf108dcdda4",
-      "status": "go_mapping",
+      "status": "unresolved",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Remove",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Delete",
@@ -66962,7 +66962,9 @@
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
         "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
       ],
-      "remaining": []
+      "remaining": [
+        "With cascade or force, Remove cannot carry the query and the generated Delete has no ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete with query options is needed."
+      ]
     },
     {
       "operation": "python:block_storage/v3/volumes",
@@ -68209,7 +68211,7 @@
     {
       "operation": "python:block_storage/v3/delete_type_encryption",
       "source_fingerprint": "409faeb5552b3208db282ce261f0dc17b10ef50b570aeb374c21d281103e84ab",
-      "status": "go_mapping",
+      "status": "unresolved",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteEncryption"
@@ -68229,7 +68231,9 @@
         "Python's ignore_missing=True drops a 404 from the DELETE; the Go caller drops it with gophercloud.ResponseCodeIs.",
         "Python accepts either a TypeEncryption resource or volume_type and fetches the encryption itself; Go needs the type ID and encryption ID."
       ],
-      "remaining": []
+      "remaining": [
+        "The generated DeleteEncryption has no Remove or ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete is needed."
+      ]
     },
     {
       "operation": "python:block_storage/v3/create_qos_spec",
@@ -68365,7 +68369,7 @@
     {
       "operation": "python:block_storage/v3/delete_qos_spec",
       "source_fingerprint": "ce3c509bfb08b743a5e193083d9cf620fe357ef0f21bd66348113866508bbd5f",
-      "status": "go_mapping",
+      "status": "unresolved",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Remove",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete",
@@ -68390,7 +68394,9 @@
         "Remove cannot carry force, so with force=True the caller uses Delete and drops a 404 with gophercloud.ResponseCodeIs.",
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error."
       ],
-      "remaining": []
+      "remaining": [
+        "With force=True, Remove cannot carry the query and the generated Delete has no ignore-missing option, so Python's default ignore_missing=True is only reachable by caller-side 404 handling; an SDK ignore-missing delete with query options is needed."
+      ]
     },
     {
       "operation": "python:block_storage/v3/associate_qos_spec",
@@ -69977,6 +69983,1200 @@
       "differences": [],
       "remaining": [
         "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call deletes Nova /images/{id}/metadata keys or replaces the set."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/aggregates",
+      "source_fingerprint": "36719128dcf499e3c798b730ffbdc8d428e84bee25698c63fa7a611883a07f90",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithName"
+      ],
+      "contracts": [
+        {
+          "behavior": "List and All send GET os-aggregates without a query, and All with resource.WithName filters the decoded rows locally like Python's Body attribute filter.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateCreateGetListDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python can send limit and marker query keys, which Nova's aggregate list ignores; the Go aggregate list accepts no wire query.",
+        "Go reads one page and does not follow aggregates_links.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/get_aggregate",
+      "source_fingerprint": "79dab65f30cc4010f4a3faa024ace705b8362ea1c4c5ab2d6aca067599118abb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET os-aggregates/{id} and decodes id, uuid, name, availability_zone, hosts and metadata.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateCreateGetListDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
+        "Go decodes metadata values as strings and the timestamps only in the zone-less Nova format.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_aggregate",
+      "source_fingerprint": "8dc61bb89d7a535045c58229ea36799f06e98c6c90c9d6a92a3f23def317aca4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST os-aggregates with {\"aggregate\": {name, availability_zone}} and returns the decoded aggregate.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateCreateGetListDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends only passed attributes and may send availability_zone null; Go omits an empty AvailabilityZone, which Nova treats the same as null on create.",
+        "Go rejects an empty Name before HTTP.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/delete_aggregate",
+      "source_fingerprint": "d5d1875c52de5272d6cb49054d407433d1b5e12b882efb31f3235147ecdf72dc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove sends DELETE os-aggregates/{id}, ignores 404 by default and reports NotFound with WithMissingError.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateCreateGetListDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Remove parses the reference as an integer and rejects a non-numeric ID before HTTP.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/add_host_to_aggregate",
+      "source_fingerprint": "8266cdc133f73eee301aa0fd86006e682b81cb2ed4a6c4c7274670c8c5bf1c0e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.AddHost"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddHost posts {\"add_host\": {\"host\": h}} to os-aggregates/{id}/action and returns the response aggregate.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
+        "Go rejects an empty host before HTTP; Nova rejects it as well.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/remove_host_from_aggregate",
+      "source_fingerprint": "f9916019472b3c2f0c52aaa4beb458ea10f81fc256fe0431071dca31e5b58f5e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.RemoveHost"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveHost posts {\"remove_host\": {\"host\": h}} to os-aggregates/{id}/action and returns the response aggregate.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
+        "Go rejects an empty host before HTTP; Nova rejects it as well.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/set_aggregate_metadata",
+      "source_fingerprint": "19a858d3353f207f529f9102a8a70d62932ee673189a7001d07d403c3ddc9568",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.SetMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadata posts {\"set_metadata\": {\"metadata\": {...}}}, sends nil values as null and an empty map as {} like Python's call without metadata.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
+        "Python's call without metadata sends {}; Go needs an explicit empty map because a nil Metadata map is rejected before HTTP.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/update_aggregate",
+      "source_fingerprint": "3d2bdf782fbc1aefaa9891cf9d1afbbcc5ae399f6db35f9e8e919e4f584e21b3",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT os-aggregates/{id} with non-empty name and availability_zone, while an availability_zone extension field is rejected before HTTP.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateUpdateCannotSendNullAvailabilityZone"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
+        "Python sends no request when nothing changed; Go Update always sends PUT.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "UpdateOpts omits an empty availability_zone and WithUpdateField cannot replace a core key, so Python's availability_zone=None, which Nova uses to remove the aggregate's zone, cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/find_aggregate",
+      "source_fingerprint": "f14399f18ef77fd15d8c47c1716b64a82d02cf3fd2275be73f7d52cb7918bb14",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) rejects a non-numeric reference before HTTP and Find(resource.Name) lists os-aggregates and matches names only, so the ID-then-list fallback exists only as separate calls.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no aggregate helper that tries GET os-aggregates/{name_or_id} and falls back to a list match on 400/403/404; Find(resource.ID(x)) fails with ErrInvalidOption for names, so the caller must branch on the error and call Find(resource.Name(x))."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/aggregate_precache_images",
+      "source_fingerprint": "e50e0b08275877c4dd182ba13656f490c8b69df9242b59269ac0b320405cada0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for POST os-aggregates/{id}/images with {\"cache\": [{\"id\": ...}]} at microversion 2.81."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/create_flavor",
+      "source_fingerprint": "19f4a83dd5867e7851fa27ae8b4c05d6f523886aae22097e31538b611940d854",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST flavors with name, ram, vcpus, disk, id, os-flavor-access:is_public, OS-FLV-EXT-DATA:ephemeral and description, carries other keys through WithCreateField and decodes the flavor.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorCreateDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends only passed attributes; Go always sends name, ram, vcpus and disk, which Nova requires anyway.",
+        "Go omits an empty description and a zero rxtx_factor; Nova rejects a zero rxtx_factor and stores no description for both.",
+        "flavors.Flavor has no OS-FLV-DISABLED:disabled or original_name field.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/delete_flavor",
+      "source_fingerprint": "f5a56cc4b6811546c8baf05a48a29d0ba1cb1a111ba61d3bdf0b3060b1a9f379",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove sends DELETE flavors/{id}, accepts 202, ignores 404 by default and reports NotFound with WithMissingError.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorCreateDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/update_flavor",
+      "source_fingerprint": "9f41da89d54961306be19ad227e643a470151ba07ba9dee66f86661d20ce9dd3",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT flavors/{id} with a non-empty description, while a description extension field is rejected before HTTP.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorUpdateCannotClearDescription"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends no request when nothing changed; Go Update always sends PUT.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "UpdateOpts omits an empty description and WithUpdateField cannot replace a core key, so description=None or \"\", which Nova accepts to clear the description, cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/flavor_add_tenant_access",
+      "source_fingerprint": "32f3fdfdb10bdf90af7443e2cfd09ea8a5a2e63b5382a516f14c444e0dbedfb2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.AddAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddAccess posts {\"addTenantAccess\": {\"tenant\": t}} to flavors/{id}/action.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorTenantAccessMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns None and sends an empty Accept header; Go returns the response flavor_access rows with the default Accept header.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/flavor_remove_tenant_access",
+      "source_fingerprint": "95bc04b688f51297c8a73b667821982b7003da8d3e17065e473d2d645cbb7e9a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.RemoveAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveAccess posts {\"removeTenantAccess\": {\"tenant\": t}} to flavors/{id}/action.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorTenantAccessMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns None and sends an empty Accept header; Go returns the response flavor_access rows with the default Accept header.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/get_flavor_access",
+      "source_fingerprint": "0e5691fa36f89d3a0117e87bf51933fbd5de1554bfe8c26f5b0174b68bc6b6d9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListAccesses"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccesses sends GET flavors/{id}/os-flavor-access and yields flavor_id and tenant_id rows.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorTenantAccessMatchesProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns the raw flavor_access dicts as a list; Go yields typed FlavorAccess rows one by one.",
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_flavor_extra_specs",
+      "source_fingerprint": "c834887d0b91ed549dd5fdd9bbbeeef424f1740f7dd55c80f35f4ed2920e9fa9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.CreateExtraSpecs"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateExtraSpecs posts {\"extra_specs\": {...}} to flavors/{id}/os-extra_specs and returns the merged response specs.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorExtraSpecsWriteRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns a Flavor holding the response extra_specs; Go returns the map.",
+        "Go ExtraSpecsOpts holds string values, so numeric values are passed in string form, which Nova stores identically.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/update_flavor_extra_specs_property",
+      "source_fingerprint": "79867e88ade169a7010fc69c8d97197a2f5ec798ad7e087df8ba4839a9c7f30a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.UpdateExtraSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateExtraSpec sends PUT flavors/{id}/os-extra_specs/{key} with {key: value} and returns the response map.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorExtraSpecsWriteRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns the value under the key; Go returns the response map.",
+        "Go rejects an ExtraSpecsOpts without exactly one pair before HTTP.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/delete_flavor_extra_specs_property",
+      "source_fingerprint": "1223a844a86991b7cd69a3c4b4fb6f650292f905bb7aa8e905aeeb79da3b3aa4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.DeleteExtraSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteExtraSpec sends DELETE flavors/{id}/os-extra_specs/{key} and returns the 404 as an error.",
+          "tests": [
+            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorExtraSpecsWriteRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; DeleteExtraSpec has no ignore-missing option or collection Remove, so Go cannot select that default."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/extensions",
+      "source_fingerprint": "38debbdbf3dae83c69069f35dd61b8ceeaf612194206f4a619df8c71e4841fd7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET extensions and decodes alias, name, namespace, updated and description.",
+          "tests": [
+            "compute/v2/extensions/python_parity_test.go:TestPythonExtensionListAndGetHaveNoFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/find_extension",
+      "source_fingerprint": "880bc041f25c3ff214681fdbffba069dcf904dae866c3373b62139f151e55171",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET extensions/{alias} and returns the 404 for a name without listing extensions.",
+          "tests": [
+            "compute/v2/extensions/python_parity_test.go:TestPythonExtensionListAndGetHaveNoFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no extension helper that falls back to listing extensions and matching alias or name after a 400/403/404 from GET extensions/{name_or_id}, and Get has no ignore-missing option for Python's default None result."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_hypervisor",
+      "source_fingerprint": "0c60fdbb01763e47168270bdf64ad4dc2ae2d4d2262fe1431940b6d2ea24f730",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET os-hypervisors/{id} and decodes id, hypervisor_hostname, type, version, host_ip, state, status and service.",
+          "tests": [
+            "compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorGetAndUptimeMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "hypervisors.Hypervisor has no uptime field, which Nova returns in the show response from 2.88.",
+        "Python sends min(Hypervisor _max_microversion 2.88, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/get_hypervisor_uptime",
+      "source_fingerprint": "176f05a6ad1700ffdfd155723bd895668c668ede06be147483a0bc6cb10f7a49",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.GetUptime"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetUptime sends GET os-hypervisors/{id}/uptime below 2.88 and decodes id, hypervisor_hostname, state, status and uptime, and returns Nova's 404 at 2.88.",
+          "tests": [
+            "compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorGetAndUptimeMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python raises SDKException without a request when the server supports 2.88; Go sends the request and returns Nova's 404.",
+        "Python returns a Hypervisor with uptime filled; Go returns the Uptime value.",
+        "Python sends min(Hypervisor _max_microversion 2.88, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/hypervisors",
+      "source_fingerprint": "e47df6b0c22c9fc52bf510f5808a8000cb54c2725638b73be353e5f64ba9f538",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "List always sends GET os-hypervisors/detail and carries hypervisor_hostname_pattern and with_servers as query keys.",
+          "tests": [
+            "compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorListAlwaysUsesDetailRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends with_servers=True; Go WithServers sends with_servers=true.",
+        "Python sends min(Hypervisor _max_microversion 2.88, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Go has no request for the default details=False summary list GET os-hypervisors.",
+        "Below 2.53 Python sends hypervisor_hostname_pattern as GET os-hypervisors/{pattern}/search; Go has no API for that route."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/find_hypervisor",
+      "source_fingerprint": "ce7ca4a92a6945db6d26eef7456059fe19f05b75d0af2613ba64df560699f623",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID) sends one GET os-hypervisors/{id} without list fallback, and Find(resource.Name) returns ErrUnsupported before HTTP.",
+          "tests": [
+            "compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorFindHasNoNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no hypervisor helper that falls back to os-hypervisors/detail (or os-hypervisors with details=False) and matches ID or hypervisor_hostname after a 400/403/404, and the hypervisor collection has no name lookup."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/services",
+      "source_fingerprint": "da292423059ee75b469707a3c985023f024a8386791a8d46b83467f047cbce17",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET os-services without a query by default and maps Python's name/binary and host to binary and host query keys.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceListMapsNameToBinary"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python filters non-query Body attributes such as status locally; Go Services.List has no local filter, so the caller filters the rows.",
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/enable_service",
+      "source_fingerprint": "59a0547f15d82ae87397e6354853fa8f5b690fe9e4b49ac500e0cd9e527fb54f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "From 2.53 Update sends PUT os-services/{id} with {\"status\": \"enabled\"}.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+          ]
+        },
+        {
+          "behavior": "Below 2.53 Update can send the legacy PUT os-services/{action} body with host and binary extension fields but fails decoding the id-less service response.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceLegacyActionsSendBodyButFailDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "With service=None Python lists services(host=, binary=) and updates the single match; Go needs List followed by Update.",
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Below 2.53 Python sends PUT os-services/enable with host and binary; Go Update can build that request but the Gophercloud Service decoder rejects Nova's response because it has no id."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/disable_service",
+      "source_fingerprint": "cd3c30754ebdc983b88d01accd4d41816573643d0e123fa9c7a71e105e6f8ca2",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "From 2.53 Update sends PUT os-services/{id} with status disabled and disabled_reason.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+          ]
+        },
+        {
+          "behavior": "Below 2.53 Update sends PUT os-services/disable with host and binary like Python but fails decoding the id-less service response.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceLegacyActionsSendBodyButFailDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "With service=None Python lists services(host=, binary=) and updates the single match; Go needs List followed by Update.",
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Below 2.53 Python sends PUT os-services/disable or disable-log-reason with host and binary; Go Update can build that request but the Gophercloud Service decoder rejects Nova's response because it has no id."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/update_service_forced_down",
+      "source_fingerprint": "1c0eb08a829a48663e10595068d485d5817bc008f3d9375b5f3efe2b79e2c7c1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "From 2.53 Update sends {\"forced_down\": true} to PUT os-services/{id}, while forced_down false cannot be sent and a forced_down extension field is rejected before HTTP.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "UpdateOpts.ForcedDown is omitted when false and WithUpdateField cannot replace it, so forced=False cannot be sent.",
+        "Below 2.53 Python sends PUT os-services/force-down at microversion 2.11; Go can build the body only with forced true and cannot decode Nova's id-less service response."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/update_service",
+      "source_fingerprint": "f38dd0a417acc57f7b5a8d6532d4bf8fd8a183bc26b062fb587a72bc76f3a207",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT os-services/{id} with an unwrapped status, disabled_reason and forced_down body but cannot send forced_down false.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python raises SDKException without a request below 2.53; Go sends the PUT with any client microversion.",
+        "Python sends no request when nothing changed; Go Update always sends PUT.",
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "UpdateOpts omits false forced_down and empty status or disabled_reason, and WithUpdateField cannot replace these core keys, so forced_down=False cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/find_service",
+      "source_fingerprint": "f4a63de784134844bd4ba8fd6664d5c42a23a814432ee28db93773b516c0642c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET os-services and decodes id, binary and host, which a caller must match by hand.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceListMapsNameToBinary"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no service lookup that lists os-services, matches ID or name (binary when name is absent), applies the host argument and reports duplicates or a missing match."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/delete_service",
+      "source_fingerprint": "96d7601b875b7ecd69ae848bdb784b6a43c199336a32699452e486d558077eb7",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE os-services/{id}, succeeds on 204 and returns the 404 as an error.",
+          "tests": [
+            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceDeleteReturnsMissingError"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Python's default ignore_missing=True turns 404 into success; the services package has no collection Remove or ignore-missing option, so Go cannot select that default."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/migrations",
+      "source_fingerprint": "98eee6d4ecfcc1f0a8df571e44ac50c3d708dd31acfdfe2348dd338af691eb01",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET os-migrations, maps every Python query key including changes-since, changes-before and instance_uuid, and decodes the migration fields from one page.",
+          "tests": [
+            "compute/v2/migrations/python_parity_test.go:TestPythonMigrationListMapsQueryAndReadsOnePage"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Go reads one page and does not follow migrations_links; the caller continues with Marker.",
+        "Python sends the caller's changes_since/changes_before strings; Go formats time.Time values as RFC3339.",
+        "Python filters non-query Body attributes locally; Go WithListQuery sends such keys to the server.",
+        "Python sends min(Migration _max_microversion 2.80, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/server_migrations",
+      "source_fingerprint": "980bd7717798efa28942d000b63ffae5a695165147017e6780f6a199e947d5b7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for GET servers/{id}/migrations."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_server_migration",
+      "source_fingerprint": "9782142f70d76e0e832bdff159d0b739507ddef4f306ed803db11321a417fbc1",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for GET servers/{id}/migrations/{migration_id}."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/abort_server_migration",
+      "source_fingerprint": "0ce9c5f4361f8d993a1d343292f47f5c1a771b5dcc46762065973d730f54e350",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for DELETE servers/{id}/migrations/{migration_id} or its ignore_missing default."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/force_complete_server_migration",
+      "source_fingerprint": "0b9e799428cf814f23a60423e7a59c07146b9adb59004d187d89ab308c42a184",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for POST servers/{id}/migrations/{migration_id}/action with {\"force_complete\": null}."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/reset_server_state",
+      "source_fingerprint": "25b172d188aa0d528a06577b8ae29e8b6aa4220c98720ab7bf3a289ae3cf1537",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ResetState"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetState posts {\"os-resetState\": {\"state\": s}} to servers/{id}/action for active and error.",
+          "tests": [
+            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerResetStateMatchesProxyBody"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python takes a string; Go takes servers.ServerState, so the caller converts the string.",
+        "Python sends an empty Accept header and accepts any status below 400; Go uses the default Accept header and accepts 201 or 202.",
+        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/evacuate_server",
+      "source_fingerprint": "17fca98e38f319e84336d4b4699f9d96c866225138b81d3661c42ea2edab4ca1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Evacuate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Evacuate with empty options posts {\"evacuate\": {\"onSharedStorage\": false}} where Python posts {\"evacuate\": {}}.",
+          "tests": [
+            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "EvacuateOpts.OnSharedStorage has no omitempty, so Go always sends onSharedStorage, which Nova rejects from 2.14; Python's default and host/admin_pass/force calls on 2.14+ cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/migrate_server",
+      "source_fingerprint": "525f4f82a4bd1d757715781ef2bc7f4841a5684490caf8c85659a44d1508cd39",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Migrate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Migrate posts {\"migrate\": null} like Python without a host and accepts no options.",
+          "tests": [
+            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": [
+        "Migrate takes no options, so Python's host argument ({\"migrate\": {\"host\": h}} from 2.56) cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/live_migrate_server",
+      "source_fingerprint": "931fd0837cea5bb0ae0eea9e9eea01bb74b974ce3bf93385218c844ded6ebd57",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.LiveMigrate",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "LiveMigrate sends host, a boolean block_migration and force through WithLiveMigrateField, while block_migration \"auto\" is rejected before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python picks the 2.30, 2.25 or legacy body and microversion from server discovery; Go sends the body the caller builds with the client microversion."
+      ],
+      "remaining": [
+        "LiveMigrateOpts.BlockMigration is *bool and block_migration is a core key, so Python's default block_migration \"auto\" from 2.25 cannot be sent."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/trigger_server_crash_dump",
+      "source_fingerprint": "e7cc770b9d0edfd71e2ac5f3f13be7385b9a0f187ed55e94b24bf3c8124ff643",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for the {\"trigger_crash_dump\": null} server action (microversion 2.17)."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_server_diagnostics",
+      "source_fingerprint": "1474d1eeb858f0421fcde70dde26003fe552201d8b74f9270c08c3d17dd02a55",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/diagnostics.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET servers/{id}/diagnostics and returns the 2.48 diagnostics keys as a map.",
+          "tests": [
+            "compute/v2/diagnostics/python_parity_test.go:TestPythonServerDiagnosticsGetMatchesProxyRequest"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python returns a ServerDiagnostics resource; Go returns map[string]any with float64 numbers.",
+        "Python sends min(ServerDiagnostics _max_microversion 2.48, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/usages",
+      "source_fingerprint": "873c275492299c94c07da3750f3d1bb9c84ea0431588684b74105f54a00bc2b7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.AllTenants",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithAllTenantsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "AllTenants sends GET os-simple-tenant-usage without a query by default and with start, end and detailed=1 when set.",
+          "tests": [
+            "compute/v2/usage/python_parity_test.go:TestPythonUsageAllTenantsMatchesProxyQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends start.isoformat() including any offset; Go sends the wall-clock time without the offset, so callers pass UTC values.",
+        "Go Detailed true sends detailed=1; other Python query values go through WithAllTenantsQuery.",
+        "Python sends min(Usage _max_microversion 2.75, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/get_usage",
+      "source_fingerprint": "4bf9eab167876bde5d7749f4675cd3f0a76d4f4a995e90dabef3f4aa98f2c9bb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "SingleTenant sends GET os-simple-tenant-usage/{project} with start and end, and stopping after the first value keeps it to Python's single fetch.",
+          "tests": [
+            "compute/v2/usage/python_parity_test.go:TestPythonUsageSingleProjectFirstPageMatchesFetch"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python fetches one response; Go SingleTenant is a stream that follows tenant_usage_links unless the caller stops after the first value.",
+        "Python sends start.isoformat() including any offset; Go sends the wall-clock time without the offset, so callers pass UTC values.",
+        "Python sends min(Usage _max_microversion 2.75, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:compute/v2/create_server_external_events",
+      "source_fingerprint": "2c633bb48f7812369aca772a470173d903fdbce2c8b6be54447d9a8fbb6d1b99",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for POST os-server-external-events."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_quota_class_set",
+      "source_fingerprint": "090e4b51bc98e8f5df731d6e442559ce2e87bade14ffc88760ebe6ccd10319f7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for GET os-quota-class-sets/{id} in the compute packages."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/update_quota_class_set",
+      "source_fingerprint": "1d351e29f5e64f061cb95afd18786debb94671ce36ac7e3963597e99106351b5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for PUT os-quota-class-sets/{id} in the compute packages."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/create_share_attachment",
+      "source_fingerprint": "a48ca96655e9d0631c90abed8ba88f051bb9294f10febfc9f27694718b8c61ab",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for POST servers/{id}/shares (microversion 2.97)."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/get_share_attachment",
+      "source_fingerprint": "14268e92aa64e8cbbf37382075c19de2fb11fcef940283a71d73d3df6adfb4a8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for GET servers/{id}/shares/{share_id}."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/share_attachments",
+      "source_fingerprint": "0ae71ae359253fa4c2cf63db360d1d9fc8886892ef438d4dc5999015cb272e70",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for GET servers/{id}/shares."
+      ]
+    },
+    {
+      "operation": "python:compute/v2/delete_share_attachment",
+      "source_fingerprint": "d93f7f22491a9b3d8c4630c52ba6b7ed99c09bc834d1c6e29b2cf736a5ffdeda",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/v2/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no API for DELETE servers/{id}/shares/{share_id} or its ignore_missing default."
       ]
     }
   ]
