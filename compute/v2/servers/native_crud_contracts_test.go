@@ -260,3 +260,38 @@ func contains(values []int, value int) bool {
 	}
 	return false
 }
+
+// The remaining CreateOpts fields keep their pinned JSON names and omitempty
+// rules, and the selected client microversion reaches the create request.
+func TestNativeServerCreateFullOptionsAndMicroversion(t *testing.T) {
+	cloud := testcloud.New(t)
+	client := nativeServerClient(cloud)
+	client.Microversion = "2.90"
+	var calls []nativeServerCall
+	var version string
+	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		raw, _ := io.ReadAll(req.Body)
+		calls = append(calls, nativeServerCall{req.Method, req.URL.Path, req.URL.RawQuery, string(raw)})
+		version = req.Header.Get("X-OpenStack-Nova-API-Version")
+		return nativeServerWire(200, `{"server":{"id":"s2"}}`), nil
+	})
+	opts := servers.CreateOpts{
+		Name: "vm", FlavorRef: "f1", AvailabilityZone: "az", Metadata: map[string]string{"k": "v"},
+		Personality: servers.Personality{&servers.File{Path: "/etc/motd", Contents: []byte("hi")}},
+		AdminPass:   "p", AccessIPv4: "192.0.2.1", AccessIPv6: "2001:db8::1", Tags: []string{"t"}, Hostname: "host",
+		BlockDevice: []servers.BlockDevice{{SourceType: servers.SourceImage, UUID: "img", DestinationType: servers.DestinationVolume, VolumeSize: 10}},
+		DiskConfig:  servers.Auto, HypervisorHostname: "hv",
+		Networks: []servers.Network{{UUID: "net"}, {Port: "port", Tag: "nic"}, {UUID: "net2", FixedIP: "10.0.0.5"}},
+	}
+	created, err := servers.New(client).Create(context.Background(), opts)
+	if err != nil || created.ID != "s2" || version != "2.90" {
+		t.Fatal(created, err, version)
+	}
+	want := `{"server":{"OS-DCF:diskConfig":"AUTO","accessIPv4":"192.0.2.1","accessIPv6":"2001:db8::1","adminPass":"p","availability_zone":"az","block_device_mapping_v2":[{"boot_index":0,"delete_on_termination":false,"destination_type":"volume","source_type":"image","uuid":"img","volume_size":10}],"flavorRef":"f1","hostname":"host","hypervisor_hostname":"hv","imageRef":"","metadata":{"k":"v"},"name":"vm","networks":[{"uuid":"net"},{"port":"port","tag":"nic"},{"fixed_ip":"10.0.0.5","uuid":"net2"}],"personality":[{"contents":"aGk=","path":"/etc/motd"}],"tags":["t"]}}`
+	if len(calls) != 1 || calls[0].body != want {
+		t.Fatalf("%s", calls[0].body)
+	}
+	if _, err := servers.New(client).Create(context.Background(), servers.CreateOpts{Name: "vm", Networks: "none"}); err != nil || !strings.Contains(calls[1].body, `"networks":"none"`) {
+		t.Fatal(err, calls)
+	}
+}

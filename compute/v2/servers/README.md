@@ -46,3 +46,7 @@ SDK가 적용합니다. `WaitForState`는 caller가 대상 상태를 지정하�
 순서대로 재정의합니다. 기존 `WaitFor`/`WaitForDeletion`과 네이티브
 `WaitForStatus`의 계약은 유지됩니다. 전체 예제와 Python Resource/cache의
 차이는 [서비스 대기 가이드](../../../docs/service-waits.md)를 참고하세요.
+
+## native 호출
+
+[Nova native 서버 호출](native.md)은 generated `Get/List/ListSimple/Create/Update/Delete`의 경로·본문·성공 status와 확장 필드 위치를 설명합니다.

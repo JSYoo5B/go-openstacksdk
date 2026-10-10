@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Nova native `servers` CRUD 6개 계약 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체357/3,362·핵심283/2,292·Compute45/333입니다. 처리량이 큰 핵심 서비스의 미검토 native Gophercloud 연산을 user 범위부터 진행하며, Nova servers 42개를 CRUD 6개 → metadata 6개 → user action → 주소·콘솔·대기 순으로 나누고 관리자 action(Evacuate·ForceDelete·LiveMigrate·Migrate·ResetState·ResetNetwork·InjectNetworkInfo)은 핵심 admin 단계로 둡니다. 이번 단위는 `Get/List/ListSimple/Create/Update/Delete`의 경로, `{"server": ...}` envelope 안의 확장 필드와 최상위 scheduler hints, user_data base64·security group·networks 직렬화, 고정 status(200/203·200/202·200·202/204), `servers_links` next를 검증했습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Nova native `servers` CRUD 6개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계363).** 기존 unresolved였던 `servers.Create`는 남은 CreateOpts 필드·microversion 경로 테스트를 보강해 go_mapping으로 닫았습니다. 직전 완료 집계는 전체357/3,362·핵심283/2,292·Compute45/333입니다. 처리량이 큰 핵심 서비스의 미검토 native Gophercloud 연산을 user 범위부터 진행하며, Nova servers 42개를 CRUD 6개 → metadata 6개 → user action → 주소·콘솔·대기 순으로 나누고 관리자 action(Evacuate·ForceDelete·LiveMigrate·Migrate·ResetState·ResetNetwork·InjectNetworkInfo)은 핵심 admin 단계로 둡니다. 이번 단위는 `Get/List/ListSimple/Create/Update/Delete`의 경로, `{"server": ...}` envelope 안의 확장 필드와 최상위 scheduler hints, user_data base64·security group·networks 직렬화, 고정 status(200/203·200/202·200·202/204), `servers_links` next를 검증했습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Barbican Python `find_container`·`find_order` 2개, 전체355→357(+2)·핵심281→283/2,292·Key Manager50→52/67.** 공통 `keymanagerread.FindIdentity`로 Python `Resource.find`의 직접 GET·fallback 목록·id/name 일치를 제공합니다. [검증 기록](sdk-support-ledger.md#barbican-python-find_containerfind_order-완료)에 설명합니다. 새2그룹8사례와 전체 `make check`(race 51개 실제 test package)가 통과했고 `0f187761`·`bceed143`·`582c7662`를 push했습니다.
 
@@ -394,11 +394,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 357 (10.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 363 (10.8%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,004 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 616 | 아직 개별 기록 없는 선언 2,746 |
-| 기록한 부분·전체 계약 | 3,843 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,998 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 621 | 아직 개별 기록 없는 선언 2,741 |
+| 기록한 부분·전체 계약 | 3,850 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -441,7 +441,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Nova native servers CRUD 6개 | pinned Gophercloud v2.15.0 servers requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Nova native servers CRUD 6개 | pinned Gophercloud v2.15.0 servers requests/results 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS, 전체 gate 대기 | native.md 추가 | Create unresolved→go_mapping·신규5행, gate 대기 | `9168bc58`·보강 테스트·가이드·판정 push; 다음 gate·대장 |
 | Barbican Python find_container·find_order | pinned Python find/_get_one_match·Container/Order alternate id 검토 완료 | 공통 `keymanagerread.FindIdentity`·두 package FindIdentity 완료 | 새2그룹8·전체 `make check` PASS | README find 절 추가 | **신규2행 go_mapping·357/3,362** | 작은 commit3개 push 완료 |
 | Barbican Python secret ACL 4개 | pinned Python proxy·SecretACL Resource·commit/delete 검토 완료 | owned `secretacls` package·서비스 연결 완료 | 새3그룹15·전체 `make check` PASS | secretacls README 추가 | **신규4행 go_mapping·355/3,362** | 작은 commit3개 push 완료 |
 | Barbican native acls 8개 | pinned Gophercloud v2.15.0 acls requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹35·전체 `make check` PASS | acls README 추가 | **신규8행 go_mapping·351/3,362** | 작은 commit2개 push 완료; 다음 Python secret ACL |
@@ -498,19 +498,19 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 283 / 2,292 | 12.3% | 159 | 1,849 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 289 / 2,292 | 12.6% | 158 | 1,844 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 357 / 3,362 | 10.6% | 258 | 2,746 | 1 |
+| 전체 | 363 / 3,362 | 10.8% | 257 | 2,741 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
-| Compute / Nova | 45 / 333 | 21 | 267 | 0 |
+| Compute / Nova | 51 / 333 | 20 | 262 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |

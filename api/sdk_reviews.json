@@ -38554,14 +38554,18 @@
     {
       "operation": "gophercloud:compute/v2/servers.Create",
       "source_fingerprint": "b8ba8b7ecf5b3209ffe853b2617b76e8a6965e483ba0a5f0b78f88409a5ae922",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.Servers.Create",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithNetworkInterfaces",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithNetworkMode",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithNetworks",
         "github.com/JSYoo5B/go-openstacksdk.WithDefaultNetwork",
-        "github.com/JSYoo5B/go-openstacksdk.WithoutDefaultNetwork"
+        "github.com/JSYoo5B/go-openstacksdk.WithoutDefaultNetwork",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateHintOpts"
       ],
       "contracts": [
         {
@@ -38660,13 +38664,27 @@
             "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
             "connection_default_network_test.go:TestConnectionDefaultNetworkNameFailuresAndRetry"
           ]
+        },
+        {
+          "behavior": "Create POSTs {\"server\": ...} with required name, base64 user_data, named security groups and auto/none or structured networks, places extension fields inside the single server envelope and scheduler hints at top-level os:scheduler_hints, rejects invalid networks, invalid hints, collisions and nil options before HTTP, and accepts 200 and 202.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDRoutesBodiesAndDecode",
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDStrictStatusesAndPreflight"
+          ]
+        },
+        {
+          "behavior": "The remaining CreateOpts fields keep their pinned JSON names and omitempty rules: availability zone, metadata, base64 personality files, admin password, access IPs, tags, hostname, block_device_mapping_v2 with boot_index/delete_on_termination always sent, OS-DCF:diskConfig, hypervisor_hostname and structured or none networks; the selected client microversion header reaches the request.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCreateFullOptionsAndMicroversion"
+          ]
         }
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
         "compute/README.md",
         "compute/server-default-network.md",
-        "network/network-roles.md"
+        "network/network-roles.md",
+        "compute/v2/servers/native.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
@@ -38674,10 +38692,7 @@
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success."
       ],
-      "remaining": [
-        "Review the complete native CreateOpts/SchedulerHintOpts and generated API.Create contract, including remaining fields/counts, userdata/security groups, extensions, success/response/error and version paths beyond these high-level NIC assertions.",
-        "The high-level API adds name resolution, selected-version policy and optional wait; these partial assertions do not promote the whole native Create declaration or the generated native method."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_default_network",
@@ -47700,6 +47715,140 @@
       "differences": [
         "Python returns a mutable Order Resource; Go returns the owned FetchedOrder projection with the actual response metadata. Resource session, cache and list controls beyond ignore_missing are tracked as SDK-R1/C1/S1.",
         "Skipping the direct GET for identities that are not safe path segments is the shared Go finder policy; Python would first request the unescaped path and then list."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Get",
+      "source_fingerprint": "62577038e76fb1297a62e4dfaf4f40a2dfd5b1d56872d5c370dd7b8ef940ece1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET servers/{raw id} with service MoreHeaders and live token, accepts 200 and 203, decodes Server with an empty image string as nil Image, and keeps other statuses as native errors under Get/servers context.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDRoutesBodiesAndDecode",
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server call only; Python compute server Resource parity and the owned create/wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.List",
+      "source_fingerprint": "278aaec07b084e115b16cda2c210d300ed932533a06514c8e3d3f59d6b5d9a62",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs servers/detail with the ListOpts query including all_tenants and extension values, follows the servers_links next href verbatim and sends no further page after the caller stops.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server call only; Python compute server Resource parity and the owned create/wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ListSimple",
+      "source_fingerprint": "cc7cdb48333ebecd092f1eec0004053b53691a9393053fa163b89eee2c2c83f5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListSimple",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithListSimpleQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListSimple GETs servers with the same ListOpts query and follows the servers_links next href verbatim.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerListsQueryPagingAndStop"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server call only; Python compute server Resource parity and the owned create/wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Update",
+      "source_fingerprint": "3817bdd681a1b8ff9b220e3f99662964a1086c3223b732afc5f010bb838e1a6a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"server\": ...} with omitted empty name/access IPs and an optional hostname, returns the decoded server and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDRoutesBodiesAndDecode",
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server call only; Python compute server Resource parity and the owned create/wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Delete",
+      "source_fingerprint": "5ab637fc85b8852f42718438ccc49cc95d36a1443368fee51b06f2457ddcde82",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE servers/{raw id} and accepts the native default 202 and 204.",
+          "tests": [
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDRoutesBodiesAndDecode",
+            "compute/v2/servers/native_crud_contracts_test.go:TestNativeServerCRUDStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md",
+        "compute/v2/servers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server call only; Python compute server Resource parity and the owned create/wait workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
       ],
       "remaining": []
     }
