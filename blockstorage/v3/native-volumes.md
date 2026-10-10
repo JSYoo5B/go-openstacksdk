@@ -43,7 +43,19 @@ connection 두 호출은 connector를 `connector` 안에 한 번 더 감싸므�
 
 `ExtendSize`의 `NewSize`와 `ChangeType`의 `NewType`은 필수 tag가 있지만 native 검사는 빈 문자열만 거부하고 정수 0은 그대로 보냅니다. `SetImageMetadata`의 nil metadata는 `null`, `SetBootable`의 false와 `ReImage`의 빈 image ID·false 예약 플래그도 항상 보냅니다. `Detach`의 빈 attachment ID는 빈 action 객체가 됩니다.
 
-`UploadImage`는 `os-volume_upload_image` 객체를 `VolumeImage`로 decode하며, key가 없으면 오류 없이 zero 값을 돌려줍니다. 응답 시각은 볼륨과 같은 시간대 없는 형식만 받습니다. force delete, reset status, unmanage는 기본 정책상 관리자 action이라 이 절에서 다루지 않습니다.
+`UploadImage`는 `os-volume_upload_image` 객체를 `VolumeImage`로 decode하며, key가 없으면 오류 없이 zero 값을 돌려줍니다. 응답 시각은 볼륨과 같은 시간대 없는 형식만 받습니다.
+
+## 관리자 action
+
+아래 세 action은 기본 Cinder 정책상 관리자 호출입니다.
+
+| 메서드 | 본문 | 성공 status |
+|---|---|---|
+| `ForceDelete(ctx, id)` | `{"os-force_delete": ""}` | 201, 202 |
+| `ResetStatus(ctx, id, opts, options...)` | `{"os-reset_status": {"status": ..., ...}}` | 202 |
+| `Unmanage(ctx, id)` | `{"os-unmanage": {}}` | 202 |
+
+`ForceDelete`는 빈 객체가 아니라 빈 문자열을 값으로 보내고 OkCodes를 정하지 않아 POST 기본값 201·202를 받습니다. `ResetStatus`의 `Status`는 omitempty가 없어 빈 값도 보내며, `MigrationStatus`·`AttachStatus`는 비면 생략합니다. 확장 필드는 action 객체 안에 들어가고 `status` 같은 기존 key와 겹치면 HTTP 전에 거부됩니다.
 
 ## 상태 대기
 

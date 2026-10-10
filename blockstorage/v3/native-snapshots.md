@@ -17,4 +17,8 @@
 
 응답의 진행률과 프로젝트는 `os-extended-snapshot-attributes:` 접두사 key에서 읽습니다. 시각은 볼륨과 같은 시간대 없는 형식만 받아서 끝에 `Z`가 붙으면 decode 오류입니다. 볼륨과 달리 snapshot 응답은 일반 envelope decode라 `snapshot` key가 없거나 null이면 오류 없이 nil을 돌려줍니다.
 
-`WaitForStatus(ctx, id, status)`는 즉시 한 번, 이후 1초 간격으로 `Get`을 반복하며 대소문자를 구분해 정확히 같은 상태에서 멈춥니다. `Get` 오류와 호출자 `ctx` deadline에서도 멈춥니다. 다만 응답에 `snapshot` key가 없으면 native 구현이 nil snapshot의 상태를 읽다가 **panic**합니다. 이 경로는 아직 SDK가 막지 않으므로 신뢰할 수 없는 endpoint에서는 SDK의 `WaitForState`·`WaitForAvailable`을 사용합니다. force delete, reset status, update status는 기본 정책상 관리자 호출이라 이 문서에서 다루지 않습니다.
+`WaitForStatus(ctx, id, status)`는 즉시 한 번, 이후 1초 간격으로 `Get`을 반복하며 대소문자를 구분해 정확히 같은 상태에서 멈춥니다. `Get` 오류와 호출자 `ctx` deadline에서도 멈춥니다. 다만 응답에 `snapshot` key가 없으면 native 구현이 nil snapshot의 상태를 읽다가 **panic**합니다. 이 경로는 아직 SDK가 막지 않으므로 신뢰할 수 없는 endpoint에서는 SDK의 `WaitForState`·`WaitForAvailable`을 사용합니다.
+
+## 관리자 action
+
+기본 정책상 관리자 호출인 세 action은 모두 `POST snapshots/{id}/action`에 보내고 202만 받습니다. `ForceDelete(ctx, id)`는 `{"os-force_delete": {}}`, `ResetStatus(ctx, id, opts, options...)`는 `{"os-reset_status": {"status": ...}}`, `UpdateStatus(ctx, id, opts, options...)`는 `{"os-update_snapshot_status": {"status": ..., "progress": ...}}`를 보냅니다. 두 상태 action의 `Status`는 omitempty가 없어 빈 값도 보내고 `Progress`는 비면 생략합니다.

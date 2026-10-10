@@ -9,7 +9,7 @@ Cinder v2 API는 Cinder 자체에서 오래전에 deprecated된 legacy API입니
 - `CreateOpts.Size`는 omitempty가 없어 0도 `"size": 0`으로 보내며, 필수 tag가 있어도 native 검사는 정수 0을 거부하지 않습니다. v3은 0이면 생략합니다.
 - v2 `CreateOpts`에는 `BackupID`가 없고, 응답 `Volume`에도 `backup_id`·`volume_image_metadata` 필드가 없습니다.
 - v2 `ListOpts`에는 `Bootable` 필터가 없습니다.
-- `Unmanage`는 v2에 없습니다. force delete와 reset status는 v3과 같이 기본 정책상 관리자 호출이라 이 문서에서 다루지 않습니다.
+- `Unmanage`는 v2에 없습니다. 관리자 action인 `ForceDelete`·`ResetStatus`는 [v3 관리자 action](../v3/native-volumes.md#관리자-action)과 같은 본문과 status를 따릅니다.
 
 ## snapshot
 
