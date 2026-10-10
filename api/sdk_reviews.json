@@ -63907,6 +63907,970 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/extensions.Get",
+      "source_fingerprint": "a3c88ff86011513ca673fd7f6c7fcd22c6219d8a47043d03b9e6180cf510af9d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET extensions/{alias} on the legacy Keystone v2.0 endpoint, decodes the common extension envelope with a missing or null envelope as a nil result, and accepts only HTTP 200.",
+          "tests": [
+            "identity/v2/extensions/native_contracts_test.go:TestNativeV2ExtensionRoutesValuesEnvelopeAndDecode",
+            "identity/v2/extensions/native_contracts_test.go:TestNativeV2ExtensionStatusesAndListEnvelope"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/extensions call only; Python openstacksdk identity v2 Extension resources and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/extensions.List",
+      "source_fingerprint": "1cc9bd5374580295afd515f20b50598fcd8e8d99c1045225b39625e6ebcf8d5c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends one GET extensions and decodes only the v2 {\"extensions\":{\"values\":[...]}} envelope as a single page that never follows links; a flat extensions array is a JSON type error, an empty page ends cleanly, 404 fails with Expected [200,204,300] and a bodyless 204 yields io.EOF.",
+          "tests": [
+            "identity/v2/extensions/native_contracts_test.go:TestNativeV2ExtensionRoutesValuesEnvelopeAndDecode",
+            "identity/v2/extensions/native_contracts_test.go:TestNativeV2ExtensionStatusesAndListEnvelope"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/extensions call only; Python openstacksdk identity v2 Extension resources and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/roles.AddUser",
+      "source_fingerprint": "2de3ea159a0346182d58d09b5c00869a2becb3c6a359cca361faba1567162e25",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.API.AddUser"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddUser is an admin-only OS-KSADM call that sends a bodyless PUT tenants/{tenant}/users/{user}/roles/OS-KSADM/{role} and accepts HTTP 200 or 201.",
+          "tests": [
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleRoutesAndDecode",
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleStatusesAndListPager"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/roles.DeleteUser",
+      "source_fingerprint": "2d340e7b04d13b25c7938b89ddaa02bc85641558b14291ad0c2c35bb18649aca",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.API.DeleteUser"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteUser is an admin-only OS-KSADM call that sends DELETE tenants/{tenant}/users/{user}/roles/OS-KSADM/{role} and accepts HTTP 202 or 204.",
+          "tests": [
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleRoutesAndDecode",
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleStatusesAndListPager"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/roles.List",
+      "source_fingerprint": "ec70f48f19ec32b8d53bfc2ff6ff1304d08ebd74e1e3d450534450cf2ef353da",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List is an admin-only call that sends one GET OS-KSADM/roles as a single page ignoring roles_links, decodes untagged Role fields case-insensitively (serviceId but not service_id), ends cleanly on an empty page, fails 404 with Expected [200,204,300] and yields io.EOF for a bodyless 204.",
+          "tests": [
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleRoutesAndDecode",
+            "identity/v2/roles/native_contracts_test.go:TestNativeV2RoleStatusesAndListPager"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tenants.Create",
+      "source_fingerprint": "a02188d65788d431e21235ebab2372c85419adff830e05bcb04dbc66d5874bde",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create is an admin call that sends POST tenants with {\"tenant\":{...}} requiring name and omitting empty description and enabled, rejects missing name, core-field extensions and nil options before HTTP, decodes the tenant envelope and accepts HTTP 200 or 201.",
+          "tests": [
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode",
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tenants.Delete",
+      "source_fingerprint": "086ad99026e2ece826c2e1ff659f044c45fe054b1daf0285fa3ef3c60449c0e4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete is an admin call that sends DELETE tenants/{id} and accepts HTTP 202 or 204.",
+          "tests": [
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode",
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tenants.Get",
+      "source_fingerprint": "e07f9766e64b0ac1dedd5c23da125e341aa431018cf8da16d4e2ba81e456038d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get is an admin call that sends GET tenants/{id}, decodes the tenant envelope with a missing or null envelope as nil, and accepts only HTTP 200.",
+          "tests": [
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode",
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tenants.List",
+      "source_fingerprint": "d1e1851a343cfdb98249c8af65f7c79b8abc68a7232f9f68f1d82ca11cc477a7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET tenants with marker and limit plus extra query values, follows only tenants_links rel=next and ignores links.next, rejects nil options and blank query keys before HTTP, ends cleanly on an empty page, fails 404 with Expected [200,204,300] and yields io.EOF for a bodyless 204.",
+          "tests": [
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode",
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tenants.Update",
+      "source_fingerprint": "d3e71de971cadd9140fff2c0c10ea5a044bc9bbaa33ad31650ea1350fac67021",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update is an admin call that sends PUT tenants/{id} with {\"tenant\":{...}} omitting empty fields (an empty UpdateOpts sends {\"tenant\":{}} and a pointer description may send an empty string), rejects core-field extensions and nil options before HTTP and accepts only HTTP 200.",
+          "tests": [
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantRoutesBodiesPagingAndDecode",
+            "identity/v2/tenants/native_contracts_test.go:TestNativeV2TenantStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tokens.Create",
+      "source_fingerprint": "cbf810943dc3d3afff02d12b262d2b4b7ae0ac6f53996c4dd8f5e2fec4baf670",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST tokens with {\"auth\":{\"passwordCredentials\":{username,password}}} when Password is set (dropping TokenID) or {\"auth\":{\"token\":{\"id\"}}} otherwise plus non-empty tenantId and tenantName, rejects a missing username or token, core-field and passwordCredentials extensions and nil options before HTTP, still sends an existing provider X-Auth-Token because native OmitHeaders runs before token injection, decodes access.token (RFC3339Milli expires with a literal Z), access.serviceCatalog and access.user into Authentication, and accepts HTTP 200 or 203.",
+          "tests": [
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenRoutesBodiesAndAccessDecode",
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tokens.CreateURL",
+      "source_fingerprint": "f1ec0703d602b93630ff65668e5ade355d570fd2c252b79b82befbc1fe25d4a7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.API.CreateURL"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateURL formats ResourceBase tokens without sending a request.",
+          "tests": [
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenRoutesBodiesAndAccessDecode",
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tokens.Get",
+      "source_fingerprint": "1fc51df0a3143d9583af2e1a9f79dcb2f04daa13cce18fa2f88c335b99f6032a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get is an admin token validation call that sends GET tokens/{token} with the provider X-Auth-Token, decodes the same access envelope into Authentication with unscoped responses leaving tenant, catalog and user empty, fails on a missing or offset expires, and accepts HTTP 200 or 203.",
+          "tests": [
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenRoutesBodiesAndAccessDecode",
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/tokens.GetURL",
+      "source_fingerprint": "e836fca2791d463f20d069fb9ae598fce5df29182453669eaa2cd3abd1d39d24",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/tokens.API.GetURL"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetURL formats ResourceBase tokens/{token} without escaping the token and without sending a request.",
+          "tests": [
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenRoutesBodiesAndAccessDecode",
+            "identity/v2/tokens/native_contracts_test.go:TestNativeV2TokenStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.Create",
+      "source_fingerprint": "d669805f271c79a467c2dfdd3299e974e61d6cf8214b72af281024d4ee7c7aec",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create is an admin-only call that sends POST users with {\"user\":{...}} omitting empty fields, requires name or username with gophercloud.ErrMissingInput before HTTP, rejects core-field extensions and nil options, decodes the user envelope where TenantID reads only tenant_id although the request sends tenantId, and accepts HTTP 200 or 201.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.Delete",
+      "source_fingerprint": "e19e408c508a6a1cea17f7ed85f2beb7170d19d72c70b44c368a337997c2b179",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete is an admin-only call that sends DELETE users/{id}, accepts HTTP 202 or 204 and always returns a nil User because the native call never decodes a response body.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.Get",
+      "source_fingerprint": "1e1d988ffa4adff13eae5d3206c0981c5df9321f4925dab8fae0325a0371608d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get is an admin-only call that sends GET users/{id} with an ID or name, decodes the user envelope with a missing or null envelope as nil, and accepts only HTTP 200.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.List",
+      "source_fingerprint": "9482487aff76daef50eb2afb5dc571984cb40e1d62e933dd620379e72286c985",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List is an admin-only call that sends one GET users as a single page ignoring users_links, decodes untagged User fields case-insensitively and tenant_id only, ends cleanly on an empty page, fails 404 with Expected [200,204,300] and yields io.EOF for a bodyless 204.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.ListRoles",
+      "source_fingerprint": "b4b2a89bac70305f8ac1b43bbe1caafd6c0d417ba8f1f6d784529d07cbf82d46",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.ListRoles"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRoles is an admin-only call that sends one GET tenants/{tenant}/users/{user}/roles as a single page ignoring roles_links, ends cleanly on an empty page, fails 404 with Expected [200,204,300] and yields io.EOF for a bodyless 204.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.ResourceURL",
+      "source_fingerprint": "31c84b215787a91c0026e546d974c605e64dd1ad59859af7756d4787003055da",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.ResourceURL"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResourceURL formats ResourceBase users/{id} without sending a request.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v2/users.Update",
+      "source_fingerprint": "9f81f0e854b14865275c32a33a0a16e66f93d87ac78a2dc77205585ed8147a78",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update is an admin-only call that sends PUT users/{id} with {\"user\":{...}} omitting empty fields (an empty UpdateOpts sends {\"user\":{}}), rejects core-field extensions and nil options before HTTP and accepts only HTTP 200.",
+          "tests": [
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserRoutesBodiesAndDecode",
+            "identity/v2/users/native_contracts_test.go:TestNativeV2UserStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.CreateConsumer",
+      "source_fingerprint": "a84bfaac924b4fe4d10c7932b6b821917e757cc13f4d15a76d6f68ac8a2c618f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.CreateConsumer",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateConsumerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateConsumerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateConsumer POSTs {\"consumer\":{\"description\":...}} to OS-OAUTH1/consumers always sending description (empty included), keeping extensions inside the envelope and rejecting a description extension before HTTP, decodes the consumer id, secret and description and accepts only 201.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.GetConsumer",
+      "source_fingerprint": "d8745872e18af8bd1a2d025870daec12038a5ed08f3dbf40f23f2d2f62feebb9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.GetConsumer"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetConsumer GETs OS-OAUTH1/consumers/{id}, decodes the consumer envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.UpdateConsumer",
+      "source_fingerprint": "e5d51f14cfa2cae0e7b9b9ead3e895d96aeff2dde61757a66ab55712bddea926",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.UpdateConsumer",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithUpdateConsumerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithUpdateConsumerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateConsumer PATCHes {\"consumer\":{\"description\":...}} to OS-OAUTH1/consumers/{id} always sending description, keeping extensions inside the envelope and rejecting a description extension before HTTP, decodes the consumer envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.DeleteConsumer",
+      "source_fingerprint": "d3df226826e4bb67737b5e4d900265019324f0a0010408f49c25f80e914d3720",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.DeleteConsumer"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteConsumer DELETEs OS-OAUTH1/consumers/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.ListConsumers",
+      "source_fingerprint": "1e37d46dfd75f76bbe76da5f3dfdaba8b563a6728a0e09190b652074c94925a2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.ListConsumers"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListConsumers GETs OS-OAUTH1/consumers, follows the links.next string across hosts, stops on a null next link, yields nothing for an empty consumers array, returns io.EOF for a bodyless 204 and an unexpected-code error expecting 200, 204 or 300 for 404.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1ConsumerRoutesBodiesPagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.RequestToken",
+      "source_fingerprint": "9edfe5a580d15fe8153f84b3028ac46019be2d9b493d4654524d38e2484f295f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.RequestToken",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithRequestTokenOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithRequestTokenHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "RequestToken POSTs no body to OS-OAUTH1/request_token with an OAuth Authorization header carrying sorted oauth_callback=oob, oauth_consumer_key, oauth_nonce, oauth_signature_method, oauth_timestamp and oauth_version=1.0 plus an HMAC-SHA1 or PLAINTEXT oauth_signature over the full URL (nonce and timestamp generated when unset), sends RequestedProjectID as Requested-Project-Id, requires the consumer key and signature method and rejects Authorization or Requested-Project-Id extension headers before HTTP, still sends the provider X-Auth-Token, accepts only 201 and decodes an exactly application/x-www-form-urlencoded body into oauth_token, oauth_token_secret and an RFC3339Milli oauth_expires_at, failing on any other Content-Type.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1SignedRequestAndAccessTokens",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1TokenResponseDecodeFailures",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.AuthorizeToken",
+      "source_fingerprint": "1feadaecdf024e12dab1958558e5b460746e2da663bddf2f8fa878197f072e93",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.AuthorizeToken",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithAuthorizeTokenOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithAuthorizeTokenField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AuthorizeToken PUTs an unwrapped {\"roles\":[...]} body (null when no roles are given) to OS-OAUTH1/authorize/{id} with extensions at the root, rejects an empty role or a roles extension before HTTP, decodes token.oauth_verifier and accepts only 200.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.CreateAccessToken",
+      "source_fingerprint": "7b30c93e8de72584d6344a5e1a88e571721086549e4d6c474ad2220ed65bf7b2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.CreateAccessToken",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateAccessTokenOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateAccessTokenHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateAccessToken POSTs no body to OS-OAUTH1/access_token with an OAuth Authorization header carrying sorted oauth_consumer_key, oauth_nonce, oauth_signature_method, oauth_timestamp, oauth_token, oauth_verifier and oauth_version=1.0 plus an oauth_signature keyed by the consumer and token secrets, requires the consumer key, token, verifier and signature method but not the secrets, rejects an Authorization extension header before HTTP, accepts only 201 and decodes the exact form-encoded token response.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1SignedRequestAndAccessTokens",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1TokenResponseDecodeFailures",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.Create",
+      "source_fingerprint": "41f69c9c7faa6980cf5a7b24da0b2718af95e51d15de9dd3ddc80afc73698082",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"auth\":{\"identity\":{\"methods\":[\"oauth1\"],\"oauth1\":{}}}} to auth/tokens with extensions inside auth and no scope, signs an OAuth Authorization header with oauth_token and the consumer and token secrets, still sends the provider X-Auth-Token (empty when the provider has none), rejects Authorization or X-Auth-Token extension headers and a missing token before HTTP, accepts only 201, returns a tokens.Token whose ID is X-Subject-Token without the OS-OAUTH1 extension and leaves the ProviderClient token and ReauthFunc unchanged.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1CreateAuthTokenBodyHeadersAndSubjectToken",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource and keystoneauth OAuth1 plugin parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.GetAccessToken",
+      "source_fingerprint": "d0eb52c2090ece0063d7774dd8a970974192ef516330fbe5444a4ade1d329b45",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.GetAccessToken"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAccessToken GETs users/{user}/OS-OAUTH1/access_tokens/{id}, decodes the access_token envelope with an RFC3339Milli expires_at and accepts only 200.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.RevokeAccessToken",
+      "source_fingerprint": "a39a87046d6fbd8ea171be3bdf453994f262fd8e4fa3347e0e4c5252b0aa31c0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.RevokeAccessToken"
+      ],
+      "contracts": [
+        {
+          "behavior": "RevokeAccessToken DELETEs users/{user}/OS-OAUTH1/access_tokens/{id} without a body and accepts 202 or 204.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.ListAccessTokens",
+      "source_fingerprint": "c37bb0f279ff8177fa0f095c468e0e9de9ff79dd70d9e4ee83ad1ecca3a1855e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.ListAccessTokens"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccessTokens GETs users/{user}/OS-OAUTH1/access_tokens, follows the links.next string, decodes access_tokens rows, yields nothing for an empty array, returns io.EOF for a bodyless 204 and an unexpected-code error expecting 200, 204 or 300 for 404.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.ListAccessTokenRoles",
+      "source_fingerprint": "bc62b51c5128080c6f07e2172878df0193a7a8381097ee87e3d960ccaa7f7af5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.ListAccessTokenRoles"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccessTokenRoles GETs users/{user}/OS-OAUTH1/access_tokens/{id}/roles, follows the links.next string, decodes roles rows with id, name and domain_id, yields nothing for an empty array, returns io.EOF for a bodyless 204 and an unexpected-code error expecting 200, 204 or 300 for 404.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/oauth1.GetAccessTokenRole",
+      "source_fingerprint": "56a7a918eb88cbf4a2605d0cfa5beabf3294cce02c81f26ea089e250eb2f5596",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1.API.GetAccessTokenRole"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAccessTokenRole GETs users/{user}/OS-OAUTH1/access_tokens/{id}/roles/{role}, decodes the role envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1AccessTokenRoutesAuthorizePagingAndDecode",
+            "identity/v3/oauth1/native_contracts_test.go:TestNativeOAuth1StatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2tokens.Create",
+      "source_fingerprint": "d23ebe21feab78a09749b7ce742edf0f0fc6644cee5de74bd0de60ebb36e301f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"credentials\":{...}} to ec2tokens sending an explicit signature with the non-omitempty fields as-is or computing an AWS V2 (HmacSHA1/HmacSHA256, dropping body_hash and headers) or V4 signature (adding X-Amz-Date and Authorization to the body headers, random body hash and current time when unset), removes token, keeps extensions inside credentials, requires non-nil options and access and rejects unsupported signature versions or methods and core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token without touching the ProviderClient token, while header extensions are silently dropped.",
+          "tests": [
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenBodiesSignaturesAndSubjectToken",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsDropped",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": [
+        "WithCreateHeader and WithValidateS3TokenHeader are accepted but never sent because native ec2tokens.Create and ValidateS3Token do not call ToTokenV3HeadersMap; sdkgen should stop exposing header extensions for these operations before this mapping is accepted."
+      ]
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2tokens.ValidateS3Token",
+      "source_fingerprint": "f9d65ecd672090bda3fad880cf560a38cbc9b10f7134ded7180b86a7e9ccb154",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.API.ValidateS3Token",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens.WithValidateS3TokenHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "ValidateS3Token POSTs {\"credentials\":{...}} to s3tokens keeping only access, signature, token (the V4 string to sign when computed) and extensions, base64-encoding []byte values, requires non-nil options and access and rejects core-key extensions before HTTP, accepts only 200 and returns a tokens.Token whose ID is X-Subject-Token, while header extensions are silently dropped.",
+          "tests": [
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenBodiesSignaturesAndSubjectToken",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenHeaderExtensionIsDropped",
+            "identity/v3/ec2tokens/native_contracts_test.go:TestNativeEC2TokenStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-oauth1-ec2.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": [
+        "WithCreateHeader and WithValidateS3TokenHeader are accepted but never sent because native ec2tokens.Create and ValidateS3Token do not call ToTokenV3HeadersMap; sdkgen should stop exposing header extensions for these operations before this mapping is accepted."
+      ]
     }
   ]
 }
