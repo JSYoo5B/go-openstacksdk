@@ -56805,6 +56805,262 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.Create",
+      "source_fingerprint": "8f97b134f1914f12592396bbe9c3cf7034011df4f0b67d17924336780607adb2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"security_group\":{...}} to os-security-groups, requires name and rejects a core-key collision before HTTP, decodes numeric or string group/rule IDs as strings and accepts only 200.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.Get",
+      "source_fingerprint": "35f63efae0c2c906dd249b534d5976121892f22ef08e08dee655df87e998f643",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-security-groups/{id}, decodes the group with rules, ip_range and peer group and accepts only 200.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.Update",
+      "source_fingerprint": "89ae1cb78c020edd290343e093d1594a0e52039349d106211338d6d2792dd3a5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"security_group\":{...}} to os-security-groups/{id} sending an explicit empty pointer description and accepts only 200.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.Delete",
+      "source_fingerprint": "c6e406c4d31f19dd2805c7eaa69ad4bea473b36add0ecc1238efce97b9352488",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs os-security-groups/{id} and accepts only 202/204.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.List",
+      "source_fingerprint": "de2f2f154dec2c44c395e28c23c95edb862fdfeabf9d944ade09440e4c64af0c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-security-groups as a single page and yields groups with numeric or string IDs as strings, reporting native page status errors.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.ListByServer",
+      "source_fingerprint": "65f8e5d83896e97d831b0dc0b66bd8a2b52fa7e331e3917f4723db63a6c42751",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.ListByServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListByServer GETs servers/{server}/os-security-groups as a single page.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.CreateRule",
+      "source_fingerprint": "77d1f0e96eb6d7bb671ae825532c575796add4da1c92e9d0f4f18d6716d0a995",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.CreateRule",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.WithCreateRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateRule POSTs {\"security_group_rule\":{...}} to os-security-group-rules always sending from/to ports (zero included), requires parent group and protocol plus at least one of CIDR or group_id before HTTP, decodes numeric or string rule/parent IDs and accepts only 200.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.DeleteRule",
+      "source_fingerprint": "4810224b534b97b589cfa3c59f70ac86c6253899921104f60bbefbb9ba2e11f8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.DeleteRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteRule DELETEs os-security-group-rules/{id} and accepts only 202/204.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.AddServer",
+      "source_fingerprint": "71ab6af9cc56f80206a1c9b5f1568867d051488b9e609e5843a20e7306f5b9cd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.AddServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddServer POSTs {\"addSecurityGroup\":{\"name\":...}} to servers/{server}/action and accepts only the native POST default 201/202.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/secgroups.RemoveServer",
+      "source_fingerprint": "59daf59e57f4a28c19a91a210c55fb6231ddeb5c1b677eae6af2b0856deca9f6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.RemoveServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveServer POSTs {\"removeSecurityGroup\":{\"name\":...}} to servers/{server}/action and accepts only the native POST default 201/202.",
+          "tests": [
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupRoutesBodiesAndDecode",
+            "compute/v2/secgroups/native_contracts_test.go:TestNativeSecurityGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/secgroups/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/secgroups proxy call only; the API was removed at Compute microversion 2.36 and Neutron security groups are reviewed separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
