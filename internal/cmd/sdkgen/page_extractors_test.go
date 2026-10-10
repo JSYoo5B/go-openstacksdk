@@ -165,12 +165,13 @@ func helper(Builder) {}
 func Create(opts Builder) { _, _ = opts.ToCreateMap() }
 func Read(opts Builder) { _, _ = opts.ToCreateMap(); _, _ = opts.ToCreateHeadersMap() }
 func Escape(opts Builder) { helper(opts) }
+func Stub(opts Builder) {}
 `)
 	iface, _ := ifaceOf(pkg.Scope().Lookup("Builder").Type())
 	for _, tc := range []struct {
 		name    string
 		headers bool
-	}{{"Create", false}, {"Read", true}, {"Escape", true}} {
+	}{{"Create", false}, {"Read", true}, {"Escape", true}, {"Stub", true}} {
 		b := builder{name: "opts", iface: iface, unread: unreadBuilderMethods(decls[tc.name], "opts", iface)}
 		// A parameter passed elsewhere may be read there, so its methods all stay available.
 		if caps := capabilities(pkg, b); !caps.body || caps.headers != tc.headers {

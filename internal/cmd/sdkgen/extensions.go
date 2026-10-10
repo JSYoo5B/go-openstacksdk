@@ -136,7 +136,8 @@ func unreadBuilderMethods(decl *ast.FuncDecl, parameter string, iface *types.Int
 		}
 		return !escaped
 	})
-	if escaped {
+	// A declaration that never touches its builder is a stub, not evidence.
+	if escaped || len(called) == 0 {
 		return nil
 	}
 	unread := map[string]bool{}
