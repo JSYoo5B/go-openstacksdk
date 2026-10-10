@@ -75,9 +75,19 @@ func validateReflectedHeaderRequests(pkg *types.Package, decls map[string]*ast.F
 	return nil
 }
 
+// These native requests reflect their builder argument with BuildQueryString
+// instead of calling its query method, so the adapter must carry the q fields.
+var reflectedQueryRequests = map[string]bool{
+	"identity/v3/endpoints.List": true,
+}
+
+func directNativeHeaders(pkg *types.Package, decl *ast.FuncDecl, file *ast.File, parameter string) bool {
+	return directNativeReflection(pkg, decl, file, parameter, "BuildHeaders")
+}
+
 // Resolve imports in the declaration's file. A package-wide alias map cannot
 // distinguish different imports using the same spelling in separate files.
-func directNativeHeaders(pkg *types.Package, decl *ast.FuncDecl, file *ast.File, parameter string) bool {
+func directNativeReflection(pkg *types.Package, decl *ast.FuncDecl, file *ast.File, parameter, reflector string) bool {
 	if decl == nil || decl.Body == nil || file == nil {
 		return false
 	}
@@ -124,11 +134,11 @@ func directNativeHeaders(pkg *types.Package, decl *ast.FuncDecl, file *ast.File,
 		switch function := call.Fun.(type) {
 		case *ast.SelectorExpr:
 			qualifier, ok := function.X.(*ast.Ident)
-			if ok && !dot && qualifier.Name == alias && qualifier.Obj == nil && function.Sel.Name == "BuildHeaders" {
+			if ok && !dot && qualifier.Name == alias && qualifier.Obj == nil && function.Sel.Name == reflector {
 				found = true
 			}
 		case *ast.Ident:
-			if dot && function.Name == "BuildHeaders" && function.Obj == nil && pkg.Scope().Lookup("BuildHeaders") == nil {
+			if dot && function.Name == reflector && function.Obj == nil && pkg.Scope().Lookup(reflector) == nil {
 				found = true
 			}
 		}
@@ -138,8 +148,20 @@ func directNativeHeaders(pkg *types.Package, decl *ast.FuncDecl, file *ast.File,
 }
 
 func withReflectedHeaders(pkg *types.Package, b builder, decl *ast.FuncDecl, file *ast.File) (builder, error) {
-	if b.iface == nil || !directNativeHeaders(pkg, decl, file, b.name) {
+	if b.iface == nil {
 		return b, nil
+	}
+	headers := directNativeHeaders(pkg, decl, file, b.name)
+	query := directNativeReflection(pkg, decl, file, b.name, "BuildQueryString")
+	if !headers && !query {
+		return b, nil
+	}
+	if query {
+		name := sdkPath(pkg.Path()) + "." + decl.Name.Name
+		if !reflectedQueryRequests[name] {
+			return b, fmt.Errorf("direct native query reflection in %s needs review", name)
+		}
+		b.reflectedQuery = true
 	}
 	base := types.Unalias(b.base)
 	if pointer, ok := base.(*types.Pointer); ok {
@@ -147,19 +169,20 @@ func withReflectedHeaders(pkg *types.Package, b builder, decl *ast.FuncDecl, fil
 	}
 	fields, ok := base.Underlying().(*types.Struct)
 	if !ok {
-		return b, fmt.Errorf("direct header input %s is not a concrete struct", b.name)
+		return b, fmt.Errorf("direct reflected input %s is not a concrete struct", b.name)
 	}
 	for i := 0; i < fields.NumFields(); i++ {
-		if reflect.StructTag(fields.Tag(i)).Get("h") == "" {
+		tag := reflect.StructTag(fields.Tag(i))
+		if !(headers && tag.Get("h") != "") && !(query && tag.Get("q") != "") {
 			continue
 		}
 		field := fields.Field(i)
 		if !field.Exported() {
-			return b, fmt.Errorf("direct header field %s is not exported", field.Name())
+			return b, fmt.Errorf("direct reflected field %s is not exported", field.Name())
 		}
 		for j := 0; j < b.iface.NumMethods(); j++ {
 			if b.iface.Method(j).Name() == field.Name() {
-				return b, fmt.Errorf("direct header field %s conflicts with a builder method", field.Name())
+				return b, fmt.Errorf("direct reflected field %s conflicts with a builder method", field.Name())
 			}
 		}
 		b.headers = append(b.headers, reflectedHeaderField{field: field, tag: fields.Tag(i)})

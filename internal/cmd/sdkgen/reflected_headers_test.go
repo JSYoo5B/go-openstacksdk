@@ -340,3 +340,33 @@ func TestReflectedHeadersPreserveOptionalBuildersAndSecondaryInputs(t *testing.T
 		}
 	}
 }
+
+func TestReflectedQueryFieldsAreCopiedOnlyForReviewedLists(t *testing.T) {
+	source := "package fixture\nimport gophercloud \"" + upstreamModule + "\"\ntype ListOpts struct{Kind string `q:\"interface\"`;Body string `json:\"body\"`}\ntype ListOptsBuilder interface{ToListParams()(string,error)}\nfunc(ListOpts)ToListParams()(string,error){return \"\",nil}\nfunc Request(client *gophercloud.ServiceClient,opts ListOptsBuilder)error{return nil}\n"
+	pkg, _ := typedCollectionFixture(t, "fixture", source)
+	file, decl := revisionParse(t, strings.Replace(source, "error{return nil}", "error{_,_=gophercloud.BuildQueryString(opts);return nil}", 1))
+	base, err := concrete(pkg, pkg.Scope().Lookup("ListOptsBuilder").Type())
+	if err != nil {
+		t.Fatal(err)
+	}
+	iface, _ := ifaceOf(pkg.Scope().Lookup("ListOptsBuilder").Type())
+	b := builder{name: "opts", base: base, iface: iface, adapter: "listOptsBuilder"}
+	if _, err := withReflectedHeaders(pkg, b, decl, file); err == nil || !strings.Contains(err.Error(), "fixture.Request needs review") {
+		t.Fatal("unreviewed query reflection accepted", err)
+	}
+	if !capabilities(pkg, b).query {
+		t.Fatal("fixture builder should expose query extensions before review")
+	}
+	reflectedQueryRequests["fixture.Request"] = true
+	defer delete(reflectedQueryRequests, "fixture.Request")
+	b, err = withReflectedHeaders(pkg, b, decl, file)
+	if err != nil || !b.reflectedQuery || len(b.headers) != 1 || b.headers[0].field.Name() != "Kind" || b.headers[0].tag != `q:"interface"` {
+		t.Fatal("reviewed query fields not copied", b.headers, err)
+	}
+	if capabilities(pkg, b).query {
+		t.Fatal("query extensions remain enabled although native List never reads them")
+	}
+	if literal := builderLiteral(b, "cfg.Options", "cfg"); literal != "listOptsBuilder{base:cfg.Options,config:cfg,Kind:cfg.Options.Kind}" {
+		t.Fatal(literal)
+	}
+}

@@ -709,6 +709,9 @@ type builder struct {
 	iface   *types.Interface
 	adapter string
 	headers []reflectedHeaderField
+	// reflectedQuery marks a native call that never reads the adapter's query
+	// method, so query extensions would be dropped.
+	reflectedQuery bool
 }
 
 func extraction(t types.Type) *types.Signature {

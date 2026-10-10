@@ -94,12 +94,14 @@ func (a *API) Get(ctx context.Context, id string) (*Endpoint, error) {
 
 type ListOption = request.Option[ListOpts]
 
-func WithListOptions(value ListOpts) ListOption  { return request.WithOptions(value) }
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
+func WithListOptions(value ListOpts) ListOption { return request.WithOptions(value) }
 
 type listOptsBuilder struct {
-	base   ListOpts
-	config request.Config[ListOpts]
+	base         ListOpts
+	config       request.Config[ListOpts]
+	Availability gophercloud.Availability "q:\"interface\""
+	ServiceID    string                   "q:\"service_id\""
+	RegionID     string                   "q:\"region_id\""
 }
 
 func (b listOptsBuilder) ToEndpointListParams() (string, error) {
@@ -128,11 +130,11 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 		err = request.Wrap("List", "endpoints", err)
 		return func(yield func(*Endpoint, error) bool) { var zero *Endpoint; yield(zero, err) }
 	}
-	if err = request.ValidateCapabilities(cfg, false, true, false); err != nil {
+	if err = request.ValidateCapabilities(cfg, false, false, false); err != nil {
 		err = request.Wrap("List", "endpoints", err)
 		return func(yield func(*Endpoint, error) bool) { var zero *Endpoint; yield(zero, err) }
 	}
-	_opts := listOptsBuilder{base: cfg.Options, config: cfg}
+	_opts := listOptsBuilder{base: cfg.Options, config: cfg, Availability: cfg.Options.Availability, ServiceID: cfg.Options.ServiceID, RegionID: cfg.Options.RegionID}
 	return resource.StreamWithControl(ctx, upstream.List(a.client, _opts), func(page pagination.Page) ([]Endpoint, error) {
 		values, err := upstream.ExtractEndpoints(page)
 		return []Endpoint(values), err

@@ -46,6 +46,9 @@ func capabilities(pkg *types.Package, b builder) extensionCapabilities {
 		caps.query = caps.query || value.query
 		caps.headers = caps.headers || value.headers
 	}
+	if b.reflectedQuery {
+		caps.query = false
+	}
 	return caps
 }
 

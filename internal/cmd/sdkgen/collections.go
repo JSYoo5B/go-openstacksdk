@@ -238,7 +238,7 @@ func identifyNamedCollection(pkg *types.Package, decls map[string]*ast.FuncDecl,
 					continue
 				}
 				plan.listInput = base
-				plan.listQueryBuilder = capabilities(pkg, builder{iface: iface}).query
+				plan.listQueryBuilder = capabilities(pkg, builder{iface: iface, reflectedQuery: reflectedQueryRequests[sdkPath(pkg.Path())+"."+name]}).query
 			} else {
 				plan.listInput = options
 			}

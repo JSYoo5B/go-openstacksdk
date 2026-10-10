@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"reflect"
 	"slices"
 	"strings"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/endpoints"
@@ -100,7 +102,7 @@ func TestNativeEndpointRoutesBodiesPagingAndDecode(t *testing.T) {
 		t.Fatal(updated, err)
 	}
 	var rows []*endpoints.Endpoint
-	for value, err := range api.List(ctx, endpoints.WithListOptions(endpoints.ListOpts{Availability: gophercloud.AvailabilityPublic, ServiceID: "svc-1", RegionID: "RegionOne"}), endpoints.WithListQuery("extra", "1")) {
+	for value, err := range api.List(ctx, endpoints.WithListOptions(endpoints.ListOpts{Availability: gophercloud.AvailabilityPublic, ServiceID: "svc-1", RegionID: "RegionOne"})) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -117,9 +119,7 @@ func TestNativeEndpointRoutesBodiesPagingAndDecode(t *testing.T) {
 		{http.MethodPost, base, "", `{"endpoint":{"description":"d","enabled":false,"interface":"public","name":"nova","region":"RegionOne","service_id":"svc-1","url":"https://nova","x_extension":1}}`},
 		{http.MethodGet, base + "/ep-1", "", ""},
 		{http.MethodPatch, base + "/ep-1", "", `{"endpoint":{"enabled":false,"interface":"internal","x_extension":2}}`},
-		// Native List runs BuildQueryString on the generated builder instead of calling
-		// ToEndpointListParams, so typed filters and WithListQuery are silently dropped.
-		{http.MethodGet, base, "", ""},
+		{http.MethodGet, base, "interface=public&region_id=RegionOne&service_id=svc-1", ""},
 		{http.MethodGet, "/other/endpoints", "page=2", ""},
 		{http.MethodDelete, base + "/ep-1", "", ""},
 	}
@@ -239,9 +239,11 @@ func TestNativeEndpointStatusesDecodeAndPreflight(t *testing.T) {
 	})
 }
 
-// The upstream List serializes a plain ListOpts correctly; only the generated
-// builder wrapper loses the filters, so the facade List is pinned as unresolved.
-func TestNativeEndpointListFiltersDroppedByGeneratedBuilder(t *testing.T) {
+// Native List runs BuildQueryString on its argument instead of calling
+// ToEndpointListParams. The generated builder copies the q fields so the typed
+// filters still reach the URL, and raw query extensions are rejected because
+// the native call has no way to send them.
+func TestNativeEndpointListFiltersMatchNativeQuery(t *testing.T) {
 	ctx := context.Background()
 	var calls []nativeEndpointCall
 	api, _ := nativeEndpointAPI(t, &calls, func(*http.Request) *http.Response { return nativeEndpointWire(200, `{"endpoints":[]}`) })
@@ -252,13 +254,34 @@ func TestNativeEndpointListFiltersDroppedByGeneratedBuilder(t *testing.T) {
 	for _, err := range api.List(ctx, endpoints.WithListOptions(filters)) {
 		t.Fatal(err)
 	}
-	for _, err := range api.List(ctx, endpoints.WithListQuery("interface", "admin")) {
+	for _, err := range api.Resources.List(ctx, resource.WithQuery("interface", "admin"), resource.WithQuery("service_id", "svc-1")) {
 		t.Fatal(err)
+	}
+	rejected := 0
+	for _, err := range api.Resources.List(ctx, resource.WithQuery("extra", "1")) {
+		if !errors.Is(err, resource.ErrUnsupported) {
+			t.Fatal(err)
+		}
+		rejected++
+	}
+	extension := func(config *request.Config[endpoints.ListOpts]) error {
+		config.Query = url.Values{"extra": {"1"}}
+		return nil
+	}
+	for _, err := range api.List(ctx, extension) {
+		nativeEndpointOperation(t, err, "List")
+		if !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
+		rejected++
+	}
+	if rejected != 2 {
+		t.Fatal(rejected)
 	}
 	want := []nativeEndpointCall{
 		{http.MethodGet, "/keystone/v3/endpoints", "interface=admin&service_id=svc-1", ""},
-		{http.MethodGet, "/keystone/v3/endpoints", "", ""},
-		{http.MethodGet, "/keystone/v3/endpoints", "", ""},
+		{http.MethodGet, "/keystone/v3/endpoints", "interface=admin&service_id=svc-1", ""},
+		{http.MethodGet, "/keystone/v3/endpoints", "interface=admin&service_id=svc-1", ""},
 	}
 	if !reflect.DeepEqual(calls, want) {
 		t.Fatalf("%+v", calls)

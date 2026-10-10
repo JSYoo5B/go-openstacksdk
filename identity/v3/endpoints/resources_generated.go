@@ -4,6 +4,7 @@ package endpoints
 import (
 	context "context"
 	fmt "fmt"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
 	iter "iter"
 	maps "maps"
@@ -21,13 +22,11 @@ func (a *API) newResources() *resource.Collection[Endpoint] {
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Endpoint, error] {
 			q = maps.Clone(q)
 			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
-				}
+			input, err := request.QueryOptions[ListOpts](q)
+			if err != nil {
+				return func(yield func(*Endpoint, error) bool) { yield(nil, err) }
 			}
-			return a.listWithControl(ctx, control, options...)
+			return a.listWithControl(ctx, control, WithListOptions(input))
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Endpoint, error) {
