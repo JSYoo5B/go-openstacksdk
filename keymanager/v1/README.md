@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 keymanager/v1 API를 하나의 인증된 서비스 객체
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+openstacksdk key manager의 수정·대기 메서드 대응은 [Python Proxy 대응](python-parity.md)에 정리했습니다.
+
 `Orders.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 상속 query `limit`·`marker`와 로컬 Body 속성 14개를 분류합니다. 최상위 원문 `name`과 중첩 `meta.name`을 구분하며 원문 metadata·timestamp를 비교합니다. `id`는 literal id 또는 전체 order_ref이고 `order_id`·`secret_id`는 각 참조의 별도 HREF accessor입니다. native Order·Meta 전체 페이지 디코드 뒤 typed Order를 반환합니다. 공통 `WithName`과 이름 Ref 조회는 지원하지 않으며 ID 조회·삭제·대기는 호출자의 고정 order 경로를 사용합니다. [Order 목록 Python/Go 사용법](orders/listing/README.md)에 metadata 비교·두 formatter·반복 query·고정 소스 검증과 응답 모델 경계를 설명합니다.
 
 `Containers.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 상속 query `limit`·`marker`와 로컬 Body 속성 10개를 분류합니다. `name`은 로컬 조건이며 기존 `WithName`의 서버 hint와 구분합니다. timestamp·참조·중첩 배열을 원본 행에서 비교하며 `id`는 literal id 또는 전체 container_ref이고 `container_id`는 별도의 HREF accessor입니다. native 전체 페이지 디코드 뒤 typed Container를 반환합니다. [Container 목록 Python/Go 사용법](containers/listing/README.md)에 raw name/offset 확장·반복 query·원문 배열·고정 소스 검증과 응답 모델 경계를 설명합니다.

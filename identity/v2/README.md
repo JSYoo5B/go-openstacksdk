@@ -17,6 +17,8 @@ Gophercloud v2.15.0의 identity/v2 API를 하나의 인증된 서비스 객체�
 
 Keystone v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. extension·role·tenant·token·user native 호출의 요청 본문, 성공 status와 관리자 전용 호출은 [Keystone v2.0 native 호출](native-calls.md)에 설명합니다.
 
+openstacksdk identity v2 Proxy 메서드와의 대응은 [Python Proxy 대응](python-parity.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go

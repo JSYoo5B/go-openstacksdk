@@ -146,6 +146,8 @@ if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
 
 ## 전체 API와 남은 작업
 
+고정 openstacksdk의 Glance v1 Proxy 메서드 11개는 Go API가 없어 모두 미해결로 기록했습니다. 메서드별 이유는 [Python Glance v1 대응](python-v1-parity.md)에 정리했습니다.
+
 생성·속성 수정, 데이터 업로드·다운로드, import, task, 멤버 관리는 `service.API`의 [Image v2 API](v2/README.md)에서 제공합니다. `service.API.Images`, `ImageData`, `ImageImport`, `Tasks`, `Members`에서 각 호출을 사용하며, 멤버는 `Members.InImage(ctx, ref)`로 부모 이미지를 고정할 수 있습니다. 서버 생성의 이미지 이름 해석은 이 패키지의 Find를 사용합니다.
 
 `Service.CreateAndImport`는 metadata 생성·직접 staging·import 접수를 연결하고 remote URL/Glance 소스와 저장소 선택도 concrete 옵션으로 처리합니다. [생성·import 사용법](create-import.md)은 실제 단계별 접수 증거와 부분 실패, 기본값·소유권·선택적 active 대기를 설명합니다. 현대 전체 흐름은 `service.CreateImageRecord`와 `conn.CreateImageRecord`에서 cloud 기본값·checksum 계산/재사용·vendor metadata·선택된 Swift Task를 구성합니다. [현대 생성 사용법](image-record-create.md)에 typed convenience API와의 차이·실제 Source 순서·부분 결과·명시적 Go 경계를 설명합니다. 다운로드 결과의 `Body`는 사용자가 닫아야 합니다.
