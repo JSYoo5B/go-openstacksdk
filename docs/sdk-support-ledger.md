@@ -4,13 +4,28 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder native QoS specs](#cinder-native-qos-specs-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 admin 병렬 8묶음](#핵심-admin-병렬-8묶음-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는737입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는972입니다.
+
+## 핵심 admin 병렬 8묶음 완료
+
+**최신 API 완료 (2026-10-11): 핵심 admin 병렬 8묶음 235개, 전체737→972(+235)·핵심663→898/2,292·Identity34→117/389·Compute117→153/333·Placement0→32/71·Network182→238/758·Image82→85/120·Block Storage178→203/480.** 서비스별 묶음을 별도 worktree에서 동시에 검증하고, 판정 JSON·생성 README·집계는 머지할 때 한곳에서 갱신했습니다. 새 판정 237행 가운데 235행이 `go_mapping`이고 2행은 unresolved입니다. 기존 generated facade는 바꾸지 않았습니다.
+
+- Nova flavor·서버 관리자 16개: flavor 생성·수정·삭제·접근 권한·extra spec과 서버 관리자 action의 계약을 고정했습니다. evacuate가 2.14 이전 key를 항상 보내는 점과 live migrate에 `"auto"`를 보낼 수 없는 점을 [Nova native flavor·서버 관리자 호출](../compute/v2/native-admin-flavors-servers.md)에 적었습니다. 테스트 `1d75f7ee`, 새 6그룹입니다.
+- Neutron agent·segment·IP 사용량·L3 agent 22개: segment 목록이 `segments_links`를 읽지 않아 첫 페이지만 읽는 점과 agent 시각 형식을 [Neutron native 관리자 호출](../network/v2/native-admin.md)에 적었습니다. 테스트 `22ca0b38`, 새 7그룹입니다.
+- Neutron BGP peer·speaker·BGP VPN 34개: peer·speaker 목록은 single page라 링크를 따라가지 않고, BGP VPN 목록은 marker pager입니다. [Neutron native BGP·BGP VPN 호출](../network/v2/native-bgp.md)에 설명합니다. 테스트 `7b306bb7`, 새 6그룹입니다.
+- Placement 33개: 32개는 `go_mapping`입니다. allocation candidate `List`는 native `ExtractAllocationCandidates110`으로 읽어 1.12 이상 응답에서 decode 오류가 나므로 unresolved로 남겼습니다. usage 조회도 1.38 이상 모양만 읽습니다. [Placement native 호출](../placement/v1/native-calls.md)에 설명합니다. 테스트 `d2e48aa8`, 새 13그룹입니다.
+- Nova hypervisor·aggregate·service·migration·진단·AZ 상세·사용량 20개: service `Update`에서 `ForcedDown: false`를 보낼 수 없는 점과 migration 목록의 pointer 규칙을 [Nova native 인프라 관리자 호출](../compute/v2/native-admin-infra.md)에 적었습니다. 테스트 `3306eec8`, 새 13그룹입니다.
+- Cinder volume type 관리·manage·pool·service·v2 quota·limit 25개와 Glance task 3개: 생성과 수정의 공개 여부 key가 다른 점, encryption 수정은 네 필드를 모두 채워야 하는 점, task `ListOpts`의 `Type`이 query에서 빠지는 점을 [Cinder native 관리자 호출](../blockstorage/v3/native-admin.md)과 [Glance native task 호출](../image/v2/native-tasks.md)에 적었습니다. 테스트 `868bfc29`, 새 18그룹입니다.
+- Keystone region·service·endpoint·policy·limit·registered limit·project endpoint·federation mapping 39개: 38개는 `go_mapping`입니다. native endpoint `List`는 builder 대신 받은 값에 직접 `BuildQueryString`을 적용해서 facade의 필터와 `WithListQuery`가 모두 사라지므로 unresolved로 남겼습니다. [Keystone v3 native catalog·policy·limit·mapping 관리자 호출](../identity/v3/native-admin-b.md)에 설명합니다. 테스트 `091e25b6`, 새 17그룹입니다.
+- Keystone domain·group·project·user·role·OS-INHERIT 45개: `Filters` map을 쓰면 Gophercloud가 `q:"-"` 필드를 건너뛰지 않아 `-=` query가 하나 더 붙고, role 할당 목록의 `effective=false`도 Keystone에서는 설정된 값으로 취급될 수 있습니다. project `ModifyTags`는 빈 목록으로 tag를 비울 수 없습니다. [Keystone v3 native 관리 호출](../identity/v3/native-admin-a.md)에 설명합니다. 테스트 `cc2a1052`, 새 14그룹입니다.
+
+8묶음의 새 집중 계약 테스트 94그룹이 race로 통과했습니다. 마지막 머지 뒤 전체 gate의 race는 **146개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews1,235·contracts4,465·go_mapping972입니다. 판정은 `c3ce712d`·`80d5f3e0`·`8d04f4eb`·`01e28db7`·`46048d30`으로 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder native QoS specs 완료
 
-**최신 API 완료 (2026-10-11): 핵심 admin Cinder native QoS spec 10개, 전체727→737(+10)·핵심653→663/2,292·Block Storage168→178/480.** 기본 정책상 관리자 호출인 QoS spec의 계약을 고정했습니다. 생성은 200만 받고, `Specs` key를 typed 필드 뒤에 펼쳐 넣어 `name` key가 `Name`을 덮어씁니다. 수정 결과는 spec map이고, key 삭제는 목록이 없으면 `{"keys": null}`을 보냅니다. association 변경 세 호출은 GET이며 `vol_type_id`가 비면 HTTP 전에 오류입니다. [Cinder v3 native QoS spec 호출](../blockstorage/v3/native-qos.md)을 새로 쓰고 생성 README 링크를 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 admin Cinder native QoS spec 10개, 전체727→737(+10)·핵심653→663/2,292·Block Storage168→178/480.** 기본 정책상 관리자 호출인 QoS spec의 계약을 고정했습니다. 생성은 200만 받고, `Specs` key를 typed 필드 뒤에 펼쳐 넣어 `name` key가 `Name`을 덮어씁니다. 수정 결과는 spec map이고, key 삭제는 목록이 없으면 `{"keys": null}`을 보냅니다. association 변경 세 호출은 GET이며 `vol_type_id`가 비면 HTTP 전에 오류입니다. [Cinder v3 native QoS spec 호출](../blockstorage/v3/native-qos.md)을 새로 쓰고 생성 README 링크를 추가했습니다.
 
 새 집중 계약 테스트2그룹(하위 사례32)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **109개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새10행을 추가해 reviews998·contracts4,228·go_mapping737입니다. 테스트 `97ac8acc`, 가이드 `f0ccc0c7`, 판정 `03d074c6`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
