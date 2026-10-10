@@ -60984,6 +60984,737 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.Create",
+      "source_fingerprint": "310e366470b64311c94177b49a43001296b363c5d53b01739ca98ef4b2047d65",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs types with a volume_type envelope (required name, omitempty description and extra_specs, os-volume-type-access:is_public pointer) plus extension fields inside the envelope, rejects a missing name, core-key extensions and nil options before HTTP, decodes the volume_type key (zero value for {}) and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.Update",
+      "source_fingerprint": "36774f0efb6860ad11a17e5e14185931be663ec3dd4a67dc93da35b389907eff",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs types/{id} with a volume_type envelope of pointer name/description/is_public (nil omitted, empty strings kept, {} when unset; is_public rather than the access-prefixed create key) plus extension fields, rejects core-key extensions before HTTP, decodes the volume_type key and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.Delete",
+      "source_fingerprint": "784c54e15c17597bebfb5d2dd576fb5aa7ab14ca345afacd1d36dec3b244df67",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends a bodyless DELETE to types/{id} and accepts the default 202 and 204.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.CreateExtraSpecs",
+      "source_fingerprint": "0ad9bbcd7064f9d423d1c5efa536fb4c4cf8e1a406cabe8cdef7708bb4bf9f12",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateExtraSpecs",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateExtraSpecsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateExtraSpecsField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateExtraSpecs POSTs {\"extra_specs\": map} (null for a nil map) to types/{id}/extra_specs with extension fields placed beside the string-map envelope, rejects an extra_specs extension before HTTP, returns the extra_specs string map (nil when absent) and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.UpdateExtraSpec",
+      "source_fingerprint": "6b6471fbaf0a6c67ebeeb2eca395b566e0b346cf9667ad44312d7e555f5adabb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.UpdateExtraSpec",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateExtraSpecOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateExtraSpec PUTs the single {key: value} pair without an envelope to types/{id}/extra_specs/{unescaped key}, rejects zero or several pairs and any body extension (including the shared WithCreateExtraSpecsField option) before HTTP, returns the envelope-free string map with a wrapped decode error for non-string values and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.DeleteExtraSpec",
+      "source_fingerprint": "cf5ba723ae30ad09480891546b025bb467a7bd92999f33ed9307e2efb94937cb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteExtraSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteExtraSpec sends a bodyless DELETE to types/{id}/extra_specs/{unescaped key} and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.AddAccess",
+      "source_fingerprint": "2cb82049841efda234fc3af6e3d1060f5b2d709506da607a63f1a4a9d43fdb6a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.AddAccess",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithAddAccessOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithAddAccessField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddAccess POSTs {\"addProjectAccess\": {\"project\": ...}} to types/{id}/action without requiring the project (an empty string is sent), merges extension fields inside the action, rejects a project extension before HTTP, ignores the response body and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.RemoveAccess",
+      "source_fingerprint": "fe1d694343ba27d86f72a39501ec1033b2f72f28a82333fc6e433badb0c9addf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.RemoveAccess",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRemoveAccessOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithRemoveAccessField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveAccess POSTs {\"removeProjectAccess\": {\"project\": ...}} to types/{id}/action with extension fields inside the action, rejects nil options before HTTP, ignores the response body and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.ListAccesses",
+      "source_fingerprint": "b75d3b9633ca999eef6b2dc6f0d0450a521f359fa31ea0058e57737ede5a22bf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.ListAccesses"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccesses GETs types/{id}/os-volume-type-access as a single page of volume_type_access rows without following links, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors (200/204/300 expected) without operation context.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.CreateEncryption",
+      "source_fingerprint": "946a4a81ee2af1e74f6fbb76ac1debf23dbe865020a125e98b59ec24fb89b70f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.CreateEncryption",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateEncryptionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithCreateEncryptionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateEncryption POSTs an encryption envelope with required provider and non-omitempty key_size/control_location/cipher (zero values sent) plus extension fields to types/{id}/encryption, rejects a missing provider and core-key extensions before HTTP, decodes the encryption key (zero value for {}) and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.GetEncryption",
+      "source_fingerprint": "9ac1318194a36f07d1078e49ed0f131be3cc016a98cc960675245534d798abdc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetEncryption GETs types/{id}/encryption, decodes the envelope-free body into GetEncryptionType with raw string timestamps (null as empty) and a zero value for {}, and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.GetEncryptionSpec",
+      "source_fingerprint": "c26d1121aadcccceeacd67c861525b2494ce3b1e14fe21b267ea029fdc740477",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.GetEncryptionSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetEncryptionSpec GETs types/{id}/encryption/{unescaped key}, returns the whole envelope-free body as map[string]any with float64 numbers, and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.UpdateEncryption",
+      "source_fingerprint": "c00dc4c9dd48930f5e56426043f99ded1151c5d8a294b95f06407bb3a8cafa94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.UpdateEncryption",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateEncryptionOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.WithUpdateEncryptionField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateEncryption PUTs an encryption envelope that always carries key_size, provider, control_location and cipher (zero values included) plus extension fields to types/{id}/encryption/{encryptionID}, rejects core-key extensions before HTTP, decodes the encryption key and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumetypes.DeleteEncryption",
+      "source_fingerprint": "9d45d9e377dff3f26c1303915c5e48c1b82422258578138388cf2144f69007f5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes.API.DeleteEncryption"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteEncryption sends a bodyless DELETE to types/{id}/encryption/{encryptionID} and accepts the default 202 and 204.",
+          "tests": [
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminRoutesBodiesAndDecode",
+            "blockstorage/v3/volumetypes/native_admin_contracts_test.go:TestNativeVolumeTypeAdminStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/manageablevolumes.ManageExisting",
+      "source_fingerprint": "baf4aed14538f910527e8844dc3a70ca6bb2a5310a9edfb89381e5786bb04329",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ManageExisting",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithManageExistingOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithManageExistingField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ManageExisting POSTs an all-omitempty volume envelope (host, cluster, ref, name, availability_zone, description, volume_type, bootable, metadata; nothing required, {} when empty) plus extension fields to manageable_volumes, rejects core-key extensions and nil options before HTTP, decodes the volume key into a v3 Volume with zone-less millisecond timestamps (a Z suffix fails) and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/manageablevolumes/native_contracts_test.go:TestNativeManageableVolumeRouteBodyAndDecode",
+            "blockstorage/v3/manageablevolumes/native_contracts_test.go:TestNativeManageableVolumeStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/manageablevolumes call only; Python volume manage parity and microversion 3.8 selection are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/schedulerstats.List",
+      "source_fingerprint": "c1ddead75c7886c82e92008cd24ce45cb80bc211f0e3d536d214f651c10b63ef",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/schedulerstats.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs scheduler-stats/get_pools with tenant_id, detail only when true and extension query values as a single page of pools without following pools_links, decodes capacity numbers with \"infinite\" as +Inf and other strings as zero and max_over_subscription_ratio as a string, fails on mistyped capability fields, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListRouteAndDecode",
+            "blockstorage/v2/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/schedulerstats call only; Python storage pool Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/services.List",
+      "source_fingerprint": "5f0d1dd5bbd3148a16da6d6dd7d61e00f9a877afe92097f1ea8f3b63d0f80890",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-services with binary, host and extension query values as a single page without following services_links, decodes updated_at in the zone-less millisecond layout (null as zero, a Z suffix fails), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/services/native_contracts_test.go:TestNativeCinderServiceListRouteAndDecode",
+            "blockstorage/v2/services/native_contracts_test.go:TestNativeCinderServiceListStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/services call only; Python block storage service Resource parity and service enable/disable actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/schedulerstats.List",
+      "source_fingerprint": "acf378b2bbcdc9a2259a6143db92c064eca6c6b65256cfa11ccd838b6fca38af",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs scheduler-stats/get_pools with tenant_id, detail only when true and extension query values as a single page of pools without following pools_links, decodes capacity numbers with \"infinite\" as +Inf and other strings as zero and max_over_subscription_ratio as a string, fails on mistyped capability fields, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v3/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListRouteAndDecode",
+            "blockstorage/v3/schedulerstats/native_contracts_test.go:TestNativeSchedulerStatsListStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/schedulerstats call only; Python storage pool Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/services.List",
+      "source_fingerprint": "0b4ed23da0cfc758f017cbd999392704ce2092d114866cad6b3c04b8fc3aff3b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-services with binary, host and extension query values as a single page without following services_links, decodes updated_at in the zone-less millisecond layout (null as zero, a Z suffix fails), yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v3/services/native_contracts_test.go:TestNativeCinderServiceListRouteAndDecode",
+            "blockstorage/v3/services/native_contracts_test.go:TestNativeCinderServiceListStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/services call only; Python block storage service Resource parity and service enable/disable actions are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/quotasets.Get",
+      "source_fingerprint": "03ca052cfa9e2edd371016ea13bae47d65e3f7a0a6329e45e86c6a66b8e7a3af",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-quota-sets/{projectID}, decodes typed limits from the quota_set key with unknown per-type keys kept in Extra as JSON numbers, returns nil without an error when the envelope is missing, wraps mistyped fields as decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode",
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/quotasets.GetDefaults",
+      "source_fingerprint": "097bb3a991201c84dde4150b80aba04c6154d8c649640a45fcd5fd62fcda851b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.GetDefaults"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetDefaults GETs os-quota-sets/{projectID}/defaults with the same quota_set decode as Get (nil without an error for a missing envelope, wrapped decode errors for mistyped fields) and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode",
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/quotasets.GetUsage",
+      "source_fingerprint": "aa15a0c62d3918db75a75f9d2f34e642dada46fc04a2b25a608ce962db975eca",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.GetUsage"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetUsage GETs os-quota-sets/{projectID}?usage=true, returns a QuotaUsageSet value with in_use/limit/reserved/allocated per typed resource, drops per-type usage keys, returns a zero value for a missing envelope and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode",
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/quotasets.Update",
+      "source_fingerprint": "de85c520d2727e043cfd7d88e7ddefa72dabb8746bfa4fc5d171102ff4c84b3c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs a quota_set envelope of pointer limits (nil omitted, 0 and -1 kept), force only when true and Extra keys merged afterwards so they override typed limits, plus extension fields; it rejects extensions colliding with typed keys (even omitted) or Extra keys and nil options before HTTP, decodes the quota_set key (nil when missing) and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode",
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/quotasets.Delete",
+      "source_fingerprint": "cce26579a819fe05d098e0f534d9a354166118e118f0a90222608ff6372cf62d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends a bodyless DELETE to os-quota-sets/{projectID} to reset overrides and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2RoutesBodiesAndDecode",
+            "blockstorage/v2/quotasets/native_contracts_test.go:TestNativeQuotaSetV2StatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/limits.Get",
+      "source_fingerprint": "63c858f3b89e70397f0e6a942209f07678fa5cfa73bd7f2ac3c69718dd2e85ef",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/limits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs limits, decodes the ten absolute integer fields and rate groups with raw next-available strings from the limits key, returns nil without an error when the envelope is missing, wraps mistyped fields as decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/limits/native_contracts_test.go:TestNativeLimitsV2GetRouteAndDecode",
+            "blockstorage/v2/limits/native_contracts_test.go:TestNativeLimitsV2GetStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/limits call only; Python limits parity and the SDK-owned v3 limits fetch are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/tasks.Create",
+      "source_fingerprint": "a2981817b3e6d53424bd5e6841a3edf881f211bd3e4f57bbf7e6729efe4ab8bb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs an envelope-free {type, input} body (required type, nil input sent as null) plus top-level extension fields to tasks, rejects a missing type, type/input extensions and nil options before HTTP, decodes the envelope-free task with RFC 3339 timestamps and accepts only 201.",
+          "tests": [
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskRoutesBodiesPagingAndDecode",
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/native-tasks.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/tasks.Get",
+      "source_fingerprint": "1e4cd0229c92991778bc01cd91ac597642b11477fce12e992ea8615bb35b5b13",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs tasks/{taskID}, decodes the envelope-free task (zero value for {}, nil without an error for a JSON null body, wrapped decode error for zone-less timestamps) and accepts only 200.",
+          "tests": [
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskRoutesBodiesPagingAndDecode",
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/native-tasks.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:image/v2/tasks.List",
+      "source_fingerprint": "429581593e83b1a1608cc0cac2f5c742e4e25fb202fa2b1cfd986582eeffdf2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs tasks with limit, marker, sort_key, sort_dir and status (ListOpts.ID and ListOpts.Type carry json tags only and are never sent) plus extension query values, follows the body next path and query re-rooted under the client base without its host, stops on an empty next, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskRoutesBodiesPagingAndDecode",
+            "image/v2/tasks/native_contracts_test.go:TestNativeTaskStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "image/v2/native-tasks.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
