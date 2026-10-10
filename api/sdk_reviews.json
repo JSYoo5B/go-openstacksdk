@@ -57061,6 +57061,208 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.ForceDelete",
+      "source_fingerprint": "4457733ac4f08cbcbba15d3993d62942d810dacf23b5c1247591932368851a08",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"os-force_delete\":\"\"} (an empty string) to volumes/{id}/action and accepts the native POST default 201/202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.ResetStatus",
+      "source_fingerprint": "14993309a54543ba5e943805a8acf80e9019df1acdc12e1b95bcdc0609da3dc7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ResetStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithResetStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithResetStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus POSTs {\"os-reset_status\":{\"status\":...}} to volumes/{id}/action always sending status (empty included) and omitting empty migration/attach status, keeps extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/volumes.Unmanage",
+      "source_fingerprint": "cb24e5847ce2dc471fb67f214d20353610402c412c4ac4e9e718b401fa4b4e26",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.Unmanage"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unmanage POSTs {\"os-unmanage\":{}} to volumes/{id}/action and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.ForceDelete",
+      "source_fingerprint": "a8b5ecfe77cf4d005ebe03a7bd7127511d33658cd1ccda6f6c27e2a7c67ecdee",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"os-force_delete\":\"\"} (an empty string) to volumes/{id}/action and accepts the native POST default 201/202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/volumes.ResetStatus",
+      "source_fingerprint": "3bc29622e4f38c963089bd73221a7e4a0f8b63a9b139e333259bbde64280217c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ResetStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithResetStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus POSTs {\"os-reset_status\":{\"status\":...}} to volumes/{id}/action always sending status (empty included) and omitting empty migration/attach status, keeps extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/volumes/native_admin_contracts_test.go:TestNativeVolumeAdminActionRoutesBodiesAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-volumes.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.ForceDelete",
+      "source_fingerprint": "ee97cbbe29dcab22ddc04b595bd715ba74be5cf8bf8781219867d5570acecce9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"os-force_delete\":{}} to snapshots/{id}/action and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_admin_contracts_test.go:TestNativeSnapshotAdminActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.ResetStatus",
+      "source_fingerprint": "ecdae3a8d0f3dff79a9afbc4d2ce011b2053591e17a84a4321fbc06e24b3ffc1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ResetStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithResetStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithResetStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus POSTs {\"os-reset_status\":{\"status\":...}} to snapshots/{id}/action with extensions inside the action object, rejects a status extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_admin_contracts_test.go:TestNativeSnapshotAdminActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.UpdateStatus",
+      "source_fingerprint": "7c4941ffe54017ee283926ab65c91a644b4c8702435cca837bb0d9df4a488c5d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.UpdateStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateStatus POSTs {\"os-update_snapshot_status\":{\"status\":...,\"progress\":...}} to snapshots/{id}/action always sending status (empty included) and omitting empty progress, rejects a nil option before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_admin_contracts_test.go:TestNativeSnapshotAdminActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

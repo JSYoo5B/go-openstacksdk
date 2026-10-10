@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Nova 보안 그룹 proxy 10개 검증·판정 완료로 핵심 user 단계의 native 호출 정리를 마쳤습니다.** 전체711/3,362·핵심637/2,292입니다. 남은 핵심 native 호출은 기본 정책이 관리자 전용인 호출(Cinder QoS·volume type 관리·force delete·reset status, Nova flavor 관리·server 관리자 action·hypervisor·aggregate·service, Neutron agent·segment·BGP, Keystone 관리 호출, Placement)이며 다음 단계인 핵심 admin에서 처리합니다. snapshot 대기와 Swift object 생성의 native panic guard는 별도 작업으로 분리해 두었습니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): 핵심 admin 단계 착수. Cinder native volume·snapshot 관리자 action 8개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계719).** 판정 전 기준은 전체711/3,362·핵심637/2,292·Block Storage152/480입니다. volume force delete가 빈 문자열 값과 POST 기본 201·202를 쓰는 점, reset status의 항상 전송되는 `status`, unmanage와 snapshot 상태 action의 202 고정 status를 검증했습니다. 다음은 gate·대장이고, 그 뒤 Cinder backup 관리자 호출(force delete·reset status·export·import record)로 이어갑니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Nova native 보안 그룹 proxy 10개, 전체701→711(+10)·핵심627→637/2,292·Compute107→117/333.** 2.36에서 제거된 `os-security-groups` proxy의 CRUD·rule·서버 action 계약을 고정했습니다. [Nova 보안 그룹 proxy native 호출](../compute/v2/secgroups/README.md)과 [검증 기록](sdk-support-ledger.md#nova-native-security-group-proxy-완료)에 설명합니다. 새2그룹과 하위 사례30, 전체 `make check`(race 108개 실제 test package)가 통과했고 `ef71d203`·`12d07bed`·`bc4d1410`을 push했습니다.
 
@@ -458,11 +458,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 711 (21.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 719 (21.4%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,650 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 972 | 아직 개별 기록 없는 선언 2,390 |
-| 기록한 부분·전체 계약 | 4,202 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,642 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 980 | 아직 개별 기록 없는 선언 2,382 |
+| 기록한 부분·전체 계약 | 4,210 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -505,6 +505,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Cinder native volume·snapshot 관리자 action 8개 | pinned Gophercloud v2.15.0 v2/v3 volumes·v3 snapshots admin action 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례46 PASS, 전체 gate 대기 | native-volumes.md·native-snapshots.md·v2 native-calls.md 관리자 절 | 신규8행 go_mapping 기록, gate 대기 | `86811078`·가이드·판정 push; 다음 gate·대장 |
 | Nova native 보안 그룹 proxy 10개 | pinned Gophercloud v2.15.0 secgroups requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례30·전체 `make check` PASS | compute/v2/secgroups/README.md·생성 README 링크 | **10행 go_mapping·711/3,362** | 작은 commit3개 push 완료; 다음 핵심 admin 단계 |
 | Keystone v3 native trusts·ListAvailable·ChangePassword 9개 | pinned Gophercloud v2.15.0 trusts·projects·users 해당 요청 검토 완료 | 기존 generated facade 유지 | 새4그룹·하위 사례20·전체 `make check` PASS | identity/v3/native-trusts.md·생성 README 절 | **9행 go_mapping·701/3,362** | 작은 commit3개 push 완료; 다음 핵심 user 잔여 점검 |
 | Keystone v3 native application credentials·credentials·EC2 credentials 16개 | pinned Gophercloud v2.15.0 세 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례50·전체 `make check` PASS | identity/v3/native-credentials.md·생성 README 절 | **16행 go_mapping·692/3,362** | 작은 commit4개 push 완료; 다음 trust·사용자 본인 조회 |
@@ -627,12 +628,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 637 / 2,292 | 27.8% | 161 | 1,493 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 645 / 2,292 | 28.1% | 161 | 1,485 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 711 / 3,362 | 21.1% | 260 | 2,390 | 1 |
+| 전체 | 719 / 3,362 | 21.4% | 260 | 2,382 | 1 |
 
 **핵심 서비스**
 
@@ -643,7 +644,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 182 / 758 | 43 | 533 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
-| Block Storage / Cinder | 152 / 480 | 31 | 297 | 0 |
+| Block Storage / Cinder | 160 / 480 | 31 | 289 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |
 | Object Storage / Swift | 18 / 74 | 28 | 27 | 1 |
 
