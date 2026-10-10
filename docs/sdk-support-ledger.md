@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova native servers user actions](#nova-native-servers-user-actions-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova native servers addresses console wait](#nova-native-servers-addresses-console-wait-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는389입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는393입니다.
+
+## Nova native servers addresses console wait 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Nova native server 주소·console output·상태 대기 4개, 전체389→393(+4)·핵심315→319/2,292·Compute77→81/333.** 기존 generated `ListAddresses/ListAddressesByNetwork/ShowConsoleOutput/WaitForStatus`가 고정 Gophercloud v2.15.0의 단일 페이지 주소 stream, 본문 없는 204의 native `io.EOF`, `{"os-getConsoleOutput": {...}}` 본문과 200 고정, 즉시 조회 뒤 1초 polling과 ERROR 비종료를 바꾸지 않는지 검증했습니다. [native 서버 호출](../compute/v2/servers/native.md#주소console-output상태-대기)에 해당 절을 추가했습니다.
+
+새 집중 계약 테스트3그룹14사례가 race로 통과했습니다. 전체 `make check`의 race는 52개 실제 test package이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새4행을 추가해 reviews651·contracts3,880·go_mapping393입니다. 테스트 `17bc0b3b`·가이드/판정 `a4fbadb8`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Nova native servers user actions 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Nova native server action 20개, 전체369→389(+20)·핵심295→315/2,292·Compute57→77/333.** 기존 generated reboot·rebuild·resize·confirm/revert resize·createImage·rescue/unrescue·start/stop·pause/unpause·suspend/resume·lock/unlock·shelve/shelveOffload/unshelve·changePassword가 고정 Gophercloud v2.15.0의 `servers/{id}/action` 본문과 고정 status(기본 201/202, confirmResize 201/202/204, createImage 202, rescue 200)를 바꾸지 않는지 검증했습니다. createImage가 microversion 2.45 미만에서는 `Location`, 이상에서는 JSON 본문 `image_id`로 ID를 꺼내는 점과 version header가 없으면 202 뒤에도 오류인 점, 가용 영역 없는 unshelve의 확장 필드가 null action 옆에 붙는 점도 고정했습니다. [native 서버 호출](../compute/v2/servers/native.md#사용자-action)에 사용자 action 절을 추가했습니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Nova native server action 20개, 전체369→389(+20)·핵심295→315/2,292·Compute57→77/333.** 기존 generated reboot·rebuild·resize·confirm/revert resize·createImage·rescue/unrescue·start/stop·pause/unpause·suspend/resume·lock/unlock·shelve/shelveOffload/unshelve·changePassword가 고정 Gophercloud v2.15.0의 `servers/{id}/action` 본문과 고정 status(기본 201/202, confirmResize 201/202/204, createImage 202, rescue 200)를 바꾸지 않는지 검증했습니다. createImage가 microversion 2.45 미만에서는 `Location`, 이상에서는 JSON 본문 `image_id`로 ID를 꺼내는 점과 version header가 없으면 202 뒤에도 오류인 점, 가용 영역 없는 unshelve의 확장 필드가 null action 옆에 붙는 점도 고정했습니다. [native 서버 호출](../compute/v2/servers/native.md#사용자-action)에 사용자 action 절을 추가했습니다.
 
 새 집중 계약 테스트4그룹111사례가 race로 통과했습니다. 전체 `make check`의 race는 52개 실제 test package이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새20행을 추가해 reviews647·contracts3,876·go_mapping389입니다. 테스트 `dd12abe8`·가이드/판정 `c15ee53a`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
