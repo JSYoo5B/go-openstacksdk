@@ -57475,6 +57475,270 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Create",
+      "source_fingerprint": "c51544b9effeec17419c28e43c602644778f55b80e23662e3152749174ffa4be",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"qos_specs\":{...}} to qos-specs always sending name, merging Specs keys after typed fields (a name spec overrides Name) and extensions inside the object, rejects a core-key collision before HTTP and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Get",
+      "source_fingerprint": "f296b62e87b059e8d80e77904c01784317883dea12bdedff58c2c23a90c98c16",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs qos-specs/{id}, decodes the qos_specs key with consumer and specs and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.List",
+      "source_fingerprint": "8995f7b91b74d4cdebdd0885258579e091b2c453e6fdc1a3f84f8f153dd3eeac",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs qos-specs with sort/marker/limit and extension query values and follows qos_specs_links next hrefs as received.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Update",
+      "source_fingerprint": "291cdf8f8bfa4c7e03e4246b210a5576619e7740a60ec05cca074012ad653965",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"qos_specs\":{...}} to qos-specs/{id} with consumer and merged Specs keys, returns the response spec map and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Delete",
+      "source_fingerprint": "777080a2c6154ac31520c6187da577f0235e93fdce5f26c8f55a9aa53a345ee7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs qos-specs/{id} with force=true only when requested and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.DeleteKeys",
+      "source_fingerprint": "7b8890d5718afbc3fbad9477d66d00ac434ae099e6016ecf3d7e21da87d58665",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.DeleteKeys",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteKeysOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDeleteKeysField"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteKeys PUTs {\"keys\":[...]} (null without keys) to qos-specs/{id}/delete_keys, rejects a keys extension before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Associate",
+      "source_fingerprint": "fa4ccff0a036392ba45fa42afef1fe72efbaa30525ebf211a44654e6554e6431",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Associate",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithAssociateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithAssociateQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Associate GETs qos-specs/{id}/associate with the required vol_type_id query (rejected before HTTP when empty) and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.Disassociate",
+      "source_fingerprint": "2e5e447ab8a215838ada6118e1f15ef37216e4406525aa406fcbe4cbb040a5ed",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.Disassociate",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDisassociateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.WithDisassociateQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Disassociate GETs qos-specs/{id}/disassociate with the required vol_type_id query (rejected before HTTP when empty) and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.DisassociateAll",
+      "source_fingerprint": "1798c5d937bb81ae6a7cf9215bb4b62611abc23afe14183b71695fe854041b50",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.DisassociateAll"
+      ],
+      "contracts": [
+        {
+          "behavior": "DisassociateAll GETs qos-specs/{id}/disassociate_all and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/qos.ListAssociations",
+      "source_fingerprint": "2d74ff5a84a46b18ac9433b1641f55e710b09b0cb968514d6b6377907ab30811",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos.API.ListAssociations"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssociations GETs qos-specs/{id}/associations as a single page of id, name and association_type rows.",
+          "tests": [
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/qos/native_contracts_test.go:TestNativeQoSStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-qos.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
