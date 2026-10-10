@@ -22,3 +22,13 @@ port의 `ValueSpecs` map은 별도 key로 보내지 않고 `port` 객체에 펼�
 ## 목록
 
 각 `ListOpts`의 필드와 `WithListQuery` 확장 query를 보냅니다. ports의 `FixedIPs []ports.FixedIPOpts`는 조건마다 `fixed_ips=ip_address=...`, `fixed_ips=subnet_id=...`처럼 반복 query가 되고 `SecurityGroups`도 반복 key로 보냅니다. `*_links`의 `rel=next` href를 받은 그대로 따라가며, 호출자가 순회를 멈추면 다음 페이지를 요청하지 않습니다. 빈 목록은 아무 값도 내보내지 않고, 본문 없는 204는 native pager가 JSON을 먼저 읽기 때문에 `io.EOF` 오류 하나로 끝납니다. 목록 오류는 operation 문맥 없이 native 오류 그대로 전달됩니다.
+
+## security group·rule·floating IP
+
+`service.SecurityGroups`(`extensions/security/groups`), `service.SecurityRules`(`extensions/security/rules`), `service.FloatingIPs`(`extensions/layer3/floatingips`)의 generated `Create/Get/List/Delete`도 위 표와 같은 status와 목록 규칙을 따릅니다. 경로는 각각 `security-groups`, `security-group-rules`, `floatingips`이고 envelope는 `security_group`, `security_group_rule`, `floatingip`입니다.
+
+security group의 `Name`은 필수입니다. `Stateful`은 pointer라 false를 명시해 보낼 수 있습니다. security group 목록은 Gophercloud가 builder 대신 concrete `ListOpts`만 받으므로 `WithListQuery` 확장 query가 없습니다.
+
+rule의 `Direction`, `EtherType`, `SecGroupID`는 필수입니다. `PortRangeMin`·`PortRangeMax`는 0이면 생략하므로 ICMP type 0처럼 0을 명시해 보낼 수 없습니다. 응답의 null protocol·port range·remote group은 빈 값과 0으로 decode됩니다. `CreateBulk(ctx, []rules.CreateOpts)`는 `{"security_group_rules": [...]}` 배열을 한 번에 보내고 응답 배열을 돌려줍니다. 요소 하나라도 필수 입력이 비면 HTTP 전에 오류이며, 성공 status는 201, 202이고 확장 필드 옵션은 없습니다.
+
+floating IP의 `FloatingNetworkID`는 필수입니다. `Description`, `FloatingIP`, `PortID`, `FixedIP`, `SubnetID`, `TenantID`, `ProjectID`는 비어 있으면 생략하고 조합의 유효성은 Neutron이 판정합니다. `WithCreateOptions`는 위치 인자로 준 옵션 전체를 교체하며, 확장 필드(예: `dns_name`)는 `floatingip` 안에 들어갑니다. 응답의 null `port_id`·`fixed_ip_address`·`router_id`는 빈 문자열이고 알 수 없는 필드는 무시합니다. 잘못된 JSON이나 `floatingip`가 객체가 아닌 응답은 operation 문맥과 함께 decode 오류입니다. 서버 연결·NAT 선택·대기를 포함한 상위 workflow는 [floating IP 보장](../floating-ip-ensure.md)을 참고합니다.

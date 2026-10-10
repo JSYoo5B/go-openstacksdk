@@ -39385,14 +39385,16 @@
     {
       "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.Create",
       "source_fingerprint": "42cf37e82a81bc5eea7debff2b8154ba08b605dc89efbc27ed23341e2e7e9c5a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.Create",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.Ensure",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.PrepareEnsure",
         "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.EnsurePrepared",
-        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlan.Selection"
+        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPPlan.Selection",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithCreateField"
       ],
       "contracts": [
         {
@@ -39455,24 +39457,31 @@
             "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError",
             "network/floating_ip_accepted_model_test.go:TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined"
           ]
+        },
+        {
+          "behavior": "The generated native API.Create POSTs {\"floatingip\":{...}} to floatingips requiring floating_network_id, omitting empty Description/FloatingIP/PortID/FixedIP/SubnetID/TenantID/ProjectID, letting WithCreateOptions replace positional options, placing extensions inside the envelope and rejecting core-key collisions or nil options before HTTP; it accepts only 201/202, decodes both timestamp formats, null port/fixed/router as empty strings and ignores unknown fields, and wraps status, invalid JSON and non-object envelope errors with operation context.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPStrictStatusesAndPreflight",
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPCreateFullOptionsReplacementAndDecode"
+          ]
         }
       ],
       "documentation": [
         "network/README.md",
         "network/floating-ip-ensure.md",
         "network/network-roles.md",
-        "network/floating-ip-plan.md"
+        "network/floating-ip-plan.md",
+        "network/v2/native-crud.md"
       ],
       "differences": [
         "The generated facade owns concrete options/builders and extracts a native typed value. Higher-level Create/Ensure add safe Ref/name selection, unique IPv4 destination policy, optional wait and partial allocation results around that native call; these workflow differences do not characterize all native CreateOptsBuilder inputs.",
         "Ensure adds reuse and presence-aware native Update revision handling without changing the separately reviewed native Update declaration. No unconditional conflict fallback, new allocation after association failure, or automatic cleanup is introduced.",
         "Selected high-level Create/Ensure allocation fixtures now use the shared NAT role for the bounded automatic multi-owned-port case and preserve explicit/single-port lanes. The generated native API.Create still accepts supplied concrete options; these role-consuming fixtures do not establish its complete input/body/accepted-status/decoder/session contract.",
-        "The separate prepared-plan workflow uses owned guarded REST for exact selected targets and accepted-response evidence, including201/202 allocation proof and partial decoded models. Existing fresh Create/Ensure and the generated native API.Create keep their distinct lanes; no whole native transport/decoder parity is inferred from plan fixtures."
+        "The separate prepared-plan workflow uses owned guarded REST for exact selected targets and accepted-response evidence, including201/202 allocation proof and partial decoded models. Existing fresh Create/Ensure and the generated native API.Create keep their distinct lanes; no whole native transport/decoder parity is inferred from plan fixtures.",
+        "The native API.Create contract is now audited directly; live auth, retry and redirect behavior remain provider-owned and unchanged by the facade."
       ],
-      "remaining": [
-        "Audit the complete native Create declaration and facade rather than promote it from allocation fixtures: required/body defaults and validation, Description/FloatingIP/SubnetID/TenantID/ProjectID combinations, permitted extensions, final option replacement and all request/error/accepted-status paths.",
-        "Complete native result/decoder timestamp/model/null/unknown-field behavior and underlying request options, live auth/retry/redirect/body/header/response ownership comparisons. Bounded existing Ensure201 and prepared-plan201/202 allocation fixtures, including response proof and partial failures, do not establish the whole native Create contract."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/wait_for_server",
@@ -49598,6 +49607,314 @@
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/groups.Create",
+      "source_fingerprint": "42eae3ac0242c04705a9930a501a2bba9991702227de1c20a89cbad7aa5483cd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"security_group\":{...}} to security-groups with extensions inside the envelope, requires name and sends an explicit false stateful pointer, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/groups.Get",
+      "source_fingerprint": "c6c440700f2d129307be1029f25cf3ac732076a26f92d5c69a3efec339f4d79b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs security-groups/{raw id}, decodes the security_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/groups.List",
+      "source_fingerprint": "29ad251e62b4abbbfbd4455ab57ae6690591a475880cb4abdef59eecf5f19739",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs security-groups with concrete ListOpts (no extension query builder), follows security-groups_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/groups.Delete",
+      "source_fingerprint": "48aacc8364918a18102ad48b787cf576949fbcac1d6e2d6bbfd37fdb275c93ca",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs security-groups/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/groups/native_contracts_test.go:TestNativeSecGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/rules.Create",
+      "source_fingerprint": "4a6515654fb4e7a2cf2e3d82e5b6af8d6a030ebf973084959bf3de5fe8ac913c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"security_group_rule\":{...}} to security-group-rules with extensions inside the envelope, requires direction, ethertype and security_group_id and omits zero port ranges, rejects a core-key extension collision and nil option before HTTP, decodes the response and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/rules.Get",
+      "source_fingerprint": "48f583c96ee51ada428797a2645ec5907fa41a2488e82f5744e3ef7491a0cf54",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs security-group-rules/{raw id}, decodes the security_group_rule envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/rules.List",
+      "source_fingerprint": "367908f592f1128d1ae905f2441c9c232061f56c2e89e4d3d195dcda5a7d1bd3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs security-group-rules with ListOpts and extension query, follows security-group-rules_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/rules.Delete",
+      "source_fingerprint": "bdfdaf3b17e3288b19436ef52ab2c4dbef7651cd94addf43688e1a81595f10da",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs security-group-rules/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeRuleStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.Get",
+      "source_fingerprint": "aaeec361b6f2ebbd27796c2839e729c7d1c10c8b64ffad3c591e76584848893c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs floatingips/{raw id}, decodes the floatingip envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.List",
+      "source_fingerprint": "382233a8973d0548ef85c7e92f76372965a1f8240e1ebbc060ec03aea6b86a13",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs floatingips with ListOpts and extension query, follows floatingips_links next as received, yields nothing for an empty array, surfaces io.EOF for a bodyless 204, rejects nil options before HTTP and returns native pager status errors (200/204/300) without operation context.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.Delete",
+      "source_fingerprint": "ec900fae88731592a2333de463a73fda8a3d84e02f0c2af00f6bd375fb7cb9dd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs floatingips/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/layer3/floatingips/native_contracts_test.go:TestNativeFloatingIPStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/security/rules.CreateBulk",
+      "source_fingerprint": "cc18671c7499dfec7b997e082a8aa47698a674f9dd3a6d0cd4d1a2b1d7e81a0f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.CreateBulk"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateBulk POSTs {\"security_group_rules\":[...]} to security-group-rules, validates every element's required direction/ethertype/security_group_id before HTTP, decodes the response array and accepts only 201/202 with operation context on errors.",
+          "tests": [
+            "network/v2/extensions/security/rules/native_contracts_test.go:TestNativeSecGroupRuleCreateBulk"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native bulk rule call only; it has no extension option builder.",
+        "The SDK adds only request.Wrap operation context; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
     }
