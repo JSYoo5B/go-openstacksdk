@@ -47529,6 +47529,115 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/get_secret_acl",
+      "source_fingerprint": "8a47358a97ad5b833e924854b4ac64bb27e7b31922eda58b50a40d0dca50f873",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Get",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET secrets/{id}/acl, accepts every actual status below 400, keeps the seeded null read/acl_ref for empty or invalid JSON, overlays declared read/acl_ref from a JSON object and rejects valid non-object bodies or non-object read with the actual ResponseError; native 404 stays an error.",
+          "tests": [
+            "keymanager/v1/secretacls/api_test.go:TestSecretACLGetFollowsPythonFetch"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretacls/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python accepts a Secret Resource or ID and returns a mutable SecretACL Resource; Go fixes an explicit ID (or resolves an explicit Name once as a convenience) and returns an owned SecretACL with raw Read/ACLRef JSON and the actual response metadata. Resource session, cache and same-object semantics are tracked as SDK-R1/C1/S1.",
+        "Headers are a Go extension; Python keyword attributes become the typed ACLInput, which requires read to be a JSON object and drops undeclared attributes like the Resource does."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/set_secret_acl",
+      "source_fingerprint": "0552aab0931f809fbbe54f2cc37e83362e9c13a180feab1c0202ab7a1f271b2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Set",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Set commits with PUT secrets/{id}/acl sending only the provided declared read/acl_ref, returns the request values overlaid by the response acl_ref, sends no HTTP when no declared attribute is given, and rejects non-object read, invalid JSON and SDK-owned headers before HTTP.",
+          "tests": [
+            "keymanager/v1/secretacls/api_test.go:TestSecretACLSetAndUpdateCommitWithPut"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretacls/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python accepts a Secret Resource or ID and returns a mutable SecretACL Resource; Go fixes an explicit ID (or resolves an explicit Name once as a convenience) and returns an owned SecretACL with raw Read/ACLRef JSON and the actual response metadata. Resource session, cache and same-object semantics are tracked as SDK-R1/C1/S1.",
+        "Headers are a Go extension; Python keyword attributes become the typed ACLInput, which requires read to be a JSON object and drops undeclared attributes like the Resource does."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/update_secret_acl",
+      "source_fingerprint": "21d4c6496206685a9a313e6f7f12be464ce948aa571902c5c8d2df8b30c7de56",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Update",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update follows the same pinned _update commit as set_secret_acl: PUT, not PATCH, with the same dirty-attribute body, no-HTTP empty input and response overlay.",
+          "tests": [
+            "keymanager/v1/secretacls/api_test.go:TestSecretACLSetAndUpdateCommitWithPut"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretacls/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python accepts a Secret Resource or ID and returns a mutable SecretACL Resource; Go fixes an explicit ID (or resolves an explicit Name once as a convenience) and returns an owned SecretACL with raw Read/ACLRef JSON and the actual response metadata. Resource session, cache and same-object semantics are tracked as SDK-R1/C1/S1.",
+        "Headers are a Go extension; Python keyword attributes become the typed ACLInput, which requires read to be a JSON object and drops undeclared attributes like the Resource does."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:key_manager/v1/delete_secret_acl",
+      "source_fingerprint": "de084b7d4cfe94ed6ab7848c7286baf9d6c101c6fb260eb3a5d23eea84494467",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithDeleteHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE secrets/{id}/acl, returns the seeded ACL with the response metadata for statuses below 400, returns nil,nil for a clean 404 by default, keeps the 404 with WithDeleteIgnoreMissing(false) and keeps other native errors.",
+          "tests": [
+            "keymanager/v1/secretacls/api_test.go:TestSecretACLDeleteIgnoresMissingByDefault"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secretacls/README.md",
+        "keymanager/v1/README.md"
+      ],
+      "differences": [
+        "Python accepts a Secret Resource or ID and returns a mutable SecretACL Resource; Go fixes an explicit ID (or resolves an explicit Name once as a convenience) and returns an owned SecretACL with raw Read/ACLRef JSON and the actual response metadata. Resource session, cache and same-object semantics are tracked as SDK-R1/C1/S1.",
+        "Headers are a Go extension; Python keyword attributes become the typed ACLInput, which requires read to be a JSON object and drops undeclared attributes like the Resource does."
+      ],
+      "remaining": []
     }
   ]
 }
