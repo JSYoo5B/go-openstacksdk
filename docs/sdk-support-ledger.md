@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Glance add_image_location](#glance-add_image_location-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican native secrets](#barbican-native-secrets-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는319입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는324입니다.
+
+## Barbican native secrets 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Barbican native `secrets` 5개, 전체319→324(+5)·핵심245→250/2,292·Key Manager14→19/67.** 기존 generated `Get/List/Create/Update/Delete`가 고정 Gophercloud v2.15.0의 raw ID 경로, RFC3339NoZ 시각과 null expiration, Create의 omitempty 본문·zone 없는 expiration·확장 필드, Update의 payload 본문·header 확장, 고정 status(200·201·204·202/204), body next link를 그대로 따르는 List를 바꾸지 않는지 검증했습니다. 구현 변경은 없으며 [secrets README](../keymanager/v1/secrets/README.md#native-get-list-create-update-and-delete)에 native 절을 추가했습니다.
+
+새 집중 계약 테스트3그룹24사례가 race로 통과했습니다. 이 package의 첫 테스트라 전체 `make check`의 race는 **47개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON에 새5행·5계약을 추가해 reviews583·contracts3,808·go_mapping324입니다. 테스트 `d1ac3545`·가이드/판정 `8e82d028`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Glance add_image_location 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Glance `add_image_location`1개, 전체318→319(+1)·핵심244→245/2,292·Glance81→82/120.** 고정 Glance 정책의 `add_image_location`은 `SERVICE_OR_PROJECT_MEMBER`라 핵심 user입니다. 기존 unresolved 판정의 remaining은 SDK 전체 목표와 서버 소유 사항이었고, 고정 Python `Resource.create`와 대조한 실제 누락 두 가지를 보완했습니다. accepted status를 202 전용에서 `raise_from_response`와 같은 200..399로 넓혔고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON은 Python `body.pop`처럼 오류입니다. [location 가이드](../image/locations.md#add-결과의-imagelocation-view)에 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Glance `add_image_location`1개, 전체318→319(+1)·핵심244→245/2,292·Glance81→82/120.** 고정 Glance 정책의 `add_image_location`은 `SERVICE_OR_PROJECT_MEMBER`라 핵심 user입니다. 기존 unresolved 판정의 remaining은 SDK 전체 목표와 서버 소유 사항이었고, 고정 Python `Resource.create`와 대조한 실제 누락 두 가지를 보완했습니다. accepted status를 202 전용에서 `raise_from_response`와 같은 200..399로 넓혔고, 요청 seed·Connection location에 JSON object 응답의 선언 필드를 덮어쓴 ImageLocation view를 결과에 추가했습니다. 유효한 비object JSON은 Python `body.pop`처럼 오류입니다. [location 가이드](../image/locations.md#add-결과의-imagelocation-view)에 설명합니다.
 
 202 전용을 가정하던 기존 테스트 3개 그룹을 새 계약으로 고쳤고 새 집중 테스트2그룹34사례를 추가했습니다. 전체 `make check`의 race **46개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정은 unresolved에서 go_mapping으로 바뀌어 계약 하나가 늘었고 reviews578·contracts3,803·go_mapping319·catalog unresolved3,042입니다. 구현 `a382f17c`·테스트 `177f9f60`·가이드/판정 `89b461a0`를 push했습니다. `image_locations`(GET)는 `fetch_image_location`=`SERVICE`라 핵심 admin/service 단계에 남깁니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
