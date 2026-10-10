@@ -168,7 +168,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "identity/v3":
 		out.WriteString("generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다." + "\n\n")
 		out.WriteString("사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다." + "\n\n")
-		out.WriteString("trust와 사용자 본인의 접근 가능 project 목록·암호 변경 native 호출은 [native trust·사용자 본인 호출](native-trusts.md)에 설명합니다.\n\n")
+		out.WriteString("trust와 사용자 본인의 접근 가능 project 목록·암호 변경 native 호출은 [native trust·사용자 본인 호출](native-trusts.md)에 설명합니다." + "\n\n")
+		out.WriteString("region·service·endpoint·policy·limit·registered limit·project endpoint·federation mapping의 기본 정책상 관리자 native 호출은 [native catalog·policy·limit·mapping 관리자 호출](native-admin-b.md)에 설명합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.\n\n")
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.\n\n")
