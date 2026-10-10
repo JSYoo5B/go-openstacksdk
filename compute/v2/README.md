@@ -53,7 +53,7 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.
 
-서버 ID를 직접 받는 native [서버 호출](servers/native.md), [서버 그룹](servergroups/README.md), [볼륨 연결](volumeattach/README.md), [인터페이스 연결](attachinterfaces/README.md)은 Gophercloud 요청을 그대로 보내고 operation 문맥만 더합니다. 각 문서에 경로·본문·고정 status·단일 페이지 목록 계약을 정리합니다.
+서버 ID를 직접 받는 native [서버 호출](servers/native.md), [서버 그룹](servergroups/README.md), [볼륨 연결](volumeattach/README.md), [인터페이스 연결](attachinterfaces/README.md), [extension](extensions/README.md), [사용량](usage/README.md)은 Gophercloud 요청을 그대로 보내고 operation 문맥만 더합니다. 각 문서에 경로·본문·고정 status·단일 페이지 목록 계약을 정리합니다.
 
 `InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.
 

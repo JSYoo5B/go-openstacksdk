@@ -49084,6 +49084,210 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/instanceactions.List",
+      "source_fingerprint": "b6d030061d9259242f68d7901d5842345f2a87afecbfbbae87979c4d60d18e18",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs servers/{id}/os-instance-actions with limit, marker, RFC3339 changes-since/before keeping the caller offset and extension query as one single page ignoring links, decodes zone-less start_time, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsRoutesQueryAndDecode",
+            "compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsStatusesAndDecodeErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/instanceactions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/instanceactions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/instanceactions.Get",
+      "source_fingerprint": "936c2bcdfaa4d542fe02706e50f0a49a3d7b6f82b77589d313b4a1ddf39860c5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs servers/{id}/os-instance-actions/{requestID}, decodes zone-less start/updated/event times (null to zero or nil) and events, rejects zoned timestamps as a decode error and accepts only 200.",
+          "tests": [
+            "compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsRoutesQueryAndDecode",
+            "compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsStatusesAndDecodeErrors"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/instanceactions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/instanceactions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/extensions.List",
+      "source_fingerprint": "bcf1a9475b371bc523adc518a52a587f3a098bbf2497990c11229604691d6dc1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs extensions as one single page ignoring links, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsRoutesDecodeAndActionURL",
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/extensions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/extensions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/extensions.Get",
+      "source_fingerprint": "a5d52371a2fcaef014c8a8788d7601d378113e3cb222ea3cd84e9a455eb8e202",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs extensions/{alias}, decodes the extension envelope with updated kept as a string and accepts only 200.",
+          "tests": [
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsRoutesDecodeAndActionURL",
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/extensions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/extensions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/extensions.ActionURL",
+      "source_fingerprint": "21e95226d25b22656a9d4bb245c50df382f36b32b6ebcc0d10225f1eec843264",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.ActionURL"
+      ],
+      "contracts": [
+        {
+          "behavior": "ActionURL formats ResourceBase servers/{id}/action without sending a request.",
+          "tests": [
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsRoutesDecodeAndActionURL",
+            "compute/v2/extensions/native_contracts_test.go:TestNativeComputeExtensionsStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/extensions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/extensions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/apiversions.List",
+      "source_fingerprint": "8cdcf0f17d58b79e0b3395f3bfda45a00b1b3ea8b74df2c5ba58330b166b537f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/apiversions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs the endpoint cut before its first version segment (dropping query) as one single page, decodes versions and returns native pager status errors without operation context.",
+          "tests": [
+            "compute/apiversions/native_contracts_test.go:TestNativeComputeAPIVersionsUseTheUnversionedRoot",
+            "compute/apiversions/native_contracts_test.go:TestNativeComputeAPIVersionsStatusesAndMissingVersion"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/apiversions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/apiversions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/apiversions.Get",
+      "source_fingerprint": "38e39f683241a1f0cfbdfe9216efa276737aaead5cf3c1c1b4dd5bce57503169",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/apiversions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs {root}/{version trimmed of a trailing slash}/, decodes the version object, returns ErrVersionNotFound with operation context when it is absent and accepts only 200.",
+          "tests": [
+            "compute/apiversions/native_contracts_test.go:TestNativeComputeAPIVersionsUseTheUnversionedRoot",
+            "compute/apiversions/native_contracts_test.go:TestNativeComputeAPIVersionsStatusesAndMissingVersion"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/apiversions/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/apiversions call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/usage.SingleTenant",
+      "source_fingerprint": "f491084bc974e6e8e2a8657eecd05831153f1b12ad5d952bf3e976b1f98a8c94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.WithSingleTenantQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "SingleTenant GETs os-simple-tenant-usage/{tenantID} with offset-less wall-clock start/end, limit, marker and extension query, yields one tenant_usage per page following tenant_usage_links next, treats a missing tenant_usage as empty, surfaces io.EOF for a bodyless 204, rejects a nil option before HTTP and returns native pager status errors without operation context.",
+          "tests": [
+            "compute/v2/usage/native_contracts_test.go:TestNativeSingleTenantUsageQueryPagingAndDecode",
+            "compute/v2/usage/native_contracts_test.go:TestNativeSingleTenantUsageStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/usage/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/usage call only; Python resource models and cloud helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

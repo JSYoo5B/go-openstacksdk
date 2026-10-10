@@ -112,3 +112,16 @@ func ListServerActions(ctx context.Context, conn *sdk.Connection, serverID strin
 `WithMaxItems(0)`은 무제한이고 음수는 iterator 순회 시 HTTP 전에 실패합니다. 같은 제어는 마지막 옵션이 적용됩니다. `break`와 context 취소는 추가 요청을 중단합니다. 현재 페이지의 action·event 전체 decode 오류는 cap 이후 행에 있어도 반환됩니다. 다음 페이지가 필요하면 기존 `links` continuation과 반복 링크 검사를 사용하며, native 경로에 REST의 origin·path guard를 추가하지 않았습니다. cap이나 첫 페이지 옵션으로 멈추면 다음 링크를 처리하지 않습니다.
 
 공통 정책은 [목록 가이드](../../../docs/listing.md), 실제 scope 연결과 raw 모델 보존은 [native 목록 HTTP 계약](../../../api/native_scope_list_controls_test.go)에서 확인합니다.
+
+## native 서버 ID 호출
+
+`instanceactions.New(client)`(또는 `service.InstanceActions`)의 generated `List(ctx, serverID, options...)`와 `Get(ctx, serverID, requestID)`는 Gophercloud `v2.15.0`의 [instanceactions 요청](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/compute/v2/instanceactions/request.go)을 바꾸지 않고 호출합니다. 위 범위 객체의 이름 해석·페이지 제어·원본 보존은 적용되지 않으며, SDK는 오류에 `resource.OperationError{Resource: "instanceactions"}` 문맥만 더합니다.
+
+| 메서드 | 요청 | 성공 status | 반환 |
+|---|---|---|---|
+| `List` | `GET servers/{id}/os-instance-actions` | native pager 200, 204, 300 | `instanceActions` 행 |
+| `Get` | `GET servers/{id}/os-instance-actions/{requestID}` | 200 | `instanceAction` 값 |
+
+`ListOpts`의 `limit`, `marker`와 `changes-since`, `changes-before`를 보내며 두 시각은 호출자가 준 offset을 유지한 RFC3339 문자열입니다. `WithListQuery` 확장 query도 함께 보냅니다. native 목록은 단일 페이지로 다루므로 응답의 `links`를 따르지 않습니다. 빈 목록은 아무 값도 내보내지 않고, 본문 없는 204는 `io.EOF` 오류 하나로 끝나며, 목록 오류는 operation 문맥 없이 전달됩니다.
+
+`start_time`, `updated_at`, event의 `start_time`·`finish_time`은 Nova 형식인 zone 없는 `2006-01-02T15:04:05.999999`로 해석해 UTC 값이 됩니다. 빈 문자열과 null은 zero 시각(또는 nil `UpdatedAt`)이고, `Z`나 offset이 붙은 시각은 decode 오류입니다. `Get`의 `Events`는 응답에 없으면 nil입니다.
