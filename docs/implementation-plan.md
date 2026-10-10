@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Barbican native secret metadata 6개 검증·판정 완료, native `containers` 9개 착수.** 전체330/3,362·핵심256/2,292·Key Manager25/67입니다. 다음은 generated containers `Get/List/Create/Delete`와 consumer·secret ref 하위 호출(`CreateConsumer/DeleteConsumer/ListConsumers/CreateSecretRef/DeleteSecretRef`)의 경로·본문·고정 status·페이지를 고정 Gophercloud v2.15.0 기준으로 검증하는 단위입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Barbican native `containers` 9개 계약 테스트 완료, 가이드·판정 진행 중.** 직전 완료 집계는 전체330/3,362·핵심256/2,292·Key Manager25/67입니다. generated containers `Get/List/Create/Delete`와 consumer·secret ref 하위 호출의 raw 경로, omitempty가 없는 name, JSON 본문을 보내는 DELETE, 고정 status(200·201·202/204·200·200·201·204), body next link를 그대로 따르는 두 목록, container `ListOpts`를 쓰는 ListConsumers를 검증했습니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Barbican native secret metadata 6개, 전체324→330(+6)·핵심250→256/2,292·Key Manager19→25/67.** generated metadata 여섯 호출의 경로·본문·status·확장 위치를 고정했습니다. [secrets README](../keymanager/v1/secrets/README.md#native-secret-metadata-calls)와 [검증 기록](sdk-support-ledger.md#barbican-native-secret-metadata-완료)에 설명합니다. 새2그룹32사례와 전체 `make check`(race 47개 실제 test package)가 통과했고 `9a6b9910`·`17c5092a`를 push했습니다.
 
@@ -431,7 +431,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Barbican native containers 9개 | pinned Gophercloud v2.15.0 containers requests/results/urls 검토 완료 | 기존 generated facade | 진행 중 | 대기 | 대기 | 착수 |
+| Barbican native containers 9개 | pinned Gophercloud v2.15.0 containers requests/results/urls 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
 | Barbican native secret metadata 6개 | pinned Gophercloud v2.15.0 secret metadata requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹32·전체 `make check` PASS | native 절 추가 | **신규6행 go_mapping·330/3,362** | 작은 commit2개 push 완료; 다음 native containers |
 | Barbican native secrets 5개 | pinned Gophercloud v2.15.0 secrets requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹24·전체 `make check` PASS | native 절 추가 | **신규5행 go_mapping·324/3,362** | 작은 commit2개 push 완료; 다음 secret metadata |
 | Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새2그룹34·전체 `make check` PASS | location 가이드 갱신 | **unresolved→go_mapping·319/3,362** | 작은 commit3개 push 완료 |
