@@ -53719,6 +53719,190 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.Create",
+      "source_fingerprint": "410c0103faab77dcebc940930cd2216cb0de54348ed614cb8ed4934aac0acc2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"snapshot\":{...}} to snapshots sending force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes extended progress/project attributes and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.Get",
+      "source_fingerprint": "8fea4f8321fa83e056d4fcf5a4dce1e083a5f13de3aad4f8795ea20cb75fbb1a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs snapshots/{raw id}, returns nil without error for a missing or null snapshot envelope, wraps non-object and zoned (trailing Z) timestamp decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.List",
+      "source_fingerprint": "a10a6515dedb362778cbcdfe9770ca09bb0b7641db55aa6c0a25026e59b0cad1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs the summary snapshots route with ListOpts (all_tenants included) and extension query values, follows snapshots_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.ListDetail",
+      "source_fingerprint": "d4c43a3d3293b1ec6ecc564bc109fe3a41f6d0792026fac1f126eb259a39763d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.ListDetail",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithListDetailQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDetail GETs snapshots/detail with ListOpts (all_tenants included) and extension query values, follows snapshots_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.Update",
+      "source_fingerprint": "bc470ad55add118fa131e39c2ffd3eed809596a1731767776735e9b29de0c94b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"snapshot\":{...}} to snapshots/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.Delete",
+      "source_fingerprint": "a8849d2796d730b22eac0a25f19bda2b38d3e55424b8734ecc72b76bf10a9d69",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs snapshots/{raw id} and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesPagingAndDecode",
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/snapshots.WaitForStatus",
+      "source_fingerprint": "dad3ec993af4fd9cd64b6b03e59f943c9284c5891bdde3a02f539be815825fa0",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope panics on the nil snapshot.",
+          "tests": [
+            "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": [
+        "The native WaitForStatus dereferences a nil snapshot when Get returns no snapshot envelope; the generated facade does not guard this panic or turn it into an OperationError. Use WaitForState/WaitForAvailable until a guard exists."
+      ]
     }
   ]
 }
