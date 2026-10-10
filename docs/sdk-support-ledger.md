@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican Python secret ACL](#barbican-python-secret-acl-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Barbican Python find_container·find_order](#barbican-python-find_containerfind_order-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는355입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는357입니다.
+
+## Barbican Python find_container·find_order 완료
+
+**최신 API 완료 (2026-10-10): 핵심 user Barbican Python `find_container`·`find_order` 2개, 전체355→357(+2)·핵심281→283/2,292·Key Manager50→52/67.** 공통 `keymanagerread.FindIdentity`가 고정 Python `Resource.find`를 따릅니다. 안전한 identity는 엄격한 직접 metadata Fetch를 먼저 보내고, clean 400/403/404이면 두 resource에 name query mapping이 없으므로 이름 필터 없이 전체 목록을 봅니다. seed 없이 투영한 행은 literal id(전체 ref)나 문자열 name으로 일치를 찾으며, 하나면 반환하고 둘이면 `ErrAmbiguous`, 없으면 기본 `nil, nil`입니다. 그래서 bare UUID는 직접 GET으로만 일치합니다. 경로 segment로 안전하지 않은 identity는 공통 finder 정책에 따라 직접 GET을 건너뜁니다. containers·orders README에 find 절을 추가했습니다.
+
+새 집중 테스트2그룹8사례가 race로 통과했고 전체 `make check`의 race **51개 실제 test package**·parity·progress·gofmt가 exit0입니다. 판정 JSON에 새2행·4계약을 추가해 reviews616·contracts3,843·go_mapping357입니다. 구현 `0f187761`·테스트 `bceed143`·가이드/판정 `582c7662`를 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
 ## Barbican Python secret ACL 완료
 
-**최신 API 완료 (2026-10-10): 핵심 user Barbican Python `get_secret_acl`·`set_secret_acl`·`update_secret_acl`·`delete_secret_acl` 4개, 전체351→355(+4)·핵심277→281/2,292·Key Manager46→50/67.** 새 SDK 소유 package `keymanager/v1/secretacls`의 `SecretACLs.InSecret(ctx, ref)`가 고정 Python `SecretACL` Resource의 동작을 제공합니다. Get은 400 미만 응답을 받아 JSON object의 `read`·`acl_ref`만 덮어쓰고, Set과 Update는 모두 `_update` commit의 PUT이며 선언 속성이 없으면 HTTP 없이 seed를 반환합니다. Delete는 기본으로 clean 404를 무시합니다. sdkgen 등록으로 `keymanager/v1` 서비스에 연결했고, 수동 수정으로 생겼던 `image/v2/README.md` 생성 drift도 생성기 원문을 고쳐 0으로 맞췄습니다. [secretacls README](../keymanager/v1/secretacls/README.md)에 Python/Go 비교를 설명합니다.
+**앞선 API 완료 (2026-10-10): 핵심 user Barbican Python `get_secret_acl`·`set_secret_acl`·`update_secret_acl`·`delete_secret_acl` 4개, 전체351→355(+4)·핵심277→281/2,292·Key Manager46→50/67.** 새 SDK 소유 package `keymanager/v1/secretacls`의 `SecretACLs.InSecret(ctx, ref)`가 고정 Python `SecretACL` Resource의 동작을 제공합니다. Get은 400 미만 응답을 받아 JSON object의 `read`·`acl_ref`만 덮어쓰고, Set과 Update는 모두 `_update` commit의 PUT이며 선언 속성이 없으면 HTTP 없이 seed를 반환합니다. Delete는 기본으로 clean 404를 무시합니다. sdkgen 등록으로 `keymanager/v1` 서비스에 연결했고, 수동 수정으로 생겼던 `image/v2/README.md` 생성 drift도 생성기 원문을 고쳐 0으로 맞췄습니다. [secretacls README](../keymanager/v1/secretacls/README.md)에 Python/Go 비교를 설명합니다.
 
 새 집중 테스트3그룹15사례가 race로 통과했고 전체 `make check`의 race **51개 실제 test package**·parity·progress·gofmt가 exit0이며 재생성 결과가 커밋본과 같습니다. 판정 JSON에 새4행·4계약을 추가해 reviews614·contracts3,839·go_mapping355입니다. 구현 `d1e5b2b6`·테스트 `8374c556`·가이드/판정 `dc7c9ade`를 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
 
