@@ -53072,6 +53072,137 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/taas/tapmirrors.Create",
+      "source_fingerprint": "63cf50bb99aa81e2d36a1055cae48d039e2179e93f525b3d31e00c938e640a01",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"tap_mirror\":{...}} to taas/tap_mirrors with extensions inside the envelope, always sending name, port_id, mirror_type, remote_ip and directions (zero as {}) with string-quoted IN/OUT tunnel IDs, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/taas/tapmirrors.Get",
+      "source_fingerprint": "84534dcb695bbcd1f1fbef7f11485019a2b40a8f302cb1a5603c873e9702745e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs taas/tap_mirrors/{raw id}, decodes string-quoted direction IDs, wraps a decode error for unquoted numeric IDs and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/taas/tapmirrors.List",
+      "source_fingerprint": "592a418199f5591841032426ec914cb216d32b62a689fb5bbcac244156a27f41",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs taas/tap_mirrors with ListOpts and extension query values, follows tap_mirrors_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/taas/tapmirrors.Update",
+      "source_fingerprint": "ef88d6d163249991c6e7dd04e90c303521d34decc433ae93d899b602f1e1f636",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"tap_mirror\":{...}} to taas/tap_mirrors/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/taas/tapmirrors.Delete",
+      "source_fingerprint": "60128eb22c56a10d5a5b6773ea8c74dc061fe4ea9d36cbab8c1b6c1be393d553",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs taas/tap_mirrors/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/taas/tapmirrors/native_contracts_test.go:TestNativeTapMirrorStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

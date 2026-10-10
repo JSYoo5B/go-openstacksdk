@@ -166,3 +166,9 @@ rule의 `Protocol`과 `Action`은 필수입니다. `Protocol`이 `ProtocolAny`(`
 IKE·IPsec policy의 `Lifetime`은 pointer 객체라 nil이면 생략하고, 빈 객체를 가리키면 `"lifetime": {}`를 보냅니다. IKE policy는 생성과 수정의 negotiation mode key 철자가 다릅니다. 이 차이는 Gophercloud 고정 소스 그대로이며, 수정에서 이 필드를 쓰려면 대상 배포가 `phase_1_negotiation_mode` key를 받는지 먼저 확인해야 합니다.
 
 site connection 목록의 `PSK` 필터는 `psk=` query로 보내므로 사전 공유 키가 URL과 서버·proxy 로그에 남을 수 있습니다. 응답의 `psk`도 그대로 decode합니다. 수정 opts는 `Name`·`Description`·`AdminStateUp`만 pointer이고 나머지 빈 값은 생략합니다. 서비스·IKE·IPsec·endpoint group의 수정 opts도 이름과 설명만 pointer라 빈 문자열을 명시할 수 있습니다.
+
+## tap mirror
+
+`service.TaaSTapMirrors`(`extensions/taas/tapmirrors`)는 경로 `taas/tap_mirrors`, envelope `tap_mirror`를 쓰며 `Create`는 201·202, `Get`·`Update`는 200, `Delete`는 202·204를 받고 목록은 `tap_mirrors_links`의 next href를 따라갑니다. `CreateOpts`에는 필수 검사가 없지만 `Name`·`PortID`·`MirrorType`·`RemoteIP`·`Directions`는 omitempty가 없어 비어 있어도 `""`나 `{}`로 보냅니다. `UpdateOpts`는 이름과 설명만 바꾸며 둘 다 pointer라 빈 문자열을 명시할 수 있습니다.
+
+`Directions`의 `In`·`Out` tunnel ID는 JSON 문자열로 주고받습니다. 요청은 `{"IN": "1", "OUT": "2"}`처럼 따옴표 친 숫자를 보내고 0은 생략합니다. 응답도 같은 문자열 형식만 decode하므로 서버가 `{"IN": 1}`처럼 숫자를 주면 decode 오류입니다.
