@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native volumes CRUD list wait](#cinder-v3-native-volumes-crud-list-wait-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native volume user actions](#cinder-v3-native-volume-user-actions-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는576입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는589입니다.
+
+## Cinder v3 native volume user actions 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native volume 사용자 action 13개, 전체576→589(+13)·핵심502→515/2,292·Block Storage73→86/480.** 기존 generated action이 고정 Gophercloud v2.15.0의 `volumes/{id}/action` 본문과 action별 status를 바꾸지 않는지 검증했습니다. reserve·unreserve·initialize connection은 200·201·202, image metadata·bootable은 200, 나머지는 202만 받습니다. connection 두 호출은 connector를 한 번 더 감싸 확장 필드가 connector 옆에 붙고, `InitializeConnection`은 `connection_info`를 raw map으로 돌려줍니다. native 필수 검사는 빈 retype 대상은 거부하지만 확장 크기 0은 그대로 보냅니다. `UploadImage`는 key가 없으면 zero 값을 돌려주고 시간대 있는 시각은 decode 오류입니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md#사용자-action)에 절을 추가했습니다.
+
+새 집중 계약 테스트3그룹(하위 사례63)이 race로 통과했습니다. 전체 `make check`의 race는 **90개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새13행을 추가해 reviews846·contracts4,076·go_mapping589입니다. 테스트 `eaab9696`, 가이드/판정 `d864b0dd`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v3 native volumes CRUD list wait 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native volumes CRUD·목록·대기 6개, 전체570→576(+6)·핵심496→502/2,292·Block Storage67→73/480.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성은 202만 받고 scheduler hint를 envelope 밖 최상위 key로 보내며 UUID가 아닌 host·instance hint를 HTTP 전에 거부합니다. 상세 목록은 metadata 필터를 Python dict 모양 문자열로 보냅니다. 응답은 `volume` key를 직접 찾아 `{}`·null을 빈 볼륨으로 돌려주고, 시각은 시간대 없는 형식만 받습니다. `WaitForStatus`는 즉시 한 번, 이후 1초 간격으로 조회하며 정확한 상태 일치·Get 오류·호출자 deadline에서만 멈춥니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md)을 새로 쓰고 생성 README에서 링크했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native volumes CRUD·목록·대기 6개, 전체570→576(+6)·핵심496→502/2,292·Block Storage67→73/480.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성은 202만 받고 scheduler hint를 envelope 밖 최상위 key로 보내며 UUID가 아닌 host·instance hint를 HTTP 전에 거부합니다. 상세 목록은 metadata 필터를 Python dict 모양 문자열로 보냅니다. 응답은 `volume` key를 직접 찾아 `{}`·null을 빈 볼륨으로 돌려주고, 시각은 시간대 없는 형식만 받습니다. `WaitForStatus`는 즉시 한 번, 이후 1초 간격으로 조회하며 정확한 상태 일치·Get 오류·호출자 deadline에서만 멈춥니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md)을 새로 쓰고 생성 README에서 링크했습니다.
 
 새 집중 계약 테스트3그룹(하위 사례21)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **90개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 생성 README 문구는 sdkgen 소스에서 바꾸고 `python3.14` PATH로 `make generate`를 실행해 README 외 drift가 없음을 확인했습니다. 판정 JSON은 새6행을 추가해 reviews833·contracts4,063·go_mapping576입니다. 테스트 `5c2ebe50`, 가이드 `a07e78cb`, 판정 `d5ee2a45`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
