@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-10): Barbican native `containers` 9개 검증·판정 완료, native `orders` 4개 계약 테스트 완료.** 전체339/3,362·핵심265/2,292·Key Manager34/67입니다. generated orders `Get/List/Create/Delete`의 raw 경로, 빈 값도 보내는 type·meta 필드와 zone 없는 expiration, 고정 status(200·202·202/204), body next link 목록을 검증했습니다. 다음은 가이드·판정이며 이어서 acls 8개입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-10): Barbican native `containers` 9개 검증·판정 완료, native `orders` 4개 테스트·가이드·판정 완료, 전체 gate 진행 중.** 전체339/3,362·핵심265/2,292·Key Manager34/67입니다. generated orders `Get/List/Create/Delete`의 raw 경로, 빈 값도 보내는 type·meta 필드와 zone 없는 expiration, 고정 status(200·202·202/204), body next link 목록을 검증했습니다. 테스트 `21c4e5e7`와 가이드·판정을 push했고 판정 반영 집계는343입니다. 다음은 전체 gate·대장이며 이어서 acls 8개입니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-10): 핵심 user Barbican native `containers` 9개, 전체330→339(+9)·핵심256→265/2,292·Key Manager25→34/67.** generated container·consumer·secret ref 호출의 경로·본문·status·페이지 계약을 고정했습니다. [containers README](../keymanager/v1/containers/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-containers-완료)에 설명합니다. 새3그룹39사례와 전체 `make check`(race 48개 실제 test package)가 통과했고 `6a22fbcb`·`aaf53acc`를 push했습니다.
 
@@ -386,11 +386,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 339 (10.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 343 (10.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 3,022 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 598 | 아직 개별 기록 없는 선언 2,764 |
-| 기록한 부분·전체 계약 | 3,823 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 3,018 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 602 | 아직 개별 기록 없는 선언 2,760 |
+| 기록한 부분·전체 계약 | 3,827 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -433,7 +433,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Barbican native orders 4개 | pinned Gophercloud v2.15.0 orders requests/results/urls 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS | 진행 중 | 진행 중 | 테스트 push; 다음 가이드·판정 |
+| Barbican native orders 4개 | pinned Gophercloud v2.15.0 orders requests/results/urls 검토 완료 | 기존 generated facade 유지 | 집중 계약 테스트 PASS, 전체 gate 대기 | orders README 추가 | 신규4행 go_mapping 기록, gate 대기 | `21c4e5e7`·가이드·판정 push; 다음 gate·대장 |
 | Barbican native containers 9개 | pinned Gophercloud v2.15.0 containers requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹39·전체 `make check` PASS | containers README 추가 | **신규9행 go_mapping·339/3,362** | 작은 commit2개 push 완료; 다음 native orders |
 | Barbican native secret metadata 6개 | pinned Gophercloud v2.15.0 secret metadata requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹32·전체 `make check` PASS | native 절 추가 | **신규6행 go_mapping·330/3,362** | 작은 commit2개 push 완료; 다음 native containers |
 | Barbican native secrets 5개 | pinned Gophercloud v2.15.0 secrets requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹24·전체 `make check` PASS | native 절 추가 | **신규5행 go_mapping·324/3,362** | 작은 commit2개 push 완료; 다음 secret metadata |
@@ -482,12 +482,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 265 / 2,292 | 11.6% | 159 | 1,867 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 269 / 2,292 | 11.7% | 159 | 1,863 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 339 / 3,362 | 10.1% | 258 | 2,764 | 1 |
+| 전체 | 343 / 3,362 | 10.2% | 258 | 2,760 | 1 |
 
 **핵심 서비스**
 
@@ -499,7 +499,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Network / Neutron | 31 / 758 | 44 | 683 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 67 / 480 | 28 | 385 | 0 |
-| Key Manager / Barbican | 34 / 67 | 10 | 23 | 0 |
+| Key Manager / Barbican | 38 / 67 | 10 | 19 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**

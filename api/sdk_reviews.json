@@ -47216,6 +47216,110 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/orders.Get",
+      "source_fingerprint": "645f16af5b4f74cb7d8c622e0013a7a0c299e8417f26d7231a098b2486d84daa",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET orders/{raw id}, decodes Order with nested Meta and RFC3339-without-zone times, and accepts only 200.",
+          "tests": [
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderRoutesBodiesAndDecode",
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderStrictStatusesListAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native order call only; Python key_manager order parity is tracked separately by the owned order records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/orders.List",
+      "source_fingerprint": "b0119e3e875c9b153f7ee87eefe42a69e29fb218965a9277a6c921c7b11ae663",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List serializes limit/offset plus extension query values, follows the body next link verbatim and stops on an empty orders page.",
+          "tests": [
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderStrictStatusesListAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native order call only; Python key_manager order parity is tracked separately by the owned order records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/orders.Create",
+      "source_fingerprint": "fe8f4cf0748b266f130ad8b42e55bb501a816babe082822b6cb0b42f74102b6f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs type and meta with algorithm/bit_length/mode always present, omitted empty name/payload_content_type and a zone-less expiration, merges non-colliding extension fields, rejects collisions and nil options before HTTP and accepts only 202.",
+          "tests": [
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderRoutesBodiesAndDecode",
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderStrictStatusesListAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native order call only; Python key_manager order parity is tracked separately by the owned order records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/orders.Delete",
+      "source_fingerprint": "7c2809c9f344741a8787a60fd91919a0db9ebe51d7ee988361104da769c12554",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE orders/{raw id} and accepts the native default 202 and 204.",
+          "tests": [
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderRoutesBodiesAndDecode",
+            "keymanager/v1/orders/native_contracts_test.go:TestNativeOrderStrictStatusesListAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/orders/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native order call only; Python key_manager order parity is tracked separately by the owned order records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
