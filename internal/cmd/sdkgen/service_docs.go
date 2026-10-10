@@ -195,6 +195,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.BlockStorageProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. 프로젝트 필터는 실제 요청 버전 3.39 이상이 필요하며 [limits 사용법](limits/README.md)에 버전·typed/raw 응답을 설명합니다.\n\n")
 		out.WriteString("native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md), [transfer·availability zone·버전 호출](native-transfers.md), [volume type 조회](native-volume-types.md), [QoS spec 호출](native-qos.md), [관리자 호출](native-admin.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.\n\n")
 		out.WriteString("Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규칙은 [noauth native client 생성](../noauth/README.md)에 설명합니다." + "\n\n")
+		out.WriteString("volume·snapshot·backup·attachment·transfer·volume type·QoS·availability zone의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다." + "\n\n")
 	case "network/v2":
 		out.WriteString("`Networks`, `Subnets`, `Ports`의 native Create/Get/List/Delete 경로·본문·고정 status와 subnet gateway null, port value_specs 병합, `*_links` 순회는 [native 생성·조회·목록·삭제](native-crud.md)에 설명합니다.\n\n")
 		out.WriteString("Neutron agent·segment·IP 사용량 관리자 호출과 router L3 agent 목록의 경로·status·페이지 규칙은 [Neutron native 관리자 호출](native-admin.md)에 설명합니다.\n\n")
