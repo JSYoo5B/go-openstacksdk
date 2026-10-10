@@ -25,7 +25,7 @@ Gophercloud v2.15.0의 blockstorage/v3 API를 하나의 인증된 서비스 객�
 
 `Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.BlockStorageProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. 프로젝트 필터는 실제 요청 버전 3.39 이상이 필요하며 [limits 사용법](limits/README.md)에 버전·typed/raw 응답을 설명합니다.
 
-native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.
+native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md), [transfer·availability zone·버전 호출](native-transfers.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.
 
 ## Go 사용
 
