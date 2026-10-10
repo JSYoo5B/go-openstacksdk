@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v2 native snapshots backups transfers zones](#cinder-v2-native-snapshots-backups-transfers-zones-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Swift native accounts containers](#swift-native-accounts-containers-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는655입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는663입니다.
+
+## Swift native accounts containers 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Swift native 계정·container 8개, 전체655→663(+8)·핵심581→589/2,292·Object Storage2→10/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·status를 바꾸지 않는지 검증했습니다. 계정 두 호출과 container 목록·bulk delete는 `ResourceBase`가 아니라 정규화된 client endpoint를 쓰고, container 단건 호출은 이름을 path escape하며 비어 있거나 `/`가 든 이름을 HTTP 전에 거부합니다. typed bool header는 true일 때만, update pointer header는 빈 값과 false도 보냅니다. container 조회의 ACL은 쉼표로 나눈 값이라 header가 없으면 `[""]`이고, 목록은 마지막 이름을 marker로 다시 요청하는 Swift marker paging입니다. [Swift native 호출](../objectstorage/v1/native-calls.md)을 새로 쓰고 생성 README 링크를 추가했습니다.
+
+새 집중 계약 테스트6그룹이 race로 통과했습니다. 두 package에는 기존 테스트가 있어 전체 `make check`의 race는 **101개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새8행을 추가해 reviews923·contracts4,153·go_mapping663입니다. 테스트 `8235ad2e`, 가이드 `639de41e`, 판정 `18435016`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v2 native snapshots backups transfers zones 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native snapshots·backups·transfers·AZ 16개, 전체639→655(+16)·핵심565→581/2,292·Block Storage136→152/480.** v2 backups·transfers·availability zones는 고정 Gophercloud 소스가 v3과 같아서 v3 계약 테스트를 v2 경로로 옮겼고, availability zone 목록은 앞선 sdkgen 수정으로 v2에서도 한 페이지를 바로 추출합니다. v2 snapshot은 `Update`·`ListDetail`·확장 속성이 없고 목록이 `SinglePageBase`라 `snapshots_links`를 따라가지 않는 점을 새 테스트로 고정했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native snapshots·backups·transfers·AZ 16개, 전체639→655(+16)·핵심565→581/2,292·Block Storage136→152/480.** v2 backups·transfers·availability zones는 고정 Gophercloud 소스가 v3과 같아서 v3 계약 테스트를 v2 경로로 옮겼고, availability zone 목록은 앞선 sdkgen 수정으로 v2에서도 한 페이지를 바로 추출합니다. v2 snapshot은 `Update`·`ListDetail`·확장 속성이 없고 목록이 `SinglePageBase`라 `snapshots_links`를 따라가지 않는 점을 새 테스트로 고정했습니다.
 
 v2 snapshot `WaitForStatus`는 v3과 같은 native panic이 있어 unresolved로 기록했고, generator guard 작업은 v2·v3를 함께 다루도록 별도 작업으로 넓혔습니다. v2 backup `Update`는 SDK의 envelope 보정이 v3에만 적용되고(생성기 테스트가 범위를 고정) Cinder가 backup 수정을 v3 API 3.9에서 추가했으므로 unresolved로 두었습니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)에 절을 추가했습니다.
 
