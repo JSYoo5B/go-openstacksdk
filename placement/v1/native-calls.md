@@ -85,7 +85,7 @@ trait 목록의 `ListOpts.Name`은 `startswith:CUSTOM`이나 `in:A,B` 같은 문
 
 allocation candidate의 `ListOpts`는 `Required`, `MemberOf`, `SameSubtree` 목록을 반복 key로 보내고 `Resources`, `InTree`, `GroupPolicy`, `Limit`, `RootRequired`는 값 하나로 보냅니다. `ResourceGroups` map의 key는 suffix가 되어 `resources_NIC`, `required_NIC`(반복), `member_of_NIC`, `in_tree_NIC`처럼 붙고, 그룹의 빈 required 항목은 건너뜁니다. query는 key 순으로 정렬해 percent-encoding합니다.
 
-이 목록은 단일 페이지 하나를 값 하나로 내보냅니다. `allocation_requests`가 비거나 없으면 native page가 비어 있다고 판단하므로 빈 결과 값 없이 끝납니다. generated `List`는 native `ExtractAllocationCandidates110`으로 decode하므로 `allocations`가 배열인 1.10, 1.11 응답만 읽습니다. 1.12 이상에서는 `allocations`가 provider UUID를 key로 둔 객체라 decode 오류 하나로 끝나며, 이 문제는 해결되지 않은 상태로 기록합니다. 1.12 이상 응답이 필요하면 `RawClient()`로 native `List`와 `ExtractAllocationCandidates`를 직접 호출합니다.
+이 목록은 단일 페이지 하나를 값 하나로 내보냅니다. `allocation_requests`가 비거나 없으면 native page가 비어 있다고 판단하므로 빈 결과 값 없이 끝납니다. generated `List`는 native `ExtractAllocationCandidates`로 decode하므로 `allocations`가 provider UUID를 key로 둔 객체인 1.12 이상 응답을 읽습니다. 1.34의 `mappings`, 1.17의 `traits`, 1.29의 parent·root provider UUID는 pointer라 해당 microversion 아래에서는 nil입니다. `allocations`가 배열인 1.10, 1.11 응답은 decode 오류 하나로 끝나므로, 이 범위에서는 `RawClient()`로 native `List`와 `ExtractAllocationCandidates110`을 직접 호출합니다.
 
 `Usages.Get`의 `GetOpts`는 `project_id`, `user_id`, `consumer_type` query를 보냅니다. `ProjectID`는 서버에서 필수지만 native 필수 tag가 없어 비어 있으면 query 없이 요청합니다. 응답은 native `Extract`로 읽어 1.38 이상의 consumer type별 map만 받습니다. 1.9부터 1.37까지의 평평한 `{"usages": {"VCPU": 2}}` 응답은 decode 오류가 되므로, 이 범위에서는 `RawClient()`로 native `Get`과 `ExtractPre138`을 호출합니다.
 
