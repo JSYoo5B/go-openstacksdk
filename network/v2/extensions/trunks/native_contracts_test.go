@@ -236,6 +236,26 @@ func TestNativeTrunkStrictStatusesDecodeAndPreflight(t *testing.T) {
 		_, err := api.Get(ctx, "tr-1")
 		nativeTrunkOperation(t, err, "Get")
 	})
+	t.Run("list follows only a links.next string", func(t *testing.T) {
+		var calls []nativeTrunkCall
+		var cloud *testcloud.Cloud
+		api, cloud := nativeTrunkAPI(t, &calls, func(req *http.Request) *http.Response {
+			if req.URL.Path == "/other/trunks" {
+				return nativeTrunkWire(200, `{"trunks":[{"id":"tr-2"}]}`)
+			}
+			return nativeTrunkWire(200, `{"trunks":[{"id":"tr-1"}],"links":{"next":"`+cloud.Server.URL+`/other/trunks"}}`)
+		})
+		var ids []string
+		for value, err := range api.List(ctx) {
+			if err != nil {
+				t.Fatal(err)
+			}
+			ids = append(ids, value.ID)
+		}
+		if !reflect.DeepEqual(ids, []string{"tr-1", "tr-2"}) || len(calls) != 2 {
+			t.Fatal(ids, calls)
+		}
+	})
 	t.Run("list pager status, empty page and bodyless 204", func(t *testing.T) {
 		for _, tc := range []struct {
 			code int
