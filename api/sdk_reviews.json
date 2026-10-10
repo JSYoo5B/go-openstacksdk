@@ -48624,6 +48624,158 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, polling and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.Add",
+      "source_fingerprint": "7d8f91f434a995bf06c8a44918ffb10e6d4abf036ec0802046b0fe89a34e35b2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.Add"
+      ],
+      "contracts": [
+        {
+          "behavior": "Add PUTs servers/{id}/tags/{raw tag} without a body and accepts only 201/204.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.Check",
+      "source_fingerprint": "e6952b4a88aad3b44304baa4ab43049b65c28fa515013914086ccad9b78d3ca7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.Check"
+      ],
+      "contracts": [
+        {
+          "behavior": "Check GETs servers/{id}/tags/{raw tag}, returns true for 204, false with nil error for 404, false with the error for other statuses, and expects only 204.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.List",
+      "source_fingerprint": "8779e2bced3f7bb80544edf20d681e3e39997344f327198cc33b649e55d30900",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs servers/{id}/tags, returns the tags array in server order and accepts only 200.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.ReplaceAll",
+      "source_fingerprint": "fc79142c46cb4bd7caecde12d04708405e4eb411f32085e9c12c12e7aeddfcbc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.ReplaceAll",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.WithReplaceAllOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.WithReplaceAllField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ReplaceAll PUTs {\"tags\":[...]} with extensions beside the array, rejects nil tags, a tags override or nil option before HTTP, returns the server-ordered tags and accepts only 200.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.Delete",
+      "source_fingerprint": "3e81f1e5e30e5496021cfceff36cfa5c4d7121beed9f8b4bd2008c532cca4e7b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs servers/{id}/tags/{raw tag} and accepts only 204.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/tags.DeleteAll",
+      "source_fingerprint": "d35b09d64777cf8cadd23673cd94ab95176f13fb51ee3258044d79ce532ed363",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags.API.DeleteAll"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteAll DELETEs servers/{id}/tags and accepts only 204.",
+          "tests": [
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsRoutesBodiesAndDecode",
+            "compute/v2/tags/native_contracts_test.go:TestNativeTagsStrictStatusesCheckAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/tags/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server-ID tag call only; the InServer scope adds microversion, tag and missing-policy validation documented separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

@@ -62,3 +62,18 @@ func main() {
 태그 목록 자체에는 필터 query가 없습니다. 서버 목록의 `tags`, `tags-any`, `not-tags`, `not-tags-any` 필터는 `service.Servers.All(ctx, resource.WithQuery("tags", "managed,role=db"))`처럼 서버 API에 전달합니다. Python의 `any_tags` 등 keyword 별칭은 위 HTTP query 이름으로 지정합니다. 서버 목록도 microversion 2.26 이상이 필요합니다.
 
 범위 객체는 태그를 캐시하거나 기존 `Server` 모델의 `Tags` 필드를 수정하지 않습니다. Python Resource의 변경 추적·dirty state·`commit` 동작은 제공하지 않습니다. 변경 후 현재 태그를 다시 확인하려면 `List`를 호출합니다. 범위 객체는 호출마다 context 취소를 전달하며 공유 클라이언트 설정은 동시 요청 중 변경하지 않습니다. 서버 ID를 직접 전달하는 기존 `Tags.Add/Check/List/ReplaceAll/Delete/DeleteAll` API도 계속 사용할 수 있으며, 위 사전 검증과 범위 정책은 `InServer`로 얻은 객체에 적용됩니다.
+
+## native 서버 ID 호출
+
+`tags.New(client)`(또는 `service.Tags`)의 generated `Add/Check/List/ReplaceAll/Delete/DeleteAll`은 Gophercloud `v2.15.0`의 [tags 요청](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/compute/v2/tags/requests.go)을 바꾸지 않고 호출합니다. SDK는 오류에 `resource.OperationError{Resource: "tags"}` 문맥만 더합니다. 위 범위 객체와 달리 microversion, 태그 문자열, 50개 제한을 사전 검증하지 않고, 서버 ID와 태그를 escape 없이 경로에 이어 붙입니다.
+
+| 메서드 | 요청 | 성공 status | 반환 |
+|---|---|---|---|
+| `Add(ctx, serverID, tag)` | `PUT servers/{id}/tags/{tag}`, 본문 없음 | 201, 204 | error |
+| `Check(ctx, serverID, tag)` | `GET servers/{id}/tags/{tag}` | 204 | 존재 여부 |
+| `List(ctx, serverID)` | `GET servers/{id}/tags` | 200 | 응답의 `tags` |
+| `ReplaceAll(ctx, serverID, opts, options...)` | `PUT servers/{id}/tags`, `{"tags": [...]}` | 200 | 응답의 `tags` |
+| `Delete(ctx, serverID, tag)` | `DELETE servers/{id}/tags/{tag}` | 204 | error |
+| `DeleteAll(ctx, serverID)` | `DELETE servers/{id}/tags` | 204 | error |
+
+native `Check`는 404를 `false, nil`로 바꾸고 다른 실패는 `false`와 오류로 돌려줍니다. 엄격한 404 정책은 제공하지 않습니다. `ReplaceAll`은 `Tags`가 nil이면 HTTP 전에 필수 입력 오류이며, 빈 slice는 `{"tags": []}`로 모든 태그를 지웁니다. `tags` 값은 객체 envelope가 아니므로 `WithReplaceAllField` 확장 필드는 `tags` 옆 최상위에 붙고, `tags`를 덮어쓰는 확장과 nil 옵션은 HTTP 전에 거부됩니다. 반환 목록은 Nova 응답 순서를 그대로 유지합니다.
