@@ -4,13 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v2 native volume user calls](#cinder-v2-native-volume-user-calls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v2 native snapshots backups transfers zones](#cinder-v2-native-snapshots-backups-transfers-zones-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는639입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는655입니다.
+
+## Cinder v2 native snapshots backups transfers zones 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native snapshots·backups·transfers·AZ 16개, 전체639→655(+16)·핵심565→581/2,292·Block Storage136→152/480.** v2 backups·transfers·availability zones는 고정 Gophercloud 소스가 v3과 같아서 v3 계약 테스트를 v2 경로로 옮겼고, availability zone 목록은 앞선 sdkgen 수정으로 v2에서도 한 페이지를 바로 추출합니다. v2 snapshot은 `Update`·`ListDetail`·확장 속성이 없고 목록이 `SinglePageBase`라 `snapshots_links`를 따라가지 않는 점을 새 테스트로 고정했습니다.
+
+v2 snapshot `WaitForStatus`는 v3과 같은 native panic이 있어 unresolved로 기록했고, generator guard 작업은 v2·v3를 함께 다루도록 별도 작업으로 넓혔습니다. v2 backup `Update`는 SDK의 envelope 보정이 v3에만 적용되고(생성기 테스트가 범위를 고정) Cinder가 backup 수정을 v3 API 3.9에서 추가했으므로 unresolved로 두었습니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)에 절을 추가했습니다.
+
+새·이식 계약 테스트9그룹(하위 사례54)이 race로 통과했습니다. 네 package의 첫 테스트라 전체 `make check`의 race는 **101개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 go_mapping 16행과 unresolved 2행을 추가해 reviews915·contracts4,145·go_mapping655입니다. 테스트 `02f29e82`, 가이드 `a5f6a9ea`, 판정 `70a79fdc`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v2 native volume user calls 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native volume 사용자 호출 19개, 전체620→639(+19)·핵심546→565/2,292·Block Storage117→136/480.** 고정 Gophercloud v2.15.0의 v2 volumes package는 v3과 거의 같아서 v3 계약 테스트 두 파일을 v2 경로로 옮겼습니다. v2만의 차이로 생성 `size`가 omitempty 없이 0도 전송되는 점, 없는 `BackupID`·`backup_id`·`volume_image_metadata`·bootable 필터를 고정했습니다. 판정 행은 검증한 v3 계약 문구를 재사용하고 v2 차이를 덧붙였습니다. force delete·reset status는 핵심 admin 단계로 둡니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native volume 사용자 호출 19개, 전체620→639(+19)·핵심546→565/2,292·Block Storage117→136/480.** 고정 Gophercloud v2.15.0의 v2 volumes package는 v3과 거의 같아서 v3 계약 테스트 두 파일을 v2 경로로 옮겼습니다. v2만의 차이로 생성 `size`가 omitempty 없이 0도 전송되는 점, 없는 `BackupID`·`backup_id`·`volume_image_metadata`·bootable 필터를 고정했습니다. 판정 행은 검증한 v3 계약 문구를 재사용하고 v2 차이를 덧붙였습니다. force delete·reset status는 핵심 admin 단계로 둡니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 추가했습니다.
 
 이식한 계약 테스트6그룹(하위 사례84)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **97개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새19행을 추가해 reviews897·contracts4,127·go_mapping639입니다. 테스트 `9b322c9f`, 가이드 `9f69b50c`, 판정 `e36f2692`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
