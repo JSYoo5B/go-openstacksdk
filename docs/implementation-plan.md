@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): 핵심 서비스 Gophercloud native 정리 마무리 단계. 전체1,011/3,362·핵심937/2,292, 전체 gate PASS.** Keystone v2·OAuth1·EC2 token native를 머지하고 앞선 단위의 생성 결함 3건(endpoint 목록 필터, Placement allocation candidate decode, token header 확장)을 sdkgen에서 고쳤습니다. 남은 핵심 native 호출은 noauth·swauth 4개이고, 이후 핵심 서비스의 Python openstacksdk proxy·cloud 연산 979개를 서비스별로 진행합니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): 핵심 서비스 Python openstacksdk proxy 단계 착수. 전체1,015/3,362·핵심941/2,292, 전체 gate PASS.** Cinder noauth·Swift swauth 4개로 핵심 서비스의 Gophercloud native 선언을 모두 검토했습니다. 이제 핵심 서비스의 Python proxy·cloud 연산 979개를 서비스별 병렬 묶음으로 판정하며, 첫 묶음은 Placement 38개, Keystone v2·Glance v1·Barbican 잔여 38개, Cinder v3 volume·snapshot·backup·transfer·type·QoS 66개입니다. Python 판정은 기본 인자로 보내는 요청을 Go 호출이 그대로 만들 수 있을 때만 `go_mapping`으로 하고, 차이는 판정 JSON과 서비스별 `python-parity.md`에 남깁니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): Keystone v2·OAuth1·EC2 token native 37개와 sdkgen 결함 수정 3건, 전체972→1,011(+39)·핵심898→937/2,292.** Keystone v2.0 21개와 OAuth1·EC2 token 16개의 계약을 고정하고, endpoint 목록 필터 누락·Placement 1.12 이상 decode 오류·token header 확장 누락을 sdkgen에서 고쳐 unresolved 3행을 해소했습니다. [검증 기록](sdk-support-ledger.md#keystone-잔여-native와-sdkgen-결함-3건-완료)에 근거를 남겼습니다.
 
