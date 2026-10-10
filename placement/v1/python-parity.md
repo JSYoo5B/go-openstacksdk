@@ -10,7 +10,7 @@
 | `get_allocation(consumer)` | `Allocations.Get(ctx, consumer)` | 대응 |
 | `update_allocation(consumer, **attrs)` | `Allocations.Update(ctx, consumer, UpdateOpts{...})` | 대응 |
 | `create_allocations(allocations)` | `Allocations.Manage(ctx, ManageOpts{...})` | 미해결 |
-| `delete_allocation(consumer, ignore_missing=True)` | `Allocations.Delete(ctx, consumer)` | 미해결 |
+| `delete_allocation(consumer, ignore_missing=True)` | `Allocations.Delete(ctx, consumer)` | 대응 |
 | `create_resource_class(**attrs)` | `ResourceClasses.Create(ctx, CreateOpts{Name})` | 대응 |
 | `delete_resource_class(rc, ignore_missing=True)` | `ResourceClasses.Remove(ctx, resource.ID(name))` | 대응 |
 | `update_resource_class(rc, **attrs)` | 없음 (`ResourceClasses.Update`는 1.7 이상의 존재 보장 PUT) | 미해결 |
@@ -26,7 +26,7 @@
 | `get_resource_provider_aggregates(rp)` | `ResourceProviders.GetAggregates(ctx, id)` | 대응 |
 | `set_resource_provider_aggregates(rp, *aggregates)` | `ResourceProviders.UpdateAggregates(ctx, id, UpdateAggregatesOpts{...})` | 대응 |
 | `create_resource_provider_inventory(rp, rc, *, total, **attrs)` | 없음 | 미해결 |
-| `delete_resource_provider_inventory(inv, rp, ignore_missing=True)` | `ResourceProviders.DeleteInventory(ctx, id, class)` | 미해결 |
+| `delete_resource_provider_inventory(inv, rp, ignore_missing=True)` | `ResourceProviders.DeleteInventory(ctx, id, class)` | 대응 |
 | `update_resource_provider_inventory(inv, rp, *, resource_provider_generation, **attrs)` | `ResourceProviders.UpdateInventory(ctx, id, class, UpdateInventoryOpts{...})` | 대응 |
 | `get_resource_provider_inventory(inv, rp)` | `ResourceProviders.GetInventory(ctx, id, class)` | 대응 |
 | `resource_provider_inventories(rp, **query)` | `ResourceProviders.GetInventories(ctx, id)` | 대응 |
@@ -35,12 +35,12 @@
 | `fetch_resource_provider_usages(rp)` | `ResourceProviders.GetUsages(ctx, id)` | 대응 |
 | `resource_provider_allocations(rp, **query)` | `ResourceProviders.GetAllocations(ctx, id)` | 대응 |
 | `create_trait(name)` | `Traits.Create(ctx, name)` | 대응 |
-| `delete_trait(trait, ignore_missing=True)` | `Traits.Delete(ctx, name)` | 미해결 |
+| `delete_trait(trait, ignore_missing=True)` | `Traits.Delete(ctx, name)` | 대응 |
 | `get_trait(trait)` | `Traits.Get(ctx, name)` | 대응 |
 | `traits(**query)` | `Traits.List(ctx, WithListOptions(ListOpts{...}))` | 대응 |
 | `get_resource_provider_trait(rp)` | `ResourceProviders.GetTraits(ctx, id)` | 대응 |
 | `set_resource_provider_trait(rp_trait, **attrs)` | `ResourceProviders.UpdateTraits(ctx, id, UpdateTraitsOpts{...})` | 대응 |
-| `delete_resource_provider_trait(rp, ignore_missing=True)` | `ResourceProviders.DeleteTraits(ctx, id)` | 미해결 |
+| `delete_resource_provider_trait(rp, ignore_missing=True)` | `ResourceProviders.DeleteTraits(ctx, id)` | 대응 |
 | `usages(project_id, user_id=None, consumer_type=None)` | `Usages.Get(ctx, WithGetOptions(GetOpts{...}))` | 대응 |
 | `wait_for_status(res, status, ...)` | `ResourceProviders.WaitFor`, `ResourceClasses.WaitFor` | 미해결 |
 | `wait_for_delete(res, ...)` | `ResourceProviders.WaitForDeletion`, `ResourceClasses.WaitForDeletion` | 미해결 |
@@ -110,11 +110,12 @@ inventory 호출은 Python이 microversion 헤더 없이 보내므로 Go도 `Mic
 
 Placement Resource에는 `status` 속성이 없으므로 Python 호출자는 `attribute=`로 다른 속성을 고릅니다. Go에서는 `resource.WithStatusAttribute("name")`처럼 모델의 문자열 필드를 고르고, Python 기본 `failures=['ERROR']`는 `resource.WithFailureStates("ERROR")`, `interval`은 `resource.WithPollInterval`, `wait`은 `resource.WithTimeout`이나 `resource.WithUnlimitedWait`로 옮깁니다. Python `wait_for_status`의 `wait=None`은 끝없이 기다리고 `wait_for_delete`의 기본은 120초인데, Go는 둘 다 기본 5분입니다. Python은 넘긴 Resource가 이미 목표 상태면 요청 없이 돌려주지만 Go는 항상 첫 GET을 보냅니다. Go 대기는 ID를 받아 오류와 최종 모델만 돌려줍니다.
 
+allocation·inventory·trait·provider trait 삭제는 `Remove`가 없으므로 Python 기본값 `ignore_missing=True`를 `resource.IgnoreMissing(api.Delete(...))`처럼 직접 호출을 감싸 고릅니다. 이 helper는 순수 404만 성공으로 바꾸고 409 같은 다른 실패와 전송·취소 오류는 그대로 돌려주며, 감싸지 않은 호출은 `ignore_missing=False`처럼 404를 돌려줍니다.
+
 ## 미해결 메서드
 
 - `allocation_candidates`: Python은 `member_of1=["agg-4", "agg-5"]`처럼 suffix 그룹의 `member_of`를 반복 key로 보낼 수 있습니다(1.24 이상, 기본 1.34). Go `ResourceGroup.MemberOf`는 값 하나이고 `WithListQuery`는 같은 key를 대체하므로 이 요청을 만들 수 없습니다.
 - `create_allocations`: Python은 consumer 값 dict를 그대로 보내므로 1.34의 `mappings` 같은 key를 consumer마다 넣을 수 있습니다. Go `UpdateOpts`에는 그런 필드가 없고, consumer가 둘 이상이면 `WithManageField`가 본문 최상위에 들어갑니다.
-- `delete_allocation`, `delete_resource_provider_inventory`, `delete_trait`, `delete_resource_provider_trait`: Python 기본값 `ignore_missing=True`가 404를 성공으로 바꾸지만 Go에는 이 경로의 `Remove`나 무시 옵션이 없고 native 404 오류가 그대로 나옵니다.
 - `update_resource_class`: Python은 1.2에서 JSON 본문을 담은 PUT으로 class 이름을 바꾸고 200 응답을 받습니다. Go `Update`는 1.7 이상의 본문 없는 PUT이라 본문을 보낼 수 없고 200을 오류로 봅니다.
 - `create_resource_provider_inventory`: Go에는 `POST resource_providers/{id}/inventories` 호출이 없습니다. `UpdateInventory`는 이미 있는 inventory만 바꾸고 `UpdateInventories`는 모든 inventory를 바꾸는 다른 요청입니다.
 - `wait_for_status`, `wait_for_delete`: Python은 fetch가 가능한 모든 placement Resource(inventory, trait, provider trait, allocation 포함)를 기다릴 수 있습니다. Go 대기는 `ResourceProviders`와 `ResourceClasses` collection에만 있습니다.

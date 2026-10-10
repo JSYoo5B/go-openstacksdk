@@ -10,7 +10,7 @@
 | `volumes` | `Volumes.List(ctx, options...)` (상세 경로만 가능) | unresolved |
 | `create_volume` | `Volumes.Create(ctx, opts, WithCreateField, WithCreateHintOpts)` | go_mapping |
 | `update_volume` | `Volumes.Update(ctx, id, opts, WithUpdateField)` | go_mapping |
-| `delete_volume` | `Volumes.Remove(ctx, resource.ID(id))`, `Volumes.Delete(ctx, id, WithDeleteQuery)`, `Volumes.ForceDelete(ctx, id)` | unresolved |
+| `delete_volume` | `Volumes.Remove(ctx, resource.ID(id))`, `Volumes.Delete(ctx, id, WithDeleteQuery)`, `Volumes.ForceDelete(ctx, id)` | go_mapping |
 | `init_volume_attachment` | `Volumes.InitializeConnection(ctx, id, opts)` | unresolved |
 | `terminate_volume_attachment` | `Volumes.TerminateConnection(ctx, id, opts)` | unresolved |
 | `get_snapshot` | `Snapshots.Get(ctx, id)` | go_mapping |
@@ -59,13 +59,13 @@
 | `get_type_encryption` | `VolumeTypes.GetEncryption(ctx, id)` | go_mapping |
 | `create_type_encryption` | `VolumeTypes.CreateEncryption(ctx, id, opts)` | unresolved |
 | `update_type_encryption` | `VolumeTypes.GetEncryption`와 `VolumeTypes.UpdateEncryption(ctx, id, encryptionID, opts)` | unresolved |
-| `delete_type_encryption` | `VolumeTypes.GetEncryption`와 `VolumeTypes.DeleteEncryption(ctx, id, encryptionID)` | unresolved |
+| `delete_type_encryption` | `VolumeTypes.GetEncryption`와 `VolumeTypes.DeleteEncryption(ctx, id, encryptionID)` | go_mapping |
 | `create_qos_spec` | `QoS.Create(ctx, opts, WithCreateField)` | go_mapping |
 | `get_qos_spec` | `QoS.Get(ctx, id)` | go_mapping |
 | `find_qos_spec` | `QoS.Find(ctx, resource.ID(x))`와 `resource.Name(x)`를 따로 호출 | unresolved |
 | `qos_specs` | `QoS.List(ctx, options...)` | go_mapping |
 | `update_qos_spec` | `QoS.Update(ctx, id, opts, WithUpdateField)` | go_mapping |
-| `delete_qos_spec` | `QoS.Remove(ctx, resource.ID(id))`, `QoS.Delete(ctx, id, WithDeleteQuery("force", ...))` | unresolved |
+| `delete_qos_spec` | `QoS.Remove(ctx, resource.ID(id))`, `QoS.Delete(ctx, id, WithDeleteQuery("force", ...))` | go_mapping |
 | `associate_qos_spec` | `QoS.Associate(ctx, id, opts)` | go_mapping |
 | `disassociate_qos_spec` | `QoS.Disassociate(ctx, id, opts)` | go_mapping |
 | `disassociate_all_qos_spec` | `QoS.DisassociateAll(ctx, id)` | go_mapping |
@@ -139,6 +139,8 @@ Python은 microversion 3.55를 쓸 수 있으면 `/volume-transfers`, 아니면 
 
 Python `find_*`는 ID로 GET을 먼저 보내고 404·400·403이면 목록에서 ID나 이름이 같은 항목을 하나 고릅니다. 결과가 없으면 기본값 `ignore_missing=True`에 따라 None을 돌려줍니다. 이 cinder3 범위의 snapshot, backup, type, QoS, transfer에는 Volumes의 `FindIdentity` 같은 helper가 없습니다. 그래서 `Find(resource.ID(x), resource.WithIgnoreMissing())`와 `Find(resource.Name(x))`를 caller가 이어 붙여야 하며, 400·403 fallback, `details`·`all_projects`, `find_type`의 `is_public=none`, `find_qos_spec`의 `**query`는 `Find`에 전달할 수 없습니다. Snapshot과 type의 이름 목록은 `name` query를 보내고 backup, QoS, transfer는 전체 목록을 받아 이름을 비교합니다.
 
+`cascade`·`force` query를 보내는 volume·QoS spec 삭제와 encryption 삭제는 `Remove`를 쓸 수 없으므로 `resource.IgnoreMissing(api.Delete(...))`처럼 직접 호출을 감싸 Python 기본값 `ignore_missing=True`를 고릅니다. 이 helper는 순수 404만 성공으로 바꾸고 다른 실패는 그대로 돌려줍니다.
+
 ## unresolved 목록
 
 - `volumes`: `details=False`의 `GET /volumes` 요약 목록을 보내는 공개 Go 호출이 없습니다.
@@ -150,5 +152,3 @@ Python `find_*`는 ID로 GET을 먼저 보내고 404·400·403이면 목록에�
 - `create_transfer`: `/volume-transfers` 경로와 3.55의 `no_snapshots` 생성을 보낼 수 없습니다.
 - `transfers`: `details=False` 요약 목록과 `/volume-transfers` 경로가 없습니다.
 - `create_type_encryption`, `update_type_encryption`: 넘기지 않은 encryption field를 생략할 수 없어서 부분 생성과 부분 수정이 불가능합니다.
-- `delete_volume`, `delete_qos_spec`: `cascade`·`force` query를 보낼 때는 `Remove`를 쓸 수 없고 generated `Delete`에는 404를 무시하는 옵션이 없습니다. 그래서 Python 기본값 `ignore_missing=True`를 호출자가 404를 직접 걸러야만 재현할 수 있습니다.
-- `delete_type_encryption`: `DeleteEncryption`에는 `Remove`나 404 무시 옵션이 없어서 Python 기본값 `ignore_missing=True`를 호출자가 직접 처리해야 합니다.

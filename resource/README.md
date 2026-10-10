@@ -205,6 +205,8 @@ origin·path·query 연속성 검사는 별도 REST binding의 정책이며 nati
 
 공통 GET과 FindIdentity의 GET은 실제 HTTP 404를 `ErrNotFound`로 감싸며 원래 Gophercloud 오류를 보존합니다. URL 전송 오류, 받아들인 응답의 `ResponseError`, JSON 해석·읽기 실패와 context 취소·deadline 오류는 미존재로 처리하지 않습니다. 이런 오류의 내부 원인에 404나 `ErrNotFound`가 있어도 `Find(..., WithIgnoreMissing())`와 `WaitDeleted`는 오류를 반환합니다. 실제 미존재와 성공한 nil/deleted 응답에 대한 기존 동작은 유지됩니다.
 
+Collection이 없는 직접 삭제 호출은 `resource.IgnoreMissing(err)`로 같은 규칙을 고릅니다. 순수 HTTP 404만 `nil`로 바꾸고, 전송·해석·취소 오류나 여러 원인을 담은 `errors.Join`은 안에 404가 있어도 그대로 돌려줍니다. openstacksdk Proxy 삭제의 기본값 `ignore_missing=True`에 해당하며, 감싸지 않은 호출은 `ignore_missing=False`처럼 404 오류를 돌려줍니다.
+
 `Delete`의 기본 missing 무시는 순수 미존재 응답에 적용합니다. 이름 lookup이나 삭제의 404에 callback·source·취소·응답 정책 실패가 함께 담기면 전체 오류를 보존합니다. 이런 실패는 `WithMissingError()` 여부와 관계없이 숨기거나 새 미존재 오류로 분류하지 않습니다. 여러 원인을 담은 중첩 `errors.Join`도 같은 규칙을 사용합니다.
 
 SDK 소유 Cyborg·Senlin·Masakari 모델의 `Metadata.Body`는 원래 JSON 필드를 `json.RawMessage`로 보존합니다. 큰 정수를 `float64`로 바꾸지 않으며 null·빈 값·생략도 구별합니다. `Metadata.Header`와 `StatusCode`는 받아들인 응답의 HTTP 근거입니다. Senlin·Masakari의 받아들인 응답을 읽거나 해석하지 못하면 `ResponseError`가 원문·헤더·상태·cause를 보존합니다. 생성 요청이 이미 성공했을 수 있으므로 이 오류만으로 자동 재전송하지 않습니다.

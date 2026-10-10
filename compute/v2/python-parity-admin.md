@@ -17,8 +17,8 @@
 | `create_share_attachment` | 없음 | unresolved |
 | `delete_aggregate` | `Aggregates.Remove(ctx, resource.ID(id))` | go_mapping |
 | `delete_flavor` | `Flavors.Remove(ctx, resource.ID(id))` | go_mapping |
-| `delete_flavor_extra_specs_property` | `Flavors.DeleteExtraSpec(ctx, id, key)` (404를 무시하는 기본값 없음) | unresolved |
-| `delete_service` | `Services.Delete(ctx, id)` (404를 무시하는 기본값 없음) | unresolved |
+| `delete_flavor_extra_specs_property` | `Flavors.DeleteExtraSpec(ctx, id, key)` + `resource.IgnoreMissing` | go_mapping |
+| `delete_service` | `Services.Delete(ctx, id)` + `resource.IgnoreMissing` | go_mapping |
 | `delete_share_attachment` | 없음 | unresolved |
 | `disable_service` | `Services.Update(ctx, id, UpdateOpts{Status, DisabledReason})` (2.53 이상만) | unresolved |
 | `enable_service` | `Services.Update(ctx, id, UpdateOpts{Status})` (2.53 이상만) | unresolved |
@@ -139,13 +139,14 @@ Python `find_*`는 ID로 GET을 먼저 보내고 404, 400, 403이면 목록에�
 
 `get_usage(project, start, end)`는 `GET os-simple-tenant-usage/{project}`를 한 번 보내고 첫 응답의 Usage를 돌려줍니다. Go `SingleTenant`는 `tenant_usage_links`를 따라가는 stream이므로 첫 값을 받은 뒤 순회를 멈추면 같은 요청 하나로 끝납니다. 시각은 Go가 offset을 버린 벽시계 시각으로 보내므로 UTC 값을 넘겨야 하고, Python은 timezone이 있는 datetime이면 `+00:00` 같은 offset을 붙여 보냅니다.
 
+flavor extra spec 삭제와 compute service 삭제는 `Remove`가 없으므로 `resource.IgnoreMissing(api.Delete(...))`처럼 직접 호출을 감싸 Python 기본값 `ignore_missing=True`를 고릅니다. 이 helper는 순수 404만 성공으로 바꾸고 다른 실패는 그대로 돌려줍니다.
+
 ## unresolved 목록
 
 - `find_aggregate`, `find_extension`, `find_hypervisor`, `find_service`: ID GET과 목록 fallback을 묶은 helper가 없습니다. aggregate는 숫자가 아닌 ID를 HTTP 전에 거부하고, hypervisor collection은 이름 조회를 지원하지 않으며, extension과 service에는 collection lookup이 없습니다.
 - `hypervisors`: 기본값의 요약 목록 `GET os-hypervisors`와 2.53 미만의 `os-hypervisors/{pattern}/search` 경로를 보낼 수 없습니다.
 - `update_aggregate`: `availability_zone`의 null을 보낼 수 없어 가용 영역을 지울 수 없습니다.
 - `update_flavor`: description의 null이나 빈 문자열을 보낼 수 없어 설명을 지울 수 없습니다.
-- `delete_flavor_extra_specs_property`, `delete_service`: Python의 `ignore_missing=True` 기본값에 해당하는 옵션이나 `Remove`가 없습니다.
 - `enable_service`, `disable_service`: 2.53 미만 action 응답을 Go `Update`가 decode하지 못합니다.
 - `update_service`, `update_service_forced_down`: `forced_down` false를 보낼 수 없고, 2.53 미만의 `force-down` action 응답도 decode하지 못합니다.
 - `evacuate_server`: `onSharedStorage`를 빼고 보낼 수 없어서 2.14 이상에서 실패합니다.
