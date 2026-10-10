@@ -147,3 +147,34 @@ HTTP evidence is in
 [keymanager_secret_fetch_test.go](../../../api/keymanager_secret_fetch_test.go),
 covering the eight `TestKeyManagerSecretFetch` contract groups with local HTTP
 servers and custom transports. This is not a live-cloud test.
+
+## Native Get, List, Create, Update and Delete
+
+`API.Get`, `API.List`, `API.Create`, `API.Update` and `API.Delete` call the
+pinned Gophercloud `v2.15.0` [secret requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/keymanager/v1/secrets/requests.go)
+unchanged. IDs are joined into `secrets/{id}` without escaping, so a slash or
+query delimiter changes the native path.
+
+| Method | Request | Accepted statuses |
+|---|---|---|
+| `Get(ctx, id)` | `GET secrets/{id}` | 200 |
+| `List(ctx, options...)` | `GET secrets` with `ListOpts` query | native pager |
+| `Create(ctx, opts, options...)` | `POST secrets` with the `CreateOpts` JSON body | 201 |
+| `Update(ctx, id, opts, options...)` | `PUT secrets/{id}` with the raw payload body | 204 |
+| `Delete(ctx, id)` | `DELETE secrets/{id}` | 202, 204 |
+
+`Secret` decodes `created`, `updated` and `expiration` with the native
+RFC3339-without-zone parser; a null expiration becomes the zero time. `Create`
+omits empty fields, formats `Expiration` without a zone and sends `{}` for zero
+options. `WithCreateField` adds extension JSON but rejects keys that are core
+`CreateOpts` fields. The create response usually holds only `secret_ref`.
+
+`Update` sends `UpdateOpts.Payload` as the raw body and maps `ContentType` and
+`ContentEncoding` to headers. `WithUpdateHeader` adds other headers and rejects
+the two core header names. `List` serializes `ListOpts` (including
+`created`/`updated`/`expiration` date filters) plus `WithListQuery` values,
+follows the body `next` link exactly as returned (host and path included),
+stops on an empty `secrets` page and sends no further page after the caller
+stops. Other statuses keep the native `gophercloud.ErrUnexpectedResponseCode`;
+the SDK adds only `resource.OperationError{Resource: "secrets"}` context.
+

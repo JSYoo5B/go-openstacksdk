@@ -46691,6 +46691,137 @@
         "The SDK adds only request.Wrap operation context and, for Download, the request.Download wrapper whose Header field repeats the native body; native URLs, OkCodes, retries and stream ownership are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.Get",
+      "source_fingerprint": "6cf02f145641dda44e2ffa27702d3db4c4d74da22d00a96fab5a2d8493fb7167",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET secrets/{raw id} with service MoreHeaders and live token, decodes Secret with native RFC3339-without-zone times and a null expiration as zero time, and accepts only 200; other statuses keep native ErrUnexpectedResponseCode under Get/secrets context.",
+          "tests": [
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret call only; it is not Python key_manager parity, which the owned secret record APIs cover separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.List",
+      "source_fingerprint": "05a4700cd131ea9cde6f34bdc8bf49215af4dd59357c375f95a2961af8d11c04",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List serializes ListOpts including date filters and appends WithListQuery values, follows the body next link verbatim including a different path, stops on an empty secrets page and sends no further page after the caller stops.",
+          "tests": [
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretListQueryPagingAndStop"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret call only; it is not Python key_manager parity, which the owned secret record APIs cover separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.Create",
+      "source_fingerprint": "27def950ed844700ee303619ccb9c5a254c13d8e5dd80e373ff8880be690d790",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs the omitempty CreateOpts body with Expiration formatted without zone and {} for zero options, merges non-core WithCreateField values, rejects core-field collisions and nil options before HTTP, and accepts only 201.",
+          "tests": [
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret call only; it is not Python key_manager parity, which the owned secret record APIs cover separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.Update",
+      "source_fingerprint": "d271ed97b89c6152c65f7508378700675486c238c2ee6783e0312715dfa1b34c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs the raw payload to secrets/{id} with ContentType/ContentEncoding headers and extra WithUpdateHeader headers, rejects core header collisions and nil options before HTTP, and accepts only 204.",
+          "tests": [
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret call only; it is not Python key_manager parity, which the owned secret record APIs cover separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/secrets.Delete",
+      "source_fingerprint": "b91561e33ef56b77c70ff6977ea88436905a0ff90c3596c27ae3d664a2393627",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE secrets/{raw id} and accepts the native default 202 and 204; other statuses keep the native error under Delete/secrets context without an owned receipt.",
+          "tests": [
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
+            "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/secrets/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native secret call only; it is not Python key_manager parity, which the owned secret record APIs cover separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension field/header merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
