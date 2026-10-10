@@ -99,3 +99,26 @@ func TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators(t *testing
 		})
 	}
 }
+
+func TestTokenScopeBuildersDelegateWithoutExtensionFields(t *testing.T) {
+	g, _ := snapshotMetadataActualNative(t)
+	g.root = t.TempDir()
+	for _, path := range []string{"identity/v3/tokens", "identity/v3/ec2tokens", "identity/v3/oauth1"} {
+		t.Run(path, func(t *testing.T) {
+			if err := g.generate(upstreamModule + "/openstack/" + path); err != nil {
+				t.Fatal(err)
+			}
+			body, err := os.ReadFile(filepath.Join(g.root, path, "api_generated.go"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			source := string(body)
+			if !strings.Contains(source, "ToTokenV3ScopeMap() (map[string]any, error) {\n\treturn b.base.ToTokenV3ScopeMap()\n}") {
+				t.Fatal("scope builder is not a plain delegate")
+			}
+			if !strings.Contains(source, "value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)") {
+				t.Fatal("create builder lost its extension field merge")
+			}
+		})
+	}
+}

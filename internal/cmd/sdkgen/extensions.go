@@ -50,6 +50,12 @@ func capabilities(pkg *types.Package, b builder) extensionCapabilities {
 }
 
 func emitConfiguredBuilderMethod(e *emitter, b builder, method *types.Func, call string) bool {
+	// The native token builders nest the scope map inside the create map, which
+	// already receives extension fields. Merging them into the scope as well
+	// duplicated each field there and invented a scope when none was requested.
+	if method.Name() == "ToTokenV3ScopeMap" {
+		return false
+	}
 	sig := method.Type().(*types.Signature)
 	caps := methodCapabilities(e.pkg, method)
 	if sig.Results().Len() < 2 || !isError(sig.Results().At(sig.Results().Len()-1).Type()) || !(caps.body || caps.query || caps.headers) {

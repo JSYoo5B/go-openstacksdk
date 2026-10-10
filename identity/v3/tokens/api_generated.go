@@ -74,17 +74,7 @@ func (b createOptsBuilder) ToTokenV3HeadersMap(arg0 map[string]any) (map[string]
 	return value0, nil
 }
 func (b createOptsBuilder) ToTokenV3ScopeMap() (map[string]any, error) {
-	value0, err := b.base.ToTokenV3ScopeMap()
-	if err != nil {
-		var zero0 map[string]any
-		return zero0, err
-	}
-	value0, err = request.MergeFieldsFor(value0, b.config.Fields, b.base)
-	if err != nil {
-		var zero0 map[string]any
-		return zero0, err
-	}
-	return value0, nil
+	return b.base.ToTokenV3ScopeMap()
 }
 
 // Create invokes the upstream API with library-owned builders and result handling.
