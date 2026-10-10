@@ -4,13 +4,24 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 Python proxy 첫 병렬 묶음](#핵심-python-proxy-첫-병렬-묶음-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova Python proxy와 직접 삭제 ignore_missing](#nova-python-proxy와-직접-삭제-ignore_missing-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,103입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,174입니다.
+
+## Nova Python proxy와 직접 삭제 ignore_missing 완료
+
+**최신 API 완료 (2026-10-11): Nova Python proxy 114개 판정과 직접 삭제 `ignore_missing` 공통 기능, 전체1,103→1,174(+71)·핵심1,029→1,100/2,292·Compute153→220/333.** Nova proxy 메서드를 서버 user 호출과 관리자 호출 두 묶음으로 나누어 판정했고, 반복되던 삭제 기본값 문제를 `resource` package의 공통 helper로 해결했습니다.
+
+- Nova 서버 user Python 62개: 42개 `go_mapping`, 20개 unresolved입니다. 서버 조회·수정·삭제와 action, metadata, tag, server group, interface, volume attachment를 Go 호출로 재현했습니다. Python은 resource별 최대 microversion을 협상하지만 Go는 client에 설정한 값을 보내므로, server tag는 2.26 이상을 설정해야 합니다. Nova 이미지 proxy 8개, 고정 IP·floating IP 제거·backup·restore·암호 삭제·attachment 수정은 Go API가 없고, `locked_reason`·unshelve 인자·attachment 목록 paging은 보낼 수 없습니다. [Nova Python 대응](../compute/v2/python-parity.md)에 정리했습니다.
+- Nova 관리자 Python 52개: 23개 `go_mapping`, 29개 unresolved입니다. aggregate·flavor 관리·hypervisor 조회·service 목록·migration 목록·진단·사용량은 같은 요청을 보냅니다. 서버별 migration·share attachment·quota class·precache·crash dump·external event는 Go API가 없고, aggregate의 AZ null, flavor 설명 지우기, `forced_down=false`, live migrate의 `"auto"`, evacuate의 2.14 이후 본문은 보낼 수 없습니다. [Nova 관리자 Python 대응](../compute/v2/python-parity-admin.md)에 정리했습니다.
+- 판정 기준 정렬: 호출자가 404를 직접 걸러야 Python 기본값이 되는 Cinder 삭제 3개를 Placement·Nova와 같은 기준으로 unresolved로 바꿨습니다.
+- `resource.IgnoreMissing`: Collection이 없는 직접 삭제 호출을 감싸 순수 HTTP 404만 성공으로 바꾸는 공개 helper입니다. `Collection.Delete`와 같은 규칙으로 전송·해석·취소 오류와 여러 원인을 담은 오류는 그대로 돌려줍니다. 이 helper로 Placement 4개, Cinder 3개, Nova 2개 삭제를 `go_mapping`으로 판정했습니다. 수정 `e49dba8a`, [공통 resource 문서](../resource/README.md)에 설명합니다.
+
+새 Python 테스트는 Nova 두 묶음 39그룹과 직접 삭제 8그룹입니다. 마지막 전체 gate의 race는 **155개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews1,532·contracts4,737·go_mapping1,174입니다. 판정은 `19a7ade0`·`58f54d42`·`dd2db375`로 push했습니다. 실제 OpenStack 호출과 Python 실행은 하지 않았습니다.
 
 ## 핵심 Python proxy 첫 병렬 묶음 완료
 
-**최신 API 완료 (2026-10-11): Cinder noauth·Swift swauth native 4개와 핵심 Python proxy 142개 판정, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** 핵심 서비스의 Gophercloud native 선언을 모두 검토하고, Python openstacksdk proxy 판정을 서비스별 병렬 묶음으로 시작했습니다. Python 판정은 고정 openstacksdk 소스에서 기본 인자로 보내는 요청을 읽고, 같은 요청을 공개 Go 호출이 만들 수 있을 때만 `go_mapping`으로 기록했습니다. 그렇지 않은 메서드는 무엇이 없는지 `remaining`에 남긴 unresolved입니다.
+**앞선 API 완료 (2026-10-11): Cinder noauth·Swift swauth native 4개와 핵심 Python proxy 142개 판정, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** 핵심 서비스의 Gophercloud native 선언을 모두 검토하고, Python openstacksdk proxy 판정을 서비스별 병렬 묶음으로 시작했습니다. Python 판정은 고정 openstacksdk 소스에서 기본 인자로 보내는 요청을 읽고, 같은 요청을 공개 Go 호출이 만들 수 있을 때만 `go_mapping`으로 기록했습니다. 그렇지 않은 메서드는 무엇이 없는지 `remaining`에 남긴 unresolved입니다.
 
 - Cinder noauth·Swift swauth native 4개: noauth client 생성은 HTTP 없이 `user:project` token의 project를 endpoint에 붙입니다. swauth `NewObjectStorageV1`은 받은 token을 공유 ProviderClient에 직접 써서 같은 provider의 모든 client가 swauth token으로 바뀝니다. [noauth native client 생성](../blockstorage/noauth/README.md)과 [swauth native 호출](../objectstorage/v1/swauth/README.md)에 설명합니다. 테스트 `6a48e91f`, 새 4그룹입니다.
 - Placement Python 38개: 28개 `go_mapping`, 10개 unresolved입니다. Go는 resource마다 microversion을 협상하지 않고 client에 설정한 값을 보내며, find는 ID 조회 뒤 이름 조회의 두 호출로 재현합니다. allocation·inventory·trait 삭제 4개는 Python 기본 `ignore_missing=True`를 고를 수 없고, resource class 이름 변경, 반복 suffix `member_of`, consumer별 `mappings`, inventory 생성 경로, 일부 대기는 Go에 없습니다. [Python placement 대응](../placement/v1/python-parity.md)에 정리했습니다.
