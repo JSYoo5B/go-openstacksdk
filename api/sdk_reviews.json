@@ -62733,6 +62733,1174 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.Create",
+      "source_fingerprint": "03cf9e374dd31588847985ea6ff0ed833399021df06b72bf5bf20d967687b1e3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs domains with a domain envelope, requires name, omits empty optional fields, sends a non-nil enabled false, merges extension fields inside the envelope while rejecting core-key collisions and nil options before HTTP, decodes the domain envelope and accepts only 201.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.Get",
+      "source_fingerprint": "7c93f817fe3e3a896b4e9c811981f97fcf8539562d5e3b8a4604acb4ad10dd65",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs domains/{id}, decodes the domain envelope (a missing or null envelope is nil without error) and accepts only 200.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.Update",
+      "source_fingerprint": "256229f4d82de7051fa083a1cceb9b62258f4cc595b9e3535b023a615cc7f2f6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes domains/{id} with a domain envelope (an empty update sends an empty envelope and a pointer to an empty description clears it), merges extension fields inside the envelope, rejects core-key collisions and nil options before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.Delete",
+      "source_fingerprint": "f573e154a9022127c790bce7320f0646c7e8c73ccb9dd19bb19a75330bd03121",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE domains/{id} and accepts the native 202 or 204 default.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.List",
+      "source_fingerprint": "d6424b61794b965d2d8bcbd41b999e91b1bbfec92579876613f114a4f1c2fb76",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs domains with sorted enabled, name, limit and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/domains.ListAvailable",
+      "source_fingerprint": "fb2d58f28d3df92683a19ba4a94c33d4207d83ebb7075e0b2c4c49060bfba83b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListAvailable"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAvailable GETs auth/domains without options, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF and reports 404 as the native pager error.",
+          "tests": [
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainRoutesBodiesPagingAndDecode",
+            "identity/v3/domains/native_contracts_test.go:TestNativeDomainStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/groups.Create",
+      "source_fingerprint": "e292dd2c2de3deb4bb89ba99972b8f3f5b78eab191433cfc092606ff4ad159d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs groups with a group envelope, requires name, flattens Extra keys into the envelope, merges extension fields there while rejecting core-key or Extra collisions and nil options before HTTP, collects unknown response keys into Extra and accepts only 201.",
+          "tests": [
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode",
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/groups.Get",
+      "source_fingerprint": "6dc01c58e848b4703051fbe93f903a278eced11a8ee8d1d09da7693adbf5a4ac",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs groups/{id}, decodes the group envelope with remaining keys or a nested extra object as Extra and accepts only 200.",
+          "tests": [
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode",
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/groups.Update",
+      "source_fingerprint": "4ea53399994f6187ed67d77f6c885b54168cd79b4f8268809922438beed8fb5f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes groups/{id} with a group envelope, sends a pointer to an empty description, flattens Extra keys (nil as null) and extension fields into the envelope, rejects nil options before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode",
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/groups.Delete",
+      "source_fingerprint": "fc1d910c08b11ec23de845cb5b8aa63711e545d14d6184b1c4b0cfb09cc9175a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE groups/{id} and accepts the native 202 or 204 default.",
+          "tests": [
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode",
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/groups.List",
+      "source_fingerprint": "69d98c6cea674b209ed9a06d4a525b3614489794d7ffc28cb2ffc7cf993f3ecc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs groups with sorted domain_id, name and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.",
+          "tests": [
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupRoutesBodiesPagingAndDecode",
+            "identity/v3/groups/native_contracts_test.go:TestNativeGroupStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.Create",
+      "source_fingerprint": "52fe0185a74215382d116596a979023757632f58ae4de1334d9a01102ddaae6c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs projects with a project envelope, requires name, sends enabled/is_domain pointers, tags and options, flattens Extra keys and extension fields into the envelope while rejecting core-key or Extra collisions and nil options before HTTP, collects unknown keys including links into Extra and accepts the native 201 or 202 POST default.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.Get",
+      "source_fingerprint": "c9c706de819d000a99b82a26fc997de523d9348e0cba7dd353cc478c49727166",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs projects/{id}, decodes the project envelope with tags, options and remaining keys as Extra and accepts only 200.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.Update",
+      "source_fingerprint": "f2404b7f3a3828d58c45f81f197246852e454cec790ca86db18e950c16eb8e44",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes projects/{id} with a project envelope where a pointer to an empty tag list sends tags [] and a pointer to an empty description clears it, merges Extra and extension fields into the envelope, rejects nil options before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.Delete",
+      "source_fingerprint": "5178dfa6b203c1d6f7644930d22e3689ea603272654494a2176ff8ae50795762",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE projects/{id} and accepts the native 202 or 204 default.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.List",
+      "source_fingerprint": "6bd1b4f6bf60abacbfb70920da9ac36fe8af2a049cddf20dcfa333c2ebd0796b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs projects with sorted domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags, not-tags-any, limit and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.ListTags",
+      "source_fingerprint": "cd2a69c1fa17588f701f9356cfa3618165eb68abde80557da44b88dcf4677908",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ListTags"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListTags GETs projects/{id}/tags, decodes the top-level tags list, accepts only 200 and returns a non-nil zero Tags together with an error.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.ModifyTags",
+      "source_fingerprint": "70088e60cff68195e523d23c9468446e18d365e07827d98032a044e9ed41fa2e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ModifyTags",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithModifyTagsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithModifyTagsField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ModifyTags PUTs projects/{id}/tags with an unwrapped tags body (an empty list is omitted, so it sends {}) and top-level extension fields, rejects a core tags extension before HTTP, decodes only top-level projects and links, accepts only 200 and returns a non-nil zero ProjectTags together with an error.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/projects.DeleteTags",
+      "source_fingerprint": "6d27fe2bf3994c2c96086a92747c239835d60eb9e88ead68b79a1cc3e42a6f78",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.DeleteTags"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteTags sends DELETE projects/{id}/tags and accepts only 204.",
+          "tests": [
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/projects/native_admin_test.go:TestNativeProjectAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.Create",
+      "source_fingerprint": "43785c8b9c8f12c9b2a959e343ebaac1dc13c4d16145d3511c7fb5460e8df820",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs users with a user envelope, requires name, sends password, options and enabled pointers, flattens Extra keys and extension fields into the envelope while rejecting core-key collisions and nil options before HTTP, decodes string enabled values and the zone-less password_expires_at layout and accepts only 201.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.Get",
+      "source_fingerprint": "293717871e021f3194881492ba34d30f70a507209094407334b14b70dd0aadc8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs users/{id}, decodes enabled from bool, string or null, password_expires_at from the zone-less microsecond layout (null is zero, a trailing Z fails), keeps remaining keys except password_expires_at in Extra and accepts only 200.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.Update",
+      "source_fingerprint": "afad951f819cf61d6d9cccf2bd475fa5592fd735a10abd6cc2d6ed84dd18c622",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes users/{id} with a user envelope including a pointer to an empty description, enabled false and password, flattens Extra (nil as null) and extension fields into the envelope while rejecting Extra collisions and nil options before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.Delete",
+      "source_fingerprint": "7d8e2913f60d432cdcbc69585f298606c0134cc9ecc1af135b8e27a20575cf30",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE users/{id} and accepts the native 202 or 204 default.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.List",
+      "source_fingerprint": "400908094198dcf2ed7df030cfa1c9424cccbeaa966f3190722b20af47f3aae3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs users with sorted domain_id, enabled, idp_id, name, password_expires_at, protocol_id, unique_id and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.ListInGroup",
+      "source_fingerprint": "b58c6518283769e30c9163a006b4042f6e6a6599d43037dc1d8babdf0446eb4a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListInGroup GETs groups/{group}/users with the users ListOpts and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects nil options before HTTP while malformed filter keys fail with an unwrapped InvalidListFilter.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.AddToGroup",
+      "source_fingerprint": "08f73938b2c3503cc8ec1c8d25bda26b5a23609d459c120452bcece774fc6699",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AddToGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddToGroup PUTs groups/{group}/users/{user} without a body and accepts only 204.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.IsMemberOfGroup",
+      "source_fingerprint": "3cbe52bd4d23fbdc697addfdaaa4cb80564eb6a8dac57776e75b5aee9f40f0df",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.IsMemberOfGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "IsMemberOfGroup sends HEAD groups/{group}/users/{user}, returns true for 204 and false without error for 404, and reports every other status as a native error expecting 204 or 404.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/users.RemoveFromGroup",
+      "source_fingerprint": "fa10e4ba540b3922c13632463bdc8e205ad8e8eefd9cc8fdf53de9dc46e7b288",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.RemoveFromGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveFromGroup sends DELETE groups/{group}/users/{user} and accepts only 204.",
+          "tests": [
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminRoutesBodiesPagingAndDecode",
+            "identity/v3/users/native_admin_test.go:TestNativeUserAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Create",
+      "source_fingerprint": "e17049065c5cec1dd9bff6ed6e76e6c41b92d0517efe644c80ce98ca454d6c08",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs roles with a role envelope, requires name, sends domain_id, description and options, flattens Extra and extension fields into the envelope while rejecting core-key collisions and nil options before HTTP, decodes null domain_id as empty, copies description into Extra alongside remaining keys and accepts only 201.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Get",
+      "source_fingerprint": "bf29dff6e0eebb0a8d55f169094bf75eb6fbbab38b1f3ddd7c0b1e01f8e607aa",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs roles/{id}, decodes the role envelope with options and Extra (remaining keys plus a description copy) and accepts only 200.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Update",
+      "source_fingerprint": "a630cf8856ef399899dd0fed093affec18fd04453b49510b61871df00510a2f6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes roles/{id} with a role envelope including a pointer to an empty description, options and Extra (nil as null) plus extension fields, rejects nil options before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Delete",
+      "source_fingerprint": "ce84d4ad90664d2b58aaf8a1bf249d81de402d032487f43e9fdb5c9d076115c3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE roles/{id} and accepts the native 202 or 204 default.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.List",
+      "source_fingerprint": "1de8b4e5679f21412822d528d3cad288d221f93283f8a92c1669ac5e98d49a2f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs roles with sorted domain_id, name and extension query values, follows the Keystone links.next string until null, yields nothing for an empty page, ends bodyless 204 with io.EOF, reports 404 as the native pager error and rejects a nil option before HTTP. A non-empty Filters map adds NAME__COMPARATOR keys (malformed keys fail before HTTP with an unwrapped InvalidListFilter) but native BuildQueryString also leaks a stray '-' parameter holding the map's text.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleRoutesBodiesPagingAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Assign",
+      "source_fingerprint": "22236f62d5d160665b7c17f55d1da65c3c1db89691f4c2776816ec0b4af62cfd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Assign PUTs {projects|domains}/{id}/{users|groups}/{id}/roles/{role} or system/{users|groups}/{id}/roles/{role} without a body, requires exactly one of user/group and exactly one of project/domain/system before HTTP (ErrMissingInput with operation context), lets WithAssignOptions replace the positional options and accepts only 204.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Validate",
+      "source_fingerprint": "599bc639aa48bd74ac25370e3505106fdf72625adfcac6620775cff270dd6d2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithValidateOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Validate sends HEAD to the same project, domain or system role assignment path, applies the same exactly-one actor and scope checks before HTTP and accepts only 204.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.Unassign",
+      "source_fingerprint": "26ea4f58c34dcc0f4d8f66a77babe79558ca537bfdfa668fed76557d0a20c67c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUnassignOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unassign sends DELETE to the same project, domain or system role assignment path, applies the same exactly-one actor and scope checks before HTTP and accepts only 204.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.ListAssignmentsOnResource",
+      "source_fingerprint": "f1ea802411a644d2a708eb69d024ed5b006d2311348501b41e8d682aec5b044e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignmentsOnResource",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOnResourceOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssignmentsOnResource GETs {projects|domains}/{id}/{users|groups}/{id}/roles or system/{users|groups}/{id}/roles, follows the Keystone links.next string, ends bodyless 204 with io.EOF, reports 404 as the native pager error, wraps a nil option but yields an unwrapped ErrMissingInput without HTTP when called without options.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.ListAssignments",
+      "source_fingerprint": "16cf37bc9652992503f8eedc8b3195985de16863211214f141c5e928c5a3cd93",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssignments GETs role_assignments with sorted group.id, role.id, scope.domain.id, scope.project.id, scope.system, user.id, effective, include_names, include_subtree (pointer booleans sent as true/false text) and extension query values, follows the Keystone links.next string, decodes role, scope (System only for system scope), user and group, ends bodyless 204 with io.EOF and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleAssignmentRoutesQueryAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.CreateRoleInferenceRule",
+      "source_fingerprint": "5ae1345f6493b39e29c470b5fa32c1a52fbc70d78edf000a71fb08321321c738",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.CreateRoleInferenceRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateRoleInferenceRule PUTs roles/{prior}/implies/{implied} without a body, decodes the top-level role_inference prior_role/implies and links, accepts only 201 and returns a non-nil zero rule with an error.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleInferenceRoutesAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.GetRoleInferenceRule",
+      "source_fingerprint": "685917b13bf01ef46b2eedf648a270a6dc2bfcd5e57e45848e1c78d58aeebdfb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.GetRoleInferenceRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetRoleInferenceRule GETs roles/{prior}/implies/{implied}, decodes the top-level role_inference and links, accepts only 200 and returns a non-nil zero rule together with an error.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleInferenceRoutesAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.DeleteRoleInferenceRule",
+      "source_fingerprint": "eab45adc2c232b2d8fd20278bdacffd12321cac8bda92619d0ad49477cf8e782",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.DeleteRoleInferenceRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteRoleInferenceRule sends DELETE roles/{prior}/implies/{implied} and accepts only 204.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleInferenceRoutesAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/roles.ListRoleInferenceRules",
+      "source_fingerprint": "8f16f578527dbf3e786a58a1ebb9204ded0e1909d82a84fa206c6eef78a7047f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRoleInferenceRules"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRoleInferenceRules GETs role_inferences once (links.next is kept in Links but not followed), decodes each prior_role with its implies list, accepts only 200 and returns a non-nil zero list together with an error.",
+          "tests": [
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleInferenceRoutesAndDecode",
+            "identity/v3/roles/native_contracts_test.go:TestNativeRoleStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/osinherit.Assign",
+      "source_fingerprint": "dd8820aef91d2c5f67da8cb404a29ed53062389b8779c293b3650f75a21cc952",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.WithAssignOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Assign PUTs OS-INHERIT/{projects|domains}/{id}/{users|groups}/{id}/roles/{role}/inherited_to_projects without a body, requires exactly one of user/group and exactly one of project/domain before HTTP (ErrMissingInput with operation context), lets WithAssignOptions replace the positional options and accepts only 204.",
+          "tests": [
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritRoutes",
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/osinherit.Validate",
+      "source_fingerprint": "09a50de1cfbba15324e71393ee0725ce3afa397d3a276a82f2e28398fe691196",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.WithValidateOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Validate sends HEAD to the same OS-INHERIT inherited_to_projects path, applies the same exactly-one actor and target checks before HTTP and accepts only 204.",
+          "tests": [
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritRoutes",
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/osinherit.Unassign",
+      "source_fingerprint": "9af02b2fe7bfe474a62ceed218f7a8f9ff48c0668ee13beac37461352e4fa26b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.WithUnassignOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Unassign sends DELETE to the same OS-INHERIT inherited_to_projects path, applies the same exactly-one actor and target checks before HTTP and accepts only 204.",
+          "tests": [
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritRoutes",
+            "identity/v3/osinherit/native_contracts_test.go:TestNativeInheritStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-admin-a.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
