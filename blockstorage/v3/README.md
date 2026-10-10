@@ -27,6 +27,8 @@ Gophercloud v2.15.0의 blockstorage/v3 API를 하나의 인증된 서비스 객�
 
 native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md), [transfer·availability zone·버전 호출](native-transfers.md), [volume type 조회](native-volume-types.md), [QoS spec 호출](native-qos.md), [관리자 호출](native-admin.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.
 
+Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규칙은 [noauth native client 생성](../noauth/README.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
