@@ -4,13 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Swift native objects](#swift-native-objects-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone v3 native tokens catalog](#keystone-v3-native-tokens-catalog-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는671입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는676입니다.
+
+## Keystone v3 native tokens catalog 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Keystone v3 native token·catalog 5개, 전체671→676(+5)·핵심597→602/2,292·Identity4→9/389.** token 생성은 password·token·application credential 방식과 project·domain·system scope의 본문, 응답 `X-Subject-Token`에서 읽는 ID를 고정했습니다. 조회는 200·203, 검증은 200·204를 true·404를 오류 없는 false로, 폐기는 202·204를 받으며 `Validate`는 native 오류를 감싸지 않습니다.
+
+검증 중 생성 결함을 찾았습니다. generated token·EC2 token·OAuth1 생성 builder가 확장 필드를 create 본문과 그 안에 들어가는 scope map 양쪽에 병합해, 필드가 scope에 중복되고 scope가 없을 때도 `"scope": {"x": ...}`를 만들었습니다. sdkgen이 `ToTokenV3ScopeMap`을 그대로 위임하도록 고치고 세 package를 재생성했으며 생성기 테스트를 더했습니다. 또 native 생성은 `X-Auth-Token` 제외를 요청하지만 Gophercloud가 provider token을 나중에 다시 붙여 인증된 client에서는 token이 함께 전송되는 점을 테스트와 문서에 남겼습니다. [Keystone v3 native token·catalog 호출](../identity/v3/native-tokens.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
+
+새 집중 계약 테스트4그룹과 생성기 3사례가 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **102개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새5행을 추가해 reviews937·contracts4,167·go_mapping676입니다. 생성기 수정 `9be824ab`, 테스트 `54c82805`, 가이드 `be42d62f`, 판정 `ba47812f`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Swift native objects 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Swift native object 8개, 전체663→671(+8)·핵심589→597/2,292·Object Storage10→18/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·query·status를 바꾸지 않는지 검증했습니다. container와 object 이름을 각각 path escape하므로 object 이름의 slash는 `%2F`가 됩니다. COPY는 `Destination`을 앞의 두 slash로만 나눠 escape하고, 목록은 이름 없는 subdir 행의 값을 다음 marker로 씁니다. `Download`는 RFC1123 조건부 header를 보내고 호출자가 닫을 body를 돌려줍니다. `CreateTempURL`은 escape하지 않은 경로로 서명하고 key가 없으면 container, 그다음 계정 HEAD에서 찾으며, 옵션 오류 외의 오류는 native 그대로 돌려줍니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Swift native object 8개, 전체663→671(+8)·핵심589→597/2,292·Object Storage10→18/74.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·header·query·status를 바꾸지 않는지 검증했습니다. container와 object 이름을 각각 path escape하므로 object 이름의 slash는 `%2F`가 됩니다. COPY는 `Destination`을 앞의 두 slash로만 나눠 escape하고, 목록은 이름 없는 subdir 행의 값을 다음 marker로 씁니다. `Download`는 RFC1123 조건부 header를 보내고 호출자가 닫을 body를 돌려줍니다. `CreateTempURL`은 escape하지 않은 경로로 서명하고 key가 없으면 container, 그다음 계정 HEAD에서 찾으며, 옵션 오류 외의 오류는 native 그대로 돌려줍니다.
 
 native `Create`는 ETag를 계산해야 할 때 nil content reader를 읽다가 panic하고, `NoETag`는 소문자 key만 지워 명시 ETag를 남깁니다. panic이 SDK 오류로 바뀌지 않으므로 `Create`는 unresolved로 기록하고 guard를 별도 작업으로 분리했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md#object)에 object 절을 추가했습니다.
 
