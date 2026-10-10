@@ -57739,6 +57739,990 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.Create",
+      "source_fingerprint": "f5f850d985b625fde4a03c31cff7d68e7f67f65a12eae598de42550e4c3ca89f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs flavors with {\"flavor\":{...}} rejecting only an empty name or nil disk before HTTP (zero ram/vcpus are sent), merges extensions inside the envelope while refusing core keys, decodes the flavor including string swap values and accepts only 200/201.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.Update",
+      "source_fingerprint": "7c6da19d7d8a97c00c5c833e50c84b56606f0e5748dda0b7bfdd13c4cfd48d05",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs flavors/{id} with {\"flavor\":{\"description\":...}} (an empty description leaves {\"flavor\":{}}), refuses the description extension key before HTTP, decodes the flavor and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.Delete",
+      "source_fingerprint": "70e04777423d5ff85896b1ab010a202f4553d2c771501b4c8e3e24e3dfa1a1f8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE flavors/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.AddAccess",
+      "source_fingerprint": "2d8f16e8db844b33535af4bdef446b8bb719b7333a6e0673d748a4e022a315ec",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.AddAccess",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithAddAccessOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithAddAccessField"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddAccess POSTs flavors/{id}/action with {\"addTenantAccess\":{\"tenant\":...}} sending an empty tenant as \"\", merges extensions inside the action object while refusing the tenant key, decodes the full flavor_access list and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.RemoveAccess",
+      "source_fingerprint": "8cdf369fa9703033371f9b8296fac021c279e1f138ea8255ae2ef80ac7bbbabd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.RemoveAccess",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithRemoveAccessOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithRemoveAccessField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveAccess POSTs flavors/{id}/action with {\"removeTenantAccess\":{\"tenant\":...}}, refuses the tenant extension key before HTTP, decodes the remaining flavor_access list (an empty array is an empty slice) and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.ListAccesses",
+      "source_fingerprint": "e832409582c944f4540a6eedb758aa460b20a66343891a50d63a9a059eec8839",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListAccesses"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccesses GETs flavors/{id}/os-flavor-access as a single page that ignores links, streams flavor_access rows, yields nothing for an empty array, io.EOF for a bodyless 204 and unwrapped ErrUnexpectedResponseCode outside 200/204/300.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminAccessListStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.CreateExtraSpecs",
+      "source_fingerprint": "ea80b0231ccb2cdfeb2f7540a2707320e2d425bccf05516b16f3cd628cd2a851",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.CreateExtraSpecs",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateExtraSpecsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithCreateExtraSpecsField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateExtraSpecs POSTs flavors/{id}/os-extra_specs with {\"extra_specs\":{...}}, places extensions beside extra_specs at the top level and refuses an extra_specs extension before HTTP, decodes the extra_specs map and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.UpdateExtraSpec",
+      "source_fingerprint": "8ff2602df0e37d9ff6acda7ced017308cd1b71ab671041f9c72028f2ca80122d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.UpdateExtraSpec",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateExtraSpecOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateExtraSpec PUTs the single key/value pair to flavors/{id}/os-extra_specs/{key} with the unescaped key, rejects zero or multiple pairs before HTTP, decodes the bare response map and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/flavors.DeleteExtraSpec",
+      "source_fingerprint": "ab998640d9baf772d134218743d331c75d631c68bcf265c315173881a30c3cf6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.DeleteExtraSpec"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteExtraSpec sends DELETE flavors/{id}/os-extra_specs/{key} without a body and accepts only 200.",
+          "tests": [
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminRoutesBodiesAndDecode",
+            "compute/v2/flavors/native_admin_contracts_test.go:TestNativeFlavorAdminStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Evacuate",
+      "source_fingerprint": "7237d74f65d9524f74dca9c5969459296b3bf313ee4500ce084d7985d7666f28",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Evacuate",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Evacuate POSTs servers/{id}/action with {\"evacuate\":{...}} always including onSharedStorage regardless of microversion, merges extensions inside the action while refusing core keys before HTTP, returns adminPass or an empty string for {} or a bodyless 200, and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ForceDelete",
+      "source_fingerprint": "7dbdd3d9526aa7ecbab4999c8a79e4779fbe6b99c0078b63e69cf34e16a99773",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"forceDelete\":\"\"} to servers/{id}/action and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.InjectNetworkInfo",
+      "source_fingerprint": "bc1a5fa99a377da3f2613437d4412770fc1c7ba5c3ef69a302202db4bfb28860",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.InjectNetworkInfo"
+      ],
+      "contracts": [
+        {
+          "behavior": "InjectNetworkInfo POSTs {\"injectNetworkInfo\":null} to servers/{id}/action and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.LiveMigrate",
+      "source_fingerprint": "7462064a84da2ea90cf0a728382afba402aa551ef8f6a2258269c438af90ae88",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.LiveMigrate",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "LiveMigrate POSTs {\"os-migrateLive\":{...}} with host always present (null when nil) and block_migration/disk_over_commit omitted when nil, refuses a block_migration \"auto\" or other core-key extension before HTTP, merges other extensions inside the action and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Migrate",
+      "source_fingerprint": "8396534193de7c8ab617cf844dba3a83fd483a46447631c3a034fc3595662d38",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Migrate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Migrate POSTs {\"migrate\":null} to servers/{id}/action without a host option and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ResetNetwork",
+      "source_fingerprint": "616922ac3250aa5359747d04ad4dc6540332e2cc49e32d644780192cc87ac11f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ResetNetwork"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetNetwork POSTs {\"resetNetwork\":null} to servers/{id}/action and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ResetState",
+      "source_fingerprint": "bf00c5d2554fc7c998c35632770f2560299f27d2ba4374def70f8e0fecef6d96",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ResetState"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetState POSTs {\"os-resetState\":{\"state\":...}} passing any state string through unvalidated and accepts only 201/202.",
+          "tests": [
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsRoutesBodiesAndDecode",
+            "compute/v2/servers/native_admin_action_contracts_test.go:TestNativeServerAdminActionsStrictStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/native-admin-flavors-servers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.Get",
+      "source_fingerprint": "7ef68b61653c0020b7e1ddd3f618b2c7d97742e5c1039b59701471a922dbeadc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs agents/{id}, accepts only 200, decodes space-separated zone-less created_at/started_at/heartbeat_timestamp (empty string is zero, RFC3339 fails), and returns a nil agent without error when the agent envelope is missing or null.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.Update",
+      "source_fingerprint": "31fc0021fb98138a03ecb1007f166799c241cdd5968897d98aa1fb803ba3eaf0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"agent\":{...}} with pointer description/admin_state_up (empty and false sent explicitly) and extensions inside the envelope to agents/{id}, rejects a core-key extension and nil option before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.Delete",
+      "source_fingerprint": "d05ac1d4148e020504f892232c8a19dbd704e06a671a2939e934c1d0aaa82677",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE agents/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.List",
+      "source_fingerprint": "3aa715137cbe2b5fbb048681a6a46633d7b224bb445b605d9e44eaa44261987f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs agents with ListOpts (pointer alive including false) and extension query values, follows agents_links rel=next hrefs while ignoring a links.next string, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ListDHCPNetworks",
+      "source_fingerprint": "31f12bbb5299cec79cdf7efd4241d4df392e871b45370f36a382b31613d97730",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPNetworks"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDHCPNetworks GETs agents/{id}/dhcp-networks as one request, accepts only 200, and decodes the networks key into []networks.Network with a missing key returning nil without error.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ScheduleDHCPNetwork",
+      "source_fingerprint": "1ba553b2f6793cfc7a421f56fc2013e53b4d095a661488573e1da332e6ed6f74",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleDHCPNetwork",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleDHCPNetworkOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleDHCPNetworkField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScheduleDHCPNetwork POSTs an unenveloped {\"network_id\":...} body with top-level extensions to agents/{id}/dhcp-networks, rejects an empty network_id, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.RemoveDHCPNetwork",
+      "source_fingerprint": "26d18cd79c51986652ee65e534d42089d6cd6e547d3c4752af7fd2d6248ef3f8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.RemoveDHCPNetwork"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveDHCPNetwork sends DELETE agents/{id}/dhcp-networks/{networkID} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ListL3Routers",
+      "source_fingerprint": "55dfd11cb2d9a00f28e1618a24630134a68323f5831c02ac51779722284582ba",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListL3Routers"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListL3Routers GETs agents/{id}/l3-routers as one request, accepts only 200, and decodes the routers key into []routers.Router with a missing key returning nil without error.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ScheduleL3Router",
+      "source_fingerprint": "207e151e55a4054763c533f5634ac60313165440a3f9e119eea1f262594f4bf0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleL3Router",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScheduleL3Router POSTs an unenveloped {\"router_id\":...} body with top-level extensions to agents/{id}/l3-routers, rejects an empty router_id, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.RemoveL3Router",
+      "source_fingerprint": "1c78709af9c4ee232708e7d1cd5d71fc6d0765b004563a82c11e31cbce1ea7e3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.RemoveL3Router"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveL3Router sends DELETE agents/{id}/l3-routers/{routerID} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ListBGPSpeakers",
+      "source_fingerprint": "da3d166391fc8193e2547ab60917484ebdfe1927ae6f4ac1d21490c89c0ce6f5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListBGPSpeakers"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListBGPSpeakers GETs agents/{agentID}/bgp-drinstances as a single page that follows no links, decodes bgp_speakers into speakers.BGPSpeaker, yields nothing for an empty page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ScheduleBGPSpeaker",
+      "source_fingerprint": "85ed315d26735cd415898c7bfa5fb4d3063b5eda3292c086d188095df9536889",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleBGPSpeaker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleBGPSpeakerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleBGPSpeakerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScheduleBGPSpeaker POSTs an unenveloped {\"bgp_speaker_id\":...} body with top-level extensions to agents/{agentID}/bgp-drinstances, rejects an empty speaker ID, a core-key extension and nil option before HTTP, ignores the response body, and accepts only 201.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.RemoveBGPSpeaker",
+      "source_fingerprint": "3156ec70eae16b933d24a607d5b8f469ab680dc922d5ea565c28787dc4443feb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.RemoveBGPSpeaker"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveBGPSpeaker sends DELETE agents/{agentID}/bgp-drinstances/{speakerID} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/agents.ListDRAgentHostingBGPSpeakers",
+      "source_fingerprint": "203a8ca3851c53377fb79af1b6eb2b9549be14b6c5f9377962835ebc27d3b673",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDRAgentHostingBGPSpeakers"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDRAgentHostingBGPSpeakers GETs bgp-speakers/{bgpSpeakerID}/bgp-dragents, follows agents_links rel=next hrefs while ignoring a links.next string, yields nothing for an empty page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/agents/native_admin_test.go:TestNativeAgentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/segments.Create",
+      "source_fingerprint": "895d8eb35a6a65393c89df9951a9af49ef44fd39b7e50262ca323cd07f77ff1f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"segment\":{...}} to segments with extensions inside the envelope, omits empty optional fields including segmentation_id 0, rejects empty network_id/network_type, a core-key extension and nil option before HTTP, and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/segments.Get",
+      "source_fingerprint": "3db7a316ba2d7c3a15170646d3edf7e4e2d7dbf75f1ba019f9e02b7960f89087",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs segments/{id}, accepts only 200, decodes RFC3339 timestamps (zone-less forms fail) and null segmentation_id as 0, returns a zero segment for {} or a null envelope, and fails for other keys or a non-object envelope.",
+          "tests": [
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/segments.Update",
+      "source_fingerprint": "2762d85048c955c4d16260e1eee54fa5ce84c8504fa96af7f4ad886968e6ed5a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"segment\":{...}} with pointer name/description/segmentation_id (empty and 0 sent explicitly) and extensions inside the envelope to segments/{id}, rejects a core-key extension and nil option before HTTP, and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/segments.Delete",
+      "source_fingerprint": "c7c26d97c0e0cb687fe0da017a42eb830441756f820c87d0a525acea817b28bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE segments/{id} without a body and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/segments.List",
+      "source_fingerprint": "a5b27764c1937bc12e64de7739564137e471b593686b333feb9547cddf44666f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs segments with ListOpts (integer filters omitted at 0) and extension query values, ignores the Neutron segments_links array and follows only a links.next string because SegmentPage defines no NextPageURL, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/segments/native_admin_test.go:TestNativeSegmentStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/networkipavailabilities.Get",
+      "source_fingerprint": "d74c074bf137e8e0e0218a4be0f235dd67e4a48313833aee82f4ce7a6df0752e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs network-ip-availabilities/{id}, accepts only 200, decodes total_ips/used_ips (network and every subnet, including exponent notation) into exact decimal strings, fails when a count is missing or null, and returns nil without error when the envelope is missing or null.",
+          "tests": [
+            "network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityRoutesSinglePageAndDecode",
+            "network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/networkipavailabilities call only; Python network IP availability resource models and finders are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/networkipavailabilities.List",
+      "source_fingerprint": "f1c2196a93ae932f5b712da0d43b778753c5751d132a262983a8fff556691da5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs network-ip-availabilities with ListOpts and extension query values as a single page that follows no links, decodes counts into exact decimal strings with a native page error for a missing count, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityRoutesSinglePageAndDecode",
+            "network/v2/extensions/networkipavailabilities/native_admin_test.go:TestNativeIPAvailabilityStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/networkipavailabilities call only; Python network IP availability resource models and finders are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/layer3/routers.ListL3Agents",
+      "source_fingerprint": "6bfa3c4c7877abf39559569f6c44eef4a01279854a1fd0132b0691689bdb3226",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.ListL3Agents"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListL3Agents GETs routers/{id}/l3-agents as a single page that follows neither agents_links nor links.next, decodes agents into routers.L3Agent with space-separated zone-less timestamps (RFC3339 is a page decode error), yields nothing for an empty or keyless page, and reports io.EOF for a bodyless 204 and native page status errors without operation context.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/native_l3agents_test.go:TestNativeRouterL3AgentsSinglePageDecodeAndStatuses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-admin.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python router L3 agent helpers and agent resource models are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

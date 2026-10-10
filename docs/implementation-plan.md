@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): 핵심 admin 단계 진행 중, 서비스별 병렬 진행으로 전환. Cinder QoS spec 10개 검증·판정 완료(전체737/3,362·핵심663/2,292).**  QoS spec의 `Specs` key가 typed 필드를 덮어쓰는 병합 순서, GET으로 보내는 association 변경, `{"keys": null}` 삭제 본문을 검증했습니다. 나머지 핵심 admin 호출은 Nova flavor·server 관리자 action, Nova infra(hypervisor·aggregate·service 등), Neutron agent·segment, Neutron BGP·BGPVPN, Keystone 관리 호출 두 묶음, Placement, Cinder volume type 관리·나머지와 Glance task로 나눠 워크트리 에이전트가 병렬로 테스트·가이드를 만들고, 판정·계획·대장·생성 README 링크는 머지할 때 한곳에서 갱신합니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): 핵심 admin 단계 병렬 진행 중. Nova flavor·서버 관리자 16개와 Neutron agent·segment·IP 사용량 22개 묶음을 머지해 판정 반영 집계775, 전체 gate 진행 중.** 판정 전 기준은 전체737/3,362·핵심663/2,292입니다. Nova evacuate가 2.14 이전 key를 항상 보내는 점, live migrate의 `"auto"`를 보낼 수 없는 점, Neutron segment 목록이 첫 페이지만 읽는 점과 agent 시각 형식을 문서화했습니다. 나머지 병렬 묶음(Nova infra, Neutron BGP·BGPVPN, Keystone 관리 두 묶음, Placement, Cinder volume type 관리·Glance task)은 진행 중이며 도착하는 대로 머지합니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 admin Cinder native QoS spec 10개, 전체727→737(+10)·핵심653→663/2,292·Block Storage168→178/480.** QoS spec 생성·조회·목록·수정·삭제·key 삭제와 volume type association 호출의 계약을 고정했습니다. [Cinder v3 native QoS spec 호출](../blockstorage/v3/native-qos.md)과 [검증 기록](sdk-support-ledger.md#cinder-native-qos-specs-완료)에 설명합니다. 새2그룹과 하위 사례32, 전체 `make check`(race 109개 실제 test package)가 통과했고 `97ac8acc`·`f0ccc0c7`·`03d074c6`을 push했습니다.
 
@@ -464,11 +464,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 737 (21.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 775 (23.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,624 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 998 | 아직 개별 기록 없는 선언 2,364 |
-| 기록한 부분·전체 계약 | 4,228 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,586 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 1,036 | 아직 개별 기록 없는 선언 2,326 |
+| 기록한 부분·전체 계약 | 4,266 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -512,6 +512,8 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
 | Cinder native QoS spec 10개 | pinned Gophercloud v2.15.0 qos requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례32·전체 `make check` PASS | blockstorage/v3/native-qos.md·생성 README 링크 | **10행 go_mapping·737/3,362** | 작은 commit3개 push 완료 |
+| Nova native flavor·서버 관리자 16개 | 병렬 묶음, pinned flavors·servers admin 요청 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례59 PASS, 전체 gate 대기 | compute/v2/native-admin-flavors-servers.md·생성 README 링크 | 신규16행 go_mapping 기록, gate 대기 | `1d75f7ee`·`bf3a1265` 머지; 다음 gate·대장 |
+| Neutron native agent·segment·IP 사용량·L3 agent 22개 | 병렬 묶음, pinned 네 package 검토 완료 | 기존 generated facade 유지 | 새7그룹·하위 사례72 PASS, 전체 gate 대기 | network/v2/native-admin.md·생성 README 링크 | 신규22행 go_mapping 기록, gate 대기 | 머지 완료; 다음 gate·대장 |
 | 핵심 admin 병렬 8묶음 | Nova·Neutron·Keystone·Placement·Cinder/Glance 묶음별 착수 | 워크트리 에이전트 진행 중 | 진행 중 | 묶음별 신규 가이드 | 머지 때 판정 반영 | 머지·gate·대장 순서로 처리 |
 | Cinder native backup 관리자 호출 8개(v3·v2) | pinned Gophercloud v2.15.0 backups export/import/reset/force delete 검토 완료 | 기존 generated facade 유지 | 새4그룹·하위 사례36·전체 `make check` PASS | native-backups.md 관리자 절·v2 native-calls.md | **8행 go_mapping·727/3,362** | 작은 commit3개 push 완료; 다음 Cinder QoS·volume type 관리 |
 | Cinder native volume·snapshot 관리자 action 8개 | pinned Gophercloud v2.15.0 v2/v3 volumes·v3 snapshots admin action 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례46·전체 `make check` PASS | native-volumes.md·native-snapshots.md·v2 native-calls.md 관리자 절 | **8행 go_mapping·719/3,362** | 작은 commit3개 push 완료; 다음 backup 관리자 호출 |
@@ -640,21 +642,21 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 663 / 2,292 | 28.9% | 161 | 1,467 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 701 / 2,292 | 30.6% | 161 | 1,429 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 737 / 3,362 | 21.9% | 260 | 2,364 | 1 |
+| 전체 | 775 / 3,362 | 23.1% | 260 | 2,326 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 34 / 389 | 5 | 350 | 0 |
-| Compute / Nova | 117 / 333 | 20 | 196 | 0 |
+| Compute / Nova | 133 / 333 | 20 | 180 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
-| Network / Neutron | 182 / 758 | 43 | 533 | 0 |
+| Network / Neutron | 204 / 758 | 43 | 511 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
 | Block Storage / Cinder | 178 / 480 | 31 | 271 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |
