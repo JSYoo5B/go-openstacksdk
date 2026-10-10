@@ -57,6 +57,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 Nova flavor 생성·수정·접근 권한·extra spec 관리와 서버 관리자 action의 native 호출 규칙은 [native 관리자 flavor·서버 호출](native-admin-flavors-servers.md)에 설명합니다.
 
+[Nova 인프라 관리자 native 호출](native-admin-infra.md)은 hypervisor·aggregate·compute service·migration·서버 진단·availability zone 상세·전체 프로젝트 사용량 호출의 경로·고정 status·microversion별 decode 계약을 설명합니다.
+
 `InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.
 
 ## Go 사용

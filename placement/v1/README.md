@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 placement/v1 API를 하나의 인증된 서비스 객체�
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+resource provider·inventory·allocation·trait 등 native Placement 호출의 경로·본문·microversion header·성공 status는 [Placement native 호출](native-calls.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go

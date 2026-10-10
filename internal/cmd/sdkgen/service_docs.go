@@ -162,6 +162,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Introspection.Resources`는 node와 같은 UUID로 조회하고 목록을 순회합니다. 이름·Status·Delete는 가정하지 않습니다. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)`는 `Finished`를 기다리고 실제 `Error`를 `IntrospectionFailureError`에 보존합니다. `StartIntrospection`은 SDK 소유 helper로 pinned native 함수의 query 누락을 보정해 `ManageBoot`의 nil/false/true와 확장 query를 전달합니다. [시작·조회·완료 대기 사용법](introspection/README.md)을 참고합니다.\n\n")
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
+	case "placement/v1":
+		out.WriteString("resource provider·inventory·allocation·trait 등 native Placement 호출의 경로·본문·microversion header·성공 status는 [Placement native 호출](native-calls.md)에 정리했습니다.\n\n")
 	case "identity/v3":
 		out.WriteString("generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다." + "\n\n")
 		out.WriteString("사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다." + "\n\n")
@@ -173,6 +175,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Tags.InServer(ctx, serverRef)`는 서버 이름/ID를 한 번 해석한 뒤 Add/Check/List/Replace/Remove/RemoveAll을 제공합니다. tag set은 Collection이 아니며 실제 선택 microversion 2.26 이상을 요구합니다. [태그의 빈 목록·404 정책과 Python 대응](tags/README.md)을 참고합니다.\n\n")
 		out.WriteString("서버 ID를 직접 받는 native [서버 호출](servers/native.md), [서버 그룹](servergroups/README.md), [볼륨 연결](volumeattach/README.md), [인터페이스 연결](attachinterfaces/README.md), [extension](extensions/README.md), [사용량](usage/README.md), [보안 그룹 proxy](secgroups/README.md)는 Gophercloud 요청을 그대로 보내고 operation 문맥만 더합니다. 각 문서에 경로·본문·고정 status·단일 페이지 목록 계약을 정리합니다.\n\n")
 		out.WriteString("Nova flavor 생성·수정·접근 권한·extra spec 관리와 서버 관리자 action의 native 호출 규칙은 [native 관리자 flavor·서버 호출](native-admin-flavors-servers.md)에 설명합니다.\n\n")
+		out.WriteString("[Nova 인프라 관리자 native 호출](native-admin-infra.md)은 hypervisor·aggregate·compute service·migration·서버 진단·availability zone 상세·전체 프로젝트 사용량 호출의 경로·고정 status·microversion별 decode 계약을 설명합니다.\n\n")
 		out.WriteString("`InstanceActions.InServer(ctx, serverRef)`는 requestID로 상세를 조회하고 이력을 페이지 순회합니다. SDK의 `ActionResource`는 목록과 상세를 구분하고 추가 event 정보·원본 JSON·헤더를 보존합니다. [이력 조회와 버전·권한 조건](instanceactions/README.md)을 참고합니다.\n\n")
 	case "blockstorage/v2", "blockstorage/v3":
 		out.WriteString("`Volumes.MetadataIn(ctx, ref)`와 `Snapshots.MetadataIn(ctx, ref)`는 ID 또는 이름을 한 번 해석해 Get·Merge·Replace·DeleteKeys를 같은 방식으로 제공합니다. Merge는 POST 병합, Replace는 PUT 전체 교체이며 nil/빈 map도 명시적 metadata 객체를 보냅니다. DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음, 그 외에는 입력 순서대로 삭제하고 실패 전 결과를 반환합니다. 실제 metadata·원문·헤더·성공 코드를 반환하며 Resource cache를 만들지 않습니다. [공통 metadata 사용법](../metadata/README.md), [Volume](volumes/README.md), [Snapshot](snapshots/README.md)에 Python 대응·ETag·옵션·부분 성공을 설명합니다. Backup metadata 하위 경로는 이 범위에 포함하지 않습니다.\n\n")
