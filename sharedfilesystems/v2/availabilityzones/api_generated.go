@@ -21,7 +21,7 @@ type AvailabilityZonePage = upstream.AvailabilityZonePage
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context) iter.Seq2[*AvailabilityZone, error] {
-	return resource.Stream(ctx, upstream.List(a.client), func(page pagination.Page) ([]AvailabilityZone, error) {
+	return resource.SinglePageStream(ctx, upstream.List(a.client), func(page pagination.Page) ([]AvailabilityZone, error) {
 		values, err := upstream.ExtractAvailabilityZones(page)
 		return []AvailabilityZone(values), err
 	})

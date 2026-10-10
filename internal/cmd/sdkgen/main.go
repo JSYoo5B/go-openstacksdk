@@ -197,6 +197,16 @@ func sdkPath(path string) string {
 	return strings.Join(parts, "/")
 }
 
+// singlePageObjectLists names pinned List calls whose page embeds
+// SinglePageBase without overriding its array-only IsEmpty. The compute
+// ListDetail call shares such a page but is an admin call reviewed separately.
+var singlePageObjectLists = map[string]bool{
+	"compute/v2/availabilityzones.List":           true,
+	"blockstorage/v2/availabilityzones.List":      true,
+	"blockstorage/v3/availabilityzones.List":      true,
+	"sharedfilesystems/v2/availabilityzones.List": true,
+}
+
 type emitter struct {
 	pkg             *types.Package
 	imports         map[string]string
@@ -1067,9 +1077,9 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 				pageAlias := e.use(upstreamModule + "/pagination")
 				stream := "Stream"
 				control := ""
-				// This pinned native page inherits an array-only IsEmpty despite
-				// its object envelope. Preserve native AllPages' single-page seam.
-				if e.pkg.Path() == upstreamModule+"/openstack/compute/v2/availabilityzones" && op == "List" {
+				// These pinned native pages inherit an array-only IsEmpty despite
+				// their object envelope. Preserve native AllPages' single-page seam.
+				if singlePageObjectLists[strings.TrimPrefix(e.pkg.Path(), upstreamModule+"/openstack/")+"."+op] {
 					stream = "SinglePageStream"
 				}
 				if controlled {

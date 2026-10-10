@@ -76,6 +76,9 @@ func TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators(t *testing
 		{"db/v1/configurations", []string{"iter.Seq2[*instances.Instance, error]", "values, err := instances.ExtractInstances(page)"}},
 		{"identity/v2/extensions", []string{"values, err := upstream.ExtractExtensions(page)"}},
 		{"compute/v2/availabilityzones", []string{"return resource.SinglePageStream(ctx, upstream.List(a.client)", "return resource.Stream(ctx, upstream.ListDetail(a.client)", "values, err := upstream.ExtractAvailabilityZones(page)"}},
+		{"blockstorage/v2/availabilityzones", []string{"return resource.SinglePageStream(ctx, upstream.List(a.client)"}},
+		{"blockstorage/v3/availabilityzones", []string{"return resource.SinglePageStream(ctx, upstream.List(a.client)"}},
+		{"sharedfilesystems/v2/availabilityzones", []string{"return resource.SinglePageStream(ctx, upstream.List(a.client)"}},
 	} {
 		t.Run(tc.path, func(t *testing.T) {
 			if err := g.generate(upstreamModule + "/openstack/" + tc.path); err != nil {
