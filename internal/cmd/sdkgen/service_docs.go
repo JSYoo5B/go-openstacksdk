@@ -163,6 +163,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Introspection.Resources`는 node와 같은 UUID로 조회하고 목록을 순회합니다. 이름·Status·Delete는 가정하지 않습니다. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)`는 `Finished`를 기다리고 실제 `Error`를 `IntrospectionFailureError`에 보존합니다. `StartIntrospection`은 SDK 소유 helper로 pinned native 함수의 query 누락을 보정해 `ManageBoot`의 nil/false/true와 확장 query를 전달합니다. [시작·조회·완료 대기 사용법](introspection/README.md)을 참고합니다.\n\n")
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
+		out.WriteString("Keystone v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. extension·role·tenant·token·user native 호출의 요청 본문, 성공 status와 관리자 전용 호출은 [Keystone v2.0 native 호출](native-calls.md)에 설명합니다." + "\n\n")
 	case "placement/v1":
 		out.WriteString("resource provider·inventory·allocation·trait 등 native Placement 호출의 경로·본문·microversion header·성공 status는 [Placement native 호출](native-calls.md)에 정리했습니다.\n\n")
 	case "identity/v3":
@@ -170,7 +171,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("사용자가 소유하는 application credential·access rule·credential·EC2 credential의 native 호출은 [native credential 호출](native-credentials.md)에 설명합니다." + "\n\n")
 		out.WriteString("trust와 사용자 본인의 접근 가능 project 목록·암호 변경 native 호출은 [native trust·사용자 본인 호출](native-trusts.md)에 설명합니다." + "\n\n")
 		out.WriteString("region·service·endpoint·policy·limit·registered limit·project endpoint·federation mapping의 기본 정책상 관리자 native 호출은 [native catalog·policy·limit·mapping 관리자 호출](native-admin-b.md)에 설명합니다." + "\n\n")
-		out.WriteString("domain·group·project·user·role의 관리자 CRUD, project tag, group membership, role 할당·추론 규칙, OS-INHERIT 상속 할당 native 호출은 [native 관리 호출](native-admin-a.md)에 설명합니다.\n\n")
+		out.WriteString("domain·group·project·user·role의 관리자 CRUD, project tag, group membership, role 할당·추론 규칙, OS-INHERIT 상속 할당 native 호출은 [native 관리 호출](native-admin-a.md)에 설명합니다." + "\n\n")
+		out.WriteString("OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출은 [native OAuth1·EC2 token 호출](native-oauth1-ec2.md)에 설명합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.\n\n")
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.\n\n")

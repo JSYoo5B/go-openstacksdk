@@ -15,6 +15,8 @@ Gophercloud v2.15.0의 identity/v2 API를 하나의 인증된 서비스 객체�
 
 `Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.
 
+Keystone v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. extension·role·tenant·token·user native 호출의 요청 본문, 성공 status와 관리자 전용 호출은 [Keystone v2.0 native 호출](native-calls.md)에 설명합니다.
+
 ## Go 사용
 
 ```go

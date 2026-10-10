@@ -27,6 +27,8 @@ region·service·endpoint·policy·limit·registered limit·project endpoint·fe
 
 domain·group·project·user·role의 관리자 CRUD, project tag, group membership, role 할당·추론 규칙, OS-INHERIT 상속 할당 native 호출은 [native 관리 호출](native-admin-a.md)에 설명합니다.
 
+OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출은 [native OAuth1·EC2 token 호출](native-oauth1-ec2.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
