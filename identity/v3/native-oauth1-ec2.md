@@ -60,7 +60,7 @@ access token 조회와 폐기는 기본 정책상 token을 승인한 사용자 �
 
 `Create`는 본문에서 `token`을 지우고, `ValidateS3Token`은 `access`·`signature`·`token`만 남깁니다. 확장 필드는 `credentials` 안에 들어가며 `token`은 `Create`에서 지워지는 필드여도 core 필드라서 확장 키로 쓸 수 없습니다. 결과 token의 ID는 `X-Subject-Token` header에서 읽고, provider token은 `X-Auth-Token`으로 함께 전송되지만 ProviderClient의 token은 바뀌지 않습니다.
 
-native `Create`와 `ValidateS3Token`은 header builder를 호출하지 않습니다. 그래서 `WithCreateHeader`·`WithValidateS3TokenHeader`는 header 형식만 검사하고 실제 요청에서는 빠지며, 이 두 연산은 판정을 보류했습니다.
+native `Create`와 `ValidateS3Token`은 header builder를 호출하지 않습니다. 그래서 두 연산은 header 확장 옵션을 제공하지 않고, 설정에 남은 raw header 확장은 HTTP 전에 거부합니다.
 
 ## Python openstacksdk와의 차이
 
