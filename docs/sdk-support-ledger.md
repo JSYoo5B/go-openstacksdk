@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native address groups RBAC policies](#neutron-native-address-groups-rbac-policies-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native attribute tags API versions extensions](#neutron-native-attribute-tags-api-versions-extensions-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는511입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는521입니다.
+
+## Neutron native attribute tags API versions extensions 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Neutron native attribute tags·API 버전·extension 조회 10개, 전체511→521(+10)·핵심437→447/2,292·Network123→133/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 태그 호출은 resource type과 태그를 escape 없이 경로에 붙이고, 추가는 201, 두 삭제와 `Confirm`은 204만 받습니다. `Confirm`은 404를 오류 없는 false로 바꿉니다. 버전 두 호출은 `ResourceBase`를 쓰지 않고 client endpoint에서 버전 segment와 query를 잘라낸 root를 씁니다. extension 조회는 `updated`를 문자열로 유지합니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#attribute-tagapi-버전extension-조회)에 절을 추가했습니다.
+
+새 집중 계약 테스트6그룹이 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **80개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새10행을 추가해 reviews778·contracts4,008·go_mapping521입니다. 테스트 `f19a18d9`, 가이드/판정 `9db4cc68`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Neutron native address groups RBAC policies 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Neutron native address groups·RBAC policies 12개, 전체499→511(+12)·핵심425→437/2,292·Network111→123/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. address group은 생성 시 `addresses` 필수(빈 slice 허용), 선택 ID 전달, 반복 `addresses` 목록 필터, envelope 없는 주소 추가·제거 본문을 고정했습니다. RBAC policy는 네 생성 필드와 수정 `target_tenant`의 필수 검사, Update의 200·201 허용, `rbac_policy` key를 직접 찾는 decode와 `links.next` 문자열만 따르는 목록을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#address-grouprbac-policy)에 절을 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Neutron native address groups·RBAC policies 12개, 전체499→511(+12)·핵심425→437/2,292·Network111→123/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. address group은 생성 시 `addresses` 필수(빈 slice 허용), 선택 ID 전달, 반복 `addresses` 목록 필터, envelope 없는 주소 추가·제거 본문을 고정했습니다. RBAC policy는 네 생성 필드와 수정 `target_tenant`의 필수 검사, Update의 200·201 허용, `rbac_policy` key를 직접 찾는 decode와 `links.next` 문자열만 따르는 목록을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#address-grouprbac-policy)에 절을 추가했습니다.
 
 새 집중 계약 테스트5그룹(하위 사례40)이 race로 통과했습니다. 두 package의 첫 테스트라 전체 `make check`의 race는 **77개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 바뀌지 않은 package는 같은 소스의 Go test cache 결과를 재사용했습니다. 판정 JSON은 새12행을 추가해 reviews768·contracts3,998·go_mapping511입니다. 테스트 `bd07075c`, 가이드/판정 `18cb9c37`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
