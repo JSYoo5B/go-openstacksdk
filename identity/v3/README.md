@@ -25,6 +25,8 @@ trust와 사용자 본인의 접근 가능 project 목록·암호 변경 native 
 
 region·service·endpoint·policy·limit·registered limit·project endpoint·federation mapping의 기본 정책상 관리자 native 호출은 [native catalog·policy·limit·mapping 관리자 호출](native-admin-b.md)에 설명합니다.
 
+domain·group·project·user·role의 관리자 CRUD, project tag, group membership, role 할당·추론 규칙, OS-INHERIT 상속 할당 native 호출은 [native 관리 호출](native-admin-a.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
