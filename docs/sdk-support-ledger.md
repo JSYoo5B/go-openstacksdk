@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native snapshots](#cinder-v3-native-snapshots-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder v3 native attachments](#cinder-v3-native-attachments-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는595입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는602입니다.
+
+## Cinder v3 native attachments 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native attachments 7개, 전체595→602(+7)·핵심521→528/2,292·Block Storage92→99/480.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. native 호출은 microversion을 고르지 않고 호출자가 정한 client 값을 header로 보냅니다. 생성은 volume·instance UUID를 비어 있어도 보내고, 수정의 nil connector는 null입니다. `Complete`는 `{"os-complete": null}`에 204만, `Delete`는 200만 받습니다. 목록은 `attachments_links`를 읽지 않아 첫 페이지만 반환합니다. `WaitForStatus`는 `attachment` key를 직접 찾는 decode 덕분에 envelope 없는 응답에서도 panic 없이 deadline까지 조회합니다. [Cinder v3 native attachment 호출](../blockstorage/v3/native-attachments.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 갱신했습니다.
+
+새 집중 계약 테스트3그룹(하위 사례25)이 race로 통과했습니다. package의 첫 테스트라 전체 `make check`의 race는 **92개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새7행을 추가해 reviews860·contracts4,090·go_mapping602입니다. 테스트 `fc493906`, 가이드 `7f514dc6`, 판정 `8a4048a5`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder v3 native snapshots 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Cinder v3 native snapshots 6개, 전체589→595(+6)·핵심515→521/2,292·Block Storage86→92/480.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성은 202만 받고 volume ID를 HTTP 전에 요구하며 `force`는 true일 때만 보냅니다. `List`와 `ListDetail`은 같은 옵션을 요약·상세 경로로 보냅니다. 응답은 일반 envelope decode라 `snapshot` key가 없거나 null이면 오류 없이 nil을 돌려주고, 시간대 있는 시각은 decode 오류입니다. [Cinder v3 native snapshot 호출](../blockstorage/v3/native-snapshots.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 갱신했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native snapshots 6개, 전체589→595(+6)·핵심515→521/2,292·Block Storage86→92/480.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. 생성은 202만 받고 volume ID를 HTTP 전에 요구하며 `force`는 true일 때만 보냅니다. `List`와 `ListDetail`은 같은 옵션을 요약·상세 경로로 보냅니다. 응답은 일반 envelope decode라 `snapshot` key가 없거나 null이면 오류 없이 nil을 돌려주고, 시간대 있는 시각은 decode 오류입니다. [Cinder v3 native snapshot 호출](../blockstorage/v3/native-snapshots.md)을 새로 쓰고 생성 README 링크를 sdkgen 소스에서 갱신했습니다.
 
 `WaitForStatus`는 정확한 상태·Get 오류·호출자 deadline의 동작을 테스트로 고정했지만, envelope 없는 응답에서 native 구현이 nil snapshot을 읽다가 panic합니다. SDK가 이 panic을 OperationError로 바꾸지 않으므로 판정은 unresolved이고 문서에서 SDK의 `WaitForState`·`WaitForAvailable`을 안내합니다. generator 수준의 guard는 별도 작업으로 분리했습니다.
 
