@@ -17,6 +17,8 @@ Gophercloud v2.15.0의 identity/v3 API를 하나의 인증된 서비스 객체�
 
 `Users.ListProjectRecords(ctx, userID, options...)`와 `Users.ListGroupRecords(ctx, userID)`는 사용자별 프로젝트·그룹을 SDK 소유 record로 조회합니다. 고정 부모 user ID와 독립 Resource/Wire 응답을 사용하고, 프로젝트는 concrete 옵션으로 고정 Python UserProject의 query 별칭·네 Body 필터를 조립합니다. 공개 query 인자가 없는 UserGroup에는 목록 옵션을 추가하지 않습니다. [사용자별 프로젝트·그룹의 Python/Go 비교](users/memberships.md)는 소유권·목록 제어·고정 경로 정책을 설명합니다. 기존 native `Users.ListProjects`의 Project alias·인자·pager와 `Users.ListGroups`의 Group alias는 유지합니다.
 
+generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다.
+
 ## Go 사용
 
 ```go

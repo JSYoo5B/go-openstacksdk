@@ -162,6 +162,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Introspection.Resources`는 node와 같은 UUID로 조회하고 목록을 순회합니다. 이름·Status·Delete는 가정하지 않습니다. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)`는 `Finished`를 기다리고 실제 `Error`를 `IntrospectionFailureError`에 보존합니다. `StartIntrospection`은 SDK 소유 helper로 pinned native 함수의 query 누락을 보정해 `ManageBoot`의 nil/false/true와 확장 query를 전달합니다. [시작·조회·완료 대기 사용법](introspection/README.md)을 참고합니다.\n\n")
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get`은 SDK의 `Authentication`을 반환합니다. `Token`, `User`, `Catalog`를 한 번에 해석하고 `Header`와 추가 응답 필드를 포함한 JSON `Body`도 보존합니다. [인증 응답 사용법](tokens/README.md)을 참고합니다.\n\n")
+	case "identity/v3":
+		out.WriteString("generated `Tokens`의 생성·조회·검증·폐기와 `Catalog.List`의 경로·header·status, 확장 필드 위치는 [native token·catalog 호출](native-tokens.md)에 설명합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`conn.ProjectQuotas(ctx, project)`와 `CurrentProjectQuotas(ctx)`는 Nova quota를 고정된 프로젝트 singleton으로 제공합니다. `scope.InUser(ctx, user)`는 project+user quota를 고정합니다. nil/zero/-1 limit과 명시적 force, 별도 Defaults와 사용자 query·redirect·retry 계약은 [프로젝트 quota 사용법](quotasets/README.md)에 설명합니다.\n\n")
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.ProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. reserved 0/1, legacy rate와 raw HTTP 응답의 의미는 [limits 사용법](limits/README.md)을 참고합니다.\n\n")
