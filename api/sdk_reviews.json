@@ -57263,6 +57263,218 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes and bodies are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/backups.Export",
+      "source_fingerprint": "c16d7532137dc88cbfbdb007d30eba899a5d91ed1e58ea73f7193699c29a2ade",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Export"
+      ],
+      "contracts": [
+        {
+          "behavior": "Export GETs backups/{id}/export_record, decodes the backup-record key with backup_url base64-decoded into bytes (empty record when the key is absent, wrapped error for invalid base64) and accepts only 200.",
+          "tests": [
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/backups.Import",
+      "source_fingerprint": "e43a45d076c5ea8a76a90b22df4d603c77a7b621514afaccb919d9a59b979d22",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Import",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithImportOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithImportField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Import POSTs {\"backup-record\":{...}} to backups/import_record re-encoding backup_url bytes as base64 with extensions inside the record, rejects a core-key collision before HTTP, decodes the backup ID and name and accepts only 201.",
+          "tests": [
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/backups.ResetStatus",
+      "source_fingerprint": "343b19f93d1141dc8ec7332d970caebd7eaf321c6b8fafb023c705104e2342bc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ResetStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithResetStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithResetStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus POSTs {\"os-reset_status\":{\"status\":...}} to backups/{id}/action, rejects a nil option before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v3/backups.ForceDelete",
+      "source_fingerprint": "d7cf80c9f0b2441d15f357d3e1333949535caa6b564d4cd6b1de0a455918ac7f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"os-force_delete\":{}} to backups/{id}/action and accepts only 202.",
+          "tests": [
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v3/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Export",
+      "source_fingerprint": "e6468b142b28fffd0ae7e7b3cf8d72739e6424b87e59378d437c7b3a3be643eb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Export"
+      ],
+      "contracts": [
+        {
+          "behavior": "Export GETs backups/{id}/export_record, decodes the backup-record key with backup_url base64-decoded into bytes (empty record when the key is absent, wrapped error for invalid base64) and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md",
+        "blockstorage/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Import",
+      "source_fingerprint": "481b9190913bf4f2e2976dc704a11599c75cb1a33592ac3be2445034af13f34e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Import",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithImportField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Import POSTs {\"backup-record\":{...}} to backups/import_record re-encoding backup_url bytes as base64 with extensions inside the record, rejects a core-key collision before HTTP, decodes the backup ID and name and accepts only 201.",
+          "tests": [
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md",
+        "blockstorage/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.ResetStatus",
+      "source_fingerprint": "e138dc18689a8985e3ae0e3fa27578915bc47fb077a06c8e262caf590b39f5c5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ResetStatus",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithResetStatusField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus POSTs {\"os-reset_status\":{\"status\":...}} to backups/{id}/action, rejects a nil option before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md",
+        "blockstorage/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.ForceDelete",
+      "source_fingerprint": "4cc10209b9e43a8b08434578443adadce8a52d1539d033382f146cd8329c36c1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ForceDelete"
+      ],
+      "contracts": [
+        {
+          "behavior": "ForceDelete POSTs {\"os-force_delete\":{}} to backups/{id}/action and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminCalls",
+            "blockstorage/v2/backups/native_admin_contracts_test.go:TestNativeBackupAdminStatusesAndDecode"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/native-backups.md",
+        "blockstorage/v2/native-calls.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, base64 record handling and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
