@@ -47851,6 +47851,162 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Metadata",
+      "source_fingerprint": "ace43d4cb32c5816efc5aad9da9ec97bedc2c93da30f4df47550b50dd44cf9f8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Metadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "Metadata GETs servers/{id}/metadata, returns the decoded metadata map and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.Metadatum",
+      "source_fingerprint": "137dea6d48ec68bde2e77aa196b95aff8a8606959740f9b1057afbabfebca73e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Metadatum"
+      ],
+      "contracts": [
+        {
+          "behavior": "Metadatum GETs servers/{id}/metadata/{raw key}, returns the decoded meta map and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.ResetMetadata",
+      "source_fingerprint": "33a0ca7e42fbfc441e8447da5c9c850e82061072bc5700955b7fc0120299f894",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ResetMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResetMetadataOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithResetMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetMetadata PUTs {\"metadata\": opts} replacing every item, returns the server metadata map, rejects a metadata key collision and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.UpdateMetadata",
+      "source_fingerprint": "2b9e45b1b1b0be3b1a8f7fd4fb17c978c49cda74abd46e6a65c5262fc6700e43",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.UpdateMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateMetadataOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithUpdateMetadataField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMetadata POSTs {\"metadata\": opts} merging items, adds extension fields beside metadata because the typed map is not a generic envelope, rejects nil options and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.CreateMetadatum",
+      "source_fingerprint": "9c9179543c837368066ad14ed33eedccab3c84742f024784663585d9268b3a1d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.CreateMetadatum",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateMetadatumOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCreateMetadatumField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMetadatum requires exactly one pair before HTTP, PUTs {\"meta\": opts} to servers/{id}/metadata/{key}, returns the server meta map and accepts only 200.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:compute/v2/servers.DeleteMetadatum",
+      "source_fingerprint": "148e036701d3b0204beb3e69cb533219db1a4a08c3102c3e5b4265b1be05c388",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.DeleteMetadatum"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteMetadatum sends DELETE servers/{id}/metadata/{raw key} and accepts the native default 202 and 204.",
+          "tests": [
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataRoutesBodiesAndDecode",
+            "compute/v2/servers/native_metadata_contracts_test.go:TestNativeServerMetadataStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/servers/native.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }

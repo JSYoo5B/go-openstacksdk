@@ -18,3 +18,17 @@
 `Create`는 `CreateOpts`를 `{"server": {...}}`로 감쌉니다. `Name`은 필수이며, `UserData`는 base64가 아니면 인코딩하고, `SecurityGroups`는 `{"name": ...}` 목록으로, `Networks`는 `[]servers.Network` 또는 `"auto"`/`"none"` 문자열로 보냅니다. 다른 문자열은 HTTP 전에 오류입니다. `WithCreateField`의 확장 필드는 단일 `server` envelope 안에 들어가고 기존 key와 겹치면 HTTP 전에 거부됩니다. `WithCreateHintOpts`의 scheduler hints는 최상위 `os:scheduler_hints`로 보내며, UUID가 아닌 `Group` 같은 잘못된 hint는 HTTP 전에 오류입니다.
 
 `Update`는 이름·access IP·`Hostname`을 `{"server": {...}}`로 보내고 비어 있는 값은 생략합니다. 생성·수정 응답은 서버가 돌려준 `Server`이며 SDK가 요청 값을 합성하지 않습니다. Python의 mutable Server Resource와 대기·주소 helper는 [서버 생성 사용법](../../create-with-floating-ip.md)과 [서버 대기](../../../docs/service-waits.md)를 참고합니다.
+
+## metadata
+
+| 메서드 | 요청 | 성공 status | 반환 |
+|---|---|---|---|
+| `Metadata(ctx, id)` | `GET servers/{id}/metadata` | 200 | `metadata` map |
+| `ResetMetadata(ctx, id, opts, options...)` | `PUT servers/{id}/metadata`, 전체 교체 | 200 | 응답의 `metadata` map |
+| `UpdateMetadata(ctx, id, opts, options...)` | `POST servers/{id}/metadata`, 병합 | 200 | 응답의 `metadata` map |
+| `Metadatum(ctx, id, key)` | `GET servers/{id}/metadata/{key}` | 200 | `meta` map |
+| `CreateMetadatum(ctx, id, opts, options...)` | `PUT servers/{id}/metadata/{key}` | 200 | 응답의 `meta` map |
+| `DeleteMetadatum(ctx, id, key)` | `DELETE servers/{id}/metadata/{key}` | 202, 204 | error |
+
+Reset·Update는 `{"metadata": {...}}`, CreateMetadatum은 `{"meta": {...}}`를 보냅니다. `MetadatumOpts`는 정확히 한 쌍이어야 하며 그 key가 경로가 됩니다. 비어 있거나 두 쌍 이상이면 HTTP 전에 오류입니다. typed metadata map은 일반 object envelope가 아니므로 `With...Field` 확장 필드는 `metadata`/`meta` 옆 최상위에 붙고, 이미 있는 key와 겹치면 HTTP 전에 거부됩니다. 반환 map은 서버 응답이며 요청 값을 합성하지 않습니다. key는 escape 없이 경로에 이어 붙입니다.
+
