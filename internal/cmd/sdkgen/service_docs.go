@@ -186,6 +186,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "network/v2":
 		out.WriteString("`Networks`, `Subnets`, `Ports`의 native Create/Get/List/Delete 경로·본문·고정 status와 subnet gateway null, port value_specs 병합, `*_links` 순회는 [native 생성·조회·목록·삭제](native-crud.md)에 설명합니다.\n\n")
 		out.WriteString("Neutron agent·segment·IP 사용량 관리자 호출과 router L3 agent 목록의 경로·status·페이지 규칙은 [Neutron native 관리자 호출](native-admin.md)에 설명합니다.\n\n")
+		out.WriteString("BGP peer·speaker와 BGP VPN·association의 native 요청·status·paging 규칙은 [Neutron native BGP·BGP VPN 호출](native-bgp.md)에 정리했습니다.\n\n")
 		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
 	case "loadbalancer/v2":
 		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
