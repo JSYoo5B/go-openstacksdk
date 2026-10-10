@@ -114,6 +114,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`KeyPairs.CreateKeypair`는 nullable 속성·ID/name 별칭·입력/응답 병합과 ssh view 기본값을 처리합니다. `Servers.ConsoleURL`은6개 legacy action과 실제 console raw 값을 제공합니다. [Keypair·console의 Python/Go 비교](../keypairs-console.md)에 독립 main·alias/default·응답 정책을 설명합니다.\n\n")
 	}
 	if key == "image/v2" {
+		out.WriteString("native [task 호출](native-tasks.md)은 Glance task 생성·조회·목록의 본문·query 누락·next 경로 규칙을 설명합니다.\n\n")
 		out.WriteString("Glance 이미지 자동 조회는 정상 목록 전체에서 찾지 못했을 때 원래 caller query에 `os_hidden=true`를 적용해 숨김 이미지를 한 번 더 검색합니다. 두 번째 목록에는 자동 이름 hint를 넣지 않으며 추가 GET도 하지 않습니다. 첫 검색의 오류·중복·취소는 즉시 반환하고, 두 목록 모두 정상적으로 비었을 때 최종 미존재 옵션을 적용합니다. Python `find_image(name_or_id, ignore_missing=True)`에 대응하며 raw wire query는 Go의 확장 옵션입니다.\n\n")
 	}
 	if key == "network/v2" {
@@ -185,7 +186,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		}
 		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.\n\n")
 		out.WriteString("`Limits.Fetch(ctx)`는 현재 프로젝트의 읽기 전용 limits 응답을 보존하고 `conn.BlockStorageProjectLimits(ctx, project)`는 프로젝트 query를 고정합니다. 프로젝트 필터는 실제 요청 버전 3.39 이상이 필요하며 [limits 사용법](limits/README.md)에 버전·typed/raw 응답을 설명합니다.\n\n")
-		out.WriteString("native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md), [transfer·availability zone·버전 호출](native-transfers.md), [volume type 조회](native-volume-types.md), [QoS spec 호출](native-qos.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.\n\n")
+		out.WriteString("native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md), [attachment 호출](native-attachments.md), [backup 호출](native-backups.md), [transfer·availability zone·버전 호출](native-transfers.md), [volume type 조회](native-volume-types.md), [QoS spec 호출](native-qos.md), [관리자 호출](native-admin.md)은 generated 생성·조회·목록·수정·삭제·action과 상태 대기의 경로·본문·고정 status, scheduler hint 위치와 시각 decode 형식을 설명합니다.\n\n")
 	case "network/v2":
 		out.WriteString("`Networks`, `Subnets`, `Ports`의 native Create/Get/List/Delete 경로·본문·고정 status와 subnet gateway null, port value_specs 병합, `*_links` 순회는 [native 생성·조회·목록·삭제](native-crud.md)에 설명합니다.\n\n")
 		out.WriteString("Neutron agent·segment·IP 사용량 관리자 호출과 router L3 agent 목록의 경로·status·페이지 규칙은 [Neutron native 관리자 호출](native-admin.md)에 설명합니다.\n\n")
