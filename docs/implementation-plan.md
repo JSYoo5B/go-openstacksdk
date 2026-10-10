@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Cinder v2 legacy native volume 사용자 호출 19개 검증·판정 완료.** 전체639/3,362·핵심565/2,292·Block Storage136/480입니다. 다음은 v2 snapshots·backups·transfers·AZ·limits 사용자 호출입니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Cinder v2 volume 19개 검증·판정 완료, v2 snapshots·backups·transfers·AZ 18개 테스트·가이드·판정 완료(16개 go_mapping, snapshot `WaitForStatus`·backup `Update` 2개 unresolved), 전체 gate 진행 중(판정 반영 집계655).** 판정 전 기준은 전체639/3,362·핵심565/2,292·Block Storage136/480입니다. v2 snapshot 목록이 한 페이지만 읽는 점을 고정했고, v2 backup 수정은 Cinder v2에 경로가 없고 SDK 보정도 v3에만 있어 미완료로 두었습니다. 다음은 gate·대장이고, 그 뒤 v2 limits·quota 조회와 Placement 사용자 호출을 검토합니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native volume 사용자 호출 19개, 전체620→639(+19)·핵심546→565/2,292·Block Storage117→136/480.** v3 계약 테스트를 v2 경로로 옮겨 생성·조회·목록·수정·삭제·대기와 사용자 action 13개를 고정했습니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)과 [검증 기록](sdk-support-ledger.md#cinder-v2-native-volume-user-calls-완료)에 설명합니다. 6그룹과 하위 사례84, 전체 `make check`(race 97개 실제 test package)가 통과했고 `9b322c9f`·`9f69b50c`·`e36f2692`를 push했습니다.
 
@@ -444,11 +444,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 639 (19.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 655 (19.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,722 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 897 | 아직 개별 기록 없는 선언 2,465 |
-| 기록한 부분·전체 계약 | 4,127 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,706 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 915 | 아직 개별 기록 없는 선언 2,447 |
+| 기록한 부분·전체 계약 | 4,145 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -491,6 +491,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Cinder v2 native snapshots·backups·transfers·AZ 18개 | pinned Gophercloud v2.15.0 v2/v3 차이와 backup Update 보정 범위 검토 완료 | 기존 generated facade 유지 | 새·이식 9그룹·하위 사례54 PASS, 전체 gate 대기 | blockstorage/v2/native-calls.md 절 추가 | 신규16행 go_mapping·2행 unresolved 기록, gate 대기 | `02f29e82`·가이드·판정 push; 다음 gate·대장 |
 | Cinder v2 native volumes 사용자 호출 19개 | pinned Gophercloud v2.15.0 v2 volumes와 v3 차이 검토 완료 | 기존 generated facade 유지 | v3 테스트 이식 6그룹·하위 사례84·전체 `make check` PASS | blockstorage/v2/native-calls.md·생성 README 링크 | **19행 go_mapping·639/3,362** | 작은 commit3개 push 완료; 다음 v2 snapshots·backups 등 |
 | Cinder v3 native volume type 조회 4개 | pinned Gophercloud v2.15.0 volumetypes read requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례15·전체 `make check` PASS | blockstorage/v3/native-volume-types.md·생성 README 링크 | **4행 go_mapping·620/3,362** | 작은 commit3개 push 완료; 다음 Cinder v2 legacy |
 | Cinder v3 native transfers·AZ·API versions 7개 | pinned Gophercloud v2.15.0 transfers·availabilityzones·apiversions와 SinglePageBase.IsEmpty 검토 완료 | **sdkgen AZ 단일 페이지 추출 수정**(Cinder v2/v3·Manila) | 새6그룹·하위 사례18·생성기 3사례·전체 `make check` PASS | blockstorage/v3/native-transfers.md·생성 README 링크 | **7행 go_mapping·616/3,362** | 작은 commit5개 push 완료; 다음 Cinder v2·volume type 조회 |
@@ -599,12 +600,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 565 / 2,292 | 24.7% | 158 | 1,568 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 581 / 2,292 | 25.3% | 160 | 1,550 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 639 / 3,362 | 19.0% | 257 | 2,465 | 1 |
+| 전체 | 655 / 3,362 | 19.5% | 259 | 2,447 | 1 |
 
 **핵심 서비스**
 
@@ -615,7 +616,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 182 / 758 | 43 | 533 | 0 |
 | Image / Glance | 82 / 120 | 24 | 14 | 0 |
-| Block Storage / Cinder | 136 / 480 | 29 | 315 | 0 |
+| Block Storage / Cinder | 152 / 480 | 31 | 297 | 0 |
 | Key Manager / Barbican | 52 / 67 | 10 | 5 | 0 |
 | Object Storage / Swift | 2 / 74 | 27 | 44 | 1 |
 

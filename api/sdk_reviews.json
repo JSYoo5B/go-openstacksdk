@@ -55089,6 +55089,495 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.Create",
+      "source_fingerprint": "88f3bab6026bedc1be1e6b8f6020fd44cb9be56d6b99923eeffcfc2de74cf5a7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"snapshot\":{...}} to snapshots sending force only when true, requires volume_id and rejects a core-key extension collision before HTTP and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode",
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.Get",
+      "source_fingerprint": "ad02123ded1fd00026ccf53fd48404b56c214999d1b48bb699c8469dc4d6082f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs snapshots/{raw id}, returns nil without error for a missing or null snapshot envelope, wraps non-object and zoned (trailing Z) timestamp decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode",
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.List",
+      "source_fingerprint": "f4c41ea1d4087a1d15714cc2056576c12dde0ef221fd62dd014bbf515860cc68",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs the summary snapshots route with ListOpts (all_tenants included) and extension query values as a single page that never follows snapshots_links, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode",
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.Delete",
+      "source_fingerprint": "336336ce39dedf227d62589f71db02a09f2843ae32f465f5f955c1978bc4b118",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs snapshots/{raw id} and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotRoutesBodiesSinglePageAndDecode",
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/snapshots.WaitForStatus",
+      "source_fingerprint": "a2714fef92c5b66bd7493aa5510f9166c57ecc1a0cfea2c02f4fbd87fbcc9080",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.WaitForStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope panics on the nil snapshot.",
+          "tests": [
+            "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotWaitForStatus"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-snapshots.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+      ],
+      "remaining": [
+        "The native WaitForStatus dereferences a nil snapshot when Get returns no snapshot envelope; the generated facade does not guard this panic or turn it into an OperationError. Use WaitForState/WaitForAvailable until a guard exists."
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Create",
+      "source_fingerprint": "277492e5a94d9b94de177906809861afe85bc1b4fedfc827f49ba1f354b375d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"backup\":{...}} to backups sending incremental/force only when true, requires volume_id and rejects a core-key extension collision before HTTP, decodes project, pointer metadata/availability zone and data timestamp, and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Get",
+      "source_fingerprint": "e0b256b9703341683d1e8c269c1ac3317528d7d67dbd0088db1fb7b0c4f55f43",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs backups/{raw id}, decodes the backup key returning a zero backup (nil metadata) for {} or null, wraps missing-key and zoned timestamp decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.List",
+      "source_fingerprint": "4ac5b84fdd3d542d1c7d7f980a64cd51c1feff85a1167463a090b3d7cdb261a7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs the summary backups route with ListOpts (all_tenants included) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.ListDetail",
+      "source_fingerprint": "fd5dae2817d0e2c36b50cc2f8e402c3c09d62a1d13507f93682dd492c1ed4fa6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.ListDetail",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithListDetailQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListDetail GETs backups/detail with the separate ListDetailOpts (with_count, sort, all_tenants) and extension query values, follows backups_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.RestoreFromBackup",
+      "source_fingerprint": "221ae39386a54db71e16002b28133c597e0af2030e25d3012ecc6395ec1007ef",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.RestoreFromBackup",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithRestoreFromBackupField"
+      ],
+      "contracts": [
+        {
+          "behavior": "RestoreFromBackup POSTs {\"restore\":{...}} (empty object for empty options) to backups/{id}/restore with extensions inside it, rejects a nil option before HTTP, decodes the restore key and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Delete",
+      "source_fingerprint": "4c16856c3bb853755f066418cd89cb11874456298b2dc57b07b4686da47e4025",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs backups/{raw id} and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/backups/native_crud_contracts_test.go:TestNativeBackupStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-backups.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/backups.Update",
+      "source_fingerprint": "f6ac36c19b7b6f67a40935a7f1bac1acc9dd1bd01f813670f86e4ac18a352e1c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "The v2 facade forwards the native flat name/description/metadata body to PUT backups/{id} without the SDK backup-envelope repair applied to v3; the generator test pins that only the v3 package receives the repair.",
+          "tests": [
+            "internal/cmd/sdkgen/backup_update_body_test.go:TestBackupUpdateBodyRepairHasExactPackageAndBuilderScope"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md"
+      ],
+      "differences": [
+        "Cinder added backup update in the v3 API at microversion 3.9, so the v2 route is not usable and the native body lacks the backup envelope."
+      ],
+      "remaining": [
+        "Decide whether to expose v2 backup Update at all; the native flat body is not accepted by Cinder and no v2 route exists."
+      ]
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/transfers.Create",
+      "source_fingerprint": "31bf4c06044244d0c985d696bdb8bec841c49e45ae77d1217ca5c22ea65a5c69",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"transfer\":{...}} to os-volume-transfer, requires volume_id and rejects a core-key extension collision before HTTP, decodes the transfer key including the auth_key secret and links, and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/transfers.Accept",
+      "source_fingerprint": "733956103c4162b0f381bb1aeef7e869ef32e9f7536c62cde8002b99ec26dbab",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Accept",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithAcceptField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Accept POSTs {\"accept\":{\"auth_key\":...}} to os-volume-transfer/{id}/accept with extensions inside the accept object, requires auth_key and rejects a nil option before HTTP, decodes the transfer key and accepts only 202.",
+          "tests": [
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/transfers.Get",
+      "source_fingerprint": "7472b9c66980dbd4dd9068f9b101314ba98fe6aec3ff34431676c68059b56bfb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs os-volume-transfer/{raw id}, decodes the transfer key returning a zero value for {} or null, wraps missing-key and zoned timestamp decode errors and accepts only 200.",
+          "tests": [
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/transfers.List",
+      "source_fingerprint": "3b55c7f2a3b27ecc6aab88e64572388dfef435846479dc30640c5c05df3fdca0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-volume-transfer/detail with ListOpts (all_tenants included) and extension query values, follows transfers_links next hrefs as received, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/transfers.Delete",
+      "source_fingerprint": "437c67f7badf8e2050508d5d59ef70923616954bea6a61c167e79e6508735bb1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs os-volume-transfer/{raw id} and accepts only 202/204.",
+          "tests": [
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferRoutesBodiesPagingAndDecode",
+            "blockstorage/v2/transfers/native_contracts_test.go:TestNativeTransferStrictStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:blockstorage/v2/availabilityzones.List",
+      "source_fingerprint": "a634fbe4f2bb8eb73a4e1bb20025e5c0a23d87125a4cbb5dd031336b0d04a71c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/availabilityzones.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs os-availability-zone once and extracts the availabilityZoneInfo array without the inherited array-only IsEmpty check or link following, yields nothing for an empty or missing list, reports extraction errors for a non-array list or bare array body, and native status errors.",
+          "tests": [
+            "blockstorage/v2/availabilityzones/native_contracts_test.go:TestNativeVolumeAvailabilityZonesSinglePageObjectEnvelope",
+            "blockstorage/v2/availabilityzones/native_contracts_test.go:TestNativeVolumeAvailabilityZonesStatusesAndDecode",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestPinnedForeignPagesAndLocalWrapperGenerateCompatibleIterators"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/native-calls.md",
+        "blockstorage/v3/native-transfers.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native blockstorage/v2/availabilityzones call only; Python availability zone Resource parity is tracked separately.",
+        "The page embeds SinglePageBase without overriding its array-only IsEmpty, so the generated facade reads it like native AllPages (resource.SinglePageStream) instead of page-by-page iteration, which would reject every object response. URL construction, OkCodes and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
