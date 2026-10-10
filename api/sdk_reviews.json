@@ -56164,6 +56164,418 @@
         "The SDK adds only request.Wrap operation context (not on list streams or Validate) and the documented extension merge; native URL construction, OkCodes, header handling and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.Create",
+      "source_fingerprint": "bcd573e6014aec3a3f8578b3fcf4687f07c49e910f2454bf930acc3cfcb4513d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"application_credential\":{...}} to users/{user}/application_credentials always sending unrestricted (false included), formatting expires_at without a zone in the time's own location, keeping roles/access rules and extensions inside the envelope, rejects a missing name and core-key collision before HTTP, decodes the one-time secret and accepts only 201.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.Get",
+      "source_fingerprint": "b827ed906da2f2fbc264def0620307e77202e1fd34ea1a86814cd8f6efdff0e1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs users/{user}/application_credentials/{id}, returns nil without error for a missing envelope, wraps a zoned expires_at decode error and accepts only 200.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.List",
+      "source_fingerprint": "b015fff522cc7454da0b9af5c08d70f77e4de9d91af8e3d428c9829086cef624",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs users/{user}/application_credentials with the name filter and extension query values, follows the Keystone links.next string until null, reports native page status errors without operation context and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.Delete",
+      "source_fingerprint": "7659b8dc6cf8e72429f765f663ae6251014c30f6c54aa1fa92ee6d5f51241ba5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs users/{user}/application_credentials/{id} and accepts only 202/204.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.ListAccessRules",
+      "source_fingerprint": "3f0a4776eb5378e1488723cbb01532310dc7e5fdb9720ec6fb3379c39f8dfe0f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.ListAccessRules"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAccessRules GETs users/{user}/access_rules and follows the Keystone links.next string until null.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.GetAccessRule",
+      "source_fingerprint": "c139cb955004fe0bb0292e2c37ded8dd45d00468e69f6303ac0dc749e43f0915",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.GetAccessRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetAccessRule GETs users/{user}/access_rules/{id}, decodes the access_rule envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/applicationcredentials.DeleteAccessRule",
+      "source_fingerprint": "825367068a61f26d3299785accfba151324b44e260ce01ff3311f81820bb9510",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.DeleteAccessRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteAccessRule DELETEs users/{user}/access_rules/{id} and accepts only 202/204.",
+          "tests": [
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/applicationcredentials/native_contracts_test.go:TestNativeApplicationCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/credentials.Create",
+      "source_fingerprint": "0101d622c736a00bbb6d8a359c336df37755a85ca8003bc740243fe6f50a7ece",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"credential\":{...}} to credentials with the JSON blob string, requires blob, type and user_id and rejects a core-key collision before HTTP, and accepts only 201.",
+          "tests": [
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/credentials.Get",
+      "source_fingerprint": "7f3d6cf22a0cb9003cbddf87d818e2fa38eb834acdf9dec8c8334ec27848c2b4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs credentials/{id}, returns nil without error for a missing envelope and accepts only 200.",
+          "tests": [
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/credentials.List",
+      "source_fingerprint": "637c553969c4abeb5129bff46998940e18018700783074622339ae6d050cc2ba",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs credentials with user_id/type filters and extension query values, follows the Keystone links.next string until null, and rejects a nil option before HTTP.",
+          "tests": [
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/credentials.Update",
+      "source_fingerprint": "57723360e0857b8257f0fdd272e7ab5ee692e5bd718e1768199d74c898ed4b19",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PATCHes {\"credential\":{...}} to credentials/{id} omitting empty fields with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/credentials.Delete",
+      "source_fingerprint": "a82fc2d96b8a1adcae374d0b686bba47afb4c0b126372d36d1a6f0415e401f01",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs credentials/{id} and accepts only 202/204.",
+          "tests": [
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/credentials/native_contracts_test.go:TestNativeCredentialStatusesDecodeAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2credentials.Create",
+      "source_fingerprint": "beb39a4274b0f57c60d2b8fd737ca2a9967f59c52e0314b7024aa8f02fde7abc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs an envelope-free {\"tenant_id\":...} body with top-level extensions to users/{user}/credentials/OS-EC2, requires tenant_id and rejects a tenant_id extension before HTTP, decodes the credential access/secret and accepts only 201.",
+          "tests": [
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2credentials.Get",
+      "source_fingerprint": "fe59e451777917461082d5ba34c656850eefd95c36d98c041950db9a7367c2b0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs users/{user}/credentials/OS-EC2/{access}, decodes the credential envelope with a null trust_id as empty and accepts only 200.",
+          "tests": [
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2credentials.List",
+      "source_fingerprint": "6910440b847a2415902ed207545d82d4b6befea09a0a749d18ac042c522bd878",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs users/{user}/credentials/OS-EC2 and follows the Keystone links.next string until null.",
+          "tests": [
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/ec2credentials.Delete",
+      "source_fingerprint": "5d05cb059a4c7bff69c1e4723908ec6c30691c9c4896f56834e0049e33a2571f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2credentials.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs users/{user}/credentials/OS-EC2/{access} and accepts only 202/204.",
+          "tests": [
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialRoutesBodiesPagingAndDecode",
+            "identity/v3/ec2credentials/native_contracts_test.go:TestNativeEC2CredentialStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-credentials.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
