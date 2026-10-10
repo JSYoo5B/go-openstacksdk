@@ -150,3 +150,19 @@ policy의 `FirewallRules`는 생성 때 비어 있으면 생략하고, 수정 �
 `InsertRule`은 `ID`가 필수이고 `InsertBefore`와 `InsertAfter` 중 정확히 하나를 요구하며, 어긋나면 HTTP 전에 오류입니다. 본문에 envelope가 없어서 확장 필드는 최상위에 붙습니다. `RemoveRule`은 옵션이 없고 빈 rule ID도 그대로 보냅니다. 두 호출의 응답은 envelope 없는 policy 객체입니다.
 
 rule의 `Protocol`과 `Action`은 필수입니다. `Protocol`이 `ProtocolAny`(`"any"`)이면 `"protocol": null`로 바꿔 보내 모든 protocol을 뜻합니다. 수정 opts는 모든 필드가 pointer라 빈 문자열이나 false도 보낼 수 있습니다. 응답의 `firewall_policy_id`는 `[]string`으로만 decode하므로 서버가 문자열 하나를 주면 decode 오류입니다. null `protocol`은 빈 문자열입니다.
+
+## VPNaaS
+
+`service.VPNEndpointGroups`, `service.VPNIKEPolicies`, `service.VPNIPsecPolicies`, `service.VPNServices`, `service.VPNSiteConnections`(`extensions/vpnaas/...`)는 모두 `Create/Get/List/Update/Delete`를 제공합니다. 경로와 envelope는 아래와 같고, 다섯 resource 모두 Create는 201·202, Get·Update는 200, Delete는 202·204를 받으며 목록은 각 `*_links`의 next href를 따라갑니다.
+
+| resource | 경로 | envelope | 입력에서 주의할 점 |
+|---|---|---|---|
+| endpoint group | `vpn/endpoint-groups` | `endpoint_group` | 생성 `Endpoints`는 omitempty가 없어 nil이면 `null` |
+| IKE policy | `vpn/ikepolicies` | `ikepolicy` | 생성은 `phase1_negotiation_mode`, 수정과 목록 필터는 `phase_1_negotiation_mode` key |
+| IPsec policy | `vpn/ipsecpolicies` | `ipsecpolicy` | 생성 필드는 모두 선택이며 비면 생략 |
+| VPN service | `vpn/vpnservices` | `vpnservice` | 생성 `RouterID` 필수, `AdminStateUp`이 nil이면 `"admin_state_up": null` |
+| site connection | `vpn/ipsec-site-connections` | `ipsec_site_connection` | 생성의 policy·service·peer ID, peer 주소, PSK는 omitempty가 없어 비어도 `""`로 보냄 |
+
+IKE·IPsec policy의 `Lifetime`은 pointer 객체라 nil이면 생략하고, 빈 객체를 가리키면 `"lifetime": {}`를 보냅니다. IKE policy는 생성과 수정의 negotiation mode key 철자가 다릅니다. 이 차이는 Gophercloud 고정 소스 그대로이며, 수정에서 이 필드를 쓰려면 대상 배포가 `phase_1_negotiation_mode` key를 받는지 먼저 확인해야 합니다.
+
+site connection 목록의 `PSK` 필터는 `psk=` query로 보내므로 사전 공유 키가 URL과 서버·proxy 로그에 남을 수 있습니다. 응답의 `psk`도 그대로 decode합니다. 수정 opts는 `Name`·`Description`·`AdminStateUp`만 pointer이고 나머지 빈 값은 생략합니다. 서비스·IKE·IPsec·endpoint group의 수정 opts도 이름과 설명만 pointer라 빈 문자열을 명시할 수 있습니다.

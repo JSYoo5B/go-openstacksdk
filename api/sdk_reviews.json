@@ -52417,6 +52417,661 @@
         "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/endpointgroups.Create",
+      "source_fingerprint": "18d0ab221f9188f18d23e4fe4fb5b183c86af933900fb9cb97325c0ace435f43",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"endpoint_group\":{...}} to vpn/endpoint-groups with extensions inside the envelope, sending nil endpoints as null, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/endpointgroups.Get",
+      "source_fingerprint": "dd29571451f1832a833f6ed353f0b15ac289d02bc7c44517c01af868e6442562",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs vpn/endpoint-groups/{raw id}, decodes the endpoint_group envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/endpointgroups.List",
+      "source_fingerprint": "b4f69e08fa46677e31f04a3e21882452c51fdd425cbd4d80ad7b3ee5c70a872c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs vpn/endpoint-groups with ListOpts and extension query values, follows endpoint_groups_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/endpointgroups.Update",
+      "source_fingerprint": "4d14662a2bca0c9c693f169935858a58b564b406eacb75e4042b9d91c35d05ab",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"endpoint_group\":{...}} to vpn/endpoint-groups/{id} sending explicit empty pointer name/description with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/endpointgroups.Delete",
+      "source_fingerprint": "bcf044dbdc5a3d0a2cbfadc03a4464599f23e454599d4b7ca965d48206fd60cc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs vpn/endpoint-groups/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/endpointgroups/native_contracts_test.go:TestNativeVPNEndpointGroupStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ikepolicies.Create",
+      "source_fingerprint": "ede9af7f11ad6e5d8585ea8412e334970c93e01c9055ea283f545208ea351869",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"ikepolicy\":{...}} to vpn/ikepolicies with extensions inside the envelope, sending the phase1_negotiation_mode key and a nested lifetime object (empty when pointed but unset), rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ikepolicies.Get",
+      "source_fingerprint": "8576ecaa31157ed004203654163d8b35f6de3ccadd6adcd4405c7ec0ea8a7aac",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs vpn/ikepolicies/{raw id}, decodes the ikepolicy envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ikepolicies.List",
+      "source_fingerprint": "47f8590b7dcb827757ee3d7ebaf00ae14656d2e65432fcbb3f998f32addd62fb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs vpn/ikepolicies with ListOpts (phase_1_negotiation_mode filter key) and extension query values, follows ikepolicies_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ikepolicies.Update",
+      "source_fingerprint": "aaf6582b0a061603df18b42318b2733a50f49ac0fbd3dd69325569bb7bf6bb1b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"ikepolicy\":{...}} to vpn/ikepolicies/{id} sending the differently spelled phase_1_negotiation_mode key and explicit empty pointer name with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ikepolicies.Delete",
+      "source_fingerprint": "78251be0bdb5b7979a2df72b1621116d32520a40e2f6b5c093ed3a0e4b7f850c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs vpn/ikepolicies/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ikepolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ipsecpolicies.Create",
+      "source_fingerprint": "a9a1fe731a7d8db180aa92a6a1f170ecac1ee10a9e06e59496ae379cd8a18c99",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"ipsecpolicy\":{...}} to vpn/ipsecpolicies with extensions inside the envelope, omitting every empty optional field and nesting lifetime, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ipsecpolicies.Get",
+      "source_fingerprint": "99bfe78d29e4c35402ed9d0694eb4eef50779910d985852ccc9519bc783ff62a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs vpn/ipsecpolicies/{raw id}, decodes the ipsecpolicy envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ipsecpolicies.List",
+      "source_fingerprint": "427f0e6de9bc5f338947135874cc38ba8e83e28c807c3105a735d748d7759bf1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs vpn/ipsecpolicies with ListOpts and extension query values, follows ipsecpolicies_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ipsecpolicies.Update",
+      "source_fingerprint": "31b4caafbc84ce1654df454bb2b2b4519313d498938fbd8d86c9d39334a39e94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"ipsecpolicy\":{...}} to vpn/ipsecpolicies/{id} sending explicit empty pointer description and a partial lifetime with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/ipsecpolicies.Delete",
+      "source_fingerprint": "e3dcdc1d30400044a67a98a53efed794a296557dc33bd63587ed21f74b0deafd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs vpn/ipsecpolicies/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/ipsecpolicies/native_contracts_test.go:TestNativeVPNPolicyStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/services.Create",
+      "source_fingerprint": "2381821f85253a6985dad57e41c671a3de678a9252f0f687bfd9e5140cc12a50",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"vpnservice\":{...}} to vpn/vpnservices with extensions inside the envelope, requiring router_id before HTTP, sending explicit false and nil admin_state_up as null, decoding null subnet_id as empty, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/services.Get",
+      "source_fingerprint": "b5a5e7d9df6b66fe4582ae4d31394f685e30816c7d4d2d8251b54a12bfdf9de0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs vpn/vpnservices/{raw id}, decodes the vpnservice envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/services.List",
+      "source_fingerprint": "634405f0a9ca7d6e54234c707cddac29e1bbe2a21972620d2e1ef5dc42c33da0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs vpn/vpnservices with ListOpts and extension query values, follows vpnservices_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/services.Update",
+      "source_fingerprint": "98200182f366309cfff1807ac55688b52d86f42bbf121b3a3c45cf7010f47f06",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"vpnservice\":{...}} to vpn/vpnservices/{id} sending explicit empty pointer name and admin_state_up with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/services.Delete",
+      "source_fingerprint": "282f2809cfe568589e8bdc133d85d451693e183c26ba37db33e7bfac9960a399",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs vpn/vpnservices/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/services/native_contracts_test.go:TestNativeVPNServiceStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/siteconnections.Create",
+      "source_fingerprint": "aacf51dc180e74945cb29e45261f4ce4a9d6c2ceaa0158911018ce7db8f223f9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"ipsec_site_connection\":{...}} to vpn/ipsec-site-connections with extensions inside the envelope, always sending policy, service, peer and psk fields even when empty, nesting dpd and decoding psk/dpd/route_mode, rejects a core-key extension collision before HTTP and accepts only 201/202.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/siteconnections.Get",
+      "source_fingerprint": "2ffb6b45b65d7e550f08471e1811ba9a84077a5f2e113333981c15e3debf36d5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs vpn/ipsec-site-connections/{raw id}, decodes the ipsec_site_connection envelope and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/siteconnections.List",
+      "source_fingerprint": "be16b514ffa6e7eebe9353e078f686ee74974f311f34495400d6960f38259267",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs vpn/ipsec-site-connections with ListOpts (psk filter sent in the query string) and extension query values, follows ipsec_site_connections_links next hrefs as received, decodes null names as empty, yields nothing for an empty page, reports io.EOF for a bodyless 204 and native page status errors without operation context, and rejects a nil option before HTTP.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/siteconnections.Update",
+      "source_fingerprint": "a560dd7fef15b0f2897edac0a81ecad1bbd413c49b3894e8cec93ca2d4d7f479",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs {\"ipsec_site_connection\":{...}} to vpn/ipsec-site-connections/{id} sending explicit empty pointer name, false admin_state_up and mtu with extensions inside the envelope, rejects a nil option before HTTP and accepts only 200.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:networking/v2/extensions/vpnaas/siteconnections.Delete",
+      "source_fingerprint": "c41409774ba37619d4df6f8a7e6a7d52ce31d5d37bf39a057827e6b52d9627b9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete DELETEs vpn/ipsec-site-connections/{raw id} and accepts only 202/204.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionRoutesBodiesPagingAndDecode",
+            "network/v2/extensions/vpnaas/siteconnections/native_contracts_test.go:TestNativeVPNConnectionStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/native-crud.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
