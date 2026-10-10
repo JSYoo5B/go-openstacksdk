@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone v3 native tokens catalog](#keystone-v3-native-tokens-catalog-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone v3 native credentials](#keystone-v3-native-credentials-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는676입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는692입니다.
+
+## Keystone v3 native credentials 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Keystone v3 native application credential·credential·EC2 credential 16개, 전체676→692(+16)·핵심602→618/2,292·Identity9→25/389.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. application credential 생성은 201만 받고 `unrestricted`를 false도 항상 보내며, `expires_at`을 시간대 변환 없이 그 시각의 location 값으로 적어 UTC가 아닌 시각은 다른 시각으로 해석될 수 있습니다. credential 수정은 PATCH이고 EC2 credential 생성은 envelope 없는 `tenant_id` 본문입니다. 세 목록은 Keystone `links.next` 문자열을 따라갑니다. [Keystone v3 native credential 호출](../identity/v3/native-credentials.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
+
+새 집중 계약 테스트6그룹(하위 사례50)이 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **105개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새16행을 추가해 reviews953·contracts4,183·go_mapping692입니다. 테스트 `e2c16439`·`afb290da`, 가이드 `f73f368f`, 판정 `220e3998`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Keystone v3 native tokens catalog 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Keystone v3 native token·catalog 5개, 전체671→676(+5)·핵심597→602/2,292·Identity4→9/389.** token 생성은 password·token·application credential 방식과 project·domain·system scope의 본문, 응답 `X-Subject-Token`에서 읽는 ID를 고정했습니다. 조회는 200·203, 검증은 200·204를 true·404를 오류 없는 false로, 폐기는 202·204를 받으며 `Validate`는 native 오류를 감싸지 않습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Keystone v3 native token·catalog 5개, 전체671→676(+5)·핵심597→602/2,292·Identity4→9/389.** token 생성은 password·token·application credential 방식과 project·domain·system scope의 본문, 응답 `X-Subject-Token`에서 읽는 ID를 고정했습니다. 조회는 200·203, 검증은 200·204를 true·404를 오류 없는 false로, 폐기는 202·204를 받으며 `Validate`는 native 오류를 감싸지 않습니다.
 
 검증 중 생성 결함을 찾았습니다. generated token·EC2 token·OAuth1 생성 builder가 확장 필드를 create 본문과 그 안에 들어가는 scope map 양쪽에 병합해, 필드가 scope에 중복되고 scope가 없을 때도 `"scope": {"x": ...}`를 만들었습니다. sdkgen이 `ToTokenV3ScopeMap`을 그대로 위임하도록 고치고 세 package를 재생성했으며 생성기 테스트를 더했습니다. 또 native 생성은 `X-Auth-Token` 제외를 요청하지만 Gophercloud가 provider token을 나중에 다시 붙여 인증된 client에서는 token이 함께 전송되는 점을 테스트와 문서에 남겼습니다. [Keystone v3 native token·catalog 호출](../identity/v3/native-tokens.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
 
