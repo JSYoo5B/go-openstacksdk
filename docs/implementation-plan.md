@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-11): Swift native object 8개 검증·판정 완료, `Create` 1개는 nil content panic 때문에 미완료.** 전체671/3,362·핵심597/2,292·Object Storage18/74입니다. 다음은 Keystone 사용자 호출(token·application credential·credential·EC2·catalog·trust)입니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
+**현재 구현 (2026-10-11): Swift native object 8개 검증·판정 완료, Keystone v3 native token·catalog 5개 테스트·가이드·판정 완료, 전체 gate 진행 중(판정 반영 집계676).** 판정 전 기준은 전체671/3,362·핵심597/2,292·Identity4/389입니다. 검증 중 token·EC2 token·OAuth1 생성의 확장 필드가 scope 객체에도 섞여 들어가 scope가 없을 때도 가짜 scope를 만드는 생성 결함을 찾아 sdkgen에서 고쳤습니다. native 생성이 인증된 client의 `X-Auth-Token`을 계속 보내는 점과 `Validate`의 404→false·감싸지 않는 오류를 문서화했습니다. 다음은 gate·대장이고, 그 뒤 application credential·credential·EC2 credential·trust 사용자 호출로 이어갑니다. 관리자 전용 호출은 핵심 admin 단계로 둡니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다. user→admin→후속 user→후속 admin 순서를 유지합니다.
 
 **최신 API 완료 (2026-10-11): 핵심 user Swift native object 8개, 전체663→671(+8)·핵심589→597/2,292·Object Storage10→18/74.** object 조회·다운로드·수정·삭제·복사·목록·bulk delete·temp URL 서명의 계약을 고정했습니다. native `Create`는 nil content에서 panic하므로 unresolved로 기록했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md#object)과 [검증 기록](sdk-support-ledger.md#swift-native-objects-완료)에 설명합니다. 새6그룹, 전체 `make check`(race 101개 실제 test package)가 통과했고 `d6db09fd`·`cedebdf7`·`4d4678f2`를 push했습니다.
 
@@ -450,11 +450,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 671 (20.0%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 676 (20.1%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,690 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 932 | 아직 개별 기록 없는 선언 2,430 |
-| 기록한 부분·전체 계약 | 4,162 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,685 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 937 | 아직 개별 기록 없는 선언 2,425 |
+| 기록한 부분·전체 계약 | 4,167 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -497,6 +497,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
 | Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
 | Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
+| Keystone v3 native tokens·catalog 5개 | pinned Gophercloud v2.15.0 tokens·catalog와 OmitHeaders 처리 순서 검토 완료 | **sdkgen token scope 확장 필드 중복 수정**(tokens·ec2tokens·oauth1) | 새4그룹·생성기 3사례 PASS, 전체 gate 대기 | identity/v3/native-tokens.md·생성 README 절 | 신규5행 go_mapping 기록, gate 대기 | `9be824ab`·`54c82805`·가이드·판정 push; 다음 gate·대장 |
 | Swift native objects 9개 | pinned Gophercloud v2.15.0 objects requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례2·전체 `make check` PASS | objectstorage/v1/native-calls.md object 절 | **8행 go_mapping·671/3,362**, `Create` unresolved | 작은 commit3개 push 완료; panic guard는 별도 작업; 다음 Keystone |
 | Swift native accounts·containers 8개 | pinned Gophercloud v2.15.0 accounts·containers와 objectstorage/v1 이름 검사 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례3·전체 `make check` PASS | objectstorage/v1/native-calls.md·생성 README 링크 | **8행 go_mapping·663/3,362** | 작은 commit3개 push 완료; 다음 Swift objects |
 | Cinder v2 native snapshots·backups·transfers·AZ 18개 | pinned Gophercloud v2.15.0 v2/v3 차이와 backup Update 보정 범위 검토 완료 | 기존 generated facade 유지 | 새·이식 9그룹·하위 사례54·전체 `make check` PASS | blockstorage/v2/native-calls.md 절 추가 | **16행 go_mapping·655/3,362**, 2행 unresolved | 작은 commit3개 push 완료; snapshot 대기 guard는 별도 작업 |
@@ -611,18 +612,18 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 597 / 2,292 | 26.0% | 161 | 1,533 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 602 / 2,292 | 26.3% | 161 | 1,528 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 671 / 3,362 | 20.0% | 260 | 2,430 | 1 |
+| 전체 | 676 / 3,362 | 20.1% | 260 | 2,425 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 4 / 389 | 5 | 380 | 0 |
+| Identity / Keystone | 9 / 389 | 5 | 375 | 0 |
 | Compute / Nova | 107 / 333 | 20 | 206 | 0 |
 | Placement | 0 / 71 | 0 | 71 | 0 |
 | Network / Neutron | 182 / 758 | 43 | 533 | 0 |

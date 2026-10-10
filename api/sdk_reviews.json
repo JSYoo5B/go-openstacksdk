@@ -56036,6 +56036,134 @@
         "The generated facade wraps only option errors; key lookup, digest and split errors are returned as native errors without OperationError."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/tokens.Create",
+      "source_fingerprint": "f0a253eadc401130309cfb427406560064960d57014a8b42160973fe57f39452",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCreateHeader"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs {\"auth\":{\"identity\":...,\"scope\":...}} to auth/tokens for password (name+domain or user ID), token and application credential methods with project, domain or system scope, keeps extension fields in the auth object only, rejects nil options, no auth method and invalid extension headers before HTTP, reads the token ID from X-Subject-Token and RFC3339 expires_at, still sends the provider X-Auth-Token because native OmitHeaders runs before it is applied, and accepts only 201/202.",
+          "tests": [
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenCreateBodiesScopesAndSubjectHeader",
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenStatusesAndPreflight",
+            "internal/cmd/sdkgen/page_extractors_test.go:TestTokenScopeBuildersDelegateWithoutExtensionFields"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-tokens.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
+        "The generated scope builder delegates without merging extension fields, so extensions appear once in the auth object; native URL construction, OkCodes, header handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/tokens.Get",
+      "source_fingerprint": "d32d9e23b945a476d9c25e7fd22f1783ec4ee099233220642f84abbd599b859d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get GETs auth/tokens with X-Subject-Token, reads the ID from the response subject header and accepts only 200/203.",
+          "tests": [
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenGetValidateRevoke",
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-tokens.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams or Validate) and the documented extension merge; native URL construction, OkCodes, header handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/tokens.Validate",
+      "source_fingerprint": "5f06e5966556c08d6c5fa91614aaef8c6d614d5838ef5ab9774808a7ac664376",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "Validate HEADs auth/tokens with X-Subject-Token, returns true for 200/204 and false without error for 404, and returns other status errors as native errors without operation context.",
+          "tests": [
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenGetValidateRevoke",
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-tokens.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams or Validate) and the documented extension merge; native URL construction, OkCodes, header handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/tokens.Revoke",
+      "source_fingerprint": "a2f686e0f285d006807ce1d23b29f0e62b7af2ffeb50a4bb73de2a720038ec2c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.Revoke"
+      ],
+      "contracts": [
+        {
+          "behavior": "Revoke DELETEs auth/tokens with X-Subject-Token, decodes the bodyless response into an empty Token and accepts only 202/204.",
+          "tests": [
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenGetValidateRevoke",
+            "identity/v3/tokens/native_contracts_test.go:TestNativeTokenStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-tokens.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams or Validate) and the documented extension merge; native URL construction, OkCodes, header handling and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:identity/v3/catalog.List",
+      "source_fingerprint": "a7aca5ce098597a7dc241082762a9dd0bef9d5ce673b958bc124aad11b63a731",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/catalog.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List GETs auth/catalog and yields catalog entries with their endpoints, stops at a null links.next, yields nothing for an empty catalog and reports native page status errors.",
+          "tests": [
+            "identity/v3/tokens/native_contracts_test.go:TestNativeCatalogList"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/native-tokens.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native identity/v3/catalog call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
+        "The SDK adds only request.Wrap operation context (not on list streams or Validate) and the documented extension merge; native URL construction, OkCodes, header handling and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
