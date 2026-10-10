@@ -172,6 +172,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	case "blockstorage/v2", "blockstorage/v3":
 		out.WriteString("`Volumes.MetadataIn(ctx, ref)`와 `Snapshots.MetadataIn(ctx, ref)`는 ID 또는 이름을 한 번 해석해 Get·Merge·Replace·DeleteKeys를 같은 방식으로 제공합니다. Merge는 POST 병합, Replace는 PUT 전체 교체이며 nil/빈 map도 명시적 metadata 객체를 보냅니다. DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음, 그 외에는 입력 순서대로 삭제하고 실패 전 결과를 반환합니다. 실제 metadata·원문·헤더·성공 코드를 반환하며 Resource cache를 만들지 않습니다. [공통 metadata 사용법](../metadata/README.md), [Volume](volumes/README.md), [Snapshot](snapshots/README.md)에 Python 대응·ETag·옵션·부분 성공을 설명합니다. Backup metadata 하위 경로는 이 범위에 포함하지 않습니다.\n\n")
 		if key == "blockstorage/v2" {
+			out.WriteString("native [v2 호출](native-calls.md)은 deprecated v2 package의 generated 메서드가 v3 native 호출과 다른 입력·목록·decode 계약만 정리합니다.\n\n")
 			break
 		}
 		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.\n\n")
