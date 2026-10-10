@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native FWaaS v2 groups policies rules](#neutron-native-fwaas-v2-groups-policies-rules-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron native VPNaaS](#neutron-native-vpnaas-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는540입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는565입니다.
+
+## Neutron native VPNaaS 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Neutron native VPNaaS 25개, 전체540→565(+25)·핵심466→491/2,292·Network152→177/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. endpoint group의 null `endpoints`, IKE policy의 생성 `phase1_negotiation_mode`와 수정·목록 `phase_1_negotiation_mode` key 차이, 중첩 `lifetime`, VPN service의 필수 `router_id`와 null `admin_state_up`, site connection의 항상 전송되는 ID·peer·PSK 필드와 query로 나가는 PSK 필터를 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#vpnaas)에 절을 추가했습니다.
+
+새 집중 계약 테스트10그룹(하위 사례75)이 race로 통과했습니다. 다섯 package의 첫 테스트라 전체 `make check`의 race는 **88개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새25행을 추가해 reviews822·contracts4,052·go_mapping565입니다. 테스트 `a0acba52`, 가이드/판정 `d8bf1110`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Neutron native FWaaS v2 groups policies rules 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Neutron native FWaaS v2 groups·policies·rules 19개, 전체521→540(+19)·핵심447→466/2,292·Network133→152/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. group은 slice pointer `ports`의 반복 query와 빈 목록 수정, 정책 제거를 위한 null 수정 본문을 고정했습니다. policy는 `InsertRule`의 rule ID 필수·위치 정확히 하나 조건과 envelope 없는 policy 응답, 옵션 없는 `RemoveRule`을 고정했습니다. rule은 protocol·action 필수, `any` protocol의 null 변환, `firewall_policy_id`의 목록 전용 decode를 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#firewall-grouppolicyrule)에 절을 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Neutron native FWaaS v2 groups·policies·rules 19개, 전체521→540(+19)·핵심447→466/2,292·Network133→152/758.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. group은 slice pointer `ports`의 반복 query와 빈 목록 수정, 정책 제거를 위한 null 수정 본문을 고정했습니다. policy는 `InsertRule`의 rule ID 필수·위치 정확히 하나 조건과 envelope 없는 policy 응답, 옵션 없는 `RemoveRule`을 고정했습니다. rule은 protocol·action 필수, `any` protocol의 null 변환, `firewall_policy_id`의 목록 전용 decode를 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#firewall-grouppolicyrule)에 절을 추가했습니다.
 
 새 집중 계약 테스트7그룹(하위 사례62)이 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **83개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새19행을 추가해 reviews797·contracts4,027·go_mapping540입니다. 테스트 `ddaa5995`, 가이드/판정 `1b79e5be`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
