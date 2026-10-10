@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone v3 native credentials](#keystone-v3-native-credentials-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone v3 native trusts user-self calls](#keystone-v3-native-trusts-user-self-calls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는692입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는701입니다.
+
+## Keystone v3 native trusts user-self calls 완료
+
+**최신 API 완료 (2026-10-11): 핵심 user Keystone v3 native trust·사용자 본인 호출 9개, 전체692→701(+9)·핵심618→627/2,292·Identity25→34/389.** trust 생성은 201만 받고 `impersonation`을 false도 항상 보내며, `expires_at`을 문자 `Z`가 붙은 형식으로 적지만 UTC로 바꾸지 않아 다른 시간대의 시각은 시계 값 그대로 전송됩니다. role 확인은 native HEAD 기본값이라 200만 받습니다. 접근 가능 project 목록은 `auth/projects`, 암호 변경은 두 암호를 빈 값도 그대로 보내고 204만 받습니다. [Keystone v3 native trust·사용자 본인 호출](../identity/v3/native-trusts.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
+
+새 집중 계약 테스트4그룹(하위 사례20)이 race로 통과했습니다. 두 package의 첫 테스트라 전체 `make check`의 race는 **107개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새9행을 추가해 reviews962·contracts4,192·go_mapping701입니다. 테스트 `e97ab5c2`, 가이드 `91598b0b`, 판정 `8a13c9b0`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Keystone v3 native credentials 완료
 
-**최신 API 완료 (2026-10-11): 핵심 user Keystone v3 native application credential·credential·EC2 credential 16개, 전체676→692(+16)·핵심602→618/2,292·Identity9→25/389.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. application credential 생성은 201만 받고 `unrestricted`를 false도 항상 보내며, `expires_at`을 시간대 변환 없이 그 시각의 location 값으로 적어 UTC가 아닌 시각은 다른 시각으로 해석될 수 있습니다. credential 수정은 PATCH이고 EC2 credential 생성은 envelope 없는 `tenant_id` 본문입니다. 세 목록은 Keystone `links.next` 문자열을 따라갑니다. [Keystone v3 native credential 호출](../identity/v3/native-credentials.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 user Keystone v3 native application credential·credential·EC2 credential 16개, 전체676→692(+16)·핵심602→618/2,292·Identity9→25/389.** 기존 generated facade가 고정 Gophercloud v2.15.0의 경로·본문·status를 바꾸지 않는지 검증했습니다. application credential 생성은 201만 받고 `unrestricted`를 false도 항상 보내며, `expires_at`을 시간대 변환 없이 그 시각의 location 값으로 적어 UTC가 아닌 시각은 다른 시각으로 해석될 수 있습니다. credential 수정은 PATCH이고 EC2 credential 생성은 envelope 없는 `tenant_id` 본문입니다. 세 목록은 Keystone `links.next` 문자열을 따라갑니다. [Keystone v3 native credential 호출](../identity/v3/native-credentials.md)을 새로 쓰고 생성 README에 절을 추가했습니다.
 
 새 집중 계약 테스트6그룹(하위 사례50)이 race로 통과했습니다. 세 package의 첫 테스트라 전체 `make check`의 race는 **105개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새16행을 추가해 reviews953·contracts4,183·go_mapping692입니다. 테스트 `e2c16439`·`afb290da`, 가이드 `f73f368f`, 판정 `220e3998`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
