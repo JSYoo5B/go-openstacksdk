@@ -47320,6 +47320,215 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.GetSecretACL",
+      "source_fingerprint": "2591cbec17482410e7a55048993a346990905048be8a5aa8d90e3f2eb7098495",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.GetSecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetSecretACL sends GET secrets/{raw id}/acl, decodes the ACL map of ACLDetails with RFC3339-without-zone times and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.SetSecretACL",
+      "source_fingerprint": "1f785c1e0b0a043a3390ce99420e5d88af4202ddf0505dba3e019056fe9713e9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.SetSecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithSetSecretACLOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithSetSecretACLField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetSecretACL PUTs the SetOpts body keyed by required Type with omitted nil users/project-access, returns the acl_ref and accepts only 200; extension fields join a single type object or the top level for several types, and collisions or nil options fail before HTTP.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.UpdateSecretACL",
+      "source_fingerprint": "c6aac4e7bff4e2790962072e54ab9169cea28826adc93d6aa72d8b4eb53471bf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.UpdateSecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithUpdateSecretACLOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithUpdateSecretACLField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateSecretACL PATCHes the same SetOpts body to secrets/{id}/acl with the same extension merge, returns the acl_ref and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.DeleteSecretACL",
+      "source_fingerprint": "2144daafe560c68032a97afab5f54f6d9d00f56b9da9d868e61079993cfcc7a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.DeleteSecretACL"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteSecretACL sends DELETE secrets/{raw id}/acl and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.GetContainerACL",
+      "source_fingerprint": "3172991ade88e1e10787d2062b84aa9c041281cee1031ca26f820dfb7ff7c695",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.GetContainerACL"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetContainerACL sends GET containers/{raw id}/acl, decodes the ACL map of ACLDetails with RFC3339-without-zone times and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.SetContainerACL",
+      "source_fingerprint": "379c940d7e5a71ed0087dff509b56bbbb7a2b1d9e9fd16f2614270d7297cd49e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.SetContainerACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithSetContainerACLOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithSetContainerACLField"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetContainerACL PUTs the SetOpts body keyed by required Type with omitted nil users/project-access, returns the acl_ref and accepts only 200; extension fields join a single type object or the top level for several types, and collisions or nil options fail before HTTP.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.UpdateContainerACL",
+      "source_fingerprint": "674cebf1a7e930b4bb57c215aaaedafd96680ab07c15dcd4edc4711472f5708b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.UpdateContainerACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithUpdateContainerACLOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.WithUpdateContainerACLField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateContainerACL PATCHes the same SetOpts body to containers/{id}/acl with the same extension merge, returns the acl_ref and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/acls.DeleteContainerACL",
+      "source_fingerprint": "d210ae455b3fd2dbdd448fbfc128b4825a30a84a7238914086b0ffaf48623c40",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/acls.API.DeleteContainerACL"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteContainerACL sends DELETE containers/{raw id}/acl and accepts only 200.",
+          "tests": [
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLRoutesBodiesAndDecode",
+            "keymanager/v1/acls/native_contracts_test.go:TestNativeACLStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/acls/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native ACL call only; Python key_manager secret ACL parity is tracked separately.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
