@@ -4,13 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder native volume snapshot admin actions](#cinder-native-volume-snapshot-admin-actions-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Cinder native backup admin calls](#cinder-native-backup-admin-calls-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는719입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는727입니다.
+
+## Cinder native backup admin calls 완료
+
+**최신 API 완료 (2026-10-11): 핵심 admin Cinder native backup 관리자 호출 8개, 전체719→727(+8)·핵심645→653/2,292·Block Storage160→168/480.** v3·v2 backup의 관리자 호출 계약을 고정했습니다. export record는 `backup_url` 문자열을 base64로 해석해 byte로 돌려주고 잘못된 base64는 decode 오류, record key가 없으면 빈 값입니다. import record는 같은 byte를 base64로 다시 보내고 201만 받습니다. reset status와 force delete는 action 경로에 202만 받습니다. [Cinder v3 native backup 호출](../blockstorage/v3/native-backups.md#관리자-호출)에 관리자 절을 추가했습니다.
+
+새 집중 계약 테스트4그룹(하위 사례36)이 race로 통과했습니다. 전체 `make check`의 race는 **108개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새8행을 추가해 reviews988·contracts4,218·go_mapping727입니다. 테스트 `ec6b5663`, 가이드 `43465118`, 판정 `d463bdd9`를 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
 ## Cinder native volume snapshot admin actions 완료
 
-**최신 API 완료 (2026-10-11): 핵심 admin Cinder native volume·snapshot 관리자 action 8개, 전체711→719(+8)·핵심637→645/2,292·Block Storage152→160/480.** 핵심 admin 단계의 첫 단위입니다. 기본 Cinder 정책상 관리자 호출인 action의 본문과 status를 고정했습니다. volume force delete는 `{"os-force_delete": ""}`처럼 빈 문자열을 보내고 OkCodes를 정하지 않아 POST 기본 201·202를 받습니다. reset status는 `status`를 빈 값도 항상 보내고 확장 필드의 `status` 충돌을 HTTP 전에 거부합니다. v3 unmanage와 snapshot의 force delete·reset status·update status는 202만 받습니다. 각 native 문서에 관리자 action 절을 추가했습니다.
+**앞선 API 완료 (2026-10-11): 핵심 admin Cinder native volume·snapshot 관리자 action 8개, 전체711→719(+8)·핵심637→645/2,292·Block Storage152→160/480.** 핵심 admin 단계의 첫 단위입니다. 기본 Cinder 정책상 관리자 호출인 action의 본문과 status를 고정했습니다. volume force delete는 `{"os-force_delete": ""}`처럼 빈 문자열을 보내고 OkCodes를 정하지 않아 POST 기본 201·202를 받습니다. reset status는 `status`를 빈 값도 항상 보내고 확장 필드의 `status` 충돌을 HTTP 전에 거부합니다. v3 unmanage와 snapshot의 force delete·reset status·update status는 202만 받습니다. 각 native 문서에 관리자 action 절을 추가했습니다.
 
 새 집중 계약 테스트3그룹(하위 사례46)이 race로 통과했습니다. 전체 `make check`의 race는 **108개 실제 test package**이며 parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 새8행을 추가해 reviews980·contracts4,210·go_mapping719입니다. 테스트 `86811078`, 가이드 `ac117b34`, 판정 `d67be278`을 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
 
