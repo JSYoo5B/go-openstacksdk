@@ -4,13 +4,27 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 admin 병렬 8묶음](#핵심-admin-병렬-8묶음-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Keystone 잔여 native와 sdkgen 결함 3건](#keystone-잔여-native와-sdkgen-결함-3건-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는972입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,011입니다.
+
+## Keystone 잔여 native와 sdkgen 결함 3건 완료
+
+**최신 API 완료 (2026-10-11): Keystone v2·OAuth1·EC2 token native 37개와 sdkgen 결함 수정 3건, 전체972→1,011(+39)·핵심898→937/2,292·Identity117→155/389·Placement32→33/71.** 두 묶음은 별도 worktree에서 동시에 검증했고, 그동안 앞선 단위에서 unresolved로 남긴 생성 결함을 sdkgen에서 고쳤습니다.
+
+- Keystone v2.0 native 21개: extension·role·tenant·token·user 호출을 모두 `go_mapping`으로 기록했습니다. v2.0 API는 Queens에서 제거되어 기존 배포에서만 동작합니다. password 방식 token 생성은 `TokenID`를 조용히 버리고, user 응답의 `tenantId`는 모델이 `tenant_id`만 읽어 비어 있습니다. [Keystone v2.0 native 호출](../identity/v2/native-calls.md)에 설명합니다. 테스트 `644321fa`, 새 10그룹(하위 사례63)입니다.
+- Keystone OAuth1·EC2 token native 16개: consumer CRUD, request token·authorize·access token 흐름, OAuth1·EC2·S3 token 생성 계약을 고정했습니다. 고정 nonce와 timestamp로 HMAC-SHA1 서명을 독립 계산해 비교하고, EC2 V4 서명은 upstream helper로 기대값을 만들었습니다. [native OAuth1·EC2 token 호출](../identity/v3/native-oauth1-ec2.md)에 설명합니다. 테스트 `72d7a83d`, 새 9그룹(하위 사례58)입니다.
+- endpoint 목록 필터: native `endpoints.List`가 builder의 query 메서드 대신 인자에 `BuildQueryString`을 적용해 생성 wrapper의 필터가 모두 사라졌습니다. sdkgen이 검토한 호출에 한해 `q` tag 필드를 wrapper로 복사하고, 보낼 수 없는 raw query 확장은 거부하며, `Resources` 목록은 query key를 `ListOpts` 필드로 옮깁니다. 수정 `7978ac10`입니다.
+- Placement allocation candidate: 같은 page를 읽는 두 extractor 중 1.10용 `ExtractAllocationCandidates110`이 선택되어 1.12 이상 응답이 모두 decode 오류였습니다. 이름이 microversion 숫자만 덧붙인 extractor는 접미사 없는 extractor에 양보하도록 고쳤습니다. 수정 `239c146a`입니다.
+- token header 확장: native `tokens.Create`, `ec2tokens.Create`, `ValidateS3Token`은 header builder를 호출하지 않아 header 확장이 조용히 빠졌습니다. builder 메서드는 native 함수가 실제로 호출할 때만 확장 옵션을 제공하고, builder를 다른 함수로 넘기거나 전혀 쓰지 않는 선언은 기존처럼 둡니다. 수정 `e363d3f5`·`ae7c858e`입니다.
+
+마지막 전체 gate의 race는 **153개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews1,272·contracts4,504·go_mapping1,011입니다. 판정은 `55e1d001`·`c16e49de`·`8c5b9287`·`11261eaf`로 push했습니다. 실제 OpenStack 호출은 실행하지 않았습니다.
+
+이로써 핵심 서비스의 Gophercloud native 호출은 noauth·swauth 4개만 남았습니다. 핵심 서비스의 남은 미검토 1,193개 가운데 979개는 Python openstacksdk proxy·cloud 연산입니다.
 
 ## 핵심 admin 병렬 8묶음 완료
 
-**최신 API 완료 (2026-10-11): 핵심 admin 병렬 8묶음 235개, 전체737→972(+235)·핵심663→898/2,292·Identity34→117/389·Compute117→153/333·Placement0→32/71·Network182→238/758·Image82→85/120·Block Storage178→203/480.** 서비스별 묶음을 별도 worktree에서 동시에 검증하고, 판정 JSON·생성 README·집계는 머지할 때 한곳에서 갱신했습니다. 새 판정 237행 가운데 235행이 `go_mapping`이고 2행은 unresolved입니다. 기존 generated facade는 바꾸지 않았습니다.
+**앞선 API 완료 (2026-10-11): 핵심 admin 병렬 8묶음 235개, 전체737→972(+235)·핵심663→898/2,292·Identity34→117/389·Compute117→153/333·Placement0→32/71·Network182→238/758·Image82→85/120·Block Storage178→203/480.** 서비스별 묶음을 별도 worktree에서 동시에 검증하고, 판정 JSON·생성 README·집계는 머지할 때 한곳에서 갱신했습니다. 새 판정 237행 가운데 235행이 `go_mapping`이고 2행은 unresolved입니다. 기존 generated facade는 바꾸지 않았습니다.
 
 - Nova flavor·서버 관리자 16개: flavor 생성·수정·삭제·접근 권한·extra spec과 서버 관리자 action의 계약을 고정했습니다. evacuate가 2.14 이전 key를 항상 보내는 점과 live migrate에 `"auto"`를 보낼 수 없는 점을 [Nova native flavor·서버 관리자 호출](../compute/v2/native-admin-flavors-servers.md)에 적었습니다. 테스트 `1d75f7ee`, 새 6그룹입니다.
 - Neutron agent·segment·IP 사용량·L3 agent 22개: segment 목록이 `segments_links`를 읽지 않아 첫 페이지만 읽는 점과 agent 시각 형식을 [Neutron native 관리자 호출](../network/v2/native-admin.md)에 적었습니다. 테스트 `22ca0b38`, 새 7그룹입니다.
