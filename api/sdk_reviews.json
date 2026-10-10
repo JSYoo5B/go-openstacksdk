@@ -46978,6 +46978,244 @@
         "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, retries and decoding are unchanged."
       ],
       "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.Get",
+      "source_fingerprint": "cfb70d7f91f10518942818ffe2b38c961e992baa9c05442c923040a0b7bd232e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET containers/{raw id}, decodes Container with consumers, secret refs and RFC3339-without-zone times, and accepts only 200.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.List",
+      "source_fingerprint": "d0be9709b415bcce01ae793c3e7457cd3450455f0684ac8a565fd8c41d153038",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List serializes limit/name/offset plus extension query values, follows the body next link verbatim including a different path and sends no further page after the caller stops.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerListsQueryPagingAndStop"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.Create",
+      "source_fingerprint": "b0f45b0dfc7b18d3fada89345c76fb479e60d63c98bc81b2fd6405805748a7e8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create requires Type before HTTP, sends name without omitempty and secret_refs, merges non-colliding extension fields, rejects core collisions and accepts only 201.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.Delete",
+      "source_fingerprint": "a232ea40cdf857ec4068442c7d7bc352dc5818f96abc1ff67ef458b3113e51ee",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE containers/{raw id} and accepts the native default 202 and 204.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.CreateConsumer",
+      "source_fingerprint": "de470f94bc98e743846fb2cea91ba9a3e302a344188b8019f3eedc01e0b5faf8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.CreateConsumer",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateConsumerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateConsumerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateConsumer POSTs {\"name\",\"URL\"} to containers/{id}/consumers, rejects extension collisions before HTTP, returns the updated Container and accepts only 200.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.DeleteConsumer",
+      "source_fingerprint": "acc041ea57d7019cb747417cb2ed1fe7f8c948ed0e75d921d1e563a349b2edff",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.DeleteConsumer",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithDeleteConsumerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithDeleteConsumerField"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteConsumer sends DELETE containers/{id}/consumers with the {\"name\",\"URL\"} JSON body, returns the updated Container and accepts only 200.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.ListConsumers",
+      "source_fingerprint": "71fdb776007aff4b0eebfd703ac309fa83f66855921f88def40ac63e4555a317",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.ListConsumers",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithListConsumersOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithListConsumersQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListConsumers serializes the container ListOpts, including name, to containers/{id}/consumers, decodes Consumer times, follows the body next link and stops on an empty page.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerListsQueryPagingAndStop"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.CreateSecretRef",
+      "source_fingerprint": "1f184b26df7a53393b0e732e2d9012c72848a1fd751897ab7ec034099e3be784",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.CreateSecretRef",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateSecretRefOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateSecretRefField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateSecretRef POSTs {\"name\",\"secret_ref\"} to containers/{id}/secrets, returns the decoded Container and accepts only 201.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "gophercloud:keymanager/v1/containers.DeleteSecretRef",
+      "source_fingerprint": "a647d0449e312427ae42907650ff188bd1d45a32bf11c195880ae9ca9f6e0bc2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.DeleteSecretRef",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithDeleteSecretRefOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithDeleteSecretRefField"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteSecretRef sends DELETE containers/{id}/secrets with the secret-ref JSON body, rejects nil options before HTTP, returns error only and accepts only 204.",
+          "tests": [
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerRoutesBodiesAndDecode",
+            "keymanager/v1/containers/native_contracts_test.go:TestNativeContainerStrictStatusesAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "keymanager/v1/containers/README.md"
+      ],
+      "differences": [
+        "This declaration maps the Gophercloud native container call only; Python key_manager container parity is tracked separately by the owned container records.",
+        "The SDK adds only request.Wrap operation context and the documented extension merge; native URL construction, OkCodes, paging, retries and decoding are unchanged."
+      ],
+      "remaining": []
     }
   ]
 }
