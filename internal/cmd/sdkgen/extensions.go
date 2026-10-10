@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go/ast"
 	"go/types"
 	"strings"
 )
@@ -41,6 +42,9 @@ func capabilities(pkg *types.Package, b builder) extensionCapabilities {
 		return caps
 	}
 	for i := 0; i < b.iface.NumMethods(); i++ {
+		if b.unread[b.iface.Method(i).Name()] {
+			continue
+		}
 		value := methodCapabilities(pkg, b.iface.Method(i))
 		caps.body = caps.body || value.body
 		caps.query = caps.query || value.query
@@ -103,4 +107,43 @@ func emitConfiguredBuilderMethod(e *emitter, b builder, method *types.Func, call
 	}
 	e.printf("return %s,nil\n", strings.Join(values, ","))
 	return true
+}
+
+// unreadBuilderMethods names builder methods the native function never calls.
+// Extensions merged by such a method would be dropped silently, so they must
+// not be offered. Any other use of the parameter, such as passing it to a
+// helper or asserting another interface, may read every method.
+func unreadBuilderMethods(decl *ast.FuncDecl, parameter string, iface *types.Interface) map[string]bool {
+	if decl == nil || decl.Body == nil || iface == nil {
+		return nil
+	}
+	called, escaped := map[string]bool{}, false
+	selected := map[*ast.Ident]bool{}
+	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		if call, ok := node.(*ast.CallExpr); ok {
+			if selector, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if id, ok := selector.X.(*ast.Ident); ok && id.Name == parameter {
+					called[selector.Sel.Name] = true
+					selected[id] = true
+				}
+			}
+		}
+		return true
+	})
+	ast.Inspect(decl.Body, func(node ast.Node) bool {
+		if id, ok := node.(*ast.Ident); ok && id.Name == parameter && !selected[id] {
+			escaped = true
+		}
+		return !escaped
+	})
+	if escaped {
+		return nil
+	}
+	unread := map[string]bool{}
+	for i := 0; i < iface.NumMethods(); i++ {
+		if name := iface.Method(i).Name(); !called[name] {
+			unread[name] = true
+		}
+	}
+	return unread
 }

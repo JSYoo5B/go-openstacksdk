@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/catalog"
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -193,8 +194,15 @@ func TestNativeTokenStatusesAndPreflight(t *testing.T) {
 		for name, err := range map[string]error{
 			"nil options": func() error { _, err := api.Create(ctx, nil); return err }(),
 			"no method":   func() error { _, err := api.Create(ctx, &tokens.AuthOptions{}); return err }(),
-			"bad header": func() error {
-				_, err := api.Create(ctx, &tokens.AuthOptions{TokenID: "old"}, tokens.WithCreateHeader("bad header", "x"))
+			// Native Create never calls ToTokenV3HeadersMap, so header extensions are unsupported.
+			"header extension": func() error {
+				_, err := api.Create(ctx, &tokens.AuthOptions{TokenID: "old"}, func(config *request.Config[*tokens.AuthOptions]) error {
+					config.Headers = map[string]string{"X-Vendor": "1"}
+					return nil
+				})
+				if !errors.Is(err, resource.ErrInvalidOption) {
+					return nil
+				}
 				return err
 			}(),
 		} {

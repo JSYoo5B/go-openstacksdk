@@ -726,6 +726,8 @@ type builder struct {
 	// reflectedQuery marks a native call that never reads the adapter's query
 	// method, so query extensions would be dropped.
 	reflectedQuery bool
+	// unread names builder methods the native function never calls.
+	unread map[string]bool
 }
 
 func extraction(t types.Type) *types.Signature {
@@ -829,6 +831,7 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		if err != nil {
 			return err
 		}
+		builders[i].unread = unreadBuilderMethods(decl, builders[i].name, builders[i].iface)
 	}
 	contextAlias := e.use("context")
 	requestAlias := e.use("github.com/JSYoo5B/go-openstacksdk/request")

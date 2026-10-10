@@ -151,3 +151,30 @@ func ExtractCapsulesV132(r Page)([]CapsuleV132,error){_ = r.(CapsulePage);return
 		}
 	}
 }
+
+func TestUnreadBuilderMethodsDisableTheirExtensions(t *testing.T) {
+	pkg, decls := fixture(t, `package fixture
+type Builder interface {
+	ToCreateMap() (map[string]any, error)
+	ToCreateHeadersMap() (map[string]string, error)
+}
+type Options struct{}
+func (Options) ToCreateMap() (map[string]any, error) { return nil, nil }
+func (Options) ToCreateHeadersMap() (map[string]string, error) { return nil, nil }
+func helper(Builder) {}
+func Create(opts Builder) { _, _ = opts.ToCreateMap() }
+func Read(opts Builder) { _, _ = opts.ToCreateMap(); _, _ = opts.ToCreateHeadersMap() }
+func Escape(opts Builder) { helper(opts) }
+`)
+	iface, _ := ifaceOf(pkg.Scope().Lookup("Builder").Type())
+	for _, tc := range []struct {
+		name    string
+		headers bool
+	}{{"Create", false}, {"Read", true}, {"Escape", true}} {
+		b := builder{name: "opts", iface: iface, unread: unreadBuilderMethods(decls[tc.name], "opts", iface)}
+		// A parameter passed elsewhere may be read there, so its methods all stay available.
+		if caps := capabilities(pkg, b); !caps.body || caps.headers != tc.headers {
+			t.Fatal(tc.name, caps, b.unread)
+		}
+	}
+}

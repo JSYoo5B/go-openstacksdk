@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/ec2tokens"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/ec2tokens"
@@ -163,18 +164,24 @@ func TestNativeEC2TokenBodiesSignaturesAndSubjectToken(t *testing.T) {
 }
 
 // The native Create and ValidateS3Token never call ToTokenV3HeadersMap, so the
-// generated header extension is accepted and then silently dropped.
-func TestNativeEC2TokenHeaderExtensionIsDropped(t *testing.T) {
+// facade offers no header extension and rejects a raw one before HTTP.
+func TestNativeEC2TokenHeaderExtensionIsRejected(t *testing.T) {
 	ctx := context.Background()
 	var calls []nativeEC2Call
 	api, _ := nativeEC2API(t, &calls, func(*http.Request) (int, string) { return 200, nativeEC2Token })
-	if _, err := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, ec2tokens.WithCreateHeader("X-Vendor", "1")); err != nil {
-		t.Fatal(err)
+	header := func(config *request.Config[*ec2tokens.AuthOptions]) error {
+		config.Headers = map[string]string{"X-Vendor": "1"}
+		return nil
 	}
-	if _, err := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, ec2tokens.WithValidateS3TokenHeader("X-Vendor", "1")); err != nil {
-		t.Fatal(err)
+	_, createErr := api.Create(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, header)
+	_, validateErr := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{Access: "a", Signature: "sig"}, header)
+	for operation, err := range map[string]error{"Create": createErr, "ValidateS3Token": validateErr} {
+		nativeEC2Operation(t, err, operation)
+		if !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(operation, err)
+		}
 	}
-	if len(calls) != 2 || calls[0].vendor != "" || calls[1].vendor != "" {
+	if len(calls) != 0 {
 		t.Fatal(calls)
 	}
 }
@@ -238,10 +245,6 @@ func TestNativeEC2TokenStatusesAndPreflight(t *testing.T) {
 			// token is reserved by its json tag even though Create deletes it from the body.
 			"token extension": {"Create", func() error {
 				_, err := api.Create(ctx, valid(), ec2tokens.WithCreateField("token", "x"))
-				return err
-			}()},
-			"invalid header": {"Create", func() error {
-				_, err := api.Create(ctx, valid(), ec2tokens.WithCreateHeader("bad header", "x"))
 				return err
 			}()},
 			"validate access":      {"ValidateS3Token", func() error { _, err := api.ValidateS3Token(ctx, &ec2tokens.AuthOptions{}); return err }()},

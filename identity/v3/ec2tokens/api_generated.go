@@ -30,9 +30,6 @@ func WithCreateOptions(value *AuthOptions) CreateOption { return request.WithOpt
 func WithCreateField(key string, value any) CreateOption {
 	return request.WithField[*AuthOptions](key, value)
 }
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[*AuthOptions](key, value)
-}
 
 type createOptsBuilder struct {
 	base   *AuthOptions
@@ -80,7 +77,7 @@ func (a *API) Create(ctx context.Context, opts *AuthOptions, options ...CreateOp
 		var zero0 *tokens.Token
 		return zero0, err
 	}
-	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("Create", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err
@@ -99,9 +96,6 @@ func WithValidateS3TokenOptions(value *AuthOptions) ValidateS3TokenOption {
 }
 func WithValidateS3TokenField(key string, value any) ValidateS3TokenOption {
 	return request.WithField[*AuthOptions](key, value)
-}
-func WithValidateS3TokenHeader(key, value string) ValidateS3TokenOption {
-	return request.WithHeader[*AuthOptions](key, value)
 }
 
 type validateS3TokenOptsBuilder struct {
@@ -150,7 +144,7 @@ func (a *API) ValidateS3Token(ctx context.Context, opts *AuthOptions, options ..
 		var zero0 *tokens.Token
 		return zero0, err
 	}
-	if err = request.ValidateCapabilities(cfg, true, false, true); err != nil {
+	if err = request.ValidateCapabilities(cfg, true, false, false); err != nil {
 		err = request.Wrap("ValidateS3Token", "ec2tokens", err)
 		var zero0 *tokens.Token
 		return zero0, err
