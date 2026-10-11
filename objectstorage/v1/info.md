@@ -114,6 +114,6 @@ Python은 fresh mutable [Info Resource](https://github.com/openstack/openstacksd
 
 Swift proxy는 [effective constraints](https://github.com/openstack/swift/blob/5e4b45fc17a59d4edd7079c0da3fe028175def45/swift/proxy/server.py#L359-L378)를 등록하므로 `max_file_size`는 설정에 따라 달라지고 [기본값](https://github.com/openstack/swift/blob/5e4b45fc17a59d4edd7079c0da3fe028175def45/swift/common/constraints.py#L28-L66)은 5,368,709,122 bytes입니다. [선택적인 SLO middleware](https://github.com/openstack/swift/blob/5e4b45fc17a59d4edd7079c0da3fe028175def45/swift/common/middleware/slo.py#L1893-L1922)는 `min_segment_size=1`을 광고합니다. SLO section이 없다는 사실만으로 기능·권한을 확정할 수 없으며, 선택한 크기는 업로드의 성공이나 전체 large-object 크기를 보장하지 않습니다.
 
-pinned Gophercloud v2.15.0의 objectstorage/v1에는 `/info` 조회 또는 segment 선택 공개 연산이 없습니다. 기존 listing의 `ExtractInfo`는 다른 함수입니다. 이 두 workflow는 SDK 소유의 partial 구현이며 Python Resource·descriptor·adapter·exception·URL coercion까지 완료한 것으로 판정하지 않습니다.
+pinned Gophercloud v2.15.0의 objectstorage/v1에는 `/info` 조회 또는 segment 선택 공개 연산이 없습니다. 기존 listing의 `ExtractInfo`는 다른 함수입니다. 이 두 workflow는 SDK가 소유한 구현이며 기본 인자의 Python `get_info`, `get_object_segment_size`와 같은 `/info` 요청을 보내고 같은 값을 돌려주므로 대응으로 판정합니다. Python Resource descriptor 변환, URL 해석 세부, 예외 class와 float fallback 값 같은 차이는 위에 적은 대로 남습니다.
 
 회귀 테스트는 [raw model·선택·응답 소유권](info_core_test.go), [옵션·사전검증](info_options_test.go), [public HTTP·native retry·fallback](info_contracts_test.go)을 다룹니다. [Connection 공유](../../connection_objectstorage_info_test.go)와 [native facade·생성물 보존](../../internal/cmd/sdkgen/swift_info_test.go)도 별도 계약입니다.

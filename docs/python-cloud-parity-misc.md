@@ -22,9 +22,9 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 | `update_container` | `containers.API.SetMetadataAndRefresh(ctx, name, headers, containers.WithMetadataRefresh(false))` | 대응 |
 | `set_container_access` | `SetMetadataAndRefresh`에 ACL 문자열 직접 전달 | 미해결 |
 | `get_container_access` | `Find` 결과의 `X-Container-Read`를 호출자가 해석 | 미해결 |
-| `get_object_capabilities` | `objectstorage/v1.Service.GetInfo` | 미해결 |
-| `get_object_segment_size` | `objectstorage/v1.Service.GetObjectSegmentSize` | 미해결 |
-| `is_object_stale` | `objects.API.IsObjectStale` | 미해결 |
+| `get_object_capabilities` | `objectstorage/v1.Service.GetInfo` | 대응 |
+| `get_object_segment_size` | `objectstorage/v1.Service.GetObjectSegmentSize` | 대응 |
+| `is_object_stale` | `objects.API.IsObjectStale` | 대응 |
 | `create_object` | `objects.API.CreateObject` | 미해결 |
 | `update_object` | `objects.API.SetMetadataFromFresh(ctx, container, name, values)` | 대응 |
 | `list_objects` | `objects.API.InContainer` 뒤 `Collection.List` | 미해결 |
@@ -92,7 +92,7 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이고 Go는 `%2F`로 escape합니다. Swift는 두 경로를 같은 object로 해석합니다.
 
-`get_object`, `stream_object`, `create_object`, `is_object_stale`, `get_object_capabilities`, `get_object_segment_size`, `list_objects`는 같은 이름의 Proxy 메서드에 그대로 위임합니다. 이 Proxy 메서드들은 이미 미해결로 기록되어 있고, cloud helper의 기본 경로도 그 차이를 그대로 지나갑니다. 예를 들어 `get_object`는 기본값에서 `response.text`를 저장하므로 Requests가 추측한 문자 집합으로 디코딩한 문자열을 돌려주는데, Go `GetObject`는 원본 바이트를 돌려줍니다. `stream_object`는 `resp_chunk_size` 단위 iterator이고 404에서 빈 iterator가 되지만 Go `StreamObject`는 `io.ReadCloser`를 돌려주고 404를 오류로 냅니다.
+`get_object`, `stream_object`, `create_object`, `is_object_stale`, `get_object_capabilities`, `get_object_segment_size`, `list_objects`는 같은 이름의 Proxy 메서드에 그대로 위임합니다. 그래서 cloud helper의 판정은 위임하는 Proxy 메서드의 판정을 따릅니다. `get_object_capabilities`, `get_object_segment_size`, `is_object_stale`는 Proxy 쪽 `GetInfo`, `GetObjectSegmentSize`, `IsObjectStale`이 기본 인자에서 같은 `/info` `GET`이나 object `HEAD`를 보내고 같은 값을 돌려주므로 대응입니다. 나머지 Proxy 메서드는 미해결로 기록되어 있고, cloud helper의 기본 경로도 그 차이를 그대로 지나갑니다. 예를 들어 `get_object`는 기본값에서 `response.text`를 저장하므로 Requests가 추측한 문자 집합으로 디코딩한 문자열을 돌려주는데, Go `GetObject`는 원본 바이트를 돌려줍니다. `stream_object`는 `resp_chunk_size` 단위 iterator이고 404에서 빈 iterator가 되지만 Go `StreamObject`는 `io.ReadCloser`를 돌려주고 404를 오류로 냅니다.
 
 ## Connection 상태
 
@@ -109,7 +109,7 @@ object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이
 - `stream_object`: chunk iterator와 404를 빈 iterator로 바꾸는 동작이 없습니다.
 - `get_object_raw`: 임의 query 문자열로 `GET`을 보내고 원본 응답을 돌려주는 호출이 없습니다.
 - `list_objects`: Python과 같은 object record 목록 호출이 없고, 기존 Collection 목록은 `format=json` query와 Python 이어 받기 규칙을 기준으로 비교하지 않았습니다.
-- `create_object`, `is_object_stale`, `get_object_capabilities`, `get_object_segment_size`: 위임하는 Proxy 메서드가 미해결인 이유가 그대로 남습니다.
+- `create_object`: 위임하는 Proxy `create_object`가 미해결인 이유가 그대로 남습니다. large object segment 이름과 `If-None-Match` header, DLO manifest prefix가 Python 요청과 다릅니다.
 - `delete_autocreated_image_objects`: `image_api_use_tasks` 확인, `images` container 목록, `x-sdk-autocreated` metadata 확인과 삭제를 묶은 helper가 없습니다.
 - `auth_token`, `Connection.authorize`: Connection이 token을 노출하지 않습니다. token은 Gophercloud `ProviderClient`에 있고, 만료 전에 미리 다시 인증하지도 않습니다.
 - `current_user_id`, `service_catalog`, `session`: 인증 응답의 user ID, service catalog, keystoneauth Session에 해당하는 공개 접근자가 없습니다.
