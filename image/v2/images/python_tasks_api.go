@@ -156,6 +156,20 @@ func (a *API) TaskRecords(ctx context.Context, imageID string, options ...TaskRe
 			}
 		}
 		fixed := rest.RequestHeaderPolicy{Values: headers, Absent: []string{"Authorization", "X-Service-Token", "Host", "Cookie", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "Te", "Upgrade", "X-OpenStack-Nova-API-Version", "X-OpenStack-Volume-API-Version", "X-OpenStack-Manila-API-Version", "X-OpenStack-Ironic-API-Version", "X-OpenStack-Ironic-Inspector-API-Version"}}
+		// An unselected conditional request must remain unconditional on retry.
+		// Captured or explicit conditional headers instead belong to fixed.Values.
+		for _, key := range []string{"If-Match", "If-None-Match", "If-Modified-Since", "If-Unmodified-Since"} {
+			present := false
+			for name := range headers {
+				if strings.EqualFold(name, key) {
+					present = true
+					break
+				}
+			}
+			if !present {
+				fixed.Absent = append(fixed.Absent, key)
+			}
+		}
 		if version != "" {
 			headers["OpenStack-API-Version"] = "image " + version
 		} else {

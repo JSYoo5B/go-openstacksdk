@@ -656,3 +656,70 @@ func TestPythonImageTasksRecordsPhysicalProofAndStickySource(t *testing.T) {
 		}
 	}
 }
+
+// Conditional headers are safe caller choices; a native retry cannot add an
+// unselected condition, replace a selected value, or omit it before replay.
+func TestPythonImageTasksRecordsConditionalHeadersAreOwned(t *testing.T) {
+	for _, key := range []string{"If-Match", "If-None-Match", "If-Modified-Since", "If-Unmodified-Since"} {
+		for _, lane := range []string{"absent", "absent-custom", "captured", "explicit", "changed", "omitted"} {
+			t.Run(key+"/"+lane, func(t *testing.T) {
+				var calls []imageTasksCall
+				var observed []http.Header
+				body := `{"rejection":"conditional-original"}`
+				value := `"selected-etag"`
+				if strings.HasSuffix(key, "-Since") {
+					value = "Wed, 21 Oct 2015 07:28:00 GMT"
+				}
+				api, _ := imageTasksAPI(t, &calls, func(req *http.Request) *http.Response {
+					observed = append(observed, req.Header.Clone())
+					if len(calls) == 1 {
+						r := imageTasksWire(503, body)
+						r.Header.Set("X-Request-Id", "conditional-proof")
+						return r
+					}
+					return imageTasksWire(200, `{"tasks":[{"image_id":"parent"}]}`)
+				})
+				var options []images.TaskRecordsOption
+				if lane == "captured" {
+					api.RawClient().MoreHeaders = map[string]string{strings.ToLower(key): value}
+				}
+				if lane == "explicit" || lane == "changed" || lane == "omitted" {
+					options = append(options, images.WithTaskRecordsHeaders(map[string]string{strings.ToLower(key): value}))
+				}
+				cause := errors.New("conditional callback")
+				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
+					switch lane {
+					case "absent", "absent-custom":
+						opts.MoreHeaders[strings.ToLower(key)] = "injected"
+					case "changed":
+						opts.MoreHeaders[key] = "changed"
+					case "omitted":
+						opts.OmitHeaders = []string{strings.ToLower(key)}
+					}
+					if lane == "absent-custom" {
+						return cause
+					}
+					return nil
+				}
+				rows, err := api.AllTaskRecords(context.Background(), "parent", options...)
+				if lane == "captured" || lane == "explicit" {
+					if err != nil || len(rows) != 1 || len(calls) != 2 || len(observed) != 2 || observed[0].Get(key) != value || observed[1].Get(key) != value {
+						t.Fatal(rows, err, calls, observed)
+					}
+					return
+				}
+				var native gophercloud.ErrUnexpectedResponseCode
+				if rows != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.Is(err, cause) != (lane == "absent-custom") || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "conditional-proof" || len(calls) != 1 {
+					t.Fatal(rows, err, native, calls)
+				}
+				want := ""
+				if lane == "changed" || lane == "omitted" {
+					want = value
+				}
+				if len(observed) != 1 || observed[0].Get(key) != want {
+					t.Fatal(observed, want)
+				}
+			})
+		}
+	}
+}
