@@ -31,6 +31,8 @@ Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규�
 
 `Volumes.FindRecord`와 `Volumes/Snapshots.FetchMetadataRecord/GetMetadataRecord/SetMetadataRecord/DeleteMetadataRecord`는 검색·metadata 기본값과 Source 캐시 전환을 제공합니다. [Volume 검색](volume-find-python.md), [Metadata 비교](metadata-python.md)에 구체적 옵션·nil/빈 입력·순차 삭제와 부분 응답을 설명합니다.
 
+`Groups/GroupSnapshots.FindRecord`는 SDK가 ID/name 검색·missing 기본값·단계별 버전과 실제 오류 증거를 처리합니다. [Group 검색](group-find-python.md), [Group snapshot 검색](group-snapshot-find-python.md)에 독립 Python/Go 사용법을 설명합니다.
+
 `Groups`·`GroupSnapshots`는 고정된 Cinder v3 기본값과 구체적 함수 옵션으로 generic group API를 제공합니다. [Group](groups-python.md), [Group snapshot](group-snapshots-python.md)에 Python/Go 사용법·버전·Create/Update/Delete·목록 증거를 설명합니다.
 
 `Messages.GetRecord/ListRecords/DeleteRecord`는 SDK가 기본값과 구체적 옵션을 제공하는 Cinder message API입니다. [Python/Go 비교](messages-python.md)에 Source envelope·stock 호환·기본 missing·목록 정책을 설명합니다.
