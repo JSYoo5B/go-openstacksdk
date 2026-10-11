@@ -230,7 +230,7 @@ func listFindRecords(ctx context.Context, source *cloudread.Source, guard func(c
 			// containing one duplicates an argument to existing/__init__ even
 			// when its value is null or false. Direct Secret.fetch instead consumes
 			// Body attributes and silently ignores these undeclared metadata keys.
-			for _, key := range []string{"connection", "microversion", "_synchronized"} {
+			for _, key := range []string{"connection", "microversion", "_synchronized", "cls"} {
 				if _, exists := wire.Body[key]; exists {
 					cause := fmt.Errorf("%w: Source secret list row duplicates constructor key %q", resource.ErrInvalidOption, key)
 					yield(nil, page.Fail(cloudread.ContextError(ctx, errors.Join(cause, guard(ctx)))))

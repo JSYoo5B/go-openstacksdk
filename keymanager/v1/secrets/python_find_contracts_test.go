@@ -41,7 +41,7 @@ func TestPythonSecretFindRecordDirectDescriptorsAndOwnedReceipts(t *testing.T) {
 	client := secretFindRecordClient(cloud)
 	client.MoreHeaders = map[string]string{"X-Project-Id": "project", "aCcEpT": "configured"}
 	calls := 0
-	metadata := `{"name":false,"id":null,"secret_ref":"https://foreign.example/secrets/passive","status":0,"bit_length":9007199254740993,"algorithm":[false],"created":null,"created_at":"alias loses","content_types":{"default":"text/plain"},"payload_content_type":"application/octet-stream","unknown":{"n":9007199254740993},"connection":null,"microversion":true,"_synchronized":false}`
+	metadata := `{"name":false,"id":null,"secret_ref":"https://foreign.example/secrets/passive","status":0,"bit_length":9007199254740993,"algorithm":[false],"created":null,"created_at":"alias loses","content_types":{"default":"text/plain"},"payload_content_type":"application/octet-stream","unknown":{"n":9007199254740993},"connection":null,"microversion":true,"_synchronized":false,"cls":null}`
 	cloud.Provider.HTTPClient.Transport = secretFindRecordTransport(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.Method != http.MethodGet || req.Header.Get("X-Auth-Token") != "test-token" || req.Header.Get("X-Project-Id") != "project" {
@@ -75,7 +75,7 @@ func TestPythonSecretFindRecordDirectDescriptorsAndOwnedReceipts(t *testing.T) {
 	}
 	// The direct custom Body updater accepts and ignores constructor controls;
 	// only Resource.list's existing(...) call treats their presence as an error.
-	for key, want := range map[string]string{"connection": "null", "microversion": "true", "_synchronized": "false"} {
+	for key, want := range map[string]string{"connection": "null", "microversion": "true", "_synchronized": "false", "cls": "null"} {
 		if value.Resource.Body[key] != nil || string(value.Wire.Body[key]) != want {
 			t.Fatalf("direct constructor control %s changed response semantics: %#v", key, value)
 		}
@@ -294,6 +294,8 @@ func TestPythonSecretFindRecordListOnlyExactMatchingAndLateFailures(t *testing.T
 		{"constructor connection", "name with spaces", `{"secrets":[{"id":"1","name":"name with spaces","connection":null}]}`, "", true, false, 1},
 		{"constructor microversion", "name with spaces", `{"secrets":[{"id":"1","name":"name with spaces","microversion":false}]}`, "", true, false, 1},
 		{"constructor synchronized", "name with spaces", `{"secrets":[{"id":"1","name":"name with spaces","_synchronized":{}}]}`, "", true, false, 1},
+		{"constructor cls null", "name with spaces", `{"secrets":[{"id":"1","name":"name with spaces","cls":null}]}`, "", true, false, 1},
+		{"constructor cls false", "name with spaces", `{"secrets":[{"id":"1","name":"name with spaces","cls":false}]}`, "", true, false, 1},
 		{"foreign next rejected", "name with spaces", `{"secrets":[{"name":"name with spaces"}],"next":"https://foreign.example/secrets?offset=1"}`, "", true, false, 1},
 		{"cycle rejected", "name with spaces", `{"secrets":[{"name":"name with spaces"}],"next":"?offset=0"}`, "", true, false, 1},
 		{"wrong next filter rejected", "name with spaces", `{"secrets":[{"name":"name with spaces"}],"next":"?offset=1&name=replace"}`, "", true, false, 1},

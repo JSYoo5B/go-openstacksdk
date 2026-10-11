@@ -130,9 +130,10 @@ the original request ID; list rows use the full `secret_ref`. The separate
 `secret_id` formatter exposes only its last HREF path component. Repeated
 matches, including the same ID twice, are ambiguous. A late page/row/continuation
 failure defeats an earlier candidate. A list row containing `connection`,
-`microversion`, or `_synchronized` fails even when its value is null or false:
-Source `Resource.list` passes these constructor controls to `existing` or its
-initializer, so matching row keys duplicate explicit arguments. The error
+`microversion`, `_synchronized`, or `cls` fails even when its value is null or false:
+Source `Resource.list` supplies `connection`/`microversion` explicitly, and
+`Resource.existing` supplies `_synchronized` to the initializer. Its classmethod
+also binds `cls`, so those row keys duplicate arguments. The error
 retains the actual whole page as `resource.ResponseError` and an optional
 `Resource=nil` receipt. Direct metadata accepts these same keys as unknown
 Body data; they remain only in Wire and do not change the declared view.
