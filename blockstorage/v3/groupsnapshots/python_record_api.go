@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
@@ -174,7 +173,7 @@ func (p *recordPrepared) request(method, target string, body any) (*rest.Respons
 		}
 		policy.Values["Content-Type"] = "application/json"
 	}
-	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, body, policy, rest.RejectionPolicy{Codes: recordCodes(400, 600), PreserveCleanRetry: true}, recordCodes(100, 400)...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, body, policy, rest.RejectionPolicy{Codes: recordCodes(400, 600), PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, recordCodes(100, 400)...)
 	if response == nil && err != nil {
 		var native gophercloud.ErrUnexpectedResponseCode
 		if errors.As(err, &native) {
@@ -222,15 +221,25 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordReadOpt
 		}
 	}
 	seed["id"], _ = json.Marshal(id)
-	if err == nil {
-		err = p.prepare(cfg.Microversion, cfg.Headers, cfg.Location, false)
-	}
 	if err != nil {
 		return nil, recordWrap(ctx, op, errors.Join(err, p.guard(ctx)))
 	}
-	r, err := p.request(http.MethodGet, p.source.Client.ServiceURL("group_snapshots", url.PathEscape(id)), nil)
-	value, err := p.response(r, seed, err)
+	value, err := p.getRecord(id, seed, nil, cfg)
 	return value, recordWrap(ctx, op, err)
+}
+
+// getRecord shares the existing guarded transport and projector with FindRecord.
+// Its caller owns the constructor seed and any query; it never captures a new source.
+func (p *recordPrepared) getRecord(id string, seed map[string]json.RawMessage, query url.Values, cfg RecordReadOpts) (*GroupSnapshotRecord, error) {
+	if err := errors.Join(p.prepare(cfg.Microversion, cfg.Headers, cfg.Location, false), p.guard(p.ctx)); err != nil {
+		return nil, err
+	}
+	target := p.source.Client.ServiceURL("group_snapshots", url.PathEscape(id))
+	if len(query) != 0 {
+		target += "?" + query.Encode()
+	}
+	r, err := p.request(http.MethodGet, target, nil)
+	return p.response(r, seed, err)
 }
 
 // CreateRecord posts only the pinned declared attrs. Unknown attrs are ignored;
@@ -318,17 +327,34 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			return
 		}
 		cfg, err := applyRecord(p, RecordListOpts{}, copyList, owned)
-		var query url.Values
-		var filters []cloudfilter.JSONMember
-		var control rest.ListControl
-		if err == nil {
-			query, filters, control, err = prepareList(cfg)
+		if err != nil {
+			fail(errors.Join(err, p.guard(ctx)))
+			return
 		}
+		for value, err := range p.listRecords(cfg) {
+			if err != nil {
+				fail(err)
+				return
+			}
+			if !yield(value, nil) {
+				return
+			}
+		}
+	}
+}
+
+// listRecords reuses the source-owned pager and raw/declared record projection.
+// It receives already-owned options, without replaying caller callbacks or capture.
+func (p *recordPrepared) listRecords(cfg RecordListOpts) iter.Seq2[*GroupSnapshotRecord, error] {
+	cfg = copyList(cfg)
+	return func(yield func(*GroupSnapshotRecord, error) bool) {
+		fail := func(err error) { yield(nil, err) }
+		query, filters, control, err := prepareList(cfg)
 		if err == nil {
 			err = p.prepare(cfg.Microversion, cfg.Headers, cfg.Location, false)
 		}
 		if err != nil {
-			fail(errors.Join(err, p.guard(ctx)))
+			fail(errors.Join(err, p.guard(p.ctx)))
 			return
 		}
 		// Resource.list owns JSON Accept over an adapter/source default.
@@ -346,13 +372,13 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 		var page *rest.Response
 		spec := rest.CollectionSpec[GroupSnapshotRecord]{Client: &p.source.Client, Path: path, Kind: "group_snapshots", PluralKey: "group_snapshots", Metadata: recordMetadata, Validate: p.guard, SourceGuard: p.guard, ListCodes: recordCodes(100, 400), ReadPage: func(_ context.Context, target string, _ ...int) (*rest.Response, error) {
 			return p.request(http.MethodGet, target, nil)
-		}, ValidateResponse: func(r *rest.Response) error { page = r; return p.guard(ctx) }, ValidateItem: func(v *GroupSnapshotRecord) error {
+		}, ValidateResponse: func(r *rest.Response) error { page = r; return p.guard(p.ctx) }, ValidateItem: func(v *GroupSnapshotRecord) error {
 			v.Envelope = bytes.Clone(page.Body)
 			v.Header, v.StatusCode = v.Wire.Header.Clone(), v.Wire.StatusCode
 			p.proof(v)
-			return errors.Join(recordProject(v, nil, p.location), p.guard(ctx))
+			return errors.Join(recordProject(v, nil, p.location), p.guard(p.ctx))
 		}, Paging: rest.PagePolicy[GroupSnapshotRecord]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: recordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, MarkerOrOffsetPagination: true}}
-		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
+		for value, err := range rest.ListWithControl(p.ctx, spec, query, control) {
 			if err != nil {
 				fail(err)
 				return
@@ -362,7 +388,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 				fail(page.Fail(err))
 				return
 			}
-			matched, cause := cloudsnapshot.MatchLocal(ctx, raw, filters, func() error { return p.guard(ctx) })
+			matched, cause := cloudsnapshot.MatchLocal(p.ctx, raw, filters, func() error { return p.guard(p.ctx) })
 			if cause != nil {
 				fail(page.Fail(cause))
 				return
