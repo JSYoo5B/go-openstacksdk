@@ -10,6 +10,7 @@ import (
 	resource5 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
 	resource6 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 	resource7 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -24,6 +25,7 @@ type Service struct {
 	SecretConsumers *resource5.API
 	Secrets         *resource6.API
 	SecretStores    *resource7.API
+	Waits           *resource8.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
@@ -36,6 +38,7 @@ func New(client *gophercloud.ServiceClient) *Service {
 		SecretConsumers: resource5.New(client),
 		Secrets:         resource6.New(client),
 		SecretStores:    resource7.New(client),
+		Waits:           resource8.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

@@ -116,6 +116,10 @@ func (g *generator) generateServices() error {
 		groups["blockstorage/v3"]["groups"] = true
 		groups["blockstorage/v3"]["groupsnapshots"] = true
 	}
+	// Finite owned waits extend Barbican without inventing native operations.
+	if groups["keymanager/v1"] != nil {
+		groups["keymanager/v1"]["waits"] = true
+	}
 	keys := []string{}
 	for key := range groups {
 		keys = append(keys, key)
