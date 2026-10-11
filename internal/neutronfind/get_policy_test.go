@@ -155,3 +155,52 @@ func TestSourceConstructorClassCollisionIsOptInAndPreservesActualListPage(t *tes
 		}
 	}
 }
+
+func TestSourceMemberVersionAttributeUsesSelectedPolicyWhileWireStaysActual(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		for _, version := range []string{"", "2.2"} {
+			t.Run(map[bool]string{false: "baseline", true: "Source"}[enabled]+"/"+version, func(t *testing.T) {
+				cloud := testcloud.New(t)
+				client := cloud.Client("network", "/neutron/v2.0/")
+				client.Microversion = version
+				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+					return policyWire(200, `{"record":{"id":"actual","microversion":"foreign"}}`), nil
+				})
+				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				value, err := engine.Get(context.Background(), "target", neutronfind.Options{})
+				if err != nil || value == nil {
+					t.Fatal(value, err)
+				}
+				want := `"foreign"`
+				if enabled {
+					want = "null"
+					if version != "" {
+						want = `"` + version + `"`
+					}
+				}
+				if string(value.Resource.Body["microversion"]) != want || string(value.Wire.Body["microversion"]) != `"foreign"` {
+					t.Fatal(value, want)
+				}
+			})
+		}
+	}
+}
+func TestSourceFindControlsNeverBecomeFetchQueryOrConstructorSeed(t *testing.T) {
+	for _, key := range []string{"name_or_id", "ignore_missing"} {
+		cloud := testcloud.New(t)
+		client := cloud.Client("network", "/neutron/v2.0/")
+		calls := 0
+		cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, `{"record":{}}`), nil })
+		engine, err := neutronfind.New(context.Background(), client, policyProfile(true), nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		_, err = engine.Find(context.Background(), "target", neutronfind.Options{Query: map[string]json.RawMessage{key: json.RawMessage("false")}})
+		if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+			t.Fatal(key, err, calls)
+		}
+	}
+}

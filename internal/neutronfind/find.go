@@ -61,6 +61,9 @@ type Profile struct {
 	// CPython float truthiness and GET-only find microversion overrides.
 	// Existing bindings keep their reviewed baseline until explicitly migrated.
 	SourceFindPolicy bool
+	// StopFaultRetryCallbacks is independent of Source projection policy.
+	// Zero preserves the reviewed native callback behavior of older bindings.
+	StopFaultRetryCallbacks bool
 }
 
 // Engine captures selected service facts before leaf option callbacks run.
@@ -105,6 +108,7 @@ type Record struct {
 	StatusCode     int
 	row            json.RawMessage
 	fromList       bool
+	microversion   string
 }
 
 func (v *Record) UnmarshalJSON(data []byte) error {
@@ -284,6 +288,16 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 		}
 		body[field.Name] = converted
 	}
+	if e.profile.SourceFindPolicy && !value.fromList {
+		if _, exists := body["microversion"]; exists {
+			// Source to_dict reads the Resource's selected fetch version rather
+			// than the unknown response member. Wire keeps that actual member.
+			body["microversion"] = json.RawMessage("null")
+			if value.microversion != "" {
+				body["microversion"], _ = json.Marshal(value.microversion)
+			}
+		}
+	}
 	// Connection-derived mutable location stays an owned null unless supplied.
 	if _, exists := body["location"]; !exists {
 		body["location"] = json.RawMessage("null")
@@ -368,11 +382,11 @@ func (e *Engine) findMarker(value *Record) (string, error) {
 	}
 	return values[0], nil
 }
-func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawMessage) (*Record, error) {
+func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawMessage, version string) (*Record, error) {
 	if response == nil {
 		return nil, nil
 	}
-	value := &Record{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
+	value := &Record{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode, microversion: version}
 	if !json.Valid(response.Body) {
 		return value, e.findProject(value, seed)
 	}
@@ -460,6 +474,9 @@ func (e *Engine) prepareQuery(policy Options, identity string, forFind bool) (ur
 		raw := policy.Query[key]
 		if err := findKey(key); err != nil && (forFind || key != "id") {
 			return nil, nil, nil, nil, control, err
+		}
+		if e.profile.SourceFindPolicy && forFind && (key == "name_or_id" || key == "ignore_missing") {
+			return nil, nil, nil, nil, control, findInvalid("%q is an owned find argument", key)
 		}
 		if e.profile.SourceFindPolicy && (key == "cls" || key == "location" || key == "__conflicting_attrs") {
 			return nil, nil, nil, nil, control, findInvalid("%q is an SDK-owned Resource constructor control", key)
@@ -654,7 +671,7 @@ func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, poli
 		var origin *rest.Response
 		spec := rest.CollectionSpec[Record]{Client: &client, Path: e.profile.Path, Kind: e.profile.Kind, PluralKey: e.profile.Plural, Metadata: findMetadata, Validate: guard, SourceGuard: guard, ListCodes: findCodes(),
 			ReadPage: func(pageCtx context.Context, target string, codes ...int) (*rest.Response, error) {
-				return rest.DoJSONGuardedRejectionsHeaderPolicy(pageCtx, &client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, codes...)
+				return rest.DoJSONGuardedRejectionsHeaderPolicy(pageCtx, &client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, codes...)
 			},
 			ValidateResponse: func(response *rest.Response) error { origin = response; return guard(ctx) },
 			ValidateItem: func(value *Record) error {
@@ -747,13 +764,13 @@ func (e *Engine) getRecord(ctx context.Context, source *cloudread.Source, header
 	if len(query) != 0 {
 		target += "?" + query.Encode()
 	}
-	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, findCodes()...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, findCodes()...)
 	if err != nil {
 		return nil, err
 	}
 	owned := findFields(seed)
 	owned[e.profile.IDKey], _ = json.Marshal(id)
-	value, err := e.findResponse(response, owned)
+	value, err := e.findResponse(response, owned, source.Client.Microversion)
 	if err = errors.Join(err, e.Check(ctx)); err != nil {
 		err = response.Fail(err)
 	}
