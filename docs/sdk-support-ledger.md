@@ -4,9 +4,21 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 Credential·Neutron·Swift·Nova34개](#핵심-credentialneutronswiftnova-34개-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [핵심 독립 서비스42개](#핵심-독립-서비스42개-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,250입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,292입니다.
+
+## 핵심 독립 서비스42개 마감
+
+2026-10-11 재개 후 Keystone Credential update1·Trust5, Nova user action8·attachment/group3·server backup1, Cinder attachment2·transfer3·type/encryption/QoS4·connector2, Swift native Create1, Neutron port forwarding12개를 추가했습니다. named Go 호출은1,250→1,292(+42), 핵심1,176→1,218/2,292입니다. 새18개 review와 기존 unresolved24개 승격으로 reviews1,604·contracts5,122(+154)·catalog unresolved2,069·unsupported1이며 supported는0개입니다. catalog SHA와 양쪽 Source pin/fingerprint, 관련 없는 이전 review는 보존했습니다.
+
+작업 에이전트8개는 소유 파일의 구현·fixture 회귀·개별 Python/Go guide를 병렬 작성하고, root가 공통 수정·실행·판정·generator·commit/push를 통합했습니다. Gophercloud 공개 testhelper 기반 기존 testcloud·native fixture·오류 transport와 공유 REST·Resource·discovery 엔진을 재사용했습니다. [권한 분기](core-policy-branches.md)의 정책 감사37개는 기존 Transfer3개도 포함하므로 신규 증가42개와 중복 집계하지 않습니다.
+
+서비스별 최종 집중/회귀 race는 Swift8+generator1·Credential7·Trust12·Cinder type/QoS20·Attachment24·Transfer13·Connector/Volume22·Nova attachment12·group13·Nova servers44·Compute140·Connection457·공통 discovery1그룹이 PASS입니다. Neutron forwarding 전체12그룹도 PASS입니다. 각 숫자는 해당 실행의 top-level test group이며 기존 회귀를 포함합니다. 초기 connector base64·Nova discovery fixture·부분 응답 증거 단언 실패를 수정했고, 동결 후 다시 실행한 PASS를 사용합니다. peer 검토에서 발견한 falsey attachment mode의 advertised range와 Transfer400..599 Read/Close 관찰을 보완했습니다. Nova backup 테스트에서 발견한 discovery 응답 경계의 순간적인 source 변경도 공통 엔진에서 보존합니다.
+
+구현·서비스 문서는 작은 의미 있는 커밋으로 저장했습니다. 전체 gate와 원문 문서11개 main build는 최종 불변 snapshot에서 확인할 마감 단계이며 아래에 정확한 revision·결과를 덧붙입니다. 이는 인증된 실제 OpenStack 호출, Python SDK runtime 실행 또는 최신 원격 module의 replace 없는 설치를 뜻하지 않습니다.
+
+재개 시 이42개를 재구현하지 않습니다. 먼저 `api/sdk_reviews.json`의 핵심 user unresolved 중 구현되지 않은 leaf를 고르고 의존성이 없는 서비스별로 나눕니다. root가 공통 계약·generator·판정·전체 검사·작은 commit/push를 맡습니다. SDK-R1/C1/S1, stock Backup child metadata4개, alpha release와 전체 inventory 목표는 계속 미완료입니다.
 
 ## 핵심 Credential·Neutron·Swift·Nova34개 마감
 
@@ -2993,3 +3005,12 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 2026-10-11에 작업 에이전트8개로 핵심 user 구현을 재개했습니다. 먼저 native `objects.Create`의 nil Content panic을 SDK empty reader 기본값으로 고치고 typed nil은 HTTP 전 오류로 처리했습니다. `WithCreateBytes`는 snapshot과 호출마다 새 reader를 제공합니다. generic Credential `UpdateRecord`는 PATCH `/credentials/{id}`의 선언된 attrs만 전송하며 null/false/zero/empty·응답 병합·no-op·물리 오류를 보존합니다. [Swift 사용법](../objectstorage/v1/objects/create-defaults-python.md)과 [Credential 사용법](../identity/v3/credential-update-python.md)에 Python과 비교한 실행 가능한 Go 예제를 기록합니다.
 
 기존 fixture와 REST/Source 공통 기능을 재사용했습니다. 신규 Swift5그룹·기존 Swift3그룹·생성기1그룹과 Credential 신규7그룹의 집중 race PASS이며 실제 run은 `/private/tmp/go-openstacksdk-oct11-resume-swift-focus.jsonl`·`/private/tmp/go-openstacksdk-oct11-resume-credential-focus.jsonl`입니다. pinned `make generate`도 exit0으로 native 기본값 seam을 재현했습니다. 전체 gate는 나머지 병렬 구현을 통합한 immutable revision에서 실행할 예정이므로 이 기록은 집중 검증입니다. catalog/pins는 변경하지 않았고 native 미완료1행을 승격·Python 새1행을 추가했습니다. 전체1,252/3,362·핵심1,178/2,292, 전체 supported0이며 기존 Python create_object와 SDK-R1/C1/S1은 미완료입니다.
+
+
+## 핵심 Port Forwarding·Trust·Cinder Record 추가 완료
+
+재개 묶음에서 Neutron forwarding의 두 Python 이름 계열12개, Keystone trust5개, Cinder attachment2·transfer3·type/encryption/QoS4개를 검증해 추가26개를 완료했습니다. Source attrs·nullable RawResource view와 실제 Wire/HTTP proof를 분리하고, partial mutations·query/local Body filters·bounded pagination·GET-first clean-only fallback·ignore_missing 기본값을 라이브러리가 제공합니다. forwarding은 같은6개 Go callable에 Source12개 선언이 대응합니다. 이름 별 선언 수와 새 HTTP route 수는 다릅니다. Native API는 호환 경로로 유지합니다.
+
+`go test -race -count=1`에서 Cinder attachment19개·transfer12개·Neutron forwarding12개·Keystone trust12개 실제 package그룹이 통과했고, Cinder encryption/type/QoS는 최종 집중20개 그룹을 통과했습니다. `/private/tmp/go-openstacksdk-oct11-resume-ready-packages.jsonl`의 다른 Nova/connector 실패 package는 통과 근거에 포함하지 않으며, 두 Cinder 거부-response proof assertion 수정 후 최종 실행은 `...resume-encryption-final-focus.jsonl`, trust는 `...resume-trusts-full.jsonl`입니다. 초기 전체log에 통과와 실패가 함께 있으므로 package별 실제 terminal 상태를 근거로 기록합니다. 신규 HTTP 서버를 만들지 않고 기존 fixture·공개 Gophercloud testhelper와 공통 REST/List/FindIdentity를 재사용했습니다.
+
+[Cinder attachment](../blockstorage/v3/attachments-python.md)·[transfer](../blockstorage/v3/transfers-python.md)·[type/encryption/QoS](../blockstorage/v3/type-encryption-python.md)·[Neutron forwarding](../network/v2/port-forwarding-python.md)·[Keystone trust](../identity/v3/trusts-python.md)에 standalone Go와 Python 비교를 제공합니다. 기본 정책상 encryption 생성/수정·QoS lookup3개는 core admin이며 core user 완료로 기록하지 않습니다. 기존 완료 transfer3행의 계약은 보존하고 새 owned API 계약을 추가했습니다. catalog/pins는 그대로이며 supported0·SDK-R1/C1/S1·stock Backup metadata4개는 미완료입니다. 전체1,278/3,362·핵심1,204/2,292는 user/admin 합계입니다. 문서 외부 빌드·최종 전체 gate는 현재 병렬 묶음 통합 후 수행합니다.
