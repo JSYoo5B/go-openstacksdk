@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -56,6 +57,10 @@ type Profile struct {
 	PreserveUnknownBody          bool
 	NameQueryHint                bool
 	VersionedPath                string
+	// SourceFindPolicy opts new leaf profiles into ordered constructor aliases,
+	// CPython float truthiness and GET-only find microversion overrides.
+	// Existing bindings keep their reviewed baseline until explicitly migrated.
+	SourceFindPolicy bool
 }
 
 // Engine captures selected service facts before leaf option callbacks run.
@@ -206,7 +211,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 	// Bulk options have no map ordering contract. Canonical constructor values
 	// win over wire aliases; ordered response members remain last-value-wins.
 	for _, field := range e.profile.Body {
-		if raw, exists := body[field.Wire]; exists && field.Name != field.Wire {
+		if raw, exists := body[field.Wire]; !e.profile.SourceFindPolicy && exists && field.Name != field.Wire {
 			if _, canonical := body[field.Name]; !canonical {
 				body[field.Name] = bytes.Clone(raw)
 			}
@@ -248,7 +253,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 			body[field.Name] = json.RawMessage(field.Missing)
 			continue
 		}
-		converted, err := descriptorJSON(raw, field.Kind)
+		converted, err := e.descriptorJSON(raw, field.Kind)
 		if err != nil {
 			return err
 		}
@@ -273,7 +278,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 				}
 			}
 		}
-		converted, err := descriptorJSON(raw, field.Kind)
+		converted, err := e.descriptorJSON(raw, field.Kind)
 		if err != nil {
 			return err
 		}
@@ -287,7 +292,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 	return nil
 }
 
-func descriptorJSON(raw json.RawMessage, kind DescriptorKind) (json.RawMessage, error) {
+func (e *Engine) descriptorJSON(raw json.RawMessage, kind DescriptorKind) (json.RawMessage, error) {
 	raw = bytes.Clone(raw)
 	trim := bytes.TrimSpace(raw)
 	if bytes.Equal(trim, []byte("null")) {
@@ -295,7 +300,17 @@ func descriptorJSON(raw json.RawMessage, kind DescriptorKind) (json.RawMessage, 
 	}
 	switch kind {
 	case Boolean:
-		return jsonfilter.BooleanJSON(raw)
+		if !e.profile.SourceFindPolicy {
+			return jsonfilter.BooleanJSON(raw)
+		}
+		truth, err := e.truthy(raw)
+		if err != nil {
+			return nil, err
+		}
+		if truth {
+			return json.RawMessage("true"), nil
+		}
+		return json.RawMessage("false"), nil
 	case Integer:
 		return jsonfilter.DescriptorIntegerJSON(raw)
 	case List:
@@ -308,6 +323,27 @@ func descriptorJSON(raw json.RawMessage, kind DescriptorKind) (json.RawMessage, 
 		}
 	}
 	return raw, nil
+}
+
+// truthy mirrors CPython JSON float parsing without changing raw evidence or
+// the deliberately exact-decimal JSON equality policy. Plain integers remain
+// arbitrary precision. Baseline profiles retain their reviewed parser.
+func (e *Engine) truthy(raw json.RawMessage) (bool, error) {
+	if !e.profile.SourceFindPolicy {
+		return cloudfilter.PythonTruthy(raw)
+	}
+	if !utf8.Valid(raw) || !json.Valid(raw) {
+		return false, findInvalid("truthiness requires complete UTF-8 JSON")
+	}
+	token := bytes.TrimSpace(raw)
+	if (token[0] == '-' || token[0] >= '0' && token[0] <= '9') && strings.ContainsAny(string(token), ".eE") {
+		number, err := strconv.ParseFloat(string(token), 64)
+		if err != nil && !errors.Is(err, strconv.ErrRange) {
+			return false, err
+		}
+		return number != 0, nil
+	}
+	return cloudfilter.PythonTruthy(raw)
 }
 
 func findText(value *Record, key string) string {
@@ -416,14 +452,20 @@ func findKey(key string) error {
 	}
 	return nil
 }
-func (e *Engine) prepareFindQuery(policy Options, identity string) (url.Values, url.Values, map[string]json.RawMessage, map[string]json.RawMessage, rest.ListControl, error) {
+func (e *Engine) prepareQuery(policy Options, identity string, forFind bool) (url.Values, url.Values, map[string]json.RawMessage, map[string]json.RawMessage, rest.ListControl, error) {
 	getQuery, listQuery := make(url.Values), make(url.Values)
 	filters, seed := make(map[string]json.RawMessage), make(map[string]json.RawMessage)
 	control := rest.ListControl{LimitHint: true}
 	for _, key := range policy.Order {
 		raw := policy.Query[key]
-		if err := findKey(key); err != nil {
+		if err := findKey(key); err != nil && (forFind || key != "id") {
 			return nil, nil, nil, nil, control, err
+		}
+		if e.profile.SourceFindPolicy && (key == "location" || key == "__conflicting_attrs") {
+			return nil, nil, nil, nil, control, findInvalid("%q is an SDK-owned Resource constructor control", key)
+		}
+		if !forFind && !e.listKeyKnown(key) {
+			continue
 		}
 		if !utf8.Valid(raw) || !json.Valid(raw) {
 			return nil, nil, nil, nil, control, findInvalid("query %q must contain complete UTF-8 JSON", key)
@@ -438,12 +480,27 @@ func (e *Engine) prepareFindQuery(policy Options, identity string) (url.Values, 
 		if len(values) != 0 {
 			getQuery[key] = values
 		}
-		if e.profile.PreserveUnknownBody || e.findBodyKnown(key) {
-			seed[key] = bytes.Clone(raw)
+		headerSeed := false
+		if e.profile.SourceFindPolicy {
+			for _, field := range e.profile.Headers {
+				if strings.EqualFold(key, field.Name) || strings.EqualFold(key, field.Wire) {
+					seed[field.Name] = bytes.Clone(raw)
+					headerSeed = true
+				}
+			}
 		}
-		for _, field := range e.profile.Headers {
-			if key == field.Name || strings.EqualFold(key, field.Wire) {
+		if !headerSeed && (e.profile.PreserveUnknownBody || e.findBodyKnown(key)) {
+			if e.profile.SourceFindPolicy {
+				e.consumeFindBody(seed, []cloudfilter.JSONMember{{Key: key, Value: raw}})
+			} else {
 				seed[key] = bytes.Clone(raw)
+			}
+		}
+		if !e.profile.SourceFindPolicy {
+			for _, field := range e.profile.Headers {
+				if key == field.Name || strings.EqualFold(key, field.Wire) {
+					seed[key] = bytes.Clone(raw)
+				}
 			}
 		}
 		switch key {
@@ -454,7 +511,7 @@ func (e *Engine) prepareFindQuery(policy Options, identity string) (url.Values, 
 			}
 			control.MaxItems = amount
 		case "paginated":
-			enabled, err := cloudfilter.PythonTruthy(raw)
+			enabled, err := e.truthy(raw)
 			if err != nil {
 				return nil, nil, nil, nil, control, err
 			}
@@ -490,7 +547,7 @@ func (e *Engine) prepareFindQuery(policy Options, identity string) (url.Values, 
 			listQuery[pair.Wire] = slices.Clone(values)
 		}
 	}
-	if e.profile.NameQueryHint {
+	if forFind && e.profile.NameQueryHint {
 		if _, supplied := policy.Query[e.profile.NameKey]; !supplied {
 			listQuery.Set(e.profile.NameKey, identity)
 		}
@@ -498,7 +555,7 @@ func (e *Engine) prepareFindQuery(policy Options, identity string) (url.Values, 
 	return getQuery, listQuery, filters, seed, control, nil
 }
 
-func findLocalMatch(actual, filter json.RawMessage) (bool, error) {
+func (e *Engine) localMatch(actual, filter json.RawMessage) (bool, error) {
 	if len(actual) == 0 {
 		actual = json.RawMessage("null")
 	}
@@ -508,7 +565,7 @@ func findLocalMatch(actual, filter json.RawMessage) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		truthy, err := cloudfilter.PythonTruthy(actual)
+		truthy, err := e.truthy(actual)
 		if err != nil || !truthy {
 			return false, err
 		}
@@ -521,7 +578,7 @@ func findLocalMatch(actual, filter json.RawMessage) (bool, error) {
 			return false, fmt.Errorf("local dictionary filter requires an actual mapping")
 		}
 		for _, member := range wanted {
-			matched, err := findLocalMatch(observed[member.Key], member.Value)
+			matched, err := e.localMatch(observed[member.Key], member.Value)
 			if err != nil || !matched {
 				return matched, err
 			}
@@ -531,9 +588,156 @@ func findLocalMatch(actual, filter json.RawMessage) (bool, error) {
 	return jsonfilter.EqualPythonJSON(actual, filter)
 }
 
+// listKeyKnown classifies only declared server or Body filters and owned
+// list controls. Unknown list kwargs are discarded before value evaluation.
+func (e *Engine) listKeyKnown(key string) bool {
+	if key == "max_items" || key == "paginated" {
+		return true
+	}
+	if e.findBodyKnown(key) {
+		return true
+	}
+	for _, pair := range e.profile.Query {
+		if key == pair.Name || key == pair.Wire {
+			return true
+		}
+	}
+	return false
+}
+
+func stripVersion(source *cloudread.Source) {
+	source.Client.MoreHeaders = maps.Clone(source.Client.MoreHeaders)
+	for key := range source.Client.MoreHeaders {
+		if strings.EqualFold(key, "OpenStack-API-Version") {
+			delete(source.Client.MoreHeaders, key)
+		}
+	}
+}
+func (e *Engine) headerPolicy(source *cloudread.Source, list bool, headers map[string]string) rest.RequestHeaderPolicy {
+	values := maps.Clone(source.Client.MoreHeaders)
+	if values == nil {
+		values = make(map[string]string)
+	}
+	for key := range values {
+		if strings.EqualFold(key, "OpenStack-API-Version") {
+			delete(values, key)
+		}
+	}
+	if list {
+		values["Accept"] = "application/json"
+		for key, value := range headers {
+			if strings.EqualFold(key, "Accept") {
+				values["Accept"] = value
+			}
+		}
+	}
+	var absent []string
+	if source.Client.Microversion != "" {
+		values["OpenStack-API-Version"] = "network " + source.Client.Microversion
+	} else {
+		absent = append(absent, "OpenStack-API-Version")
+	}
+	if e.profile.SourceFindPolicy {
+		// X-Auth-Token remains live and SDK-owned in fixedrequest's transport.
+		// All other source-forbidden auth/route/protocol headers remain absent.
+		absent = append(absent, "Authorization", "X-Service-Token", "Cookie", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade", "X-OpenStack-Nova-API-Version", "X-OpenStack-Volume-API-Version")
+	}
+	return rest.RequestHeaderPolicy{Values: values, Absent: absent}
+}
+
+func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, policy Options, query url.Values, filters map[string]json.RawMessage, control rest.ListControl) iter.Seq2[*Record, error] {
+	return func(yield func(*Record, error) bool) {
+		guard := e.Check
+		headerPolicy := e.headerPolicy(source, true, policy.Headers)
+		client := source.Client
+		client.MoreHeaders = maps.Clone(headerPolicy.Values)
+		var origin *rest.Response
+		spec := rest.CollectionSpec[Record]{Client: &client, Path: e.profile.Path, Kind: e.profile.Kind, PluralKey: e.profile.Plural, Metadata: findMetadata, Validate: guard, SourceGuard: guard, ListCodes: findCodes(),
+			ReadPage: func(pageCtx context.Context, target string, codes ...int) (*rest.Response, error) {
+				return rest.DoJSONGuardedRejectionsHeaderPolicy(pageCtx, &client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, codes...)
+			},
+			ValidateResponse: func(response *rest.Response) error { origin = response; return guard(ctx) },
+			ValidateItem: func(value *Record) error {
+				value.fromList = true
+				for _, key := range []string{"connection", "microversion", "_synchronized"} {
+					if _, exists := value.Wire.Body[key]; exists {
+						return fmt.Errorf("list row %q collides with Resource.existing constructor", key)
+					}
+				}
+				value.Envelope = bytes.Clone(origin.Body)
+				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
+				return errors.Join(e.findProject(value, nil), guard(ctx))
+			},
+			Paging: rest.PagePolicy[Record]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: e.findMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: e.profile.VersionedPath},
+		}
+		if e.profile.SourceFindPolicy {
+			spec.Paging.NextTruthy = e.truthy
+		}
+		for value, err := range rest.ListWithControl(ctx, spec, query, control) {
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			matched := true
+			for _, key := range policy.Order {
+				filter, exists := filters[key]
+				if !exists {
+					continue
+				}
+				equal, cause := e.localMatch(value.Resource.Body[key], filter)
+				if cause = errors.Join(cause, guard(ctx)); cause != nil {
+					yield(nil, origin.Fail(cause))
+					return
+				}
+				if !equal {
+					matched = false
+					break
+				}
+			}
+			if matched && !yield(value, nil) {
+				return
+			}
+		}
+	}
+}
+
+// List lazily yields Source-shaped records. It shares lookup's projector,
+// query classification, local filters, guarded physical reader and pager.
+// Its explicit microversion controls every list page; no name hint is added.
+func (e *Engine) List(ctx context.Context, policy Options) iter.Seq2[*Record, error] {
+	owned := CloneOptions(policy)
+	return func(yield func(*Record, error) bool) {
+		if err := cloudread.Context(ctx); err != nil {
+			yield(nil, err)
+			return
+		}
+		if err := e.Check(ctx); err != nil {
+			yield(nil, err)
+			return
+		}
+		_, query, filters, _, control, err := e.prepareQuery(owned, "", false)
+		source := *e.source
+		if e.profile.SourceFindPolicy && owned.Microversion != nil {
+			stripVersion(&source)
+		}
+		if err == nil {
+			err = errors.Join(source.WithPolicy(ctx, owned.Microversion, owned.Headers), e.Check(ctx))
+		}
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		for value, err := range e.listRecords(ctx, &source, owned, query, filters, control) {
+			if !yield(value, err) {
+				return
+			}
+		}
+	}
+}
+
 // Find matches the pinned Source GET-first, complete ID-or-name search.
-// It suppresses only clean GET 400/403/404. A physical body/Close/source/cancel
-// failure never becomes a fallback or missing-resource success.
+// It suppresses only clean GET400/403/404; physical/source/cancel faults remain
+// terminal. SourceFindPolicy keeps per-call GET version separate from LIST.
 func (e *Engine) Find(ctx context.Context, identity string, policy Options) (*Record, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
@@ -541,41 +745,35 @@ func (e *Engine) Find(ctx context.Context, identity string, policy Options) (*Re
 	if err := e.Check(ctx); err != nil {
 		return nil, err
 	}
-	guard := e.Check
-	source := e.source
 	policy = CloneOptions(policy)
-	getQuery, listQuery, filters, seed, control, err := e.prepareFindQuery(policy, identity)
+	getQuery, listQuery, filters, seed, control, err := e.prepareQuery(policy, identity, true)
+	source := *e.source
+	listSource := *e.source
+	if e.profile.SourceFindPolicy && policy.Microversion != nil {
+		stripVersion(&source)
+	}
 	if err == nil {
-		err = errors.Join(source.WithPolicy(ctx, policy.Microversion, policy.Headers), guard(ctx))
+		err = errors.Join(source.WithPolicy(ctx, policy.Microversion, policy.Headers), e.Check(ctx))
+	}
+	if err == nil {
+		if e.profile.SourceFindPolicy {
+			err = errors.Join(listSource.WithPolicy(ctx, nil, policy.Headers), e.Check(ctx))
+		} else {
+			listSource = source
+		}
 	}
 	if err != nil {
 		return nil, err
 	}
-	getHeaders := maps.Clone(source.Client.MoreHeaders)
-	if getHeaders == nil {
-		getHeaders = make(map[string]string)
-	}
-	var versionAbsent []string
-	if source.Client.Microversion != "" {
-		getHeaders["OpenStack-API-Version"] = "network " + source.Client.Microversion
-	} else {
-		versionAbsent = []string{"OpenStack-API-Version"}
-	}
-	listHeaders := maps.Clone(getHeaders)
-	listHeaders["Accept"] = "application/json"
-	for key, value := range policy.Headers {
-		if strings.EqualFold(key, "Accept") {
-			listHeaders["Accept"] = value
-		}
-	}
-	listClient := source.Client
-	listClient.MoreHeaders = maps.Clone(listHeaders)
+	guard := e.Check
+	headerPolicy := e.headerPolicy(&source, false, policy.Headers)
+	source.Client.MoreHeaders = maps.Clone(headerPolicy.Values)
 	get := func(_ context.Context, id string) (*Record, error) {
 		target := source.Client.ServiceURL(e.profile.Path, url.PathEscape(id))
 		if len(getQuery) != 0 {
 			target += "?" + getQuery.Encode()
 		}
-		response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, guard, http.MethodGet, target, nil, rest.RequestHeaderPolicy{Values: getHeaders, Absent: versionAbsent}, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, findCodes()...)
+		response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, findCodes()...)
 		if err != nil {
 			return nil, err
 		}
@@ -588,51 +786,10 @@ func (e *Engine) Find(ctx context.Context, identity string, policy Options) (*Re
 		return value, err
 	}
 	list := func(context.Context, url.Values) iter.Seq2[*Record, error] {
-		return func(yield func(*Record, error) bool) {
-			var origin *rest.Response
-			spec := rest.CollectionSpec[Record]{Client: &listClient, Path: e.profile.Path, Kind: e.profile.Kind, PluralKey: e.profile.Plural, Metadata: findMetadata, Validate: guard, SourceGuard: guard, ListCodes: findCodes(), ReadPage: func(pageCtx context.Context, target string, codes ...int) (*rest.Response, error) {
-				return rest.DoJSONGuardedRejectionsHeaderPolicy(pageCtx, &listClient, guard, http.MethodGet, target, nil, rest.RequestHeaderPolicy{Values: listHeaders, Absent: versionAbsent}, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, codes...)
-			}, ValidateResponse: func(response *rest.Response) error { origin = response; return guard(ctx) }, ValidateItem: func(value *Record) error {
-				value.fromList = true
-				for _, key := range []string{"connection", "microversion", "_synchronized"} {
-					if _, exists := value.Wire.Body[key]; exists {
-						return fmt.Errorf("list row %q collides with Resource.existing constructor", key)
-					}
-				}
-				value.Envelope = bytes.Clone(origin.Body)
-				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
-				return errors.Join(e.findProject(value, nil), guard(ctx))
-			}, Paging: rest.PagePolicy[Record]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: e.findMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: e.profile.VersionedPath}}
-			for value, err := range rest.ListWithControl(ctx, spec, listQuery, control) {
-				if err != nil {
-					yield(nil, err)
-					return
-				}
-				matched := true
-				for _, key := range policy.Order {
-					filter, exists := filters[key]
-					if !exists {
-						continue
-					}
-					equal, cause := findLocalMatch(value.Resource.Body[key], filter)
-					if cause = errors.Join(cause, guard(ctx)); cause != nil {
-						yield(nil, origin.Fail(cause))
-						return
-					}
-					if !equal {
-						matched = false
-						break
-					}
-				}
-				if matched && !yield(value, nil) {
-					return
-				}
-			}
-		}
+		return e.listRecords(ctx, &listSource, policy, listQuery, filters, control)
 	}
-	collection := resource.NewCollection(resource.Adapter[Record]{Kind: e.profile.Kind, IdentityFind: true, ValidateID: findSegment, IdentityDirectGet: findSegment, IdentityResponseID: func(value *Record) (string, error) {
-		return findText(value, e.profile.IDKey), nil
-	}, Name: func(value *Record) string { return findText(value, e.profile.NameKey) }, Get: get, Iterate: list})
+	collection := resource.NewCollection(resource.Adapter[Record]{Kind: e.profile.Kind, IdentityFind: true, ValidateID: findSegment, IdentityDirectGet: findSegment,
+		IdentityResponseID: func(value *Record) (string, error) { return findText(value, e.profile.IDKey), nil }, Name: func(value *Record) string { return findText(value, e.profile.NameKey) }, Get: get, Iterate: list})
 	value, err := collection.FindIdentity(ctx, identity, resource.WithIdentityFindIgnoreMissing(policy.IgnoreMissing == nil || *policy.IgnoreMissing))
 	return value, errors.Join(err, guard(ctx))
 }
