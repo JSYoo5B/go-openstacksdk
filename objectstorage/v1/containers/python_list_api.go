@@ -126,7 +126,7 @@ func (p *listRecordSource) read(ctx context.Context, target string) (*rest.Respo
 		}
 	}
 	accepted, rejected := recordStatuses()
-	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &p.client, p.check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true}, accepted...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &p.client, p.check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, accepted...)
 	// Native rejected responses are errors, not accepted pages. The shared REST
 	// reader deliberately returns no Response for those errors; project only the
 	// actual native receipt without reading, closing or replaying the body again.
