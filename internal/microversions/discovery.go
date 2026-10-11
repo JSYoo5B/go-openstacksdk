@@ -267,8 +267,11 @@ func advertisedEndpoint(row advertisement) (bool, error) {
 
 func discoveryGet(ctx context.Context, source *cloudread.Source, target string, profile Profile) (*rest.Response, error) {
 	var faults faultsState
+	sourceGuard := func(ctx context.Context) error {
+		return errors.Join(source.Guard(ctx), rest.CheckOperationGuard(ctx))
+	}
 	guard := func(ctx context.Context) error {
-		return errors.Join(source.Guard(ctx), faults.error(), rest.CheckOperationGuard(ctx))
+		return errors.Join(sourceGuard(ctx), faults.error())
 	}
 	client, err := fixedrequest.NewGuarded(&source.Client, http.MethodGet, target, guard)
 	if err != nil {
@@ -303,7 +306,7 @@ func discoveryGet(ctx context.Context, source *cloudread.Source, target string, 
 		}
 		response, err := parent.RoundTrip(req)
 		if response != nil && response.Body != nil && (response.StatusCode == 404 || response.StatusCode == 405) {
-			response.Body = &observedBody{ReadCloser: response.Body, faults: &faults}
+			response.Body = &observedBody{ReadCloser: response.Body, faults: &faults, ctx: req.Context(), guard: sourceGuard}
 		}
 		return response, err
 	})
@@ -336,6 +339,8 @@ func (f *faultsState) error() error { f.mu.Lock(); defer f.mu.Unlock(); return f
 type observedBody struct {
 	io.ReadCloser
 	faults *faultsState
+	ctx    context.Context
+	guard  func(context.Context) error
 }
 
 func (b *observedBody) Read(data []byte) (int, error) {
@@ -343,9 +348,16 @@ func (b *observedBody) Read(data []byte) (int, error) {
 	if err != io.EOF {
 		b.faults.add(err)
 	}
+	// Capture a source change at the physical boundary even if Close restores it.
+	b.faults.add(b.guard(b.ctx))
 	return n, err
 }
-func (b *observedBody) Close() error { err := b.ReadCloser.Close(); b.faults.add(err); return err }
+func (b *observedBody) Close() error {
+	err := b.ReadCloser.Close()
+	b.faults.add(err)
+	b.faults.add(b.guard(b.ctx))
+	return err
+}
 
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
