@@ -1077,6 +1077,13 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		e.printf("if err=%s.ValidateCapabilities(cfg,%t,%t,%t%s);err!=nil{\n", requestAlias, caps.body, caps.query, caps.headers, arguments)
 		errReturn()
 		e.printf("}\n")
+		// Normalize the owned empty Swift content default after options, so an
+		// explicit replacement wins before native ETag generation reads the body.
+		if e.pkg.Path() == upstreamModule+"/openstack/objectstorage/v1/objects" && op == "Create" {
+			e.printf("cfg.Options,err=normalizeCreateDefaults(cfg.Options)\nif err!=nil{\n")
+			errReturn()
+			e.printf("}\n")
+		}
 		if primary.iface != nil {
 			e.printf("_%s := %s\n", primary.name, builderLiteral(primary, "cfg.Options", "cfg"))
 		}

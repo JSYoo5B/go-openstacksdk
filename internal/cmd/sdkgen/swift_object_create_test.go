@@ -30,6 +30,17 @@ func TestSwiftObjectCreatePreservesNativeAndRegistry(t *testing.T) {
 			t.Fatalf("object create changed %s: %v", path, err)
 		}
 	}
+	objectSource, err := os.ReadFile(filepath.Join(g.root, "objectstorage/v1/objects/api_generated.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	prepared := string(objectSource)
+	normalized := strings.Index(prepared, "cfg.Options, err = normalizeCreateDefaults(cfg.Options)")
+	capability := strings.LastIndex(prepared[:max(normalized, 0)], "request.ValidateCapabilities(cfg, false, true, true)")
+	builder := strings.Index(prepared[max(normalized, 0):], "_opts := createOptsBuilder{base: cfg.Options, config: cfg}")
+	if normalized < 0 || capability < 0 || builder < 0 || strings.Count(prepared, "normalizeCreateDefaults(cfg.Options)") != 1 {
+		t.Fatal("empty Swift content normalization missing, duplicated or ordered before validated options")
+	}
 	for _, name := range []string{"accounts", "containers", "objects"} {
 		if _, err := os.Stat(filepath.Join(g.root, "objectstorage/v1", name, "resources_generated.go")); !os.IsNotExist(err) {
 			t.Fatalf("%s unexpectedly gained Collection: %v", name, err)

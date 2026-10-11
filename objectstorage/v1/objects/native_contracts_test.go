@@ -358,14 +358,11 @@ func TestNativeObjectStatusesNamesAndPreflight(t *testing.T) {
 	})
 }
 
-func TestNativeObjectCreateNilContentPanics(t *testing.T) {
+func TestNativeObjectCreateNilContentUsesEmptyBody(t *testing.T) {
 	var calls []nativeObjectCall
 	api := nativeObjectAPI(t, &calls, func(*http.Request) nativeObjectReply { return nativeObjectReply{201, nil, ""} })
-	defer func() {
-		// The native ETag computation reads a nil Content reader before any request.
-		if recover() == nil || len(calls) != 0 {
-			t.Fatal("no panic", calls)
-		}
-	}()
-	_, _ = api.Create(context.Background(), "c", "o", objects.CreateOpts{})
+	created, err := api.Create(context.Background(), "c", "o", objects.CreateOpts{})
+	if err != nil || created == nil || len(calls) != 1 || calls[0].body != "" || calls[0].method != http.MethodPut {
+		t.Fatal(created, err, calls)
+	}
 }

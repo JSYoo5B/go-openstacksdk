@@ -165,6 +165,12 @@ func (a *API) Create(ctx context.Context, containerName string, objectName strin
 		var zero0 *CreateHeader
 		return zero0, err
 	}
+	cfg.Options, err = normalizeCreateDefaults(cfg.Options)
+	if err != nil {
+		err = request.Wrap("Create", "objects", err)
+		var zero0 *CreateHeader
+		return zero0, err
+	}
 	_opts := createOptsBuilder{base: cfg.Options, config: cfg}
 	result := upstream.Create(ctx, a.client, containerName, objectName, _opts)
 	value0, err := result.Extract()
