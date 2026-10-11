@@ -118,6 +118,10 @@ func (g *generator) generateServices() error {
 		groups["blockstorage/v3"]["consistencygroups"] = true
 		groups["blockstorage/v3"]["consistencygroupsnapshots"] = true
 	}
+	// Keystone OS-EP-FILTER endpoint groups have no pinned native package.
+	if groups["identity/v3"] != nil {
+		groups["identity/v3"]["endpointgroups"] = true
+	}
 	// Finite owned waits extend Barbican without inventing native operations.
 	if groups["keymanager/v1"] != nil {
 		groups["keymanager/v1"]["waits"] = true

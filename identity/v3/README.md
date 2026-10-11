@@ -43,6 +43,8 @@ domain·group·project·user·role의 생성·조회·수정·삭제·목록과 
 
 openstacksdk cloud 계층의 사용자·프로젝트·그룹·역할·도메인·서비스·endpoint helper(`conn.create_user` 등)별 Go 대응과 미해결 사유는 [identity cloud helper Python 대응](../python-cloud-parity.md)에 정리했습니다.
 
+Keystone OS-EP-FILTER endpoint group의 생성·조회·수정·삭제·목록·find와 project·endpoint 연결은 SDK 소유 [`EndpointGroups`](endpointgroups/README.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -70,6 +72,7 @@ _ = value
 | `Domains` | [domains](domains/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `EC2Credentials` | [ec2credentials](ec2credentials/api_generated.go) | `InUser(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `EC2Tokens` | [ec2tokens](ec2tokens/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `EndpointGroups` | [endpointgroups](endpointgroups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Endpoints` | [endpoints](endpoints/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Federation` | [federation](federation/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Groups` | [groups](groups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
