@@ -56438,13 +56438,13 @@
     {
       "operation": "gophercloud:blockstorage/v3/snapshots.WaitForStatus",
       "source_fingerprint": "dad3ec993af4fd9cd64b6b03e59f943c9284c5891bdde3a02f539be815825fa0",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForStatus"
       ],
       "contracts": [
         {
-          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope panics on the nil snapshot.",
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope returns an OperationError wrapping resource.ErrUnsupported instead of the native nil dereference.",
           "tests": [
             "blockstorage/v3/snapshots/native_contracts_test.go:TestNativeSnapshotWaitForStatus"
           ]
@@ -56455,11 +56455,10 @@
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
-        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged.",
+        "The generated method calls an SDK helper with the native request, interval and status comparison, adding only a nil-snapshot guard where native WaitForStatus panics."
       ],
-      "remaining": [
-        "The native WaitForStatus dereferences a nil snapshot when Get returns no snapshot envelope; the generated facade does not guard this panic or turn it into an OperationError. Use WaitForState/WaitForAvailable until a guard exists."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:blockstorage/v3/attachments.Create",
@@ -57758,13 +57757,13 @@
     {
       "operation": "gophercloud:blockstorage/v2/snapshots.WaitForStatus",
       "source_fingerprint": "a2714fef92c5b66bd7493aa5510f9166c57ecc1a0cfea2c02f4fbd87fbcc9080",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.WaitForStatus"
       ],
       "contracts": [
         {
-          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope panics on the nil snapshot.",
+          "behavior": "WaitForStatus polls Get immediately then on a one-second ticker until the status matches exactly (case-sensitive), returns Get errors at once and stops on the caller context deadline with operation context; a poll returning no snapshot envelope returns an OperationError wrapping resource.ErrUnsupported instead of the native nil dereference.",
           "tests": [
             "blockstorage/v2/snapshots/native_contracts_test.go:TestNativeSnapshotWaitForStatus"
           ]
@@ -57776,11 +57775,10 @@
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
-        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged."
+        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension merge; native URL construction, OkCodes, paging, polling and decoding are unchanged.",
+        "The generated method calls an SDK helper with the native request, interval and status comparison, adding only a nil-snapshot guard where native WaitForStatus panics."
       ],
-      "remaining": [
-        "The native WaitForStatus dereferences a nil snapshot when Get returns no snapshot envelope; the generated facade does not guard this panic or turn it into an OperationError. Use WaitForState/WaitForAvailable until a guard exists."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:blockstorage/v2/backups.Create",
