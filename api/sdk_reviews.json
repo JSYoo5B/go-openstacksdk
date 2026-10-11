@@ -86861,6 +86861,1187 @@
       "remaining": [
         "Gophercloud v2.15.0 has no binding for POST group_snapshots/{id}/action with {\"reset_status\": {\"status\": ...}} (deprecated alias of reset_group_snapshot_status) and this SDK has no owned call for it, so an SDK-owned call would be needed."
       ]
+    },
+    {
+      "operation": "python:identity/v3/associate_endpoint_with_project",
+      "source_fingerprint": "5a3beb5f5ed0603d3b9d44188e69544d34a063ab5c7c9d08e6486501f4bffd82",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends a bodyless PUT OS-EP-FILTER/projects/{project}/endpoints/{endpoint} like Python Project.associate_endpoint, succeeds on 204 and returns 404 and 409 as errors.",
+          "tests": [
+            "identity/v3/projectendpoints/python_parity_test.go:TestPythonProjectEndpointAssociation"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400; the native call accepts only 204, so 200 or 202 becomes an error in Go.",
+        "Python takes project and endpoint as ID strings or Resources; Go takes ID strings and returns only an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/associate_project_with_endpoint_group",
+      "source_fingerprint": "5f12e257b847d2356b57b92316dacc372c81cbca4ad58d8472cacea5fd142c06",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_domain_config",
+      "source_fingerprint": "863a640bb3403fc8cd5555c978e3e0e70329ea2a6b56081cccaa0818c0b9a6ce",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT domains/{domain_id}/config, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_endpoint",
+      "source_fingerprint": "9f34a7353e53ef5858a755d180fd6931292d9898bb7f8d5b45bf33d1dbd81a54",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST endpoints with only the given interface/enabled/service_id/url keys plus region_id through WithCreateField in the {\"endpoint\": {...}} envelope, the request Python create_endpoint sends, and decodes id, interface, region_id, service_id, url and enabled.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Go CreateOpts.Region sends the legacy region key; the region_id key Python sends is added with endpoints.WithCreateField(\"region_id\", id).",
+        "Go requires interface, url and service_id before HTTP, while Python sends whatever attributes were given and lets Keystone reject the request.",
+        "Python drops attributes Endpoint does not declare, such as description; Go CreateOpts can send description."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_endpoint_group",
+      "source_fingerprint": "cfff98fb08ea9ee43840794f5e5d5c1ea89c0a2242dcb9a7726db8c3023eb539",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST OS-EP-FILTER/endpoint_groups, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_limit",
+      "source_fingerprint": "dec0dbda62b4c6543c4dce39f9999d2ccbd320580679334b7385400e1fa4ab44",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.BatchCreate"
+      ],
+      "contracts": [
+        {
+          "behavior": "A one-row BatchCreate sends POST limits with {\"limits\": [{...}]}, the body Python create_limit builds by wrapping its single limit, and element 0 of the result carries the fields Python reads from the first response row.",
+          "tests": [
+            "identity/v3/limits/python_parity_test.go:TestPythonLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Go returns the whole decoded slice; Python keeps only the first response row.",
+        "Go requires service_id and resource_name before HTTP and always sends resource_limit, even 0, while Python sends only the given attributes.",
+        "Go extension fields from WithBatchCreateField land beside the limits array, not inside the row."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_region",
+      "source_fingerprint": "6988d453ad61d8341955d7bc741e5704267acc943a197e2d1e0191aeb50d25c6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST regions with id, description and parent_region_id in the {\"region\": {...}} envelope, the request Python create_region sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Go CreateOpts omits empty values, so Python attributes explicitly set to None or empty strings are not sent."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_registered_limit",
+      "source_fingerprint": "a12ff824cdf1f2b2d99485c7f2dab9a9d0f8ecb9016adf7e8f48bff27fc2493d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.BatchCreate"
+      ],
+      "contracts": [
+        {
+          "behavior": "A one-row BatchCreate sends POST registered_limits with {\"registered_limits\": [{...}]}, the body Python create_registered_limit builds by wrapping its single registered limit, and element 0 of the result carries the fields Python reads from the first response row.",
+          "tests": [
+            "identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Go returns the whole decoded slice; Python keeps only the first response row.",
+        "Go requires service_id and resource_name before HTTP and always sends default_limit, even 0, while Python sends only the given attributes.",
+        "Go extension fields from WithBatchCreateField land beside the registered_limits array, not inside the row."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_service",
+      "source_fingerprint": "0a086464d55b62773f8885d35c1f29284808cfef20ca766985e48c521f713309",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST services with name, type, description and enabled in the {\"service\": {...}} envelope, the request Python create_service sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Go CreateOpts.Type has no omitempty, so Go always sends type (as \"\" when empty) while Python omits an unset type.",
+        "Without an extra object in the response, Go Service.Extra also copies name and description."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_domain_config",
+      "source_fingerprint": "e9c05fd7b2e302bcc5848fd684ea83c861580f64808c5c9d1d9816f472a62ee5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE domains/{domain_id}/config, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_endpoint",
+      "source_fingerprint": "202016cde6c2237afaa63ea448c28cc4ec5b453904f1273199f74761080cc684",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE endpoints/{id}, succeeds on 204 and on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and returns a 409 error unchanged.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204. Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_endpoint_group",
+      "source_fingerprint": "5f6b3da03ca9ee58e87b263833f32dea4193f6eb75e66774b236d6a42471de8d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_limit",
+      "source_fingerprint": "62ce3688af8965a4b9d0007576598b296fd8ff07905a33448b755f074c68ed38",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE limits/{id}, succeeds on 204 and on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and returns a 409 error unchanged.",
+          "tests": [
+            "identity/v3/limits/python_parity_test.go:TestPythonLimitDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204. Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_region",
+      "source_fingerprint": "e8aef5f5215aa94659205283b65322b4ca905fa287e7fe337c42f9bec5353901",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE regions/{id}, succeeds on 204 and on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and returns a 409 error unchanged.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204. Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_registered_limit",
+      "source_fingerprint": "0b572b76e7e0f36ac81a2b6a9b51cbd70fb952a7be59a643a4c5676da983c318",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE registered_limits/{id}, succeeds on 204 and on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and returns a 409 error unchanged.",
+          "tests": [
+            "identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204. Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_service",
+      "source_fingerprint": "43e0e9d16b14fe35eef5f2a097a16c30c7996a67ce42a804a3c00899c2bcd70b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE services/{id}, succeeds on 204 and on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and returns a 409 error unchanged.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204. Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/disassociate_endpoint_from_project",
+      "source_fingerprint": "623bc153130aedcd76e9c5a8daaf9f7a4d080074ba5b02b82cb61a9c156625f2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "Delete sends a bodyless DELETE OS-EP-FILTER/projects/{project}/endpoints/{endpoint} like Python Project.disassociate_endpoint, succeeds on 204 and returns 404 and 409 as errors because Python has no ignore_missing here.",
+          "tests": [
+            "identity/v3/projectendpoints/python_parity_test.go:TestPythonProjectEndpointAssociation"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400; the native call accepts only 204, so 200 or 202 becomes an error in Go.",
+        "Python takes project and endpoint as ID strings or Resources; Go takes ID strings and returns only an error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/disassociate_project_from_endpoint_group",
+      "source_fingerprint": "c051ab8b2d558b6753fde03e52f4569ad3f52e50e239f649fb564f044f4ff164",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/endpoint_group_endpoints",
+      "source_fingerprint": "c3b8cb886e79f65cb8b58ded4cdae6cfb1ea5f28007bab6803adacf92dd6d13c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/endpoints, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/endpoint_group_projects",
+      "source_fingerprint": "0d7be1cb0878f6c9315c045fac58a8a216ef9105c2011747f53dd0c73e026eea",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/endpoint_groups",
+      "source_fingerprint": "6df01517c8696bab77d124143e999983cc9b5f6a553f5d7ee3f836316185cf53",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/endpoint_projects",
+      "source_fingerprint": "91702ef57a0cb7801d5d60e4e78e3635747306be6494312eaef548d787e4fc02",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoints/{endpoint_id}/projects, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/endpoints",
+      "source_fingerprint": "dc68ac913c6d4b20b9d0b38e7de249ff8fcd43c43a2569af6358a75147a6dc0b",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "List with ListOpts sends GET endpoints?interface=&region_id=&service_id= like Python endpoints(interface=..., region_id=..., service_id=...), follows links.next, and the endpoints collection maps those query keys while rejecting limit and marker before HTTP.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "The endpoints List rejects raw query extensions, so the limit and marker query parameters Python maps cannot be sent.",
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_endpoint",
+      "source_fingerprint": "b5377fe985d17597507a1fd8d11aac110e625724ef65cbac2a820e1ae1e4f5f9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) followed on nil by Find(resource.Name(x)) sends GET endpoints/{x} and then GET endpoints without query (Endpoint maps no name query), returns the ID or unique name match, nil when missing with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointFindIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the list fallback in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller must continue to the name lookup only after a nil result.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "Go follows Keystone links.next during the name lookup; Python's list fallback does not.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/find_endpoint_group",
+      "source_fingerprint": "c81fa24eb713e9e495f99b5a498003911604321041ace1d51cea43266e4f0ecb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id} and the name-filtered GET OS-EP-FILTER/endpoint_groups fallback, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_region",
+      "source_fingerprint": "ff96aaca6fc042d37784edc9a17e2ee7c5e80a454ec8c295a4c84a496ed99f4f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET regions/{x} and returns nil on 404, while Find(resource.Name(x)) fails with resource.ErrUnsupported before HTTP.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionFindByIDOnly"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Python find_region emits a RemovedInSDK50Warning deprecation warning; Go has no deprecation signal."
+      ],
+      "remaining": [
+        "The regions collection has no name selector, so after a missing ID Go cannot send the unfiltered GET regions fallback that Python matches by ID or name.",
+        "Python also falls back after GET 400 or 403; Go returns those errors."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_service",
+      "source_fingerprint": "c489bb22058bd724185a3d9dc82df519c9a7134a5e30557bbc7ff5ee3e893125",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) followed on nil by Find(resource.Name(x)) sends GET services/{x} and then GET services?name=x like Python (Service maps name as a query parameter), returns the ID or unique name match, nil when missing with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceFindIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the list fallback in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller must continue to the name lookup only after a nil result.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "Go follows Keystone links.next during the name lookup; Python's list fallback does not.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_domain_config",
+      "source_fingerprint": "10225a2098aaaf716b23f72a4eaf1fe490cf4f2ec6553a069f27ccf7e8b3f92e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET domains/{domain_id}/config, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_endpoint",
+      "source_fingerprint": "4ba2607c4b9b1d679270f3d3af5c776add6d734975c8597799650f93c03e4dda",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET endpoints/{id}, the request Python get_endpoint sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_endpoint_group",
+      "source_fingerprint": "6993e61a257de0429d805cc8fb595ef86b6a6d616897df2c8a17b43e36e66ac7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_limit",
+      "source_fingerprint": "6c8e5d136c42abf53baf8f3f11e32b68f526d46b7d45e3f5320556edbe77c691",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET limits/{id}, the request Python get_limit sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/limits/python_parity_test.go:TestPythonLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_region",
+      "source_fingerprint": "765c62261f19dc7d4e982c349546a15130481488c3e2f7c16bd29a445d0692f4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET regions/{id}, the request Python get_region sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_registered_limit",
+      "source_fingerprint": "5646f8026f6e422bc768af0d6a9c29aa4d6ce61a397e3d51780130648e52b35b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET registered_limits/{id}, the request Python get_registered_limit sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_service",
+      "source_fingerprint": "ad954d4b223f7f0a81f19c78357c8f1ff97b889f172efa2116cc7f4157e026e5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET services/{id}, the request Python get_service sends, and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/limits",
+      "source_fingerprint": "c84b60baeb8eeac0be108419230e0194773992446502dd3024ece487b6fe98fd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All with resource.WithQuery forwards service_id, project_id, domain_id and limit to GET limits as Python limits(**query) does for mapped parameters and follows links.next.",
+          "tests": [
+            "identity/v3/limits/python_parity_test.go:TestPythonLimitListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Python filters domain_id locally because Limit does not map it as a query parameter; Go WithQuery sends domain_id to Keystone as a server filter."
+      ],
+      "remaining": [
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/project_endpoint_groups",
+      "source_fingerprint": "0b5024c124bc447d331916bffdace023ca47c50dfa3c1ffa88ffe8f2af79e132",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/projects/{project_id}/endpoint_groups, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/project_endpoints",
+      "source_fingerprint": "891c3d1068fbaa458b6a266e5d2182572c9ac78448edb51f4953ad8b27fa1acc",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "List(projectID) sends the same GET OS-EP-FILTER/projects/{project}/endpoints as Python project_endpoints(project) without query and decodes id, interface, region, service_id and url.",
+          "tests": [
+            "identity/v3/projectendpoints/python_parity_test.go:TestPythonProjectEndpointListDefault"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "The Go row model has no enabled, region_id or links fields that Python ProjectEndpoint exposes."
+      ],
+      "remaining": [
+        "projectendpoints.API.List takes no options, so the interface, region_id, service_id, limit and marker query parameters Python maps cannot be sent.",
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/regions",
+      "source_fingerprint": "753f2dc583f895c7fb270a1ddb23f8efc0f529056219c58224996e8359962bcb",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All with resource.WithQuery forwards parent_region_id, limit and marker to GET regions as Python regions(**query) does for mapped parameters and follows links.next.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/registered_limits",
+      "source_fingerprint": "0f6e673646a16c4ccea2d3cb9b910bc6a648713d2b72f082f98981952b7f9539",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All with resource.WithQuery forwards service_id, resource_name and marker to GET registered_limits as Python registered_limits(**query) does for mapped parameters and follows links.next.",
+          "tests": [
+            "identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/services",
+      "source_fingerprint": "4efc6e82190e0097861aad6b8a81ce24d87e39b5da2180b6735317a20987d7f0",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All with resource.WithQuery forwards name, type and limit to GET services as Python services(**query) does for mapped parameters and follows links.next.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+      ],
+      "remaining": [
+        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
+        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_domain_config",
+      "source_fingerprint": "569dbf5417e58a3eb60b78291f5f9c328c8d019352d3b72f97cc1414a81edf8b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PATCH domains/{domain_id}/config, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_endpoint",
+      "source_fingerprint": "4eb97189a885dfbe5941595305cf22632d3318870bf4c25a1afcae492f334142",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH endpoints/{id} with only the changed keys in the {\"endpoint\": {...}} envelope, region_id through WithUpdateField, the request Python update_endpoint sends.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
+        "region_id is sent with endpoints.WithUpdateField(\"region_id\", id) because UpdateOpts.Region sends the legacy region key.",
+        "Go UpdateOpts omits empty strings and WithUpdateField cannot override typed keys, so Python None or empty values for interface, url or service_id cannot be sent."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_endpoint_group",
+      "source_fingerprint": "007d050eb92c89eee28b1408a15119079b0f25a07d702836bb6f829a79fcf268",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PATCH OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_limit",
+      "source_fingerprint": "78fd51c2b4b29d3a3ec09d4583f90334280e9d36e7e80b10a4e22bbc71e3732c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH limits/{id} with only the changed keys in the {\"limit\": {...}} envelope, including zero resource_limit and empty description, the request Python update_limit sends.",
+          "tests": [
+            "identity/v3/limits/python_parity_test.go:TestPythonLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
+        "Python can send any Limit attribute; Go UpdateOpts types only description and resource_limit, and other keys such as region_id go through WithUpdateField."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_region",
+      "source_fingerprint": "2434c8a7bf56c2e54a4e5be56e8abe8832f14c3285e938a433a4bec627e243e2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH regions/{id} with only the changed keys in the {\"region\": {...}} envelope, including an empty description through the pointer field, the request Python update_region sends.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
+        "UpdateOpts.ParentRegionID omits empty values and WithUpdateField rejects parent_region_id, so Python update_region(parent_region_id=None) cannot be sent."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_registered_limit",
+      "source_fingerprint": "c8bc610844fb1985d17d58d9d78abc644db830f9f7ad0a443ed26741e149dd9a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH registered_limits/{id} with only the changed keys in the {\"registered_limit\": {...}} envelope, including zero default_limit, the request Python update_registered_limit sends.",
+          "tests": [
+            "identity/v3/registeredlimits/python_parity_test.go:TestPythonRegisteredLimitCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
+        "UpdateOpts.RegionID, ServiceID and ResourceName omit empty values and WithUpdateField rejects those keys, so Python None values for them cannot be sent."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_service",
+      "source_fingerprint": "b6faa33c2d8d87ba999bacee772f21ac632c489e76ceb0b39bd4f293d6c013b3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH services/{id} with only the changed keys in the {\"service\": {...}} envelope, including empty description and false enabled, the request Python update_service sends.",
+          "tests": [
+            "identity/v3/services/python_parity_test.go:TestPythonServiceCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400 through raise_from_response; the native call accepts only its Gophercloud OkCodes listed in identity/v3/native-admin-b.md.",
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Keystone v3 catalog resources declare no microversion, so neither side negotiates or sends one.",
+        "Python commit sends no request when no attribute changed and never puts id in the PATCH body; Go Update always sends PATCH, with an empty envelope for empty options.",
+        "UpdateOpts.Type omits an empty value and WithUpdateField rejects type, so Python type=None cannot be sent."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/wait_for_delete",
+      "source_fingerprint": "16ac46c22a26506c67dc2b6a28b68c2bdcdeadb3536541f71333e58b77d1fa06",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.WaitForDeletion",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+      ],
+      "contracts": [
+        {
+          "behavior": "Region WaitForDeletion with WithTimeout(120s) repeats GET regions/{id} on the fixed ID until 404, reports progress 0 after the nonterminal observation and then succeeds.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout while the identity v3 Proxy default is wait=120; resource.WithTimeout reproduces it."
+      ],
+      "remaining": [
+        "Python accepts every identity v3 Resource; Go has separate per-package helpers and none for packages outside a Resources collection.",
+        "Python returns the original Resource on deletion; Go returns only an error."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/wait_for_status",
+      "source_fingerprint": "180ea92c9a886202acae83c5c6e00cfd8efddcceeb6152f0d6723b5943b03ccd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait"
+      ],
+      "contracts": [
+        {
+          "behavior": "Endpoint and Region WaitFor without a status attribute fail with resource.ErrUnsupported before HTTP, like the Python AttributeError for a missing status attribute.",
+          "tests": [
+            "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointWaitHelpers",
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers"
+          ]
+        },
+        {
+          "behavior": "Region WaitFor with WithStatusAttribute(\"description\") polls GET regions/{id} on the fixed ID and compares the selected field case-insensitively, like Python attribute selection with lowercased status values.",
+          "tests": [
+            "identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-catalog.md"
+      ],
+      "differences": [
+        "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait. resource.WithPollInterval reproduces the 2-second interval."
+      ],
+      "remaining": [
+        "Python accepts every identity v3 Resource; Go has separate per-package helpers and none for packages outside a Resources collection.",
+        "Python returns the given Resource without HTTP when its cached attribute already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
+      ]
     }
   ]
 }
