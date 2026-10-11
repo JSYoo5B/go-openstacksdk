@@ -147,7 +147,7 @@ func (s *SecretScope) ListRecords(ctx context.Context, options ...ListRecordOpti
 		visited := map[string]bool{current.String(): true}
 		consumed := 0
 		for page := 0; ; page++ {
-			response, prior := rest.DoJSONGuardedRejectionsHeaders(ctx, &source.Client, guard, http.MethodGet, current.String(), nil, map[string]string{"Accept": "application/json"}, rest.RejectionPolicy{Codes: []int{400, 401, 403, 404, 409}, PreserveCleanRetry: true}, recordSuccessCodes()...)
+			response, prior := rest.DoJSONGuardedRejectionsHeaders(ctx, &source.Client, guard, http.MethodGet, current.String(), nil, map[string]string{"Accept": "application/json"}, rest.RejectionPolicy{Codes: recordRejectionCodes(), PreserveCleanRetry: true}, recordSuccessCodes()...)
 			if prior != nil {
 				fail(prior)
 				return

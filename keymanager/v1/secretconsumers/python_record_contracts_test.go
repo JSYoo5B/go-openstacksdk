@@ -89,13 +89,16 @@ func TestPythonConsumerRecordCreateSeedWireAndLiteralParent(t *testing.T) {
 }
 
 func TestPythonConsumerRecordMutationStatusesAndNoBodyPolicy(t *testing.T) {
-	for _, code := range []int{200, 201, 202, 204, 302, 399} {
+	for _, code := range []int{199, 200, 201, 202, 204, 302, 399} {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := consumerRecordClient(cloud)
 			calls := 0
 			cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
 				calls++
+				if req.Method == http.MethodGet {
+					return consumerRecordWire(code, `{"consumers":[{}]}`), nil
+				}
 				return consumerRecordWire(code, "not JSON"), nil
 			})
 			api := secretconsumers.New(client)
@@ -108,6 +111,10 @@ func TestPythonConsumerRecordMutationStatusesAndNoBodyPolicy(t *testing.T) {
 			deleted, err := api.DeleteRecord(context.Background(), "s1")
 			if err != nil || deleted.StatusCode != code || string(deleted.Envelope) != "not JSON" || calls != 2 {
 				t.Fatal(deleted, err, calls)
+			}
+			listed, err := api.AllRecords(context.Background(), "s1")
+			if err != nil || len(listed) != 1 || listed[0].StatusCode != code || calls != 3 {
+				t.Fatal(listed, err, calls)
 			}
 		})
 	}
@@ -498,5 +505,69 @@ func TestPythonConsumerRecordRetriesCannotChangeBodyOrListAccept(t *testing.T) {
 				t.Fatal(err, calls)
 			}
 		})
+	}
+}
+
+// All native rejection statuses need the same physical proof policy. A retry
+// hook willing to replay must not override a mixed Read/Close/source/cancel
+// observation, including throttling and server failures outside plain404.
+func TestPythonConsumerRecordRejectedStatusesPreventPhysicalReplay(t *testing.T) {
+	for _, status := range []int{429, 500, 503} {
+		for _, method := range []string{http.MethodPost, http.MethodDelete, http.MethodGet} {
+			t.Run(fmt.Sprintf("%s/%d", method, status), func(t *testing.T) {
+				cloud := testcloud.New(t)
+				client := consumerRecordClient(cloud)
+				ctx, cancel := context.WithCancelCause(context.Background())
+				defer cancel(nil)
+				readErr, closeErr, cause := errors.New("rejected Read"), errors.New("rejected Close"), errors.New("rejected cancellation")
+				body := `{"error":"original rejected receipt"}`
+				calls := 0
+				cloud.Provider.HTTPClient.Transport = consumerRecordTransport(func(req *http.Request) (*http.Response, error) {
+					calls++
+					if req.Method != method {
+						t.Fatal(req.Method, method)
+					}
+					response := consumerRecordWire(status, body)
+					response.Body = &consumerRecordFaultBody{
+						data: []byte(body), readErr: readErr, closeErr: closeErr,
+						read:  func() { client.ResourceBase = cloud.Server.URL + "/transient/" },
+						close: func() { client.ResourceBase = cloud.Server.URL + "/barbican/v1/"; cancel(cause) },
+					}
+					return response, nil
+				})
+				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return nil }
+				api := secretconsumers.New(client)
+				var err error
+				switch method {
+				case http.MethodPost:
+					result, failure := api.CreateRecord(ctx, "s1")
+					err = failure
+					if result != nil {
+						t.Fatal("rejection manufactured accepted create", result)
+					}
+				case http.MethodDelete:
+					result, failure := api.DeleteRecord(ctx, "s1")
+					err = failure
+					if result != nil {
+						t.Fatal("rejection manufactured successful delete", result)
+					}
+				case http.MethodGet:
+					result, failure := api.AllRecords(ctx, "s1")
+					err = failure
+					if result != nil {
+						t.Fatal("rejection yielded rows", result)
+					}
+				}
+				for _, expected := range []error{readErr, closeErr, cause, context.Canceled, resource.ErrInvalidOption} {
+					if !errors.Is(err, expected) {
+						t.Fatalf("lost %v: %v", expected, err)
+					}
+				}
+				var native gophercloud.ErrUnexpectedResponseCode
+				if !errors.As(err, &native) || native.Actual != status || string(native.Body) != body || native.ResponseHeader.Get("X-Receipt") != "actual" || calls != 1 {
+					t.Fatalf("receipt or request count changed: native=%+v error=%v requests=%d", native, err, calls)
+				}
+			})
+		}
 	}
 }

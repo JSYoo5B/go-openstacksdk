@@ -164,8 +164,12 @@ and nil error. `WithDeleteRecordIgnoreMissing(false)` preserves that status.
 Transport, Read, Close, retry, source-change, context cancellation and custom
 cancellation causes cannot be suppressed as missing.
 
-Both Source mutation methods and list status handling accept final HTTP200–399,
-matching the pinned `raise_from_response` boundary. The primary
+Both Source mutation methods and list status handling accept final HTTP100–399,
+matching the pinned `raise_from_response` boundary. The HTTP client normally
+handles interim 1xx responses; a transport exposing a final 1xx retains that
+Source boundary. All HTTP400–599 rejection bodies receive the same Read/Close,
+source and cancellation observation before native retry policy may continue.
+The primary
 [Barbican consumer reference](https://docs.openstack.org/barbican/latest/api/reference/secret_consumers.html)
 documents normal success as HTTP200 with a full Secret root for POST/DELETE;
 accepting the wider Source boundary does not assert extra server endpoints.

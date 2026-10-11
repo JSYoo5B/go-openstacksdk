@@ -60,9 +60,16 @@ func recordGuard(source *cloudread.Source) func(context.Context) error {
 	return func(ctx context.Context) error { return errors.Join(source.Guard(ctx), rest.CheckOperationGuard(ctx)) }
 }
 func recordSuccessCodes() []int {
+	result := make([]int, 300)
+	for i := range result {
+		result[i] = i + 100
+	}
+	return result
+}
+func recordRejectionCodes() []int {
 	result := make([]int, 200)
 	for i := range result {
-		result[i] = i + 200
+		result[i] = i + 400
 	}
 	return result
 }
@@ -186,7 +193,7 @@ func (s *SecretScope) mutateRecord(ctx context.Context, method string, options [
 		return nil, nil, cloudread.ContextError(ctx, err)
 	}
 	target := source.Client.ServiceURL("secrets", url.PathEscape(id), "consumers")
-	response, err := rest.DoJSONGuardedRejections(ctx, &source.Client, guard, method, target, recordCloneFields(attributes), nil, rest.RejectionPolicy{Codes: []int{400, 401, 403, 404, 409}, PreserveCleanRetry: true}, recordSuccessCodes()...)
+	response, err := rest.DoJSONGuardedRejections(ctx, &source.Client, guard, method, target, recordCloneFields(attributes), nil, rest.RejectionPolicy{Codes: recordRejectionCodes(), PreserveCleanRetry: true}, recordSuccessCodes()...)
 	err = cloudread.ContextError(ctx, errors.Join(err, guard(ctx)))
 	if method == http.MethodDelete && (config.Options.IgnoreMissing == nil || *config.Options.IgnoreMissing) {
 		err = resource.IgnoreMissing(err)
