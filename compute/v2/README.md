@@ -47,7 +47,7 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `Servers.ClearPassword/Restore/LockWithOptions/UnshelveWithOptions`와 직접 fixed/floating IP action은 Source 본문·선택 인자를 제공합니다. [서버 user action 비교](servers/python-user-actions.md)에 버전 상한과 host admin 조건을 설명합니다.
 
-`VolumeAttach.ListRecords/UpdateRecord`와 `ServerGroups.FindRecord`는 paging·raw 결과와 기본 검색을 제공합니다. [Attachment·group 비교](python-attachments-groups.md)에 volume swap 및 all-projects 권한 조건을 설명합니다.
+`VolumeAttachments.ListRecords/UpdateRecord`와 `ServerGroups.FindRecord`는 paging·raw 결과와 기본 검색을 제공합니다. [Attachment·group 비교](python-attachments-groups.md)에 volume swap 및 all-projects 권한 조건을 설명합니다.
 
 상위 `compute.Service.BackupServer`는 Nova createBackup 뒤 Connection이 Glance를 lazy 연결해 이미지를 조회하고 선택적으로 active를 기다립니다. [Backup의 Python/Go 비교](../backup-server-python.md)에 기본값·단계별 응답·120초 대기와 오류를 설명합니다.
 

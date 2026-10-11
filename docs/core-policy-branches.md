@@ -19,7 +19,7 @@
 공식 근거:
 
 - [Cinder attachment 정책](https://github.com/openstack/cinder/blob/27.0.0/cinder/policies/attachments.py), [volume action 정책](https://github.com/openstack/cinder/blob/27.0.0/cinder/policies/volume_actions.py), [기본 정책](https://github.com/openstack/cinder/blob/27.0.0/cinder/policies/base.py), [2025.2 정책 안내](https://docs.openstack.org/cinder/2025.2/configuration/block-storage/policy.html).
-- [Nova attachment controller](https://github.com/openstack/nova/blob/32.0.0/nova/api/openstack/compute/volumes.py), [attachment 정책](https://github.com/openstack/nova/blob/32.0.0/nova/policies/attach_volume.py), [기본 정책](https://github.com/openstack/nova/blob/32.0.0/nova/policies/base.py), [2025.2 정책 안내](https://docs.openstack.org/nova/2025.2/configuration/policy.html).
+- [Nova attachment controller](https://github.com/openstack/nova/blob/32.0.0/nova/api/openstack/compute/volume_attachments.py), [attachment 정책](https://github.com/openstack/nova/blob/32.0.0/nova/policies/attach_volume.py), [기본 정책](https://github.com/openstack/nova/blob/32.0.0/nova/policies/base.py), [2025.2 정책 안내](https://docs.openstack.org/nova/2025.2/configuration/policy.html).
 - [Neutron2025.2 정책 안내](https://docs.openstack.org/neutron/2025.2/configuration/policy.html).
 
 정확한 operation ID·Source fingerprint·45개 정책 binding·공식 소스 SHA·행 근거는 이번 실행의 `/private/tmp/go-openstacksdk-resume-policy-classification.json`에 있습니다. 정책 AST 대조는 정적 감사이며 실제 인증된 OpenStack 호출을 실행한 결과는 아닙니다.
