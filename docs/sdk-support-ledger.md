@@ -16,7 +16,13 @@
 
 서비스별 최종 집중/회귀 race는 Swift8+generator1·Credential7·Trust12·Cinder type/QoS20·Attachment24·Transfer13·Connector/Volume22·Nova attachment12·group13·Nova servers44·Compute140·Connection457·공통 discovery1그룹이 PASS입니다. Neutron forwarding 전체12그룹도 PASS입니다. 각 숫자는 해당 실행의 top-level test group이며 기존 회귀를 포함합니다. 초기 connector base64·Nova discovery fixture·부분 응답 증거 단언 실패를 수정했고, 동결 후 다시 실행한 PASS를 사용합니다. peer 검토에서 발견한 falsey attachment mode의 advertised range와 Transfer400..599 Read/Close 관찰을 보완했습니다. Nova backup 테스트에서 발견한 discovery 응답 경계의 순간적인 source 변경도 공통 엔진에서 보존합니다.
 
-구현·서비스 문서는 작은 의미 있는 커밋으로 저장했습니다. 전체 gate와 원문 문서11개 main build는 최종 불변 snapshot에서 확인할 마감 단계이며 아래에 정확한 revision·결과를 덧붙입니다. 이는 인증된 실제 OpenStack 호출, Python SDK runtime 실행 또는 최신 원격 module의 replace 없는 설치를 뜻하지 않습니다.
+최종 전체 gate는 정확한 `1544c0d3339e343d7db411020cb3531a1820a704` 불변 snapshot에서 `GOFLAGS=-p=4 make check` exit0입니다. Go2,517파일 SHA256 `8e5e16d95b95ccbfbb7cb282d7a4de242e68668eba940a67c39c5185f598c236`(sorted relative-path NUL bytes NUL), catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 실제 toolchain은 Go1.27.2 darwin/arm64, module language는1.25.0입니다. license·vet·race156개 test package·parity·progress·gofmt PASS이며 최종 run은153개 test cache와3개 새 실행을 사용했습니다. 첫 snapshot `34a70c4d`에서는 캐시 없는156개 race package가 전부 PASS했으나 callable만 받는 판정에 result type 참조7개가 들어 있어 parity에서 실패했습니다. 함수·메서드 참조만 남긴 후 SDK 구현 변경 없이 gate를 재검증했습니다. 후속 문서 필드 이름 교정은 생성기 전체206그룹 race에서도 PASS입니다.
+
+같은 최종 snapshot의 정확한11개 guide main은 원문 byte/SHA 대조 뒤 `GOWORK=off GOFLAGS=-p=4 go build -mod=mod ./...` exit0입니다. 외부 consumer-only local-replace module 검증이며 인증된 실제 OpenStack 호출, Python SDK runtime 실행 또는 최신 원격 module의 replace 없는 설치를 뜻하지 않습니다. 마지막 원격 설치 검증 revision은 기존 [설치 안내](install.md)와 별도로 유지합니다. 집중 검증16개 패키지786개 top-level group은 기존 회귀를 포함하며 전체 gate156패키지와 중복 합산하지 않습니다.
+
+정확한 실행 근거는 `/private/tmp/go-openstacksdk-oct11-resume-final-{source,check,focus,review}-receipt.json`, 원문/build 검증은 `/private/tmp/go-openstacksdk-oct11-resume-consumers/{manifest,receipt}.json`입니다. 최초 실패 log·source receipt는 `go-openstacksdk-oct11-resume-initial-*`로 보존했습니다. API catalog·고정 Source·관련 없는 이전 review는 유지하고18새 review·24승격·기존 Transfer3개의 계약 보강만 반영했습니다. 서비스 library Go/API/빌드 설정은 이 최종 검사 이후 변경하지 않았습니다.
+
+이 묶음은 `03729e58`부터 SDK·회귀·가이드·공통 오류 수정·generator·판정을34개의 의미 있는 커밋으로 나눴고, 이 마감 기록은 별도35번째 커밋으로 저장합니다. 모든 worker는 완료 상태이며 새 구현을 시작하지 않았습니다. 사용자 재시작 요청에 따라 최종 push 뒤 목표를 일시정지합니다. 전체 목표를 complete로 판정하지 않습니다.
 
 재개 시 이42개를 재구현하지 않습니다. 먼저 `api/sdk_reviews.json`의 핵심 user unresolved 중 구현되지 않은 leaf를 고르고 의존성이 없는 서비스별로 나눕니다. root가 공통 계약·generator·판정·전체 검사·작은 commit/push를 맡습니다. SDK-R1/C1/S1, stock Backup child metadata4개, alpha release와 전체 inventory 목표는 계속 미완료입니다.
 

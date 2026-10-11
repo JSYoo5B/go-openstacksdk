@@ -10,7 +10,23 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 마감 (2026-10-11): 독립 서비스 병렬 묶음42개 구현·서비스별 race 검증 완료. 전체1,292/3,362·핵심1,218/2,292.** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 사용자 재시작 요청에 따라 신규 구현 할당을 중단하고 모든 worker 파일을 동결했습니다. 남은 마감 단계는 고정 revision의 전체 `make check`, 정확한 문서 main11개의 외부 local-replace build, 최종 작은 commit/push와 목표 일시정지입니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료이며 전체 목표와 서비스 우선순위는 보존합니다.
+**현재 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 사용자 재시작 요청으로 새 구현 할당은 중단했고 모든 worker가 완료·동결 상태입니다. 최종 기록 commit/push 후 목표를 일시정지하며 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
+
+| 이번 단위 | 신규 API | 구현·서비스 검증 | Python/Go 문서·판정 |
+|---|---:|---|---|
+| Credential update | 1 | 완료·race7그룹 PASS | 완료·main 빌드 PASS |
+| Keystone Trust | 5 | 완료·패키지12그룹 PASS | 완료·main 빌드 PASS |
+| Nova user action | 8 | 완료·서버 패키지44그룹 PASS | 완료·main 빌드 PASS |
+| Nova attachment/group | 3 | 완료·패키지25그룹 PASS | 완료·main 빌드 PASS |
+| Nova server backup | 1 | 완료·leaf/service/Connection17그룹 포함 PASS | 완료·main 빌드 PASS |
+| Cinder attachment | 2 | 완료·패키지24그룹 PASS | 완료·main 빌드 PASS |
+| Cinder Transfer | 3 | 완료·패키지13그룹 PASS·기존3개 계약 보강 | 완료·main 빌드 PASS |
+| Cinder type/encryption/QoS | 4 | 완료·집중20그룹 PASS | 완료·main 빌드 PASS |
+| Cinder connector | 2 | 완료·Volume 패키지22그룹 PASS | 완료·main 빌드 PASS |
+| Swift native Create | 1 | 완료·집중8그룹 PASS·생성기 회귀 PASS | 완료·main 빌드 PASS |
+| Neutron port forwarding | 12 | 완료·패키지12그룹 PASS·6동작/2명칭 | 완료·main 빌드 PASS |
+
+표의 검증 수는 기존 회귀를 포함하며 서로 겹치는 패키지를 합산하지 않습니다. 전체 revision·소스 SHA·첫 실패와 최종 통과 구분·재개 위치는 [마감 검증 기록](sdk-support-ledger.md#핵심-독립-서비스42개-마감)에 있습니다.
 
 [권한 분기 정리](core-policy-branches.md)에 user/admin/service 조건을 기록했습니다. API 수는 합산이며 Cinder encryption/QoS3개는 admin, attachment2개는 Source 내부용입니다. Nova volume swap·unshelve host·all-projects 검색의 추가 권한은 각 분기에서 따로 설명합니다.
 
