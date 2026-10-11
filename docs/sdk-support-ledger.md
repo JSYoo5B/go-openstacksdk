@@ -4,9 +4,37 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [핵심 독립 서비스42개](#핵심-독립-서비스42개-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [핵심 Python proxy·cloud 판정 병렬 묶음](#핵심-python-proxycloud-판정-병렬-묶음-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,292입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,665입니다.
+
+## 핵심 Python proxy·cloud 판정 병렬 묶음 마감
+
+2026-10-12에 핵심 서비스에 남아 있던 Python openstacksdk proxy와 cloud 계층 helper를 서비스별 worktree 에이전트 16개로 나누어 판정했습니다. 전체는1,410→1,665/3,362(+255), 핵심은1,336→1,587/2,292이며 핵심 서비스의 미검토 선언은1개만 남았습니다. 판정은 고정 openstacksdk 소스에서 기본 인자로 보내는 요청을 읽고, 공개 Go API가 같은 요청과 결과를 만들 때만 `go_mapping`으로 기록했습니다.
+
+| 묶음 | 판정 | go_mapping | unresolved |
+|---|---:|---:|---:|
+| Keystone v3 사용자·역할 할당 | 50 | 40 | 10 |
+| Keystone v3 catalog·limit | 49 | 24 | 25 |
+| Keystone v3 policy·federation | 30 | 5 | 25 |
+| Cinder v3 관리 resource | 46 | 4 | 42 |
+| Cinder v2 volume·snapshot | 36 | 12 | 24 |
+| Cinder v2 나머지 resource | 66 | 19 | 47 |
+| Neutron core | 58 | 13 | 45 |
+| Neutron VPN·BGP | 69 | 39 | 30 |
+| Neutron L3 agent·QoS rule·FWaaS | 62 | 29 | 33 |
+| Neutron LBaaS·flavor·metering | 58 | 0 | 58 |
+| Neutron SFC·TaaS | 48 | 3 | 45 |
+| cloud identity helper | 55 | 16 | 39 |
+| cloud compute helper | 43 | 18 | 25 |
+| cloud network helper (a·b) | 83 | 22 | 61 |
+| cloud object store·Connection helper | 51 | 11 | 40 |
+
+판정 기준을 묶음 사이에 맞췄습니다. Python의 기본값 `ignore_missing=True`는 `Remove`나 `resource.IgnoreMissing`으로 고를 수 있을 때만 대응으로 보았습니다. Python이 Body 속성을 로컬에서 거르거나 `limit`·`marker`로 반복 요청하는 목록은 SDK의 `WithFilter` 계열 옵션이나 native pager가 같은 일을 할 때만 대응으로 보았습니다. 호출자가 결과 행을 직접 거르거나 페이지를 넘기거나 404를 직접 처리해야 하는 경우는 unresolved로 두었고, 이 기준으로 머지 단계에서 Neutron 목록 13개를 unresolved로 바꿨습니다. Cinder v2 메서드는 v3 package나 root `blockstorage` helper로 대응시키지 않았습니다.
+
+unresolved의 가장 큰 원인은 Gophercloud v2.15.0에 바인딩이 없는 경로입니다. Neutron LBaaS·flavor·metering·networking-sfc·tap flow·conntrack helper·NDP proxy·local IP, Keystone identity provider·endpoint group·domain config, Cinder cluster·group type·default type·quota class, Nova 이미지 proxy가 여기에 해당하며 SDK 소유 호출을 새로 작성하면 해소할 수 있습니다. 그 밖에는 typed 입력 구조체가 null·false·빈 값을 보낼 수 없는 경우, `fields` query를 보낼 수 없는 조회, find fallback과 cloud 계층의 `_filter_list`·extension 확인을 대신하는 SDK helper가 없는 경우입니다.
+
+새 Python 계약 테스트는 각 서비스 package의 `python_parity*_test.go`에 있습니다. 마지막 전체 gate의 race는 **167개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews2,487·contracts6,336·go_mapping1,665입니다. 마지막 판정 commit은 `5b526175`입니다. 실제 OpenStack 호출은 실행하지 않았고 Python 요청은 고정 소스를 읽어 도출했습니다.
 
 ## 핵심 독립 서비스42개 마감
 
