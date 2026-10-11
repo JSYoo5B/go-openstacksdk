@@ -151,7 +151,7 @@ func (p *recordPrepared) exchange(method, target string, body any) (*rest.Respon
 		}
 		policy.Values["Content-Type"] = value
 	}
-	return rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, body, policy, rest.RejectionPolicy{Codes: recordCodes(400, 600), PreserveCleanRetry: true}, recordCodes(100, 400)...)
+	return rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, body, policy, rest.RejectionPolicy{Codes: recordCodes(400, 600), PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, recordCodes(100, 400)...)
 }
 func (p *recordPrepared) response(r *rest.Response, seed map[string]json.RawMessage, err error) (*GroupRecord, error) {
 	if err != nil {
@@ -210,6 +210,14 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordGetOpti
 	if err != nil {
 		return nil, recordWrap(ctx, op, err)
 	}
+	value, err := p.getPrepared(id, v, seed)
+	return value, recordWrap(ctx, op, err)
+}
+
+// getPrepared reads with one fully prepared source and owned seed/options.
+// Policy and discovery happen before this seam, so preparation failures cannot
+// masquerade as clean member404/403/400 eligible for Find fallback.
+func (p *recordPrepared) getPrepared(id string, v RecordGetOpts, seed map[string]json.RawMessage) (*GroupRecord, error) {
 	target := p.source.Client.ServiceURL("groups", url.PathEscape(id))
 	if v.ListVolume != nil {
 		text := "False"
@@ -222,7 +230,7 @@ func (a *API) GetRecord(ctx context.Context, id string, options ...RecordGetOpti
 	rawID, _ := json.Marshal(id)
 	seed["id"] = rawID
 	value, err := p.response(r, seed, err)
-	return value, recordWrap(ctx, op, err)
+	return value, err
 }
 
 // CreateRecord posts known Source attrs and preserves explicit null/zero/false.
@@ -379,29 +387,52 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			query, filters, control, err = prepareList(v)
 		}
 		if err == nil {
-			headers := v.Headers
-			if headers == nil {
-				headers = make(map[string]string)
-			}
-			hasAccept := false
-			for key := range headers {
-				if strings.EqualFold(key, "Accept") {
-					hasAccept = true
-					break
-				}
-			}
-			if !hasAccept {
-				headers["Accept"] = "application/json"
-			}
-			err = p.policy(v.Microversion, headers)
-		}
-		if err == nil {
-			err = p.negotiate()
+			err = p.prepareListPolicy(v)
 		}
 		if err != nil {
 			fail(err)
 			return
 		}
+		for value, err := range p.listPrepared(v, query, filters, control, nil) {
+			if err != nil {
+				fail(err)
+				return
+			}
+			if !yield(value, nil) {
+				return
+			}
+		}
+	}
+}
+
+func (p *recordPrepared) prepareListPolicy(v RecordListOpts) error {
+	headers := v.Headers
+	if headers == nil {
+		headers = make(map[string]string)
+	}
+	hasAccept := false
+	for key := range headers {
+		if strings.EqualFold(key, "Accept") {
+			hasAccept = true
+			break
+		}
+	}
+	if !hasAccept {
+		headers["Accept"] = "application/json"
+	}
+	if err := p.policy(v.Microversion, headers); err != nil {
+		return err
+	}
+	return p.negotiate()
+}
+
+// listPrepared reuses frozen record/pager behavior with a fully prepared
+// source and validated query/filter/control. Optional observation is an actual
+// physical response, never a synthetic record or Find-specific type.
+func (p *recordPrepared) listPrepared(v RecordListOpts, query url.Values, filters map[string]json.RawMessage, control rest.ListControl, observe func(*rest.Response)) iter.Seq2[*GroupRecord, error] {
+	return func(yield func(*GroupRecord, error) bool) {
+		ctx := p.ctx
+		fail := func(err error) { yield(nil, err) }
 		path := "groups/detail"
 		if v.Details != nil && !*v.Details {
 			path = "groups"
@@ -410,7 +441,13 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 		var page *rest.Response
 		spec := rest.CollectionSpec[GroupRecord]{Client: &p.source.Client, Path: path, Kind: "groups", PluralKey: "groups", Metadata: recordMetadata, Validate: p.guard, SourceGuard: p.guard, ListCodes: recordCodes(100, 400), ReadPage: func(_ context.Context, target string, _ ...int) (*rest.Response, error) {
 			return p.exchange(http.MethodGet, target, nil)
-		}, ValidateResponse: func(r *rest.Response) error { page = r; return p.guard(ctx) }, ValidateItem: func(value *GroupRecord) error {
+		}, ValidateResponse: func(r *rest.Response) error {
+			page = r
+			if observe != nil {
+				observe(r)
+			}
+			return p.guard(ctx)
+		}, ValidateItem: func(value *GroupRecord) error {
 			value.Envelope = bytes.Clone(page.Body)
 			value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
 			p.proof(value)
