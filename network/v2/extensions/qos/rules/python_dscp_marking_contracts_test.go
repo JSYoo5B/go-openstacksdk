@@ -644,3 +644,53 @@ func TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse(t *testing.T) {
 		t.Fatal(requests.Load(), client)
 	}
 }
+
+func TestPythonDSCPMarkingComputedLocationStaysOwnedAcrossReads(t *testing.T) {
+	for _, operation := range []string{"get", "find", "list"} {
+		for _, forged := range []string{`{"project":{"id":"foreign"},"region":"forged"}`, `false`, `0`, `""`, `null`} {
+			t.Run(operation+"/"+forged, func(t *testing.T) {
+				row := `{"id":"target","name":"actual","dscp_mark":0,"location":` + forged + `}`
+				body := `{"dscp_marking_rule":` + row + `}`
+				if operation == "list" {
+					body = `{"dscp_marking_rules":[` + row + `]}`
+				}
+				api, calls := dscpRecordAPI(t, func(r *http.Request) *http.Response {
+					if (operation == "find") != (r.URL.Query().Get("qos_policy_id") == "policy") {
+						t.Fatal(r.URL)
+					}
+					return dscpRecordWire(203, body)
+				})
+				var value *rules.DSCPMarkingRecord
+				var err error
+				switch operation {
+				case "get":
+					value, err = api.GetDSCPMarkingRecord(context.Background(), "policy", "target")
+				case "find":
+					value, err = api.FindDSCPMarkingRecord(context.Background(), "policy", "target")
+				case "list":
+					var values []*rules.DSCPMarkingRecord
+					values, err = collectDSCPRecords(api.ListDSCPMarkingRecords(context.Background(), "policy"))
+					if len(values) == 1 {
+						value = values[0]
+					}
+				}
+				if err != nil || value == nil || value.PolicyID != "policy" || value.StatusCode != 203 || len(*calls) != 1 || string(value.Envelope) != body || string(value.Wire.Body["location"]) != forged {
+					t.Fatal(err, value, *calls)
+				}
+				dscpRecordField(t, value, "location", "null")
+				projected, wire := value.Resource.Clone(), value.Wire.Clone()
+				projected.Body["location"][0] = 'X'
+				wire.Body["location"][0] = 'Y'
+				wire.Header.Set("X-Request-Id", "clone")
+				if string(value.Resource.Body["location"]) != "null" || string(value.Wire.Body["location"]) != forged || value.Wire.Header.Get("X-Request-Id") != "actual-dscp" {
+					t.Fatal("cloned carriers alias", value)
+				}
+				value.Wire.Body["location"][0] = 'Z'
+				value.Header.Set("X-Request-Id", "record")
+				if string(value.Resource.Body["location"]) != "null" || string(value.Envelope) != body || value.Resource.Header.Get("X-Request-Id") != "actual-dscp" || value.Wire.Header.Get("X-Request-Id") != "actual-dscp" {
+					t.Fatal("actual receipt aliases projected view", value)
+				}
+			})
+		}
+	}
+}
