@@ -305,7 +305,7 @@ func discoveryGet(ctx context.Context, source *cloudread.Source, target string, 
 			return nil, err
 		}
 		response, err := parent.RoundTrip(req)
-		if response != nil && response.Body != nil && (response.StatusCode == 404 || response.StatusCode == 405) {
+		if response != nil && response.Body != nil && !slices.Contains(profile.OkCodes, response.StatusCode) {
 			response.Body = &observedBody{ReadCloser: response.Body, faults: &faults, ctx: req.Context(), guard: sourceGuard}
 		}
 		return response, err
