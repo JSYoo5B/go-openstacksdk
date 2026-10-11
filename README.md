@@ -12,6 +12,8 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 **현재 SDK 완료 수와 진행 중인 작업:** [자동 집계·현재 단계](docs/implementation-plan.md#현재-집계와-진행-중인-작업). 아래의 Gophercloud 공개 연산 수는 고정 transport 목록이며, SDK 완료 수는 위 링크의 연산별 판정으로 확인합니다.
 
+[Neutron 선택 조회·조건부 삭제](network/v2/python-read-delete.md)와 [Keystone 토큰 조회·확인·폐기](identity/v3/python-token-actions.md)는 서비스별 Python 대응과 독립 Go main을 제공합니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.
