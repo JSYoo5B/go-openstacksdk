@@ -461,7 +461,7 @@ func (e *Engine) prepareQuery(policy Options, identity string, forFind bool) (ur
 		if err := findKey(key); err != nil && (forFind || key != "id") {
 			return nil, nil, nil, nil, control, err
 		}
-		if e.profile.SourceFindPolicy && (key == "location" || key == "__conflicting_attrs") {
+		if e.profile.SourceFindPolicy && (key == "cls" || key == "location" || key == "__conflicting_attrs") {
 			return nil, nil, nil, nil, control, findInvalid("%q is an SDK-owned Resource constructor control", key)
 		}
 		if !forFind && !e.listKeyKnown(key) {
@@ -664,6 +664,11 @@ func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, poli
 						return fmt.Errorf("list row %q collides with Resource.existing constructor", key)
 					}
 				}
+				if e.profile.SourceFindPolicy {
+					if _, exists := value.Wire.Body["cls"]; exists {
+						return fmt.Errorf("list row cls collides with Resource.existing constructor")
+					}
+				}
 				value.Envelope = bytes.Clone(origin.Body)
 				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
 				return errors.Join(e.findProject(value, nil), guard(ctx))
@@ -735,6 +740,66 @@ func (e *Engine) List(ctx context.Context, policy Options) iter.Seq2[*Record, er
 	}
 }
 
+// getRecord is the physical member reader shared by Get and Find. It keeps
+// the actual rejection/descriptor response and seed projection in one place.
+func (e *Engine) getRecord(ctx context.Context, source *cloudread.Source, headers rest.RequestHeaderPolicy, id string, query url.Values, seed map[string]json.RawMessage) (*Record, error) {
+	target := source.Client.ServiceURL(e.profile.Path, url.PathEscape(id))
+	if len(query) != 0 {
+		target += "?" + query.Encode()
+	}
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, findCodes()...)
+	if err != nil {
+		return nil, err
+	}
+	owned := findFields(seed)
+	owned[e.profile.IDKey], _ = json.Marshal(id)
+	value, err := e.findResponse(response, owned)
+	if err = errors.Join(err, e.Check(ctx)); err != nil {
+		err = response.Fail(err)
+	}
+	return value, err
+}
+
+// Get performs one literal member lookup. Query values belong to fetch, so they
+// do not seed Resource Body attributes. A leaf maps its fields to wire names.
+func (e *Engine) Get(ctx context.Context, identity string, policy Options) (*Record, error) {
+	if err := errors.Join(cloudread.Context(ctx), e.Check(ctx), findSegment(identity)); err != nil {
+		return nil, err
+	}
+	policy = CloneOptions(policy)
+	query := make(url.Values)
+	for _, key := range policy.Order {
+		if err := findKey(key); err != nil {
+			return nil, err
+		}
+		if e.profile.SourceFindPolicy && (key == "cls" || key == "location" || key == "__conflicting_attrs") {
+			return nil, findInvalid("%q is an SDK-owned Resource constructor control", key)
+		}
+		raw := policy.Query[key]
+		if !utf8.Valid(raw) || !json.Valid(raw) {
+			return nil, findInvalid("query %q must contain complete UTF-8 JSON", key)
+		}
+		values, err := cloudfilter.RequestQueryValues(raw)
+		if err != nil {
+			return nil, err
+		}
+		if len(values) != 0 {
+			query[key] = values
+		}
+	}
+	source := *e.source
+	if e.profile.SourceFindPolicy && policy.Microversion != nil {
+		stripVersion(&source)
+	}
+	if err := errors.Join(source.WithPolicy(ctx, policy.Microversion, policy.Headers), e.Check(ctx)); err != nil {
+		return nil, err
+	}
+	headers := e.headerPolicy(&source, false, policy.Headers)
+	source.Client.MoreHeaders = maps.Clone(headers.Values)
+	value, err := e.getRecord(ctx, &source, headers, identity, query, nil)
+	return value, errors.Join(err, e.Check(ctx))
+}
+
 // Find matches the pinned Source GET-first, complete ID-or-name search.
 // It suppresses only clean GET400/403/404; physical/source/cancel faults remain
 // terminal. SourceFindPolicy keeps per-call GET version separate from LIST.
@@ -769,21 +834,7 @@ func (e *Engine) Find(ctx context.Context, identity string, policy Options) (*Re
 	headerPolicy := e.headerPolicy(&source, false, policy.Headers)
 	source.Client.MoreHeaders = maps.Clone(headerPolicy.Values)
 	get := func(_ context.Context, id string) (*Record, error) {
-		target := source.Client.ServiceURL(e.profile.Path, url.PathEscape(id))
-		if len(getQuery) != 0 {
-			target += "?" + getQuery.Encode()
-		}
-		response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true}, findCodes()...)
-		if err != nil {
-			return nil, err
-		}
-		owned := findFields(seed)
-		owned[e.profile.IDKey], _ = json.Marshal(id)
-		value, err := e.findResponse(response, owned)
-		if err = errors.Join(err, guard(ctx)); err != nil {
-			err = response.Fail(err)
-		}
-		return value, err
+		return e.getRecord(ctx, &source, headerPolicy, id, getQuery, seed)
 	}
 	list := func(context.Context, url.Values) iter.Seq2[*Record, error] {
 		return e.listRecords(ctx, &listSource, policy, listQuery, filters, control)
