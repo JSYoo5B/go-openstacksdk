@@ -41,6 +41,8 @@ endpoint·region·service·limit·registered limit·project endpoint의 openstac
 
 domain·group·project·user·role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 Python Proxy 대응과 미해결 목록은 [Python/Go 사용자·role 할당 비교](python-parity-users.md)에 설명합니다.
 
+openstacksdk cloud 계층의 사용자·프로젝트·그룹·역할·도메인·서비스·endpoint helper(`conn.create_user` 등)별 Go 대응과 미해결 사유는 [identity cloud helper Python 대응](../python-cloud-parity.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go
