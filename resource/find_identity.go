@@ -2,6 +2,7 @@ package resource
 
 import (
 	"context"
+	"errors"
 	"iter"
 	"net/http"
 	"net/url"
@@ -23,6 +24,9 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 		kind = c.binding.Kind
 	}
 	fail := func(err error) (*T, error) {
+		if ctx != nil && ctx.Err() != nil {
+			err = errors.Join(err, ctx.Err(), context.Cause(ctx))
+		}
 		return nil, &OperationError{Operation: "find_identity", Resource: kind, Cause: err}
 	}
 	config, err := PrepareIdentityFindOptions(options...)
@@ -64,7 +68,7 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 			var err error
 			value, err = extraSpecs(ctx, value)
 			if canceled := ctx.Err(); canceled != nil {
-				return fail(canceled)
+				return fail(errors.Join(err, canceled))
 			}
 			if err != nil {
 				return fail(err)
@@ -113,7 +117,7 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 		}
 		value, err := c.getIdentity(ctx, identity, config.Query)
 		if canceled := ctx.Err(); canceled != nil {
-			return fail(canceled)
+			return fail(errors.Join(err, canceled))
 		}
 		if err == nil {
 			if _, err := c.identityFindID(value); err != nil {

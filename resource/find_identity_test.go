@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"iter"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -700,6 +701,52 @@ func TestCollectionFindIdentityQueryHookKeepsNativeAndTerminalCauses(t *testing.
 				}
 			} else if outcome == "canceled" && !errors.Is(err, context.Canceled) {
 				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors(t *testing.T) {
+	for _, phase := range []string{"get", "extra-specs"} {
+		t.Run(phase, func(t *testing.T) {
+			ctx, cancel := context.WithCancelCause(context.Background())
+			defer cancel(nil)
+			cancelCause := errors.New("caller canceled in physical response")
+			bodyCause := errors.New("physical response close failed")
+			status := 404
+			if phase == "extra-specs" {
+				status = 500
+			}
+			native := gophercloud.ErrUnexpectedResponseCode{Actual: status, Body: []byte("physical body"), ResponseHeader: http.Header{"X-Proof": {"physical response"}}}
+			physical := errors.Join(native, bodyCause)
+			gets, lists := 0, 0
+			adapter := resource.Adapter[identityFindItem]{Kind: "identity-items", IdentityFind: true,
+				ID: func(v *identityFindItem) string { return v.ID }, Name: func(v *identityFindItem) string { return v.Name },
+				Get: func(context.Context, string) (*identityFindItem, error) {
+					gets++
+					if phase == "get" {
+						cancel(cancelCause)
+						return nil, physical
+					}
+					return &identityFindItem{ID: "canonical", Name: "matched"}, nil
+				},
+				Iterate: func(context.Context, url.Values) iter.Seq2[*identityFindItem, error] {
+					lists++
+					return func(func(*identityFindItem, error) bool) {}
+				},
+				IdentityExtraSpecs: func(context.Context, *identityFindItem) (*identityFindItem, error) {
+					cancel(cancelCause)
+					return nil, physical
+				},
+			}
+			options := []resource.IdentityFindOption{}
+			if phase == "extra-specs" {
+				options = append(options, resource.WithIdentityFindExtraSpecs(true))
+			}
+			value, err := resource.NewCollection(adapter).FindIdentity(ctx, "input", options...)
+			var observed gophercloud.ErrUnexpectedResponseCode
+			if value != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) || !errors.Is(err, bodyCause) || !errors.As(err, &observed) || observed.Actual != status || string(observed.Body) != "physical body" || observed.ResponseHeader.Get("X-Proof") != "physical response" || gets != 1 || lists != 0 {
+				t.Fatal(value, err, observed, gets, lists)
 			}
 		})
 	}
