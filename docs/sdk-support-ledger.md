@@ -3094,3 +3094,25 @@ Barbican Secret/Container/Order의 구체적 상태·삭제 대기는 별도13�
 최종 커밋 `f92faa3913b17efedb30f5156558f156b03fb2a7`을 Git archive로 분리한 불변 snapshot에서 `GOFLAGS=-p=4 make check`가 exit0입니다. testcache를 비운 실제162개 package가 모두 uncached PASS이며 license12개 원문·4개 pinned module, vet·race·고정 Source parity·progress·gofmt를 포함합니다. Go2,661개 SHA256 `2a1c4df233c0e0ec116e00f787343f23ca1592bf38ef37050283dd45086d05c1`는 정렬한 상대경로 NUL·bytes NUL로 계산했고 검사 전후 같습니다. catalog SHA와 pins는 보존했습니다. receipt `/private/tmp/go-openstacksdk-oct11-wave4-full-receipt.json`, 실제 log `...wave4-full-check.log`에 revision·snapshot·exit·package 수를 기록했습니다. 앞선 `d2cd22dc` 실패는 별도로 남기며 이 최종 PASS에 혼합하지 않습니다.
 
 같은 revision을 외부 consumer의 local replace로 연결한 정확한 비교 main17개(이번 named8개+finite wait1개+앞선23개 가이드8개) 빌드와 모든 Python fence AST가 exit0입니다. `/private/tmp/go-openstacksdk-oct11-wave4-seventeen-guide-receipt.json`에 개별 main SHA와 consumer 경로를 기록했습니다. 실제 OpenStack 인증·Python runtime·이 revision의 replace 없는 원격 설치·alpha 배포는 실행하지 않았습니다. 원격 main의 `f92faa39` push도 확인했습니다. 이후 Header 정밀화·새 QoS/security/Cinder/Barbican 구현은 이 snapshot 이후 검증 단위이며 포함됐다고 주장하지 않습니다.8개 worker의 독립 구현과 교차 검토를 계속합니다.
+
+## 핵심 user 추가34개 마감
+
+**현재 묶음 마감 (2026-10-11): 전체1,376→1,410/3,362(+34,41.9%)·핵심1,302→1,336/2,292(58.3%).** 독립 파일 담당8개 worker가 구현·테스트·Python/Go 가이드를 준비했고 root가 공통 레이어·교차 검토·생성기·판정·검증·commit/push를 통합했습니다. reviews1,683·contracts5,889·unresolved1,951·unsupported1·supported0이며 원래 Source pin과 catalog는 보존합니다. 생성 transport1,126개와 named API 완료 수는 별도입니다.
+
+| 마감 단위 | 완료 API | 사용·검증 범위 |
+|---|---:|---|
+| QoS minimum bandwidth/minimum packet rate/packet rate limit/rule types | 12 | 각 Get/Find/List, concrete 옵션·부모 경로·Source view와 실제 Wire |
+| SecurityGroup/Rule 목록 | 2 | lazy 목록·로컬 필터·header·페이지·unsupported 제어 옵션 사전 거부 |
+| Router 검색/목록 | 2 | GET-first/name fallback·Source schema·revision alias·실제 Header |
+| RBAC 생성/수정/삭제 | 3 | shared Mutate/ProjectSeed·빈 객체·null·sparse merge·no-op·clean404 |
+| Cinder replication | 3 | stock 요청 기본값과 명시적 PinnedSourceWire·3.38·실제 action 응답 |
+| Cinder legacy consistency group/snapshot | 7+5 | owned records·details/missing 기본값·no implicit discovery·페이지·stock/source 차이 |
+| Barbican SecretStore 대기 | 0 | concrete target 확장9그룹; named wait2개 unresolved 유지 |
+
+이번 서비스별 전체 race와 공통 cloudfilter/neutronfind, 생성기 회귀는 PASS입니다. 처음 후보 검증에서 발견한 미사용 import3개, Cinder replication의 non-Unwrap401 실제 receipt 누락, snapshot의 stale all_tenants 기대값을 수정했습니다. 마지막 교차 검토에서 legacy 목록의 Source 제어 옵션을 조용히 버리는 동작과 float-underflow next 처리를 보완했습니다. 실제 native *ErrUnableToReauthenticate의 ErrOriginal/ErrReauth·Read/Close·status/body/header를 보존하며 faulty response에서 retry/reauth callback0, 정상 retry/renewal은 별도 검증합니다. 공통 REST·Source guard·paging·FindIdentity·public Gophercloud testhelper의 testcloud/nativefixtures를 재사용합니다.
+
+새 사용 가이드는 Neutron8개·Cinder3개·Barbican1개, 총12개이며 각 문서에 독립 Python과 Go main을 제공합니다. [Network README](../network/v2/README.md), [Cinder README](../blockstorage/v3/README.md), [Key Manager README](../keymanager/v1/README.md)에서 찾을 수 있습니다. 생성기에 ConsistencyGroups/ConsistencyGroupSnapshots와 링크를 등록했고 SecretStore의 route/projection은 기존 waits에 연결했습니다.
+
+최종 전체 검증: 실행 대기. 고정 커밋 archive의 uncached make check와 정확한 문서 main12개 외부 local-replace 빌드·Python AST를 실행한 뒤 revision·소스 SHA·실제 package 수·exit code를 이곳에 갱신합니다. 앞선 f92faa39 full PASS와 이번 후보의 부분 실패 로그는 보존하며 서로 바꾸어 기록하지 않습니다.
+
+사용자의 여기까지 마무리 지시에 따라 새 API 할당은 끝내고 현재 worker는 동결·종료했습니다. 후속 작업은 이번34행을 재집계하지 않고 현재 unresolved에서 핵심 user 잔여를 우선 선택합니다. 다음 후보는 Barbican ACL/Quota finite wait, 남은 핵심 서비스 named API와 SDK-R1/C1/S1이며 핵심 user→핵심 admin→managed user→managed admin 순서를 유지합니다. Swift는 Glance 연계 때문에 핵심, 후속 네트워크·베어메탈은 후속 묶음 내 우선입니다. stock Backup metadata4개·실제 인증된 클라우드 acceptance·alpha release·전체 inventory 목표는 미완료입니다.

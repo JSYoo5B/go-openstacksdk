@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): 작업 에이전트8개 병렬 구현·검토 유지, 추가84개 named API 서비스 검증·판정 완료. 전체1,376/3,362(40.9%)·핵심1,302/2,292(56.8%).** 앞선26개는 `499fb413`, 다음21개는 `d740c85a` 전체 검사와 각 비교 main8개 빌드가 PASS입니다. 이후23개 비교 main8개는 PASS이나 첫 전체 snapshot `d2cd22dc`는 retry callback 호환성 회귀로 실패했으며, 기존 callback 계약을 보존하는 opt-in 수정 후 관련 서비스 full race를 재검증했습니다. 이번14개는 RBAC3·Bandwidth limit3·DSCP3·Trunk/AddressGroup 목록2·Group/GroupSnapshot 검색2·Glance image task1입니다. 서비스 full race와 교차 검토를 통과했고, discovery/member fallback·owned header maps·computed location·조건부 header 보존을 수정해 작은 커밋으로 저장했습니다. Barbican Secret/Container/Order 대기13그룹도 PASS이나 SecretStore/ACL/Quota 대상이 남아 named2개는 unresolved로 유지합니다. `f92faa39` 불변 snapshot의 전체 `make check`와 uncached162개 test package·license/vet/parity/progress/gofmt, 이번9개+앞선8개 정확한 비교 main17개 외부 빌드·Python AST가 PASS입니다. [검증 기록](sdk-support-ledger.md#핵심-user-추가14개-서비스-검증)에 첫 실패와 최종 통과를 구분합니다. 다음 QoS 조회12개·SecurityGroup/Rule 목록2개·Cinder replication3개를 병렬 진행하며 core user→core admin→managed user→managed admin 순서를 유지합니다.
+**현재 묶음 마감 (2026-10-11): 추가34개 named API 구현·서비스 race·검토·문서·판정 완료. 전체1,410/3,362(41.9%)·핵심1,336/2,292(58.3%).** Neutron QoS 조회12·SecurityGroup/Rule 목록2·Router 검색/목록2·RBAC 변경3과 Cinder replication3·legacy consistency group7·snapshot5를 추가했습니다. SecretStore 대기9개 회귀도 PASS이나 ACL·Quota·ProjectQuota가 남아 named wait2개는 unresolved이며 완료 API 수를 늘리지 않습니다. 공통 JSON float truthiness·Source Header 별칭/복수값·owned mutation/projection을 재사용했고, 401 실제 응답 보존·LIST 제어 옵션과 페이지 경계를 보완했습니다. 기능별 작은 커밋으로 저장했습니다. 이번 최종 고정 커밋의 전체 검사와 정확한 비교 main12개 빌드는 실행 대기이며, 앞선 `f92faa39`의 전체162개 test package/17개 main PASS와 구분합니다. [마감 검증 기록](sdk-support-ledger.md#핵심-user-추가34개-마감)에 최종 근거를 갱신합니다. 사용자의 여기까지 마무리 지시에 따라 새 구현 할당을 끝내고 현재 묶음만 마감합니다. 전체 목표·우선순위·남은 SDK-R1/C1/S1·실제 클라우드 acceptance·alpha 범위는 유지합니다.
 
 **이전 묶음 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 당시 재시작 요청으로 마감했으며, 최신 계속 진행 지시에 따라 현재는8개 worker로 다음 핵심 user 묶음을 진행합니다. 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
 
@@ -502,11 +502,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,376 (40.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,410 (41.9%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 1,985 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 1,652 | 아직 개별 기록 없는 선언 1,710 |
-| 기록한 부분·전체 계약 | 5,657 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 1,951 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 1,683 | 아직 개별 기록 없는 선언 1,679 |
+| 기록한 부분·전체 계약 | 5,889 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -685,12 +685,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,302 / 2,292 | 56.8% | 176 | 813 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,336 / 2,292 | 58.3% | 173 | 782 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 1,376 / 3,362 | 40.9% | 275 | 1,710 | 1 |
+| 전체 | 1,410 / 3,362 | 41.9% | 272 | 1,679 | 1 |
 
 **핵심 서비스**
 
@@ -699,9 +699,9 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Identity / Keystone | 189 / 389 | 15 | 185 | 0 |
 | Compute / Nova | 241 / 333 | 46 | 46 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 340 / 758 | 24 | 394 | 0 |
+| Network / Neutron | 359 / 758 | 21 | 378 | 0 |
 | Image / Glance | 86 / 120 | 34 | 0 | 0 |
-| Block Storage / Cinder | 291 / 480 | 26 | 163 | 0 |
+| Block Storage / Cinder | 306 / 480 | 26 | 148 | 0 |
 | Key Manager / Barbican | 59 / 67 | 8 | 0 | 0 |
 | Object Storage / Swift | 31 / 74 | 17 | 25 | 1 |
 
