@@ -21,6 +21,8 @@ native [v2 호출](native-calls.md)은 deprecated v2 package의 generated 메서
 
 Python openstacksdk v2 volume·snapshot·consistency group snapshot 메서드의 Go 대응과 미해결 항목은 [Cinder v2 Python proxy 대응](python-parity-volumes.md)에서 확인합니다.
 
+backup·transfer·quota·service 등 volume과 snapshot 외 리소스의 Python proxy 대응과 아직 대응하지 못한 메서드는 [v2 리소스 Python 비교](python-parity-resources.md)에 설명합니다.
+
 ## Go 사용
 
 ```go

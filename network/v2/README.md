@@ -65,6 +65,10 @@ networking-sfc와 tap-as-a-service Python 메서드 48개의 비교 결과는 [S
 
 L3 agent 스케줄링, QoS rule 변경, FWaaS v2와 conntrack helper·NDP proxy 등 미지원 Neutron 경로의 Python 대응은 [L3·QoS·FWaaS Python 대응](python-parity-l3-qos-fw.md)에 정리했습니다.
 
+agent·segment·port 목록과 floating IP 연결 등 Neutron core Python 메서드 58개의 Go 대응과 차이는 [Neutron core Python 대응](python-parity-core.md)에 정리했습니다.
+
+VPNaaS·BGP·BGP VPN 메서드를 Python openstacksdk와 비교한 내용은 [VPN·BGP Python 대응](python-parity-vpn-bgp.md)에 있습니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용

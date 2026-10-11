@@ -212,6 +212,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		if key == "blockstorage/v2" {
 			out.WriteString("native [v2 호출](native-calls.md)은 deprecated v2 package의 generated 메서드가 v3 native 호출과 다른 입력·목록·decode 계약만 정리합니다.\n\n")
 			out.WriteString("Python openstacksdk v2 volume·snapshot·consistency group snapshot 메서드의 Go 대응과 미해결 항목은 [Cinder v2 Python proxy 대응](python-parity-volumes.md)에서 확인합니다.\n\n")
+			out.WriteString("backup·transfer·quota·service 등 volume과 snapshot 외 리소스의 Python proxy 대응과 아직 대응하지 못한 메서드는 [v2 리소스 Python 비교](python-parity-resources.md)에 설명합니다.\n\n")
 			break
 		}
 		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.\n\n")
@@ -241,6 +242,8 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("Neutron LBaaS v2·flavor·service profile·metering Python 메서드와 floating IP 별칭 `find_ip`·`ips`의 미해결 사유는 [LBaaS·flavor·metering Python 대응](python-parity-lbaas-metering.md)에 정리했습니다.\n\n")
 		out.WriteString("networking-sfc와 tap-as-a-service Python 메서드 48개의 비교 결과는 [SFC·TaaS Python 대응](python-parity-sfc-tap.md)에 있으며, tap mirror 생성·수정·삭제만 대응되고 나머지는 미해결 사유를 함께 설명합니다.\n\n")
 		out.WriteString("L3 agent 스케줄링, QoS rule 변경, FWaaS v2와 conntrack helper·NDP proxy 등 미지원 Neutron 경로의 Python 대응은 [L3·QoS·FWaaS Python 대응](python-parity-l3-qos-fw.md)에 정리했습니다.\n\n")
+		out.WriteString("agent·segment·port 목록과 floating IP 연결 등 Neutron core Python 메서드 58개의 Go 대응과 차이는 [Neutron core Python 대응](python-parity-core.md)에 정리했습니다.\n\n")
+		out.WriteString("VPNaaS·BGP·BGP VPN 메서드를 Python openstacksdk와 비교한 내용은 [VPN·BGP Python 대응](python-parity-vpn-bgp.md)에 있습니다.\n\n")
 		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
 	case "loadbalancer/v2":
 		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")
