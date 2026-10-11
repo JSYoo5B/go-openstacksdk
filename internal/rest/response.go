@@ -184,6 +184,13 @@ func responseRequestOwnership(options *gophercloud.RequestOpts, expected []byte,
 	if options == nil || !ownedRequestHeaders(options.MoreHeaders, headers, absent) {
 		return invalid()
 	}
+	for _, omitted := range options.OmitHeaders {
+		for protected := range headers {
+			if strings.EqualFold(omitted, protected) {
+				return invalid()
+			}
+		}
+	}
 	changed := !options.KeepResponseBody || options.JSONResponse != nil || options.RawBody != nil
 	if options.JSONBody == nil {
 		if expected == nil && !changed {
