@@ -97685,6 +97685,931 @@
       "remaining": [
         "No Go helper looks the floating IP up through the cloud list, returns False when it has no port, clears port_id with a PUT and returns True, and falls back to the Nova removeFloatingIp server action after a Neutron NotFound."
       ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_network",
+      "source_fingerprint": "2137c3ad73f7c1ca05cc9f6804e7740925785b2f5b71026d1a9c041bbede53c8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns a Network Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
+        "The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.",
+        "Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.",
+        "Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_router",
+      "source_fingerprint": "5710f056928aaeb29353459e0e7a5c5b1884c46fada4abffe62e72c1ddcdc08d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns a Router Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
+        "The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.",
+        "Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.",
+        "Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_subnet",
+      "source_fingerprint": "2891b7bde27d6cd83172388a8fe44ff04f3ad23fb12f45256dd68b96140b6cdc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns a Subnet Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
+        "The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.",
+        "Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.",
+        "Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_port",
+      "source_fingerprint": "77bc3903890f0ec406130f996894ff7573533c2611b22b0fe33bc20f8142cca6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing true and a filter query sends GET /{collection}/{name_or_id}?filters first, falls back to GET /{collection}?name=...&filters, returns the single match, and returns nil without error when nothing matches, for networks, routers, subnets and ports.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetHelpersFindByIDThenNameWithFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns a Port Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
+        "The cloud filters dict maps to repeated WithRecordFindQuery options; the docstring's jmespath string form does not work in Python either because filters are expanded with **.",
+        "Python's ignore_missing=True is explicit here; Go callers pass WithRecordFindIgnoreMissing(true), which is also the FindRecord default.",
+        "Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_network_by_id",
+      "source_fingerprint": "14ea6321e7b02e9864c79563edfeacc062b66505e304dbdd426e8c8133cfb2e4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "networks.API.Get sends GET /networks/{id}, decodes the network, and returns the 404 as an error just like the Python proxy get_network.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetByIDIsPlainGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python docstring says None when missing but the proxy raises NotFoundException; Go returns the Gophercloud 404 error.",
+        "Go returns the native Gophercloud Network struct, which omits some Python Network extension attributes (for example provider and DNS fields)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_port_by_id",
+      "source_fingerprint": "d097272a0f990b362d95dcf3b847cc7d791b39f2f20a4322c8265af0388a6352",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "ports.API.Get sends GET /ports/{id}, decodes the port, and returns the 404 as an error just like the Python proxy get_port.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkGetByIDIsPlainGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python docstring says None when missing but the proxy raises NotFoundException; Go returns the Gophercloud 404 error.",
+        "Go returns the native Gophercloud Port struct rather than the Python Port Resource with every extension attribute."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_network_extensions",
+      "source_fingerprint": "cced63dab2a1c013437b152512957024b41a4b724f8bfc6d1839e6e260414df0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "extensions.API.List sends one GET /extensions and yields every extension whose Alias values form the same set Python returns.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkExtensionsListAliases"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns set[str] of aliases; Go yields Extension values through an iterator and the caller collects Alias."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/add_router_interface",
+      "source_fingerprint": "1caaeec7ba865c85142fe9f1069fc44d5d59ac17577302466c67fc9ba8d354d7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.AddInterfaceRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfacePort"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddInterfaceRecord sends PUT /routers/{id}/add_router_interface with port_id when a truthy port is given, otherwise subnet_id (null when neither is given), and returns the whole response JSON.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkAddRouterInterfaceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python accepts a Router object or ID; Go takes the router ID string.",
+        "Python returns the response dict; Go returns RouterJSONResult with the raw JSON Value, headers and status.",
+        "The docstring says passing both IDs is an error, but Python and Go both send only port_id in that case."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_port",
+      "source_fingerprint": "812fd0b794bcb107e51bb7410fca3abc8c1d127f4380752048b8cc9d38a3a15a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateWithAttributes with network_id plus forwarded attributes sends POST /ports with exactly those keys, including wire names such as binding:vnic_type and explicit false values.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreatePortForwardsKwargs"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python rejects kwargs outside its valid_kwargs list; Go WithAttribute forwards any key.",
+        "Python returns a Port Resource; Go returns the native Gophercloud Port struct.",
+        "Python negotiates the Neutron microversion per resource; Go sends the configured client version (Neutron v2.0 has no microversions in practice)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_port",
+      "source_fingerprint": "f498e9eac4c2eb7058624c33dda0f452bcbbb0aa9b9b42ee76a01f3e348b6c1b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.DeleteWithOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkDeleteHelpersFindThenDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
+        "Python passes the found Resource to the proxy delete; Go passes the found ID string.",
+        "Python logs a debug message when nothing is found; Go does not log."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_router",
+      "source_fingerprint": "725ddeb1c812071b8339d27fcb700d90a1637b5e79002096dbc96347eaff1452",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.DeleteWithOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkDeleteHelpersFindThenDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
+        "Python passes the found Resource to the proxy delete; Go passes the found ID string.",
+        "Python logs a debug message when nothing is found; Go does not log."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_subnet",
+      "source_fingerprint": "01015841f6449feecdd21d5bbe753fdf04fd024c8a824bd4dcddca995fc61118",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.DeleteWithOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord with ignore-missing returns nil without any DELETE for an absent name; otherwise DeleteWithOptions on the found ID sends DELETE without a body, ignores a racing 404, and returns a 409 as an error, for ports, routers and subnets.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkDeleteHelpersFindThenDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
+        "Python passes the found Resource to the proxy delete; Go passes the found ID string.",
+        "Python logs a debug message when nothing is found; Go does not log."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_firewall_policy",
+      "source_fingerprint": "9c4cf336786ecfcc9af86089fdc5c70c256a0498264748f64306104c7b0ad7e6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Each firewall rule name or ID is resolved with Find(ID, ignore missing) then Find(Name), sending GET /fwaas/firewall_rules/{x} then GET /fwaas/firewall_rules?name=x; the IDs go into one POST /fwaas/firewall_policies, and an unknown rule returns ErrNotFound before any POST.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallPolicyCreateResolvesRuleNames"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python Resource.find falls back to the name list after a 400 or 403 member GET and matches rows by ID or name; Go Find(resource.ID) treats only 404 as absent and Find(resource.Name) uses the server-side name filter.",
+        "Gophercloud CreateOpts uses omitempty, so an empty name or an empty firewall_rules list is omitted rather than sent; WithCreateField cannot override these core fields.",
+        "Python returns a FirewallPolicy Resource; Go returns the native Gophercloud Policy struct."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_firewall_group",
+      "source_fingerprint": "f336a8f853df6f0e52e956d3a53817ada605c095e5c927f1bb22fbb79b72ce00",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Ingress/egress policy names resolve through Find(ID) then Find(Name), each port resolves through ports FindRecord with ignore-missing false (ErrNotFound before POST when absent), and one POST /fwaas/firewall_groups carries ingress_firewall_policy_id, egress_firewall_policy_id and the port IDs.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGroupCreateResolvesPoliciesAndPorts"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python Resource.find falls back to the name list after a 400 or 403 member GET and matches rows by ID or name; Go Find(resource.ID) treats only 404 as absent and Find(resource.Name) uses the server-side name filter.",
+        "Python maps ingress_firewall_policy/egress_firewall_policy=None to an explicit *_policy_id null and sends empty ports lists; Gophercloud CreateOpts omits empty strings and lists, so Go omits those keys.",
+        "Python returns a FirewallGroup Resource; Go returns the native Gophercloud Group struct."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_firewall_rule",
+      "source_fingerprint": "231e4cb366d2df08899018314eed907b7dbdd83f6ea0ea688b86a764cf071207",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "rules.API.Create fails before HTTP when protocol and action are not set, and with them sends POST /fwaas/firewall_rules including extension fields such as source_firewall_group_id.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [
+        "Python forwards only the given kwargs, so create_firewall_rule() sends an empty firewall_rule object and Neutron applies defaults."
+      ],
+      "remaining": [
+        "Gophercloud v2.15.0 rules.CreateOpts declares protocol and action as required and WithCreateField cannot set core fields, so Go cannot send the Python body that omits them (including the default no-argument call)."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_rule",
+      "source_fingerprint": "d5cac3aef3376cca19c30f5390647a5b5f462bc6cec6af1815e2fd46cb3f52ed",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_rules name list.",
+        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_policy",
+      "source_fingerprint": "75aecee4e9236b857d5c3361676da190eebe5cb9312f5478a616eb25d548bc8a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_policies name list.",
+        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_group",
+      "source_fingerprint": "def3908f9d4b4e4aac9c6f73d198a65d4b23a22116239e351817c792cfbff06f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_groups name list.",
+        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_firewall_rule",
+      "source_fingerprint": "8fbf0081d3063b1d912ac71a40b4f5f8a17906b68aa52e0acd6b54b680b8deb4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Delete"
+      ],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
+        "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_firewall_policy",
+      "source_fingerprint": "a900f823d8ae4756e9a08bd4f7f4eb69c1fda814ea14ad5525e124d61c5b9694",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Delete"
+      ],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
+        "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_firewall_group",
+      "source_fingerprint": "2b0273ba14ada5603ad13334816a475fe9453360b7ad578af8866305bbd761ed",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Delete"
+      ],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
+        "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_router",
+      "source_fingerprint": "71426d95074780d0a457def26e6c145e04ce9f778ab8e884dd565fd8b0b7ad45",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "routers.API.CreateWithAttributes sends only explicit attributes: no arguments produce {\"router\":{}}, and admin_state_up plus a caller-built external_gateway_info are sent as given.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreateRouterSubnetSendOnlyExplicitAttributes"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No SDK helper applies the cloud defaults: admin_state_up=True on every call, name only when truthy, and building external_gateway_info from ext_gateway_net_id, enable_snat and ext_fixed_ips.",
+        "No SDK helper validates availability_zone_hints as a list and performs the per-call GET /v2.0/extensions router_availability_zone check before POST."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_subnet",
+      "source_fingerprint": "8c1095be11e439ae78323936e86a9358dac08ef78b490248de4da090c7c30207",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "subnets.API.CreateWithAttributes sends only explicit attributes, so ip_version, enable_dhcp and a null gateway_ip appear only when the caller sets them.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudNetworkCreateRouterSubnetSendOnlyExplicitAttributes"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No SDK helper resolves network_name_or_id (with the tenant_id filter) and subnetpool_name_or_id before POST, or validates the cidr/subnetpool/use_default_subnetpool and gateway_ip/disable_gateway_ip combinations.",
+        "No SDK helper applies the cloud body defaults ip_version=4 and enable_dhcp=False, converts a string ip_version, or maps disable_gateway_ip to gateway_ip null."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_policy",
+      "source_fingerprint": "5b79893332e29ae32d7ad14cb522ceb10bc5ced25ce812a9e6ac46e83e8b8024",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_policy",
+      "source_fingerprint": "913339442a0dc061b138ccb872a0ff2eea4bf74562f6a37f0a47fc7707763033",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "No SDK helper maps the cloud default argument to is_default only when the qos-default extension is listed and drops it otherwise."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_policy",
+      "source_fingerprint": "b3f284b3b6977645cccfe5bef3fc64ce5a75cc64ad5d7f03ca4bcaa0357321a8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.DeleteWithOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_rule_type_details",
+      "source_fingerprint": "2e91326a45122c3828780cbcb4fc591f7279452260d48aa5144a7f22a9c3d006",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.GetRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "The helper also requires the qos-rule-type-details extension before GET /qos/rule-types/{type}; no SDK API performs that second check."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_bandwidth_limit_rule",
+      "source_fingerprint": "dcccc53c7dc46962075f32b284799dfb094f032870260b68615a16c1c643f445",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_bandwidth_limit_rule",
+      "source_fingerprint": "3be5d3068bcb07f2cc69b9e44124a3f78dacab2ab0e01655ae4c5ea6721fd9a9",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "No SDK helper drops direction when the qos-bw-limit-direction extension is not listed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_bandwidth_limit_rule",
+      "source_fingerprint": "b39ca5f7668ffa33d52dd0843cd407cfa3b1c8750523dd6fb126d9f37aff7167",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "Python deletes the bandwidth limit rule with ignore_missing=False and converts a 404 to False; the Go rule delete returns the 404 as an error, so the False result needs caller-side 404 handling."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_dscp_marking_rule",
+      "source_fingerprint": "498d2ef43f2ceda14cc94963ad474603cbcfd0397bcf435bf45944296a4b0534",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_dscp_marking_rule",
+      "source_fingerprint": "1081b3fe64b6691aadc2b67a2f1986826b87a6fd9d46349d728afc710d01d84d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_dscp_marking_rule",
+      "source_fingerprint": "2a17dcf6b1ec21f42693f91231b6b7a19b0f1a1a3ebeb870be6ad2d06f454be6",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "Python deletes the DSCP marking rule with ignore_missing=False and converts a 404 to False; the Go rule delete returns the 404 as an error, so the False result needs caller-side 404 handling."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "648e6f28f46547388dd8f4bec889387d9a616092e8994eb7d24971001f347342",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "7f6464d2703c5b6bc5abeb7ec25b92830c39cf34e2aee60f2e26229a2bc2c38c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "1b89e348489d4c819e5d4871845fc760572600f4d0d3e0b170ab695c05d603f9",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.",
+          "tests": [
+            "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-a.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
+        "Python deletes the minimum bandwidth rule with ignore_missing=False and converts a 404 to False; the Go rule delete returns the 404 as an error, so the False result needs caller-side 404 handling."
+      ]
     }
   ]
 }
