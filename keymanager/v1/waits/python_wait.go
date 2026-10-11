@@ -93,7 +93,7 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 	if err := validID(target.id); err != nil {
 		return nil, wrap(err)
 	}
-	if target.kind != "containers" && target.kind != "orders" && target.kind != "secrets" {
+	if target.kind != "containers" && target.kind != "orders" && target.kind != "secrets" && target.kind != "secret-stores" {
 		return nil, wrap(resource.ErrUnsupported)
 	}
 	config := Options{}

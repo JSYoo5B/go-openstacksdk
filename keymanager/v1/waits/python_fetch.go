@@ -57,6 +57,9 @@ func reader(ctx context.Context, client *gophercloud.ServiceClient, guard func(c
 	return rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &copy, guard, http.MethodGet, target, nil, rest.RequestHeaderPolicy{Values: values, Absent: absent}, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, accepted...)
 }
 func fetch(ctx context.Context, source *cloudread.Source, guard func(context.Context) error, kind, id string, previous *Record) (*Record, error) {
+	if kind == "secret-stores" {
+		return fetchSecretStore(ctx, source, guard, id, previous)
+	}
 	target := source.Client.ServiceURL(kind, url.PathEscape(id))
 	response, err := reader(ctx, &source.Client, guard, target, nil)
 	if response == nil {

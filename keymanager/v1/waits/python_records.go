@@ -219,6 +219,9 @@ func canonicalFields(kind string, body map[string]json.RawMessage) map[string]js
 	return result
 }
 func validAttribute(kind, attribute string) bool {
+	if kind == "secret-stores" {
+		return secretStoreAttribute(attribute)
+	}
 	if _, ok := knownFields(kind)[attribute]; ok {
 		return true
 	}
