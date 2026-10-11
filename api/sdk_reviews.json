@@ -95844,6 +95844,991 @@
       "remaining": [
         "There is no Resources collection or find helper for BGP VPN port associations, so Python's GET-by-ID then list fallback with ignore_missing, ID-or-name matching, duplicate detection and **query forwarding must be written by the caller."
       ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/add_flavor_access",
+      "source_fingerprint": "eb1c9a62127a3fba2e3d6a995d3fe9ee48486afb8965624e8431baea54ce708a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.AddAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "add_flavor_access(flavor_id, project_id) sends POST flavors/{id}/action with {\"addTenantAccess\": {\"tenant\": project_id}} through AddAccess.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorAccessAndSpecHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns None; Go returns the flavor_access rows from the response.",
+        "Python _action sends an empty Accept header and accepts any status below 400; Go uses the Gophercloud default Accept and the action's expected status.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/remove_flavor_access",
+      "source_fingerprint": "d9ddc32dc93cf76ca7d54f41f849bb989f9dc4fac46ef33201c77a9deaf48375",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.RemoveAccess"
+      ],
+      "contracts": [
+        {
+          "behavior": "remove_flavor_access(flavor_id, project_id) sends POST flavors/{id}/action with {\"removeTenantAccess\": {\"tenant\": project_id}} through RemoveAccess.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorAccessAndSpecHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns None; Go returns the remaining flavor_access rows from the response.",
+        "Python _action sends an empty Accept header and accepts any status below 400; Go uses the Gophercloud default Accept and the action's expected status.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_flavor_access",
+      "source_fingerprint": "f40a1eae9ff4a2b866818dadff7a1d24b12b594b717cc71d4f43ead5f8e75921",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListAccesses"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_flavor_access(flavor_id) sends GET flavors/{id}/os-flavor-access and ListAccesses yields the same flavor_id and tenant_id rows.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorAccessAndSpecHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns a list of raw dicts; Go yields typed FlavorAccess values through an iterator, so unknown row keys are dropped.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/set_flavor_specs",
+      "source_fingerprint": "2d836edea6d9acfb859b4dcab35d66b41e80f86b57c8a5ccba4981b39d056f11",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.CreateExtraSpecs"
+      ],
+      "contracts": [
+        {
+          "behavior": "set_flavor_specs(flavor_id, extra_specs) sends POST flavors/{id}/os-extra_specs with {\"extra_specs\": extra_specs} through CreateExtraSpecs.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorAccessAndSpecHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns None; Go returns the merged extra_specs map from the response.",
+        "Go ExtraSpecsOpts holds string values only, while Python passes any JSON values through.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/unset_flavor_specs",
+      "source_fingerprint": "ec90e5f5f3ed00c9354a47303b3dc060bad4960a32da74a49a1baa2585f89c95",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.DeleteExtraSpec",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "unset_flavor_specs(flavor_id, keys) sends DELETE flavors/{id}/os-extra_specs/{key} per key; resource.IgnoreMissing turns a 404 into nil like the proxy's ignore_missing=True and a 409 stops the loop with the error.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorAccessAndSpecHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python loops over keys inside the helper; Go calls DeleteExtraSpec once per key and wraps each call in resource.IgnoreMissing.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/create_flavor",
+      "source_fingerprint": "cc5aa698d837233953c6fe06fd755999d9b4340e7526f9b94e00e73271333344",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_flavor(name, ram, vcpus, disk) with flavorid='auto', ephemeral=0, swap=0, rxtx_factor=1.0 and is_public=True maps to Create with explicit Swap, Ephemeral, RxTxFactor and IsPublic, and an explicit flavorid and description are sent as id and description.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorCreateNameAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python sends \"id\": null for flavorid='auto' and \"description\": null when no description is given; Go omits both keys, which Nova treats the same.",
+        "Go encodes rxtx_factor 1.0 as the JSON number 1.",
+        "Python returns a Flavor Resource; Go returns the Gophercloud Flavor without OS-FLV-DISABLED:disabled or original_name.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_flavor",
+      "source_fingerprint": "46abd2a784e0264e6554843c0c1c73d95a1b74f6bb79599d3945c2d0a3b86e21",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_flavor(name_or_id) sends GET flavors/{name_or_id}, falls back to GET flavors/detail?is_public=None and matches the name through FindIdentity, then Remove sends DELETE flavors/{id} ignoring 404; a missing flavor returns nil before any DELETE.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorCreateNameAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns True or False; Go returns the found Flavor or nil from FindIdentity and an error from Remove.",
+        "Python replaces any SDKException with SDKException('Unable to delete flavor ...'); Go returns the original lookup or HTTP error.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_flavor_name",
+      "source_fingerprint": "a1c791d5b760c50866f99857d38431ac1b8628075ac519e356a4cf5029dfccde",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_flavor_name(flavor_id) is find_flavor without extra specs: FindIdentity sends GET flavors/{id}, falls back to GET flavors/detail?is_public=None, and yields the flavor name or nil for a missing flavor.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudFlavorCreateNameAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns the name string or None; Go returns the Flavor, whose Name field the caller reads, or nil.",
+        "Python negotiates min(Flavor _max_microversion 2.61, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_flavor_by_ram",
+      "source_fingerprint": "d2fc0262b6de6a0a4766b08fae43c0fb638fa82b3559b5e685577508dd49047f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors"
+      ],
+      "contracts": [
+        {
+          "behavior": "AllFlavors reproduces the list_flavors(get_extra=True) requests that get_flavor_by_ram starts with.",
+          "tests": [
+            "api/compute_flavor_cloud_test.go:TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no helper that sorts the flavor inventory by ram and returns the first flavor with ram >= the requested amount whose name contains include, raising SDKException when none matches; the caller would have to select the row by hand."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/create_aggregate",
+      "source_fingerprint": "2f8903594099a1694f184c4e69834c9013c0cddfba1b33a6507fb59e8d857df4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_aggregate(name, availability_zone) sends POST os-aggregates with name and the given availability_zone through Create.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudAggregateCreateAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python sends \"availability_zone\": null when no zone is given; Go omits the key, which Nova treats the same.",
+        "Python returns an Aggregate Resource; Go returns the Gophercloud Aggregate with an integer ID.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_aggregates",
+      "source_fingerprint": "fd2bb46402219878b6461732c0a5613b9f740f8c102cbe3308381f45e54f408d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithName",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilter"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_aggregates() sends GET os-aggregates and list_aggregates(filters={'name': ...}) matches the attribute locally, which All reproduces with resource.WithName.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudAggregateCreateAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns a lazy generator of Aggregate Resources; Go All returns a slice and List returns an iterator.",
+        "Python turns filter keys that are Aggregate attributes into local filters; in Go the caller passes them as resource.WithName or resource.WithFilter options.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/search_aggregates",
+      "source_fingerprint": "df4f9ed481841d17927aac55e16f72cca925209560328e66d027fb0313f5d040",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "All reproduces the unfiltered GET os-aggregates request that search_aggregates starts with.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudAggregateCreateAndList"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to aggregates; the caller would have to filter the listed rows by hand."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_aggregate",
+      "source_fingerprint": "8f706535fe3ff233b3dc9b410e52908b75de51f12554dc5641bff3b394d69a3c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Go aggregate lookup has no GET-by-ID then list-by-name fallback.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/update_aggregate",
+      "source_fingerprint": "7b500811c14ea87a5a2447a067690fb0349a9eb48235de4ffe58a89b773c1565",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Go aggregate lookup has no fallback and Update cannot send availability_zone=None.",
+          "tests": [
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback",
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateUpdateCannotSendNullAvailabilityZone"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET.",
+        "The delegated proxy update_aggregate is unresolved because UpdateOpts cannot send availability_zone=None."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_aggregate",
+      "source_fingerprint": "f32f637e3b8b229ecff7b1fbf538617d254a69471ad1aa65128b9b658e47f6af",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "A digit string skips the lookup and Python turns the strict DELETE 404 into False; Go Delete returns the 404, and resource.IgnoreMissing would hide the False result.",
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/set_aggregate_metadata",
+      "source_fingerprint": "378158a854503244e3286111f8e95e7a0e6a9c5f7a72d9373536354549c19dd6",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.SetMetadata"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/add_host_to_aggregate",
+      "source_fingerprint": "77b3001b926750d63a732983f1f66a2bb2ec16e260173c9e4e52ceb7b7a967a0",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.AddHost"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/remove_host_from_aggregate",
+      "source_fingerprint": "6511eb9a5452f20e8dacad265c6003a10525438bcfbbbe66e2c2ad853b2d4a96",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.RemoveHost"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_hypervisors",
+      "source_fingerprint": "27a623bb58328bad9790b17c61e2bd2b74d7fd85ef86dafea887d39d94640824",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "Go List reproduces the default details=True GET os-hypervisors/detail request.",
+          "tests": [
+            "compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorListAlwaysUsesDetailRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With filters={'hypervisor_hostname_pattern': ...} below microversion 2.53 Python sends GET os-hypervisors/{pattern}/search; Gophercloud v2.15.0 has no binding for that route and an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/create_server_group",
+      "source_fingerprint": "1110cb8a03fe348263a70fb823b2d3779f6d000adc0368c2d47a8be5f7003454",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_server_group(name, policies=[p]) at 2.64 or later sends {\"server_group\": {\"name\": name, \"policy\": p}}, which Create sends with CreateOpts.Policy.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerGroupHelpers",
+            "compute/v2/servergroups/python_parity_test.go:TestPythonServerGroupCreateGetDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python rewrites policies to policy at 2.64 or later and policy to policies below it; Go sends the fields the caller sets, so the caller picks Policy or Policies for the client microversion.",
+        "Python negotiates min(ServerGroup _max_microversion 2.64, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_server_groups",
+      "source_fingerprint": "fd3f07e446ae479d2ca16d2aaa046cc0a36d7ae04bc2c2189df5d6c5a84d9a63",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_server_groups() sends GET os-server-groups and List yields the same groups.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerGroupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns a list of ServerGroup Resources; Go yields typed ServerGroup values through an iterator.",
+        "Python negotiates min(ServerGroup _max_microversion 2.64, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/search_server_groups",
+      "source_fingerprint": "000e6807c23b7b0fc0959886b282fa70197d386c8144e28a1d30032a910e850e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to server groups; the caller would have to filter the listed rows by hand."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_group",
+      "source_fingerprint": "24b229f9c35f3bed55243ec8f3da163b77948451ea300181e30d6cebdd2b5ad8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Without filters get_server_group(name_or_id) is find_server_group, and FindRecord sends the same GET os-server-groups/{id} with the list fallback.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerGroupHelpers",
+            "compute/v2/servergroups/python_find_contracts_test.go:TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The deprecated filters argument switches to search_server_groups and _utils._filter_list with dictionary or JMESPath filters and a duplicate check; Go has no public SDK helper for that path."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_server_group",
+      "source_fingerprint": "5b67b390da79a42fe33e64145ba35bf43c0d8aeca2a4e4238781d8e4d2b12996",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.Delete"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_server_group(name_or_id) finds the group with GET os-server-groups/{name_or_id} and the list fallback, then sends a strict DELETE whose 404 is an error; a missing group stops before DELETE.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerGroupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns True or False; Go returns the found ServerGroupRecord or nil from FindRecord and an error from Delete.",
+        "Python negotiates min(ServerGroup _max_microversion 2.64, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_id",
+      "source_fingerprint": "58f3b03e5632c6fae02d0c44996642f712f2a45504bce798233faba52a779388",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_server_id(name_or_id) sends GET servers/{name_or_id} then GET servers/detail?name=..., and FindRecord yields the server id or nil for a missing server.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
+        "Python returns the ID string or None; Go returns the record or nil and the id is read from Resource.Body.",
+        "Python negotiates min(Server _max_microversion 2.100, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/set_server_metadata",
+      "source_fingerprint": "2bde4d26db4c55390182f2e3a2cca6f5c55aa7d1c1e760188d1041d476edf23a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.UpdateMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "set_server_metadata(name_or_id, metadata) finds the server like get_server(bare=True) and then sends POST servers/{id}/metadata with {\"metadata\": metadata} through UpdateMetadata.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
+        "Python raises SDKException for a missing server; in Go FindRecord returns nil and the caller does not call UpdateMetadata.",
+        "Python returns None; Go returns the merged metadata, and Go MetadataOpts holds string values only."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_server_metadata",
+      "source_fingerprint": "deb37fb4efe4fbe72e2bf058d0981867300066382d99874c94a6e12482a73f7d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.DeleteMetadatum"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_server_metadata(name_or_id, keys) finds the server like get_server(bare=True) and then sends DELETE servers/{id}/metadata/{key} per key through DeleteMetadatum.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
+        "Python raises SDKException for a missing server; in Go FindRecord returns nil and the caller does not call DeleteMetadatum.",
+        "Python loops over keys inside the proxy; Go calls DeleteMetadatum once per key."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_server_security_groups",
+      "source_fingerprint": "abe359e8535fa3c96a728f58891fcbbd3d94e9624a2a6f3dd004421a0d9efcbe",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.ListByServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_server_security_groups(server) sends GET servers/{id} and GET servers/{id}/os-security-groups, which Get and ListByServer reproduce.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python returns [] without HTTP when the secgroup_source config is unset or not nova/neutron; Go has no such config gate.",
+        "Python returns the raw security group dicts; Go yields typed SecurityGroup values.",
+        "Python negotiates min(Server _max_microversion 2.100, server maximum) per request; Go sends the one microversion configured or negotiated on the Connection client."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/create_image_snapshot",
+      "source_fingerprint": "fb7c6c9196238350056442977bf120d9f1b7a2c159600eb9e72221e528e9cbe7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.CreateImage",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.WaitFor",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_image_snapshot(name, server, wait=True, **metadata) finds the server, sends createImage with name and metadata, reads the image from Glance and waits for active with a 3600 second budget, failing on error.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudCreateImageSnapshotFindsServerThenImage",
+            "compute/v2/servers/python_parity_test.go:TestPythonServerCreateImageFetchesAndWaitsForGlanceImage"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
+        "Python always sends \"metadata\": {} when no metadata kwargs are given; Go omits an empty metadata map, which Nova treats the same.",
+        "Python wait_for_image keeps polling while the image is not found and raises a timeout exception; Go WaitFor returns a 404 at once and reports the timeout as a context deadline error.",
+        "Python pins 2.45 for createImage when the server supports it; Go uses the client microversion and picks the image ID from the body or the Location header accordingly."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server",
+      "source_fingerprint": "95df3113389e19e20babaf7bdc399a60dcde3a92b525cf8ad64f20f0bbd2bfee",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord reproduces the find_server(details=True) lookup that get_server performs before expansion.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.",
+        "The deprecated filters argument switches to search_servers and _utils._filter_list; Go has no public SDK helper for that path."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_by_id",
+      "source_fingerprint": "083751ecbdb5249cf59b5e9f75426e549dae39b77ccf2a6c20d5e7e1777cdfa4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.",
+        "Python returns None on NotFoundException; Go Get returns the 404 error and only caller-side status handling could produce None."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/list_servers",
+      "source_fingerprint": "2028293772dfe5eb963908cf3864185d87d9ea2167346388338092a1b5ebbfc8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.",
+        "The delegated proxy servers listing is itself unresolved."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/search_servers",
+      "source_fingerprint": "3fbb723edb16fd44d0cb75225d7963e6cb193bbda8a73d38b4671352508ad9bd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List"
+      ],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to servers; the caller would have to filter the listed rows by hand.",
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/update_server",
+      "source_fingerprint": "97c3052531012e7251ce54fe20526bf88ef01b77a995e0b54b790d6fae6b002f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "The find and PUT parts match the proxy calls update_server delegates to.",
+          "tests": [
+            "compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/rebuild_server",
+      "source_fingerprint": "af4a072d333d5c4accfe3057aab0c634c35c87eec22f1f8965c14d319a6715ca",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild"
+      ],
+      "contracts": [
+        {
+          "behavior": "The rebuild action matches the proxy rebuild_server request.",
+          "tests": [
+            "compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.",
+        "With wait=True Python runs compute.wait_for_server for timeout seconds and copies adminPass onto the ACTIVE server; python:compute/v2/wait_for_server is unresolved and Go has no helper that keeps the admin password."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/delete_server",
+      "source_fingerprint": "2a85cffe36f5d36eb882369b9ae4831e53027b2744bd677a97715ceffbb76d3f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID"
+      ],
+      "contracts": [
+        {
+          "behavior": "With wait=False and delete_ips=False, FindRecord and Remove reproduce the find_server lookup and the DELETE that ignores 404.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerDeleteAndConsolePartialPaths"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "With wait=True Python calls compute.wait_for_delete with the given timeout; python:compute/v2/wait_for_delete is unresolved.",
+        "With delete_ips=True Python first finds floating addresses in the server addresses, resolves each with get_floating_ip and deletes it with delete_floating_ip(retry=delete_ip_retry), aborting the server delete on failure; Go has no helper that composes this cleanup with server deletion."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_console",
+      "source_fingerprint": "b6a08c8ee9bacf16ee93031e8c6f276b0b93f06379bb597d4c3e24d192781ae1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput"
+      ],
+      "contracts": [
+        {
+          "behavior": "FindRecord and ConsoleOutput send the same lookup and os-getConsoleOutput action, but Go returns the 400 error where Python returns an empty string.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudServerDeleteAndConsolePartialPaths"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python turns a 400 BadRequestException from the console action into an empty string for clouds without console logs; Go ConsoleOutput returns the 400 and only caller-side status handling could reproduce the result."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/add_server_security_groups",
+      "source_fingerprint": "bc91d089c75c95f21e169d988dbc903cff7c927cda49f335af64b668fc8788c8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.AddServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "The addSecurityGroup action matches the proxy request once the group name is known.",
+          "tests": [
+            "compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python resolves every group with the cloud get_security_group (search over Neutron or Nova security groups selected by secgroup_source) and raises OpenStackCloudUnavailableFeature when security groups are disabled; Go has no SDK helper for that lookup or gate."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/remove_server_security_groups",
+      "source_fingerprint": "dae9d43669f798624a9fb8d2fcc68b16b6637fef789cea245183f9fcce46db17",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.RemoveServer"
+      ],
+      "contracts": [
+        {
+          "behavior": "The removeSecurityGroup action matches the proxy request once the group name is known.",
+          "tests": [
+            "compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python resolves every group with the cloud get_security_group (search over Neutron or Nova security groups selected by secgroup_source) and raises OpenStackCloudUnavailableFeature when security groups are disabled; Go has no SDK helper for that lookup or gate.",
+        "Python catches a 404 per group, continues and returns False; Go RemoveServer returns the 404 and only caller-side status handling could reproduce it."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_compute_limits",
+      "source_fingerprint": "8e948b401f310f168ce336e7b5539a3e12838b77a4e2f03129f9767ccd345788",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/limits.API.Fetch"
+      ],
+      "contracts": [
+        {
+          "behavior": "Without name_or_id, Fetch sends the same GET limits and returns the absolute limits.",
+          "tests": [
+            "compute/v2/python_parity_test.go:TestPythonCloudComputeLimitsCurrentProject"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python resolves name_or_id with identity v3 find_project(ignore_missing=False), a GET projects/{name_or_id} followed by a name-filtered list; the Go project scopes take an explicit resource.ID or resource.Name and python:identity/v3/find_project itself is unresolved, so the same lookup requests cannot be produced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_compute_usage",
+      "source_fingerprint": "c1334618acbd235f5b428768070c1ecd99ad1991011482773e781f457678348e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once the project ID is known, SingleTenant sends the os-simple-tenant-usage request that get_usage sends.",
+          "tests": [
+            "compute/v2/usage/python_parity_test.go:TestPythonUsageSingleProjectFirstPageMatchesFetch"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python resolves name_or_id with identity v3 find_project(ignore_missing=False), a GET projects/{name_or_id} followed by a name-filtered list; the Go project scopes take an explicit resource.ID or resource.Name and python:identity/v3/find_project itself is unresolved, so the same lookup requests cannot be produced.",
+        "Python parses string start and end values as ISO 8601 and raises SDKException for invalid dates; Go takes time values and has no such parsing helper."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_openstack_vars",
+      "source_fingerprint": "0e5c3abf3baeddb31c27daf6ee7b625e15f60a75b433c0b6566235e5876848e8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python returns meta.get_hostvars_from_server, which expands addresses, flavor, image, volumes, region, cloud and location into an Ansible hostvars mapping; Go has no equivalent helper."
+      ]
+    },
+    {
+      "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_meta",
+      "source_fingerprint": "fb09595e234f67930ba59e1e2659820e893769957473d4f101e8a72ebfe0e583",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "compute/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Python returns server_vars from meta.get_hostvars_from_server plus inventory groups from meta.get_groups_from_server; Go has no equivalent helper."
+      ]
     }
   ]
 }
