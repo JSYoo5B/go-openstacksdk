@@ -666,6 +666,25 @@ func (e *Engine) headerPolicy(source *cloudread.Source, list bool, headers map[s
 		// X-Auth-Token remains live and SDK-owned in fixedrequest's transport.
 		// All other source-forbidden auth/route/protocol headers remain absent.
 		absent = append(absent, "Authorization", "X-Service-Token", "Cookie", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade", "X-OpenStack-Nova-API-Version", "X-OpenStack-Volume-API-Version")
+		// A clean retry cannot add a condition absent from the selected call.
+		for _, condition := range []string{"If-Match", "If-None-Match", "If-Modified-Since", "If-Unmodified-Since"} {
+			supplied := false
+			for key := range values {
+				if strings.EqualFold(key, condition) {
+					supplied = true
+					break
+				}
+			}
+			for key := range headers {
+				if strings.EqualFold(key, condition) {
+					supplied = true
+					break
+				}
+			}
+			if !supplied {
+				absent = append(absent, condition)
+			}
+		}
 	}
 	return rest.RequestHeaderPolicy{Values: values, Absent: absent}
 }

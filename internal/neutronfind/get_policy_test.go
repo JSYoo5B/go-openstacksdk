@@ -321,3 +321,45 @@ func TestAlternatePhysicalMarkerIsOptInAndPrimaryPresenceWins(t *testing.T) {
 		})
 	}
 }
+
+func TestSourceRetryCannotAddUnselectedConditionsWhileBaselineRetainsPolicy(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		for _, key := range []string{"If-Match", "If-None-Match", "If-Modified-Since", "If-Unmodified-Since"} {
+			t.Run(map[bool]string{false: "baseline", true: "Source"}[enabled]+"/"+key, func(t *testing.T) {
+				cloud := testcloud.New(t)
+				client := cloud.Client("network", "/neutron/v2.0/")
+				calls, hooks := 0, 0
+				cloud.Provider.RetryFunc = func(ctx context.Context, method, target string, options *gophercloud.RequestOpts, cause error, count uint) error {
+					hooks++
+					options.MoreHeaders[key] = "foreign"
+					return nil
+				}
+				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+					calls++
+					if calls == 1 {
+						return policyWire(503, `{"error":"actual first"}`), nil
+					}
+					if calls != 2 || req.Header.Get(key) != "foreign" {
+						t.Fatal(req.Header, calls)
+					}
+					return policyWire(200, `{"record":{"id":"one"}}`), nil
+				})
+				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				row, err := engine.Get(context.Background(), "one", neutronfind.Options{})
+				if !enabled {
+					if err != nil || row == nil || calls != 2 || hooks != 1 {
+						t.Fatal(row, err, calls, hooks)
+					}
+					return
+				}
+				var actual gophercloud.ErrUnexpectedResponseCode
+				if row != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &actual) || actual.Actual != 503 || string(actual.Body) != `{"error":"actual first"}` || calls != 1 || hooks != 1 {
+					t.Fatal(row, err, calls, hooks, actual)
+				}
+			})
+		}
+	}
+}
