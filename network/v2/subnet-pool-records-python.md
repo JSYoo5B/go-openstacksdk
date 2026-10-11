@@ -132,7 +132,9 @@ find의 소비된 인수로 HTTP에 넣지 않으며 권한을 늘리지 않습�
 `WithRecordListLimit/Marker/MaxItems/Paginated`와 같은 Find 옵션은 목록 단계에만 적용합니다.
 기본은 전체 페이지이며 cap은 로컬 filter 전에 받은 raw row 수를 셉니다. nonzero limit에서는
 짧은 페이지에도 실제 wire ID marker로 계속 검색합니다. body/HTTP Link와 top-level next를
-읽으며, owned pager는 표준 `links: {next: URL}`도 허용합니다. pinned Source의 dict 변환 루프는
+읽으며, top-level next의 숫자 truthiness도 Python JSON binary64 기준입니다.
+`next: 1e-400`처럼 0으로 underflow되는 값은 링크가 없어 종료하고, truthy 숫자/객체 next는
+전체 페이지·status·Header를 보존한 오류가 됩니다. owned pager는 표준 `links: {next: URL}`도 허용합니다. pinned Source의 dict 변환 루프는
 이 형태를 따라가지 못하므로 이 지원은 명시적인 Go 개선입니다. 충돌·순환·다른 origin 링크는
 증거를 가진 오류로 판정합니다. iterator를 중단하면 다음 페이지를 요청하지 않습니다.
 

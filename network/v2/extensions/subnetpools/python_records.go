@@ -128,7 +128,7 @@ func (p *preparedPoolRecord) list(ctx context.Context, query url.Values, filters
 				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
 				return errors.Join(poolRecordProject(value, value.fields), p.guard(ctx))
 			},
-			Paging: rest.PagePolicy[SubnetPoolRecord]{VersionedPath: "/v2.0/subnetpools", HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: poolRecordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true},
+			Paging: rest.PagePolicy[SubnetPoolRecord]{VersionedPath: "/v2.0/subnetpools", HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, NextTruthy: poolRecordNextTruthy, MarkerFallback: true, Marker: poolRecordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true},
 		}
 		keys := make([]string, 0, len(filters))
 		for key := range filters {

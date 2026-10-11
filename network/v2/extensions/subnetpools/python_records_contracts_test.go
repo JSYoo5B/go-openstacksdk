@@ -819,3 +819,36 @@ func TestPythonSubnetPoolRecordsFindMicroversionIsMemberPhaseOnly(t *testing.T) 
 		}
 	}
 }
+
+func TestPythonSubnetPoolRecordsNextUsesBinary64TruthinessAndWholePageProof(t *testing.T) {
+	for _, next := range []string{`1e-400`, `-1e-400`, `0.0`, `1e400`, `1.0`, `false`, `null`} {
+		t.Run(next, func(t *testing.T) {
+			body := `{"subnetpools":[{"id":"one","x_actual":false}],"next":` + next + `}`
+			var calls []nativePoolCall
+			api, _ := nativePoolAPI(t, &calls, func(*http.Request) *http.Response {
+				reply := nativePoolWire(207, body)
+				reply.Header.Set("X-Request-Id", "next-physical")
+				return reply
+			})
+			var rows []*subnetpools.SubnetPoolRecord
+			var failure error
+			for value, err := range api.ListRecords(context.Background()) {
+				if err != nil {
+					failure = err
+					break
+				}
+				rows = append(rows, value)
+			}
+			wantError := next == `1e400` || next == `1.0`
+			if (failure != nil) != wantError || len(rows) != 1 || len(calls) != 1 || string(rows[0].Envelope) != body || rows[0].StatusCode != 207 || rows[0].Header.Get("X-Request-Id") != "next-physical" {
+				t.Fatal(rows, failure, calls)
+			}
+			if wantError {
+				var proof *resource.ResponseError
+				if !errors.As(failure, &proof) || proof.StatusCode != 207 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "next-physical" {
+					t.Fatal(failure, proof)
+				}
+			}
+		})
+	}
+}

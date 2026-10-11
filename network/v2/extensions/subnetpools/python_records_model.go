@@ -112,6 +112,12 @@ func poolRecordBoolean(raw json.RawMessage) (json.RawMessage, error) {
 	}
 	return jsonfilter.BooleanJSON(raw)
 }
+
+// Next links use the same binary64 JSON truthiness as Python response.json.
+func poolRecordNextTruthy(raw json.RawMessage) (bool, error) {
+	converted, err := poolRecordBoolean(raw)
+	return bytes.Equal(bytes.TrimSpace(converted), []byte("true")), err
+}
 func poolRecordDescriptor(key string, raw json.RawMessage) (json.RawMessage, error) {
 	if err := poolRecordJSON(raw); err != nil {
 		return nil, err
