@@ -15,6 +15,11 @@ import (
 // matchLocal follows Resource.list's ordered Body predicates, not cloud search
 // mapping membership. Missing object fields are None; only reached dictionary
 // predicates call .get, so truthy scalars match {} but fail nonempty mappings.
+// MatchLocal shares ordered Cinder Resource Body predicates with owned leaf APIs.
+func MatchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (bool, error) {
+	return matchLocal(ctx, view, filters, guard)
+}
+
 func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (matched bool, err error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return false, err
