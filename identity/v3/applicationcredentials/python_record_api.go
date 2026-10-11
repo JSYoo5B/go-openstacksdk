@@ -104,7 +104,7 @@ func (p *preparedRecord) get(id string, credential bool, query url.Values) (*App
 	if len(query) != 0 {
 		target += "?" + query.Encode()
 	}
-	response, err := rest.DoJSONGuarded(p.ctx, &p.source.Client, p.guard, http.MethodGet, target, nil, nil, recordCodes()...)
+	response, err := rest.DoJSONGuardedRejections(p.ctx, &p.source.Client, p.guard, http.MethodGet, target, nil, nil, rest.RejectionPolicy{Codes: []int{400, 403, 404}, PreserveCleanRetry: true}, recordCodes()...)
 	seedID, _ := json.Marshal(id)
 	seed := map[string]json.RawMessage{"id": seedID}
 	for key, values := range query {
@@ -212,7 +212,7 @@ func (a *API) deleteRecord(ctx context.Context, userID, id string, credential bo
 	if err != nil {
 		return err
 	}
-	_, err = rest.DoJSONGuarded(ctx, &p.source.Client, p.guard, http.MethodDelete, p.source.Client.ServiceURL(p.path(credential), url.PathEscape(id)), nil, nil, recordCodes()...)
+	_, err = rest.DoJSONGuardedRejections(ctx, &p.source.Client, p.guard, http.MethodDelete, p.source.Client.ServiceURL(p.path(credential), url.PathEscape(id)), nil, nil, rest.RejectionPolicy{Codes: []int{404}, PreserveCleanRetry: true}, recordCodes()...)
 	if policy.IgnoreMissing == nil || *policy.IgnoreMissing {
 		err = resource.IgnoreMissing(err)
 	}

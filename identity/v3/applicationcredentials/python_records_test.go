@@ -658,16 +658,189 @@ func TestPythonApplicationCredentialLiteralScopesAndResponseProof(t *testing.T) 
 }
 
 type appRecordFaultBody struct {
-	data        []byte
-	read, close error
+	data            []byte
+	read, close     error
+	closes          int
+	onRead, onClose func()
 }
 
 func (b *appRecordFaultBody) Read(p []byte) (int, error) {
 	if len(b.data) > 0 {
 		n := copy(p, b.data)
 		b.data = b.data[n:]
+		if b.onRead != nil {
+			b.onRead()
+		}
 		return n, nil
+	}
+	if b.onRead != nil {
+		b.onRead()
 	}
 	return 0, b.read
 }
-func (b *appRecordFaultBody) Close() error { return b.close }
+func (b *appRecordFaultBody) Close() error {
+	b.closes++
+	if b.onClose != nil {
+		b.onClose()
+	}
+	return b.close
+}
+
+func TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind(t *testing.T) {
+	for _, operation := range []string{"delete credential default", "delete credential strict", "delete access default", "delete access strict", "find"} {
+		statuses := []int{404}
+		if operation == "find" {
+			statuses = []int{400, 403, 404}
+		}
+		for _, status := range statuses {
+			for _, kind := range []string{"read", "close", "read and close", "cancel after read", "cancel after close", "source restored by Close", "retry callback"} {
+				t.Run(fmt.Sprintf("%s/%d/%s", operation, status, kind), func(t *testing.T) {
+					var serverCalls []nativeAppCredCall
+					api, cloud := nativeAppCredAPI(t, &serverCalls, func(*http.Request) (int, string) { return 200, `{}` })
+					remove := api.DeleteCredentialRecord
+					if strings.Contains(operation, "access") {
+						remove = api.DeleteAccessRuleRecord
+					}
+					calls := 0
+					readCause, closeCause, cancelCause := errors.New("physical rejected Read"), errors.New("physical rejected Close"), errors.New("caller canceled in rejected body")
+					retryCause := errors.New("rejected callback failed")
+					if kind == "retry callback" {
+						api.RawClient().RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return retryCause }
+					}
+					ctx, cancel := context.WithCancelCause(context.Background())
+					defer cancel(nil)
+					body := &appRecordFaultBody{data: []byte("physical rejection"), read: io.EOF}
+					if kind == "read" || kind == "read and close" {
+						body.read = readCause
+					}
+					if kind == "close" || kind == "read and close" {
+						body.close = closeCause
+					}
+					if kind == "cancel after read" {
+						body.onRead = func() { cancel(cancelCause) }
+					}
+					if kind == "cancel after close" {
+						body.onClose = func() { cancel(cancelCause) }
+					}
+					originalEndpoint := api.RawClient().Endpoint
+					if kind == "source restored by Close" {
+						body.onRead = func() { api.RawClient().Endpoint = originalEndpoint + "changed/" }
+						body.onClose = func() { api.RawClient().Endpoint = originalEndpoint }
+					}
+					cloud.Provider.HTTPClient.Transport = nativeAppCredTransport(func(*http.Request) (*http.Response, error) {
+						calls++
+						if calls > 1 {
+							return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"application_credentials":[{"id":"found","name":"ci"}]}`))}, nil
+						}
+						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"rejected-proof"}}, Body: body}, nil
+					})
+					var err error
+					if operation == "find" {
+						value, findErr := api.FindCredentialRecord(ctx, "u1", "ci")
+						err = findErr
+						if value != nil {
+							t.Fatal("faulty member rejection produced a lookup result", value, err)
+						}
+					} else if strings.Contains(operation, "strict") {
+						err = remove(ctx, "u1", "ci", applicationcredentials.WithRecordDeleteIgnoreMissing(false))
+					} else {
+						err = remove(ctx, "u1", "ci")
+					}
+					if err == nil || calls != 1 || body.closes != 1 {
+						t.Fatal("faulty rejection established absence or retried", err, calls, body.closes)
+					}
+					var native gophercloud.ErrUnexpectedResponseCode
+					if !errors.As(err, &native) || native.Actual != status || string(native.Body) != "physical rejection" || native.ResponseHeader.Get("X-Request-Id") != "rejected-proof" {
+						t.Fatal("native rejection proof lost", err, native)
+					}
+					if kind == "read" || kind == "read and close" {
+						if !errors.Is(err, readCause) {
+							t.Fatal(err)
+						}
+					}
+					if kind == "close" || kind == "read and close" {
+						if !errors.Is(err, closeCause) {
+							t.Fatal(err)
+						}
+					}
+					if kind == "retry callback" && !errors.Is(err, retryCause) {
+						t.Fatal(err)
+					}
+					if strings.HasPrefix(kind, "cancel") {
+						if !errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) {
+							t.Fatal(err)
+						}
+					}
+					if kind == "source restored by Close" {
+						if !errors.Is(err, resource.ErrInvalidOption) || api.RawClient().Endpoint != originalEndpoint {
+							t.Fatal("source read failure lost after restoration", err)
+						}
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook(t *testing.T) {
+	for _, operation := range []string{"delete credential default", "delete credential strict", "delete access default", "delete access strict", "find"} {
+		statuses := []int{404}
+		if operation == "find" {
+			statuses = []int{400, 403, 404}
+		}
+		for _, status := range statuses {
+			t.Run(fmt.Sprintf("%s/%d", operation, status), func(t *testing.T) {
+				var serverCalls []nativeAppCredCall
+				api, cloud := nativeAppCredAPI(t, &serverCalls, func(*http.Request) (int, string) { return 200, `{}` })
+				remove := api.DeleteCredentialRecord
+				if strings.Contains(operation, "access") {
+					remove = api.DeleteAccessRuleRecord
+				}
+				ctx := context.Background()
+				calls, retries := 0, 0
+				body := &appRecordFaultBody{data: []byte("clean rejection"), read: io.EOF}
+				api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, original error, _ uint) error {
+					retries++
+					return original
+				}
+				cloud.Provider.HTTPClient.Transport = nativeAppCredTransport(func(*http.Request) (*http.Response, error) {
+					calls++
+					if calls == 1 {
+						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"clean-proof"}}, Body: body}, nil
+					}
+					return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"application_credentials":[{"id":"found","name":"ci"}]}`))}, nil
+				})
+				if operation == "find" {
+					value, err := api.FindCredentialRecord(ctx, "u1", "ci")
+					if err != nil || calls != 2 {
+						t.Fatal(value, err, calls)
+					}
+					recordField(t, value, "id", `"found"`)
+				} else {
+					var err error
+					if strings.Contains(operation, "strict") {
+						err = remove(ctx, "u1", "ci", applicationcredentials.WithRecordDeleteIgnoreMissing(false))
+					} else {
+						err = remove(ctx, "u1", "ci")
+					}
+					if !strings.Contains(operation, "strict") {
+						if err != nil {
+							t.Fatal("identical native retry rejection was marked mixed", err)
+						}
+					} else {
+						var native gophercloud.ErrUnexpectedResponseCode
+						if !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "clean rejection" {
+							t.Fatal(err, native)
+						}
+					}
+					if calls != 1 {
+						t.Fatal("stop hook replayed DELETE", calls)
+					}
+				}
+				if retries != 1 || body.closes != 1 {
+					t.Fatal(retries, body.closes)
+				}
+			})
+		}
+	}
+}
