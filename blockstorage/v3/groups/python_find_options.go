@@ -15,6 +15,9 @@ type RecordFindOption func(*RecordFindOpts) error
 
 func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 	v.Headers = maps.Clone(v.Headers)
+	if v.Headers == nil {
+		v.Headers = make(map[string]string)
+	}
 	if v.IgnoreMissing != nil {
 		x := *v.IgnoreMissing
 		v.IgnoreMissing = &x

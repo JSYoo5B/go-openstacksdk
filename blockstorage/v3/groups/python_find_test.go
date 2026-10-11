@@ -456,3 +456,53 @@ func TestPythonCinderGroupFindRecordAcceptedPhysicalCausesCannotBecomeFallback(t
 		}
 	}
 }
+
+func TestPythonCinderGroupFindRecordFirstCustomHeaderOptionOwnsDefaultAndNilMaps(t *testing.T) {
+	for _, mode := range []string{"default", "nil_opts_headers", "nil_header_option"} {
+		t.Run(mode, func(t *testing.T) {
+			var held *groups.RecordFindOpts
+			api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
+				if held != nil {
+					held.Headers["X-Custom"] = "retained-mutated"
+				}
+				if r.URL.Path == groupBase+"/target" {
+					return groupWire(404, `{"member":"fallback"}`)
+				}
+				return groupWire(200, `{"groups":[{"id":"found","name":"target"}]}`)
+			})
+			original := map[string]string{"X-Original": "source", "Accept": "application/source"}
+			expected := map[string]string{"X-Original": "source", "Accept": "application/source"}
+			api.RawClient().MoreHeaders = original
+			for _, value := range []string{"first", "second"} {
+				options := []groups.RecordFindOption{}
+				switch mode {
+				case "nil_opts_headers":
+					options = append(options, groups.WithRecordFindOpts(groups.RecordFindOpts{Headers: nil}))
+				case "nil_header_option":
+					options = append(options, groups.WithRecordFindHeaders(nil))
+				}
+				options = append(options, func(cfg *groups.RecordFindOpts) error {
+					if cfg.Headers == nil || len(cfg.Headers) != 0 {
+						t.Fatal("first custom option requires a fresh empty owned map", cfg.Headers)
+					}
+					cfg.Headers["X-Custom"] = value
+					held = cfg
+					return nil
+				})
+				start := len(*calls)
+				result, err := api.FindRecord(context.Background(), "target", options...)
+				if err != nil || result == nil || len(*calls) != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
+					t.Fatal(result, err, *calls, api.RawClient().MoreHeaders)
+				}
+				for _, call := range (*calls)[start:] {
+					if call.headers.Get("X-Custom") != value || call.headers.Get("X-Original") != "source" {
+						t.Fatal(call, value)
+					}
+				}
+				if (*calls)[start].headers.Get("Accept") != "application/source" || (*calls)[start+1].headers.Get("Accept") != "application/json" {
+					t.Fatal((*calls)[start:])
+				}
+			}
+		})
+	}
+}

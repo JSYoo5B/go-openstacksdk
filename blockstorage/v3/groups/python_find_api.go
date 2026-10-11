@@ -70,7 +70,8 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	getPhase := p.cloneFindPhase()
 	listPhase := p.cloneFindPhase()
-	// Empty inherited override is falsey in Source fetch and keeps the default.
+	// Empty override is the documented Go inherit-default policy; Source
+	// Resource.fetch forwards an explicitly empty microversion string.
 	if v.Microversion != nil && *v.Microversion == "" {
 		v.Microversion = nil
 	}
