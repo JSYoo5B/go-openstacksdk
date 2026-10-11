@@ -96829,6 +96829,862 @@
       "remaining": [
         "Python returns server_vars from meta.get_hostvars_from_server plus inventory groups from meta.get_groups_from_server; Go has no equivalent helper."
       ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_subnet_by_id",
+      "source_fingerprint": "1404d3fe45cd6ddd8edc57ead6418463bb0cb7d9049b6c0ba86e04f052625a6c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_subnet_by_id sends one GET /v2.0/subnets/{id}, decodes the subnet fields and keeps a 404 as an error like Python NotFoundException.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBGetSubnetByID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python returns a mutable Subnet Resource; Go returns the native Gophercloud Subnet model, so unknown response fields are not kept.",
+        "The Python docstring promises None when missing, but the code raises NotFoundException; Go returns the 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/get_subnetpool",
+      "source_fingerprint": "3eae3131234ec68757d9a936d13cdc2fc05c7942487d980276069f19781a260b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_subnetpool sends GET /v2.0/subnetpools/{name_or_id}, falls back to GET /v2.0/subnetpools?name= after a 404 and returns nil without error when nothing matches, as find_subnet_pool(ignore_missing=True) does.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBGetSubnetpool"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Go returns the native SubnetPool model, which requires the three prefix length fields; a projected response without them fails instead of yielding a partial Resource.",
+        "Absence is nil, nil in Go instead of Python None; FindIdentity ignores missing by default so no option is needed."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_routers",
+      "source_fingerprint": "c5522710bb2c531ca5d08f895421e4709aef4cb22500147044db86a214e2126c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilters",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilter"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_routers sends GET /v2.0/routers with the filters as server query parameters (none by default) and follows routers_links to collect every router.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBListAndSearchRouters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python returns an empty list when has_service('network') is false; Go fails when the network service client cannot be built.",
+        "Python query booleans are encoded by Requests as True/False while Go semantic filters encode lowercase true/false.",
+        "Go returns native Router models instead of mutable Router Resources."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_routers",
+      "source_fingerprint": "a004cf833515ee2c078d11f7889d3a6bfe8aea5d7ea1cd9dbcaad249055cfc91",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilter",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilters"
+      ],
+      "contracts": [
+        {
+          "behavior": "search_routers sends name_or_id only as the server name query merged with the filters and follows every page, which Go reproduces with WithFilter(\"name\", x) and WithFilters.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBListAndSearchRouters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Like Python, a router ID passed as name_or_id is only sent as a name query; Go does not add a local ID match.",
+        "Python query booleans are encoded by Requests as True/False while Go semantic filters encode lowercase true/false.",
+        "Go returns native Router models instead of mutable Router Resources."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/create_security_group",
+      "source_fingerprint": "e4d978b0357bb53405c892c227769dbcdf821ba11e0821e4d8f74b18a8f9e1a3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_security_group posts security_group with name and description, adding stateful and tenant_id only when supplied, and returns the decoded group with its rules.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBCreateSecurityGroup"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
+        "Python maps project_id to the tenant_id body key itself; Go callers pass WithAttribute(\"tenant_id\", id) and WithAttribute(\"stateful\", v) only when those arguments are given.",
+        "Go returns the native SecGroup model instead of a SecurityGroup Resource."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_security_group_by_id",
+      "source_fingerprint": "3f49a5087b1dcc164017157fb4dc8586caa574985bb1dfb0ed56e485d12e42d5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_security_group_by_id sends GET /v2.0/security-groups/{id}, decodes the group and keeps a 404 as an error.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBSecurityGroupReads"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
+        "Go returns the native SecGroup model instead of a SecurityGroup Resource."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/list_security_groups",
+      "source_fingerprint": "6b5b506ddc532d47b79f689eb705b0a1650deb6d884845907e0dd3dfa96f0c54",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithFilters"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_security_groups sends GET /v2.0/security-groups with the filters as server query parameters and follows security_groups_links to collect every group.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBSecurityGroupReads"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
+        "Python query booleans are encoded by Requests as True/False while Go semantic filters encode lowercase true/false.",
+        "Go returns native SecGroup models instead of SecurityGroup Resources."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/delete_security_group_rule",
+      "source_fingerprint": "fdaa8cfbc8f06f63e5829778a8b8ee4cbf10ca96aed5b1a5fb3c094fdda237c7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_security_group_rule sends DELETE /v2.0/security-group-rules/{id} with no body; with WithDeleteIgnoreMissing(false) a 204 succeeds while 404 and 409 remain errors, matching ignore_missing=False.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBDeleteSecurityGroupRule"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced. The Nova branch returns False on 404, which Go does not provide.",
+        "Python returns True on success; Go returns a nil error. DeleteWithOptions ignores 404 by default, so WithDeleteIgnoreMissing(false) is required."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_networks",
+      "source_fingerprint": "8dab8ab34ae1f4522ddfe1c0d942e01b5c77224ec5360d04ecb199695c5201fa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The underlying python:network/v2/networks listing is unresolved and the native Network model omits router:external, provider, MTU, DNS and port security attributes that the Python Network Resource exposes; there is no full-JSON network list record API.",
+        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_networks",
+      "source_fingerprint": "5ceee3657246f451f4380fb2161880b84742f8cf5616c291f3ddb7563fd6393b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "search_networks delegates to the unresolved python:network/v2/networks listing with name_or_id as the name query, and the native Network model omits the extension attributes Python returns."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_subnets",
+      "source_fingerprint": "d273c50a478828129ff5aceb3d2483dc679ab7b0c1f63122c5e30a6f069e378e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The underlying python:network/v2/subnets listing is unresolved (descriptor coercion, Link-header continuation and returned model differences), so this cloud wrapper cannot be mapped.",
+        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_subnets",
+      "source_fingerprint": "04dcd17f09c8cd4810000ba9c969e1208d4f56603c448e33bba3de665db9cd14",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "search_subnets delegates to the unresolved python:network/v2/subnets listing with name_or_id as the name query."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_ports",
+      "source_fingerprint": "4d8103c9f51b11629691d3ca37804e69f6498e80af2cd412f64bc8035c59b221",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The native Port model returned by Go listing omits binding:*, dns_*, port_security_enabled, qos_policy_id, extra_dhcp_opts and other extension attributes that the Python Port Resource exposes, and Go has no full-JSON port list record API.",
+        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_ports",
+      "source_fingerprint": "9bc20d583d738e631442f3a1bc4c0c07eb4d96b7641bf50742b44f61ae365600",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "search_ports lists ports (pushing dict filters to the server, or none for a JMESPath string) and then applies _utils._filter_list locally; No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows.",
+        "The native Port model omits the extension attributes Python returns."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_router_interfaces",
+      "source_fingerprint": "b7ae8cf6dc14be3f0f590501c2635292fcb3d68668b74084c8347e8406a7e030",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper lists ports by device_id and classifies router_interface, router_interface_distributed, ha_router_replicated_interface and router_gateway owners by interface_type; the caller would have to filter rows.",
+        "The native Port model omits extension attributes the Python Port Resource exposes."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/remove_router_interface",
+      "source_fingerprint": "f6ea72b2e549e3ff72660bbbd80d603be3f9bca89c3e6bb52fc2bb2c5f6613c7",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveInterfaceRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfacePort"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveInterfaceRecord sends PUT /v2.0/routers/{id}/remove_router_interface with subnet_id, or port_id when a port is given, and with neither it still sends subnet_id null.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBRemoveRouterInterfaceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python returns None and discards the response body; Go returns the parsed response JSON."
+      ],
+      "remaining": [
+        "With default arguments (no subnet_id and no port_id) Python raises ValueError before any HTTP request, while Go RemoveInterfaceRecord sends the PUT with subnet_id null; no Go API rejects this locally."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_router",
+      "source_fingerprint": "aa06a50620e1989fe510303f2567aad1fca9d7310de39b5a785db8985ac41d0f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper sends GET /v2.0/extensions to check extraroute before including routes and drops routes with a warning when it is absent.",
+        "No Go helper returns without HTTP when no router fields are given and otherwise resolves name_or_id with find_router before the PUT; the caller would have to sequence these steps and the external_gateway_info construction."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_subnet",
+      "source_fingerprint": "589dcfadd625ca39ac18024d1088971d3c31fb869cc7ffe01b9e55b0f43c7f3e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "With attributes, FindRecord with ignore_missing false followed by UpdateWithAttributes sends the lookup GET and a PUT whose body carries name, enable_dhcp and gateway_ip null for disable_gateway_ip.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBUpdatePortAndSubnetChains"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Go returns the native Subnet model instead of a Subnet Resource."
+      ],
+      "remaining": [
+        "With default arguments Python returns None without any HTTP request, and it rejects disable_gateway_ip with gateway_ip before the lookup; no Go helper performs this, so the caller must decide to skip the lookup and PUT."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_port",
+      "source_fingerprint": "b103ad49d1626adc97f55d0026308a29f4122fffc2e49e2419ac226d94601672",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "With attributes, FindRecord with ignore_missing false (member GET, then name list) followed by UpdateWithAttributes sends Python's lookup and PUT body, and a missing port fails before any PUT.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBUpdatePortAndSubnetChains"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.",
+        "Go returns the native Port model, which omits extension attributes."
+      ],
+      "remaining": [
+        "With default arguments (no attributes) Python only looks the port up and commits nothing, so no PUT is sent; Go UpdateWithAttributes always sends a PUT, and no Go helper skips it."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_policies",
+      "source_fingerprint": "6536033ca058904a39cabfc634bdc10e8334b9bea18912381c240fef710a84b6",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_policies",
+      "source_fingerprint": "da37d08d315cd074648fdc45569cd75dedc54547f29eeaf13313834ff7a16dd4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_rule_types",
+      "source_fingerprint": "4fe395ec092df1535ff6117080c73fb3cc8d6bb36481d06a0629906f0cb4a78d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_policy",
+      "source_fingerprint": "38b69926f523db4486683b21fd5f3234cafcb16eeb34887c76e3b8256555053a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper converts default to is_default only when the qos-default extension is present, returns None without HTTP when nothing is left to update, and resolves name_or_id with find_qos_policy before the PUT; python:network/v2/update_qos_policy is itself unresolved."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_bandwidth_limit_rules",
+      "source_fingerprint": "8e94dc067dadafeb62f7d7bf75541276bfc33da746cb46de44ae4b72bf34d595",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_bandwidth_limit_rules",
+      "source_fingerprint": "1b521acebec1fd5202a9b97dbd8c820cf604c2bfbe604d2b34c45e56f93dd72a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_bandwidth_limit_rule",
+      "source_fingerprint": "bdf516b96222916406f80130e4c832e7dbe79ee27e707182b319ea9fa8e3c94e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No Go helper fetches the current rule before the update and returns None without HTTP when no fields remain, nor drops direction when the qos-bw-limit-direction extension is absent."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_dscp_marking_rules",
+      "source_fingerprint": "b0749b9cb9c403fcf0a140d3b915f5f8cd39c62f869eb28bde2af16f607dbfb4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_dscp_marking_rules",
+      "source_fingerprint": "2b4f26ae8e7482e23efd00a4eb2a5b5ae36b1029717042d9fccc84a37b38053a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_dscp_marking_rule",
+      "source_fingerprint": "d6bfe0f081f99b9ca662a0e561e8c4d9bc1e93b243c9ef19485f29f7a22486ef",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No Go helper fetches the current rule before the update and returns None without HTTP when no fields remain."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_minimum_bandwidth_rules",
+      "source_fingerprint": "ef5d87b775615c1400c57ee25723972199d9998c229ef2042ac92da051198866",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_minimum_bandwidth_rules",
+      "source_fingerprint": "c675ad453b7ace3059a135cc9762ca2fa61066e100345c83ea20819ffa33d578",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "8f4c2338a97b63faef3c082b06459c1599081563eafb71d4c5119f03fb2604c4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
+        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
+        "No Go helper fetches the current rule before the update and returns None without HTTP when no fields remain."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_firewall_groups",
+      "source_fingerprint": "01e8272b02286bc939a065c97a937df42735cf3e633c905294c903ba6da5d8a4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_groups, follows the next link and decodes every field the Python resource declares.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them."
+      ],
+      "remaining": [
+        "Python filters the Body-only keys admin_state_up and id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_firewall_policies",
+      "source_fingerprint": "f0d8cb0cb44607d66c8bf1f426835e993589e784adf3f90b051aa2f94830ef04",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_policies, follows the next link and decodes every field the Python resource declares.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them."
+      ],
+      "remaining": [
+        "Python filters the Body-only keys audited and id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/list_firewall_rules",
+      "source_fingerprint": "c71ffd3debc624cea3980ff8fba241db3be960d702ae5c2309df580e01ec2909",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_rules, follows the next link and decodes every field the Python resource declares.",
+          "tests": [
+            "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [
+        "Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them."
+      ],
+      "remaining": [
+        "Python filters the Body-only keys id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_group",
+      "source_fingerprint": "915cc75336b53eb98ca8ebba1c60cecd3ab09b021b0102e3d36582233d90416b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
+        "No Go helper maps ingress/egress_firewall_policy names to *_firewall_policy_id (None clears them) or translates port names to IDs before the PUT."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_policy",
+      "source_fingerprint": "6c2f6ded7e2794c459d1cd0d0a9c81852cd04b80382ede7476048c26f7df730f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
+        "No Go helper translates firewall_rules names or IDs to rule IDs before the PUT."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_rule",
+      "source_fingerprint": "7df318963a8453d06b1362a93966603c343d4d9c170199a92457e5ac3aa75a9e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
+        "Python sends no PUT when no attributes are given because nothing is dirty; Go has no helper that skips it."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/insert_rule_into_policy",
+      "source_fingerprint": "27b027fe1e6ee3ced6c53f8818fec10693543ed7578fa186d37d865f62e1a6b4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
+        "No Go helper returns the policy without a request when the rule is already in firewall_rules or resolves insert_after/insert_before to rule IDs before PUT insert_rule."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network/NetworkCloudMixin/remove_rule_from_policy",
+      "source_fingerprint": "0b5aa6976af2a03dfcfba175b91e065f95d16e88e462c57b05411e9dafb2309d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
+        "No Go helper returns the policy without a request when the rule is missing (find with ignore_missing=True) or not associated before PUT remove_rule."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/search_security_groups",
+      "source_fingerprint": "51d2da5942f7455730ba11c219273635cec0df10182f2c8272c58b37a7991d14",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows.",
+        "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_security_group",
+      "source_fingerprint": "94842cef9b7d5b0790efcc414cbac5d80c1c34735cafd0639fe96192ec1f1519",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/update_security_group",
+      "source_fingerprint": "018d2038225ae167055f4308810127166efd862fc0004d0849978193434fe521",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.",
+        "The Nova branch fills missing name/description from the found group before PUT /os-security-groups/{id}; Go does not provide it."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/delete_security_group",
+      "source_fingerprint": "ed0ca8a6059e533053fdac300096783694fd7a927053b427e33daebeed9cc385",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.",
+        "No Go helper returns False when the lookup finds nothing and otherwise deletes with ignore_missing=False."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/create_security_group_rule",
+      "source_fingerprint": "5873f4adddd37d86d06555673683c3083f4f8e725b2a1eb56a02e062383d5f45",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.",
+        "No Go helper converts -1 ports to null for Neutron or applies the Nova protocol, egress and port-range rules before POST /os-security-group-rules."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip",
+      "source_fingerprint": "d853187f9ad103a32ffb5228d1d66c50f756e7ab2840240bb1152de37bf0b154",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper reproduces add_auto_ip: unconditional available_floating_ip or create_floating_ip, attach, optional wait, server refresh and the interface_ip string result, plus deleting a newly created IP on timeout. network.FloatingIPs.Ensure covers only the Neutron reuse and attach part."
+      ]
+    },
+    {
+      "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/detach_ip_from_server",
+      "source_fingerprint": "e0cc3efc47b15a7d8bd32eac1b6c7ee5bc33508db770f59d87237fc2146b4373",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/python-cloud-parity-b.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "No Go helper looks the floating IP up through the cloud list, returns False when it has no port, clears port_id with a PUT and returns True, and falls back to the Nova removeFloatingIp server action after a Neutron NotFound."
+      ]
     }
   ]
 }
