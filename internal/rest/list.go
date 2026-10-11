@@ -29,6 +29,9 @@ type PagePolicy[T any] struct {
 	// before decoding a URL. Truthy nonstrings still fail. This opt-in matches
 	// Resource pagination while retaining strict defaults for other services.
 	IgnoreFalseyNext bool
+	// NextTruthy optionally supplies a library-owned JSON truthiness policy.
+	// It is used only with IgnoreFalseyNext and receives an independent copy.
+	NextTruthy func(json.RawMessage) (bool, error)
 	// VersionedPath accepts one exact escaped relative version-prefixed path
 	// as an alias of the fixed collection, including behind reverse proxies.
 	// Other origins and paths retain the normal continuation checks.
@@ -452,11 +455,15 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 	if raw, exists := fields[key]; exists {
 		decode := true
 		if policy.IgnoreFalseyNext {
-			truthy, err := cloudfilter.PythonTruthy(raw)
+			truthy := cloudfilter.PythonTruthy
+			if policy.NextTruthy != nil {
+				truthy = policy.NextTruthy
+			}
+			keep, err := truthy(bytes.Clone(raw))
 			if err != nil {
 				return nil, err
 			}
-			decode = truthy
+			decode = keep
 		}
 		if decode {
 			var next string

@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -126,6 +127,42 @@ func TestListMarkerOrOffsetRequiresOneValidInitialCursorAndPolicy(t *testing.T) 
 			_, err := collectList(context.Background(), spec, query)
 			if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(err, calls.Load())
+			}
+		})
+	}
+}
+
+func TestListFalseyNextPolicyOwnsInputAndPreservesActualProof(t *testing.T) {
+	for _, fails := range []bool{false, true} {
+		t.Run(fmt.Sprint(fails), func(t *testing.T) {
+			var calls atomic.Int32
+			body := `{"items":[{"id":"one"}],"next":1e-4000}`
+			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) { calls.Add(1); writeList(w, body) })
+			cause := errors.New("library truthiness failure")
+			spec.Paging.IgnoreFalseyNext = true
+			spec.Paging.NextTruthy = func(raw json.RawMessage) (bool, error) {
+				if string(raw) != "1e-4000" {
+					t.Error(string(raw))
+				}
+				raw[0] = 'X'
+				if fails {
+					return false, cause
+				}
+				return false, nil
+			}
+			values, err := collectList(context.Background(), spec, nil)
+			if len(values) != 1 || calls.Load() != 1 {
+				t.Fatal(values, err, calls.Load())
+			}
+			if !fails {
+				if err != nil {
+					t.Fatal(err)
+				}
+				return
+			}
+			var proof *resource.ResponseError
+			if !errors.Is(err, cause) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Page") != "kept" {
+				t.Fatal(err, proof)
 			}
 		})
 	}
