@@ -237,6 +237,8 @@ created, err := service.FloatingIPs.Create(ctx,
 
 ## 전체 API와 남은 복합 작업
 
+openstacksdk cloud 계층 network helper 가운데 network·router·subnet·port 조회·삭제, router interface, firewall 생성 등 36개의 Go 대응과 미해결 사유는 [Python cloud network helper 대응 (a)](python-cloud-parity-a.md)에 정리했습니다.
+
 openstacksdk cloud 계층 network helper 가운데 QoS·보안 그룹·FWaaS·router interface 등 47개의 Go 대응과 미해결 사유는 [Python cloud network helper 대응 (b)](python-cloud-parity-b.md)에 정리했습니다.
 
 네트워크 생성·수정, subnet, port, router, security group, floating IP의 개별 호출은 `service.API`의 [Network v2 API](v2/README.md)에서 제공합니다. 예를 들어 `service.API.Networks.Create(ctx, networks.CreateOpts{...})`와 `service.API.FloatingIPs.Create(ctx, floatingips.CreateOpts{...})`는 SDK가 제공하는 concrete options를 사용하며 builder interface 구현이 필요하지 않습니다. 각각 `github.com/JSYoo5B/go-openstacksdk/network/v2/networks`, `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips`를 import합니다.
