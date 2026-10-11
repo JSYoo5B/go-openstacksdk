@@ -4,9 +4,20 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [핵심 Python proxy·cloud 판정 병렬 묶음](#핵심-python-proxycloud-판정-병렬-묶음-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [미해결 재검토와 Keystone 소유 API](#미해결-재검토와-keystone-소유-api-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,665입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,765입니다.
+
+## 미해결 재검토와 Keystone 소유 API 마감
+
+[구현 가능성 분류](core-unresolved-feasibility.md)에 따라 새 기능 없이 끝나는 항목과 SDK 소유 호출 두 묶음을 먼저 처리했습니다. 전체는1,665→1,765/3,362(+100), 핵심은1,587→1,687/2,292입니다.
+
+- 판정 재검토: 감사 수준의 사유만 남았던 72개를 다시 확인해 62개를 `go_mapping`으로 바꿨습니다. 남은 사유는 응답 캐시 부재처럼 관찰 가능한 차이로 옮기고, 기본 인자 요청을 확인하는 `python_rejudge_test.go` 계약을 추가했습니다. 실제 요청 차이가 확인된 10개는 unresolved로 두었습니다. Nova `create_server`의 `networks: auto` 기본값, Swift 대용량 object의 segment 이름, Barbican 빈 quota 수정의 초기화 PUT이 그 예입니다.
+- Cinder snapshot 대기: native `snapshots.WaitForStatus`가 envelope 없는 응답에서 nil을 참조해 panic하던 문제를 sdkgen의 감사된 요청 override로 고쳤습니다. v2·v3 생성 메서드는 같은 요청과 간격으로 polling하는 SDK helper를 호출하고 이 경우 오류를 돌려줍니다.
+- Keystone OS-EP-FILTER: SDK 소유 `identity/v3/endpointgroups` package가 endpoint group CRUD·목록·find와 project·endpoint 연결, cloud helper를 제공해 18개를 `go_mapping`으로 판정했습니다.
+- Keystone OS-FEDERATION: SDK 소유 `identityproviders`, `federationprotocols`, `serviceproviders` package가 18개를 `go_mapping`으로 바꿨습니다. 네 package는 identity v3 서비스에 등록했습니다.
+
+마지막 전체 gate의 race는 **175개 실제 test package**이며 license·vet·parity·progress·gofmt와 함께 exit0입니다. 판정 JSON은 reviews2,487·contracts6,433·go_mapping1,765입니다. 남은 SDK 소유 호출 묶음(networking-sfc, Neutron flavor·metering, TaaS·local IP, Cinder 관리, Neutron 소규모 경로)과 공통 helper는 아직 시작하지 않았습니다.
 
 ## 핵심 Python proxy·cloud 판정 병렬 묶음 마감
 
