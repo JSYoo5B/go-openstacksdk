@@ -29,6 +29,8 @@ native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md
 
 Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규칙은 [noauth native client 생성](../noauth/README.md)에 설명합니다.
 
+`Snapshots.FindRecord/Backups.FindRecord`는 GET-first와 name fallback, details·missing 기본값, raw ID/paging과 Cinder microversion 선택을 제공합니다. [Snapshot](snapshot-find-python.md), [Backup](backup-find-python.md)에 독립 Go main과 Python 비교를 설명합니다.
+
 `Volumes.ListSummary`는 `/volumes` 요약 목록과 로컬 소비 정책을 제공합니다. [요약 목록 비교](volume-summary-python.md)를 참고합니다. Backup의 [명시적 Python metadata profile](backup-metadata-python.md)은 stock Cinder에 child route가 없어 미해결 상태이며 일반 stock metadata 지원으로 집계하지 않습니다.
 
 `Attachments.CreateRecord/ListRecords`는 Source 서비스 내부용 attachment envelope·mode discovery·summary 목록을 제공합니다. `Transfers`의 owned Record6개는3.55 경로 선택과 기본 missing을 제공합니다. [Attachment](attachments-python.md), [Transfer](transfers-python.md), [type 검색·admin encryption/QoS](type-encryption-python.md), [raw connector action](connector-python.md)에 권한·버전·옵션과 실제 응답을 설명합니다.
