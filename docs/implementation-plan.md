@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): 작업 에이전트8개 병렬 구현·검토, 다음 묶음6개 API 판정 완료. 전체1,298/3,362·핵심1,224/2,292.** Cinder snapshot/backup 검색2개와 Neutron trunk/address action4개를 패키지 race 검증 후 반영했습니다. Swift container·Barbican consumer 구현은 commit했고 교차 검토에서 찾은 요청 전 descriptor 검증·전체 오류 상태 관찰 보완을 진행 중입니다. Neutron 검색3개·router action5개·tag7개도 독립 leaf에서 구현·검증합니다. 각 worker가 구현·기존 helper 재사용 테스트·독립 main/비교 문서·판정 초안을 준비하고 root가 통과한 단위부터 작은 commit/push·집계를 처리합니다. 검증 전 후보는 완료량에 합산하지 않으며 core user→core admin→managed user→managed admin 순서를 유지합니다. 이전 재시작/일시정지 요청은 최신 계속 진행 지시로 철회됐으며 구현을 계속합니다.
+**현재 진행 (2026-10-11): 작업 에이전트8개 병렬 구현·검토 유지, 다음 묶음26개 API 서비스 검증·판정 완료. 전체1,318/3,362·핵심1,244/2,292.** Cinder snapshot/backup 검색2개·Neutron network/port/subnet 검색3개·router action5개·trunk/address action4개·tag7개·Swift container2개·Barbican consumer3개를 추가했습니다. 기존 공개 Gophercloud testhelper/서비스 fixture를 재사용해 패키지 race를 검증했고 교차 검토에서 확인한 paging marker·Source filter/Header·사전 descriptor·전체 rejected HTTP 물리 오류를 보완했습니다. 전체 snapshot gate와8개 비교 가이드 main 빌드는 root 통합 단계에서 검증합니다. 다음 Cinder volume 검색·message·metadata, Barbican secret 검색, Neutron security/trunk/address 검색·router interface를 독립 leaf에 배정해 계속 구현합니다. Placement allocation candidates는 stock admin/service 정책이므로 핵심 admin 단계로 옮기고 Source 조사만 보존했습니다. core user→core admin→managed user→managed admin 순서는 유지하며 이전 재시작/일시정지 요청은 최신 계속 진행 지시로 철회됐습니다.
 
 **이전 묶음 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 사용자 재시작 요청으로 새 구현 할당은 중단했고 모든 worker가 완료·동결 상태입니다. 최종 기록 commit/push 후 목표를 일시정지하며 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
 
@@ -502,11 +502,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,298 (38.6%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,318 (39.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,063 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 1,608 | 아직 개별 기록 없는 선언 1,754 |
-| 기록한 부분·전체 계약 | 5,159 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,043 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 1,620 | 아직 개별 기록 없는 선언 1,742 |
+| 기록한 부분·전체 계약 | 5,274 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -685,12 +685,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,224 / 2,292 | 53.4% | 210 | 857 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,244 / 2,292 | 54.3% | 202 | 845 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 1,298 / 3,362 | 38.6% | 309 | 1,754 | 1 |
+| 전체 | 1,318 / 3,362 | 39.2% | 301 | 1,742 | 1 |
 
 **핵심 서비스**
 
@@ -699,11 +699,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Identity / Keystone | 189 / 389 | 15 | 185 | 0 |
 | Compute / Nova | 240 / 333 | 47 | 46 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 298 / 758 | 37 | 423 | 0 |
+| Network / Neutron | 313 / 758 | 34 | 411 | 0 |
 | Image / Glance | 85 / 120 | 35 | 0 | 0 |
 | Block Storage / Cinder | 267 / 480 | 35 | 178 | 0 |
-| Key Manager / Barbican | 52 / 67 | 15 | 0 | 0 |
-| Object Storage / Swift | 28 / 74 | 20 | 25 | 1 |
+| Key Manager / Barbican | 55 / 67 | 12 | 0 | 0 |
+| Object Storage / Swift | 30 / 74 | 18 | 25 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 
