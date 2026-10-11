@@ -10,7 +10,9 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): 재개·핵심 user API 8개 작업 묶음 병렬 구현 중. 전체1,250/3,362·핵심1,176/2,292.** 주 에이전트1개와 작업 에이전트8개로 실행을 재개했습니다. Keystone generic Credential 수정, Nova 서버 user action, Nova attachment·server group 검색, Cinder attachment, Cinder transfer, Cinder type encryption·검색, Swift object 생성 기본값, Neutron port forwarding을 서로 다른 파일 담당으로 나눴습니다. 각 worker는 구현·의미 있는 fixture 테스트·Go/Python 비교 문서를 준비하고, 주 에이전트는 검증이 끝난 묶음부터 판정 JSON·집계·작은 commit/push를 처리합니다. 현재 완료 수는 이전 검증분이며 새 구현을 검증 전에 완료 수에 포함하지 않습니다. 직전 전체 gate는 `6788f804`의156개 test package와 문서 예제12개 빌드 PASS이고, 최신 `f53e822d`의 Go·API·빌드 설정은 같은 검증 대상과 일치합니다. 전체 목표는 active이며 SDK-R1/C1/S1과 stock Backup metadata4개는 계속 미해결입니다.
+**현재 진행 (2026-10-11): 재개·핵심 user API 8개 작업 묶음 병렬 구현 중. 전체1,252/3,362·핵심1,178/2,292.** 주 에이전트1개와 작업 에이전트8개로 실행을 재개했습니다. Keystone generic Credential 수정, Nova 서버 user action, Nova attachment·server group 검색, Cinder attachment, Cinder transfer, Cinder type encryption·검색, Swift object 생성 기본값, Neutron port forwarding을 서로 다른 파일 담당으로 나눴습니다. 각 worker는 구현·의미 있는 fixture 테스트·Go/Python 비교 문서를 준비하고, 주 에이전트는 검증이 끝난 묶음부터 판정 JSON·집계·작은 commit/push를 처리합니다. 현재 완료 수는 이전 검증분이며 새 구현을 검증 전에 완료 수에 포함하지 않습니다. 직전 전체 gate는 `6788f804`의156개 test package와 문서 예제12개 빌드 PASS이고, 최신 `f53e822d`의 Go·API·빌드 설정은 같은 검증 대상과 일치합니다. 전체 목표는 active이며 SDK-R1/C1/S1과 stock Backup metadata4개는 계속 미해결입니다.
+
+**재개 후 API 완료 (2026-10-11): Swift native object Create와 Keystone generic Credential update2개. 전체1,250→1,252·핵심1,176→1,178/2,292.** 빈 reader 기본값·typed nil preflight·재사용 bytes 옵션과 PATCH의 생략/null/응답 병합/no-op을 구현했습니다. 집중 race에서 Swift8개·생성기1개·Credential7개 그룹을 검증했고, 나머지 worker는 병렬 구현 중입니다. 이 숫자는 실제 OpenStack 인증 검증이나 전체 Resource/session 동등성의 완료 수를 뜻하지 않습니다.
 
 **최신 API 완료 (2026-10-11): Keystone5·Neutron14·Swift7·Nova8, 전체1,216→1,250(+34)·핵심1,142→1,176/2,292.** Identity178→183/389·Network268→282/758·Object Storage20→27/74·Compute220→228/333입니다. 새13개 review를 추가하고 기존 unresolved21행을 완료했으며 기존 ApplicationCredential/AccessRule5행의 오류 계약도 보강했습니다. [현재 묶음의 사용법·검증 기록](sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 구현·검증·문서·재개 위치를 기록합니다.
 
@@ -478,11 +480,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,250 (37.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,252 (37.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,111 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 1,586 | 아직 개별 기록 없는 선언 1,776 |
-| 기록한 부분·전체 계약 | 4,968 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,109 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 1,587 | 아직 개별 기록 없는 선언 1,775 |
+| 기록한 부분·전체 계약 | 4,977 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -661,25 +663,25 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,176 / 2,292 | 51.3% | 236 | 879 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,178 / 2,292 | 51.4% | 235 | 878 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 1,250 / 3,362 | 37.2% | 335 | 1,776 | 1 |
+| 전체 | 1,252 / 3,362 | 37.2% | 334 | 1,775 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 183 / 389 | 15 | 191 | 0 |
+| Identity / Keystone | 184 / 389 | 15 | 190 | 0 |
 | Compute / Nova | 228 / 333 | 59 | 46 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
 | Network / Neutron | 282 / 758 | 37 | 439 | 0 |
 | Image / Glance | 85 / 120 | 35 | 0 | 0 |
 | Block Storage / Cinder | 254 / 480 | 48 | 178 | 0 |
 | Key Manager / Barbican | 52 / 67 | 15 | 0 | 0 |
-| Object Storage / Swift | 27 / 74 | 21 | 25 | 1 |
+| Object Storage / Swift | 28 / 74 | 20 | 25 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 

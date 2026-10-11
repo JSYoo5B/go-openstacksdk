@@ -2986,3 +2986,10 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 공개 모듈은 `github.com/JSYoo5B/go-openstacksdk`, 루트 패키지는 `openstack`입니다. 기존 Source 식별자·fingerprint·pin·지원 상태·3,418개 계약은 유지하고 SDK API 참조만 옮겼습니다. 프로젝트 Apache-2.0, 변경 JMESPath Apache 고지, CPython 포팅 조건, Unicode-3.0 데이터, YAML 원본 NOTICE와 비교 reference MIT를 [통합 고지](../THIRD_PARTY_NOTICES.md)에 구분합니다. 보존한 9개 원문 SHA와 로컬 upstream 파일의 byte equality, 새 문서 링크를 확인했고 GitHub도 Apache-2.0을 인식합니다. 원본 라이선스의 공백은 byte equality를 위해 그대로 보존합니다.
 
 새 실제 checkout은 `/Users/jsyoo5b/Workspace/OpenStack/3rdParty/go-openstacksdk`입니다. Codex가 저장한 옛 프로젝트 경로를 이 작업의 도구로 변경할 수 없고 symlink writable root도 허용하지 않으므로 옛 경로 연결은 남기지 않습니다. Codex에서 새 폴더를 열어 사용합니다. 코드 라이선스와 독립 프로젝트 고지는 상표 사용 허가를 뜻하지 않습니다.
+
+
+## 재개 후 Swift 생성 기본값·Credential 수정 완료
+
+2026-10-11에 작업 에이전트8개로 핵심 user 구현을 재개했습니다. 먼저 native `objects.Create`의 nil Content panic을 SDK empty reader 기본값으로 고치고 typed nil은 HTTP 전 오류로 처리했습니다. `WithCreateBytes`는 snapshot과 호출마다 새 reader를 제공합니다. generic Credential `UpdateRecord`는 PATCH `/credentials/{id}`의 선언된 attrs만 전송하며 null/false/zero/empty·응답 병합·no-op·물리 오류를 보존합니다. [Swift 사용법](../objectstorage/v1/objects/create-defaults-python.md)과 [Credential 사용법](../identity/v3/credential-update-python.md)에 Python과 비교한 실행 가능한 Go 예제를 기록합니다.
+
+기존 fixture와 REST/Source 공통 기능을 재사용했습니다. 신규 Swift5그룹·기존 Swift3그룹·생성기1그룹과 Credential 신규7그룹의 집중 race PASS이며 실제 run은 `/private/tmp/go-openstacksdk-oct11-resume-swift-focus.jsonl`·`/private/tmp/go-openstacksdk-oct11-resume-credential-focus.jsonl`입니다. pinned `make generate`도 exit0으로 native 기본값 seam을 재현했습니다. 전체 gate는 나머지 병렬 구현을 통합한 immutable revision에서 실행할 예정이므로 이 기록은 집중 검증입니다. catalog/pins는 변경하지 않았고 native 미완료1행을 승격·Python 새1행을 추가했습니다. 전체1,252/3,362·핵심1,178/2,292, 전체 supported0이며 기존 Python create_object와 SDK-R1/C1/S1은 미완료입니다.

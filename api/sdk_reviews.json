@@ -56160,33 +56160,49 @@
     {
       "operation": "gophercloud:objectstorage/v1/objects.Create",
       "source_fingerprint": "635fdb0d503e5b769e088df5af1a47fc4dde7b9339cc7ce1afaaf770fc81a98a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateBytes",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateQuery",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateHeader"
       ],
       "contracts": [
         {
-          "behavior": "Create PUTs the path-escaped container/object (object slash as %2F) with the content, MD5 ETag computed when neither ETag nor NoETag is set, an explicit ETag kept even with NoETag, metadata/system headers and query values, rejects bad names and core-header collisions before HTTP, and accepts only 201/202; nil content needing an ETag panics in the native builder.",
+          "behavior": "Create retains native escaped object PUT, core/extension headers and query, default content MD5, explicit ETag with NoETag, native201/202 status and actual PUT header decoding. Final plain-nil Content creates an empty object rather than invoking the upstream nil-reader MD5 panic; typed-nil supplied Content is ErrInvalidOption before HTTP under every ETag mode.",
           "tests": [
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults",
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateTypedNilReadersAndPreflight",
             "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping",
             "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight",
-            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentPanics"
+            "objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentUsesEmptyBody"
+          ]
+        },
+        {
+          "behavior": "WithCreateBytes snapshots nil/empty/nonempty bytes at option construction and creates a fresh reader on each application. Request options retain last-applied Content precedence; mutation of caller bytes and reusing an option do not change later uploads.",
+          "tests": [
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateBytesSnapshotAndOptionOrder",
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults"
+          ]
+        },
+        {
+          "behavior": "Native checksum preparation retains physical read/seek causes and Create/objects wrapping without HTTP or closing a failed preflight reader. Empty bodies retain default ETag through an actual native503 retry to201;204 is still a native rejection.",
+          "tests": [
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateDefaultReaderErrorsRetainCause",
+            "objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyNativeRetryAndStatus"
           ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/native-calls.md",
+        "objectstorage/v1/objects/create-defaults-python.md"
       ],
       "differences": [
-        "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
-        "The SDK adds only request.Wrap operation context (not on list streams) and the documented extension header/query merge; native URL construction, escaping, OkCodes, paging and header decoding are unchanged."
+        "This declaration maps the native Gophercloud object Create call only. Python Resource and owned CreateObject bytes/file/SLO/DLO workflows remain separately tracked; fixing nil Content does not declare Python create_object full parity.",
+        "The SDK applies an empty-reader default after final typed options, rejecting typed-nil readers before HTTP. Native URL, headers/query, status decoding and reader/retry behavior remain unchanged; WithCreateBytes is a reusable immutable input option, not a replacement for the owned CreateObject replay/evidence workflow."
       ],
-      "remaining": [
-        "The native ToObjectCreateParams calls io.ReadAll on a nil Content reader when an ETag must be computed; the generated facade does not guard this panic or turn it into an OperationError."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:objectstorage/v1/objects.Get",
@@ -74300,6 +74316,72 @@
         "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile.",
         "Dictionary links.next is an intentional Go compatibility extension because pinned Source generic paginator ignores that shape. Fixed REST rejects cross-origin/path/new-page-key/filter changes, conflicting continuations and marker cycles; does not claim Source arbitrary version-prefix/cross-path behavior.",
         "JSON filters distinguish bool and number; malformed nested nonobjects do not match instead of Source attribute-error behavior."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_credential",
+      "source_fingerprint": "32386b3ac388fc10b7c36a8be458115aea9ac7d00d21191cd9fc5776e9a307f7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.WithRecordUpdateHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "PATCH on the literal generic /credentials member sends only declared name/blob/project_id/type/user_id under credential, preserves omitted/null/false/zero/empty JSON values, ignores unknown and id attrs, and overlays actual response fields on owned request/id seed while preserving unknown raw response fields and exact numbers.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateRawBodyAndResponseOverlay"
+          ]
+        },
+        {
+          "behavior": "Empty, unknown-only, id-only and request-policy-header-only updates issue no HTTP and return ID-only declared view without fabricated response evidence; explicit empty array/object values still cause PATCH.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateNoOpAndLiteralID"
+          ]
+        },
+        {
+          "behavior": "Source accepts 200..399, singular or root response objects and malformed/empty JSON seed retention; valid nonobject responses preserve accepted status/body proof, and 4xx/5xx/600 retain original native HTTP evidence without missing suppression.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateTranslationAndStatuses"
+          ]
+        },
+        {
+          "behavior": "Options own copied maps/raw JSON/headers and isolate retained callback pointers; invalid options, JSON, UTF-8, protected headers, context/client/ID fail before HTTP and callback errors join simultaneous cancellation or Source mutation.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateOptionOwnershipAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Physical accepted and rejected Read/Close failures, context cancellation/cause and Source changes restored by Close keep status/body/header and original causes, close each body once and never replay the update automatically.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdatePhysicalResponseFailures"
+          ]
+        },
+        {
+          "behavior": "Native retry policy retains the fixed PATCH body/route and response overlay; retry callback, body/Source mutation, cancellation and transport errors remain discoverable and invalid retries stop before a second physical request.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateNativeRetryPolicyAndOwnership"
+          ]
+        },
+        {
+          "behavior": "Literal UTF-8 member IDs containing slash/percent escape as exactly one URL segment.",
+          "tests": [
+            "identity/v3/credentials/python_update_test.go:TestPythonCredentialUpdateEscapesMemberExactlyOnce"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credential-update-python.md"
+      ],
+      "differences": [
+        "The explicit Go profile accepts a literal string ID, owns copied concrete options and returns a fresh CredentialRecord; mutable Python Resource/Munch input, same-instance dirty comparison, Connection location and dynamic adapter/subclass/session hooks remain global Resource parity work.",
+        "Unknown Credential attrs are ignored because the pinned Resource does not allow unknown Body attrs; native Update with WithUpdateField remains available for explicit Gophercloud extension bodies.",
+        "ID options are ignored to keep the explicit literal target immutable; duplicate Python literal-ID/id-kwarg TypeError is not reproduced. Go always validates ID/context/client/headers even for an otherwise empty commit.",
+        "WithRecordUpdateHeaders is an explicit Go request-policy extension rather than a Source dirty Header descriptor and does not alone trigger PATCH.",
+        "The Go fixed request policy escapes one literal member segment and retains physical rejected Read/Close/cancel/Source causes that native Gophercloud otherwise loses."
       ],
       "remaining": []
     }
