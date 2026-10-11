@@ -16442,7 +16442,7 @@
     {
       "operation": "python:block_storage/v2/delete_snapshot_metadata",
       "source_fingerprint": "ebaaeea149f9760eb0a926423cb9ad1667142be38b0f0202b81f947e899520da",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.DeleteKeys",
@@ -16546,15 +16546,13 @@
         "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
-        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_volume_metadata",
       "source_fingerprint": "0596868d553b4a40c877908475a55b3db7da30f62e1419e04d1dc01c38db5ef2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.DeleteKeys",
@@ -16658,14 +16656,13 @@
         "Python updates the Resource metadata cache after each acknowledged DELETE and can raise from a stale/missing local key; Go records actual partial acknowledgements without a cache mutation. Non-HTTP empty-key results contain no synthesized success evidence, and 404 is not ignored."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/fetch_snapshot_metadata",
       "source_fingerprint": "d0d50191b231ee40ffff627b7cff9b6601382c00554e8984f87d7db3436c7aa5",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Get",
@@ -16768,15 +16765,13 @@
         "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
-        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/fetch_volume_metadata",
       "source_fingerprint": "59c53cc7bb87944e1cc42f559b37177dc30d78e284bcfb1f58ddae04eedcd0f2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Get",
@@ -16879,14 +16874,13 @@
         "Literal ID/key components are escaped once and invalid route inputs are rejected. Mock routing evidence is not a guarantee of encoded slash/dot handling through a real proxy/WSGI or of server key/length policy acceptance."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_snapshot_metadata",
       "source_fingerprint": "5c5178977a585fd8affaf24453f8aca69ad44b6058241764e390834aa267d03b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Get",
@@ -16990,15 +16984,13 @@
         "The pinned get_snapshot_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
-        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_volume_metadata",
       "source_fingerprint": "fd2781f1bc3429f81eb55a10cf440c7427ef62b3e31c56e5df89db50b6244995",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Get",
@@ -17102,14 +17094,13 @@
         "The pinned get_volume_metadata method is a deprecated alias warning about SDK 5.0 removal and delegating to fetch_metadata. Go reuses MetadataScope.Get and does not add a duplicate deprecated warning-emitting method."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/set_snapshot_metadata",
       "source_fingerprint": "2571de17109313ae76d19bec152f097ade0ceb511a6c8b727c609dc5119bd831",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.MetadataScope.Merge",
@@ -17215,15 +17206,13 @@
         "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity.",
-        "Optional Name convenience retains native Snapshot SinglePageBase; Python inherited parent list continuation and nonstandard Resource/name workflows are not completed by this metadata scope."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/set_volume_metadata",
       "source_fingerprint": "9cce7689b41b5ff546e0a37cc4d22b184869e697ea77cd364160230c0bb859d0",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.MetadataIn",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.MetadataScope.Merge",
@@ -17329,8 +17318,7 @@
         "Python set_metadata caches the request delta and returns self rather than translating the complete merged response. Go Merge and explicit Replace return server values, have no cached lifecycle, and send metadata:{} for nil/empty inputs; native Snapshot omitempty behavior remains separate."
       ],
       "remaining": [
-        "Existing arbitrary Volume/Snapshot Resource inputs, custom subclasses/base_path/_uri and injected session/adapter selection are not accepted and mutated by this scope; their seeded response/cache identity branch remains unmapped.",
-        "Inherited mutable MetadataMixin/Resource descriptor coercion, cached metadata update/pop behavior and wider dirty/cache lifecycle are not implemented. The tested owned string-map HTTP behavior must not be treated as full Resource parity."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -18778,7 +18766,7 @@
     {
       "operation": "python:block_storage/v2/wait_for_status",
       "source_fingerprint": "357e0a80b2ffd1547b719a73a94c6be7ccaabec09f14199a81b43960468d7731",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForState",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForAvailable",
@@ -18874,15 +18862,13 @@
         "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
       ],
       "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/wait_for_delete",
       "source_fingerprint": "ba6ca867f786e107fa497d66bbe864862c97749b032f788dc98bdebba54426aa",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.WaitForDelete",
@@ -18979,9 +18965,7 @@
         "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
       ],
       "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -58193,7 +58177,7 @@
     {
       "operation": "gophercloud:blockstorage/v2/backups.Update",
       "source_fingerprint": "f6ac36c19b7b6f67a40935a7f1bac1acc9dd1bd01f813670f86e4ac18a352e1c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.WithUpdateOptions",
@@ -58214,7 +58198,7 @@
         "Cinder added backup update in the v3 API at microversion 3.9, so the v2 route is not usable and the native body lacks the backup envelope."
       ],
       "remaining": [
-        "Decide whether to expose v2 backup Update at all; the native flat body is not accepted by Cinder and no v2 route exists."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -68909,7 +68893,7 @@
     {
       "operation": "python:identity/v2/create_role",
       "source_fingerprint": "49cce5d4853719b458a8f23da8e73273f38106bdc0088b5230efd4e7947c3d8e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -68917,13 +68901,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends POST OS-KSADM/roles with a role envelope."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/delete_role",
       "source_fingerprint": "20e8a4cae983514274c7557ff002e31a9129b45e008086d3e85bd297a2c8e42b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -68931,13 +68915,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends DELETE OS-KSADM/roles/{id} and ignores 404 by default."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/find_role",
       "source_fingerprint": "250e4ba0daadf869b7ef456f5fa89e6113aaf27901f289ed079cec91668fd3aa",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -68945,13 +68929,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Without a role GET, Go cannot send the first Resource.find request GET OS-KSADM/roles/{name_or_id}, and roles has no resource.Collection Find."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/get_role",
       "source_fingerprint": "18f2152a2088a45dcd156ca993f0bdb1972457686d7e28bca67ac9d4d241cb1a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -68959,13 +68943,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends GET OS-KSADM/roles/{id}."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/update_role",
       "source_fingerprint": "5ed04f1ec5ce654a9f679d14f59f172dcb51c1b4cc249e9bc7b97aacc6c30e95",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -68973,13 +68957,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2 identity roles exposes only List, AddUser and DeleteUser, so this SDK has no Go API for the OS-KSADM/roles member routes. Python sends PUT OS-KSADM/roles/{id} with the dirty role attributes including id."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/roles",
       "source_fingerprint": "67d456384e93b41bb4e797f85722b7af1fcfe90e30685cf89435e39c971909f5",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/roles.API.List"
@@ -68999,9 +68983,7 @@
         "Go returns native Role values decoded without JSON tags; Python returns Role Resources with is_enabled converted by BoolStr."
       ],
       "remaining": [
-        "roles.API.List accepts no query, so Python limit and marker query parameters cannot be sent.",
-        "roles.API.List stops after one page and never follows roles_links rel=next or the limit-driven marker requests that Python Resource.list sends.",
-        "Go has no local filtering for Role Body attributes passed through **query."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -69120,7 +69102,7 @@
     {
       "operation": "python:identity/v2/tenants",
       "source_fingerprint": "b932e36e45738c66c90dfbe23a646ab30451f346639b30df310bbe0643860887",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.List",
@@ -69141,9 +69123,7 @@
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
       ],
       "remaining": [
-        "When limit is set and no next link is returned, Python Resource.list keeps requesting with marker set to the last ID until an empty page; the Go pager follows only tenants_links.",
-        "Python prefers a top-level links key when present; the Go pager reads only tenants_links.",
-        "Python applies Body attributes such as description and is_enabled from **query as local filters; the tenants collection supports only name filtering locally."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -69291,7 +69271,7 @@
     {
       "operation": "python:identity/v2/users",
       "source_fingerprint": "ffe9a74877a396f9fdf388fc1e33ea7dc0c32d209c54662be0ba62a8933b367e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.List"
@@ -69311,9 +69291,7 @@
         "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
       ],
       "remaining": [
-        "users.API.List accepts no query, so Python limit and marker query parameters cannot be sent.",
-        "users.API.List never follows users_links rel=next or the limit-driven marker requests that Python Resource.list sends.",
-        "Go has no local filtering for User Body attributes such as email or is_enabled passed through **query."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -69347,7 +69325,7 @@
     {
       "operation": "python:identity/v2/wait_for_status",
       "source_fingerprint": "317e12346c1634c252d0486d72bc2a9df95a16a06f4086761c9b4da7edb8e434",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.WaitFor",
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.WaitFor",
@@ -69377,14 +69355,13 @@
         "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait."
       ],
       "remaining": [
-        "Python accepts Role and Extension Resources as well; roles and extensions have no Go wait helper.",
-        "Python returns the given Resource without HTTP when its cached attribute already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:identity/v2/wait_for_delete",
       "source_fingerprint": "d59d436b847121b4ac8647e9faf085e2621043c9b61bae24306d583a5fcbf49e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/tenants.API.WaitForDeletion",
         "github.com/JSYoo5B/go-openstacksdk/identity/v2/users.API.WaitForDeletion",
@@ -69409,14 +69386,13 @@
         "Go defaults to a five-minute timeout while the identity v2 Proxy default is wait=120; resource.WithTimeout reproduces it."
       ],
       "remaining": [
-        "Python accepts Role and Extension Resources as well; roles and extensions have no Go deletion wait.",
-        "Python returns the original Resource on deletion; Go returns only an error."
+        "Keystone removed the v2.0 API in Queens and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/create_image",
       "source_fingerprint": "219a71237005e9d1987ddb967200761dd414ab902195349762b512104db35807",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69424,13 +69400,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python creates the image with POST /images after cloud-layer duplicate, checksum and vendor-agent handling, uploads data with PUT /images/{id} and deletes the image after a failed upload."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/delete_image",
       "source_fingerprint": "55b50c777b9da5a1b295c3013d12203e170b4b1cd1c8835f2122335f72e735a8",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69438,13 +69414,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends DELETE /images/{id} with ignore_missing=True by default."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/download_image",
       "source_fingerprint": "96e8d68ccf9768cc86aa1fd21d4f8f6529eb9deeac5abdcc559a2aeb52653b11",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69452,13 +69428,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python fetches GET /images/{id} metadata, downloads GET /images/{id}/file and validates the checksum."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/find_image",
       "source_fingerprint": "6b24cd876fb1feb9e6377a0743901f7e64e63ab4777cd1241ed5b86ecb89885c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69466,13 +69442,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends GET /images/{name_or_id} and on 404 lists GET /images/detail with the name query."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/get_image",
       "source_fingerprint": "ed189c97fbda10e5882a62ef19ae1bacb23479500660e2edbbab9f46d4154382",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69480,13 +69456,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends GET /images/{id}."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/images",
       "source_fingerprint": "e3a32e99b5ac955c40ff507954183f756cd886555b25b42655d9cc669cc9f4d3",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69494,13 +69470,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python lists GET /images/detail with name, container_format, disk_format, status, size_min, size_max, limit and marker query parameters and follows images_links."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/update_image",
       "source_fingerprint": "95e97db50a7fe3df41f1554088d84e94e8a1ccdf13a3becb4c95d97382d57eb4",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69508,13 +69484,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python sends PUT /images/{id} with the image envelope."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/update_image_properties",
       "source_fingerprint": "3a894f951bf89ff7ce60b182007c6437519694411452ff354c630931468a7ad4",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69522,13 +69498,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python reads the image and sends a body-less PUT /images/{id} carrying changed values as x-image-meta-* headers."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/upload_image",
       "source_fingerprint": "d6d518a94d69b23f867b68822d75cce77938d5602d331be0ea31ad156cd08ecb",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69536,13 +69512,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python warns that the method is deprecated and sends POST /images with the image envelope."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/wait_for_delete",
       "source_fingerprint": "d692225199b90f14d6b9717d6bd88fc9022908e091facc07de10a7e9734f9a66",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69550,13 +69526,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python polls the v1 Image Resource fetch until NotFoundException with a 120 second default wait."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:image/v1/wait_for_status",
       "source_fingerprint": "058c2a2ff61aaa6f014930e7e54488d297b132ee35568610d29954d9a0c692a2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -69564,7 +69540,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no Glance v1 package and this SDK exposes no Glance v1 Go API; Glance v2 image calls use different routes and bodies. Python polls the v1 Image Resource fetch until the target status."
+        "Glance removed the v1 API and no supported deployment serves it, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -85015,7 +84991,7 @@
     {
       "operation": "python:network/v2/create_load_balancer",
       "source_fingerprint": "9267364455a9a02d61e75800e606cd8427c5f5c10e49064ac267fb25b3e6ceac",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85023,14 +84999,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/loadbalancers with a \"loadbalancer\" body that also carries unknown attributes); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/delete_load_balancer",
       "source_fingerprint": "01686042e3767f14febfcd2a618051b408f384fbd9768cdb23ca9bbe7e756be4",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85038,15 +85013,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/loadbalancers/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/find_load_balancer",
       "source_fingerprint": "5253a4c90bc93b06c1f2be9db10c85e08526c6276699ed4d2ad6813bc52c655f",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85054,15 +85027,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/loadbalancers matched on ID or name); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/get_load_balancer",
       "source_fingerprint": "00e112a9d28558ed38e89998ae3057ba1d22013b2c185cceb384c6fa624b01e9",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85070,14 +85041,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers/{id}); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/load_balancers",
       "source_fingerprint": "f1c87e5622c20e40b0c68c6d35d54a253fc15c9506578303df3491dbe636807b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85085,14 +85055,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/update_load_balancer",
       "source_fingerprint": "f9e1af013ccf6213e0cc2a920105e188896cf43b09179639766b48b34fba0b5c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85100,14 +85069,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/loadbalancers/{id} with the changed attributes in a \"loadbalancer\" body); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/create_listener",
       "source_fingerprint": "272556b8811fe2b1c3302246c742e338f0fbf2e5d03f41319936429e4e53b98c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85115,14 +85083,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/listeners with a \"listener\" body that also carries unknown attributes); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/delete_listener",
       "source_fingerprint": "e70721cd8d7dcf69d159525c215e25d1cd7fddbe9d746ba4b424e29d89639a31",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85130,15 +85097,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/listeners/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/find_listener",
       "source_fingerprint": "00e8a753d260934f6871a8dad3a9a6e3f69ceb753ba9d808a3229e62fe992ded",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85146,15 +85111,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/listeners matched on ID or name); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/get_listener",
       "source_fingerprint": "8ec7387e1d70a39c4e87677a2ed549090c1d6c0df9b67955b54360398abae793",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85162,14 +85125,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners/{id}); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/listeners",
       "source_fingerprint": "4bd9fe05c832ec9e3cd4ad419da1f6f7bddba80272b974ffe317e2c6fdbb33dd",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85177,14 +85139,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/update_listener",
       "source_fingerprint": "6c31e24f9932c63f70b9e08bbff5c38f7ba9844830e644af426d8f95a25ca10b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85192,14 +85153,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/listeners/{id} with the changed attributes in a \"listener\" body); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/create_pool",
       "source_fingerprint": "fe22c40f2a38a9c7e65efcdb8e6e68021b821c16a0e6bd08ebea4fdba4e6bbd1",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85207,14 +85167,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/pools with a \"pool\" body that also carries unknown attributes); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/delete_pool",
       "source_fingerprint": "80619583593f6964f18740bcd1b61df9d8774b8c96a2a3e2ed231ce55fb525de",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85222,15 +85181,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/pools/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/find_pool",
       "source_fingerprint": "52a6ba20be9cece3d5d5811f11a3d6f65e5096b5e51b891a940174719b18208f",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85238,15 +85195,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/pools matched on ID or name); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/get_pool",
       "source_fingerprint": "2ea3b755022e9b67fb646ed6cde6213242690f5068ee021d16cdfdc95c2a38d2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85254,14 +85209,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{id} with an optional fields query); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/pools",
       "source_fingerprint": "347d0301dbf2b1483106b3589b8abaeea9f1ee448dd36ee118812e1fd9ae9d98",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85269,14 +85223,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/update_pool",
       "source_fingerprint": "38c5919acd335e968975d400ce729d8d4bae11a79535bd58b83ee81c00b33067",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85284,14 +85237,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/pools/{id} with the changed attributes in a \"pool\" body); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/create_pool_member",
       "source_fingerprint": "33ea7b9a30f69b50b3c1acef36e3db8e6dca7762be5da1151397ac9272858ae2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85299,14 +85251,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/pools/{pool_id}/members under the pool resolved from the pool argument with a \"member\" body that also carries unknown attributes); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/delete_pool_member",
       "source_fingerprint": "438f3b624267d1fcbff1af1553443a98de83f20773b5e5e72168d685247e0b7e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85314,15 +85265,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/find_pool_member",
       "source_fingerprint": "0cc0cff1dd8502174b432fdf05037e71e7a18dce2525578a26795813e12c4bb0",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85330,15 +85279,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument followed, after 400/403/404, by a list of /v2.0/lbaas/pools/{pool_id}/members matched on ID or name); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/get_pool_member",
       "source_fingerprint": "ee3a7f751e31640924b3667ed755cd2986e89301684b447a2a618aff1c1ca3c0",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85346,14 +85293,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members/{id} with an optional fields query under the pool resolved from the pool argument); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/pool_members",
       "source_fingerprint": "5e6106e07fc3908ca56cef5ab0142cb67070993f683bb9eaf1d19aace93877ab",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85361,14 +85307,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members under the pool resolved from the pool argument with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/update_pool_member",
       "source_fingerprint": "5af2cf3cf17961c13ab3e3d16db1ef3077736ec5020b85b411551af51520c74c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85376,14 +85321,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument with the changed attributes in a \"member\" body); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/create_health_monitor",
       "source_fingerprint": "eb469a63c417096c990ef95d45382fff9ab91c236e7d551ad2ad8ee2873bc5d7",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85391,14 +85335,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/healthmonitors with a \"healthmonitor\" body that also carries unknown attributes); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/delete_health_monitor",
       "source_fingerprint": "19fd1c64f9120c82b179aa307c88a400ecb60a8de73156a72a6fe6640f9394cf",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85406,15 +85349,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/healthmonitors/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/find_health_monitor",
       "source_fingerprint": "569585fc22bb505b2ffdb98bf2a571847f5280d712fbb2a7a260302eae38d1c2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85422,15 +85363,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/healthmonitors matched on ID or name); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
-        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/get_health_monitor",
       "source_fingerprint": "e413e2098a6f44748552bd6a94c6709adc8d55f034d151f10a921b8583196177",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85438,14 +85377,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors/{id}); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/health_monitors",
       "source_fingerprint": "69c91087931b1279864934e323bc6b80585aa495454de6e7f93502bcc5aa5363",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85453,14 +85391,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:network/v2/update_health_monitor",
       "source_fingerprint": "4ef08d418e336db7704f071fb0641bab5065f1cd53a652466dea7c37e00bcd53",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -85468,8 +85405,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/healthmonitors/{id} with the changed attributes in a \"healthmonitor\" body); an SDK-owned call would be needed.",
-        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+        "Neutron LBaaS v2 (neutron-lbaas) is retired and replaced by Octavia (loadbalancer/v2); no supported Neutron serves /v2.0/lbaas, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -88868,7 +88804,7 @@
     {
       "operation": "python:block_storage/v2/create_volume",
       "source_fingerprint": "27e56ac7bffa3d5e4b9bec4362c6bd193d2384f8cb3fe484d39d3f8e9b47a311",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField"
@@ -88890,13 +88826,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "CreateOpts.Size has no omitempty, so Go always sends size and cannot reproduce Python calls that omit size (for example create_volume(snapshot_id=...)); WithCreateField cannot override the core size field."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/volumes",
       "source_fingerprint": "c1ac6329481b9feff07e906e8738ea3f234871666ebed2f9f5d51d3cbb208c6a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery"
@@ -88918,13 +88854,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "details=False lists GET volumes, but the v2 Go API only lists volumes/detail and has no summary list."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_volume",
       "source_fingerprint": "03dc42f7b531fe4bf8d475e1997c8a1148ed2d9f7a82cacca60610f79923eb58",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Find",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
@@ -88947,8 +88883,7 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "Python falls back to the list after 400 and 403 as well as 404 and matches rows by ID or name; the Go chain only ignores 404 and matches by name.",
-        "details=False (GET volumes?name=x) and all_projects=True (all_tenants=True) cannot be passed to Find, and the v2 volumes adapter does not opt into FindIdentity."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -89086,7 +89021,7 @@
     {
       "operation": "python:block_storage/v2/detach_volume",
       "source_fingerprint": "c36160714346d2329e7aac1ed3d8ee0c9400bbb87bb64273b6af1c9510a350e1",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Detach"
       ],
@@ -89107,13 +89042,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "force=True posts os-force_detach with attachment_id and an optional connector, and Gophercloud v2.15.0 blockstorage/v2 has no binding for that action."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/reset_volume_status",
       "source_fingerprint": "f19956b17ade2b941a6a087a51e2b4e23da7ee5f051f9126b999fa767b082e9e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ResetStatus"
       ],
@@ -89134,7 +89069,7 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "ResetStatusOpts.Status has no omitempty and is a core field, so Go cannot omit status as Python does when status is None."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -89195,7 +89130,7 @@
     {
       "operation": "python:block_storage/v2/set_volume_readonly",
       "source_fingerprint": "5c8965533e7e87cda4017db5af31112e0dc22004e2959da99bdc7a2e017bc4b7",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89203,14 +89138,13 @@
       ],
       "differences": [],
       "remaining": [
-        "set_volume_readonly posts os-update_readonly_flag to volumes/{id}/action, which the v2 volumes API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_volume_image_metadata",
       "source_fingerprint": "874d0715ef959f6a01fc41d3049041b0bbb85bc71958309701d08ef92a3cfccc",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89218,14 +89152,13 @@
       ],
       "differences": [],
       "remaining": [
-        "delete_volume_image_metadata posts os-unset_image_metadata per key (or, for keys=None, per key of the ordinary metadata attribute), which the v2 volumes API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/unmanage_volume",
       "source_fingerprint": "7cc03149c425ff460e14685a54ffa0641a3da9450597921827a6c2a7e321c200",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89233,14 +89166,13 @@
       ],
       "differences": [],
       "remaining": [
-        "unmanage_volume posts {\"os-unmanage\": null} to volumes/{id}/action, which the v2 volumes API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/migrate_volume",
       "source_fingerprint": "031174febff0afb05ffbb4ce474300343d9f29dd12afc38d63a3fca5871a32cf",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89248,14 +89180,13 @@
       ],
       "differences": [],
       "remaining": [
-        "migrate_volume posts os-migrate_volume with host, force_host_copy and lock_volume, which the v2 volumes API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/complete_volume_migration",
       "source_fingerprint": "35bedf43e7e6e1729a651315cb279bdf9f60d1fb81abb963cdb4b2d6fc78aeeb",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89263,8 +89194,7 @@
       ],
       "differences": [],
       "remaining": [
-        "complete_volume_migration posts os-migrate_volume_completion with new_volume and error, which the v2 volumes API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -89322,7 +89252,7 @@
     {
       "operation": "python:block_storage/v2/delete_snapshot",
       "source_fingerprint": "45a9588a0880c65465d4d3674a82b0e0ef036a668f926a800894ae21c2e9d32a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Remove",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
@@ -89344,13 +89274,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "force=True posts {\"os-force_delete\": null} to snapshots/{id}/action, and Gophercloud v2.15.0 blockstorage/v2 snapshots has no binding for that action."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/snapshots",
       "source_fingerprint": "7cb594bb63cb4716a3d7487e93ceec0fe03dd439fcc1b9b22ea33627b97020d1",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery"
@@ -89371,14 +89301,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "The default details=True lists GET snapshots/detail, which the v2 Go API cannot send.",
-        "Python follows snapshots_links across pages; the v2 Go List uses a single page."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_snapshot",
       "source_fingerprint": "0495e50beb33ba85093598e587b8041ca98b2c97fed64f8ff6079a44cd53ab61",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Find",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
@@ -89401,14 +89330,13 @@
         "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
       ],
       "remaining": [
-        "The default details=True falls back to GET snapshots/detail?name=x, which the v2 Go API cannot send.",
-        "Python also falls back after 400 and 403, matches by ID or name and accepts all_projects; the Go chain only ignores 404, matches by name and takes no query."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_snapshot",
       "source_fingerprint": "2a392221acf947b41326046b54ad5a1fc363812060763bfbd0d2bb61fde0938b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89416,14 +89344,13 @@
       ],
       "differences": [],
       "remaining": [
-        "update_snapshot sends PUT snapshots/{id} with the snapshot envelope; the v2 snapshots API has only UpdateMetadata on snapshots/{id}/metadata.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/reset_snapshot_status",
       "source_fingerprint": "3dd43063c19030d812daca582d6a41bc8451b070f0e2865531c119858fdfc04b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89431,14 +89358,13 @@
       ],
       "differences": [],
       "remaining": [
-        "reset_snapshot_status posts {\"os-reset_status\": {\"status\": status}} to snapshots/{id}/action, which the v2 snapshots API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/reset_snapshot",
       "source_fingerprint": "736a43b5c8135f8349dc4d63056b34daa651877c9d492eeb8122409c28e0a598",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89446,14 +89372,13 @@
       ],
       "differences": [],
       "remaining": [
-        "reset_snapshot is a deprecated alias of reset_snapshot_status and posts the same os-reset_status action, which the v2 snapshots API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/manage_snapshot",
       "source_fingerprint": "2f6d0f59b6e8f3b0b349d348e57c33c36f1dec42d2647dbe933cc6e93d1a804a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89461,14 +89386,13 @@
       ],
       "differences": [],
       "remaining": [
-        "manage_snapshot posts the snapshot envelope with volume_id, ref, name, description and metadata to os-snapshot-manage, which no v2 Go API sends.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/unmanage_snapshot",
       "source_fingerprint": "3a89bff4df3c18b5eb8c7f7521d2ac7e519a5cef69ff0b0d71db110235a38024",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89476,14 +89400,13 @@
       ],
       "differences": [],
       "remaining": [
-        "unmanage_snapshot posts {\"os-unmanage\": null} to snapshots/{id}/action, which the v2 snapshots API cannot send.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_qos_spec_metadata",
       "source_fingerprint": "787071cdc5378e1dd579c14387b5e7d2cc5199ccb0a3203307c7fc3b9e07af3a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89491,14 +89414,13 @@
       ],
       "differences": [],
       "remaining": [
-        "delete_qos_spec_metadata sends PUT qos-specs/{id}/delete_keys with {\"keys\": [...]}, and the SDK has no blockstorage/v2 QoS package.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no QoS binding, so an SDK-owned v2 call would be needed."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_consistency_group_snapshot",
       "source_fingerprint": "c5afa7381734411fab4dad4ae6643cdd5629a31447d2c896ab19627004abd35a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89506,14 +89428,13 @@
       ],
       "differences": [],
       "remaining": [
-        "get_consistency_group_snapshot sends GET cgsnapshots/{id}.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_consistency_group_snapshot",
       "source_fingerprint": "963938960d72aa189972373d7dfdb6e700bc2da3166ed3b0ea519c982a93f7ca",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89521,14 +89442,13 @@
       ],
       "differences": [],
       "remaining": [
-        "find_consistency_group_snapshot sends GET cgsnapshots/{id} and falls back to listing cgsnapshots/detail (or cgsnapshots with details=False) and matching by ID or name.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/consistency_group_snapshots",
       "source_fingerprint": "b6819065d9c87dc5141e2474fdbc0e347bd0bdd219867ec73cceabf9fd554d91",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89536,14 +89456,13 @@
       ],
       "differences": [],
       "remaining": [
-        "consistency_group_snapshots lists cgsnapshots/detail by default or cgsnapshots with details=False, with limit, marker, offset and sort queries.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_consistency_group_snapshot",
       "source_fingerprint": "50f678f797018976419e6adf9d429d7bf0b923e944be1c270822bbcee2d6b29f",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89551,14 +89470,13 @@
       ],
       "differences": [],
       "remaining": [
-        "create_consistency_group_snapshot posts the cgsnapshot envelope to cgsnapshots.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_consistency_group_snapshot",
       "source_fingerprint": "4c61a920212524288a3c5c716e6908dfd12e5d7f0f09ff8bc7ac67c902e5e882",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -89566,8 +89484,7 @@
       ],
       "differences": [],
       "remaining": [
-        "delete_consistency_group_snapshot sends DELETE cgsnapshots/{id} and ignores 404 by default.",
-        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -93566,7 +93483,7 @@
     {
       "operation": "python:block_storage/v2/find_backup",
       "source_fingerprint": "171a55e49f5b11a35d1064d2330dc06a8d19e797daf3b9a00703a2b6ad7fbf55",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/backups.API.Find"
       ],
@@ -93585,7 +93502,7 @@
         "Python matches the list by ID or name; Go Find(resource.Name) matches the name only."
       ],
       "remaining": [
-        "Python treats GET 400/403/404 as a miss and then lists backups/detail?name=<value> (or backups when details=False); no blockstorage/v2 helper reproduces that GET-then-name-filtered fallback, and chaining Find(resource.ID) with Find(resource.Name) keeps 400/403 errors and omits the name query."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -93844,7 +93761,7 @@
     {
       "operation": "python:block_storage/v2/transfers",
       "source_fingerprint": "29706b1220f60af11a71923cc6551368b0900a73803bb2729da9d391a5e10b69",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.List"
       ],
@@ -93861,13 +93778,13 @@
       ],
       "differences": [],
       "remaining": [
-        "The pinned v2 proxy lists /volume-transfers/detail (or /volume-transfers with details=False) and maps all_projects=True to an all_projects query; blockstorage/v2 transfers only lists os-volume-transfer/detail and has no option to select that route or the summary route."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_transfer",
       "source_fingerprint": "a4fb00dc16d459e3833c84818978ef5d38daa07561c59b7804ffba1fb95452ea",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers.API.Find"
       ],
@@ -93884,7 +93801,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Python falls back on GET 400/403/404 to the summary os-volume-transfer list and matches ID or name; Go has no helper for that fallback, Find(resource.ID) keeps 400/403 errors and Find(resource.Name) lists the detail route."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -93964,7 +93881,7 @@
     {
       "operation": "python:block_storage/v2/get_quota_set",
       "source_fingerprint": "9a3944e1dbab3f3edcf9cf9b1a7cb77b7d80bf3ae9a9f32761916e8e05067ee2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.GetUsage"
@@ -93982,8 +93899,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Python always sends usage=False or usage=True and forwards additional **query parameters; quotasets.API.Get and GetUsage expose no query option.",
-        "GetUsage returns QuotaUsageSet without per-volume-type usage keys, while Python normalizes every in_use/reserved/limit entry."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -94040,7 +93956,7 @@
     {
       "operation": "python:block_storage/v2/revert_quota_set",
       "source_fingerprint": "5bf5502b9dee490902f3fc92593c0cba5f28995dc764a359988d69c2e700a237",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/quotasets.API.Delete"
       ],
@@ -94057,13 +93973,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Python forwards **query as DELETE parameters and accepts any 2xx; quotasets.API.Delete has no query option and accepts only 200."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_quota_class_set",
       "source_fingerprint": "2d666ab2915938bdbdebcc7fac22e8faa46543fe8d78c61413e4d56b4affde75",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94071,14 +93987,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET os-quota-class-sets/{class}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_quota_class_set",
       "source_fingerprint": "bcf6354984e119ce4a7c5ca791cb159aa811400290289c76f15a87bd0c6a0298",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94086,8 +94001,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-quota-class-sets/{class}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -94119,7 +94033,7 @@
     {
       "operation": "python:block_storage/v2/get_capabilities",
       "source_fingerprint": "d330c985e1d7ddad807f5180e181ac4f8f47fb8c51303ec508942a35729358a5",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94127,8 +94041,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET capabilities/{host}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
@@ -94159,7 +94072,7 @@
     {
       "operation": "python:block_storage/v2/find_service",
       "source_fingerprint": "5e06bf9402707196ef267e84b5785ae317afa846a416aaf1776888f0ea39ba89",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94167,13 +94080,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Python Service.find lists os-services with the query and selects one row by ID or binary name and host, raising on duplicates; blockstorage/v2 services has only List and no SDK-owned lookup helper."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/enable_service",
       "source_fingerprint": "950acbd89aa867c76f4262af8ab51fd4af1d07cecde87396976ddaf1d6e5e64b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94181,14 +94094,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-services/enable, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/disable_service",
       "source_fingerprint": "11bb506bb916777cfe6b9054affb90eb331df15ec6575d35367529961a8ccb4d",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94196,14 +94108,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-services/disable and os-services/disable-log-reason, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/thaw_service",
       "source_fingerprint": "cb26ca8288917993e689630c56bbf9b1661ec19771bb6c629985c119a488d763",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94211,14 +94122,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-services/thaw, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/freeze_service",
       "source_fingerprint": "a2e993ffead3ba3f316caee003e0c031653c1167284a1d6a3d321fd9659ff0e6",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94226,14 +94136,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-services/freeze, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/failover_service",
       "source_fingerprint": "fd9750cc7b63c9b6ad06f5fda042aaca74a55376c17772e41cb87ca05f8cef1b",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94241,14 +94150,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT os-services/failover_host, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/extensions",
       "source_fingerprint": "ae3311f0a96475a96351f0d65296063492f88823b1e830e336d7b18ea757c22e",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94256,14 +94164,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET extensions, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_type",
       "source_fingerprint": "d41c6a0fbd7f55db156f579b3c0b3f67edf8de2566dcd25f27c3a9ef8b0c1bba",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94271,14 +94178,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET types/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_type",
       "source_fingerprint": "9dedc1a9a653cc2c44d852c3919d1729f8faf8abf440e498654f3d0af6505f7c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94286,14 +94192,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET types/{id} with the GET types fallback, so an SDK-owned Cinder v2 lookup would be needed.",
-        "The v2 Type query mapping has only is_public, so Python sends both the GET and the list fallback without any query; the Cinder v3 volumetypes Find and FindRecord add is_public and are not counted as v2 mappings."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/types",
       "source_fingerprint": "f45d68e3b2b451177383dc317374cdd985e0842553b26b815a475837d59533d2",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94301,14 +94206,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET types, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_type",
       "source_fingerprint": "9efd2f5cf6750285465a80834ca06a051485554d22ae570ab5769bc447aef6e8",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94316,14 +94220,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST types, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_type",
       "source_fingerprint": "3738a44790cd1084175702fd272c24b76fd6df51eba2bd4f35801040482a887c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94331,14 +94234,13 @@
       ],
       "differences": [],
       "remaining": [
-        "The v2 Type resource has no allow_commit, so Python raises MethodNotSupported locally without sending HTTP; blockstorage/v2 has no types package to expose that refusal.",
-        "The Cinder v3 volumetypes Update sends PUT types/{id}, a request the v2 proxy never sends, and is not counted as a v2 mapping."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_type",
       "source_fingerprint": "82cd5d1111cae877197ca0a543df1b62b6e819a5fd7af501f3d8a4ee74ace8e6",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94346,14 +94248,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for DELETE types/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_type_extra_specs",
       "source_fingerprint": "4f34c8f6501705bbc88ab3d5c8ca8c3a96c2937b61662aa8f2c6e991554a6025",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94361,14 +94262,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST types/{id}/extra_specs, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_type_extra_specs",
       "source_fingerprint": "8c9b33b58a195e6b36ff76e934ec4d4cf3699f18886d0b9cb3fe9eb1ecfb1599",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94376,14 +94276,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for DELETE types/{id}/extra_specs/{key}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_type_access",
       "source_fingerprint": "56003c1e6407a79dd2014a38b07df1c3769b532cd4fffac5abae79a87d5c9885",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94391,14 +94290,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET types/{id}/os-volume-type-access, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/add_type_access",
       "source_fingerprint": "820e6e1279c63337bb1d25b80610034038e19584c489ae712e7f0a09eafaf44a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94406,14 +94304,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST types/{id}/action addProjectAccess, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/remove_type_access",
       "source_fingerprint": "4d497f100403ae3b69c063312f7e26fdb6865bfdc460f8bc59e76a4961d9422f",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94421,14 +94318,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST types/{id}/action removeProjectAccess, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_type_encryption",
       "source_fingerprint": "eed735437210d41fa2b4eacd06942c91203cfd70549564b4f85e20be3a9a30c3",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94436,14 +94332,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET types/{id}/encryption, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_type_encryption",
       "source_fingerprint": "fabaecfe8bae90f39374473484348b3065d768298056bf3e71d76f4c2c7c1249",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94451,14 +94346,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST types/{id}/encryption, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_type_encryption",
       "source_fingerprint": "f7f5ef68899af5e2e1516c9c87753fd6e382ca48ec1aa8c814598a7557eb3c4f",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94466,14 +94360,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT types/{id}/encryption/{encryption_id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_type_encryption",
       "source_fingerprint": "37de86c3cfce8074433a637ad5c4a53b81227a10d122d436f36146f9775f794a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94481,14 +94374,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for DELETE types/{id}/encryption/{encryption_id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_qos_spec",
       "source_fingerprint": "b1f484e9a945e449bb17bce7da444eb21200ea40803637cc2c6c093a0032e87d",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94496,14 +94388,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST qos-specs, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_qos_spec",
       "source_fingerprint": "fcc8144a34266d668edb15b8039cdf2f9aca3cdac8a9f1cdf9ff467df5d9dca7",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94511,14 +94402,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_qos_spec",
       "source_fingerprint": "05425cafc3e703c8357bf4a9b7486d3df3c4256812201caa1f86cd3828072e1a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94526,14 +94416,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id} with the qos-specs list fallback, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/qos_specs",
       "source_fingerprint": "fa09aa56c287e744d521dd32fc38a79da3887ce31c0fc6d40041badc4fa11e2a",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94541,14 +94430,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_qos_spec",
       "source_fingerprint": "7c36f462dc8c982f000d6505c49ebc4e100d51d84669194c064d684540f56323",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94556,14 +94444,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT qos-specs/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_qos_spec",
       "source_fingerprint": "dc54968b8a0b779ebee5684257cf6080a7036c853b9fd8a8cb4b7d6ab62ca8e4",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94571,14 +94458,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for DELETE qos-specs/{id}?force=..., so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/associate_qos_spec",
       "source_fingerprint": "8e40cd13d7e58a56a20c922ca743e93d2bedcc63f52706f82e9ea37272e6fa19",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94586,14 +94472,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id}/associate, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/disassociate_qos_spec",
       "source_fingerprint": "6ac83ba8a9996ec44563a03e5b071cdcf71d20af11708c2697d06f8de7f8b23c",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94601,14 +94486,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id}/disassociate, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/disassociate_all_qos_spec",
       "source_fingerprint": "56bf2f49a66a91b752819025eae612937f042405bad7fbf87f258795e6bd4610",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94616,14 +94500,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id}/disassociate_all, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/qos_spec_associations",
       "source_fingerprint": "cec7e25c3a5eb248308ec85a196f4433b3e49149b43b84aede20e57267ec3799",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94631,14 +94514,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET qos-specs/{id}/associations, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/get_consistency_group",
       "source_fingerprint": "0b7a802a06695aef19e8b34d10ed1872922256b01c02d9e88503190173598f26",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94646,14 +94528,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET consistencygroups/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/find_consistency_group",
       "source_fingerprint": "61d6b060a5659704555f08d4e61acfd29b51aa95360aad1c76e5e58920bccf73",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94661,14 +94542,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET consistencygroups/{id} with the consistencygroups/detail fallback, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/consistency_groups",
       "source_fingerprint": "ffce4d0b441ba80962e42815b6fc9e4a9cb7a114f71614004f7694e9781c19d8",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94676,14 +94556,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for GET consistencygroups/detail, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_consistency_group",
       "source_fingerprint": "5e790c6ccb17d4f4761cf0632ada4f0d2920c99fc6cabcb77f0ec9adbe574977",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94691,14 +94570,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST consistencygroups, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/create_consistency_group_from_source",
       "source_fingerprint": "fcdac9444fb9bd9ade41e0f2a0ad0d3489ba0b947683f494350fc4f4aed21099",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94706,14 +94584,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST consistencygroups/create_from_src, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/update_consistency_group",
       "source_fingerprint": "39079d886818e9d1de2056c42cc6bc4a739d790dfce2f24d61fefb3876df5cfc",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94721,14 +94598,13 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for PUT consistencygroups/{id}, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {
       "operation": "python:block_storage/v2/delete_consistency_group",
       "source_fingerprint": "f90600d9b1f82c6c617e5263481d2026da4d80b9022702ff25d2a7d4fda10407",
-      "status": "unresolved",
+      "status": "unsupported",
       "go_api": [],
       "contracts": [],
       "documentation": [
@@ -94736,8 +94612,7 @@
       ],
       "differences": [],
       "remaining": [
-        "Gophercloud v2.15.0 has no blockstorage/v2 binding for POST consistencygroups/{id}/delete, so an SDK-owned Cinder v2 call would be needed.",
-        "The Cinder v3 packages and root blockstorage helpers are not counted as v2 mappings because they target v3 discovery and microversion policy."
+        "Cinder removed the v2 API in Xena (19.0.0) and no supported deployment serves this route, so the operation is excluded from the SDK target instead of being implemented."
       ]
     },
     {

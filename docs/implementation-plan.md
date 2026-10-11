@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-12): 미해결 해소 첫 단계 마감, 작업 중지. 전체1,765/3,362(52.5%)·핵심1,687/2,292(73.6%), 전체 gate PASS.** [구현 가능성 분류](core-unresolved-feasibility.md)에서 새 기능 없이 끝나는 판정 재검토 62개, Cinder snapshot 대기 panic 수정 2개, Keystone OS-EP-FILTER·OS-FEDERATION SDK 소유 API 36개를 반영했습니다. 다음 순서는 남은 SDK 소유 호출 묶음(networking-sfc 30, Neutron flavor·metering 26, TaaS·local IP 23, Cinder 관리 31, Neutron 소규모 경로 34)과 find fallback·로컬 Body 필터·`fields` 조회·marker 반복 같은 공통 helper입니다. Cinder v2·Neutron LBaaS·Glance v1·Keystone v2의 `unsupported` 기록과 변경 없는 수정 요청의 판정 기준은 아직 결정 전입니다. 근거는 [판정대장](sdk-support-ledger.md#미해결-재검토와-keystone-소유-api-마감)에 정리했습니다.
+**현재 구현 (2026-10-12): 미해결 해소 첫 단계 마감, 작업 중지. 전체1,765/3,228(54.7%)·핵심1,687/2,158(78.2%), 전체 gate PASS.** 서버 API가 폐기된 Cinder v2·Neutron LBaaS·Glance v1·Keystone v2 연산 133개는 `unsupported`로 기록해 구현 대상에서 제외했고, 완료율은 제외분을 뺀 구현 대상 선언을 분모로 계산합니다. [구현 가능성 분류](core-unresolved-feasibility.md)에서 새 기능 없이 끝나는 판정 재검토 62개, Cinder snapshot 대기 panic 수정 2개, Keystone OS-EP-FILTER·OS-FEDERATION SDK 소유 API 36개를 반영했습니다. 다음 순서는 남은 SDK 소유 호출 묶음(networking-sfc 30, Neutron flavor·metering 26, TaaS·local IP 23, Cinder 관리 31, Neutron 소규모 경로 34)과 find fallback·로컬 Body 필터·`fields` 조회·marker 반복 같은 공통 helper입니다. 변경 없는 수정 요청의 판정 기준은 아직 결정 전입니다. 근거는 [판정대장](sdk-support-ledger.md#미해결-재검토와-keystone-소유-api-마감)에 정리했습니다.
 
 **이전 구현 (2026-10-12): 핵심 서비스 Python proxy·cloud helper 판정 마감. 전체1,665/3,362(49.5%)·핵심1,587/2,292(69.2%), 전체 gate PASS.** 서비스별 worktree 에이전트 16개가 Keystone v3·Cinder v2/v3·Neutron proxy와 cloud identity·compute·network·object store helper 904개를 판정해 255개를 `go_mapping`으로 기록했고, 핵심 서비스의 미검토 선언은1개 남았습니다. 남은 핵심 작업은 unresolved 703개의 해소이며, Gophercloud 바인딩이 없는 경로의 SDK 소유 호출 작성과 find fallback·로컬 Body 필터·`fields` 조회 같은 공통 helper 보강이 중심입니다. 근거는 [판정대장의 마감 기록](sdk-support-ledger.md#핵심-python-proxycloud-판정-병렬-묶음-마감)에 정리했습니다. 미해결 722개(native 선언 포함)를 다시 읽어 [구현 가능성](core-unresolved-feasibility.md)을 나눈 결과, 566개는 구현 가능하고 130개는 서버 API가 폐기된 경로이며 26개는 구현하지 않는 항목입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
 
@@ -506,9 +506,10 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,765 (52.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
+| 검증된 Go 매핑 | 1,765 (54.7%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 1,596 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,463 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
 | 기록한 부분·전체 계약 | 6,433 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
@@ -687,31 +688,31 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 고정 Gophercloud/Python 직접 선언과 Cloud 복합 작업을 소스의 주관 서비스에 한 번씩 포함합니다. `_network_common`의 Nova·Neutron 공통 IP 작업은 Network 그룹에서 한 번만 세며, `_coe`는 Container Infra입니다. 실행 시 다른 서비스도 호출하는 작업을 중복 집계하지 않습니다. 고정 소스의 `FileSegment` 4개(`cloud/_utils`)는 Swift, server inventory 3개는 Nova, Identity 버전을 고르는 native `utils.ChooseVersion`은 Keystone에 배정합니다. Python `connection`·`openstackcloud`와 나머지 native common/version utilities는 서비스 공통 기반으로 분리합니다. 상속·descriptor·Resource 전체 표면은 이 분모에 포함되지 않습니다.
 
 <!-- sdk-service-progress:start -->
-| 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
+| 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,687 / 2,292 | 73.6% | 603 | 1 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,687 / 2,158 | 78.2% | 470 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 1,765 / 3,362 | 52.5% | 721 | 875 | 1 |
+| 전체 | 1,765 / 3,228 | 54.7% | 588 | 875 | 134 |
 
 **핵심 서비스**
 
-| 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
+| 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 323 / 389 | 65 | 1 | 0 |
+| Identity / Keystone | 323 / 379 | 55 | 1 | 10 |
 | Compute / Nova | 264 / 333 | 69 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 471 / 758 | 287 | 0 | 0 |
-| Image / Glance | 106 / 120 | 14 | 0 | 0 |
-| Block Storage / Cinder | 345 / 480 | 135 | 0 | 0 |
+| Network / Neutron | 471 / 728 | 257 | 0 | 30 |
+| Image / Glance | 106 / 109 | 3 | 0 | 11 |
+| Block Storage / Cinder | 345 / 398 | 53 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |
-| Object Storage / Swift | 52 / 74 | 21 | 0 | 1 |
+| Object Storage / Swift | 52 / 73 | 21 | 0 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 
-| 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
+| 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
 | Load Balancer / Octavia | 3 / 144 | 7 | 134 | 0 |
 | DNS / Designate | 2 / 110 | 6 | 102 | 0 |

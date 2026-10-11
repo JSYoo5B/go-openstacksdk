@@ -11,7 +11,7 @@
 | 구현 가능 | 공통 helper | 221 | find fallback, 로컬 Body 필터, 페이지 순회 같은 SDK 기능이 빠져 있습니다 |
 | 구현 가능 | 입력 표현 | 26 | typed 입력이 Python이 보내는 null·false·빈 값을 표현하지 못합니다 |
 | 구현 가능 | 응답 모델 | 23 | 요청은 같지만 응답 모델이 필드를 버리거나 다른 모양으로 읽습니다 |
-| 구현 가능하나 대상 없음 | 서버 API 폐기 | 130 | upstream에서 제거된 API라 `unsupported`를 권장합니다 |
+| 구현 대상 제외 | 서버 API 폐기 | 130 | upstream에서 제거된 API라 `unsupported`로 기록했습니다 |
 | 구현하지 않음 | Python 전용 | 15 | Go에 대응 개념이 없거나 Go식 대안이 이미 있습니다 |
 | 구현하지 않음 | upstream 결함 | 11 | Python 또는 native 쪽 결함이라 그대로 재현하지 않습니다 |
 
@@ -87,7 +87,7 @@
 | Glance v1 | 11 | Glance v1 API가 제거되었습니다 |
 | Keystone v2.0 | 10 | Keystone Queens에서 v2.0 API가 제거되었습니다 |
 
-요청 자체는 SDK 소유 호출로 만들 수 있습니다. 그러나 지원되는 OpenStack 배포가 이 경로를 제공하지 않으므로 계약을 검증할 대상이 없습니다. 판정 JSON에는 `unsupported`와 폐기 근거를 기록하는 것을 권장합니다. 이미 `go_mapping`으로 판정한 Keystone v2·Cinder v2 연산은 Gophercloud 바인딩이 있어 기존 판정을 유지합니다.
+요청 자체는 SDK 소유 호출로 만들 수 있습니다. 그러나 지원되는 OpenStack 배포가 이 경로를 제공하지 않으므로 계약을 검증할 대상이 없습니다. 그래서 2026-10-12에 이 항목들을 구현 대상에서 제외했습니다. 판정 JSON에는 `unsupported`와 폐기 근거를 기록했고, Cinder v2의 결함·Python 전용 항목 3개(`transfers`, native `backups.Update`, `update_type`)도 같은 v2 API라 함께 제외해 모두 133개입니다. 진행 집계의 완료율은 `unsupported`를 뺀 구현 대상 선언을 분모로 계산합니다. 이미 `go_mapping`으로 판정한 Keystone v2·Cinder v2 연산은 Gophercloud 바인딩이 있어 기존 판정을 유지합니다.
 
 ## 구현하지 않는 항목 26개
 
@@ -106,9 +106,8 @@ native Cinder `snapshots.WaitForStatus` v2·v3 2개는 envelope 없는 응답에
 분류 중에 묶음 사이의 판정이 엇갈린 지점을 찾았습니다.
 
 - 변경할 값이 없을 때 Python은 수정 요청을 보내지 않지만 Go는 항상 보냅니다. `update_tap_mirror`는 이를 차이로 기록하고 대응으로 판정했고, cloud `update_port`는 같은 이유로 미해결입니다. 한쪽 기준으로 맞춰야 합니다.
-- Cinder v2를 폐기 API로 보면 이미 머지한 Cinder v2 미해결 79개의 권장 판정은 `unsupported`가 됩니다. 이 문서는 그 기준을 따랐습니다.
 - Neutron quota 상세 조회는 native가 `/details.json`을, Python이 `/details`를 씁니다. Neutron이 둘을 같게 처리하므로 같은 요청으로 보았습니다.
 
 ## 구현 순서
 
-효과가 큰 순서로 진행합니다. 먼저 판정 재검토 72개와 Cinder snapshot 대기 2개처럼 새 기능 없이 끝나는 항목을 처리합니다. 다음으로 find fallback, 로컬 Body 필터, `fields` 조회, marker 반복, 대기처럼 여러 서비스에 걸치는 공통 helper를 만듭니다. 그 뒤 SDK 소유 호출을 경로 묶음별로 병렬 작성합니다. 폐기 API와 구현하지 않는 항목은 위 기준을 정한 뒤 판정 JSON에 `unsupported`로 기록합니다.
+효과가 큰 순서로 진행합니다. 먼저 판정 재검토 72개와 Cinder snapshot 대기 2개처럼 새 기능 없이 끝나는 항목을 처리합니다. 다음으로 find fallback, 로컬 Body 필터, `fields` 조회, marker 반복, 대기처럼 여러 서비스에 걸치는 공통 helper를 만듭니다. 그 뒤 SDK 소유 호출을 경로 묶음별로 병렬 작성합니다. 구현하지 않는 나머지 항목은 기준을 정한 뒤 판정 JSON에 `unsupported`로 기록합니다.
