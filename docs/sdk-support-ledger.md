@@ -3031,3 +3031,16 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 같은 snapshot을 local replace로 연결한 별도 소비자 module에서 정확한 비교 가이드 main8개를 빌드했고 exit0입니다. Snapshot/Backup·Network/Port/Subnet·Router action·Trunk/Address action·Tags·Swift Container mutation·Barbican Consumer가 대상입니다. 가이드별 fence SHA와 consumer 경로는 `/private/tmp/go-openstacksdk-oct11-next-eight-guide-receipt.json`에 기록했습니다. 실제 인증/OpenStack/Python 실행, replace 없는 이 revision의 원격 설치 또는 alpha 배포의 근거로 사용하지 않습니다.
 
 이26개는 검토한 named 계약의 go_mapping이며 supported0·공유 SDK-R1/C1/S1·실클라우드 acceptance는 계속 미완료입니다. 이후 tag 재시도 header 수정·Cinder metadata 공통 seam·추가 named API·Neutron Find 엔진 리팩터링은 별도 커밋/검증 단위이며 위499fb413 전체 gate에 포함됐다고 주장하지 않습니다. 최신 지시에 따라 재시작 없이8개 worker의 독립 구현·교차 검토를 계속합니다.
+
+
+## 핵심 user 추가21개 전체 검증
+
+2026-10-11, 다음21개 Cinder Volume Find1·Messages3·Volume/Snapshot metadata8, Barbican Secret Find1, Neutron SecurityGroup/Rule Find2·Trunk/AddressGroup Find2·Router interface/gateway4를 검증·판정했습니다. 전체1,339/3,362(39.8%)·핵심1,265/2,292(55.2%), supported0·unresolved2,022·unsupported1·reviews1,628·contracts5,405입니다. catalog/pins는 보존했고 Go callable·기본값/옵션·모델/실제 HTTP 증거의 검토한 named 계약을 닫았습니다. 전체 Resource/session·SDK-R1/C1/S1·실클라우드 acceptance와 alpha 배포는 계속 미완료입니다.
+
+커밋 `d740c85ae6a91f76cee3b89e36cd90ec5199e6e3`의 Git archive snapshot에서 `GOFLAGS=-p=4 make check`가 exit0입니다. 실제 test package158개 모두 uncached PASS이며 license·vet·race·pinned parity·progress·gofmt를 포함합니다. Go2,589개 SHA256 `ef3989aa206207406ad02b56e4c03958e2ef2afc6855db6bdd26b2c8a434f20a`는 상대경로 NUL·bytes NUL 순서이고 검사 전후 같습니다. `/private/tmp/go-openstacksdk-oct11-wave2-full-receipt.json`과 `...wave2-full-check.log`에 실제 revision/snapshot·결과를 보존했습니다.
+
+같은 불변 snapshot을 외부 consumer의 local replace로 연결해 정확한 비교 가이드 main8개와 Python fence8개의 문법을 검증했습니다. Cinder Messages/Volume Find/Metadata·Barbican Secret Find·Neutron Security Find/Trunk Address Find/Router interfaces/갱신한 Tags 가이드가 대상입니다. `/private/tmp/go-openstacksdk-oct11-wave2-eight-guide-receipt.json`에 fence SHA와 실제 consumer 경로를 기록했습니다. Source Python·OpenStack 호출과 이 revision의 replace 없는 원격 설치는 실행하지 않았습니다. main과 origin/main의 `d740c85ae6a91f76cee3b89e36cd90ec5199e6e3` 일치는 push 후 확인했습니다.
+
+교차 검토에서 eager seed 사전 검증·LIST constructor bound 인자 충돌·Header hyphen alias·GET-only version override·모든 rejected HTTP 물리 오류 및 native retry 옵션의 reserved/version/framing 소유권을 보완했습니다. Cinder metadata Record는 기존 typed Scope의 엄격한 identity 정책을 보존하면서 별도 literal escaped scope를 공유합니다. Neutron core Find3개는 library-owned concrete Profile/Engine으로 기존39그룹과 공개 API를 유지하며 중복595줄을 공통화했습니다. 타입 참조를 callable로 집계하지 않고 선언별 실제 API/tests/docs를 연결합니다.
+
+초기 실패 실행은 지원 근거에서 제외합니다. Security fixture 이름 compile 오류, Cinder metadata literal ID와 strict Scope 충돌, Secret bytes의 RawMessage serialization 및 clean404 proof assertion은 실제 원인을 고친 뒤 해당 package full race와 최종 전체 gate로 확인했습니다. 기존 fixture·공개 Gophercloud testhelper·shared guarded REST/List/filter를 재사용했으며 새로운 HTTP harness를 만들지 않았습니다. 후속 mixed cursor·Cinder predicate export·Source Find policy/공통 List는 이 snapshot 이후 별도 진행 단위입니다.
