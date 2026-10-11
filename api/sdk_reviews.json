@@ -88042,6 +88042,2272 @@
         "Python accepts every identity v3 Resource; Go has separate per-package helpers and none for packages outside a Resources collection.",
         "Python returns the given Resource without HTTP when its cached attribute already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
       ]
+    },
+    {
+      "operation": "python:block_storage/v2/get_volume",
+      "source_fingerprint": "c2f7255f2aefb37a6e579c2ebd5543681de68a36bcc487731389e401dd1609d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Get sends GET volumes/{id} on the v2 resource base without a microversion header and decodes name, size, bootable, multiattach, host, tenant, consistency group and metadata.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeGetUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "The v2 Volume model has no volume_image_metadata, os-vol-mig-status-attr or os-volume-replication fields that the Python Volume exposes.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/update_volume",
+      "source_fingerprint": "d1bf9d6b817d8cba00c8ea2031a4816bcdcef47c713f63362af81e1ef9d24236",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Update sends PUT volumes/{id} with the supplied name, description and extension fields inside the volume envelope, and still sends an empty envelope when nothing is supplied.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeGetUpdateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
+        "Attributes outside UpdateOpts need WithUpdateField with the wire key.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/delete_volume",
+      "source_fingerprint": "af1ee1d9b3bd336707d13278c4b158fbc28673ae246ecbfcc64d533ef2869145",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithDeleteQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ForceDelete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "resource.IgnoreMissing around Volumes.Delete with WithDeleteQuery(cascade, False) sends DELETE volumes/{id}?cascade=False and turns only 404 into success while 409 stays an error, and Remove ignores 404 unless WithMissingError is given.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
+          ]
+        },
+        {
+          "behavior": "WithDeleteQuery(cascade, True) sends cascade=True and ForceDelete posts os-force_delete to volumes/{id}/action for force=True.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeDeleteDefaultsCascadeForceAndMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs WithDeleteQuery.",
+        "Python ignore_missing=True is the default; Go selects it with Remove or by wrapping Delete in resource.IgnoreMissing, and the bare Delete returns the 404 like ignore_missing=False.",
+        "ForceDelete sends {\"os-force_delete\": \"\"} where Python sends null; Python's force path catches NotFound but its v2 action never raises, whereas Go ForceDelete returns HTTP errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/create_volume",
+      "source_fingerprint": "27e56ac7bffa3d5e4b9bec4362c6bd193d2384f8cb3fe484d39d3f8e9b47a311",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.Create posts the volume envelope with size, name, snapshot_id, imageRef and WithCreateField keys such as multiattach and OS-SCH-HNT:scheduler_hints inside it, but always sends size (0 when unset) and rejects a size override before HTTP.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeCreateEnvelopeAlwaysSendsSize"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "The v2 Python Volume keeps scheduler_hints as a Body attribute inside the envelope; WithCreateHintOpts puts it outside, so WithCreateField must be used.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "CreateOpts.Size has no omitempty, so Go always sends size and cannot reproduce Python calls that omit size (for example create_volume(snapshot_id=...)); WithCreateField cannot override the core size field."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/volumes",
+      "source_fingerprint": "c1ac6329481b9feff07e906e8738ea3f234871666ebed2f9f5d51d3cbb208c6a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Volumes.List sends GET volumes/detail with the Python query mapping (all_tenants=True, name, status, project_id) and follows volumes_links like the default details=True call.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeListDetailDefaultOnly"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python all_projects=True becomes all_tenants=True; typed ListOpts.AllTenants sends all_tenants=true, so the exact string needs WithListQuery.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "details=False lists GET volumes, but the v2 Go API only lists volumes/detail and has no summary list."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/find_volume",
+      "source_fingerprint": "03dc42f7b531fe4bf8d475e1997c8a1148ed2d9f7a82cacca60610f79923eb58",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find by ID with WithIgnoreMissing then Find by Name sends GET volumes/{x} and, after 404, GET volumes/detail?name=x like the default find_volume, while a 403 on the ID lookup is returned as an error.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeFindChainUsesDetailNameQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "Python falls back to the list after 400 and 403 as well as 404 and matches rows by ID or name; the Go chain only ignores 404 and matches by name.",
+        "details=False (GET volumes?name=x) and all_projects=True (all_tenants=True) cannot be passed to Find, and the v2 volumes adapter does not opt into FindIdentity."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/extend_volume",
+      "source_fingerprint": "99f43e2f66bb472b4caaca1d91f00d90c27fa0d177683c287e1d2a9c822544e8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ExtendSize"
+      ],
+      "contracts": [
+        {
+          "behavior": "ExtendSize posts {\"os-extend\": {\"new_size\": N}} to volumes/{id}/action and reports a 400 response as an error.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/retype_volume",
+      "source_fingerprint": "f626c30e43e72d7759a8e0471df7725c816c0102dc940f9ee7296a36adeece8b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ChangeType"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangeType posts os-retype with new_type and migration_policy never or on-demand, matching the Python default never when MigrationPolicyNever is given.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python applies migration_policy=never by default; Go omits migration_policy unless the caller sets MigrationPolicyNever.",
+        "Python new_type accepts a Type object or ID; Go takes the type ID or name string.",
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/set_volume_bootable_status",
+      "source_fingerprint": "528d133aa3d72116c069d787c070eba698660aea65876d41a2007211df02f005",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetBootable"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetBootable posts {\"os-set_bootable\": {\"bootable\": false}} including an explicit false.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Go accepts only HTTP 200 for this action.",
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/set_volume_image_metadata",
+      "source_fingerprint": "bf6fc0d840e9eff1158e1a37a200aaa28eec861dee8cca8c83a8d0672fc55bbd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.SetImageMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetImageMetadata posts os-set_image_metadata with the metadata map, including an empty map as {}.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python **metadata always yields a dict; a nil Go map is sent as metadata:null, so callers pass an empty map for no keys.",
+        "Go accepts only HTTP 200 and decodes the response metadata map.",
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/attach_volume",
+      "source_fingerprint": "a2f7e29ee2aa418625024b3919a1f745980bfed51a327bf96dcae29d5bb51be4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Attach"
+      ],
+      "contracts": [
+        {
+          "behavior": "Attach posts os-attach with mountpoint and either instance_uuid or host_name, as Volume.attach does.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python prefers instance over host_name and raises ValueError when both are missing; Go sends whatever AttachOpts holds, so the caller sets exactly one.",
+        "An empty mountpoint is sent as \"\" by Python and omitted by Go.",
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/detach_volume",
+      "source_fingerprint": "c36160714346d2329e7aac1ed3d8ee0c9400bbb87bb64273b6af1c9510a350e1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.Detach"
+      ],
+      "contracts": [
+        {
+          "behavior": "Detach posts {\"os-detach\": {\"attachment_id\": id}} for the default force=False call.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "force=True posts os-force_detach with attachment_id and an optional connector, and Gophercloud v2.15.0 blockstorage/v2 has no binding for that action."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/reset_volume_status",
+      "source_fingerprint": "f19956b17ade2b941a6a087a51e2b4e23da7ee5f051f9126b999fa767b082e9e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.ResetStatus"
+      ],
+      "contracts": [
+        {
+          "behavior": "ResetStatus posts os-reset_status with status, attach_status and migration_status, but sends status as an empty string when only attach_status is supplied.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeActionBodiesMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "ResetStatusOpts.Status has no omitempty and is a core field, so Go cannot omit status as Python does when status is None."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/upload_volume_to_image",
+      "source_fingerprint": "df2a1a21aee2acc08aefcd450339f66ff7c4cf71407378045eddf0095f818422",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.UploadImage"
+      ],
+      "contracts": [
+        {
+          "behavior": "UploadImage posts os-volume_upload_image with image_name, force, disk_format and container_format and decodes image_id, volume id and status from the os-volume_upload_image response.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeUploadAndCreateImage"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python always sends force, disk_format and container_format, including false and null; Go omits empty values and relies on the server defaults.",
+        "Python returns the raw os-volume_upload_image dict; Go returns the typed VolumeImage.",
+        "Python calls .json() without raise_from_response, so an error body fails with KeyError; Go accepts only HTTP 202 and returns an error.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/create_image",
+      "source_fingerprint": "e0f8fb78d3ec73b0b854c5c837a36ae31461995743fa1a274fa6e9e919dcd618",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes.API.UploadImage",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.ExistingImageRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "UploadImage with force=allow_duplicates, disk_format qcow2 and container_format bare followed by image.Service.ExistingImageRecord(image_id) sends one action request and builds the image record without HTTP.",
+          "tests": [
+            "blockstorage/v2/volumes/python_parity_test.go:TestPythonVolumeUploadAndCreateImage"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python fills an empty disk_format from the cloud image_format setting (default qcow2) and container_format with bare; the v2 Go call does not read cloud settings, so the caller passes both values.",
+        "Python sends force:false explicitly; Go omits a false Force.",
+        "The unused wait and timeout parameters have no Go counterpart.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/set_volume_readonly",
+      "source_fingerprint": "5c8965533e7e87cda4017db5af31112e0dc22004e2959da99bdc7a2e017bc4b7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "set_volume_readonly posts os-update_readonly_flag to volumes/{id}/action, which the v2 volumes API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/delete_volume_image_metadata",
+      "source_fingerprint": "874d0715ef959f6a01fc41d3049041b0bbb85bc71958309701d08ef92a3cfccc",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "delete_volume_image_metadata posts os-unset_image_metadata per key (or, for keys=None, per key of the ordinary metadata attribute), which the v2 volumes API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/unmanage_volume",
+      "source_fingerprint": "7cc03149c425ff460e14685a54ffa0641a3da9450597921827a6c2a7e321c200",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "unmanage_volume posts {\"os-unmanage\": null} to volumes/{id}/action, which the v2 volumes API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/migrate_volume",
+      "source_fingerprint": "031174febff0afb05ffbb4ce474300343d9f29dd12afc38d63a3fca5871a32cf",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "migrate_volume posts os-migrate_volume with host, force_host_copy and lock_volume, which the v2 volumes API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/complete_volume_migration",
+      "source_fingerprint": "35bedf43e7e6e1729a651315cb279bdf9f60d1fb81abb963cdb4b2d6fc78aeeb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "complete_volume_migration posts os-migrate_volume_completion with new_volume and error, which the v2 volumes API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/get_snapshot",
+      "source_fingerprint": "f9ddc4eaaf442859fe88d6baae3b0d1ca66fde47042bacda5f1bf0d585d3a6c5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Get sends GET snapshots/{id} and decodes name, description, volume_id, status, size, metadata and created_at.",
+          "tests": [
+            "blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "The v2 Snapshot model has no force field that the Python Snapshot exposes as is_forced.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/create_snapshot",
+      "source_fingerprint": "52f171b71ddd68c065d887592e76cefafa968cf7887100365ed9a65098561c7e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Create posts the snapshot envelope with volume_id, name, description, force and metadata, omits a false force and rejects force as an extension field before HTTP.",
+          "tests": [
+            "blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotGetCreateMatchProxyRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python is_forced=False is sent as \"force\": false; Go omits a false Force and the server default is the same.",
+        "Go requires CreateOpts.VolumeID before HTTP; Python leaves validation to the server.",
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v2/delete_snapshot",
+      "source_fingerprint": "45a9588a0880c65465d4d3674a82b0e0ef036a668f926a800894ae21c2e9d32a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.Remove sends DELETE snapshots/{id}, ignores 404 by default, keeps 409 as an error and reports NotFound with WithMissingError.",
+          "tests": [
+            "blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotDeleteIgnoreMissingDefault"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "force=True posts {\"os-force_delete\": null} to snapshots/{id}/action, and Gophercloud v2.15.0 blockstorage/v2 snapshots has no binding for that action."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/snapshots",
+      "source_fingerprint": "7cb594bb63cb4716a3d7487e93ceec0fe03dd439fcc1b9b22ea33627b97020d1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Snapshots.List sends GET snapshots with the Python query mapping (all_tenants=True, name, volume_id) but reads only one page and ignores snapshots_links.",
+          "tests": [
+            "blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotListAndFindUseSummaryRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "The default details=True lists GET snapshots/detail, which the v2 Go API cannot send.",
+        "Python follows snapshots_links across pages; the v2 Go List uses a single page."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/find_snapshot",
+      "source_fingerprint": "0495e50beb33ba85093598e587b8041ca98b2c97fed64f8ff6079a44cd53ab61",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find by ID with WithIgnoreMissing then Find by Name sends GET snapshots/{x} and, after 404, GET snapshots?name=x on the summary route.",
+          "tests": [
+            "blockstorage/v2/snapshots/python_parity_test.go:TestPythonSnapshotListAndFindUseSummaryRoute"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [
+        "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
+        "Cinder v2 has no microversions: Python sends no version header and the v2 client from BlockStorageV2 has no microversion, so Go sends none either."
+      ],
+      "remaining": [
+        "The default details=True falls back to GET snapshots/detail?name=x, which the v2 Go API cannot send.",
+        "Python also falls back after 400 and 403, matches by ID or name and accepts all_projects; the Go chain only ignores 404, matches by name and takes no query."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/update_snapshot",
+      "source_fingerprint": "2a392221acf947b41326046b54ad5a1fc363812060763bfbd0d2bb61fde0938b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "update_snapshot sends PUT snapshots/{id} with the snapshot envelope; the v2 snapshots API has only UpdateMetadata on snapshots/{id}/metadata.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/reset_snapshot_status",
+      "source_fingerprint": "3dd43063c19030d812daca582d6a41bc8451b070f0e2865531c119858fdfc04b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "reset_snapshot_status posts {\"os-reset_status\": {\"status\": status}} to snapshots/{id}/action, which the v2 snapshots API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/reset_snapshot",
+      "source_fingerprint": "736a43b5c8135f8349dc4d63056b34daa651877c9d492eeb8122409c28e0a598",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "reset_snapshot is a deprecated alias of reset_snapshot_status and posts the same os-reset_status action, which the v2 snapshots API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/manage_snapshot",
+      "source_fingerprint": "2f6d0f59b6e8f3b0b349d348e57c33c36f1dec42d2647dbe933cc6e93d1a804a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "manage_snapshot posts the snapshot envelope with volume_id, ref, name, description and metadata to os-snapshot-manage, which no v2 Go API sends.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/unmanage_snapshot",
+      "source_fingerprint": "3a89bff4df3c18b5eb8c7f7521d2ac7e519a5cef69ff0b0d71db110235a38024",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "unmanage_snapshot posts {\"os-unmanage\": null} to snapshots/{id}/action, which the v2 snapshots API cannot send.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no binding for this route, so an SDK-owned v2 call would be needed; the blockstorage root helpers are Cinder v3 only (major 3 discovery and v3 microversion headers) and are not a v2 mapping."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/delete_qos_spec_metadata",
+      "source_fingerprint": "787071cdc5378e1dd579c14387b5e7d2cc5199ccb0a3203307c7fc3b9e07af3a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "delete_qos_spec_metadata sends PUT qos-specs/{id}/delete_keys with {\"keys\": [...]}, and the SDK has no blockstorage/v2 QoS package.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no QoS binding, so an SDK-owned v2 call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/get_consistency_group_snapshot",
+      "source_fingerprint": "c5afa7381734411fab4dad4ae6643cdd5629a31447d2c896ab19627004abd35a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "get_consistency_group_snapshot sends GET cgsnapshots/{id}.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/find_consistency_group_snapshot",
+      "source_fingerprint": "963938960d72aa189972373d7dfdb6e700bc2da3166ed3b0ea519c982a93f7ca",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "find_consistency_group_snapshot sends GET cgsnapshots/{id} and falls back to listing cgsnapshots/detail (or cgsnapshots with details=False) and matching by ID or name.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/consistency_group_snapshots",
+      "source_fingerprint": "b6819065d9c87dc5141e2474fdbc0e347bd0bdd219867ec73cceabf9fd554d91",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "consistency_group_snapshots lists cgsnapshots/detail by default or cgsnapshots with details=False, with limit, marker, offset and sort queries.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/create_consistency_group_snapshot",
+      "source_fingerprint": "50f678f797018976419e6adf9d429d7bf0b923e944be1c270822bbcee2d6b29f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "create_consistency_group_snapshot posts the cgsnapshot envelope to cgsnapshots.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v2/delete_consistency_group_snapshot",
+      "source_fingerprint": "4c61a920212524288a3c5c716e6908dfd12e5d7f0f09ff8bc7ac67c902e5e882",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v2/python-parity-volumes.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "delete_consistency_group_snapshot sends DELETE cgsnapshots/{id} and ignores 404 by default.",
+        "Gophercloud v2.15.0 blockstorage/v2 has no cgsnapshots binding, so an SDK-owned v2 call would be needed; the SDK-owned blockstorage/v3/consistencygroupsnapshots API covers the same legacy route but is verified only for the v3 Proxy and is not exposed by BlockStorageV2."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/add_user_to_group",
+      "source_fingerprint": "fdb4a0c069ebf4cb4413d2b71cea50bfad13fd2a886b571b67c177eccfd1dc1e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AddToGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "AddToGroup sends PUT groups/{group}/users/{user} without a body like Python add_user_to_group and returns the HTTP error for 404.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserGroupMembership"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Go takes the group ID first and the user ID second, the reverse of the Python argument order.",
+        "Python raises only for status 400 and above; the native call accepts only 204."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_domain_role_to_group",
+      "source_fingerprint": "9c5648b58cecb418068a8e12b561eba3c1e8bbc0377bde447b1c3d842c917530",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with DomainID and GroupID sends PUT domains/{id}/groups/{id}/roles/{role} like Python assign_domain_role_to_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Assign sends PUT OS-INHERIT/domains/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Assign instead of roles.API.Assign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_domain_role_to_user",
+      "source_fingerprint": "34b811f94c99d364b1d5ab495b5e1fa42f6fe646b1391e01dc488828a6e6e3e9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with DomainID and UserID sends PUT domains/{id}/users/{id}/roles/{role} like Python assign_domain_role_to_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Assign sends PUT OS-INHERIT/domains/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Assign instead of roles.API.Assign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_project_role_to_group",
+      "source_fingerprint": "dc53f3a5964b2c9569b10a05a0c2ff74cf7c0458f1e6af5783644a35b739dae9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with ProjectID and GroupID sends PUT projects/{id}/groups/{id}/roles/{role} like Python assign_project_role_to_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Assign sends PUT OS-INHERIT/projects/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Assign instead of roles.API.Assign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_project_role_to_user",
+      "source_fingerprint": "c6f873ae9d95a85e5d3dcef011825e4d70a8f7d03a7153e75c86178cf191cd57",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with ProjectID and UserID sends PUT projects/{id}/users/{id}/roles/{role} like Python assign_project_role_to_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Assign sends PUT OS-INHERIT/projects/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Assign instead of roles.API.Assign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_system_role_to_group",
+      "source_fingerprint": "0026aba69cb80e92aa6075ffe8ad4f9ba07312b16ab7d9bab90a3142380432f9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with System and GroupID sends PUT system/groups/{id}/roles/{role} like Python assign_system_role_to_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/assign_system_role_to_user",
+      "source_fingerprint": "0b5a95ebff5080ddf117f06555b127158f4831a136dc32bfad8a49ba77ac63f1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Assign with System and UserID sends PUT system/users/{id}/roles/{role} like Python assign_system_role_to_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/check_user_in_group",
+      "source_fingerprint": "bd8276281e04da280c6aa3f41fafb91c41b1f588376c4d8f352cd86fe8266794",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.IsMemberOfGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "IsMemberOfGroup sends HEAD groups/{group}/users/{user}, returns true for 204 and false without error for 404 like Python check_user_in_group, and returns an error for 403.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserGroupMembership"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Go takes the group ID first and the user ID second, the reverse of the Python argument order.",
+        "Python returns False for any other status below 400 such as 200; the native call returns an error for every status except 204 and 404."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_domain",
+      "source_fingerprint": "7138a187ebed1e6cd109bce7e769d42ab053733eba2f87bce6246f5fae7015af",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST domains with the {\"domain\": {...}} envelope that Python create_domain sends and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Create accepts only 201.",
+        "domains.CreateOpts requires Name, so Go rejects before HTTP a Python create_domain without a name.",
+        "Domain options have no typed CreateOpts field and are sent with domains.WithCreateField(\"options\", ...)."
+      ],
+      "remaining": [
+        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_group",
+      "source_fingerprint": "79481d78d64658ba980ad36eb4860e8f4216931cc5f1389ccd641fbfe11a837d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST groups with the {\"group\": {...}} envelope that Python create_group sends and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/groups/python_parity_test.go:TestPythonGroupCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Create accepts only 201.",
+        "groups.CreateOpts requires Name, so Go rejects before HTTP a Python create_group without a name.",
+        "Python attributes without a typed field go into groups.CreateOpts.Extra or WithCreateField inside the group envelope."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_project",
+      "source_fingerprint": "6b7c083e37c2be36f4c2f83a3f1c09542393dd88d97e09a0d2a99897e6b550fa",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST projects with the {\"project\": {...}} envelope that Python create_project sends and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/projects/python_parity_test.go:TestPythonProjectCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Create accepts only 201 and 202.",
+        "projects.CreateOpts requires Name, so Go rejects before HTTP a Python create_project without a name.",
+        "Python attributes without a typed field go into projects.CreateOpts.Extra or WithCreateField inside the project envelope.",
+        "Project allows unknown attributes in the Python body; Go sends them through CreateOpts.Extra, and the native Project keeps links and unknown response keys in Extra."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_role",
+      "source_fingerprint": "ae42ac0e89635c5e5b547967789aaba3150372f2c7eff22aeb525e4fa605fbe1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST roles with the {\"role\": {...}} envelope that Python create_role sends and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Create accepts only 201.",
+        "roles.CreateOpts requires Name, so Go rejects before HTTP a Python create_role without a name.",
+        "Python attributes without a typed field go into roles.CreateOpts.Extra or WithCreateField inside the role envelope."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_user",
+      "source_fingerprint": "cda09f28fc6b9e5e9825e8691c28494344642ce4d48b5ff1dafa6f6ab36bdd62",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST users with the {\"user\": {...}} envelope that Python create_user sends and decodes the fields Python exposes.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Create accepts only 201.",
+        "users.CreateOpts requires Name, so Go rejects before HTTP a Python create_user without a name.",
+        "Python attributes without a typed field go into users.CreateOpts.Extra or WithCreateField inside the user envelope.",
+        "The native User decodes email and federated into Extra and parses password_expires_at as a time without a zone, so a value ending in Z is a decode error where Python keeps the string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_domain",
+      "source_fingerprint": "3cef4dbc88efa76d2dfb4d89fc10cb64a74edc0fbe59506de93baaf3226522e2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE domains/{id}, succeeds on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and keeps a 409 as an error.",
+          "tests": [
+            "identity/v3/domains/python_parity_test.go:TestPythonDomainDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_group",
+      "source_fingerprint": "d2f78528e89211d341c80ffdd4be19e4d1f65d172a71678019d5de7a388c3424",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE groups/{id}, succeeds on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and keeps a 409 as an error.",
+          "tests": [
+            "identity/v3/groups/python_parity_test.go:TestPythonGroupDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_project",
+      "source_fingerprint": "e0f95e7802589f7d40cb8bba54e73771317051a6883a1a3df4692ad7a9ccf1be",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE projects/{id}, succeeds on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and keeps a 409 as an error.",
+          "tests": [
+            "identity/v3/projects/python_parity_test.go:TestPythonProjectDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_role",
+      "source_fingerprint": "b591ef8dd67b4a6d08485ac5d19dabf1d5ceb8b7355417e513239d2ec5d091c9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE roles/{id}, succeeds on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and keeps a 409 as an error.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_user",
+      "source_fingerprint": "6a070f708a27a48f2930b4b25c1a730eae4fc13ed8c6bddbdecfebc7dd9e4eb9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE users/{id}, succeeds on 404 like the Python ignore_missing=True default, returns resource.ErrNotFound with WithMissingError like ignore_missing=False, and keeps a 409 as an error.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python returns None and accepts any status below 400; Go returns only an error and the native Delete accepts 202 and 204.",
+        "Calling the generated Delete directly returns the 404 error, so only Remove matches the Python ignore_missing=True default."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/domains",
+      "source_fingerprint": "466311705604af41fdd0ed6c2901b4f015301bbacba4b92998dfe76baa912317",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.",
+          "tests": [
+            "identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
+        "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
+        "Python drops unknown query names; Go sends every WithListQuery key to the server."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
+        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported.",
+        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_domain",
+      "source_fingerprint": "83cb752c37e4ff37d0523336822d644847c8212e0ed2ac921da4e5fe3b2c5008",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET domains/{id} like Python get_domain and decodes the domain envelope.",
+          "tests": [
+            "identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+      ],
+      "remaining": [
+        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_group",
+      "source_fingerprint": "da5788c9ebf1716aaa2c6da1f43cba49d6f2afd21b766c28cb623ca4344ae65b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET groups/{id} like Python get_group and decodes the group envelope.",
+          "tests": [
+            "identity/v3/groups/python_parity_test.go:TestPythonGroupCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_project",
+      "source_fingerprint": "e2e76b28c3e6d72f202235d788a532455ab3724271e8197b80d4e23d164229a1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET projects/{id} like Python get_project and decodes the project envelope.",
+          "tests": [
+            "identity/v3/projects/python_parity_test.go:TestPythonProjectCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_role",
+      "source_fingerprint": "058966bae9fb9408b11a201cbd4a8b1534f11e867b580d1eae8089454d081d76",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET roles/{id} like Python get_role and decodes the role envelope.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_user",
+      "source_fingerprint": "bd127b8b11ad61d2b93702f1557f69f844e5df1e371ad18e82d45fe037a9891d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET users/{id} like Python get_user and decodes the user envelope.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/group_users",
+      "source_fingerprint": "46bc8101a970280109ce317e5afc180c6ea6838ea90f82c115859a143c24b310",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListInGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListInGroupQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListInGroup sends GET groups/{id}/users with the User query mapping such as password_expires_at like Python group_users and sends a limit without a marker follow-up.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserGroupUsersRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; ListInGroup sends only the first request.",
+        "Python applies User Body attributes passed through **attrs that are not query parameters, such as email, as local filters; ListInGroup has no local filter option."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/groups",
+      "source_fingerprint": "d89009770dc909041490f60e1a4d28d8d86cd00f771d89014a0b2512330f08e1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the single GET groups that Python groups() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.",
+          "tests": [
+            "identity/v3/groups/python_parity_test.go:TestPythonGroupListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
+        "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
+        "Python drops unknown query names; Go sends every WithListQuery key to the server.",
+        "groups.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
+        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/projects",
+      "source_fingerprint": "726df2e18d4243326e7f325e87d215f99bcfb7f9af11ce4537c40129b5be62bd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the single GET projects that Python projects() sends without arguments, maps the Python query names domain_id, enabled, is_domain, name, parent_id, tags, tags-any, not-tags and not-tags-any through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.",
+          "tests": [
+            "identity/v3/projects/python_parity_test.go:TestPythonProjectListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
+        "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
+        "Python drops unknown query names; Go sends every WithListQuery key to the server.",
+        "projects.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
+        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/remove_user_from_group",
+      "source_fingerprint": "af784ba0bdcbad8cac8b64ba06f42af6f81185ef12207d5a7e8157d49fe6f8c4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.RemoveFromGroup"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveFromGroup sends DELETE groups/{group}/users/{user} like Python remove_user_from_group and returns the HTTP error for 404.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserGroupMembership"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Go takes the group ID first and the user ID second, the reverse of the Python argument order.",
+        "Python raises only for status 400 and above; the native call accepts only 204, and a 404 is an error in both."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/role_assignments",
+      "source_fingerprint": "6f50897ce881094e59c47e06f4b279fd467d62ed531f15fcfcb497c9fe68fde4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssignments sends GET role_assignments with the dotted query keys Python maps from role_id, user_id, group_id, scope_project_id, scope_domain_id and scope_system, reproduces Python True/False and inherited_to keys through WithListAssignmentsQuery, and sends a limit without a marker follow-up.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignmentsRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Typed ListAssignmentsOpts booleans are sent as true/false while Python sends True/False; Keystone treats any value but 0 as set, so effective=False is still on in both.",
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it."
+      ],
+      "remaining": [
+        "The native RoleAssignment model drops the links object and the scope OS-INHERIT:inherited_to key that Python keeps in the scope dict, so inherited and direct assignments cannot be told apart.",
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; ListAssignments sends only the first request.",
+        "Python applies the role, scope, user and group Body dicts passed through **query as local nested filters; ListAssignments has no local filter option."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/role_assignments_filter",
+      "source_fingerprint": "e3ade432bbad443874a7249d4be930522ff8662f1a6eb3cc6f731957cba606eb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignmentsOnResource",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOnResourceOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListAssignmentsOnResource sends the single GET {domains|projects}/{id}/{users|groups}/{id}/roles or system/{users|groups}/{id}/roles that Python role_assignments_filter sends for each target and actor, decodes role id and name, and rejects two targets before HTTP.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignmentsFilterRoutes"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python raises InvalidRequest only when domain, project and system are all given and otherwise picks domain, then project, then system; Go requires exactly one target and rejects the rest before HTTP.",
+        "Python ignores the system value and always uses /system; Go takes System as a bool.",
+        "Python returns RoleXAssignment Resources with the target and actor IDs set from the URI; Go returns roles.Role values without them.",
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/roles",
+      "source_fingerprint": "4b1f0d85dfbc834de1c92078024ee598fc63737f442b375455d9ab31e558fc1a",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the single GET roles that Python roles() sends without arguments, maps the Python query names domain_id and name through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
+        "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
+        "Python drops unknown query names; Go sends every WithListQuery key to the server.",
+        "roles.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
+        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/unassign_domain_role_from_group",
+      "source_fingerprint": "cdf21343f8452b277354d63da8394c5aab632edf763af905175a200b24ff8d55",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with DomainID and GroupID sends DELETE domains/{id}/groups/{id}/roles/{role} like Python unassign_domain_role_from_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Unassign sends DELETE OS-INHERIT/domains/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Unassign instead of roles.API.Unassign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/unassign_domain_role_from_user",
+      "source_fingerprint": "933b1542c4504f5933f1258069b217cb35a21e9b1f1de55abf601bfc4e52c52d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with DomainID and UserID sends DELETE domains/{id}/users/{id}/roles/{role} like Python unassign_domain_role_from_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Unassign sends DELETE OS-INHERIT/domains/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Unassign instead of roles.API.Unassign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/unassign_project_role_from_group",
+      "source_fingerprint": "b1810b1aa27d4e1be7790fe4a2727d582e9f2b8c9868a9941d5b94ebe5b07351",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with ProjectID and GroupID sends DELETE projects/{id}/groups/{id}/roles/{role} like Python unassign_project_role_from_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Unassign sends DELETE OS-INHERIT/projects/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Unassign instead of roles.API.Unassign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/unassign_project_role_from_user",
+      "source_fingerprint": "17b14a2a5e85c4c6007c03ec4efedba7f1afa1e0fff508513bf6dded744a7d50",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with ProjectID and UserID sends DELETE projects/{id}/users/{id}/roles/{role} like Python unassign_project_role_from_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Unassign sends DELETE OS-INHERIT/projects/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Unassign instead of roles.API.Unassign."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/unassign_system_role_from_group",
+      "source_fingerprint": "c883e850a17f4d0cd267c6a1ff305835cf9e248f0a8dba37a4c7a749c6339953",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with System and GroupID sends DELETE system/groups/{id}/roles/{role} like Python unassign_system_role_from_group, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/unassign_system_role_from_user",
+      "source_fingerprint": "b2ad3dd6c4cdc2238c408339845fb5155e1808736d5c052a391cbeb29ddb0eae",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Unassign with System and UserID sends DELETE system/users/{id}/roles/{role} like Python unassign_system_role_from_user, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python sends the request through Proxy.request with raise_exc=False and discards the response, so assign and unassign return None for every HTTP status; the native call accepts only 204 and returns other statuses as errors.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_domain",
+      "source_fingerprint": "3ef999d9c3574b3813a8b4dba60190f7810bed3eac2437b5eacd829fb154f769",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH domains/{id} with the {\"domain\": {...}} envelope including the dirty id that Python update_domain sends and decodes the response.",
+          "tests": [
+            "identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Update accepts only 200.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with domains.WithUpdateField(\"id\", id) and Keystone ignores it."
+      ],
+      "remaining": [
+        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it.",
+        "domains.CreateOpts and UpdateOpts have no Extra map and With...Field rejects keys that collide with typed JSON keys, so Python None values for description or enabled cannot be sent as null."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_group",
+      "source_fingerprint": "3174138c1c81c6cf9473fc3a367b419d9b84f4f859fbb9b4c0236dbdbf9f725e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH groups/{id} with the {\"group\": {...}} envelope including the dirty id that Python update_group sends and decodes the response.",
+          "tests": [
+            "identity/v3/groups/python_parity_test.go:TestPythonGroupCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Update accepts only 200.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with groups.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_password",
+      "source_fingerprint": "7a96b76b652913947ea1c8356e5cf0229cd8137164af6eff2e854c5a70b3ba99",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ChangePassword"
+      ],
+      "contracts": [
+        {
+          "behavior": "ChangePassword sends POST users/{id}/password with {\"user\": {\"original_password\", \"password\"}} like Python update_password and returns the HTTP error for 401.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserUpdatePassword"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python raises only for status 400 and above; the native ChangePassword accepts only 204, so a 200 is a Go error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_project",
+      "source_fingerprint": "fcdb6c612e90f7fd5d0082f176d38f7aa5c9fe42b79439ff98881ed0c11d6982",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH projects/{id} with the {\"project\": {...}} envelope including the dirty id that Python update_project sends and decodes the response.",
+          "tests": [
+            "identity/v3/projects/python_parity_test.go:TestPythonProjectCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Update accepts only 200.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with projects.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_role",
+      "source_fingerprint": "3849d71a451c6e35351841d0411dc0f0e674b29f235c3097469b7df4bb9070ef",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH roles/{id} with the {\"role\": {...}} envelope including the dirty id that Python update_role sends and decodes the response.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Update accepts only 200.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with roles.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/update_user",
+      "source_fingerprint": "08be962250dd72c2afb13c60f1fb18cc98ec9633713991a309071e6e672d170d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH users/{id} with the {\"user\": {...}} envelope including the dirty id that Python update_user sends and decodes the response.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserCreateGetUpdateRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python accepts any status below 400; the native Update accepts only 200.",
+        "Python Proxy._update leaves the id dirty, so the PATCH body carries it; Go adds it with users.WithUpdateField(\"id\", id) and Keystone ignores it.",
+        "Typed UpdateOpts omit empty strings and nil pointers; a Python None value is sent as null only through the Extra map (for example Extra{\"description\": nil})."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/users",
+      "source_fingerprint": "0034e3925a05659812c1efaf902ce0a9196f94fe8b851bbb7246a881709fbf00",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends the single GET users that Python users() sends without arguments, maps the Python query names domain_id, enabled, idp_id, name, password_expires_at, protocol_id and unique_id through ListOpts or WithListQuery, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.",
+          "tests": [
+            "identity/v3/users/python_parity_test.go:TestPythonUserListRequests"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
+        "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
+        "Python drops unknown query names; Go sends every WithListQuery key to the server.",
+        "users.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+      ],
+      "remaining": [
+        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
+        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/validate_group_has_domain_role",
+      "source_fingerprint": "46eb97437b272d497e1c124722d3e36fe60ed7dea49d3b0d09ca29a2691495e4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with DomainID and GroupID sends HEAD domains/{id}/groups/{id}/roles/{role} like Python validate_group_has_domain_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Validate sends HEAD OS-INHERIT/domains/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Validate instead of roles.API.Validate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_group_has_project_role",
+      "source_fingerprint": "fec386974cd6d7a6950fb6858997e4b00c14bc04886da4374d75ed7a68fe7ddd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with ProjectID and GroupID sends HEAD projects/{id}/groups/{id}/roles/{role} like Python validate_group_has_project_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Validate sends HEAD OS-INHERIT/projects/{id}/groups/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Validate instead of roles.API.Validate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_group_has_system_role",
+      "source_fingerprint": "174c27f8aed7d5b41ca63c739aec89a3c8efa45ae46d3ef8deff08057d7cb21c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with System and GroupID sends HEAD system/groups/{id}/roles/{role} like Python validate_group_has_system_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_user_has_domain_role",
+      "source_fingerprint": "22893d4351974b4e7cc4f7f500af84a5728c69b6191fc9ec74e5f8388cac9ee1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with DomainID and UserID sends HEAD domains/{id}/users/{id}/roles/{role} like Python validate_user_has_domain_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Validate sends HEAD OS-INHERIT/domains/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Validate instead of roles.API.Validate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_user_has_project_role",
+      "source_fingerprint": "ab829661dd23b6b13870f050b4031d9ea6b77ab223ef80c6789cac5c4b9d69c5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with ProjectID and UserID sends HEAD projects/{id}/users/{id}/roles/{role} like Python validate_user_has_project_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        },
+        {
+          "behavior": "With Python inherited=True, osinherit.API.Validate sends HEAD OS-INHERIT/projects/{id}/users/{id}/roles/{role}/inherited_to_projects.",
+          "tests": [
+            "identity/v3/osinherit/python_parity_test.go:TestPythonInheritedRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python selects the OS-INHERIT route with inherited=True; Go calls osinherit.API.Validate instead of roles.API.Validate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_user_has_system_role",
+      "source_fingerprint": "66711858c51763f1a01f94f7a5dc27b311c81cfd956fce717dd80917594d4d86",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate"
+      ],
+      "contracts": [
+        {
+          "behavior": "roles.API.Validate with System and UserID sends HEAD system/users/{id}/roles/{role} like Python validate_user_has_system_role, returns nil for 204 and the status error for 404 and 200.",
+          "tests": [
+            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignUnassignValidate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-users.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
+        "Python returns True only for 204 and False for every other status including 404; the native call returns nil only for 204 and the Gophercloud status error otherwise, so a nil error means True.",
+        "Python ignores the system argument value and always uses /system; Go sets System: true."
+      ],
+      "remaining": []
     }
   ]
 }
