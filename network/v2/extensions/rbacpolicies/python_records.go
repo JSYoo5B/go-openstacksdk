@@ -29,7 +29,7 @@ type RBACPolicyRecord struct {
 var rbacRecordProfile = neutronfind.Profile{
 	Kind: "rbacpolicies", Path: "rbac-policies", Singular: "rbac_policy", Plural: "rbac_policies",
 	IDKey: "id", NameKey: "name", PreserveUnknownBody: true, NameQueryHint: false,
-	VersionedPath: "/v2.0/rbac-policies", SourceFindPolicy: true,
+	VersionedPath: "/v2.0/rbac-policies", SourceFindPolicy: true, StopFaultRetryCallbacks: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "id", Wire: "id", Missing: "null"},
 		{Name: "name", Wire: "name", Missing: "null"},
@@ -132,6 +132,11 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	policy, err := applyRBACRecordOptions(ctx, engine, RecordFindOpts{}, copyRBACFind, callbacks)
 	if err != nil {
 		return nil, rbacRecordWrap(ctx, "FindRecord", err)
+	}
+	// The public proxy already binds rbac_policy positionally. Presence in
+	// kwargs duplicates that argument even when its value is null or false.
+	if _, present := policy.Query["rbac_policy"]; present {
+		return nil, rbacRecordWrap(ctx, "FindRecord", rbacRecordInvalid("query duplicates bound argument rbac_policy"))
 	}
 	value, err := engine.Find(ctx, identity, rbacFindOptions(policy))
 	return rbacRecord(value), rbacRecordWrap(ctx, "FindRecord", err)

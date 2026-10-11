@@ -640,3 +640,64 @@ func TestPythonRBACPolicyFindRecordNativeClean404RetryStillFallsBackOnce(t *test
 	}
 	rbacRecordField(t, row, "id", `"match"`)
 }
+
+func TestPythonRBACPolicyFindRecordBoundArgumentsFailBeforeHTTP(t *testing.T) {
+	for _, key := range []string{"rbac_policy", "name_or_id", "ignore_missing"} {
+		for _, raw := range []string{"null", "false", "0", "\"other\"", "invalid unevaluated JSON"} {
+			t.Run(key+"/"+raw, func(t *testing.T) {
+				var calls []nativeRBACCall
+				api := rbacRecordAPI(t, &calls, func(*http.Request) *http.Response {
+					t.Fatal("reserved arguments reached HTTP")
+					return nativeRBACWire(200, `{"rbac_policy":{"id":"one"}}`)
+				})
+				row, err := api.FindRecord(context.Background(), "one", rbacpolicies.WithRecordFindOpts(rbacpolicies.RecordFindOpts{Query: map[string]json.RawMessage{key: json.RawMessage(raw)}}))
+				if row != nil || !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 0 {
+					t.Fatal(row, err, calls)
+				}
+			})
+		}
+	}
+}
+
+func TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion(t *testing.T) {
+	for _, lane := range []string{"get", "find"} {
+		for _, version := range []string{"", "2.2"} {
+			t.Run(lane+"/"+version, func(t *testing.T) {
+				var calls []nativeRBACCall
+				body := `{"rbac_policy":{"id":"one","microversion":{"untrusted":"response extension"}}}`
+				api := rbacRecordAPI(t, &calls, func(req *http.Request) *http.Response {
+					want := ""
+					if version != "" {
+						want = "network " + version
+					}
+					if req.Header.Get("OpenStack-API-Version") != want {
+						t.Fatal(req.Header)
+					}
+					return nativeRBACWire(200, body)
+				})
+				var row *rbacpolicies.RBACPolicyRecord
+				var err error
+				if lane == "get" {
+					row, err = api.GetRecord(context.Background(), "one", rbacpolicies.WithRecordGetMicroversion(version))
+				} else {
+					row, err = api.FindRecord(context.Background(), "one", rbacpolicies.WithRecordFindMicroversion(version))
+				}
+				if err != nil || row == nil || len(calls) != 1 || string(row.Envelope) != body {
+					t.Fatal(row, err, calls)
+				}
+				want := `null`
+				if version != "" {
+					want = `"` + version + `"`
+				}
+				rbacRecordField(t, row, "microversion", want)
+				if string(row.Wire.Body["microversion"]) != `{"untrusted":"response extension"}` {
+					t.Fatal(row.Wire)
+				}
+				row.Resource.Body["microversion"][0] = 'x'
+				if string(row.Wire.Body["microversion"]) != `{"untrusted":"response extension"}` {
+					t.Fatal("version channels alias", row)
+				}
+			})
+		}
+	}
+}
