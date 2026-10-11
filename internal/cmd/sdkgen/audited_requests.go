@@ -16,6 +16,7 @@ import (
 // generator can redirect the operation to an SDK-owned helper.
 type auditedRequestCall struct {
 	path, operation, helper, policy, declarationSHA256 string
+	signature                                          func(*types.Package, *types.Func) bool
 }
 
 var auditedRequestCalls = []auditedRequestCall{
@@ -23,6 +24,21 @@ var auditedRequestCalls = []auditedRequestCall{
 		path: "baremetalintrospection/v1/introspection", operation: "StartIntrospection",
 		helper: "startIntrospection", policy: "sdk_query_preserving_start",
 		declarationSHA256: "cf3afa01f5c61e99f1713b6f22bbdf6818982efa44fc7791cf30f4610e71f1dd",
+		signature:         matchesIntrospectionStartSignature,
+	},
+	// Native snapshot WaitForStatus dereferences the result of Get without a
+	// nil check, so a response without the snapshot envelope panics.
+	{
+		path: "blockstorage/v2/snapshots", operation: "WaitForStatus",
+		helper: "waitForStatus", policy: "sdk_nil_guarded_wait",
+		declarationSHA256: "a69c9b5988c69c5e5fb1038366e4757042777580d904f4a62a52af5cc4945e84",
+		signature:         matchesStatusWaitSignature,
+	},
+	{
+		path: "blockstorage/v3/snapshots", operation: "WaitForStatus",
+		helper: "waitForStatus", policy: "sdk_nil_guarded_wait",
+		declarationSHA256: "a69c9b5988c69c5e5fb1038366e4757042777580d904f4a62a52af5cc4945e84",
+		signature:         matchesStatusWaitSignature,
 	},
 }
 
@@ -52,7 +68,7 @@ func validateAuditedRequestCall(pkg *types.Package, decls map[string]*ast.FuncDe
 		return fmt.Errorf("audited request call %s.%s: %s; review the native contract before updating the override", spec.path, spec.operation, reason)
 	}
 	fn, ok := pkg.Scope().Lookup(spec.operation).(*types.Func)
-	if !ok || !matchesIntrospectionStartSignature(pkg, fn) {
+	if !ok || spec.signature == nil || !spec.signature(pkg, fn) {
 		return mismatch("native signature or input/result types changed")
 	}
 	hash, err := requestDeclarationHash(decls[spec.operation])
@@ -63,6 +79,16 @@ func validateAuditedRequestCall(pkg *types.Package, decls map[string]*ast.FuncDe
 		return mismatch("pinned native declaration changed")
 	}
 	return nil
+}
+
+// matchesStatusWaitSignature accepts WaitForStatus(ctx, client, id, status) error.
+func matchesStatusWaitSignature(pkg *types.Package, fn *types.Func) bool {
+	sig := fn.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 4 || sig.Results().Len() != 1 || !isContext(sig.Params().At(0).Type()) || !isString(sig.Params().At(2).Type()) || !isString(sig.Params().At(3).Type()) || !isError(sig.Results().At(0).Type()) {
+		return false
+	}
+	client := types.TypeString(sig.Params().At(1).Type(), func(p *types.Package) string { return p.Path() })
+	return client == "*"+upstreamModule+".ServiceClient"
 }
 
 // The override is deliberately specific to v2.15.0's StartIntrospection rather

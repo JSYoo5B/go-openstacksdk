@@ -713,7 +713,8 @@
       "name": "WaitForStatus",
       "sdk_package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots",
       "builder_free": true,
-      "return_policy": "direct-error"
+      "return_policy": "direct-error",
+      "request_policy": "sdk_nil_guarded_wait"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v2/transfers",
@@ -1314,7 +1315,8 @@
       "name": "WaitForStatus",
       "sdk_package": "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots",
       "builder_free": true,
-      "return_policy": "direct-error"
+      "return_policy": "direct-error",
+      "request_policy": "sdk_nil_guarded_wait"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/blockstorage/v3/transfers",

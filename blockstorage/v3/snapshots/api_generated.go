@@ -379,5 +379,5 @@ func (a *API) UpdateStatus(ctx context.Context, id string, opts UpdateStatusOpts
 
 // WaitForStatus invokes the upstream API with library-owned builders and result handling.
 func (a *API) WaitForStatus(ctx context.Context, id string, status string) error {
-	return request.Wrap("WaitForStatus", "snapshots", upstream.WaitForStatus(ctx, a.client, id, status))
+	return request.Wrap("WaitForStatus", "snapshots", waitForStatus(ctx, a.client, id, status))
 }

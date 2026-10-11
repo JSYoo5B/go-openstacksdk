@@ -228,15 +228,15 @@ func TestNativeSnapshotWaitForStatus(t *testing.T) {
 			t.Fatal(calls)
 		}
 	})
-	t.Run("missing envelope panics on the nil snapshot", func(t *testing.T) {
+	// Native WaitForStatus would dereference the nil snapshot; the SDK helper reports it.
+	t.Run("missing envelope is an error instead of a panic", func(t *testing.T) {
 		var calls []nativeSnapCall
 		api, _ := nativeSnapAPI(t, &calls, func(*http.Request) *http.Response { return nativeSnapWire(200, `{}`) })
-		defer func() {
-			if recover() == nil {
-				t.Fatal("no panic")
-			}
-		}()
-		_ = api.WaitForStatus(ctx, "snap-1", "available")
+		err := api.WaitForStatus(ctx, "snap-1", "available")
+		nativeSnapOperation(t, err, "WaitForStatus")
+		if !errors.Is(err, resource.ErrUnsupported) || len(calls) != 1 {
+			t.Fatal(err, calls)
+		}
 	})
 	t.Run("case-sensitive status polls until the deadline", func(t *testing.T) {
 		var calls []nativeSnapCall
