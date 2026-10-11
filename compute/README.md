@@ -215,6 +215,8 @@ if err := service.Servers.Delete(ctx, resource.ID(server.ID)); err != nil {
 
 ## 확장과 미지원 범위
 
+openstacksdk `ComputeCloudMixin` helper 43개와 Go 호출의 대응·차이는 [Python cloud compute helper 비교](python-cloud-parity.md)에 정리했습니다.
+
 `compute.WithField("vendor_hint", value)`로 기본 생성 필드와 충돌하지 않는 확장 JSON을 전달할 수 있습니다. 예시 필드는 표준 Nova API가 아닙니다. builder는 SDK 내부에서 구현합니다. 필드 스키마·지원 여부·microversion은 실제 API가 검증합니다.
 
 flavor는 상위 계층에서 조회를 지원합니다. 서버 Update, reboot/resize 등의 action, keypair 관리에는 `service.API`의 [전체 Compute API](v2/README.md)를 사용할 수 있습니다. floating IP 생성·재사용·연결은 Network의 `FloatingIPs`와 아래 `CreateWithFloatingIP`으로 제공합니다. `service.RawClient()`를 이용한 Gophercloud 호출도 가능합니다.
