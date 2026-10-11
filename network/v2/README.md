@@ -59,6 +59,10 @@ Neutron agent·segment·IP 사용량 관리자 호출과 router L3 agent 목록�
 
 BGP peer·speaker와 BGP VPN·association의 native 요청·status·paging 규칙은 [Neutron native BGP·BGP VPN 호출](native-bgp.md)에 정리했습니다.
 
+Neutron LBaaS v2·flavor·service profile·metering Python 메서드와 floating IP 별칭 `find_ip`·`ips`의 미해결 사유는 [LBaaS·flavor·metering Python 대응](python-parity-lbaas-metering.md)에 정리했습니다.
+
+networking-sfc와 tap-as-a-service Python 메서드 48개의 비교 결과는 [SFC·TaaS Python 대응](python-parity-sfc-tap.md)에 있으며, tap mirror 생성·수정·삭제만 대응되고 나머지는 미해결 사유를 함께 설명합니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용
