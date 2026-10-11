@@ -298,8 +298,10 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 			}
 		}
 	}
-	// Connection-derived mutable location stays an owned null unless supplied.
-	if _, exists := body["location"]; !exists {
+	// Source's Computed location cannot be supplied by an unknown wire member.
+	// These profiles own a null connection view; baseline bindings retain their
+	// previously reviewed treatment of response extensions.
+	if _, exists := body["location"]; e.profile.SourceFindPolicy || !exists {
 		body["location"] = json.RawMessage("null")
 	}
 	value.Resource = &resource.RawResource{Metadata: resource.Metadata{Body: body, Header: value.Header.Clone(), StatusCode: value.StatusCode}}

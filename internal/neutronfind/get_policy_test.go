@@ -204,3 +204,51 @@ func TestSourceFindControlsNeverBecomeFetchQueryOrConstructorSeed(t *testing.T) 
 		}
 	}
 }
+
+func TestSourceComputedLocationIgnoresResponseExtensionAndKeepsWire(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		for _, lane := range []string{"get", "find", "list"} {
+			t.Run(map[bool]string{false: "baseline", true: "Source"}[enabled]+"/"+lane, func(t *testing.T) {
+				cloud := testcloud.New(t)
+				client := cloud.Client("network", "/neutron/v2.0/")
+				calls := 0
+				row := `{"id":"one","location":{"project":{"id":"forged"}}}`
+				body := `{"record":` + row + `}`
+				if lane == "list" {
+					body = `{"records":[` + row + `]}`
+				}
+				cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) { calls++; return policyWire(200, body), nil })
+				engine, err := neutronfind.New(context.Background(), client, policyProfile(enabled), nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+				var value *neutronfind.Record
+				switch lane {
+				case "get":
+					value, err = engine.Get(context.Background(), "one", neutronfind.Options{})
+				case "find":
+					value, err = engine.Find(context.Background(), "one", neutronfind.Options{})
+				case "list":
+					for current, cause := range engine.List(context.Background(), neutronfind.Options{}) {
+						value, err = current, cause
+						break
+					}
+				}
+				if err != nil || value == nil || calls != 1 {
+					t.Fatal(value, err, calls)
+				}
+				want := `{"project":{"id":"forged"}}`
+				if enabled {
+					want = "null"
+				}
+				if string(value.Resource.Body["location"]) != want || string(value.Wire.Body["location"]) != `{"project":{"id":"forged"}}` || string(value.Envelope) != body {
+					t.Fatal(value, want)
+				}
+				value.Resource.Body["location"][0] = 'x'
+				if string(value.Wire.Body["location"]) != `{"project":{"id":"forged"}}` || string(value.Envelope) != body {
+					t.Fatal("projection aliases actual response", value)
+				}
+			})
+		}
+	}
+}
