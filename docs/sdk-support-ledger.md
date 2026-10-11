@@ -3113,6 +3113,12 @@ Barbican Secret/Container/Order의 구체적 상태·삭제 대기는 별도13�
 
 새 사용 가이드는 Neutron8개·Cinder3개·Barbican1개, 총12개이며 각 문서에 독립 Python과 Go main을 제공합니다. [Network README](../network/v2/README.md), [Cinder README](../blockstorage/v3/README.md), [Key Manager README](../keymanager/v1/README.md)에서 찾을 수 있습니다. 생성기에 ConsistencyGroups/ConsistencyGroupSnapshots와 링크를 등록했고 SecretStore의 route/projection은 기존 waits에 연결했습니다.
 
-최종 전체 검증: 실행 대기. 고정 커밋 archive의 uncached make check와 정확한 문서 main12개 외부 local-replace 빌드·Python AST를 실행한 뒤 revision·소스 SHA·실제 package 수·exit code를 이곳에 갱신합니다. 앞선 f92faa39 full PASS와 이번 후보의 부분 실패 로그는 보존하며 서로 바꾸어 기록하지 않습니다.
+최종 전체 검증은 깨끗한 작업 tree의 커밋 **`f129e687bb90f1a23792151d178bd98057bd022d`**에서 실행했습니다. `GOFLAGS=-p=4 make check` **exit0**, 실제 race test package**164개 PASS**(캐시 재사용0개), license·vet·pinned parity·progress·gofmt 모두 PASS입니다. Go**2708파일**의 relative-path NUL/bytes NUL SHA256은 **`f644bd82eb56940fc117daadd7ab71c0eb282c42320ba9adfdefed883545b3c1`**이며 실행 전후와 앞선 `4162546beec80f6ec40d85b1909694eae0d66a45` 불변 archive 모두 같습니다. 작업 tree도 실행 후 clean입니다.
+
+첫 불변 archive 검사 `4162546beec80f6ec40d85b1909694eae0d66a45`는164개 **uncached race PASS**, license/vet PASS 이후 parity에서 **exit2 FAIL**입니다. Legacy consistency group7개 draft의 `docs`가 중앙 `documentation`으로 옮겨지지 않고 Go API 경로가 module prefix 없이 기록된 metadata 문제였습니다. `f129e687`은 판정 JSON만 수리했으며 Go 코드·API 수·Source fingerprint는 변경하지 않았습니다. 같은 Go SHA를 확인하고 최종 전체 gate를 다시 실행했으며 실제 test cache 재사용은0개입니다. 첫 FAIL을 최종 PASS로 덮어쓰지 않습니다.
+
+비교 가이드12개는 앞선 `4162546beec80f6ec40d85b1909694eae0d66a45` 불변 archive에서 **정확한 main12개 외부 local-replace module build/tidy exit0·Python AST12개 PASS**입니다. 최종 커밋의 main 원문 SHA도 모두 일치합니다. 실제 OpenStack 인증/driver/backend 실행, Python runtime 실행, 이번 커밋의 replace 없는 원격 설치·alpha release를 주장하지 않습니다. catalog SHA256 **`231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`**는 그대로입니다.
+
+실행 근거는 `/private/tmp/go-openstacksdk-oct11-final-full-receipt.json`(첫 metadata FAIL/uncached164 PASS), `/private/tmp/go-openstacksdk-oct11-final-current-check-receipt.json`(최종 전체 PASS), `/private/tmp/go-openstacksdk-oct11-final-guides-receipt.json`(정확한12개 main)과 각 log입니다. 마감 기록 커밋은 Markdown만 갱신하며 Go SHA와 완료 API 수를 바꾸지 않습니다.
 
 사용자의 여기까지 마무리 지시에 따라 새 API 할당은 끝내고 현재 worker는 동결·종료했습니다. 후속 작업은 이번34행을 재집계하지 않고 현재 unresolved에서 핵심 user 잔여를 우선 선택합니다. 다음 후보는 Barbican ACL/Quota finite wait, 남은 핵심 서비스 named API와 SDK-R1/C1/S1이며 핵심 user→핵심 admin→managed user→managed admin 순서를 유지합니다. Swift는 Glance 연계 때문에 핵심, 후속 네트워크·베어메탈은 후속 묶음 내 우선입니다. stock Backup metadata4개·실제 인증된 클라우드 acceptance·alpha release·전체 inventory 목표는 미완료입니다.
