@@ -19,6 +19,8 @@ Gophercloud v2.15.0의 blockstorage/v2 API를 하나의 인증된 서비스 객�
 
 native [v2 호출](native-calls.md)은 deprecated v2 package의 generated 메서드가 v3 native 호출과 다른 입력·목록·decode 계약만 정리합니다.
 
+Python openstacksdk v2 volume·snapshot·consistency group snapshot 메서드의 Go 대응과 미해결 항목은 [Cinder v2 Python proxy 대응](python-parity-volumes.md)에서 확인합니다.
+
 ## Go 사용
 
 ```go
