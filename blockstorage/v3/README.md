@@ -47,6 +47,8 @@ Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규�
 
 volume·snapshot·backup·attachment·transfer·volume type·QoS·availability zone의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다.
 
+Python openstacksdk의 Cinder 관리 proxy(service, pool, extension, 볼륨 가져오기, cluster, group type 등) 대응은 [Cinder v3 Python 관리 proxy 대응](python-parity-admin.md)에서 확인할 수 있습니다.
+
 ## Go 사용
 
 ```go
