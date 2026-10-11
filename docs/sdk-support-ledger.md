@@ -4,13 +4,29 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Nova Python proxy와 직접 삭제 ignore_missing](#nova-python-proxy와-직접-삭제-ignore_missing-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron 선택 조회·조건부 삭제와 Keystone 토큰](#neutron-선택-조회조건부-삭제와-keystone-토큰-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,174입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,195입니다.
+
+## Neutron 선택 조회·조건부 삭제와 Keystone 토큰 완료
+
+**최신 API 완료 (2026-10-11): 독립 서비스 병렬 구현21개, 전체1,174→1,195(+21)·핵심1,100→1,121/2,292·Network238→256/758·Identity167→170/389.** Neutron 기능과 Keystone 토큰을 별도 에이전트가 동시에 구현하고, 공통 요청·생성기 통합과 최종 판정은 한곳에서 처리했습니다. 새 구현은 기존 native API와 함께 사용할 수 있는 공개 SDK 기능입니다.
+
+- Neutron 선택 조회11개: `GetWithFields(ctx, id, fields...)`가 Resource 상속의 Body 별칭을 wire 필드로 변환하고 순서·중복·알 수 없는 이름을 보존합니다. 기존 AST resolver로 고정 Source17개 파일과 리소스별 유효 Body 매핑208개를 검증하며 list-query 별칭과 구분합니다. 결과는 native typed 모델입니다. SubnetPool에만 누락된 prefix3필드의 typed zero adapter를 적용해 sparse 조회를 지원하고, 명시null·잘못된 타입·기존 native Get의 오류는 유지합니다.
+- Neutron 조건부 삭제7개: `DeleteWithOptions`와 concrete revision/missing 옵션을 추가했습니다. 명시0·음수·int64 경계, 기본404 무시·strict404·412, bulk/callback snapshot과 case-insensitive header override를 처리합니다. 기존 guarded REST rejection observer·IgnoreMissing을 재사용해404의 read/close 오류와 accepted 응답 안의404 원인을 성공으로 오인하지 않습니다.
+- Keystone 토큰3개: `ValidateToken/CheckToken/RevokeToken`이 true-only query·별도 subject header·owned TokenRecord·HTTP200만 true인 HEAD 정책·opaque DELETE를 제공합니다. 기존 cloudread capture·REST·descriptor 변환을 재사용하고 날짜 원문·13 Body필드·location·실제 receipt를 보존합니다. callback 오류와 취소/custom cause/source 변경을 함께 반환합니다. 거부된 HTTP는 native error에 증거가 남고 accepted 처리 실패만 부분 owned receipt를 반환합니다.
+
+[Neutron Python/Go 비교](../network/v2/python-read-delete.md)와 [Keystone Python/Go 비교](../identity/v3/python-token-actions.md)는 전체 Connection·서비스·leaf 호출과 정확한 독립 main을 제공합니다. typed 모델·string ID·int64 revision·고정 요청 및 Resource/session 범위의 차이를 명시했습니다. Source 전체 Resource/cache/adapter 동등성은 별도 목표이며 supported 판정을 추가하지 않았습니다.
+
+Gophercloud 공개 testhelper 기반의 기존 testcloud/nativeToken fixture·payloadContractTrack·fault transport를 재사용했습니다. 새 HTTP 서버 harness는 추가하지 않았습니다. 최종 집중 race는 새22그룹을 포함한 **51그룹·838 PASS test event(부모 그룹 포함)**이며, 전체 `make check`는 license·vet·race **155개 실제 test package**·고정 parity/progress·gofmt exit0입니다. 고정 Source로 전체 재생성이 PASS이고 fresh Source 생성 결과 대조도 통과했습니다. 정확한 두 guide main은 외부 consumer-only local replace tidy/build PASS입니다. 실제 인증된 OpenStack 호출과 Python SDK runtime 호출은 실행하지 않았습니다.
+
+최종 Go source2,423개 SHA256 `f16a6e62d8de1d6fd4b9618f3f2764f373a761240462cec5465f8879cdf034c8`는 sorted relative-path NUL bytes NUL 방식으로 확인했습니다. Source·집중/전체 검사·문서 소비자·판정 근거는 `/private/tmp/go-openstacksdk-oct11-neutron-token-{source,passing-focused,check,review-receipt}` 자료와 consumer receipt에 있습니다. 초기 실패한 generator fixture와 sparse decoder 검증은 수정 후 재실행한 PASS만 완료 근거로 사용했습니다.
+
+공통 요청 `4c0ee04d`, 생성 API `dfafeb53`, Neutron 테스트 `a80c95ed`, Keystone 구현 `49162539`·테스트 `f4ab5adf`, 비교 문서 `7061dbba`로 작은 커밋에 나눴습니다. catalog bytes·3,362개 ID/fingerprint·source pins·기존1,532 reviews를 보존하고21행61계약만 추가했습니다. 최종 reviews1,553·contracts4,798·go_mapping1,195·review unresolved357·미검토1,809·unsupported1·catalog unresolved2,166입니다. 핵심 완료 수는 user/admin 합산이며 1단계 전체 완료를 의미하지 않습니다.
 
 ## Nova Python proxy와 직접 삭제 ignore_missing 완료
 
-**최신 API 완료 (2026-10-11): Nova Python proxy 114개 판정과 직접 삭제 `ignore_missing` 공통 기능, 전체1,103→1,174(+71)·핵심1,029→1,100/2,292·Compute153→220/333.** Nova proxy 메서드를 서버 user 호출과 관리자 호출 두 묶음으로 나누어 판정했고, 반복되던 삭제 기본값 문제를 `resource` package의 공통 helper로 해결했습니다.
+**앞선 API 완료 (2026-10-11): Nova Python proxy 114개 판정과 직접 삭제 `ignore_missing` 공통 기능, 전체1,103→1,174(+71)·핵심1,029→1,100/2,292·Compute153→220/333.** Nova proxy 메서드를 서버 user 호출과 관리자 호출 두 묶음으로 나누어 판정했고, 반복되던 삭제 기본값 문제를 `resource` package의 공통 helper로 해결했습니다.
 
 - Nova 서버 user Python 62개: 42개 `go_mapping`, 20개 unresolved입니다. 서버 조회·수정·삭제와 action, metadata, tag, server group, interface, volume attachment를 Go 호출로 재현했습니다. Python은 resource별 최대 microversion을 협상하지만 Go는 client에 설정한 값을 보내므로, server tag는 2.26 이상을 설정해야 합니다. Nova 이미지 proxy 8개, 고정 IP·floating IP 제거·backup·restore·암호 삭제·attachment 수정은 Go API가 없고, `locked_reason`·unshelve 인자·attachment 목록 paging은 보낼 수 없습니다. [Nova Python 대응](../compute/v2/python-parity.md)에 정리했습니다.
 - Nova 관리자 Python 52개: 23개 `go_mapping`, 29개 unresolved입니다. aggregate·flavor 관리·hypervisor 조회·service 목록·migration 목록·진단·사용량은 같은 요청을 보냅니다. 서버별 migration·share attachment·quota class·precache·crash dump·external event는 Go API가 없고, aggregate의 AZ null, flavor 설명 지우기, `forced_down=false`, live migrate의 `"auto"`, evacuate의 2.14 이후 본문은 보낼 수 없습니다. [Nova 관리자 Python 대응](../compute/v2/python-parity-admin.md)에 정리했습니다.

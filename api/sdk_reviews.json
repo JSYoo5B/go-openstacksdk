@@ -71238,6 +71238,885 @@
       "remaining": [
         "Go has no API for DELETE servers/{id}/shares/{share_id} or its ignore_missing default."
       ]
+    },
+    {
+      "operation": "python:network/v2/get_network",
+      "source_fingerprint": "287618da1770964749670fe471b182fb1e983ab0dbae2b8c9ffc7d2fc155319e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_subnet",
+      "source_fingerprint": "d564f6a66027c7157f989e8eb4c70259aef956cd81057614327fd3a68488272d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_port",
+      "source_fingerprint": "8909a22703c6131da0c4477c264c6b9ac1d43700584f1d33a4ac23c525fe3b75",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_ip",
+      "source_fingerprint": "f50526aa26b1fc5fe05663a3429bccd2367a56b6e32a053d32bc838866ff88b2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_router",
+      "source_fingerprint": "2910984151e4b51e05e34846b64dbc8313ffa7aae8ead8bfa99bb325f22d76af",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_security_group",
+      "source_fingerprint": "e8f83152527e0952495cfbac43d10490164802f2de9f5247165be93fe35f9b7a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_security_group_rule",
+      "source_fingerprint": "c29e503b75d22cc209729c525d2350f969357b2cb750d8119e604d688ef8d688",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_subnet_pool",
+      "source_fingerprint": "ae209a2a60d3e6546bd254f0f51c2e036d62a7161feeda4f3d2ccc632616b5c8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy.",
+        "Only GetWithFields adapts omitted default_prefixlen/min_prefixlen/max_prefixlen to typed zero in an owned extraction map; explicit null and invalid values retain native errors. Existing native Get is unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_trunk",
+      "source_fingerprint": "98e9420cb5b5f37102049c88425d8df5370a5909b3413b8dd3adb8631b162db3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_qos_policy",
+      "source_fingerprint": "ecb8d26cdb15fd24317548cf90bc41ad3c84e6890a0e8acbb97d5e90b33d421e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_address_group",
+      "source_fingerprint": "e270c08aec45ff77a62e914bee3fa7069722ecbb0a48c4d0d57087efb0c64ecd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.GetWithFields"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET uses the pinned member route and all inherited Resource.Body aliases, independently of list-query aliases. Caller field order, repeats, empty and unknown names survive; seventeen Source files and 208 effective Body field mappings are freshly SHA-checked and extracted using the existing AST-only MRO resolver without executing Source modules.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsPreservesAliasesOrderAndNativeModels",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "Nil and empty fields omit the query. Sparse selected responses are extracted as the existing typed model without ID seeding, and HTTP200..399 follow the dedicated Python read profile. SubnetPool alone adapts the native required prefix fields when omitted, preserving explicit null and invalid-type failures.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsEmptyAndSparseResponse",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsAcceptsSourceResponseStatuses"
+          ]
+        },
+        {
+          "behavior": "Native unexpected status, response evidence, decoder and transport causes are preserved under OperationError. Fields and aliases are copied before HTTP callbacks and reusable concurrently; pre/post-request cancellation keeps custom context causes.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsKeepsNativeDecodeStatusAndWireCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsCancellationStopsBeforeHTTP",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonGetFieldsSnapshotAndConcurrentReuse",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource or an ID and returns a mutable Resource; Go takes a string ID and returns the pinned Gophercloud typed model with native decoder behavior and zero values for omitted fields. Arbitrary Resource/session/cache behavior is tracked separately.",
+        "The SDK-owned field getter accepts HTTP200..399, preserves unknown fields in the query, and never synthesizes an ID. Invalid JSON or known-field types remain errors; existing native Get keeps its native status and extraction policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_network",
+      "source_fingerprint": "27782d200f523a62ff0d342d462924929a4e7600cefca4acc1fd5240008084e7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_subnet",
+      "source_fingerprint": "d9b9c8c9fa3193ee7b1b90d53e0e5cb83f06ba35a706b0bcc4662d3bfe82bb7d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_port",
+      "source_fingerprint": "1bfa563c16b7f79140da81f508d5a0aa01cabf444394f0aa752f0ddaf7bc0033",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_ip",
+      "source_fingerprint": "b41a1e36d80b7330a5dea83b52391f7de1dfa751e2382eb40702405296fba1dd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_router",
+      "source_fingerprint": "f11f19f9970782d7d2d2167bd202f8aa772b7b8a9db26fc7ea897a0b17aa25d1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_security_group",
+      "source_fingerprint": "13db7634c5fccccd13bc2d9a9b85a581e86d4bc89e988d754b704ce1219c88ea",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_security_group_rule",
+      "source_fingerprint": "40bc9d632ca82172be2e642c095fd7d5bbb3462f914effaa07814d303ca918c1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteRevision",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE uses the pinned member route and an empty body. Omitted revision adds no condition; explicit zero, negative and int64 bounds send If-Match: revision_number=N, overriding case-insensitive configured aliases without modifying the shared client.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteRevisionMissingPolicyAndNativeRoutes"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 succeeds with opaque body handling. Pure actual404 is ignored by default and strict missing returns the native error. Existing guarded REST rejection observation and IgnoreMissing preserve read/close/transport/context and accepted-response failures, including errors containing another404.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteResponseStatusesAndCauses",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Concrete options apply in order. Bulk constructors capture pointer values, replace the complete policy and clone per invocation; the final configuration is independently owned even when custom callbacks retain their supplied pointer. Reuse is race-tested; nil/failed options and pre-cancelled requests never reach HTTP.",
+          "tests": [
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteOptionsFreezeCallbacksAndReusableBulk",
+            "api/neutron_python_reads_deletes_test.go:TestNeutronPythonDeleteCancellationWireFailuresAndInvalidOptions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-read-delete.md",
+        "network/v2/README.md"
+      ],
+      "differences": [
+        "Python Resource-or-ID and default-value arguments become a literal string ID plus concrete DeleteOption values; revision is bounded to Go int64 instead of arbitrary Python integer.",
+        "The SDK-owned operation fixes its method, target and selected revision header through retry hooks and preserves physical response failures; native generated Delete remains available with its original strict status policy."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/validate_token",
+      "source_fingerprint": "ce3170adf416c769021ea4a4c0b25c1c8cbab468c30bb333e9c48fb7b2f5279f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.ValidateToken",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenNoCatalog",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithValidateTokenAllowExpired"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET auth/tokens sends an independent X-Subject-Token and only truthy nocatalog=True/allow_expired=True parameters while retaining provider authentication. The owned Token Resource, Wire, Envelope and Header channels are independent; thirteen Body descriptors, raw date values and response-only subject token follow pinned Source defaults and conversion.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenValidateQueriesHeadersAndOwnedRecord",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenValidateDescriptorConversionsAndToleratedBodies"
+          ]
+        },
+        {
+          "behavior": "HTTP200..399 is accepted. Empty or syntactically invalid JSON becomes an empty declared view; valid non-object envelope or token values fail with actual response evidence. Rejected HTTP responses retain native status/body/header causes; accepted representation/read/close/context failures retain the partial owned receipt.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenValidateRepresentationAndHTTPFailures",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenTransportCancellationAndAcceptedBodyErrors"
+          ]
+        },
+        {
+          "behavior": "Concrete options replace/apply in order and remain owned after callbacks. Nil/failed options, cancellation and service-source changes stop before dispatch; simultaneous callback and guard failures are joined. Subject headers cannot be changed by configured aliases or native retry hooks.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenOptionsPreflightAndSourceCapture",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenSelectedHeaderCannotChangeDuringRetry"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-token-actions.md",
+        "identity/v3/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Token Resource; Go returns an owned TokenRecord with separate declared/raw/envelope/HTTP channels, no automatic Resource mutation or session/cache subclass behavior.",
+        "Token headers and JSON use valid UTF-8 Go strings. The fixed request/source guard forbids retargeting through retry or redirect hooks; native Get is unchanged."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/check_token",
+      "source_fingerprint": "28f4ec099c1151bc84cf16dc9ff8425f9900bab95d46954296843519d8bdbcf7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.CheckToken",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.WithCheckTokenAllowExpired"
+      ],
+      "contracts": [
+        {
+          "behavior": "HEAD auth/tokens returns true only for actual HTTP200; other statuses, including204/403/404/500, return false without status error. True allow_expired is encoded as allow_expired=True and false is omitted; the subject header remains separate from authentication.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenCheckAllHTTPStatusesAndExpiredQuery"
+          ]
+        },
+        {
+          "behavior": "Concrete options, source capture and fixed subject header ownership are shared with token validation. Transport/read/close/cancellation failures remain errors; callback and guard causes are joined and no subsequent callback or HTTP runs after preflight failure.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenOptionsPreflightAndSourceCapture",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenTransportCancellationAndAcceptedBodyErrors",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenSelectedHeaderCannotChangeDuringRetry"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-token-actions.md",
+        "identity/v3/README.md"
+      ],
+      "differences": [
+        "Python arguments become a string subject token and concrete CheckTokenOption values; Go returns (bool,error) and preserves non-HTTP handling failures.",
+        "The SDK captures service/provider/endpoint/microversion once and fixes target and subject header across native attempts; arbitrary session/adapter/cache policies are separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/revoke_token",
+      "source_fingerprint": "507d1a4937af7ca3b745ba42ebf4b291c31ed341226dd984aa85df76b00f91fb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens.API.RevokeToken"
+      ],
+      "contracts": [
+        {
+          "behavior": "DELETE auth/tokens sends an independent subject token and an empty body; actual HTTP200..399 is accepted without JSON decoding, while400+ keeps native status/body/header evidence.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenRevokeAcceptedCodesAndOpaqueBody"
+          ]
+        },
+        {
+          "behavior": "Invalid headers, cancelled contexts or invalid sources stop before HTTP. Transport/read/close/context failures retain their causes and response evidence, while selected subject headers and service capture cannot be changed by retry hooks.",
+          "tests": [
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenOptionsPreflightAndSourceCapture",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenTransportCancellationAndAcceptedBodyErrors",
+            "identity/v3/tokens/token_actions_test.go:TestPythonTokenSelectedHeaderCannotChangeDuringRetry"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-token-actions.md",
+        "identity/v3/README.md"
+      ],
+      "differences": [
+        "Python positional token becomes a valid UTF-8 Go string; Go returns error under the existing OperationError cause chain and leaves native Revoke unchanged.",
+        "The SDK-owned fixed-request and source guard reject retry/redirect retargeting and preserve physical body failures rather than ignoring them."
+      ],
+      "remaining": []
     }
   ]
 }
