@@ -90308,6 +90308,1312 @@
         "Python ignores the system argument value and always uses /system; Go sets System: true."
       ],
       "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_firewall_group",
+      "source_fingerprint": "142257782cdd036be31aecfb83338c349d669b317932955f2cbe818ecb2c42de",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST /fwaas/firewall_groups with the {\"firewall_group\": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_group.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_firewall_group",
+      "source_fingerprint": "ac25b1d161f7f043d4d96b63c32600a11a84135ead7718288f4e5a720473ecd3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveIngressPolicy",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.RemoveEgressPolicy"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT /fwaas/firewall_groups/{id} with only the set pointer fields in the firewall_group envelope, including explicit empty strings, false and empty lists. RemoveIngressPolicy and RemoveEgressPolicy send the policy ID as JSON null, matching update_firewall_group(..., <policy>_id=None).",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python skips the request when no attribute changed; Go Update always sends PUT, with an empty envelope when UpdateOpts is empty.",
+        "Gophercloud accepts only 200 for the PUT; Python accepts any non-error status.",
+        "A null ingress or egress policy ID is sent by the separate RemoveIngressPolicy or RemoveEgressPolicy call rather than inside one combined update."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_firewall_group",
+      "source_fingerprint": "a91508698ebba063a84663357c061b43cd7d64a92c7bb35a60765acecff44fad",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE /fwaas/firewall_groups/{id}, succeeds on 204, ignores 404 by default like ignore_missing=True, returns resource.ErrNotFound with WithMissingError and keeps 409 as an error.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource; Go takes resource.ID(id).",
+        "Go uses resource.WithMissingError() for ignore_missing=False and returns resource.ErrNotFound instead of NotFoundException."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_firewall_group",
+      "source_fingerprint": "15972341d167b3650e14ce5b8eb31d847561029936746f961dcaa906d9d967ed",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get(id) sends GET /fwaas/firewall_groups/{id} with no query like the fields=None default, decodes the firewall_group, and returns a 404 error where Python raises NotFoundException.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python get_firewall_group(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 group API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_firewall_group",
+      "source_fingerprint": "c220b5b8a6798f9469730a60e20490bfe0301825b4945a682503f744f80c4e47",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET /fwaas/firewall_groups/{x}; after a 404, or a 400 or 403 the caller continues past, Find(resource.Name(x)) sends GET /fwaas/firewall_groups?name=x and returns the unique match, nil with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupFindIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the name list in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller continues to the name lookup after a 400 or 403 error.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "Python forwards **query to both the ID GET and the name list; Go Find takes no extra query.",
+        "Python defaults ignore_missing=True (deprecated toward False); Go Find defaults to the missing error and needs WithIgnoreMissing.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/firewall_groups",
+      "source_fingerprint": "e615a2a870dc325bf53ef5aa49330c3a1899ff9c89fae90269f0f3d5fb701cde",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "List with WithListOptions(ListOpts{Name, Status, ProjectID, Ports}) and WithListQuery for shared and fields sends the Python query mapping keys, repeats ports per value, follows firewall_groups_links, and All sends no query for firewall_groups().",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/groups/python_parity_test.go:TestPythonFirewallGroupProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.",
+        "Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, \"True\") reproduces the exact string.",
+        "WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.",
+        "Go follows the server _links next href; Python can also continue by marker after a page that fills limit.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_firewall_policy",
+      "source_fingerprint": "15a2e42da72c47e2724b6a12931438aa59187cb6f0108ce4a8ccb869aa98300b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST /fwaas/firewall_policies with the {\"firewall_policy\": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_policy.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_firewall_policy",
+      "source_fingerprint": "e1ac252646a50375142571a09e1e4a1f5d6bfb541c498c713c31554f6107518f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT /fwaas/firewall_policies/{id} with only the set pointer fields in the firewall_policy envelope, including explicit empty strings, false and empty lists.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python skips the request when no attribute changed; Go Update always sends PUT, with an empty envelope when UpdateOpts is empty.",
+        "Gophercloud accepts only 200 for the PUT; Python accepts any non-error status."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_firewall_policy",
+      "source_fingerprint": "4742c824a68db745de89730776403407d1ad9207cef379129ef4924227476b01",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE /fwaas/firewall_policies/{id}, succeeds on 204, ignores 404 by default like ignore_missing=True, returns resource.ErrNotFound with WithMissingError and keeps 409 as an error.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource; Go takes resource.ID(id).",
+        "Go uses resource.WithMissingError() for ignore_missing=False and returns resource.ErrNotFound instead of NotFoundException."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_firewall_policy",
+      "source_fingerprint": "693de0fd761c3f8ac78344ad4ebc2ff16a55aecc225067518531856602be0892",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get(id) sends GET /fwaas/firewall_policies/{id} with no query like the fields=None default, decodes the firewall_policy, and returns a 404 error where Python raises NotFoundException.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python get_firewall_policy(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 policy API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_firewall_policy",
+      "source_fingerprint": "109c44f0d3d864ad96a9faa9ad02d903863225e8497dd679ef6ac2e4a0f59755",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET /fwaas/firewall_policies/{x}; after a 404, or a 400 or 403 the caller continues past, Find(resource.Name(x)) sends GET /fwaas/firewall_policies?name=x and returns the unique match, nil with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyFindIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the name list in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller continues to the name lookup after a 400 or 403 error.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "Python forwards **query to both the ID GET and the name list; Go Find takes no extra query.",
+        "Python defaults ignore_missing=True (deprecated toward False); Go Find defaults to the missing error and needs WithIgnoreMissing.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/firewall_policies",
+      "source_fingerprint": "d4b20b671d923c6dce85088887fc27590ef64cf243cbe0ff829b6bfec08cf0a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "List with WithListOptions(ListOpts{Name, ProjectID}) and WithListQuery for shared, firewall_rules and fields sends the Python query mapping keys, and All sends no query for firewall_policies().",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.",
+        "Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, \"True\") reproduces the exact string.",
+        "WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.",
+        "Go follows the server _links next href; Python can also continue by marker after a page that fills limit.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_firewall_rule",
+      "source_fingerprint": "1e372300b469d7b207ea6794e44db9d02c3dc8cc7dba4b4b5b2a35db6449c363",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST /fwaas/firewall_rules with the {\"firewall_rule\": {...}} envelope holding the supplied attributes and extension keys, and decodes the created firewall_rule. Omitting protocol or action fails before HTTP, while ProtocolAny with ActionDeny sends protocol null and action deny.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python sends every supplied attribute, including empty strings and unknown keys; Go CreateOpts drops empty strings through omitempty and WithCreateField cannot rewrite a declared key, so an explicit empty or null value for a declared field cannot be sent on create.",
+        "Python may omit protocol and action and let Neutron default them to any (null) and deny; Go CreateOpts requires both before HTTP, so the caller passes ProtocolAny (sent as null) and ActionDeny to get the same rule."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_firewall_rule",
+      "source_fingerprint": "a26f029fe927759c90186a85b24188bce3bd62bb12a1021779e620325643e242",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PUT /fwaas/firewall_rules/{id} with only the set pointer fields in the firewall_rule envelope, including explicit empty strings, false and empty lists.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Python skips the request when no attribute changed; Go Update always sends PUT, with an empty envelope when UpdateOpts is empty.",
+        "Gophercloud accepts only 200 for the PUT; Python accepts any non-error status."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_firewall_rule",
+      "source_fingerprint": "819ab6f4332ef01e621a3f9f6ce3bc88e26f9625c00d053154c0f73cbd8f1bd5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove(resource.ID(id)) sends DELETE /fwaas/firewall_rules/{id}, succeeds on 204, ignores 404 by default like ignore_missing=True, returns resource.ErrNotFound with WithMissingError and keeps 409 as an error.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource; Go takes resource.ID(id).",
+        "Go uses resource.WithMissingError() for ignore_missing=False and returns resource.ErrNotFound instead of NotFoundException."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_firewall_rule",
+      "source_fingerprint": "9f7dfccabdb56cae5ea4d742b40edca8513356a1db875fcb404b8dc285d722cd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get(id) sends GET /fwaas/firewall_rules/{id} with no query like the fields=None default, decodes the firewall_rule, and returns a 404 error where Python raises NotFoundException.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python get_firewall_rule(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 rule API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_firewall_rule",
+      "source_fingerprint": "bea31689cfc7e729d17cf6030a514f71ead8262ba2b09fe194a4e43a33621504",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET /fwaas/firewall_rules/{x}; after a 404, or a 400 or 403 the caller continues past, Find(resource.Name(x)) sends GET /fwaas/firewall_rules?name=x and returns the unique match, nil with WithIgnoreMissing, resource.ErrNotFound when strict and resource.ErrAmbiguous for duplicate names.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleFindIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go needs two Find calls; Python Resource.find does the ID GET and the name list in one call.",
+        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404, so the caller continues to the name lookup after a 400 or 403 error.",
+        "The Python list match compares both ID and name; the Go name lookup compares only the name. Duplicates raise DuplicateResource in Python and resource.ErrAmbiguous in Go.",
+        "Python forwards **query to both the ID GET and the name list; Go Find takes no extra query.",
+        "Python defaults ignore_missing=True (deprecated toward False); Go Find defaults to the missing error and needs WithIgnoreMissing.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/firewall_rules",
+      "source_fingerprint": "bb57dfc35a33d339b7c15e3b61dc4cdf953e3e12f172e568da289636adf869d8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "List with WithListOptions(ListOpts{Protocol, Action, IPVersion, FirewallPolicyID}) and WithListQuery for enabled sends the Python query mapping keys, and All sends no query for firewall_rules().",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_parity_test.go:TestPythonFirewallRuleProxyParity"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python filters Body attributes that are not in its query mapping (such as admin_state_up) on the returned rows; Go ListOpts sends such fields to the server and leaves other local filtering to the caller.",
+        "Python encodes booleans as True/False; typed Go ListOpts booleans send true/false, so WithListQuery(key, \"True\") reproduces the exact string.",
+        "WithListQuery sends one value per key, so Python's repeated fields=[a, b] query cannot be sent; typed slice fields such as ListOpts.Ports do repeat.",
+        "Go follows the server _links next href; Python can also continue by marker after a page that fills limit.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/insert_rule_into_policy",
+      "source_fingerprint": "e288ffc9a14ae3687a76257a8264a397d1ee84d2f7a2b6882c7a52d2f1f2582f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.InsertRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "InsertRule with exactly one of InsertAfter or InsertBefore sends PUT /fwaas/firewall_policies/{id}/insert_rule with an unwrapped firewall_rule_id body and decodes the unwrapped policy; no position, both positions, or a null insert_before extension fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyRuleActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python always sends insert_after and insert_before, as JSON null when not given; Go omits the unused position key.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": [
+        "Python's default call insert_rule_into_policy(policy, rule) sends both positions as null; Gophercloud v2.15.0 InsertRuleOpts requires exactly one of InsertBefore and InsertAfter and the core keys cannot be added as null extensions, so an SDK-owned insert call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/remove_rule_from_policy",
+      "source_fingerprint": "49490704aec86111825bcc58a6d494dcbea962890acb049e9ebae756a282a27a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.RemoveRule"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveRule(id, ruleID) sends PUT /fwaas/firewall_policies/{id}/remove_rule with {\"firewall_rule_id\": ruleID}, decodes the unwrapped policy response and returns HTTP errors such as 400.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyRuleActions"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python FirewallPolicy._put_request treats any status below 400 as success; Gophercloud accepts only 200.",
+        "Python takes firewall_rule as an ID or Resource and resolves its ID; Go takes the rule ID string.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_qos_bandwidth_limit_rule",
+      "source_fingerprint": "4654610cefc12e28c841179f810d324e6ca8a723ee1258b16b818fe39b4be12d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateBandwidthLimitRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateBandwidthLimitRule(policyID, opts) sends POST /qos/policies/{policy_id}/bandwidth_limit_rules with the bandwidth_limit_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go always sends max_kbps, even as 0, where Python omits a missing attribute; Neutron requires max_kbps, so only failing Python requests differ.",
+        "Declared Go fields with omitempty (such as direction) cannot be sent as empty or null, and WithCreate...Field cannot rewrite a declared key.",
+        "Gophercloud accepts only 201 for the POST; Python accepts any non-error status.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_qos_bandwidth_limit_rule",
+      "source_fingerprint": "f169d4acadd0d6394a51f9a5ef919ff23704bf6f54055994158022d23d6b7872",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateBandwidthLimitRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateBandwidthLimitRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/bandwidth_limit_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python skips the request when no attribute changed; Go always sends PUT, with an empty envelope when the options are empty.",
+        "Go takes ID strings in (policyID, ruleID) order while Python takes (qos_rule, qos_policy) as IDs or Resources.",
+        "Gophercloud accepts only 200 for the PUT.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_qos_bandwidth_limit_rule",
+      "source_fingerprint": "6957efbaafd552e122853e741a9ed2ac0efa77a449e94d7e77ad7db33b2ebf1b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "resource.IgnoreMissing(DeleteBandwidthLimitRule(policyID, ruleID)) sends DELETE /qos/policies/{policy_id}/bandwidth_limit_rules/{rule_id}, succeeds on 204, turns only a plain 404 into nil like ignore_missing=True and keeps 409; the unwrapped call returns the 404 like ignore_missing=False.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python defaults ignore_missing=True inside delete; Go wraps the direct delete with resource.IgnoreMissing for that default and leaves it unwrapped for ignore_missing=False.",
+        "Python accepts IDs or Resources for rule and policy; Go takes ID strings in (policyID, ruleID) order."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_qos_dscp_marking_rule",
+      "source_fingerprint": "a7f590a9eb3de4f8df790dc92f9ff7f7f1e25cdeb18089a73c099e1fe72edb40",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateDSCPMarkingRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateDSCPMarkingRule(policyID, opts) sends POST /qos/policies/{policy_id}/dscp_marking_rules with the dscp_marking_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go always sends dscp_mark, even as 0, where Python omits a missing attribute; Neutron requires dscp_mark, so only failing Python requests differ.",
+        "Declared Go fields with omitempty (such as direction) cannot be sent as empty or null, and WithCreate...Field cannot rewrite a declared key.",
+        "Gophercloud accepts only 201 for the POST; Python accepts any non-error status.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_qos_dscp_marking_rule",
+      "source_fingerprint": "a04ea960886919815b0a598ee59e807c1efe07420be4cb178fb93ccc551b3b43",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateDSCPMarkingRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateDSCPMarkingRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/dscp_marking_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python skips the request when no attribute changed; Go always sends PUT, with an empty envelope when the options are empty.",
+        "Go takes ID strings in (policyID, ruleID) order while Python takes (qos_rule, qos_policy) as IDs or Resources.",
+        "Gophercloud accepts only 200 for the PUT.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_qos_dscp_marking_rule",
+      "source_fingerprint": "89d66bea7448d55d09ff66018c9a0554fc9804018663ccb2e2474a07c226a9bb",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "resource.IgnoreMissing(DeleteDSCPMarkingRule(policyID, ruleID)) sends DELETE /qos/policies/{policy_id}/dscp_marking_rules/{rule_id}, succeeds on 204, turns only a plain 404 into nil like ignore_missing=True and keeps 409; the unwrapped call returns the 404 like ignore_missing=False.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python defaults ignore_missing=True inside delete; Go wraps the direct delete with resource.IgnoreMissing for that default and leaves it unwrapped for ignore_missing=False.",
+        "Python accepts IDs or Resources for rule and policy; Go takes ID strings in (policyID, ruleID) order."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "68147e9627245dfe4be8a90799fb412e05b818174282b7d6999eabbd281b9eca",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithCreateMinimumBandwidthRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMinimumBandwidthRule(policyID, opts) sends POST /qos/policies/{policy_id}/minimum_bandwidth_rules with the minimum_bandwidth_rule envelope, keeps the policy ID out of the body, carries extension keys and decodes the created rule.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Go always sends min_kbps, even as 0, where Python omits a missing attribute; Neutron requires min_kbps, so only failing Python requests differ.",
+        "Declared Go fields with omitempty (such as direction) cannot be sent as empty or null, and WithCreate...Field cannot rewrite a declared key.",
+        "Gophercloud accepts only 201 for the POST; Python accepts any non-error status.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "156f9820e3c217a1817e5335f0c583f860886f0bac386acac104cbbb8c4d64f1",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithUpdateMinimumBandwidthRuleField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMinimumBandwidthRule(policyID, ruleID, opts) sends PUT /qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id} with only the set fields, including an explicit 0, and returns HTTP errors such as 409.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityCreateUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python skips the request when no attribute changed; Go always sends PUT, with an empty envelope when the options are empty.",
+        "Go takes ID strings in (policyID, ruleID) order while Python takes (qos_rule, qos_policy) as IDs or Resources.",
+        "Gophercloud accepts only 200 for the PUT.",
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_qos_minimum_bandwidth_rule",
+      "source_fingerprint": "e584ede1718538bfdf0c77d70adbd202349dff64dd80278c62ff4deae0bdc26a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "resource.IgnoreMissing(DeleteMinimumBandwidthRule(policyID, ruleID)) sends DELETE /qos/policies/{policy_id}/minimum_bandwidth_rules/{rule_id}, succeeds on 204, turns only a plain 404 into nil like ignore_missing=True and keeps 409; the unwrapped call returns the 404 like ignore_missing=False.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_parity_test.go:TestPythonQoSRuleParityDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python defaults ignore_missing=True inside delete; Go wraps the direct delete with resource.IgnoreMissing for that default and leaves it unwrapped for ignore_missing=False.",
+        "Python accepts IDs or Resources for rule and policy; Go takes ID strings in (policyID, ruleID) order."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_qos_minimum_packet_rate_rule",
+      "source_fingerprint": "338a6d39e783c06178fa1effd2a5a94859ddb41f604f700ec13668b29c366426",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /qos/policies/{policy_id}/minimum_packet_rate_rules; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned create call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_qos_minimum_packet_rate_rule",
+      "source_fingerprint": "2469701b8f5145a42b0683cbc4add9fb453cf0fb0be361a7eb2a4bd1905fd892",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id}; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned update call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_qos_minimum_packet_rate_rule",
+      "source_fingerprint": "96b73aea29346ca10ee7f2137a017964af93d2e59524d935cfbcf973f8b25ec2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id}; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned delete call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_qos_packet_rate_limit_rule",
+      "source_fingerprint": "2d0bcd240b80ef973d1c764564c737ebb0e131012ba9e884a5145dd6f09d52ef",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /qos/policies/{policy_id}/packet_rate_limit_rules; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned create call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_qos_packet_rate_limit_rule",
+      "source_fingerprint": "f5fb94c4cedd9359624ca8e599cfae0c5bddea8c0e7e07e8056f3ffaf6f52f98",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id}; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned update call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_qos_packet_rate_limit_rule",
+      "source_fingerprint": "41f750e1c13bba5e864881d1400e1f35370192215e4fb411ebc2f38defe38ae5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id}; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned delete call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/add_router_to_agent",
+      "source_fingerprint": "2076cbdbd78ab5af60bde3253a04309f7aed2431c651861747dea3886cfc60ec",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ScheduleL3Router",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithScheduleL3RouterField"
+      ],
+      "contracts": [
+        {
+          "behavior": "ScheduleL3Router(agentID, {RouterID}) sends POST /agents/{agent_id}/l3-routers with {\"router_id\": id}, WithScheduleL3RouterField adds ha_chassis_priority only when given, and a 404 is returned as an error.",
+          "tests": [
+            "network/v2/extensions/agents/python_parity_test.go:TestPythonL3AgentRouterScheduling"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python returns the decoded response JSON as a dict and never raises because the proxy requests with raise_exc=False; Go accepts only 201, returns an error otherwise and discards the response body.",
+        "Python accepts agent and router as IDs or Resources; Go takes ID strings."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/remove_router_from_agent",
+      "source_fingerprint": "7a904e0e6242d4ecdb706c61d01f86ce117d28d60eb7f45988325a5fc897e8b7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.RemoveL3Router"
+      ],
+      "contracts": [
+        {
+          "behavior": "RemoveL3Router(agentID, routerID) sends DELETE /agents/{agent_id}/l3-routers/{router_id}, succeeds on 204 and returns 404 or 409 as errors.",
+          "tests": [
+            "network/v2/extensions/agents/python_parity_test.go:TestPythonL3AgentRouterScheduling"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python also sends {\"router_id\": id} as a DELETE body; Go sends no body.",
+        "Python never raises and returns None for any status; Go reports non-2xx statuses, so a caller that wants Python's behavior discards the error.",
+        "Python accepts agent and router as IDs or Resources; Go takes ID strings."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_router_in_agent",
+      "source_fingerprint": "9c1ad402a6d05693551ae20aa74df2a30062186e4b64cd8d1b9e1ae27fa7855c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /agents/{agent_id}/l3-routers/{router_id} with an optional ha_chassis_priority body, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/agent_hosted_routers",
+      "source_fingerprint": "9e32c19118924089aad7edcf9337483c5ea11801304cc28f5483ba8bbce71ca4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListL3Routers"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListL3Routers(agentID) sends GET /agents/{agent_id}/l3-routers with no query, decodes the routers array into routers.Router values and returns HTTP errors.",
+          "tests": [
+            "network/v2/extensions/agents/python_parity_test.go:TestPythonL3AgentRouterScheduling"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python forwards **query (the inherited Router query mapping) to the server; Go ListL3Routers takes no query, so the caller filters the returned slice.",
+        "Go reads one response and does not follow routers_links; it returns a slice instead of a lazy generator.",
+        "routers.Router lacks fields such as ha and flavor_id that Python L3AgentRouter exposes.",
+        "Python accepts the agent as an ID or Resource; Go takes an ID string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/routers_hosting_l3_agents",
+      "source_fingerprint": "2bc0ce10d46255bf35bb5e5d4126cdd9031e6b06e97c1027693bc435664a71b6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.ListL3Agents"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListL3Agents(routerID) sends GET /routers/{router_id}/l3-agents with no query, yields each agent with host, ha_state, alive, admin_state_up, agent_type, binary, availability_zone and configurations, and yields HTTP errors.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_parity_test.go:TestPythonRouterHostingL3Agents"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [
+        "Python forwards **query (the inherited Agent query mapping such as host or agent_type) to the server; Go ListL3Agents takes no query, so the caller filters the yielded agents.",
+        "Go reads a single page and does not follow agents_links.",
+        "routers.L3Agent lacks ha_chassis_priority, and its timestamps are parsed time values rather than strings.",
+        "Python accepts the router as an ID or Resource; Go takes an ID string."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/conntrack_helpers",
+      "source_fingerprint": "bdc20e3912b86947c18fa887eae5edfe9068b76fb6ef67359860a9652bbe1450",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /routers/{router_id}/conntrack_helpers, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_conntrack_helper",
+      "source_fingerprint": "abdb2a10c88175185b8d81b2b713c25f6eaf7a6fe7e8d0180d00ed2924e9f825",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /routers/{router_id}/conntrack_helpers, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_conntrack_helper",
+      "source_fingerprint": "9bdf0f8d77b4228e29a03449a8725a23dd77292fc53b214a69872665be0f3e91",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_conntrack_helper",
+      "source_fingerprint": "6e86136a5ea579f9d25a6711d86e25a0153051f09cd787a2217700971f00b1ed",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_conntrack_helper",
+      "source_fingerprint": "983614ce1d7b615a0dd7a71f0d4249de2fa7e1c236e7b944206ba1522b42005a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_ndp_proxy",
+      "source_fingerprint": "a356c75fae9bd195ebd7819ba9bde6c5ecd28b6adbe2cd215d73e2b3304a7d38",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /ndp_proxies, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_ndp_proxy",
+      "source_fingerprint": "cdf13b4ac73f5753e501be8a2364fac9331d38801baafc1d55b995b6bab9499b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_ndp_proxy",
+      "source_fingerprint": "3bd06cab77f1be94d27ad946f8a9ec367206d732c8e46262d1e0cd0ace39011f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies/{id} with a list fallback on /ndp_proxies, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_ndp_proxy",
+      "source_fingerprint": "bd789b5a76d75748b0eac11ea65ce7708410f42d9d4123139e317cbd7b3da7ae",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /ndp_proxies/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/ndp_proxies",
+      "source_fingerprint": "6365e7654344a29b53d6950200d5f0cafc59f8c2654d27f49ccf28a3c77d6e97",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_ndp_proxy",
+      "source_fingerprint": "a8fd4f27886ec443137c90375c72907ff2651ac7dff228413c4a179d7746d29c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /ndp_proxies/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_default_security_group_rule",
+      "source_fingerprint": "e7c9ecfe4d7e341c82b39cfd380226f5501e084ed99e8c2d63742bb9d7ac67f9",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /default-security-group-rules, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_default_security_group_rule",
+      "source_fingerprint": "b089ac0a721c9311d4d2d090a3f3809941f4e82cb3c33410334e8f7c6e3041f3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /default-security-group-rules/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_default_security_group_rule",
+      "source_fingerprint": "729805885b7241296051e040d007c0bac50c056ba9905fb001be03deb49c2210",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules/{id} with a list fallback on /default-security-group-rules, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_default_security_group_rule",
+      "source_fingerprint": "f5d4f252a6fc08e5700364242a7374fa87b21c9fcb8f6881f49024bd0664e1f4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/default_security_group_rules",
+      "source_fingerprint": "aed5e5f5ecf550e3e6bab83d4cc2be83dd22b90274a4d6af43dbad36209e2979",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_security_groups_default_statefulness",
+      "source_fingerprint": "2c4e2d39967d7b0945f84913d98cf2f1d56acf08734ae6469f9310f8c05f9fbf",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /security-groups-default-statefulness, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_security_groups_default_statefulness",
+      "source_fingerprint": "3972d8f094c2d8e600cf1397594b60eacf72b6c879ae781af425a5434c5a458b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_security_groups_default_statefulness",
+      "source_fingerprint": "c33a8e609239ae35a9f2d12c5e06b2f32880f2532700ba408a9211f50c260056",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness/{id} with a list fallback on /security-groups-default-statefulness, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_security_groups_default_statefulness",
+      "source_fingerprint": "c0537267c5b0ce82352f25265ee4af5bb4b9a88e9046be7c54eb5fc9a859b5c5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/security_groups_default_statefulness",
+      "source_fingerprint": "90f2cf0b26d9a6f55dbc8d4e6753dbc54764c214ae7d00bcb69503600edb34a7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_security_groups_default_statefulness",
+      "source_fingerprint": "674738f59f30cace000875ae02961817eea440d59d96bd5b19a78167f84f4b31",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-l3-qos-fw.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
+      ]
     }
   ]
 }
