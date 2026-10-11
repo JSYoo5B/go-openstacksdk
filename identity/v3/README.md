@@ -35,6 +35,8 @@ domain·group·project·user·role의 관리자 CRUD, project tag, group members
 
 OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출은 [native OAuth1·EC2 token 호출](native-oauth1-ec2.md)에 설명합니다.
 
+`Policies`의 생성·조회·수정·삭제와 federation mapping 삭제가 Python Proxy와 어떻게 대응하는지, identity provider·protocol·service provider 경로가 왜 미해결인지는 [Python policy·federation 대응](python-parity-federation.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go
