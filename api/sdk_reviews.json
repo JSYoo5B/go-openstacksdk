@@ -98610,6 +98610,916 @@
         "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
         "Python deletes the minimum bandwidth rule with ignore_missing=False and converts a 404 to False; the Go rule delete returns the 404 as an error, so the False result needs caller-side 404 handling."
       ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/list_containers",
+      "source_fingerprint": "46d94b2f094e636bc3c5c66ba8153d5ca52ed73518642b0f62c66a4f8887eae3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a list of Container resources; Go yields ContainerRecord values lazily through an iterator, so a Python list is the collected iterator.",
+        "The deprecated full_listing argument only emits a warning in Python and has no Go counterpart.",
+        "Python sends the Swift microversion it negotiates; Go sends the configured client microversion when one is set."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/search_containers",
+      "source_fingerprint": "d0683d72501b4e8a81a72ac2516fda44ca4a883059b362f022a778979c3f4f48",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public helper reproducing _utils._filter_list for containers (name or ID glob match, nested dictionary filters and JMESPath string filters); filtering the listed records is caller-side work."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_container",
+      "source_fingerprint": "2be550a9cdb5c5bd02d28004ff6f4726cb9d3ef42dbeece0a5f0babc08fab35b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find with resource.ID and resource.WithIgnoreMissing sends one bodyless HEAD to the container, returns name, count, bytes, custom metadata and the raw X-Container-Read header, returns nil without error on 404 and keeps other statuses such as 403 as errors.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudGetContainerHeadAndMissingNone"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a Container resource or None; Go returns *ContainerResource with typed Details, Metadata keyed by the original header suffix and the cloned response Header, or nil.",
+        "Go validates the container name before HTTP (Gophercloud CheckContainerName rejects '/' and names over 256 bytes); Python sends any name.",
+        "Gophercloud accepts only 200 and 204 for the HEAD; Python accepts any 2xx status.",
+        "The skip_cache argument is ignored in Python and has no Go counterpart."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_container",
+      "source_fingerprint": "5d3d0cd6761e8623727ba69adf197700ce75ef98f2ddcd1cd5ce82ba4ddab4c9",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "The Find, CreateRecord, Find chain sends HEAD only for an existing container and HEAD, PUT, HEAD for a missing one; the PUT is bodyless and carries X-Container-Read .r:*,.rlistings only when read_ACL is passed.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudCreateContainerSequence"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no get-or-create helper: the caller must branch on a nil Find result, call CreateRecord and run a second Find, which is caller-side orchestration rather than one SDK call.",
+        "Go has no public=True switch; the caller must pass the literal read_ACL value .r:*,.rlistings to CreateRecord."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/delete_container",
+      "source_fingerprint": "2ac929211443016a1a12f90a232a61f93607681021333be2d23887ce558f4ec7",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteRecord sends one bodyless DELETE; 204 returns IgnoredMissing false (Python True), a clean 404 returns IgnoredMissing true without error (Python False) and 409 stays an HTTP error.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudDeleteContainerOutcomes"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a bool; Go returns *ContainerResponse whose IgnoredMissing field is the negated Python result.",
+        "Python converts 409 into SDKException with a 'container is not empty' message; Go returns the HTTP 409 error with its status, body and headers.",
+        "Go validates the container name before HTTP; Python sends any name."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/update_container",
+      "source_fingerprint": "0229b270fbcf7698c72e07b2f63e9f3d00a1961f66695198da7e045f64986c0a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost",
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns None; Go returns the POST acknowledgement with Refreshed nil because refresh is disabled.",
+        "Python headers are keyword arguments; Go takes a map[string]any converted with Python string spellings, and colliding aliases fail before HTTP instead of last-assignment wins."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/set_container_access",
+      "source_fingerprint": "4bc9f867518b8a1aa5abc523b046c1e4d0c1439b9f1cf9c678b842684670daf2",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost",
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no helper translating the access names public and private into the ACL strings .r:*,.rlistings and an empty value, nor one rejecting other access names before HTTP; the caller must pass the literal read_ACL value to SetMetadataAndRefresh."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_container_access",
+      "source_fingerprint": "7200cf48b8c95ff57cca6e2b7a2f8a6de91a49d8cb2e3b653207874c2ed0b9b4",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find with resource.ID and resource.WithIgnoreMissing sends one bodyless HEAD to the container, returns name, count, bytes, custom metadata and the raw X-Container-Read header, returns nil without error on 404 and keeps other statuses such as 403 as errors.",
+          "tests": [
+            "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudGetContainerHeadAndMissingNone"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no helper classifying the X-Container-Read value as public or private and failing for a missing container or an unknown ACL; Find exposes only the raw header, so the classification is caller-side work."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_capabilities",
+      "source_fingerprint": "0593a4fb5b01de2c7c32e3b528b5e04f32db212527280027d2f510b60223a684",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetInfo"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper only delegates to Proxy.get_info, which stays unresolved: Python Info Resource descriptor coercion, unknown-body handling and JSON exception translation are not reproduced by the strict Go Info model."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_segment_size",
+      "source_fingerprint": "4ea8276546756b3f53e391c7715f7495763bb006d93bc7d82a4eeef5df9a84e2",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetObjectSegmentSize"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper only delegates to Proxy.get_object_segment_size, which stays unresolved: Python float results, unrestricted numeric comparisons and the NotFound/PreconditionFailed default fallback classes differ from the strict Go integer contract."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/is_object_stale",
+      "source_fingerprint": "31a567eca78b3423acb4feccb6aeb6507a4ccb2ea72fb9a59eda8d1aa0ac2c40",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.IsObjectStale"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper only delegates to Proxy.is_object_stale, which stays unresolved: Python Resource metadata cache and exception policies are not reproduced by the Go HEAD evidence and nullable decision."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_object",
+      "source_fingerprint": "cb953138fa389d47c2ed36fb82bd459fa1ed5fb1576a8c83b34bf282e22a0cec",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper only delegates to Proxy.create_object, which stays unresolved: Python kwargs headers, mutable Object and container precedence, segment cleanup and exception classes are not reproduced wholesale by the Go upload workflow."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/update_object",
+      "source_fingerprint": "2fc66f436cd145289f5a797ada5ef59c22313d8946e70a35a8f8c449c98d54b6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadataFromFresh"
+      ],
+      "contracts": [
+        {
+          "behavior": "SetMetadataFromFresh sends a query-free HEAD and then one bodyless POST that resends the observed custom metadata, adds the new suffix keys, maps content_type to Content-Type and omits falsey values, with no final HEAD.",
+          "tests": [
+            "objectstorage/v1/objects/python_parity_test.go:TestPythonObjectCloudUpdateObjectMergesFreshMetadata"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python merges the metadata dict and keyword headers itself; the Go caller passes one map[string]any holding both.",
+        "Python returns None; Go returns the HEAD observation and the POST acknowledgement.",
+        "Go escapes '/' in object names as %2F while Python joins the raw name; Swift decodes both to the same object path."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/list_objects",
+      "source_fingerprint": "03842d4bcc31a70b6f7d3af6a6e4dc2a39ccf05c66e3924a494af64ffe7366cc",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.InContainer",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper delegates to Proxy.objects, which stays unresolved: Go has no Python-shaped object record listing that reproduces the format=json query, Python count/limit/marker continuation and Object record projection, and the native Collection listing was not compared for those defaults."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/search_objects",
+      "source_fingerprint": "735bc34810a9602294d325689bfa26154b73d857d4f41c3cdb38f923ace8c222",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.InContainer",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public helper reproducing _utils._filter_list for objects, and the underlying list_objects listing is itself unresolved."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/delete_object",
+      "source_fingerprint": "d5e19faadab923e453415c641345a844096d5346527a0286668443d413dc4131",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject"
+      ],
+      "contracts": [
+        {
+          "behavior": "DeleteObject sends HEAD and then DELETE, adding multipart-manifest=delete for a static large object; 404 at HEAD or DELETE returns IgnoredMissing true without error (Python False) and 409 stays an HTTP error.",
+          "tests": [
+            "objectstorage/v1/objects/python_parity_test.go:TestPythonObjectCloudDeleteObjectOutcomes"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns False for every SDKException, including 409 and 5xx; Go returns those failures as errors and reports only a clean 404 through IgnoredMissing.",
+        "The meta argument is unused in Python and has no Go counterpart.",
+        "Go escapes '/' in object names as %2F while Python joins the raw name; Swift decodes both to the same object path."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/delete_autocreated_image_objects",
+      "source_fingerprint": "168addad8a834e9d0baabfb3061ac5ac7094b12ae8d7ef2899513c09a6fd0e28",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no helper that checks the image_api_use_tasks setting, lists objects in the images container by segment prefix, reads each object's x-sdk-autocreated metadata and deletes the marked objects."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_metadata",
+      "source_fingerprint": "2e33b078f3aacc48b060c6e610e18e0734a21bcacf9a363b031001d2187422a0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.HeadMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "HeadMetadata sends one bodyless, query-free HEAD and returns custom metadata keyed by the lower-cased X-Object-Meta suffix; 404 stays an error as in Python.",
+          "tests": [
+            "objectstorage/v1/objects/python_parity_test.go:TestPythonObjectCloudGetObjectMetadataHead"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns the metadata dict; Go returns GetMetadataResult whose Metadata.Values holds the same keys, together with typed system headers and the response evidence.",
+        "Go escapes '/' in object names as %2F while Python joins the raw name; Swift decodes both to the same object path."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_raw",
+      "source_fingerprint": "9523e7dd3b515659047b838fb041be2ed07065d1b18d3fd2c7c6684a98d1e488",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no call that sends a GET with an arbitrary caller query string and returns the raw HTTP response; GetObject accepts only typed read options and returns decoded results."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/stream_object",
+      "source_fingerprint": "8078cd6b27dc2d19ac6b55c9e2ff47e2ae28fe20b66cd7afe26a2500911243bd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "This helper delegates to Proxy.stream_object, which stays unresolved: Python yields resp_chunk_size chunks from a Requests iterator, while Go returns an io.ReadCloser; the cloud helper also turns NotFound into an empty iterator, which Go would need caller-side 404 handling to reproduce."
+      ]
+    },
+    {
+      "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object",
+      "source_fingerprint": "a69f073d71fb0a0b9d5dee4e2e0356a911084875dff7e4cda09b9683987962d2",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject"
+      ],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The default path stores response.text, a string decoded with the Requests charset guess, which Go GetObject does not reproduce because it returns raw bytes.",
+        "Python accepts an outfile path that it opens, writes and closes, or a file object that it flushes; Go DownloadObject only writes to a caller-owned io.Writer.",
+        "Python returns None for a missing object; Go GetObject returns the 404 as an error, so the None result needs caller-side handling."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/current_location",
+      "source_fingerprint": "15ae5cfa6975bb13ec42864b94bb9b2c238607fc00972173984dbc76f489dbf8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.",
+          "tests": [
+            "python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a Munch; Go returns resource.CloudLocation with nullable pointer and raw JSON fields.",
+        "For a connection built from OS_* environment variables Python names the cloud envvars (or OS_CLOUD_NAME), while Go uses the identity endpoint host; FromProvider leaves the cloud null unless WithCloudLocation supplies it.",
+        "Python reports region_name from configuration (an empty string when unset); Go leaves it null when no region is configured.",
+        "Python reads the project id through session.get_project_id(), which can authenticate; Go reads the scope recorded at Connect without I/O."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/current_project",
+      "source_fingerprint": "020a799fb60b27893a86705975e1fb1b7f34aebd1b4c9783c4b7787b9429966c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.",
+          "tests": [
+            "python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a Munch with id, name, domain_id and domain_name; Go exposes the same four fields as CurrentLocation().Project.",
+        "Python reads the project id through session.get_project_id(), which can authenticate; Go reads the scope recorded at Connect without I/O."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/current_project_id",
+      "source_fingerprint": "ab4f8ec300485e30b511c5acc9965f599a63c2a14c21a1ebf20bddddd5aa3556",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.",
+          "tests": [
+            "python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName"
+          ]
+        },
+        {
+          "behavior": "An unscoped token yields a nil CurrentLocation().Project.ID, matching Python None.",
+          "tests": [
+            "python_parity_test.go:TestPythonConnectionCurrentProjectIDUnscopedIsNull"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns a string or None; Go returns CurrentLocation().Project.ID as raw JSON or nil.",
+        "Python reads the project id through session.get_project_id(), which can authenticate; Go reads the scope recorded at Connect without I/O."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/get_name",
+      "source_fingerprint": "5ff3fdbce738601b0b961cc51f0fb5eba50e2c44eeda85bf9da65bf3cd394a30",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CurrentLocation"
+      ],
+      "contracts": [
+        {
+          "behavior": "CurrentLocation returns cloud, region_name, null zone and the project id from the recorded token scope with project name and domain from configuration, encoded with the Python key names, without any request beyond the initial authentication.",
+          "tests": [
+            "python_parity_test.go:TestPythonConnectionCurrentLocationProjectAndName"
+          ]
+        }
+      ],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [
+        "Python returns the configured cloud name string; Go returns CurrentLocation().Cloud as a nullable pointer.",
+        "For a connection built from OS_* environment variables Python names the cloud envvars (or OS_CLOUD_NAME), while Go uses the identity endpoint host; FromProvider leaves the cloud null unless WithCloudLocation supplies it."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/auth_token",
+      "source_fingerprint": "26dc436acb6f3282e1e9529df841e23cd1511b35d91316118e3f92e21e73c67c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Connection exposes no token accessor; the token lives in the Gophercloud ProviderClient, which is not an SDK API and does not re-authenticate before expiry the way keystoneauth get_token does."
+      ]
+    },
+    {
+      "operation": "python:connection/authorize",
+      "source_fingerprint": "c120ab6317418c281cbe72cacc4a04d975d3064f84c57f601f300855b8d4fea0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Connection exposes no token accessor; the token lives in the Gophercloud ProviderClient, which is not an SDK API and does not re-authenticate before expiry the way keystoneauth get_token does. Connect authenticates eagerly but returns no token string, and keystoneauth failures are not mapped to SDKException."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/current_user_id",
+      "source_fingerprint": "27b1c2d1623f519746780c53bd1f83451b5ea587003c27de803c02a89f627345",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Connection exposes no accessor for the user ID recorded in the authentication response."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/service_catalog",
+      "source_fingerprint": "d4162f682050b8572461bfc083e7da4341569084839d8d2b2acbc1cb74ec8b99",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Connection exposes no accessor for the token service catalog."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/session",
+      "source_fingerprint": "c020d0854f3109bfeece431c59ccd4e95207901835367a6de71102e60a78e58a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no keystoneauth Session equivalent on Connection; the authenticated Gophercloud ProviderClient is not exposed as SDK API."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/close",
+      "source_fingerprint": "41746dd9a0e3b4cb15d63acb29ad95a39ebc47ef0d649c62b1e43d38c7f90929",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Connection has no Close method; there is no auth cache persistence, session pool shutdown or executor shutdown to trigger, and the caller owns the http.Client."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/set_global_request_id",
+      "source_fingerprint": "1cd9032beffe3423d0108c7b1dd58eb5bc0dde09ba26dcf2fa38d5818c7135d3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no global request ID setting, so no X-OpenStack-Request-ID header is added to requests."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/global_request",
+      "source_fingerprint": "0e563a134510a6d7e41373940fa05895a183c5ac27f0b121227e2674af8bd617",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go cannot derive a Connection that shares the session and sends a global request ID header."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/pprint",
+      "source_fingerprint": "6cc72fde00dfd350a20b915edad0781eec296221ca425aedecefae83550c4892",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK has no printing helper; Python delegates to the standard pprint module and Go callers use fmt or encoding/json themselves."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/pformat",
+      "source_fingerprint": "227c322134ec02386ab8e885e81df0c920d524507b928113db15f7b96942e67f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK has no formatting helper; Python delegates to pprint.pformat and Go callers use fmt or encoding/json themselves."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/range_search",
+      "source_fingerprint": "8c13d734371babc9cda5ccfb6eedc1ee1806ae0a73390a6002b4271e4e83d92f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public helper for the integer range filters (<, >, <=, >=, exact and min/max) applied across a list of dictionaries."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/search_resources",
+      "source_fingerprint": "b07a7eb42fdc729da183c2c41b22cf740a4d97ad2486d184ef64d13bff3626ac",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no registry that resolves a 'service.resource' string to a proxy resource and runs the GET-by-ID then filtered list fallback."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/project_cleanup",
+      "source_fingerprint": "35b2963389f81436747bde8b2c68fa949f685351c5fc245c3e10e4714de9f5f3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no project cleanup workflow with service dependency ordering, dry run, filters, evaluation callback and status queue."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/has_service",
+      "source_fingerprint": "5dea5582ca614fcceefc8532dd8fa087c42285b440c49b11c47ee2901b6ee33c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no boolean service probe that honours has_<service> configuration and version discovery; service accessors return errors that do not distinguish an absent service from other failures."
+      ]
+    },
+    {
+      "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/get_session_endpoint",
+      "source_fingerprint": "daadc1c339a2e942ae5dedd39e8bb9fc8e984d67dfb88f46321be920a652a654",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public endpoint lookup by service type with min_version and max_version discovery that returns None when the endpoint is missing."
+      ]
+    },
+    {
+      "operation": "python:connection/endpoint_for",
+      "source_fingerprint": "36717b27b5d35caa681af960315745d4c1d944ff3ac9ae35ed5b08e40eabcd6b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no public endpoint lookup by service type string with per-call interface and region_name that honours endpoint overrides and returns None when the catalog has no match."
+      ]
+    },
+    {
+      "operation": "python:connection/connect_as",
+      "source_fingerprint": "c11541b7de39a9aa269a30fff4a945133e4b82c4c1f1e461acfa6cbc757ba79c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go cannot derive a new Connection from the current configuration with overridden auth arguments and a shared discovery cache; the caller must run Connect again with explicit options."
+      ]
+    },
+    {
+      "operation": "python:connection/connect_as_project",
+      "source_fingerprint": "dc72b3abbdd396ea458fda1523306325ecde83117d32ebb2c11823d8dc4fd458",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go cannot derive a new Connection scoped to another project name or project dict from the current configuration; the caller must run Connect again with explicit options."
+      ]
+    },
+    {
+      "operation": "python:connection/add_service",
+      "source_fingerprint": "5c7f6bef437eef5da218cb0fdabfe23fcc44b0941a0b03014047dfb55fcec21d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no runtime registration of a ServiceDescription that attaches a new proxy to Connection and enables its service type."
+      ]
+    },
+    {
+      "operation": "python:cloud/_utils/FileSegment/read",
+      "source_fingerprint": "de37994ec001985c0f655b187c50fe7a6796c7100809ca6f1d1d62a350616cbb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject."
+      ]
+    },
+    {
+      "operation": "python:cloud/_utils/FileSegment/reset",
+      "source_fingerprint": "97183fd98f76fb1169e1c4cbef0fcc29ec655e11f45d06894fa8d46f4afa76fb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject."
+      ]
+    },
+    {
+      "operation": "python:cloud/_utils/FileSegment/seek",
+      "source_fingerprint": "a97055962c9fa4a6f4bf2f5a076d901dfa0bd171b6fb4946bb9f692652986bbe",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject."
+      ]
+    },
+    {
+      "operation": "python:cloud/_utils/FileSegment/tell",
+      "source_fingerprint": "4aa3828d1800f2f57ee21e2c8adeaaa64d048ada8e2c81562d20e177ba66e44d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject."
+      ]
+    },
+    {
+      "operation": "python:cloud/inventory/OpenStackInventory/list_hosts",
+      "source_fingerprint": "ab308cbf581a104fee663015eba0e8c327e69392f95fb488b3fe67d2ef379cd2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no multi-cloud inventory that connects to every clouds.yaml entry and lists servers across them with fail_on_cloud_config handling."
+      ]
+    },
+    {
+      "operation": "python:cloud/inventory/OpenStackInventory/search_hosts",
+      "source_fingerprint": "fd468cc8e7a0d52428c7685efb5d46ee69ddc097bd57ac4cca9475a4a533a7cf",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no multi-cloud inventory, and no public _utils._filter_list helper for its server list."
+      ]
+    },
+    {
+      "operation": "python:cloud/inventory/OpenStackInventory/get_host",
+      "source_fingerprint": "89d823fe48675da1282180543bb34b37ea6bc1435415cc6f400b614cc4b5cf44",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "docs/python-cloud-parity-misc.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Go has no multi-cloud inventory search that returns one server or None and fails on multiple matches."
+      ]
     }
   ]
 }
