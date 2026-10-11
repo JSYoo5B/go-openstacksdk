@@ -13,7 +13,7 @@
 | 상속된 `Group.find(..., microversion=version)` | `WithRecordFindMicroversion(version)` | Go 확장: GET만 override, 목록은 원래 기본값 |
 | session의 일반 추가 헤더 | `WithRecordFindHeaders(headers)` | Go 확장: 두 단계에 복사, 버전·인증·route control은 거부 |
 
-고정된 `find_group` proxy는 `name_or_id`, `ignore_missing`, `details`만 받습니다. Go의 Microversion/Headers는 명시적인 확장입니다. `Group`의 query mapping에는 `name`이 없으므로 fallback GET에 `?name=...`를 추가하지 않습니다. 모든 페이지를 읽고 실제 string `id` 또는 `name`이 caller identity와 정확히 같은 항목을 비교합니다. 최초 일치 뒤의 페이지도 확인하며, 같은 ID를 가진 두 행도 중복 오류입니다. 성공한 member GET은 서버의 ID/name을 caller 입력과 다시 비교하지 않고 반환합니다.
+고정된 `find_group` proxy는 `name_or_id`, `ignore_missing`, `details`만 받습니다. Go의 Microversion/Headers는 명시적인 확장입니다. `Group`의 query mapping에는 `name`이 없으므로 fallback LIST에 `?name=...`를 추가하지 않습니다. 모든 페이지를 읽고 실제 string `id` 또는 `name`이 caller identity와 정확히 같은 항목을 비교합니다. 최초 일치 뒤의 페이지도 확인하며, 같은 ID를 가진 두 행도 중복 오류입니다. 성공한 member GET은 서버의 ID/name을 caller 입력과 다시 비교하지 않고 반환합니다.
 
 ## 독립 Python main
 
@@ -94,7 +94,7 @@ func main() {
 }
 ```
 
-`groups.New(service.RawClient())`로 같은 API를 만들 수도 있습니다. interface나 사용자 builder 구현은 필요하지 않습니다. `RecordFindOpts`의 nullable bool/string과 `WithRecordFindOpts`·각 옵션 함수는 map/pointer를 복사합니다. 옵션 생성 후 caller map을 바꾸거나 옵션 callback이 보관한 pointer를 HTTP 중 바꿔도 검색에 적용한 스냅샷을 바꾸지 않습니다.
+`groups.New(service.RawClient())`로 같은 API를 만들 수도 있습니다. interface나 사용자 builder 구현은 필요하지 않습니다. `RecordFindOpts`의 nullable bool/string과 `WithRecordFindOpts`·각 옵션 함수는 map/pointer를 복사합니다. 기본값과 명시적인 nil Headers도 빈 소유 map으로 준비하므로 첫 사용자 옵션 callback에서 안전하게 헤더를 추가할 수 있습니다. 옵션 생성 후 caller map을 바꾸거나 옵션 callback이 보관한 pointer를 HTTP 중 바꿔도 검색에 적용한 스냅샷을 바꾸지 않습니다.
 
 ## 두 단계의 버전·응답과 오류
 
@@ -106,7 +106,7 @@ value, err := service.Groups.FindRecord(ctx, "sample",
     groups.WithRecordFindHeaders(map[string]string{"X-Trace": "group-find"}))
 ```
 
-원래 selected version이 `3.13`이면 GET은 `3.90`, fallback 목록은 `3.13`입니다. selected version이 비어 있으면 기본 discovery는 Group의 cap `3.38`까지 협상합니다. 기본 GET이 이미 협상한 경우 그 실제 discovery 응답을 같은 검색의 목록 단계에 재사용합니다. 명시적인 GET override 뒤 fallback이 필요하면 목록 단계에서 원래 기본값을 협상합니다. Discovery가 거부되면 member 실패로 취급하지 않고 중단합니다. `WithRecordFindMicroversion("")`는 원래 기본값을 유지합니다. 명시적으로 선택한 유효 version은 `3.38`보다 높아도 client 정책대로 유지됩니다.
+원래 selected version이 `3.13`이면 GET은 `3.90`, fallback 목록은 `3.13`입니다. selected version이 비어 있으면 기본 discovery는 Group의 cap `3.38`까지 협상합니다. 기본 GET이 이미 협상한 경우 그 실제 discovery 응답을 같은 검색의 목록 단계에 재사용합니다. 명시적인 GET override 뒤 fallback이 필요하면 목록 단계에서 원래 기본값을 협상합니다. Discovery가 거부되면 member 실패로 취급하지 않고 중단합니다. `WithRecordFindMicroversion("")`는 원래 기본값을 유지하는 Go 정책입니다. 상속된 Python `Resource.fetch`의 명시적인 빈 microversion 문자열 처리와는 다릅니다. 명시적으로 선택한 유효 version은 `3.38`보다 높아도 client 정책대로 유지됩니다.
 
 GET은 source의 일반 `Accept` 헤더를 유지합니다. LIST는 고정 Source대로 `application/json`을 사용하며, per-call `Headers`에 case-insensitive `Accept`를 명시했을 때만 그 값을 사용합니다. 버전 세 헤더와 reserved 인증/프레이밍 헤더는 SDK가 소유합니다. Native retry callback의 버전 변경·별도 Nova 헤더 추가·Authorization 추가·owned header의 OmitHeaders 억제는 기존 실제 거부 응답과 옵션 오류를 보존하고 다음 HTTP를 차단합니다. 일반 `X-Retry` 변경과 provider의 live token 갱신은 허용됩니다. 이미 관찰된 물리적 read/Close·취소·source 변경 오류는 retry callback 전에 중단합니다.
 
@@ -122,4 +122,4 @@ Python의 mutable Resource/Munch/subclass, Connection에서 계산한 `location`
 
 ## 회귀 검증 범위
 
-`blockstorage/v3/groups/python_find_test.go`의 16개 그룹은 기존 `groupAPI`·`groupFaultBody` fixture와 public Gophercloud testhelper를 사용하는 `internal/testcloud`를 재사용합니다. literal GET, clean fallback, missing, 모든 페이지·중복·late failure, accepted/rejected 물리적 cause, owned 옵션, 한 captured source의 두 버전 단계·discovery, native retry 정책을 검사합니다. 기존 Group GET/LIST 테스트도 helper 재사용 변경 때문에 함께 검증해야 합니다. 실제 검증 결과와 진행량은 중앙 API ledger에서 관리합니다.
+`blockstorage/v3/groups/python_find_test.go`의 17개 그룹은 기존 `groupAPI`·`groupFaultBody` fixture와 public Gophercloud testhelper를 사용하는 `internal/testcloud`를 재사용합니다. literal GET, clean fallback, missing, 모든 페이지·중복·late failure, accepted/rejected 물리적 cause, owned 옵션, 한 captured source의 두 버전 단계·discovery, native retry 정책을 검사합니다. 기존 Group GET/LIST 테스트도 helper 재사용 변경 때문에 함께 검증해야 합니다. 실제 검증 결과와 진행량은 중앙 API ledger에서 관리합니다.
