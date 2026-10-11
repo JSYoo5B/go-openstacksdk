@@ -8,6 +8,19 @@
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,195입니다.
 
+## Keystone credential·Neutron mutation·Cinder summary 병렬 묶음
+
+2026-10-11에 ApplicationCredential/AccessRule8개, Neutron AddressGroup/AddressScope/SubnetPool/Trunk/QoSPolicy의 생성5·수정2·기본 삭제5개, Cinder volume summary1개를 집중 검증했습니다. 서로 의존하지 않는 서비스별 leaf를 worker3개가 담당하고 부모는 현재 리소스의 검토·포맷·집중 실행·판정·커밋을 순차 통합했습니다. 완료된 worker는 Swift metadata, generic Credential, Neutron port/subnet/router/ip와 다음 Nova user 후보로 바로 재배정합니다.
+
+실제 실행은 Keystone 새8+기존native2그룹 PASS, Neutron 새31그룹 PASS, Cinder summary 새3+기존detail1그룹 PASS입니다. 초기 Neutron fixture의 204 model 기대값 오류7사례를 발견했고, Gophercloud가204 JSON body를 decode하지 않아 nil,nil을 반환하는 native 계약을 테스트·가이드에 명시한 후 해당 묶음을 재검증했습니다. 별도 Backup profile8그룹도 PASS입니다. 증거는 `/private/tmp/go-openstacksdk-oct11-{identity-neutron-mutations-focused,neutron-mutations-passing,volume-summary-focused,backup-profile-focused}.jsonl`이며 최종 focused 결과와 최초 실패를 구분합니다.
+
+Source pin/catalog bytes는 그대로 유지하고 기존1,553개 리뷰 중 Volume의 실제 summary gap과 Backup4개의 새 compatibility 근거만 갱신했습니다. 신규20행과 Volume 판정 승격1개로 Go 매핑1,195→1,216, 핵심1,121→1,142/2,292, reviews1,573·contracts4,857·catalog 미해결2,145·미지원1입니다. Keystone178/389, Neutron268/758, Cinder254/480입니다. Source처럼 동작하는 named 호출의 bounded Go profile을 판정했으며 전체 mutable Resource/session/cache/discovery를 completed로 선언하지 않습니다.
+
+[Keystone](../identity/v3/application-credentials-python.md)는 literal user scope·owned raw Resource/Wire·기본 Find·필터 전raw cap·pagination·기본 미존재 삭제를 제공합니다. [Neutron](../network/v2/python-resource-mutations.md)은 omitted/false/zero/null/empty/unknown Body·canonical aliases·empty update noHTTP·기본404 삭제를 callable options로 제공합니다. [Cinder summary](../blockstorage/v3/volume-summary-python.md)는 details=False를 실제 `/volumes`로 보냅니다. [Backup explicit profile](../blockstorage/v3/backup-metadata-python.md)은 stock 미지원 경로의404를 보존하며 일반 stock 지원 숫자에 더하지 않습니다.
+
+Cinder `0b4a1f06`·`3970223e`, Keystone 구현 `fe3960cd`·계약/가이드 `5e89923e`, Neutron 리소스별 `77c2157d`·`427332da`·`2dbd4084`·`8e8341d8`·`c453a444` 및 가이드 `1afc9c79`를 작은 단위로 commit/push했습니다. 현재 named 판정 후 전체 gate·문서 main의 검증은 이 커밋 묶음의 불변 스냅샷에서 이어갑니다. 실제 인증 클라우드/Python runtime 호출과 alpha release는 이 fixture 검증에 포함하지 않습니다.
+
+
 ## Neutron 선택 조회·조건부 삭제와 Keystone 토큰 완료
 
 **최신 API 완료 (2026-10-11): 독립 서비스 병렬 구현21개, 전체1,174→1,195(+21)·핵심1,100→1,121/2,292·Network238→256/758·Identity167→170/389.** Neutron 기능과 Keystone 토큰을 별도 에이전트가 동시에 구현하고, 공통 요청·생성기 통합과 최종 판정은 한곳에서 처리했습니다. 새 구현은 기존 native API와 함께 사용할 수 있는 공개 SDK 기능입니다.

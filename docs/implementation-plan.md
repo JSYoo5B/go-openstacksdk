@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): Neutron·Keystone 독립 서비스 병렬 묶음 완료. 전체1,195/3,362·핵심1,121/2,292.** Neutron 선택 조회11개·조건부 삭제7개와 Keystone 토큰3개를 구현·검토했고, 새22그룹을 포함한 집중 race51그룹·전체155개 실제 test package gate·정확한 문서 main2개 외부 빌드가 PASS입니다. 기존 FindIdentity와 완료된 Glance cloud·현대 이미지 생성은 재사용합니다. 전체 목표는 active입니다. 다음 핵심 user 묶음은 Keystone ApplicationCredential/AccessRule, Neutron resource mutation, Cinder Backup Python metadata compatibility profile을 서비스별 에이전트가 병렬 구현 중입니다. Backup profile의 stock 서버 미지원 경로는 일반 metadata API와 분리해 추적합니다.
+**현재 진행 (2026-10-11): 의존성 없는 서비스의 3 worker 슬롯을 계속 채워 병렬 구현 중. 전체1,216/3,362·핵심1,142/2,292.** ApplicationCredential/AccessRule8개·Neutron Body mutation/기본 삭제12개·Cinder volume summary1개를 새로 구현해 집중 race와 Source/계약 판정검사를 통과했습니다. 구현·회귀·비교 문서를 작은 서비스 커밋으로 수시 push합니다. Backup metadata4개는 명시적 Python 호환 프로파일을 구현하고 race8그룹을 통과했지만 stock Cinder에 child route가 없어 미해결 수에 유지합니다. 다음 작업은 Keystone generic credential5개의 중앙 검증, Neutron port/subnet/router/ip8개, Swift metadata7개와 Nova 핵심 user 후보입니다. 중앙 runner는 동결한 커밋의 불변 스냅샷에서 전체 gate를 검증하여 다른 에이전트의 다음 독립 구현을 계속 진행합니다. SDK-R1/C1/S1과 전체 목표는 active입니다.
 
 서비스 사이 의존성이 없는 구현은 서비스별 에이전트가 동시에 진행합니다. 공통 기능은 먼저 확정해 재사용하고, 담당 파일을 나눠 구현·서비스별 테스트·Python 비교 문서를 준비합니다. 생성기 통합·판정 JSON·자동 집계·전체 검사·commit/push는 한곳에서 순서대로 처리합니다.
 
@@ -476,11 +476,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
-| 검증된 Go 매핑 | 1,195 (35.5%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,216 (36.2%) | 전체 연산의 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 미지원 | 2,166 / 1 | 미검토 선언도 미해결 집계에 포함 |
-| 연산별 검토 기록 | 1,553 | 아직 개별 기록 없는 선언 1,809 |
-| 기록한 부분·전체 계약 | 4,798 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 미해결 / 미지원 | 2,145 / 1 | 미검토 선언도 미해결 집계에 포함 |
+| 연산별 검토 기록 | 1,573 | 아직 개별 기록 없는 선언 1,789 |
+| 기록한 부분·전체 계약 | 4,857 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -659,23 +659,23 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 전체 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,121 / 2,292 | 48.9% | 258 | 912 | 1 |
+| 핵심 서비스 · 1·2단계 합산 | 1,142 / 2,292 | 49.8% | 257 | 892 | 1 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 0 / 29 | 0.0% | 0 | 29 | 0 |
-| 전체 | 1,195 / 3,362 | 35.5% | 357 | 1,809 | 1 |
+| 전체 | 1,216 / 3,362 | 36.2% | 356 | 1,789 | 1 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 전체 | 부분·미해결 검토 | 미검토 | 미지원 |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 170 / 389 | 15 | 204 | 0 |
+| Identity / Keystone | 178 / 389 | 15 | 196 | 0 |
 | Compute / Nova | 220 / 333 | 67 | 46 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 256 / 758 | 43 | 459 | 0 |
+| Network / Neutron | 268 / 758 | 43 | 447 | 0 |
 | Image / Glance | 85 / 120 | 35 | 0 | 0 |
-| Block Storage / Cinder | 253 / 480 | 49 | 178 | 0 |
+| Block Storage / Cinder | 254 / 480 | 48 | 178 | 0 |
 | Key Manager / Barbican | 52 / 67 | 15 | 0 | 0 |
 | Object Storage / Swift | 20 / 74 | 28 | 25 | 1 |
 

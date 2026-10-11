@@ -67003,11 +67003,14 @@
     {
       "operation": "python:block_storage/v3/volumes",
       "source_fingerprint": "dc1c5dc7595368bdb3b8ebee79563f93b2b3e187732d42550f339465393b2be5",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListWithDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummary",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.ListSummaryWithControl"
       ],
       "contracts": [
         {
@@ -67015,20 +67018,38 @@
           "tests": [
             "blockstorage/v3/volumes/python_parity_test.go:TestPythonVolumeListDefaultUsesDetailRouteOnly"
           ]
+        },
+        {
+          "behavior": "details=false selects GET /volumes, details=true and existing List retain /volumes/detail; selected query/native options, ResourceBase and authentication are preserved and linked native pages yield typed summary rows.",
+          "tests": [
+            "blockstorage/v3/volumes/summary_test.go:TestPythonVolumeSummarySelectsDetailsAndPreservesQuery"
+          ]
+        },
+        {
+          "behavior": "Shared raw-row MaxItems and SinglePage never rewrite an explicit wire limit; consumer break stops continuation and whole native page decode errors remain observable beyond a cap.",
+          "tests": [
+            "blockstorage/v3/volumes/summary_test.go:TestPythonVolumeSummaryLocalControlsAndConsumerBreak"
+          ]
+        },
+        {
+          "behavior": "Invalid receiver/context/control/options do not issue HTTP, callback failure and cancellation cause remain joined, and a later page native HTTP error preserves prior rows and ListSummary operation identity.",
+          "tests": [
+            "blockstorage/v3/volumes/summary_test.go:TestPythonVolumeSummaryPreflightAndPartialFailures"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/volume-summary-python.md"
       ],
       "differences": [
         "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so WithListQuery(\"all_tenants\", \"True\") is needed for the identical string.",
         "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
-        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python sends min(resource _max_microversion, server maximum) or the session default; Go sends the one microversion configured or negotiated on the Connection client.",
+        "The shared native summary cap is local and does not supply Python max_items wire-limit hints; native linked URL/query and whole-page decode policy remain explicit. The aggregate /volumes/summary API is a different operation."
       ],
-      "remaining": [
-        "volumes(details=False) sends GET /volumes (summary route); no public Go list call can request that route."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/init_volume_attachment",
@@ -67509,58 +67530,138 @@
       "operation": "python:block_storage/v3/fetch_backup_metadata",
       "source_fingerprint": "44366618ad521a9e7ed3242721117672c9493dc716038b7dcf53f9a1f6866387",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.PythonMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.PythonMetadataProfile.FetchMetadata"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Fetch creates a resource from an explicit ID without a preliminary member GET, GETs the metadata child route, accepts the Source final200..399 status family, parses one response object and observes only its exact metadata JSON field; absence/null/large integers/extension JSON are independent from physical proof.",
+          "tests": [
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileFetchAndLegacyAliasKeepObservedJSON",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileFetchOmissionNullAndDecodeFailures",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallback",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileAcceptedAndRejectedBodyFaultsKeepPhysicalCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChanges"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/backup-metadata-python.md"
+      ],
+      "differences": [
+        "Compatibility is explicitly selected by API.PythonMetadata(); these child routes are absent from stock Cinder27.0.0 router c36f40684e140a1492b00dd4812e8dce17fb2ebf. A physical stock404 remains an error and does not trigger fallback to ordinary backup GET/PUT.",
+        "Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.",
+        "Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.",
+        "Fetch requires an UTF-8 JSON object root and stores metadata as owned rawJSON: omission is nil and explicitnull is nonnil null; arbitrary metadata shapes and duplicate literals are retained without float conversion."
+      ],
       "remaining": [
-        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+        "Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support."
       ]
     },
     {
       "operation": "python:block_storage/v3/get_backup_metadata",
       "source_fingerprint": "568f7e2447af6c70a2f5973592c8e2c6dd1da8a668c6f77a9e23d3f63016b1ff",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.PythonMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.PythonMetadataProfile.GetMetadata"
+      ],
+      "contracts": [
+        {
+          "behavior": "Deprecated Source alias delegates to fetch; the explicit Go profile emits the same GET and retains operation identity GetMetadata.",
+          "tests": [
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileFetchAndLegacyAliasKeepObservedJSON",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallback",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileAcceptedAndRejectedBodyFaultsKeepPhysicalCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChanges"
+          ]
+        }
+      ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/backup-metadata-python.md"
       ],
       "differences": [
-        "Python also emits a RemovedInSDK50Warning before delegating to fetch_backup_metadata."
+        "Compatibility is explicitly selected by API.PythonMetadata(); these child routes are absent from stock Cinder27.0.0 router c36f40684e140a1492b00dd4812e8dce17fb2ebf. A physical stock404 remains an error and does not trigger fallback to ordinary backup GET/PUT.",
+        "Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.",
+        "Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.",
+        "Fetch requires an UTF-8 JSON object root and stores metadata as owned rawJSON: omission is nil and explicitnull is nonnil null; arbitrary metadata shapes and duplicate literals are retained without float conversion.",
+        "Deprecated GoDoc replaces the Python RemovedInSDK50Warning; no runtime warning is emitted."
       ],
       "remaining": [
-        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+        "Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support."
       ]
     },
     {
       "operation": "python:block_storage/v3/set_backup_metadata",
       "source_fingerprint": "a5642b88578610dbf4b7cf27834d987b53375a8821e59aa762d28325179e057d",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.PythonMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.PythonMetadataProfile.SetMetadata"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Source MetadataMixin POSTs metadata envelope including explicit{} for nil/empty input, adds no3.43 microversion gate and does not JSON-decode the response; Go owns input before callbacks and preserves opaque accepted-response evidence.",
+          "tests": [
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileSetOwnsInputAndOpaqueAcknowledgement",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallback",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileAcceptedAndRejectedBodyFaultsKeepPhysicalCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChanges"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/backup-metadata-python.md"
+      ],
+      "differences": [
+        "Compatibility is explicitly selected by API.PythonMetadata(); these child routes are absent from stock Cinder27.0.0 router c36f40684e140a1492b00dd4812e8dce17fb2ebf. A physical stock404 remains an error and does not trigger fallback to ordinary backup GET/PUT.",
+        "Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.",
+        "Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.",
+        "Go uses map[string]string for the documented string kwargs; opaque response is returned without manufacturing the Python input-based mutable cache."
+      ],
       "remaining": [
-        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+        "Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support."
       ]
     },
     {
       "operation": "python:block_storage/v3/delete_backup_metadata",
       "source_fingerprint": "90645fff2c7de7eb341b7818e87543fd0e9aec7f53a8c479feaf2fa22c8b97eb",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.PythonMetadata",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.PythonMetadataProfile.DeleteMetadata"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Source keys=None PUTs metadata:{}, nonnil empty keys issue noHTTP, and other keys DELETE sequentially preserving duplicates until first error. Go retains ordered prior acknowledgements, captures literal key segments and never falls back to ordinary backup member GET/PUT.",
+          "tests": [
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileDeleteNilEmptyLiteralKeysAndPartialFailure",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallback",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileAcceptedAndRejectedBodyFaultsKeepPhysicalCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses",
+            "blockstorage/v3/backups/metadata_python_test.go:TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChanges"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/backup-metadata-python.md"
+      ],
+      "differences": [
+        "Compatibility is explicitly selected by API.PythonMetadata(); these child routes are absent from stock Cinder27.0.0 router c36f40684e140a1492b00dd4812e8dce17fb2ebf. A physical stock404 remains an error and does not trigger fallback to ordinary backup GET/PUT.",
+        "Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.",
+        "Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.",
+        "Go validates and escapes literal keys once; it returns partial HTTP acknowledgements rather than None and does not reproduce mutable-resource cache removal KeyError behavior."
+      ],
       "remaining": [
-        "Go has no API for the /backups/{id}/metadata routes used by MetadataMixin; Backups.Update with Metadata replaces the backup body field through PUT backups/{id}, which is a different request."
+        "Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support."
       ]
     },
     {
@@ -72115,6 +72216,804 @@
       "differences": [
         "Python positional token becomes a valid UTF-8 Go string; Go returns error under the existing OperationError cause chain and leaves native Revoke unchanged.",
         "The SDK-owned fixed-request and source guard reject retry/redirect retargeting and preserve physical body failures rather than ignoring them."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/access_rules",
+      "source_fingerprint": "1074c4a699cdc1483877944e3f5266d599f94a64fc256d89cbe07590f6e6c49b",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.ListAccessRuleRecords"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Declared Body JSON filters run locally; only limit/marker are wire query. Unknown filters discarded. Null versus empty preserved, credential unrestricted uses Source JSON truthiness. Owned raw Wire keeps unknown fields and precise numbers.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Lazy reusable iterator, raw observed-row cap before local filters, max_items limit hint replaces absent/zero initial limit, paginated=false single page, singleton object page, Source array/top-level/HTTP next and positive-initial-limit short-page marker fallback; empty page stops.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted.",
+        "JSON filter comparisons distinguish bool from number; malformed nested nonobjects fail matching rather than raising Python attribute errors.",
+        "Dictionary links.next is a Go compatibility extension: pinned Source paginator does not recognize that shape. Fixed continuation preserves initial filters, rejects cross-origin/path changes, new arbitrary page keys, conflict/cycles; Source arbitrary version-prefix and cross-path continuation are broader.",
+        "All Python list control kwargs, JMESPath and negative dynamic values are not provided; concrete Limit/Marker/MaxItems/Paginated/Headers/declared JSON Filters cover this binding."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/application_credentials",
+      "source_fingerprint": "6d14f86b49dcfe891efd7d8c4cfbc87f000ca67118ceaf42901f376739721694",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.ListCredentialRecords"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Declared Body JSON filters run locally; only limit/marker are wire query. Unknown filters discarded. Null versus empty preserved, credential unrestricted uses Source JSON truthiness. Owned raw Wire keeps unknown fields and precise numbers.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Lazy reusable iterator, raw observed-row cap before local filters, max_items limit hint replaces absent/zero initial limit, paginated=false single page, singleton object page, Source array/top-level/HTTP next and positive-initial-limit short-page marker fallback; empty page stops.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListFiltersRawCapAndPaging",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialListContinuationsAndLazyErrors",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted.",
+        "JSON filter comparisons distinguish bool from number; malformed nested nonobjects fail matching rather than raising Python attribute errors.",
+        "Dictionary links.next is a Go compatibility extension: pinned Source paginator does not recognize that shape. Fixed continuation preserves initial filters, rejects cross-origin/path changes, new arbitrary page keys, conflict/cycles; Source arbitrary version-prefix and cross-path continuation are broader.",
+        "All Python list control kwargs, JMESPath and negative dynamic values are not provided; concrete Limit/Marker/MaxItems/Paginated/Headers/declared JSON Filters cover this binding."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_application_credential",
+      "source_fingerprint": "b57fc0b5d81292a8a4b862675e3a0772ff0b0fdc7597701931f481b2deda6003",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.CreateCredentialRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCreateAndOwnedViews",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCreateAndOwnedViews",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "POST singular application_credential envelope with explicit name; supplied known Body attrs only, unknown attrs discarded before serialization, fixed name/user_id collision rejected. Omitted unrestricted not injected. Explicit null/false/empty retained and untyped expires_at/roles/access_rules preserved.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCreateAndOwnedViews",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Accepted blank/malformed JSON tolerates Source ValueError branch and retains seeded attrs; valid nonobject errors with actual response evidence. Response declared fields overlay seed; fixed user_id view and independent Wire/Envelope/Header.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCreateAndOwnedViews",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_access_rule",
+      "source_fingerprint": "526a8ee27c35edbd6c9a7cbe49abadfe491482e84ae2492f893000edb174b5d5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.DeleteAccessRuleRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "DELETE literal member, actual200..399 accepted, opaque body never JSON decoded. IgnoreMissing defaults true; only clean404 suppressed, strict false preserves original native404 body/header; joined retry/read/close/cancel/source failures visible.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_application_credential",
+      "source_fingerprint": "07e3475611fa58e81ceb430e305858210583ec1931249929e0c9b4fcd17c2721",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.DeleteCredentialRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "DELETE literal member, actual200..399 accepted, opaque body never JSON decoded. IgnoreMissing defaults true; only clean404 suppressed, strict false preserves original native404 body/header; joined retry/read/close/cancel/source failures visible.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/find_application_credential",
+      "source_fingerprint": "415c9f4cc1780c02719bf4d33caf93e46e46ceca02ee5407faa59ec2342f3233",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.FindCredentialRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialFindSourceDefaultsAndQueries",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialFindSourceDefaultsAndQueries",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "GET first on escaped literal identity with fixed user_id query and supplied string query. Direct response overlays id and known Body query seeds. Clean400/403/404 allow list fallback; transport/source/cancellation/body failures never fallback or get suppressed.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialFindSourceDefaultsAndQueries",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "No automatic name query hint for this class. Complete exact ID-or-name list uses shared FindIdentity; default missing nil,nil, strict IgnoreMissing false NotFoundError, duplicates AmbiguousError, later-page HTTP failure preserved. Known Body query becomes local string filter; only limit/marker stay wire.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialFindSourceDefaultsAndQueries",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted.",
+        "Shared IdentityFindOption accepts string-valued service query; arbitrary Python JSON object/list query/filter and pagination/transport kwargs are not accepted. Explicit fixed id/user_id query replacements are preflight errors. Unsupported shared Details/AllProjects/ExtraSpecs controls remain unsupported.",
+        "Dictionary links.next Go extension and fixed-origin/path/query continuation differ from broader Source generic paginator; see guide."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_access_rule",
+      "source_fingerprint": "fdc83ff73deaa054cbc63027ae056c4b39dd7663e969dab28b41addd18f01fa0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.GetAccessRuleRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "GET literal member without user_id query; singular-key unpack or root object; Source ValueError blank/malformed JSON tolerance with seeded literal id, valid nonobject error. Declared view null defaults, fixed user_id URI view, independent raw Wire/Envelope/Header; no strict native timestamp coercion.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_application_credential",
+      "source_fingerprint": "51c0e2901c354e5ad58f40d99c56357f1e37a32bfb4c33ac3bf445346795341f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.GetCredentialRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Library-owned literal user ID route and captured identity Source; no parent GET for resource.ID scopes; concrete owned options and guarded physical requests; native generated ABI unchanged.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Meaningful OperationError preserves actual accepted 200..399 response handling errors and original rejected HTTP / transport / read / close / cancellation causes.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "GET literal member without user_id query; singular-key unpack or root object; Source ValueError blank/malformed JSON tolerance with seeded literal id, valid nonobject error. Declared view null defaults, fixed user_id URI view, independent raw Wire/Envelope/Header; no strict native timestamp coercion.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/application-credentials-python.md"
+      ],
+      "differences": [
+        "Bounded Go callable profile uses explicit string IDs and owned Record DTOs, not arbitrary Python Resource/Munch identity, same-instance mutation, cache/session/subclass/Connection hooks. location is null; full Resource/session surface remains separate.",
+        "Valid UTF-8 / JSON fields and escaped member path segments; guarded fixed service routes and protected headers; arbitrary Source adapter/microversion/route choices are not accepted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_address_group",
+      "source_fingerprint": "c801b874dee66d88a280d21b9542b575a1d0d5ccf9f9e6a26b81a5d6fd41f7c6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST sends the pinned singular resource envelope with only supplied Body attributes; omitted attrs produce an empty object, no native required-field check or synthesized fields. Canonical Body names map to wire names, explicit false/zero/null/empty values survive, and unknown/query-only attrs remain in Body. Response native model comes from the server without request ID seeding.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupCreatePreservesOmissionPresenceAliasesAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Options snapshot JSON values, are reusable, and later wire-key options override earlier ones. Invalid serialization/options and Resource/Proxy controls fail before HTTP. SDK HTTP success codes are 200..399; native typed decode errors, HTTP status/body/headers and preflight/callback/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupMutationOptionSnapshotsAndPreflight",
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupCreateStatusDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "The callable Body mutation profile uses functional WithAttribute options and native Go models; existing generated native Create is unchanged.",
+        "Success is the explicit SDK HTTP 200..399 profile. Native typed decoding remains stricter than Source Resource._translate_response, which can keep its request view on empty or invalid JSON success bodies. Returned unknown fields, Python descriptor access/conversion and request attributes absent from the response are not synthesized.",
+        "Resource/Proxy control attributes base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected in this Body API; configured Gophercloud client session policy is retained.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Full mutable Python Resource return identity/state and request-attribute fallback for partial/empty success responses remain separate from the callable native Go profile.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata/location, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_address_group",
+      "source_fingerprint": "9dba022103b481962707fb3285ec7271cffc0db67646194c08cc568eb377a792",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal-ID update with no attributes sends no HTTP and returns a fresh native model containing the requested ID; an id attribute is rejected before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupUpdateEmptyAttributesReturnsIDWithoutHTTP"
+          ]
+        },
+        {
+          "behavior": "Specified empty strings, null and false, canonical Body aliases and unknown extension fields are sent in one PUT resource envelope without lookup. The returned native model comes from the response rather than merged request attributes. HTTP status/decode/cancellation causes are preserved under the 200..399 profile.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupUpdatePreservesChangedBodyAndResponseModel",
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupUpdateStatusCancellationAndDecodePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "Literal IDs and functional Body attribute options replace Python string-or-Resource inputs. No attributes reproduces the ID-only Source.new/commit no-op; specified attributes are committed without a stored mutable Resource dirty/cache comparison. Existing native Update remains unchanged.",
+        "Success is the SDK HTTP 200..399 profile. The returned native Go model is server-decoded, does not retain unknown or response-omitted request attributes, and uses native decode errors.",
+        "Resource/Proxy control attributes are explicitly rejected in the Body option surface; update id belongs to the method argument and is rejected as an attribute.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input, same-object return, prior cached value/dirty comparisons and request-attribute fallback for partial or bodyless success remain separate.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_address_group",
+      "source_fingerprint": "ce3f93d1f533f5031586ed70c0307a1677ad2d1564e62e377eb0d087a1dad751",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupDeleteDefaultsStrictOptionsAndSourceStatuses"
+          ]
+        },
+        {
+          "behavior": "Physical 404 response read failures are not treated as missing success. Native HTTP status/body/headers, invalid option rejection before HTTP and pre/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupDeleteDefaultsStrictOptionsAndSourceStatuses",
+            "network/v2/extensions/security/addressgroups/python_mutations_contracts_test.go:TestPythonAddressGroupDeletePreservesTerminalFailuresAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
+        "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_address_scope",
+      "source_fingerprint": "5b6484131eadb8cf5d1f37e0fcf375d3fcd84ed4abe2edc25c3a38caf3a4868f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST sends the pinned singular resource envelope with only supplied Body attributes; omitted attrs produce an empty object, no native required-field check or synthesized fields. Canonical Body names map to wire names, explicit false/zero/null/empty values survive, and unknown/query-only attrs remain in Body. Response native model comes from the server without request ID seeding.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeCreatePreservesOmissionPresenceAliasesAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Options snapshot JSON values, are reusable, and later wire-key options override earlier ones. Invalid serialization/options and Resource/Proxy controls fail before HTTP. SDK HTTP success codes are 200..399; native typed decode errors, HTTP status/body/headers and preflight/callback/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeMutationOptionSnapshotsAndPreflight",
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeCreateStatusDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "The callable Body mutation profile uses functional WithAttribute options and native Go models; existing generated native Create is unchanged.",
+        "Success is the explicit SDK HTTP 200..399 profile. Native typed decoding remains stricter than Source Resource._translate_response, which can keep its request view on empty or invalid JSON success bodies. Returned unknown fields, Python descriptor access/conversion and request attributes absent from the response are not synthesized.",
+        "Resource/Proxy control attributes base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected in this Body API; configured Gophercloud client session policy is retained.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Full mutable Python Resource return identity/state and request-attribute fallback for partial/empty success responses remain separate from the callable native Go profile.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata/location, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/update_address_scope",
+      "source_fingerprint": "ea2151befd6e72ac526e828f59d39283fed7a628805dcbf03191003187e8fed9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal-ID update with no attributes sends no HTTP and returns a fresh native model containing the requested ID; an id attribute is rejected before HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeUpdateEmptyAttributesReturnsIDWithoutHTTP"
+          ]
+        },
+        {
+          "behavior": "Specified empty strings, null and false, canonical Body aliases and unknown extension fields are sent in one PUT resource envelope without lookup. The returned native model comes from the response rather than merged request attributes. HTTP status/decode/cancellation causes are preserved under the 200..399 profile.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeUpdatePreservesChangedBodyAndResponseModel",
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeUpdateStatusCancellationAndDecodePolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "Literal IDs and functional Body attribute options replace Python string-or-Resource inputs. No attributes reproduces the ID-only Source.new/commit no-op; specified attributes are committed without a stored mutable Resource dirty/cache comparison. Existing native Update remains unchanged.",
+        "Success is the SDK HTTP 200..399 profile. The returned native Go model is server-decoded, does not retain unknown or response-omitted request attributes, and uses native decode errors.",
+        "Resource/Proxy control attributes are explicitly rejected in the Body option surface; update id belongs to the method argument and is rejected as an attribute.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input, same-object return, prior cached value/dirty comparisons and request-attribute fallback for partial or bodyless success remain separate.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_address_scope",
+      "source_fingerprint": "6c097466bd0767019475a69e49d6205db082f76731bce57c9211bba1923536a8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/addressscopes.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeDeleteDefaultsStrictOptionsAndSourceStatuses"
+          ]
+        },
+        {
+          "behavior": "Physical 404 response read failures are not treated as missing success. Native HTTP status/body/headers, invalid option rejection before HTTP and pre/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeDeleteDefaultsStrictOptionsAndSourceStatuses",
+            "network/v2/extensions/layer3/addressscopes/python_mutations_contracts_test.go:TestPythonAddressScopeDeletePreservesTerminalFailuresAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
+        "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_subnet_pool",
+      "source_fingerprint": "1edab29a22bf97d6914ae8aa485ca96998125a28f1254313ecb0f78b5a080519",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST sends the pinned singular resource envelope with only supplied Body attributes; omitted attrs produce an empty object, no native required-field check or synthesized fields. Canonical Body names map to wire names, explicit false/zero/null/empty values survive, and unknown/query-only attrs remain in Body. Response native model comes from the server without request ID seeding.",
+          "tests": [
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolCreatePreservesOmissionPresenceAliasesAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Options snapshot JSON values, are reusable, and later wire-key options override earlier ones. Invalid serialization/options and Resource/Proxy controls fail before HTTP. SDK HTTP success codes are 200..399; native typed decode errors, HTTP status/body/headers and preflight/callback/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolMutationOptionSnapshotsAndPreflight",
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolCreateStatusDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "The callable Body mutation profile uses functional WithAttribute options and native Go models; existing generated native Create is unchanged.",
+        "Success is the explicit SDK HTTP 200..399 profile. Native typed decoding remains stricter than Source Resource._translate_response, which can keep its request view on empty or invalid JSON success bodies. Returned unknown fields, Python descriptor access/conversion and request attributes absent from the response are not synthesized.",
+        "Resource/Proxy control attributes base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected in this Body API; configured Gophercloud client session policy is retained.",
+        "Native SubnetPool creation decode still requires default_prefixlen/min_prefixlen/max_prefixlen and supports their numeric strings; sparse selected-read normalization does not apply to creation.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Full mutable Python Resource return identity/state and request-attribute fallback for partial/empty success responses remain separate from the callable native Go profile.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata/location, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_subnet_pool",
+      "source_fingerprint": "b74280aa22ac44541c89922c5e9ae5204423405558a8a9c1126d826f9e222ee6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.",
+          "tests": [
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolDeleteDefaultsStrictOptionsAndSourceStatuses"
+          ]
+        },
+        {
+          "behavior": "Physical 404 response read failures are not treated as missing success. Native HTTP status/body/headers, invalid option rejection before HTTP and pre/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolDeleteDefaultsStrictOptionsAndSourceStatuses",
+            "network/v2/extensions/subnetpools/python_mutations_contracts_test.go:TestPythonSubnetPoolDeletePreservesTerminalFailuresAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
+        "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_trunk",
+      "source_fingerprint": "41ef7b3a3e8d52adaea96f77a5fd6adb7da92e8411737cb57cec25312743ff00",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST sends the pinned singular resource envelope with only supplied Body attributes; omitted attrs produce an empty object, no native required-field check or synthesized fields. Canonical Body names map to wire names, explicit false/zero/null/empty values survive, and unknown/query-only attrs remain in Body. Response native model comes from the server without request ID seeding.",
+          "tests": [
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkCreatePreservesOmissionPresenceAliasesAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Options snapshot JSON values, are reusable, and later wire-key options override earlier ones. Invalid serialization/options and Resource/Proxy controls fail before HTTP. SDK HTTP success codes are 200..399; native typed decode errors, HTTP status/body/headers and preflight/callback/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkMutationOptionSnapshotsAndPreflight",
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkCreateStatusDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "The callable Body mutation profile uses functional WithAttribute options and native Go models; existing generated native Create is unchanged.",
+        "Success is the explicit SDK HTTP 200..399 profile. Native typed decoding remains stricter than Source Resource._translate_response, which can keep its request view on empty or invalid JSON success bodies. Returned unknown fields, Python descriptor access/conversion and request attributes absent from the response are not synthesized.",
+        "Resource/Proxy control attributes base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected in this Body API; configured Gophercloud client session policy is retained.",
+        "Native Trunk response timestamps retain RFC3339 requirements.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Full mutable Python Resource return identity/state and request-attribute fallback for partial/empty success responses remain separate from the callable native Go profile.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata/location, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_trunk",
+      "source_fingerprint": "647169a5f69c0a869218692ae4f475a77ae491b2214b7b2a38e453a34a3eab8c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.",
+          "tests": [
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkDeleteDefaultsStrictOptionsAndSourceStatuses"
+          ]
+        },
+        {
+          "behavior": "Physical 404 response read failures are not treated as missing success. Native HTTP status/body/headers, invalid option rejection before HTTP and pre/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkDeleteDefaultsStrictOptionsAndSourceStatuses",
+            "network/v2/extensions/trunks/python_mutations_contracts_test.go:TestPythonTrunkDeletePreservesTerminalFailuresAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
+        "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_qos_policy",
+      "source_fingerprint": "150d1736ccee06fb02ed3cea725bebea4fa9c8eb8a2676a1338b2d158054b797",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithAttribute"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST sends the pinned singular resource envelope with only supplied Body attributes; omitted attrs produce an empty object, no native required-field check or synthesized fields. Canonical Body names map to wire names, explicit false/zero/null/empty values survive, and unknown/query-only attrs remain in Body. Response native model comes from the server without request ID seeding.",
+          "tests": [
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyCreatePreservesOmissionPresenceAliasesAndExtensions"
+          ]
+        },
+        {
+          "behavior": "Options snapshot JSON values, are reusable, and later wire-key options override earlier ones. Invalid serialization/options and Resource/Proxy controls fail before HTTP. SDK HTTP success codes are 200..399; native typed decode errors, HTTP status/body/headers and preflight/callback/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyMutationOptionSnapshotsAndPreflight",
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyCreateStatusDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "The callable Body mutation profile uses functional WithAttribute options and native Go models; existing generated native Create is unchanged.",
+        "Success is the explicit SDK HTTP 200..399 profile. Native typed decoding remains stricter than Source Resource._translate_response, which can keep its request view on empty or invalid JSON success bodies. Returned unknown fields, Python descriptor access/conversion and request attributes absent from the response are not synthesized.",
+        "Resource/Proxy control attributes base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected in this Body API; configured Gophercloud client session policy is retained.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Full mutable Python Resource return identity/state and request-attribute fallback for partial/empty success responses remain separate from the callable native Go profile.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Proxy/Resource control attributes, computed metadata/location, dynamic microversion and complete Python adapter/session/exception behavior remain separate.",
+        "Native Gophercloud skips HTTP204 JSON decoding; this explicit native model profile returns nil,nil rather than constructing an observed response model from requested attributes. Other bodyless/native decoder behavior remains distinct from Python seeded mutable Resource state."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_qos_policy",
+      "source_fingerprint": "4dde7cea326c99b4f64ba41922f025b728ea13181bc15052f32a7579639adb0c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.DeleteWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithDeleteOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithDeleteIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "A literal ID is deleted directly at the pinned resource path with no lookup/query/body. Omitted or nil IgnoreMissing defaults to true; explicit false preserves a 404. Later options override earlier options, constructor pointer snapshots survive mutation and options are reusable. HTTP 200..399 successes do not decode an opaque body.",
+          "tests": [
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyDeleteDefaultsStrictOptionsAndSourceStatuses"
+          ]
+        },
+        {
+          "behavior": "Physical 404 response read failures are not treated as missing success. Native HTTP status/body/headers, invalid option rejection before HTTP and pre/post-response custom context causes remain observable.",
+          "tests": [
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyDeleteDefaultsStrictOptionsAndSourceStatuses",
+            "network/v2/extensions/qos/policies/python_mutations_contracts_test.go:TestPythonQoSPolicyDeletePreservesTerminalFailuresAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-resource-mutations.md"
+      ],
+      "differences": [
+        "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
+        "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
+        "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
       ],
       "remaining": []
     }

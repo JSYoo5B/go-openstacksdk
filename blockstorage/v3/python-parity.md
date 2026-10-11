@@ -7,7 +7,7 @@
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
 | `get_volume` | `Volumes.Get(ctx, id)` | go_mapping |
-| `volumes` | `Volumes.List(ctx, options...)` (상세 경로만 가능) | unresolved |
+| `volumes` | `Volumes.List(ctx, options...)`, `ListSummary`, `ListWithDetails` | go_mapping |
 | `create_volume` | `Volumes.Create(ctx, opts, WithCreateField, WithCreateHintOpts)` | go_mapping |
 | `update_volume` | `Volumes.Update(ctx, id, opts, WithUpdateField)` | go_mapping |
 | `delete_volume` | `Volumes.Remove(ctx, resource.ID(id))`, `Volumes.Delete(ctx, id, WithDeleteQuery)`, `Volumes.ForceDelete(ctx, id)` | go_mapping |
@@ -29,10 +29,10 @@
 | `update_backup` | `Backups.Update(ctx, id, opts, WithUpdateField)` | go_mapping |
 | `delete_backup` | `Backups.Remove(ctx, resource.ID(id))`, `Backups.ForceDelete(ctx, id)` | go_mapping |
 | `reset_backup` | `Backups.ResetBackupStatus(ctx, id, status)` | go_mapping |
-| `fetch_backup_metadata` | 없음 | unresolved |
-| `get_backup_metadata` | 없음 | unresolved |
-| `set_backup_metadata` | 없음 | unresolved |
-| `delete_backup_metadata` | 없음 | unresolved |
+| `fetch_backup_metadata` | `Backups.PythonMetadata().FetchMetadata` 명시적 Source 프로파일; stock child route 없음 | unresolved |
+| `get_backup_metadata` | `Backups.PythonMetadata().GetMetadata` 명시적 Source 프로파일; stock child route 없음 | unresolved |
+| `set_backup_metadata` | `Backups.PythonMetadata().SetMetadata` 명시적 Source 프로파일; stock child route 없음 | unresolved |
+| `delete_backup_metadata` | `Backups.PythonMetadata().DeleteMetadata` 명시적 Source 프로파일; stock child route 없음 | unresolved |
 | `create_attachment` | `Attachments.Create(ctx, opts)` | unresolved |
 | `get_attachment` | `Attachments.Get(ctx, id)` | go_mapping |
 | `attachments` | `Attachments.List(ctx, options...)` (상세 경로 첫 페이지만) | unresolved |
@@ -152,3 +152,5 @@ Python `find_*`는 ID로 GET을 먼저 보내고 404·400·403이면 목록에�
 - `create_transfer`: `/volume-transfers` 경로와 3.55의 `no_snapshots` 생성을 보낼 수 없습니다.
 - `transfers`: `details=False` 요약 목록과 `/volume-transfers` 경로가 없습니다.
 - `create_type_encryption`, `update_type_encryption`: 넘기지 않은 encryption field를 생략할 수 없어서 부분 생성과 부분 수정이 불가능합니다.
+
+현재 summary 경로와 native cap 사용법은 [Volume summary 비교](volume-summary-python.md), stock Cinder 경계를 보존한 선택적 Backup child route는 [명시적 Python compatibility profile](backup-metadata-python.md)에 설명합니다. 이 선택적 프로파일4개는 일반 stock 지원 매핑 수에 더하지 않습니다.
