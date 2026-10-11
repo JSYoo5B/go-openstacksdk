@@ -363,3 +363,59 @@ func TestSourceRetryCannotAddUnselectedConditionsWhileBaselineRetainsPolicy(t *t
 		}
 	}
 }
+
+func TestSourceMemberHeaderCoalescesActualValuesWithoutChangingBaseline(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		t.Run(map[bool]string{false: "baseline", true: "Source"}[enabled], func(t *testing.T) {
+			cloud := testcloud.New(t)
+			client := cloud.Client("network", "/neutron/v2.0/")
+			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+				r := policyWire(200, `{"record":{"id":"one"}}`)
+				r.Header["If-Match"] = []string{"a", "b"}
+				return r, nil
+			})
+			profile := policyProfile(enabled)
+			profile.Headers[0].Kind = neutronfind.List
+			engine, err := neutronfind.New(context.Background(), client, profile, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			value, err := engine.Get(context.Background(), "one", neutronfind.Options{})
+			if err != nil || value == nil {
+				t.Fatal(value, err)
+			}
+			want := `["a"]`
+			if enabled {
+				want = `["a, b"]`
+			}
+			if string(value.Resource.Body["if_match"]) != want || !reflect.DeepEqual(value.Wire.Header["If-Match"], []string{"a", "b"}) {
+				t.Fatal(value, want)
+			}
+			value.Resource.Body["if_match"][2] = 'x'
+			value.Header["If-Match"][0] = "changed"
+			if !reflect.DeepEqual(value.Wire.Header["If-Match"], []string{"a", "b"}) {
+				t.Fatal("projected header aliases actual response", value)
+			}
+		})
+	}
+}
+func TestSourceHeaderCanonicalCaseIsLiteralAndWireAliasIsInsensitive(t *testing.T) {
+	cloud := testcloud.New(t)
+	client := cloud.Client("network", "/neutron/v2.0/")
+	cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+		if req.URL.Query().Get("IF_MATCH") != "extension" || req.URL.Query().Get("IF-MATCH") != "selected" {
+			t.Fatal(req.URL)
+		}
+		return policyWire(200, `{"record":{"id":"one"}}`), nil
+	})
+	profile := policyProfile(true)
+	profile.Headers[0].Kind = neutronfind.List
+	engine, err := neutronfind.New(context.Background(), client, profile, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	value, err := engine.Find(context.Background(), "one", neutronfind.Options{Query: map[string]json.RawMessage{"IF_MATCH": json.RawMessage(`"extension"`), "IF-MATCH": json.RawMessage(`"selected"`)}})
+	if err != nil || value == nil || string(value.Resource.Body["IF_MATCH"]) != `"extension"` || string(value.Resource.Body["if_match"]) != `["selected"]` || value.Wire.Body["IF_MATCH"] != nil || value.Wire.Body["if_match"] != nil {
+		t.Fatal(value, err)
+	}
+}

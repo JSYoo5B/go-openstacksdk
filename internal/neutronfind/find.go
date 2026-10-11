@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -279,6 +278,9 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 					header := ""
 					if len(values) > 0 {
 						header = values[0]
+						if e.profile.SourceFindPolicy {
+							header = strings.Join(values, ", ")
+						}
 					}
 					raw, _ = json.Marshal(header)
 					break
@@ -351,18 +353,11 @@ func (e *Engine) truthy(raw json.RawMessage) (bool, error) {
 	if !e.profile.SourceFindPolicy {
 		return cloudfilter.PythonTruthy(raw)
 	}
-	if !utf8.Valid(raw) || !json.Valid(raw) {
-		return false, findInvalid("truthiness requires complete UTF-8 JSON")
+	truth, err := cloudfilter.PythonJSONTruthy(raw)
+	if err != nil {
+		return false, errors.Join(findInvalid("truthiness requires complete UTF-8 JSON"), err)
 	}
-	token := bytes.TrimSpace(raw)
-	if (token[0] == '-' || token[0] >= '0' && token[0] <= '9') && strings.ContainsAny(string(token), ".eE") {
-		number, err := strconv.ParseFloat(string(token), 64)
-		if err != nil && !errors.Is(err, strconv.ErrRange) {
-			return false, err
-		}
-		return number != 0, nil
-	}
-	return cloudfilter.PythonTruthy(raw)
+	return truth, nil
 }
 
 func findText(value *Record, key string) string {
@@ -508,7 +503,7 @@ func (e *Engine) prepareQuery(policy Options, identity string, forFind bool) (ur
 		headerSeed := false
 		if e.profile.SourceFindPolicy {
 			for _, field := range e.profile.Headers {
-				if strings.EqualFold(key, field.Name) || strings.EqualFold(key, field.Wire) {
+				if key == field.Name || strings.EqualFold(key, field.Wire) {
 					seed[field.Name] = bytes.Clone(raw)
 					headerSeed = true
 				}
