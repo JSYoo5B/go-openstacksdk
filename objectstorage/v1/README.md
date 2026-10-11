@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+native `Objects.Create`는 nil Content를 빈 reader로 채우며 typed nil은 HTTP 전에 거부합니다. `WithCreateBytes`는 입력을 복사하고 매 호출 새 reader를 준비합니다. [빈 객체·bytes 옵션 비교](objects/create-defaults-python.md)에 native 단일 PUT과 상위 업로드의 범위를 설명합니다.
+
 Python metadata setter의 기본 refresh는 `Accounts/Containers.SetMetadataAndRefresh`로 제공합니다. `DeleteMetadataKeys`는 nil/빈 key도 POST하고, `Objects.HeadMetadata/SetMetadataFromFresh/DeleteMetadataAndRefresh`는 fresh 상태·각 변경 acknowledgement·최종 HEAD를 구분합니다. [Account](accounts/metadata-refresh-python.md), [Container](containers/metadata-refresh-python.md), [Object](objects/metadata-python.md)에 prefix·system aliases·JSON 값·부분 실패와 Python 기본값을 비교합니다.
 
 generated `Accounts`·`Containers`·`Objects`의 native 호출 경로·header·status와 marker paging, bulk delete 본문, temp URL 서명은 [Swift native 호출](native-calls.md)에 설명합니다.

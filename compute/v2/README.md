@@ -45,6 +45,12 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `KeyPairs.CreateKeypair`는 nullable 속성·ID/name 별칭·입력/응답 병합과 ssh view 기본값을 처리합니다. `Servers.ConsoleURL`은6개 legacy action과 실제 console raw 값을 제공합니다. [Keypair·console의 Python/Go 비교](../keypairs-console.md)에 독립 main·alias/default·응답 정책을 설명합니다.
 
+`Servers.ClearPassword/Restore/LockWithOptions/UnshelveWithOptions`와 직접 fixed/floating IP action은 Source 본문·선택 인자를 제공합니다. [서버 user action 비교](servers/python-user-actions.md)에 버전 상한과 host admin 조건을 설명합니다.
+
+`VolumeAttach.ListRecords/UpdateRecord`와 `ServerGroups.FindRecord`는 paging·raw 결과와 기본 검색을 제공합니다. [Attachment·group 비교](python-attachments-groups.md)에 volume swap 및 all-projects 권한 조건을 설명합니다.
+
+상위 `compute.Service.BackupServer`는 Nova createBackup 뒤 Connection이 Glance를 lazy 연결해 이미지를 조회하고 선택적으로 active를 기다립니다. [Backup의 Python/Go 비교](../backup-server-python.md)에 기본값·단계별 응답·120초 대기와 오류를 설명합니다.
+
 `Images`는 Nova legacy 이미지·metadata proxy의 owned Record 호출을 제공합니다. 일반 호출은 선택 버전2.35까지, metadata는2.38까지 허용하며 상한을 넘으면 HTTP 전에 ErrUnsupported입니다. [Nova 이미지의 Python/Go 비교](nova-images-python.md)에 버전·기본 목록·Find·metadata와 실제 응답 근거를 설명합니다.
 
 서버 조회·action·metadata·tag·server group·interface·volume attachment의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다.
