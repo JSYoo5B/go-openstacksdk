@@ -71,11 +71,18 @@ type PagePolicy[T any] struct {
 	// link may introduce a positive server limit when none was requested; that
 	// limit then stays fixed. Marker input and marker fallback are unsupported.
 	OffsetPagination bool
+	// MarkerOrOffsetPagination permits one cursor family per request, including
+	// marker fallback after advertised offset pages. Cursor switches discard the
+	// previous family; offsets must exceed every earlier offset in the stream.
+	// It is independent of and cannot be combined with OffsetPagination.
+	MarkerOrOffsetPagination bool
 }
 
 type continuationRules struct {
 	reduceLimit, offsetPagination, firstPage bool
 	allowFirstServerLimit, allowZeroLimit    bool
+	markerOrOffsetPagination                 bool
+	offsetFloor                              uint64
 }
 
 // ListControl limits raw, successfully decoded and validated rows before any
@@ -199,6 +206,20 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 				return
 			}
 		}
+		var offsetFloor uint64
+		if spec.Paging.MarkerOrOffsetPagination {
+			if spec.Paging.OffsetPagination {
+				fail(fmt.Errorf("%w: select one offset pagination policy", resource.ErrInvalidOption))
+				return
+			}
+			if initial.Has("offset") {
+				offsetFloor, err = paginationOffset(initial)
+				if err != nil {
+					fail(err)
+					return
+				}
+			}
+		}
 		base, err := url.Parse(spec.Client.ServiceURL(spec.Path))
 		if err != nil {
 			fail(err)
@@ -296,7 +317,8 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			}
 			rules := continuationRules{reduceLimit: pageNumber == 0 && spec.Paging.AllowFirstLimitReduction,
 				offsetPagination: spec.Paging.OffsetPagination, firstPage: pageNumber == 0,
-				allowFirstServerLimit: spec.Paging.AllowFirstServerLimit, allowZeroLimit: spec.Paging.AllowZeroLimit}
+				allowFirstServerLimit: spec.Paging.AllowFirstServerLimit, allowZeroLimit: spec.Paging.AllowZeroLimit,
+				markerOrOffsetPagination: spec.Paging.MarkerOrOffsetPagination, offsetFloor: offsetFloor}
 			next, err := continuation(fields, response.Header, spec.PluralKey, spec.Paging, base, current, rules)
 			if err != nil {
 				fail(response.Fail(err))
@@ -321,6 +343,9 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 				}
 				copy := *current
 				query := current.Query()
+				if spec.Paging.MarkerOrOffsetPagination {
+					query.Del("offset")
+				}
 				query.Set("marker", marker)
 				copy.RawQuery = query.Encode()
 				next = &copy
@@ -340,6 +365,9 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 			visited[key] = true
 			if marker != "" {
 				markers[marker] = true
+			}
+			if spec.Paging.MarkerOrOffsetPagination && next.Query().Has("offset") {
+				offsetFloor, _ = paginationOffset(next.Query())
 			}
 			limit, _ = paginationInput(next.Query(), spec.Paging.AllowZeroLimit)
 			current = next
@@ -480,11 +508,11 @@ func lockContinuation(base, current, next *url.URL, rules continuationRules) err
 	}
 	previous := current.Query()
 	for key, values := range query {
-		if key == "marker" && !rules.offsetPagination || key == "offset" && rules.offsetPagination {
+		if key == "marker" && (!rules.offsetPagination || rules.markerOrOffsetPagination) || key == "offset" && (rules.offsetPagination || rules.markerOrOffsetPagination) {
 			continue
 		}
 		old, exists := previous[key]
-		if key == "limit" && rules.firstPage && !exists && (rules.offsetPagination || rules.allowFirstServerLimit) {
+		if key == "limit" && rules.firstPage && !exists && (rules.offsetPagination || rules.markerOrOffsetPagination || rules.allowFirstServerLimit) {
 			if _, err := paginationInput(url.Values{"limit": values}, rules.allowZeroLimit); err == nil {
 				continue
 			}
@@ -501,17 +529,32 @@ func lockContinuation(base, current, next *url.URL, rules continuationRules) err
 		}
 	}
 	for key, values := range previous {
-		if key != "marker" && !query.Has(key) {
+		if key != "marker" && !(rules.markerOrOffsetPagination && key == "offset") && !query.Has(key) {
 			query[key] = append([]string(nil), values...)
 		}
 	}
+	if rules.markerOrOffsetPagination && !query.Has("marker") && !query.Has("offset") && previous.Has("offset") {
+		query["offset"] = append([]string(nil), previous["offset"]...)
+	}
 	// A link which omits the marker retains the previous marker. It cannot
 	// silently restart at the first page; the cycle guard rejects repetition.
-	if !query.Has("marker") && previous.Has("marker") {
+	if !query.Has("marker") && previous.Has("marker") && !(rules.markerOrOffsetPagination && query.Has("offset")) {
 		query["marker"] = append([]string(nil), previous["marker"]...)
 	}
 	if _, err := paginationInput(query, rules.allowZeroLimit); err != nil {
 		return err
+	}
+	if rules.markerOrOffsetPagination && query.Has("offset") {
+		nextOffset, err := paginationOffset(query)
+		if err != nil {
+			return err
+		}
+		if nextOffset == rules.offsetFloor {
+			return &resource.PaginationCycleError{URL: next.String()}
+		}
+		if nextOffset < rules.offsetFloor {
+			return fmt.Errorf("%w: pagination offset moves backwards", resource.ErrInvalidOption)
+		}
 	}
 	if rules.offsetPagination {
 		oldOffset, err := paginationOffset(previous)
