@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): Neutron·Keystone 독립 서비스 병렬 묶음 완료. 전체1,195/3,362·핵심1,121/2,292.** Neutron 선택 조회11개·조건부 삭제7개와 Keystone 토큰3개를 구현·검토했고, 새22그룹을 포함한 집중 race51그룹·전체155개 실제 test package gate·정확한 문서 main2개 외부 빌드가 PASS입니다. 기존 FindIdentity와 완료된 Glance cloud·현대 이미지 생성은 재사용합니다. 전체 목표는 남아 있으며 다음 단위는 우선순위에 따라 남은 핵심 서비스의 user 계약부터 선별합니다.
+**현재 진행 (2026-10-11): Neutron·Keystone 독립 서비스 병렬 묶음 완료. 전체1,195/3,362·핵심1,121/2,292.** Neutron 선택 조회11개·조건부 삭제7개와 Keystone 토큰3개를 구현·검토했고, 새22그룹을 포함한 집중 race51그룹·전체155개 실제 test package gate·정확한 문서 main2개 외부 빌드가 PASS입니다. 기존 FindIdentity와 완료된 Glance cloud·현대 이미지 생성은 재사용합니다. 전체 목표는 active입니다. 다음 핵심 user 묶음은 Keystone ApplicationCredential/AccessRule, Neutron resource mutation, Cinder Backup Python metadata compatibility profile을 서비스별 에이전트가 병렬 구현 중입니다. Backup profile의 stock 서버 미지원 경로는 일반 metadata API와 분리해 추적합니다.
 
 서비스 사이 의존성이 없는 구현은 서비스별 에이전트가 동시에 진행합니다. 공통 기능은 먼저 확정해 재사용하고, 담당 파일을 나눠 구현·서비스별 테스트·Python 비교 문서를 준비합니다. 생성기 통합·판정 JSON·자동 집계·전체 검사·commit/push는 한곳에서 순서대로 처리합니다.
 

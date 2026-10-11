@@ -1,6 +1,8 @@
 # 외부 Go 프로젝트에서 사용하기
 
-2026-10-09 최신 설치 검증: 전체 이름 변경·제3자 고지 보완 revision `831bfb1542e1263d0c1604e4ffc269946d85bde5`을 외부 프로젝트에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261009051450-831bfb1542e1`이며 생성·설치 문서 main 두 개의 get/build가 통과했습니다. Go 소스 2,184개, API 판정·catalog와 라이선스·고지·대응표 17개 파일 및 라이선스 안내가 로컬 최종 검증본과 byte-identical입니다. 아래 기본 설치 명령은 이 revision을 사용합니다. 완료 집계는292/3,362이며 현대 Glance CreateImageRecord 전체 구현을 포함합니다. 근거는 `/private/tmp/go-openstacksdk-rename-license-final-consumer.json`입니다.
+2026-10-11 최신 설치 검증: Neutron 선택 조회·조건부 삭제와 Keystone 토큰 API를 포함한 revision `59376d779797a394670cf113879e800a139a487d`을 별도 외부 프로젝트에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261011053230-59376d779797`에서 두 서비스 guide main과 기존 설치 main **3개**의 get/build가 통과했습니다. 원격 Go source2,423개 SHA256 `f16a6e62d8de1d6fd4b9618f3f2764f373a761240462cec5465f8879cdf034c8`와 API 판정·catalog·라이선스/고지/안내 **17개 파일**이 푸시한 검증본과 byte-identical입니다. 완료 집계는1,195/3,362이며 아래 설치 명령은 이 revision을 사용합니다. 근거는 `/private/tmp/go-openstacksdk-oct11-remote-consumer/receipt.json`입니다. 실제 인증·OpenStack 호출은 실행하지 않았습니다.
+
+2026-10-09 앞선 설치 검증: 전체 이름 변경·제3자 고지 보완 revision `831bfb1542e1263d0c1604e4ffc269946d85bde5`을 외부 프로젝트에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261009051450-831bfb1542e1`이며 생성·설치 문서 main 두 개의 get/build가 통과했습니다. Go 소스 2,184개, API 판정·catalog와 라이선스·고지·대응표 17개 파일 및 라이선스 안내가 로컬 최종 검증본과 byte-identical입니다. 당시 기본 설치 명령은 이 revision을 사용했습니다. 당시 완료 집계는292/3,362이며 현대 Glance CreateImageRecord 전체 구현을 포함합니다. 근거는 `/private/tmp/go-openstacksdk-rename-license-final-consumer.json`입니다.
 
 2026-10-09 최신 Glance owned 이미지 download: 정확한 문서·판정 revision `a4688f1b4cf4ae8aa26896629a0321965054840d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009033426-a4688f1b4cf4`·get/build exit0이며 download/설치 main **2개**를 빌드했습니다. 원격 Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **16개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-download-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 완료 집계는291/3,362이며 공통 Resource/cache/session 목표는 계속 추적합니다. 당시 기본 설치 명령은 이 revision을 사용했습니다.
 
@@ -56,7 +58,7 @@ Go 1.25 이상에서 공개 모듈 `github.com/JSYoo5B/go-openstacksdk`를 사�
 
 ```sh
 go mod init example.com/mycloud
-GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@831bfb1542e1263d0c1604e4ffc269946d85bde5
+GOWORK=off go get github.com/JSYoo5B/go-openstacksdk@59376d779797a394670cf113879e800a139a487d
 ```
 
 외부 소비자 검증에는 아래 main을 그대로 사용합니다. 공개 root·서비스·leaf·generic 옵션을 컴파일하며, 인증이나 HTTP 요청을 실행하지 않습니다. `CreateRecordOpts`의 공개 alias를 통해 concrete 속성과 SDK 소유 옵션을 사용할 수 있습니다. builder interface 구현은 필요하지 않습니다.

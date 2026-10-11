@@ -24,6 +24,8 @@ Gophercloud 공개 testhelper 기반의 기존 testcloud/nativeToken fixture·pa
 
 공통 요청 `4c0ee04d`, 생성 API `dfafeb53`, Neutron 테스트 `a80c95ed`, Keystone 구현 `49162539`·테스트 `f4ab5adf`, 비교 문서 `7061dbba`로 작은 커밋에 나눴습니다. catalog bytes·3,362개 ID/fingerprint·source pins·기존1,532 reviews를 보존하고21행61계약만 추가했습니다. 최종 reviews1,553·contracts4,798·go_mapping1,195·review unresolved357·미검토1,809·unsupported1·catalog unresolved2,166입니다. 핵심 완료 수는 user/admin 합산이며 1단계 전체 완료를 의미하지 않습니다.
 
+이 묶음의 정확한 판정 revision `59376d779797a394670cf113879e800a139a487d`을 GOWORK=off·replace 없는 외부 module에 설치했습니다. 실제 버전 `v0.0.0-20261011053230-59376d779797`에서 Neutron/Token/설치 main3개의 build가 PASS이고 원격 Go source2,423개·API JSON2개·라이선스/고지/안내17개는 해당 검증본과 같습니다. 초기 배포 파일 개수 assertion은 안내 문서를 집계에 포함하지 않아 실패했으나 파일은 모두 존재했고, 안내를 포함한17개 개별 byte 대조로 검증을 완료했습니다. 구현·테스트·문서·판정은 `59376d77`까지 main에 push했습니다. [설치 안내](install.md)의 기본 revision을 이 결과로 갱신했습니다.
+
 ## Nova Python proxy와 직접 삭제 ignore_missing 완료
 
 **앞선 API 완료 (2026-10-11): Nova Python proxy 114개 판정과 직접 삭제 `ignore_missing` 공통 기능, 전체1,103→1,174(+71)·핵심1,029→1,100/2,292·Compute153→220/333.** Nova proxy 메서드를 서버 user 호출과 관리자 호출 두 묶음으로 나누어 판정했고, 반복되던 삭제 기본값 문제를 `resource` package의 공통 helper로 해결했습니다.
