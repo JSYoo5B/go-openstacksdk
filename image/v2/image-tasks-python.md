@@ -122,7 +122,7 @@ captured client에 selected Microversion이 있으면 그대로 사용합니다.
 
 ## 오류·검증 범위
 
-Source list의 기본 `Accept: application/json`은 captured client Accept보다 우선하고, 명시 안전한 Headers의 Accept는 이를 바꿀 수 있습니다. auth·framing·외부 서비스 version·일반 Headers로 지정한 version은 거부합니다. native retry/reauth는 원래 route/query/body/선택 version/header 정책 안에서 유지하고 token renewal은 허용합니다. callback이 protocol header·body·OkCodes·OmitHeaders를 바꿔 원래 정책을 벗어나면 실제 rejection과 callback 원인을 남깁니다.
+Source list의 기본 `Accept: application/json`은 captured client Accept보다 우선하고, 명시 안전한 Headers의 Accept는 이를 바꿀 수 있습니다. auth·framing·외부 서비스 version·일반 Headers로 지정한 version은 거부합니다. native retry/reauth는 원래 route/query/body/선택 version/header 정책 안에서 유지하고 token renewal은 허용합니다. callback이 protocol header·body·OmitHeaders를 바꿔 원래 요청 정책을 벗어나면 두 번째 HTTP 전에 실제 rejection과 callback 원인을 남깁니다. `If-Match`·`If-None-Match`·`If-Modified-Since`·`If-Unmodified-Since`는 captured/per-call 설정에 없으면 retry에서도 부재를 유지하고, 명시한 조건은 그대로 보존합니다. OkCodes hook의 변경은 두 번째 요청까지 진행될 수 있지만 최종 응답에는 원래200..399 acceptance를 적용합니다. 예를 들어 첫503 뒤 hook이400을 추가하고 재시도가400이면 실제 두 번째400 증거로 실패하며 성공으로 바꾸지 않습니다.
 
 고정 Source `raise_from_response`는 status<400에서 반환합니다. Go는 최종 representation200..399를 받아 처리하고 informational100..199는 실제 native status/body/header를 포함해 거부하는 명시적 차이가 있습니다. 거부 응답·accepted decode·physical Read/Close·custom cancellation cause·순간적인 Source 변경 후 복원도 실제 응답과 모든 원인을 보존하고 physical body는 한 번 닫습니다. 오류 뒤 parent 이름 검색이나 다른 scope 조회로 재시도하지 않습니다. invalid UTF-8 거부는 Requests의 replacement decoding보다 엄격합니다.
 
