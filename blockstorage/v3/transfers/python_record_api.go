@@ -122,7 +122,15 @@ func (p *preparedRecord) proof(v *TransferRecord) *TransferRecord {
 	}
 	return v
 }
-func (p *preparedRecord) request(method, endpoint string, body any, rejected ...int) (*rest.Response, error) {
+func (p *preparedRecord) request(method, endpoint string, body any) (*rest.Response, error) {
+	// Native Gophercloud discards rejected body Read/Close errors. Observe all
+	// HTTP failures for every operation, independently of lookup/delete
+	// suppression policy. Only clean400/403/404 can permit find fallback,
+	// and only a clean404 can be ignored by default deletion.
+	rejected := make([]int, 200)
+	for i := range rejected {
+		rejected[i] = 400 + i
+	}
 	policy := rest.RequestHeaderPolicy{Values: make(map[string]string)}
 	if version := p.source.Client.Microversion; version != "" {
 		policy.Values["OpenStack-API-Version"] = "volume " + version
@@ -149,7 +157,7 @@ func (p *preparedRecord) get(id string) (*TransferRecord, error) {
 	if err := recordID(id); err != nil {
 		return nil, err
 	}
-	r, err := p.request(http.MethodGet, p.source.Client.ServiceURL(p.path, url.PathEscape(id)), nil, 400, 403, 404)
+	r, err := p.request(http.MethodGet, p.source.Client.ServiceURL(p.path, url.PathEscape(id)), nil)
 	rawID, _ := json.Marshal(id)
 	return p.response(r, map[string]json.RawMessage{"id": rawID}, err)
 }
@@ -263,7 +271,7 @@ func (a *API) DeleteRecord(ctx context.Context, id string, options ...RecordDele
 	if err != nil {
 		return recordWrap(ctx, op, err)
 	}
-	_, err = p.request(http.MethodDelete, p.source.Client.ServiceURL(p.path, url.PathEscape(id)), nil, 404)
+	_, err = p.request(http.MethodDelete, p.source.Client.ServiceURL(p.path, url.PathEscape(id)), nil)
 	if policy.IgnoreMissing == nil || *policy.IgnoreMissing {
 		err = resource.IgnoreMissing(err)
 	}
