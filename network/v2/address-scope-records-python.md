@@ -181,7 +181,11 @@ behavior. Arbitrary extension kwargs are not invented local filters.
 
 `max_items` counts raw rows before local filtering, supplies the first-page
 limit hint when absent, and stops at the cap without an extra request.
-`paginated` uses Python JSON truthiness; omitted means true. Singleton rows,
+`paginated` uses Python JSON truthiness; omitted means true. Top-level `next`
+uses the same binary64 fraction/exponent truthiness: `1e-400` is falsey and
+ends pagination without losing the received page or a Find candidate. Its
+original JSON bytes remain in `Envelope`; truthy nonstring next values fail
+with the actual whole-page receipt. Singleton rows,
 body/HTTP links, versioned collection links, marker fallback on nonempty
 short pages with a limit, empty-page termination and cycle checks use shared
 paging. Markers come from retained wire IDs, independent of mutations to the

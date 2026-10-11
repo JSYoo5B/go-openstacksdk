@@ -301,7 +301,7 @@ func (p *preparedScopeRecord) list(query url.Values, filters map[string]json.Raw
 				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
 				return errors.Join(scopeRecordProject(value, nil), p.guard(p.ctx))
 			},
-			Paging: rest.PagePolicy[AddressScopeRecord]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: scopeRecordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: "/v2.0/address-scopes"},
+			Paging: rest.PagePolicy[AddressScopeRecord]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, NextTruthy: scopeRecordTruthy, MarkerFallback: true, Marker: scopeRecordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: "/v2.0/address-scopes"},
 		}
 		for value, err := range rest.ListWithControl(p.ctx, spec, query, control) {
 			if err != nil {

@@ -879,3 +879,83 @@ func TestPythonAddressScopeFindGETOnlyVersionAndStandaloneListOverride(t *testin
 		})
 	}
 }
+
+func TestPythonAddressScopeNextBinary64TruthinessAndActualPageProof(t *testing.T) {
+	// Requests decodes fractional/exponent JSON numbers to binary64, so an
+	// underflowing top-level next is falsey. Preserve its original page bytes.
+	for _, find := range []bool{false, true} {
+		for _, testcase := range []struct {
+			name, next string
+			valid      bool
+		}{
+			{"positive underflow", "1e-400", true},
+			{"negative underflow", "-1e-400", true},
+			{"fractional zero", "0.0", true},
+			{"null", "null", true},
+			{"empty string", `""`, true},
+			{"false", "false", true},
+			{"empty array", "[]", true},
+			{"empty object", "{}", true},
+			{"truthy nonstring fraction", "1e-300", false},
+			{"truthy nonstring overflow", "1e400", false},
+			{"truthy nonstring bool", "true", false},
+		} {
+			lane := "LIST/"
+			if find {
+				lane = "Find fallback/"
+			}
+			t.Run(lane+testcase.name, func(t *testing.T) {
+				var calls []nativeScopeCall
+				body := `{"address_scopes":[{"id":"received","name":"target","ip_version":"٦","x_raw":1e-400}],"next":` + testcase.next + `}`
+				api, _ := nativeScopeAPI(t, &calls, func(req *http.Request) *http.Response {
+					if find && len(calls) == 1 {
+						return nativeScopeWire(404, `{"missing":"actual GET"}`)
+					}
+					if req.URL.Path != "/neutron/v2.0/address-scopes" {
+						t.Fatal(req.URL)
+					}
+					response := nativeScopeWire(203, body)
+					response.Header.Set("X-Request-Id", "actual-next-page")
+					return response
+				})
+				var value *addressscopes.AddressScopeRecord
+				var err error
+				if find {
+					value, err = api.FindRecord(context.Background(), "target")
+				} else {
+					var rows []*addressscopes.AddressScopeRecord
+					rows, err = pythonScopeList(t, api)
+					if len(rows) != 1 {
+						t.Fatal(rows, err, calls)
+					}
+					value = rows[0]
+				}
+				wantCalls := 1
+				if find {
+					wantCalls++
+				}
+				if len(calls) != wantCalls || (err == nil) != testcase.valid {
+					t.Fatal(value, err, calls)
+				}
+				if !testcase.valid {
+					var proof *resource.ResponseError
+					if !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual-next-page" || find && value != nil {
+						t.Fatal(value, err, proof)
+					}
+					return
+				}
+				if value == nil || value.Wire == nil || string(value.Envelope) != body || value.StatusCode != 203 || value.Header.Get("X-Request-Id") != "actual-next-page" || string(value.Wire.Body["ip_version"]) != `"٦"` || string(value.Wire.Body["x_raw"]) != "1e-400" || value.Wire.StatusCode != 203 || value.Wire.Header.Get("X-Request-Id") != "actual-next-page" {
+					t.Fatal(value, calls)
+				}
+				pythonScopeField(t, value, "id", `"received"`)
+				pythonScopeField(t, value, "ip_version", "6")
+				value.Resource.Body["ip_version"][0] = 'X'
+				value.Envelope[0] = 'X'
+				value.Header.Set("X-Request-Id", "mutated")
+				if string(value.Wire.Body["ip_version"]) != `"٦"` || string(value.Wire.Body["x_raw"]) != "1e-400" || value.Wire.Header.Get("X-Request-Id") != "actual-next-page" || value.Resource.Header.Get("X-Request-Id") != "actual-next-page" {
+					t.Fatal("view/actual receipt alias", value)
+				}
+			})
+		}
+	}
+}
