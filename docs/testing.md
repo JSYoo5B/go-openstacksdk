@@ -1,5 +1,8 @@
 # 테스트
 
+macOS에서 전체 로컬 HTTP 계약을 동시에 실행하다 `dial tcp ... can't assign requested address`가 발생하면 `GOFLAGS=-p=4 make check`로 Go 테스트 패키지 병렬도를 제한합니다. 2026-10-11 같은 코드의 재검증과 최신 전체156개 package 검사가 이 설정으로 통과했습니다. 이는 작업 에이전트 수와 별개이며 race 검증을 유지합니다. [마감 검증 근거](sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 정확한 revision과 Source SHA를 기록합니다.
+
+
 테스트는 로컬 HTTP 모의 서버로 SDK에서 Gophercloud를 거쳐 HTTP 요청·응답을 처리하는 경로를 검증합니다. 실클라우드 인증이나 리소스 생성은 수행하지 않습니다.
 
 ## 실행

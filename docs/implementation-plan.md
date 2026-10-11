@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): 재시작 전 현재 병렬 묶음 마감. 전체1,250/3,362·핵심1,176/2,292.** Keystone generic Credential5개·Neutron 생성/수정14개·Swift metadata7개·Nova legacy image8개를 집중 race와 Source 검토로 완료했습니다. 서비스별 작은 커밋을 main에 push했고, 새 worker 구현 할당은 중단했습니다. 공통 FindIdentity의 취소 시 HTTP 오류 유실 및 credential의 mixed404 오처리도 수정했습니다. 전체 검사와 외부 문서 예제 빌드는 확정한 커밋 스냅샷에서 실행해 최종 근거를 아래 판정대장에 남깁니다. 재개 시 핵심 서비스 잔여 user 계약부터 이어가며, generic update_credential·Nova 미해결 user action·SDK-R1/C1/S1과 stock Backup metadata4개는 별도 미해결 상태입니다. 전체 목표는 완료되지 않았습니다.
+**현재 진행 (2026-10-11): 현재 병렬 묶음 마감 완료·재시작 대기. 전체1,250/3,362·핵심1,176/2,292.** Keystone generic Credential5개·Neutron 생성/수정14개·Swift metadata7개·Nova legacy image8개를 완료하고 서비스별 작은 커밋으로 main에 push했습니다. 공통 FindIdentity의 취소 시 HTTP 오류 유실과 mixed404 오처리도 수정했습니다. 정확한 `6788f804` 스냅샷에서 전체156개 실제 test package·license·vet·race·parity·progress·gofmt 및 문서 main9개·example package3개 외부 빌드가 PASS입니다. 새 worker 구현 할당은 중단하고 목표는 사용자 재시작을 위한 일시정지입니다. 재개 시 핵심 잔여 user 계약부터 진행하며 generic update_credential·Nova 미해결 user action·SDK-R1/C1/S1과 stock Backup metadata4개는 미해결 상태입니다. 전체 목표는 완료되지 않았습니다.
 
 **최신 API 완료 (2026-10-11): Keystone5·Neutron14·Swift7·Nova8, 전체1,216→1,250(+34)·핵심1,142→1,176/2,292.** Identity178→183/389·Network268→282/758·Object Storage20→27/74·Compute220→228/333입니다. 새13개 review를 추가하고 기존 unresolved21행을 완료했으며 기존 ApplicationCredential/AccessRule5행의 오류 계약도 보강했습니다. [현재 묶음의 사용법·검증 기록](sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 구현·검증·문서·재개 위치를 기록합니다.
 
