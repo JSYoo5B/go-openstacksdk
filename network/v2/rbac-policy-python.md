@@ -180,3 +180,9 @@ LIST Accept는 기본 application/json으로 configured Accept보다 우선하�
 nil API/context/option·invalid ID/known JSON/control·protected header는 HTTP 전 오류입니다. location·route·session·constructor controls는 SDK가 소유합니다. 동적 Python Resource/Munch/subclass·mutable lifecycle·Connection-derived location·HTTP cache hit/invalidation은 제공하지 않습니다. 반복 Get은 HTTP를 수행하며 증거가 없는 성공 status/body를 만들지 않습니다.
 
 [회귀 테스트](extensions/rbacpolicies/python_records_contracts_test.go)는 기존 native RBAC fixture와 public Gophercloud testhelper 기반 internal/testcloud를 사용합니다. 별도 transport/pager/server 구현을 추가하지 않았습니다. root 통합 검증이 package/race와 이 standalone main을 실행하며 이 문서는 실행 전 통과나 실제 Neutron integration 성공을 주장하지 않습니다.
+
+### Find 예약 인자와 선택 버전
+
+`FindRecord`의 raw Query에 `rbac_policy`, `name_or_id`, `ignore_missing` 키가 있으면 값이 null·false·0이어도 HTTP 전에 오류가 납니다. Python의 공개 proxy와 내부 `_find`가 이미 이 인자들을 바인딩하므로 일반 query나 constructor seed로 다시 전달할 수 없습니다. missing 정책은 `WithRecordFindIgnoreMissing`으로 지정합니다. LIST는 별도 호출이며 일반 unknown kwargs 규칙을 유지합니다.
+
+멤버 GET/Find 응답에 unknown `microversion` 키가 있으면 `Wire`는 서버의 값을 그대로 보존합니다. `Resource`의 같은 키는 실제 선택된 SDK 버전 문자열 또는 선택 버전이 없는 경우 null을 담습니다. Source의 런타임 Resource 속성이 unknown Body 값보다 우선하는 동작이며, 응답 확장 값이 요청 버전을 선택하지는 않습니다.
