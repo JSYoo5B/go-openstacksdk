@@ -10,7 +10,9 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 사용자 재시작 요청으로 새 구현 할당은 중단했고 모든 worker가 완료·동결 상태입니다. 최종 기록 commit/push 후 목표를 일시정지하며 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
+**현재 진행 (2026-10-11): 최신 사용자 지시에 따라 구현 재개, 작업 에이전트8개 병렬 진행. 기준 완료1,292/3,362·핵심1,218/2,292.** 이전 재시작/일시정지 요청은 철회됐습니다. Cinder snapshot/backup 검색2묶음, Neutron network/port/subnet 검색·router action·trunk/address action·tag4묶음, Swift container·Barbican consumer2묶음을 독립 leaf 담당으로 배정했습니다. 공통 source guard와 discovery 오류 처리 보완은 root가 먼저 통합합니다. 각 worker는 구현·기존 helper를 재사용하는 테스트·독립 main/비교 문서·연산 판정 초안을 준비하며 root가 통과한 단위부터 작은 commit/push·집계를 진행합니다. 새 구현은 검증 전 완료량에 포함하지 않으며 core user→core admin→managed user→managed admin 순서를 유지합니다. 최신 지시가 별도로 바뀌기 전까지 재시작을 유도하거나 자의로 일시정지하지 않습니다.
+
+**이전 묶음 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 사용자 재시작 요청으로 새 구현 할당은 중단했고 모든 worker가 완료·동결 상태입니다. 최종 기록 commit/push 후 목표를 일시정지하며 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
 
 | 이번 단위 | 신규 API | 구현·서비스 검증 | Python/Go 문서·판정 |
 |---|---:|---|---|
