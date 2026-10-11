@@ -81616,8 +81616,8 @@
       "source_fingerprint": "01db12f1b415ad31bca67f920bb8f940841af885893291b4d3c876d303090a65",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.ListRecords"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.ListRecords"
       ],
       "contracts": [
         {
@@ -81658,15 +81658,18 @@
         "Stock singular consistencygroup_links is supported as explicit Go pagination improvement. Pinned Resource._get_next_link directly reads generic links/plural links/next/HTTP Link and does not directly read the stock singular key; limit-based Source marker fallback is distinct.",
         "Raw generic LIST kwargs for named controls are rejected with ErrInvalidOption and must use concrete typed options. No allow_unknown_params override is exposed; deprecated JMESPath/conflicting dynamic kwargs remain SDK-J1 rather than silent discard/full parity. Mutation attr semantics unchanged by list-only helper."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/create_consistency_group",
       "source_fingerprint": "e5b9dff1c4b4aa364ce9d722de7ab8fe15df2272f0d305fa0d9ef0eb55ada6f7",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.CreateRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.CreateRecord"
       ],
       "contracts": [
         {
@@ -81693,15 +81696,18 @@
         "Local filter equality/truthiness preserves exact decimals instead of Python binary64 rounding/underflow; deterministic sorted filters short circuit first false. Actual Wire/Envelope numbers remain unchanged.",
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/create_consistency_group_from_source",
       "source_fingerprint": "2dbfd0668cf03bf2582ee2cc5186cbe47421aa25b9f8d2aa044f4f34287d0ac1",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.CreateFromSourceRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.CreateFromSourceRecord"
       ],
       "contracts": [
         {
@@ -81729,7 +81735,10 @@
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced.",
         "Optional sourceID/name/description inputs are nullable Go strings; arbitrary Source dynamic objects/Resource reference overloads are not public Go inputs. Empty source IDs map to Source proxy falsey null. Request emits both null IDs when omitted so server can actually reject, rather than adding unrequested preflight exclusivity."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/create_consistency_group_snapshot",
@@ -81809,8 +81818,8 @@
       "source_fingerprint": "f333bba5e82338500d5b9f9903909f8e02225548018a3d31c861299f6590b14e",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.DeleteRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.DeleteRecord"
       ],
       "contracts": [
         {
@@ -81838,7 +81847,10 @@
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced.",
         "Tracked Source bug: fixed Python delete sends consistency_group but stock controller requires consistencygroup. Go correcteddefault plus explicit PinnedSourceWire replay; literal Source body is never falsely claimed accepted."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/delete_consistency_group_snapshot",
@@ -82157,8 +82169,8 @@
       "source_fingerprint": "37471f83b99e9b90fb801d43a2132afcea5e99ac183869fee882d2922c1bea18",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.FindRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.FindRecord"
       ],
       "contracts": [
         {
@@ -82195,7 +82207,10 @@
         "Local filter equality/truthiness preserves exact decimals instead of Python binary64 rounding/underflow; deterministic sorted filters short circuit first false. Actual Wire/Envelope numbers remain unchanged.",
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/find_consistency_group_snapshot",
@@ -82298,8 +82313,8 @@
       "source_fingerprint": "3d47b5a6f81c7d1e41e7dc8b9cacb01c1f2040cad6213f326aa5e18f19fcb2ce",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.GetRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.GetRecord"
       ],
       "contracts": [
         {
@@ -82327,7 +82342,10 @@
         "Local filter equality/truthiness preserves exact decimals instead of Python binary64 rounding/underflow; deterministic sorted filters short circuit first false. Actual Wire/Envelope numbers remain unchanged.",
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:block_storage/v3/get_consistency_group_snapshot",
@@ -82406,8 +82424,8 @@
       "source_fingerprint": "17b8c98f89b3d2a1e9368723aae6f09b172daad385a7308b54172fff4da289e2",
       "status": "go_mapping",
       "go_api": [
-        "blockstorage/v3/consistencygroups.New",
-        "blockstorage/v3/consistencygroups.API.UpdateRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.UpdateRecord"
       ],
       "contracts": [
         {
@@ -82434,7 +82452,10 @@
         "Local filter equality/truthiness preserves exact decimals instead of Python binary64 rounding/underflow; deterministic sorted filters short circuit first false. Actual Wire/Envelope numbers remain unchanged.",
         "Per-call Headers/Microversion are explicit owned Go policy extensions. Find microversion is GET-only; empty Find override inherits original selected policy rather than forwarding Source explicit empty string. No class ceiling/default discovery is introduced."
       ],
-      "remaining": []
+      "remaining": [],
+      "documentation": [
+        "blockstorage/v3/consistency-groups-python.md"
+      ]
     },
     {
       "operation": "python:network/v2/create_rbac_policy",
