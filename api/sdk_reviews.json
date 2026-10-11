@@ -67440,8 +67440,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeWithConnector",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.VolumeConnectorResult"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders"
       ],
       "contracts": [
         {
@@ -67486,8 +67485,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateWithConnector",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeader",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.VolumeConnectorResult"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithConnectorHeaders"
       ],
       "contracts": [
         {
@@ -68348,8 +68346,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateName",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateNoSnapshots",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateExtension",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateSuppressLegacySnapshots",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.TransferRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateSuppressLegacySnapshots"
       ],
       "contracts": [
         {
@@ -68401,8 +68398,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.GetRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.TransferRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordReadHeaders"
       ],
       "contracts": [
         {
@@ -68465,8 +68461,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMarker",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListServerQuery",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.TransferRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListServerQuery"
       ],
       "contracts": [
         {
@@ -68512,8 +68507,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.TransferRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordFindIgnoreMissing"
       ],
       "contracts": [
         {
@@ -68559,8 +68553,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.Accept",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.AcceptRecord",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordAcceptAuthKey",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.TransferRecord"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordAcceptAuthKey"
       ],
       "contracts": [
         {
