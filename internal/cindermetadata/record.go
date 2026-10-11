@@ -9,12 +9,49 @@ import (
 	"net/url"
 	"slices"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
+
+// NewRecord captures a literal resource identity as one escaped route segment.
+// Typed MetadataIn keeps its stricter identifier policy through New.
+func NewRecord(ctx context.Context, client *gophercloud.ServiceClient, collection, id string) (*Scope, error) {
+	if err := Validate(ctx, client); err != nil {
+		return nil, err
+	}
+	if collection != "volumes" && collection != "snapshots" {
+		return nil, invalid("unsupported metadata collection")
+	}
+	if err := recordIdentifier(id); err != nil {
+		return nil, err
+	}
+	target := client.ServiceURL(collection, url.PathEscape(id), "metadata")
+	if err := rest.ValidateTarget(client, target); err != nil {
+		return nil, err
+	}
+	parsed, err := url.Parse(target)
+	if err != nil || parsed.RawQuery != "" {
+		return nil, invalid("metadata URL cannot contain a query")
+	}
+	return &Scope{client: client, id: id, collection: collection, endpoint: target, literalRecordID: true}, nil
+}
+
+func recordIdentifier(id string) error {
+	if strings.TrimSpace(id) == "" || id == "." || id == ".." || !utf8.ValidString(id) {
+		return invalid("nonblank literal metadata identity required")
+	}
+	for _, char := range id {
+		if unicode.IsControl(char) {
+			return invalid("metadata identity contains controls")
+		}
+	}
+	return nil
+}
 
 // ExchangeRecord shares the fixed metadata transport with owned Resource views.
 // It leaves body projection to the caller and retains every physical receipt.

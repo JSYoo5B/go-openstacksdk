@@ -153,3 +153,40 @@ func TestRecordExchangeSelectedVersionKeepsCleanNativeRetry(t *testing.T) {
 		t.Fatal(calls, response, err)
 	}
 }
+
+func TestRecordScopeEscapesLiteralIdentityWithoutChangingTypedBoundary(t *testing.T) {
+	fake := testcloud.New(t)
+	client := fake.Client("volume", "/cinder/project/")
+	source, err := cloudread.Capture(context.Background(), client, "volume")
+	if err != nil {
+		t.Fatal(err)
+	}
+	id := "literal/%雪?query=owned#fragment"
+	if _, err := New(context.Background(), &source.Client, "volumes", id); !errors.Is(err, resource.ErrInvalidOption) {
+		t.Fatal("typed identity boundary changed", err)
+	}
+	scope, err := NewRecord(context.Background(), &source.Client, "volumes", id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	calls := 0
+	fake.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		if r.URL.EscapedPath() != "/cinder/project/volumes/literal%2F%25%E9%9B%AA%3Fquery=owned%23fragment/metadata" || r.URL.RawQuery != "" || r.URL.Fragment != "" {
+			t.Error(r.URL)
+		}
+		testcloud.JSON(w, 203, "opaque")
+	})
+	response, err := scope.ExchangeRecord(context.Background(), http.MethodGet, nil, nil, source.Guard)
+	if err != nil || response == nil || response.StatusCode != 203 || calls != 1 {
+		t.Fatal(response, err, calls)
+	}
+	for _, bad := range []string{"", " ", ".", "..", "a\x00b", "\xff"} {
+		if _, err := NewRecord(context.Background(), &source.Client, "volumes", bad); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(bad, err)
+		}
+	}
+	if calls != 1 {
+		t.Fatal(calls)
+	}
+}

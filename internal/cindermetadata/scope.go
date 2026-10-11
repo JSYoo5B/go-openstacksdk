@@ -23,6 +23,7 @@ import (
 type Scope struct {
 	client                   *gophercloud.ServiceClient
 	id, collection, endpoint string
+	literalRecordID          bool
 }
 
 // New captures the selected metadata URI once. No response can retarget it.
@@ -72,7 +73,11 @@ func (s *Scope) validate(ctx context.Context) error {
 	if s.collection != "volumes" && s.collection != "snapshots" {
 		return invalid("unsupported metadata collection")
 	}
-	if err := identifier(s.id); err != nil {
+	checkID := identifier
+	if s.literalRecordID {
+		checkID = recordIdentifier
+	}
+	if err := checkID(s.id); err != nil {
 		return err
 	}
 	return rest.ValidateTarget(s.client, s.endpoint)
