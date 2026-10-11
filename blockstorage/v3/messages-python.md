@@ -9,7 +9,7 @@
 | `delete_message(id)` | `Messages.DeleteRecord(ctx, id)` | bodyless DELETE, clean404만 무시 |
 | `delete_message(id, ignore_missing=False)` | `WithRecordDeleteIgnoreMissing(false)` | clean404도 오류 |
 
-새 leaf는 `messages.New(service.RawClient())`로 기존 인증된 Cinder client에 붙입니다. 생성된 transport API나 다른 메시징 서비스(Zaqar)의 API를 Cinder 기능으로 계산하지 않습니다.
+새 leaf는 `service.Messages`로 기존 인증된 Cinder client에 붙입니다. 생성된 transport API나 다른 메시징 서비스(Zaqar)의 API를 Cinder 기능으로 계산하지 않습니다.
 
 ## 독립 Python 예제
 
@@ -88,7 +88,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
-    api := messages.New(service.RawClient())
+    api := service.Messages
     if *id != "" {
         if *remove {
             if err := api.DeleteRecord(ctx, *id,
