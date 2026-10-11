@@ -60,14 +60,14 @@
 | `update_volume_attachment` | 없음 | unresolved |
 | `delete_volume_attachment` | `VolumeAttachments.InServer(ctx, resource.ID(serverID))`의 `Delete(ctx, resource.ID(volumeID))` | go_mapping |
 | `get_server_action` | `InstanceActions.InServer(ctx, resource.ID(serverID))`의 `Get(ctx, requestID)` | go_mapping |
-| `get_image` | 없음 | unresolved |
-| `find_image` | 없음 | unresolved |
-| `images` | 없음 | unresolved |
-| `delete_image` | 없음 | unresolved |
-| `fetch_image_metadata` | 없음 | unresolved |
-| `get_image_metadata` | 없음 | unresolved |
-| `set_image_metadata` | 없음 | unresolved |
-| `delete_image_metadata` | 없음 | unresolved |
+| `get_image` | `Images.GetRecord` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `find_image` | `Images.FindRecord` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `images` | `Images.ListRecords` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `delete_image` | `Images.DeleteRecord` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `fetch_image_metadata` | `Images.FetchMetadata` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `get_image_metadata` | `Images.GetMetadata` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `set_image_metadata` | `Images.SetMetadata` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
+| `delete_image_metadata` | `Images.DeleteMetadata` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
 
 ## 공통 차이
 
@@ -140,4 +140,4 @@ Python TagMixin은 tag를 URL에 그대로 이어 붙이고 discovery로 2.26 �
 - `find_server_group`: ID GET 뒤 목록 fallback을 하는 helper가 없고 `all_projects`를 `Find`에 전달할 수 없습니다.
 - `volume_attachments`: `limit`과 `offset` query를 보낼 수 없습니다.
 - `update_volume_attachment`: volume attachment PUT 호출이 없습니다.
-- `get_image`, `find_image`, `images`, `delete_image`, `fetch_image_metadata`, `get_image_metadata`, `set_image_metadata`, `delete_image_metadata`: Nova의 deprecated `/images` proxy와 그 metadata 하위 경로를 호출하는 Go API가 없습니다. Go에서는 Glance `ImageV2().Images`를 쓰지만 경로, 응답 모델과 metadata 표현이 달라서 같은 요청으로 보지 않았습니다.
+Nova legacy `/images`와 metadata8개는 [별도 비교 가이드](nova-images-python.md)의 owned API로 완료했습니다. 일반2.35·metadata2.38 버전 상한과 raw Resource/응답·Source 차이는 해당 프로파일에 적용됩니다. Find fallback은 Source의 `/images?name=...` summary 경로입니다.

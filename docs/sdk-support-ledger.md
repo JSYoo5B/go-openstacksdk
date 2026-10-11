@@ -4,9 +4,25 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [Neutron 선택 조회·조건부 삭제와 Keystone 토큰](#neutron-선택-조회조건부-삭제와-keystone-토큰-완료)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 완료 단위는 [핵심 Credential·Neutron·Swift·Nova34개](#핵심-credentialneutronswiftnova-34개-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,195입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,250입니다.
+
+## 핵심 Credential·Neutron·Swift·Nova34개 마감
+
+2026-10-11의 병렬 묶음은 Keystone generic Credential5개, Neutron network·port·subnet·router·floating IP·security group·security rule 생성/수정14개, Swift account/container/object metadata7개, Nova legacy image/metadata8개입니다. named Go 호출의 완료 수는1,216→1,250(+34), 핵심1,142→1,176/2,292이며 reviews1,586·contracts4,968·catalog unresolved2,111·unsupported1입니다. source 그대로 지원하는 supported는0개입니다. catalog와 양쪽 Source pin/fingerprint는 유지했고 기존1,573개 review 중 이21개 gap과 오류 계약5행만 갱신했습니다.
+
+Keystone [generic Credential](../identity/v3/credentials-python.md)은 `/credentials`를 사용하며 native EC2 경로와 구분합니다. Neutron [Network](../network/v2/networks/python-mutations.md), [Port](../network/v2/ports/python-mutations.md), [Subnet](../network/v2/subnets/python-mutations.md), [Router](../network/v2/extensions/layer3/routers/python-mutations.md), [Floating IP](../network/v2/extensions/layer3/floatingips/python-mutations.md), [Security group](../network/v2/extensions/security/groups/python-mutations.md), [Security rule·bulk](../network/v2/extensions/security/rules/python-mutations.md)은 concrete `WithAttribute/WithIfMatch/WithRevision`으로 aliases·omitted/null/zero/false·empty update·revision 우선순위를 처리합니다. Swift [Account](../objectstorage/v1/accounts/metadata-refresh-python.md)·[Container](../objectstorage/v1/containers/metadata-refresh-python.md)·[Object](../objectstorage/v1/objects/metadata-python.md)는 기본 refresh와 실제 phase 응답을 제공합니다. [Nova 이미지](../compute/v2/nova-images-python.md)는 `conn.ComputeV2(ctx).Images`에 연결했으며 일반 API2.35·metadata2.38 이하에서 호출 가능합니다. 선택 버전을 자동으로 낮추지 않고 높은/latest 버전은 HTTP 전에 ErrUnsupported입니다.
+
+최종 집중 race는 Neutron7개 leaf29그룹·Swift24그룹·generic Credential10+기존native2그룹·Nova9그룹·기존 ApplicationCredential 새 오류2+기존10그룹·공통 identity lookup41그룹·registry generator3그룹이 PASS입니다. 기존 public Gophercloud testhelper의 `internal/testcloud`, package native recorder/HTTP fault fixture, Source snapshot·JSON projection·REST rejection·FindIdentity를 재사용했습니다. `wrap-focused-receipt.json`은 최초 실패 로그에서 전체 성공으로 계산하지 않고 package별 실제 마지막 PASS를 선택합니다.
+
+교차 검토에서 rejected404의 Read/Close 오류가 native error 처리에서 버려져 Find/Delete가 잘못 성공하는 결함을 발견했습니다. 공통 `DoJSONGuardedRejections`를 Credential/Nova/ApplicationCredential·AccessRule에 적용해 clean rejection과 mixed 오류를 구분하고 native retry hook이 같은 원래 거부를 반환할 때만 missing/fallback을 유지합니다. 추가 회귀가 발견한 `FindIdentity`의 GET/extra-specs 취소 시 원래 HTTP error 유실도 수정했습니다. native status/body/header와 Read/Close·context.Cause를 함께 보존하며 후속 list를 실행하지 않습니다.
+
+Subnet204의 실제 native 반환은 nil,nil이라 최초 zero model 기대값3사례를 교정했습니다. Swift의 rejected response는 성공 receipt를 만들지 않아 실패 phase의 nil과 이전 성공 증거를 구분하도록 테스트를 고쳤습니다. Nova metadata의 누락된 import도 최종 집중 실행 전에 수정했습니다. Swift 관측 metadata suffix의 wire alias 충돌은 net/http가 응답의 원래 순서를 잃으므로 실제 POST 전에 HEAD proof를 보존한 ErrInvalidOption으로 거부합니다. 읽기·nil/빈 삭제·없는 key no-op와 suffix를 삭제해 충돌을 해소하는 분기는 유지하며 Source와 다른 Go 경계를 명시했습니다. getter는 Source에서도 항상 HEAD하므로 cached-skip 차이를 getter 판정에서 제거했습니다.
+
+생성기에 Nova owned API registry와 서비스별12가이드 링크를 통합했고 실제 `make generate`에서 catalog·Gophercloud inventory·Python manifest bytes drift0을 확인했습니다. 문서 Go blocks는 main9개와 Swift snippet을 감싼 example package3개로 따로 검증하며 실제 클라우드/Python 실행 또는 replace 없는 원격 설치와 구분합니다. 최종 전체 gate와 문서 build의 정확한 revision·소스 SHA는 이 절의 마감 검증 기록에 추가합니다. 임시 근거는 `/private/tmp/go-openstacksdk-oct11-wrap-{focused-receipt,review-receipt,generation-receipt}.json`, `/private/tmp/go-openstacksdk-oct11-wrap-consumers/manifest.json`입니다.
+
+재개 위치: 이34행은 재구현하지 않습니다. 먼저 generic `update_credential`와 core Nova 잔여 user action 및 Neutron 미해결 user 연산을 현재 판정대장에서 골라 서비스 의존성이 없는 leaf별로 배정합니다. root는 공통 변경·generator·중앙판정·전체검사·commit/push를 통합합니다. Swift metadata의 기존 native getter2개와 ApplicationCredential8개는 재집계하지 않습니다. stock Cinder Backup child metadata4개는 명시적 compatibility profile이 있어도 계속 unresolved입니다. SDK-R1/C1/S1, 인증된 실제 OpenStack acceptance, alpha release와 전체 inventory 목표는 미완료입니다. 사용자의 앱 재시작 요청에 맞춰 현재 worker의 파일은 모두 동결했고 새 구현은 시작하지 않았습니다.
 
 ## Keystone credential·Neutron mutation·Cinder summary 병렬 묶음
 

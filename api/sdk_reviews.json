@@ -27572,12 +27572,13 @@
     {
       "operation": "python:object_store/v1/set_account_metadata",
       "source_fingerprint": "0abc8a90c2165d873025a19280da373e35901ba3fbbea8fb6bc84d878cd41e38",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadataAndRefresh"
       ],
       "contracts": [
         {
@@ -27627,30 +27628,51 @@
             "connection_objectstorage_account_metadata_test.go:TestConnectionAccountMetadataSharesClientAndOwnsEvidence",
             "internal/cmd/sdkgen/swift_account_metadata_test.go:TestSwiftAccountMetadataPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "Bodyless POST then default HEAD, including empty metadata, on selected account route; actual final observation is independent from submitted input.",
+          "tests": [
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataSetterRefreshesObservedStateAndSourceValues",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "JSON-domain Python string conversion, exact full-prefix convention, Source status200..399 and existing owned concrete options/source/cause-safe REST.",
+          "tests": [
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataSetterRefreshesObservedStateAndSourceValues",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/accounts/README.md"
+        "objectstorage/v1/accounts/README.md",
+        "objectstorage/v1/accounts/metadata-refresh-python.md"
       ],
       "differences": [
-        "Pinned Python public setter returns None and performs POST followed by default refresh HEAD; Go exposes only one POST acknowledgement and requires explicit GetMetadata refresh.",
-        "Python str(any), full-prefixed keyword handling and mutable Resource/Adapter semantics are not reproduced by suffix-only string inputs and owned Go snapshots/evidence."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python default setter refresh=True and None return versus one-POST Go acknowledgement with explicit caller HEAD remain intentionally different.",
-        "Python str(any), full-prefixed keyword rules, mutable Resource/cache and Adapter/session behavior remain unresolved; Go requires suffix-only string metadata with independent snapshots.",
-        "Server quota/metadata limits/autocreate/ACL/encoding/durable replication and broader native status policy are server/native contracts, not client-side parity claims."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/delete_account_metadata",
       "source_fingerprint": "e69aff1aabbaf70be39d85c86f153bd4d0215dc8152763d526a58fe82108040c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadataKeys"
       ],
       "contracts": [
         {
@@ -27698,19 +27720,30 @@
             "connection_objectstorage_account_metadata_test.go:TestConnectionAccountMetadataSharesClientAndOwnsEvidence",
             "internal/cmd/sdkgen/swift_account_metadata_test.go:TestSwiftAccountMetadataPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "One bodyless POST including nil/empty keys; duplicate keys collapse, exact full prefix is accepted, final200..399 preserves opaque actual acknowledgement.",
+          "tests": [
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataEmptyAndPrefixedDeleteFollowSourcePOST",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/accounts/metadata_refresh_test.go:TestSwiftPythonAccountMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/accounts/README.md"
+        "objectstorage/v1/accounts/README.md",
+        "objectstorage/v1/accounts/metadata-refresh-python.md"
       ],
       "differences": [
-        "Pinned Python public deleter returns None after empty metadata-value POST; Go exposes actual204 acknowledgement and cause-safe accepted raw evidence.",
-        "Python mutable Resource/Adapter handling and full-prefixed key conventions differ from owned suffix-only strict ASCII keys, duplicate rejection and strict actual204/native error policy."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python None return, mutable Resource/Adapter/session errors and prefixed-key conventions differ from suffix-only Go keys and independent opaque acknowledgement.",
-        "Strict key/case collision validation and actual204 policy are deliberate Go boundaries; deployment header aliases/encoding and server state/durability semantics remain outside this review."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/get_container_metadata",
@@ -27802,12 +27835,17 @@
     {
       "operation": "python:object_store/v1/set_container_metadata",
       "source_fingerprint": "21e83b033927c89bb1a9bc33a3c02f9568f7641f4c0feb92293a5116439e2569",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeader",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders"
       ],
       "contracts": [
         {
@@ -27867,30 +27905,55 @@
             "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
             "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
           ]
+        },
+        {
+          "behavior": "Default refresh=true POST then HEAD and explicit false is callable through WithMetadataRefresh(false); later scalar wins and whole concrete opts resets default.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshots",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "All eight Source canonical and exact wire system aliases, full custom prefix, JSON Python string conversion and physical per-phase evidence.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshots",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/containers/README.md"
+        "objectstorage/v1/containers/README.md",
+        "objectstorage/v1/containers/metadata-refresh-python.md"
       ],
       "differences": [
-        "Python setter defaults refresh=True, performs POST then HEAD and returns the same mutable Container. Go returns one POST acknowledgement and requires explicit GetMetadata refresh.",
-        "Python system aliases and str(any)/full-prefixed metadata handling differ from suffix-only string snapshots plus exact ordinary system wire headers."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python default automatic HEAD refresh, mutable Container return/cache/descriptor state and Adapter/session behavior remain unresolved.",
-        "Python arbitrary str coercion, system aliases and prefixed-key rules are intentionally not reproduced; Go preserves literal string metadata and exposes system writes through exact generic wire header names.",
-        "Server authorization/owner filtering/metadata limits/ACL/sync/storage policy and durable replication are server decisions; acknowledgement is not refreshed state."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/delete_container_metadata",
       "source_fingerprint": "11b38c4d607fa533f5ebb1c6986282857a09d2a7754eae747f7d49beb832b844",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadataKeys"
       ],
       "contracts": [
         {
@@ -27939,31 +28002,44 @@
             "internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry",
             "objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence"
           ]
+        },
+        {
+          "behavior": "One bodyless POST including nil/empty keys; duplicate keys collapse; canonical/wire system aliases and full custom prefix reach empty header values.",
+          "tests": [
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEmptyAndPrefixedDeleteFollowSourcePOST",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy",
+            "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/containers/README.md"
+        "objectstorage/v1/containers/README.md",
+        "objectstorage/v1/containers/metadata-refresh-python.md"
       ],
       "differences": [
-        "Python returns None after empty metadata-value POST; Go exposes actual204 opaque acknowledgement and cause-safe accepted evidence.",
-        "Python system aliases and prefixed-key conventions differ from strict suffix-only copied key inputs plus explicitly named ordinary system headers."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python None return, mutable Resource/cache/Adapter/session semantics and system alias mapping remain different.",
-        "Strict duplicate/case validation, literal name/effectivebase policy and actual204-only acceptance are deliberate Go differences; no automatic refresh, missing suppression or whole-container deletion parity is claimed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/get_object_metadata",
       "source_fingerprint": "d94a0c23e14275ea5e351778b2213e010a08f8faace3f8d8628079cb5d42262f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeader",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutGetMetadataNewest"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutGetMetadataNewest",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.HeadMetadata"
       ],
       "contracts": [
         {
@@ -28025,29 +28101,42 @@
             "connection_objectstorage_object_metadata_test.go:TestConnectionObjectMetadataSharesClientAndOwnsPhases",
             "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "One query-free HEAD for explicit literal container/object names; final200..399 accepted; actual headers/body/status and atomic existing MetadataInfo projection retain Source/native/context errors.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataObservedAliasesPreserveReadsAndDeleteNoOps"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/objects/README.md"
+        "objectstorage/v1/objects/README.md",
+        "objectstorage/v1/objects/metadata-python.md"
       ],
       "differences": [
-        "Python returns mutable Object with cached descriptors/header/session state and recognized-header conversions. Go exposes strictactual200 raw owned proof, nullable exactint64/literal MetadataInfo and lowercased generic Values.",
-        "Required literal container/object and safe effectivebase/source/name policy replace Python optional-parent Object precedence and Resource coercion; broader native query/conditional models remain available."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "This callable implements the Proxy string-name branch. Pinned get_object_metadata always performs HEAD for names and existing Object resources; mutable Resource input/return semantics are tracked separately.",
+        "Observed custom wire-alias collisions remain valid HEAD observations. Go preserves both suffixes; the POST-only collision boundary applies to setters/deleters, not this getter.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python Resource descriptors/cache/Adapter/session/_last_headers and mutable sameObject identity are not reproduced.",
-        "Conditional/temp/version/SLO/symlink query options and richer native parsedheader model remain outside this bounded concrete getter. Server limits/authorization/middleware/encoding/replication are not client parity guarantees."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/set_object_metadata",
       "source_fingerprint": "41e6a3e10d05a0e595545f726865dd1f74de19bbf577d7b918ed8a0893f98102",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadataFromFresh"
       ],
       "contracts": [
         {
@@ -28122,31 +28211,73 @@
             "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
             "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "Name-created Source Object has no last_modified_at: query-free HEAD then POST, including empty setter; no final HEAD because Object override does not use refresh parameter.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterEverySystemAliasAndEmptyInput",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "Falsey JSON values omitted, all existing custom metadata preserved including empty strings, exact full prefix and all nine system canonical/wire aliases; Source incoming/system descriptor precedence preserved within the explicit observed wire-alias collision boundary; unordered observed collisions cannot claim full dictionary-order parity.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterEverySystemAliasAndEmptyInput",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "Source Header delete_after conversion reuses DescriptorIntegerJSON (unsigned digit strings/Unicode/arbitrary integers, signed/space/nonnumeric→zero, nondecimal isdigit→error); bool descriptor preserves bool(nonempty string).",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterEverySystemAliasAndEmptyInput",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "POST-only Go boundary for surviving ambiguous observed custom aliases; successful HEAD proof retained with ErrInvalidOption, without POST or manufactured acknowledgement. Read/no-op deletion remains allowed; deletion that removes an alias can proceed after resolving the collision.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataObservedAliasesRejectOnlyBeforePOST",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataObservedAliasesPreserveReadsAndDeleteNoOps"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/objects/README.md"
+        "objectstorage/v1/objects/README.md",
+        "objectstorage/v1/objects/metadata-python.md"
       ],
       "differences": [
-        "Python setter conditionallyHEADs only when last_modified_at absent, merges cached metadata/systemaliases and returns the same Object with no finalHEAD; Go alwaysfreshHEAD and returns distinct Before/POSTack.",
-        "Python drops falsey input and str-coerces alias fields. Go stores empty custom strings literally, alwaysrequests bothphases and uses suffix-only names plus exact wire header overrides.",
-        "Mutation own-linkread/rejection and onlynine bounded system carryheaders deliberately exclude unknown serverconfiguredmutable/sysmeta/currentversionedaliases; normal getter can followlinks."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "This callable implements the Proxy string-name branch. Existing cached Object inputs can skip fresh HEAD in Python; mutable Resource input/cache is tracked separately rather than silently treated as complete.",
+        "Incoming Go-map alias collisions are rejected before HTTP. Separately, when POST is actually needed, surviving observed custom suffixes that map to the same final wire header are rejected with ErrInvalidOption and successful HEAD response proof: Go http.Header loses original response order, while Python resolves these aliases by ordered last assignment. Getter and nil/empty/absent-key deletion no-ops are unchanged; deleting one conflicting suffix can remove the ambiguity.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python cache-based conditionalreads, Object return/descriptors/Adapter/session/falseycoercion/systemalias conventions remain different.",
-        "Broader temp/version/SLO/symlink mutation semantics and configurable extra systemheaders are deferred; no complete resourcecache or metadata subsystem parity.",
-        "Read/merge/write is not atomic or CAS-protected; concurrentupdates may be overwritten and POST307 may followapplication. No automatic rollback/restart/refresh or mutationabsent inference."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/delete_object_metadata",
       "source_fingerprint": "2f18ff01dbaaade5e5347a3c6487640464c9777a72e0ce9297fb3e490abbb701",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadataAndRefresh"
       ],
       "contracts": [
         {
@@ -28209,20 +28340,51 @@
             "objectstorage/v1/objects/metadata_contracts_test.go:TestObjectMetadataContractsWireAndIdentity",
             "internal/cmd/sdkgen/swift_object_metadata_test.go:TestSwiftObjectMetadataPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "Nil/empty keys are noHTTP; absent/case-mismatched/full-prefixed keys are HEAD-only no-op; actual deletion is query-free HEAD/POST/final HEAD with actual refresh data.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataDeleteNoOpsAndObservedFinalHEAD",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataDeleteAfterPreservesSourceBranch",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "Exact lower-case observed custom suffixes and system canonical keys; ordinary duplicates collapse during removal; delete_after deletes delete_at without raising deleted flag and exposes missing key as MetadataKeyError.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataDeleteNoOpsAndObservedFinalHEAD",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataDeleteAfterPreservesSourceBranch",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataCapturesSourceBeforeCustomJSONMarshaler"
+          ]
+        },
+        {
+          "behavior": "POST-only Go boundary for surviving ambiguous observed custom aliases; successful HEAD proof retained with ErrInvalidOption, without POST or manufactured acknowledgement. Read/no-op deletion remains allowed; deletion that removes an alias can proceed after resolving the collision.",
+          "tests": [
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataObservedAliasesRejectOnlyBeforePOST",
+            "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataObservedAliasesPreserveReadsAndDeleteNoOps"
+          ]
         }
       ],
       "documentation": [
-        "objectstorage/v1/objects/README.md"
+        "objectstorage/v1/objects/README.md",
+        "objectstorage/v1/objects/metadata-python.md"
       ],
       "differences": [
-        "Python falseykeys or absentkeys can skipPOST and actual deletionPOST ends with HEAD; its proxy returnsNone. Go alwaysfreshHEAD and POST, then returns distinct phaseevidence without final refresh.",
-        "Go delete keys refer onlystrict customsuffixes; Python cached custom/systemalias deletion and special delete_after behavior are not reproduced."
+        "Go returns independently owned physical response/phase proof and accepts context/explicit route names; Python None/same mutable Resource return is part of separate Resource scope.",
+        "Metadata values cover JSON-domain Python string/truthiness conversion; arbitrary __str__, nonJSON objects, float repr and Unicode runtime identity are bounded; colliding incoming Go map wire aliases fail before HTTP.",
+        "Go metadata token/field-value/single-header validation and native per-request transport policy remain explicit boundaries.",
+        "This callable implements the Proxy string-name branch. Existing cached Object inputs can skip fresh HEAD in Python; mutable Resource input/cache is tracked separately rather than silently treated as complete.",
+        "Incoming Go-map alias collisions are rejected before HTTP. Separately, when POST is actually needed, surviving observed custom suffixes that map to the same final wire header are rejected with ErrInvalidOption and successful HEAD response proof: Go http.Header loses original response order, while Python resolves these aliases by ordered last assignment. Getter and nil/empty/absent-key deletion no-ops are unchanged; deleting one conflicting suffix can remove the ambiguity.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: R1/C1/S1 mutable Resource descriptor/cache and Adapter/session behavior remain independently tracked.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Server ACL/quota/encoding/version/SLO/symlink and durable replication are deployment contracts; read/merge/write offers no CAS/rollback/whole-operation replay."
       ],
-      "remaining": [
-        "Python cachedResource mutation, no-op detection, finalHEAD refresh/None return, systemalias delete behavior and generic Adapter/session remain unresolved.",
-        "Strictown-link policy/currentversionedalias limitation, exactsuffix validation and actual200/202 evidence are explicit Go choices; native richer APIs remain available.",
-        "Concurrentread/write can overwrite changes; POST307 may followapplication. No CAS/rollback/durablecompletion or missing-absence guarantee."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/create_container",
@@ -30062,22 +30224,15 @@
     {
       "operation": "python:network/v2/update_network",
       "source_fingerprint": "a7166c371aa58f6652efcb1116b65c83e78da2ccc0e3f58669702d45b6dbf923",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRevision"
       ],
       "contracts": [
         {
@@ -30111,8 +30266,49 @@
           "tests": [
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeRedirectPolicy"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns a new ID-only native model. Supplied attrs send one PUT networks/{id}, with no lookup. Raw If-Match/WithRevision alone sends an empty network envelope. WithRevision(0) sends revision_number=0, overrides raw if_match regardless option order, discards invalid raw Header values before validation, and later revisions win.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationBodiesDefaultsAndAliases",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute snapshots JSON at constructor time; reusable options preserve false/zero/null/empty values, later wire-key values win, and aliases use the pinned generated Body MRO table: is_admin_state_up=>admin_state_up; is_router_external=>router:external; is_shared=>shared; is_port_security_enabled=>port_security_enabled; subnet_ids=>subnets; provider_network_type=>provider:network_type; provider_segmentation_id=>provider:segmentation_id; ipv4_address_scope_id=>ipv4_address_scope. Unknown and query-only attrs stay in Body. Invalid option/serialization/capability and Resource control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationBodiesDefaultsAndAliases",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 with unchanged native typed extraction. Network native Extract returns an ID-less zero model pointer and nil error on 204. Results are not seeded with request attrs/ID. OperationError retains native decode errors, HTTP status/body/header and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationStatusesDecodeAndContextCauses",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/networks/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "The explicit SDK success profile is 200..399 and strict native decode remains. Network native Extract returns an ID-less zero model pointer and nil error on 204. Source can retain a mutable request Resource on empty/invalid JSON success; native Go results do not store response unknown fields, merge request attrs, or apply descriptor access/coercion.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/ports.Update",
@@ -30172,22 +30368,15 @@
     {
       "operation": "python:network/v2/update_port",
       "source_fingerprint": "3b2426817960e0dcea08cbf1768ac41c8496bc4a2ae6af130f55b6d1e137365e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRevision"
       ],
       "contracts": [
         {
@@ -30209,8 +30398,49 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns an ID-only native model. Supplied attrs send a single PUT ports/{id} without lookup. A raw If-Match or WithRevision alone is dirty and sends {port:{}}. WithRevision(0) emits revision_number=0; it overrides raw if_match regardless option order, including invalid discarded raw values, and the last revision wins.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationBodiesDefaultsAndAliases",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. binding_host_id=>binding:host_id; binding_profile=>binding:profile; is_admin_state_up=>admin_state_up; is_port_security_enabled=>port_security_enabled; security_group_ids=>security_groups. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationBodiesDefaultsAndAliases",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Port native Extract returns an ID-less zero model pointer and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationStatusesDecodeAndContextCauses",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/ports/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Port native Extract returns an ID-less zero model pointer and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/subnets.Update",
@@ -30270,22 +30500,15 @@
     {
       "operation": "python:network/v2/update_subnet",
       "source_fingerprint": "53d476b728ff148a1c88821cbe33df72983790085e1058d6172b55e8efc89b32",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRevision"
       ],
       "contracts": [
         {
@@ -30307,8 +30530,49 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns an ID-only native model. Supplied attrs send a single PUT subnets/{id} without lookup. A raw If-Match or WithRevision alone is dirty and sends {subnet:{}}. WithRevision(0) emits revision_number=0; it overrides raw if_match regardless option order, including invalid discarded raw values, and the last revision wins.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationBodiesDefaultsAndAliases",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. is_dhcp_enabled=>enable_dhcp; prefix_length=>prefixlen; subnet_pool_id=>subnetpool_id; use_default_subnet_pool=>use_default_subnetpool. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationBodiesDefaultsAndAliases",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Subnet native Extract returns nil model and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationStatusesDecodeAndContextCauses",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/subnets/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Subnet native Extract returns nil model and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/extensions/trunks.Update",
@@ -30564,22 +30828,15 @@
     {
       "operation": "python:network/v2/update_router",
       "source_fingerprint": "c018ceb55813205ff916e05097b9e43368a1a6db33c8cd5818576312e1129186",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRevision"
       ],
       "contracts": [
         {
@@ -30601,8 +30858,49 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns an ID-only native model. Supplied attrs send a single PUT routers/{id} without lookup. A raw If-Match or WithRevision alone is dirty and sends {router:{}}. WithRevision(0) emits revision_number=0; it overrides raw if_match regardless option order, including invalid discarded raw values, and the last revision wins.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. is_admin_state_up=>admin_state_up; is_distributed=>distributed; is_ha=>ha; revision_number=>revision (pinned Source override). Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Router native Extract returns nil model and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/extensions/layer3/routers/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Router native Extract returns nil model and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/extensions/layer3/floatingips.Update",
@@ -30662,22 +30960,15 @@
     {
       "operation": "python:network/v2/update_ip",
       "source_fingerprint": "5d69ee42ae64d42f207ab83b4c8aab1f3d6f3bd7a43fe136d548cf8d9b580fb2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithRevision"
       ],
       "contracts": [
         {
@@ -30699,8 +30990,49 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns an ID-only native model. Supplied attrs send a single PUT floatingips/{id} without lookup. A raw If-Match or WithRevision alone is dirty and sends {floatingip:{}}. WithRevision(0) emits revision_number=0; it overrides raw if_match regardless option order, including invalid discarded raw values, and the last revision wins.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. Canonical Body names from the generated FloatingIP/NetworkResource/Resource MRO are reused; floating_network_id, port_id and fixed_ip_address remain literal wire names. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. FloatingIP native Extract returns an ID-less zero model pointer and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/extensions/layer3/floatingips/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. FloatingIP native Extract returns an ID-less zero model pointer and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/extensions/qos/policies.Update",
@@ -30858,22 +31190,15 @@
     {
       "operation": "python:network/v2/update_security_group",
       "source_fingerprint": "0b789cecbe364dd3cd470cb91c119855d6314ae68f396c7a8ddcf1e2a87bd473",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateOptions",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. Pinned Python NetworkResource if_revision is not None likewise produces revision_number=N, including0.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.UpdateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRevision"
       ],
       "contracts": [
         {
@@ -30895,8 +31220,49 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "Literal-ID update with no Body/Header options performs no HTTP and returns a new ID-only native model. Supplied attrs send one PUT security-groups/{id}, with no lookup. Raw If-Match/WithRevision alone sends an empty security_group envelope. WithRevision(0) sends revision_number=0, overrides raw if_match regardless option order, discards invalid raw Header values before validation, and later revisions win.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "WithAttribute snapshots JSON at constructor time; reusable options preserve false/zero/null/empty values, later wire-key values win, and aliases use the pinned generated Body MRO table: is_shared=>shared; name/description/stateful/security_group_rules/project_id/tenant_id retain Source Body wire names. Unknown and query-only attrs stay in Body. Invalid option/serialization/capability and Resource control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 with unchanged native typed extraction. SecGroup native Extract returns nil model and nil error on 204. Results are not seeded with request attrs/ID. OperationError retains native decode errors, HTTP status/body/header and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md",
+        "network/v2/extensions/security/groups/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "The explicit SDK success profile is 200..399 and strict native decode remains. SecGroup native Extract returns nil model and nil error on 204. Source can retain a mutable request Resource on empty/invalid JSON success; native Go results do not store response unknown fields, merge request attrs, or apply descriptor access/coercion.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:keymanager/v1/secrets.GetPayload",
@@ -70023,114 +70389,338 @@
     {
       "operation": "python:compute/v2/get_image",
       "source_fingerprint": "daa0a98f89da1e938195b9585cd26c7b2e37ddb201a752b8b44552823983868b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.GetRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call sends GET /images/{id} to Nova."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /images/{escaped literal ID}; singular image unpack or root JSON object. Missing id retains requested ID; blank or malformed JSON syntax preserves Source seed; valid nonobject representation is an accepted-response error with HTTP proof.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageGetProjectionAliasesAndStatuses",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Image declared Body view preserves untyped JSON and exact integers; response alias dictionary order, four Python integer descriptors and dictionary metadata descriptor project into 12 fields, including null location. Wire/Envelope/Header/Status preserve separately owned actual evidence.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageGetProjectionAliasesAndStatuses",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageGetProjectionAliasesAndStatuses",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/find_image",
       "source_fingerprint": "3cd5dcb9b3c479ab0b0fcdd2347f1430bda0e994707baab3486a18b2df074240",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.FindRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call performs Nova's GET /images/{id} then /images/detail name fallback."
-      ]
+      "contracts": [
+        {
+          "behavior": "Literal member GET first; only clean 400/403/404 allow fallback GET /images?name=... (summary, not detail). Complete exact ID/name search includes later pages; duplicate/missing/late errors retain shared FindIdentity policy.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "IgnoreMissing defaults true; false returns NotFound; successful member GET avoids list. Source find_image formal options have no details/query, which is reflected in concrete FindOpts.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided.",
+        "Corrects stale remaining text: pinned find_image fallback is /images, not /images/detail."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/images",
       "source_fingerprint": "3de20a94a57241807bfb416eff53e4f8cff8f9a1e1faf7d4318b01d65d066d9d",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.ListRecords"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call lists Nova /images or /images/detail with its query parameters."
-      ]
+      "contracts": [
+        {
+          "behavior": "Lazy reusable GET /images/detail by default and /images when Details=false; server/name/status/type/min_disk/min_ram/changes_since map to exact Source wire query, with client alias precedence. Shared Requests JSON encoder handles null/repeated arrays/object keys/True spelling; other declared Body attrs filter locally; unknown kwargs ignored.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageListQueryDetailLocalFiltersAndCaps",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageListPagingAndWireMarker",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Raw-row MaxItems precedes local filtering and supplies absent/zero limit hint; typed limit/marker/paginated controls, plural singleton, array/top-level/HTTP next, short-page marker fallback with initial positive limit, early break and fixed route proof use shared REST. Fallback marker comes from original raw row independent of consumer mutations.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageListQueryDetailLocalFiltersAndCaps",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageListPagingAndWireMarker",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided.",
+        "Dictionary links:{next:...} is a Go REST extension; pinned generic Resource does not consume dictionary links.",
+        "Local JSON filter retains exact JSON types and nested subset instead of Python bool/number equality and nonobject nested-filter exception behavior; server-spelling aliases that are not actual Body attrs do not become local filters."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/delete_image",
       "source_fingerprint": "b0474ef93e5b18b8a37416c6f3f36ea03dc0841ec7068b032b01babcf8b4faa5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.DeleteRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call sends DELETE /images/{id} to Nova."
-      ]
+      "contracts": [
+        {
+          "behavior": "DELETE /images/{escaped literal ID}; no JSON body decode. Actual 200..399 accepted and clean404 ignored by default; WithDeleteIgnoreMissing(false) retains original error. Unsupported microversion guard runs before HTTP and ignoreMissing.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageFindSummaryAndDeleteMissing",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/fetch_image_metadata",
       "source_fingerprint": "541f0cc107a45f991782f05f6b98021e7fd9fd5a6666a632c69558882dae883a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.FetchMetadata"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call reads Nova /images/{id}/metadata."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /images/{id}/metadata, using selected version through2.38; strict JSON object parse (no malformed/empty-body tolerance). Only metadata overlays seed; body id/unknown fields retained in Wire but do not override resource ID. Missing metadata stays null, dictionary descriptor projects nonobject metadata to{}.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Metadata view contains the literal image ID plus submitted/received metadata; other declared fields null, without a parent image GET. All successful statuses200..399 accepted and actual response evidence retained independently.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided.",
+        "Fetch requires nonnull JSON object rather than reproducing Python array/scalar membership behavior."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/get_image_metadata",
       "source_fingerprint": "91d6cfb48395027e16bb1bbdfc94668fb21c1583e8cc3e804c4bc073d0b54c9e",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.GetMetadata"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call reads Nova /images/{id}/metadata."
-      ]
+      "contracts": [
+        {
+          "behavior": "Pinned deprecated alias of fetch_image_metadata; identical route/body/status/metadata projection and strict JSON parse.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Metadata view contains the literal image ID plus submitted/received metadata; other declared fields null, without a parent image GET. All successful statuses200..399 accepted and actual response evidence retained independently.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided.",
+        "Source deprecation warnings have documentation-only Go representation; fetch object-domain difference applies equally."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/set_image_metadata",
       "source_fingerprint": "69e991ca95aca8b051df8366acafb9b35ef947c778d653e8f1ccbf1a17b1b5c0",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.SetMetadata"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call posts Nova /images/{id}/metadata."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /images/{id}/metadata with metadata envelope; nil input means{}. JSON snapshot before option callbacks owns nested data and exact numbers; no parent GET or native builder coercion.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Source ignores response JSON and returns submitted metadata; Go Resource uses submitted owned map, Wire=nil, and Envelope/Header/Status capture opaque actual reply. Accepted read/close/guard errors preserve real proof.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Metadata view contains the literal image ID plus submitted/received metadata; other declared fields null, without a parent image GET. All successful statuses200..399 accepted and actual response evidence retained independently.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/delete_image_metadata",
       "source_fingerprint": "7c250ec86dabb4b8ffaa08d0341df6b5ee8011dd344729fc8a391997851921b8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/images.API.DeleteMetadata"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for Nova's deprecated /images proxy; the Glance image API (image/v2/images) uses different routes, response models and metadata representation. No Go call deletes Nova /images/{id}/metadata keys or replaces the set."
-      ]
+      "contracts": [
+        {
+          "behavior": "Omitted Keys means PUT {metadata:{}}; explicit empty key slice means zero physical requests. Owned keys are validated before mutations, deduplicated, escaped once and deleted individually; strict404 and first error/cancel/source change stop later keys.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Metadata route ceiling2.38 applied before HTTP, source guarded across each physical request, successful opaque bodies never decoded.",
+          "tests": [
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageMetadataFetchAliasSetDeleteContracts",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageExplicitVersionBounds",
+            "compute/v2/images/image_records_test.go:TestPythonNovaImageOwnedOptionsGuardsAndEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity.md",
+        "compute/v2/nova-images-python.md"
+      ],
+      "differences": [
+        "Explicit legacy Nova selected-version profile, not unrestricted modern Nova coverage: ordinary image methods accept 2.1..2.35; metadata methods accept 2.1..2.38. Empty selection means Nova default2.1; selected version is never downgraded or discovered. Pinned Image has inherited _max_microversion=None and Source default selection is not capped; Go preflight rejects unsupported selections before HTTP.",
+        "Literal valid UTF-8 string IDs/keys, immutable owned records and null location replace Python mutable same-instance Resource/Munch/cache/Connection/session/subclass/warnings. Full Resource/session parity is a separate surface outside these callable Go profiles.",
+        "Library guards protect selected compute source facts and headers; typed nonnegative list controls and fixed continuation origin/path/query are Go profile choices. Arbitrary Python session/path/version hooks and JMESPath surface are not provided.",
+        "Python set(keys) iteration order is unspecified; Go uses first-seen deterministic order."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/aggregates",
@@ -72407,6 +72997,14 @@
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
           ]
+        },
+        {
+          "behavior": "Rejected 400/403/404 body Read/Close, cancellation cause and source changes retain native HTTP evidence. Only clean permitted rejections, including an unchanged native rejection from a retry callback, may be ignored or enter Find fallback; mixed failures are terminal and never replay an accepted response. Common identity lookup preserves the original HTTP error when cancellation occurs during GET or enrichment.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook",
+            "resource/find_identity_test.go:TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors"
+          ]
         }
       ],
       "documentation": [
@@ -72448,6 +73046,14 @@
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialDeleteDefaultAndMixedFailures",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Rejected 400/403/404 body Read/Close, cancellation cause and source changes retain native HTTP evidence. Only clean permitted rejections, including an unchanged native rejection from a retry callback, may be ignored or enter Find fallback; mixed failures are terminal and never replay an accepted response. Common identity lookup preserves the original HTTP error when cancellation occurs during GET or enrichment.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook",
+            "resource/find_identity_test.go:TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors"
           ]
         }
       ],
@@ -72499,6 +73105,14 @@
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
           ]
+        },
+        {
+          "behavior": "Rejected 400/403/404 body Read/Close, cancellation cause and source changes retain native HTTP evidence. Only clean permitted rejections, including an unchanged native rejection from a retry callback, may be ignored or enter Find fallback; mixed failures are terminal and never replay an accepted response. Common identity lookup preserves the original HTTP error when cancellation occurs during GET or enrichment.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook",
+            "resource/find_identity_test.go:TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors"
+          ]
         }
       ],
       "documentation": [
@@ -72539,6 +73153,14 @@
           "tests": [
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Rejected 400/403/404 body Read/Close, cancellation cause and source changes retain native HTTP evidence. Only clean permitted rejections, including an unchanged native rejection from a retry callback, may be ignored or enter Find fallback; mixed failures are terminal and never replay an accepted response. Common identity lookup preserves the original HTTP error when cancellation occurs during GET or enrichment.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook",
+            "resource/find_identity_test.go:TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors"
           ]
         }
       ],
@@ -72581,6 +73203,14 @@
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialGetTranslationAndStatuses",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialOptionsOwnershipAndPreflight",
             "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialLiteralScopesAndResponseProof"
+          ]
+        },
+        {
+          "behavior": "Rejected 400/403/404 body Read/Close, cancellation cause and source changes retain native HTTP evidence. Only clean permitted rejections, including an unchanged native rejection from a retry callback, may be ignored or enter Find fallback; mixed failures are terminal and never replay an accepted response. Common identity lookup preserves the original HTTP error when cancellation occurs during GET or enrichment.",
+          "tests": [
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/applicationcredentials/python_records_test.go:TestPythonApplicationCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook",
+            "resource/find_identity_test.go:TestCollectionFindIdentityCancellationRetainsPhysicalLookupAndEnrichmentErrors"
           ]
         }
       ],
@@ -73014,6 +73644,662 @@
         "DeleteOpts exposes only IgnoreMissing because these five pinned Source declarations have no if_revision parameter. It adapts to the already-tested shared request.DeleteNeutron helper; ordinary native Delete/Remove keep native status behavior.",
         "A string literal ID and functional options replace Python string-or-Resource inputs. The SDK success status profile is HTTP 200..399; terminal wire/transport/cancellation errors alongside a physical 404 remain errors.",
         "Full inherited Resource/session behavior remains tracked separately in SDK-R1/C1/S1: Mutable Resource instance input/state and complete Python adapter/session/dynamic microversion/exception behavior remain separate from the literal-ID callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_port",
+      "source_fingerprint": "cfe6d9ace43bd446e607a41ffd1c2b66ec78fa14a1bb87c2d46bbe21fcfb757a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST ports sends exactly the supplied singular port Body envelope. No attributes still sends {port:{}} without native required-value prevalidation or synthesized defaults; Neutron decides missing required values.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. binding_host_id=>binding:host_id; binding_profile=>binding:profile; is_admin_state_up=>admin_state_up; is_port_security_enabled=>port_security_enabled; security_group_ids=>security_groups. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationBodiesDefaultsAndAliases",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Port native Extract returns an ID-less zero model pointer and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortMutationStatusesDecodeAndContextCauses",
+            "network/v2/ports/python_mutations_contracts_test.go:TestPythonCorePortRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/ports/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Port native Extract returns an ID-less zero model pointer and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_subnet",
+      "source_fingerprint": "59ffaa427c36bf1f1964c09973d056f10b44c9803378dd9b881da77ef41c5b4f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST subnets sends exactly the supplied singular subnet Body envelope. No attributes still sends {subnet:{}} without native required-value prevalidation or synthesized defaults; Neutron decides missing required values.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. is_dhcp_enabled=>enable_dhcp; prefix_length=>prefixlen; subnet_pool_id=>subnetpool_id; use_default_subnet_pool=>use_default_subnetpool. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationBodiesDefaultsAndAliases",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Subnet native Extract returns nil model and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetMutationStatusesDecodeAndContextCauses",
+            "network/v2/subnets/python_mutations_contracts_test.go:TestPythonCoreSubnetRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/subnets/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Subnet native Extract returns nil model and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_router",
+      "source_fingerprint": "c987fa4c8ec020a44d7b79c2d7258be0582b4b56953e9e1d40ba4d50537b3991",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST routers sends exactly the supplied singular router Body envelope. No attributes still sends {router:{}} without native required-value prevalidation or synthesized defaults; Neutron decides missing required values.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. is_admin_state_up=>admin_state_up; is_distributed=>distributed; is_ha=>ha; revision_number=>revision (pinned Source override). Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. Router native Extract returns nil model and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/layer3/routers/python_mutations_contracts_test.go:TestPythonCoreRouterRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/routers/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. Router native Extract returns nil model and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_ip",
+      "source_fingerprint": "90a85968ec6d5efe3838d3b521b974ef72de361efdab8dc05ef6cba77ff9ea94",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST floatingips sends exactly the supplied singular floatingip Body envelope. No attributes still sends {floatingip:{}} without native required-value prevalidation or synthesized defaults; Neutron decides missing required values.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute constructor snapshots supplied JSON and Header values; reusable options preserve zero/false/null/empty values, later wire-key values win, canonical Body aliases map through the existing pinned MRO table, unknown extension and query-only attrs stay in Body. Canonical Body names from the generated FloatingIP/NetworkResource/Resource MRO are reused; floating_network_id, port_id and fixed_ip_address remain literal wire names. Invalid options/serialization, non-If-Match headers, query mechanisms, and Resource/Proxy control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 and native typed result extraction is retained. FloatingIP native Extract returns an ID-less zero model pointer and nil error on 204. No response model is seeded with request ID/attrs. HTTP status/body/header, native JSON decode errors, and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/layer3/floatingips/python_mutations_contracts_test.go:TestPythonCoreFloatingIPRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/floatingips/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "HTTP 200..399 is the explicit SDK profile; strict native decode behavior and returned known fields are retained. FloatingIP native Extract returns an ID-less zero model pointer and nil error on 204. Source retains a mutable Resource request view on empty or invalid JSON success bodies; this Go API does not synthesize request attributes, returned unknown fields or partial-response fallback.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_network",
+      "source_fingerprint": "f6411ad418a82bcff34de3d59b112d4ba678b27fe18dfa945338c0ff0b09e2e3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST networks sends only supplied Body attrs in the singular network envelope. Omitted attrs send an empty object, no native defaults, no required prevalidation. Neutron validates missing required values.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute snapshots JSON at constructor time; reusable options preserve false/zero/null/empty values, later wire-key values win, and aliases use the pinned generated Body MRO table: is_admin_state_up=>admin_state_up; is_router_external=>router:external; is_shared=>shared; is_port_security_enabled=>port_security_enabled; subnet_ids=>subnets; provider_network_type=>provider:network_type; provider_segmentation_id=>provider:segmentation_id; ipv4_address_scope_id=>ipv4_address_scope. Unknown and query-only attrs stay in Body. Invalid option/serialization/capability and Resource control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationBodiesDefaultsAndAliases",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 with unchanged native typed extraction. Network native Extract returns an ID-less zero model pointer and nil error on 204. Results are not seeded with request attrs/ID. OperationError retains native decode errors, HTTP status/body/header and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause.",
+          "tests": [
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkMutationStatusesDecodeAndContextCauses",
+            "network/v2/networks/python_mutations_contracts_test.go:TestPythonCoreNetworkRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/networks/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "The explicit SDK success profile is 200..399 and strict native decode remains. Network native Extract returns an ID-less zero model pointer and nil error on 204. Source can retain a mutable request Resource on empty/invalid JSON success; native Go results do not store response unknown fields, merge request attrs, or apply descriptor access/coercion.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_security_group",
+      "source_fingerprint": "0d55c69b02fa5cfceb3f75c71900975cd1b3139db60a46b9ec2d8607773f07b0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST security-groups sends only supplied Body attrs in the singular security_group envelope. Omitted attrs send an empty object, no native defaults, no required prevalidation. Neutron validates missing required values.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationBodiesDefaultsAndAliases"
+          ]
+        },
+        {
+          "behavior": "WithAttribute snapshots JSON at constructor time; reusable options preserve false/zero/null/empty values, later wire-key values win, and aliases use the pinned generated Body MRO table: is_shared=>shared; name/description/stateful/security_group_rules/project_id/tenant_id retain Source Body wire names. Unknown and query-only attrs stay in Body. Invalid option/serialization/capability and Resource control attrs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationBodiesDefaultsAndAliases",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupOptionSnapshotsHeaderRoutingAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match Header is separate from Body. String values, string lists joined by comma-space, explicit empty list and null->None are supported, with constructor snapshots and configured client Header isolation. Create accepts raw If-Match; update accepts revision/If-Match, and explicitly selected conditions replace case-insensitive configured If-Match on a cloned client.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupOptionSnapshotsHeaderRoutingAndPreflight",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        },
+        {
+          "behavior": "SDK HTTP success codes are 200..399 with unchanged native typed extraction. SecGroup native Extract returns nil model and nil error on 204. Results are not seeded with request attrs/ID. OperationError retains native decode errors, HTTP status/body/header and pre-canceled/option-callback/post-response context.Canceled plus custom context.Cause.",
+          "tests": [
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupMutationStatusesDecodeAndContextCauses",
+            "network/v2/extensions/security/groups/python_mutations_contracts_test.go:TestPythonCoreSecGroupRevisionHeaderOnlyPriorityAndClientIsolation"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/groups/python-mutations.md"
+      ],
+      "differences": [
+        "A functional callable JSON mutation profile uses native Go models and a literal update ID, while existing native Create/Update ABI, required validations and result decoders are unchanged.",
+        "The explicit SDK success profile is 200..399 and strict native decode remains. SecGroup native Extract returns nil model and nil error on 204. Source can retain a mutable request Resource on empty/invalid JSON success; native Go results do not store response unknown fields, merge request attrs, or apply descriptor access/coercion.",
+        "WithRevision accepts int64 (including zero, negative and exact max-int64), rather than arbitrary-precision Python values. Raw If-Match is a JSON string/string-list/null profile; arbitrary Python object str() coercion is unavailable. A selected Header containing CR/LF is rejected before HTTP. Raw Header values discarded by revision are not validated.",
+        "Body controls base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location are rejected. Update id and if_revision must use the literal ID parameter and WithRevision rather than Body extensions. Configured Gophercloud session/client policy is retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full Python Resource/Munch instance input, returning the same mutable instance, comparison against existing dirty/cache state and retaining request attrs or unknown response attrs remain separate from this callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, computed location/metadata, dynamic microversion, Python descriptor access/conversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_security_group_rule",
+      "source_fingerprint": "e12609a43239dbae1524404345338e6036fd5efdc8c6003b9c6535532de6232e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.CreateWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST singular security_group_rule envelope with supplied attrs; no attrs sends {}. Pinned SecurityGroupRule._prepare_request removes remote_address_group_id only when its JSON value is falsy (null/false/numeric zero/empty string/list/object); truthy string/container/nonzero exact number values remain.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleCreatePresenceAliasesAndRemoteAddressGroup"
+          ]
+        },
+        {
+          "behavior": "Canonical ether_type maps to ethertype through the pinned Body MRO map; unknown/query-only attrs remain Body. Constructor snapshots preserve empty strings, null, false and numeric zero without Direction/EtherType/SecGroupID native required validation. Invalid row/options/Header/query/Resource-control inputs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleCreatePresenceAliasesAndRemoteAddressGroup",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleOptionSnapshotsHeadersAndPreflight",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkRejectsInvalidRowsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match stays out of Body and supports string/string-list/null (None), explicit empty Header, case-insensitive configured If-Match replacement on a cloned client and reusable snapshots. Null/non-string list elements and selected CRLF Header are rejected before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleOptionSnapshotsHeadersAndPreflight",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkBodyOrderLastHeaderAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "HTTP 200..399 succeeds under the Go profile; native single/slice decoders are retained. Native 204 yields nil result/nil error without reading HTTP Body or synthesizing request values. HTTP status/body/header, native JSON errors and custom context causes before callbacks/after HTTP remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleMutationStatusesDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/rules/python-mutations.md"
+      ],
+      "differences": [
+        "A callable functional JSON-attrs API uses native Go result models and does not change existing typed Create/CreateBulk validation or result extraction.",
+        "Source returns a mutable Resource for singular create and a Resource generator after bulk HTTP/response.json(); this Go bulk method returns an eager native decoded slice. Success is the explicit 200..399 SDK profile. Native 204 returns nil,nil in both methods, while Source bulk unconditional response.json() fails on a bodyless 204. Request-state/partial-response fallback and unknown response attrs are not synthesized.",
+        "Raw If-Match supports only JSON string/string-list/null and rejects selected CRLF values and null/non-string list elements before HTTP; arbitrary Python object str() coercion is unavailable.",
+        "Resource/Proxy control attrs base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location, generic query options and arbitrary Header options are rejected. Configured Gophercloud client/session policies are retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full mutable Resource/Munch instance input, identity, dirty/cache state, request attrs on partial/empty responses and unknown returned fields remain separate from the callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, Python descriptor access/conversion, computed location/metadata, dynamic microversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_security_group_rules",
+      "source_fingerprint": "ccf2c4e08fd169b5ceacf951303ac14c0394e6d6020cfe617660362255c6b8c6",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.CreateBulkWithAttributes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithIfMatch"
+      ],
+      "contracts": [
+        {
+          "behavior": "A nonempty variadic sequence of []AttributeOption rows sends one ordered POST plural security_group_rules envelope; empty row is {} and empty total rows fails before HTTP. All row option slices are copied before callbacks. Source bulk prepares unwrapped rows so falsy remote_address_group_id values remain. Source uses the last row Header only; earlier invalid Headers still fail during row preparation. Configured Header is retained when final row has none.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkBodyOrderLastHeaderAndSnapshots",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkRejectsInvalidRowsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Canonical ether_type maps to ethertype through the pinned Body MRO map; unknown/query-only attrs remain Body. Constructor snapshots preserve empty strings, null, false and numeric zero without Direction/EtherType/SecGroupID native required validation. Invalid row/options/Header/query/Resource-control inputs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleCreatePresenceAliasesAndRemoteAddressGroup",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleOptionSnapshotsHeadersAndPreflight",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkRejectsInvalidRowsBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Inherited if_match stays out of Body and supports string/string-list/null (None), explicit empty Header, case-insensitive configured If-Match replacement on a cloned client and reusable snapshots. Null/non-string list elements and selected CRLF Header are rejected before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleOptionSnapshotsHeadersAndPreflight",
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleBulkBodyOrderLastHeaderAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "HTTP 200..399 succeeds under the Go profile; native single/slice decoders are retained. Native 204 yields nil result/nil error without reading HTTP Body or synthesizing request values. HTTP status/body/header, native JSON errors and custom context causes before callbacks/after HTTP remain observable through OperationError.",
+          "tests": [
+            "network/v2/extensions/security/rules/python_mutations_contracts_test.go:TestPythonSecurityRuleMutationStatusesDecodeAndContextCauses"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/rules/python-mutations.md"
+      ],
+      "differences": [
+        "A callable functional JSON-attrs API uses native Go result models and does not change existing typed Create/CreateBulk validation or result extraction.",
+        "Source returns a mutable Resource for singular create and a Resource generator after bulk HTTP/response.json(); this Go bulk method returns an eager native decoded slice. Success is the explicit 200..399 SDK profile. Native 204 returns nil,nil in both methods, while Source bulk unconditional response.json() fails on a bodyless 204. Request-state/partial-response fallback and unknown response attrs are not synthesized.",
+        "Raw If-Match supports only JSON string/string-list/null and rejects selected CRLF values and null/non-string list elements before HTTP; arbitrary Python object str() coercion is unavailable.",
+        "Resource/Proxy control attrs base_path, microversion, connection, _synchronized, resource_type, __conflicting_attrs and location, generic query options and arbitrary Header options are rejected. Configured Gophercloud client/session policies are retained.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Full mutable Resource/Munch instance input, identity, dirty/cache state, request attrs on partial/empty responses and unknown returned fields remain separate from the callable Go profile.",
+        "Separately tracked SDK-R1/C1/S1 or deployment boundary: Complete Proxy/Resource control kwargs, Python descriptor access/conversion, computed location/metadata, dynamic microversion and adapter/session/cache/exception policy remain separate."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_credential",
+      "source_fingerprint": "de4a9b1b9340c01c3c3cc8dc3a738b33129e3db4b84fb313e3e43a404ad28e60",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.CreateRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "POST /credentials with credential envelope; only known id/name/blob/project_id/type/user_id Body attrs, no native required-field or string coercion; omitted fields absent and explicit null/false/empty preserved.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCreateRawBodyAndOwnedViews",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Response singular unpack/root object, known response overlay on seeded create attrs; original raw blob/types/numbers/unknown Wire with independent Resource/Envelope/Header.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCreateRawBodyAndOwnedViews",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Native generated ABI remains unchanged; capture owned identity client facts and callback policy before physical requests. OperationError preserves original cause and accepted handling errors keep real ResponseError proof.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCreateRawBodyAndOwnedViews",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credentials-python.md"
+      ],
+      "differences": [
+        "Correct generic Credential /credentials binding; candidate inventory also proposes ec2credentials, but /users/{user_id}/credentials/OS-EC2 is a distinct native API and is not used to close this Python operation.",
+        "Bounded Go profile uses explicit escaped UTF-8 string IDs and owned record fields, not Resource/Munch/same-instance reuse/cache/session/subclass/Connection arbitrary hook behavior; location null. Full mutable Resource surface and Source update_credential are separately pending.",
+        "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/credentials",
+      "source_fingerprint": "eef42793f693ac7af56a91d9cfb9a7cd5b70d76b38224ca201250b4391a5e4d5",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.ListRecords"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET /credentials. Source type/user_id are wire query encoded by shared Requests JSON-domain expansion (null omitted, repeated arrays, object keys and True spelling); other known Body fields local JSON filters; unknown kwargs ignored.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListServerQueryAndLocalJSONFilters",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListPagingLazinessAndWireMarker",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Lazy reusable list, owned opts and row views, raw-row cap before local filters, max_items hint replaces absent/zero limit, marker and paginated false, singleton page, Source array/top-level/HTTP next, positive initial limit short-page fallback, empty page end; consumer mutation cannot change original-wire marker.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListServerQueryAndLocalJSONFilters",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListPagingLazinessAndWireMarker",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Native generated ABI remains unchanged; capture owned identity client facts and callback policy before physical requests. OperationError preserves original cause and accepted handling errors keep real ResponseError proof.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListServerQueryAndLocalJSONFilters",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialListPagingLazinessAndWireMarker",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credentials-python.md"
+      ],
+      "differences": [
+        "Correct generic Credential /credentials binding; candidate inventory also proposes ec2credentials, but /users/{user_id}/credentials/OS-EC2 is a distinct native API and is not used to close this Python operation.",
+        "Bounded Go profile uses explicit escaped UTF-8 string IDs and owned record fields, not Resource/Munch/same-instance reuse/cache/session/subclass/Connection arbitrary hook behavior; location null. Full mutable Resource surface and Source update_credential are separately pending.",
+        "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile.",
+        "Dictionary links.next is an intentional Go compatibility extension because pinned Source generic paginator ignores that shape. Fixed REST rejects cross-origin/path/new-page-key/filter changes, conflicting continuations and marker cycles; does not claim Source arbitrary version-prefix/cross-path behavior.",
+        "JSON filters distinguish bool and number; malformed nested nonobjects do not match instead of Source attribute-error behavior."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/get_credential",
+      "source_fingerprint": "5fc2aa1979d74cd0e1fd5d15bf678a5a85d7bc785f0ed5977027b7795c8910a0",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.GetRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal GET /credentials/{escapedID}; no parent/user lookup/query. Singular credential unpack or root object; blank/malformed syntax accepted and seeded literal ID retained; valid nonobject JSON is accepted-response handling failure with real status/body/header.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialGetTranslationAndStatuses",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialAcceptedResponseProofAndEscapedMember",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Declared id/name/blob/project_id/type/user_id plus null location, missing fields null, untyped raw blob/numbers preserved and owned Wire keeps unknown data.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialGetTranslationAndStatuses",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialAcceptedResponseProofAndEscapedMember",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Native generated ABI remains unchanged; capture owned identity client facts and callback policy before physical requests. OperationError preserves original cause and accepted handling errors keep real ResponseError proof.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialGetTranslationAndStatuses",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialAcceptedResponseProofAndEscapedMember",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialGetTranslationAndStatuses",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialAcceptedResponseProofAndEscapedMember",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credentials-python.md"
+      ],
+      "differences": [
+        "Correct generic Credential /credentials binding; candidate inventory also proposes ec2credentials, but /users/{user_id}/credentials/OS-EC2 is a distinct native API and is not used to close this Python operation.",
+        "Bounded Go profile uses explicit escaped UTF-8 string IDs and owned record fields, not Resource/Munch/same-instance reuse/cache/session/subclass/Connection arbitrary hook behavior; location null. Full mutable Resource surface and Source update_credential are separately pending.",
+        "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_credential",
+      "source_fingerprint": "43ba217ab080582e3f013a9717cfb5bd9896dbfbf3cc6f238ef54e048494b19e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.DeleteRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal DELETE /credentials/{escapedID}; actual200..399 accepted with opaque body, IgnoreMissing true by default suppresses only clean404, explicit false preserves native404. Retry callback/read/close/transport/cancel/source failures mixed with404 remain visible.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialDeleteMissingPolicyAndMixedFailure",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Native generated ABI remains unchanged; capture owned identity client facts and callback policy before physical requests. OperationError preserves original cause and accepted handling errors keep real ResponseError proof.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialDeleteMissingPolicyAndMixedFailure",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialDeleteMissingPolicyAndMixedFailure",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credentials-python.md"
+      ],
+      "differences": [
+        "Correct generic Credential /credentials binding; candidate inventory also proposes ec2credentials, but /users/{user_id}/credentials/OS-EC2 is a distinct native API and is not used to close this Python operation.",
+        "Bounded Go profile uses explicit escaped UTF-8 string IDs and owned record fields, not Resource/Munch/same-instance reuse/cache/session/subclass/Connection arbitrary hook behavior; location null. Full mutable Resource surface and Source update_credential are separately pending.",
+        "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/find_credential",
+      "source_fingerprint": "8114623fbe69db4864066ad75900d2e98c49139b51a41bb5d84fe0bd48a71322",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/credentials.API.FindRecord"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET first without user_id or arbitrary query. Only Source formal IgnoreMissing exposed via concrete owned option; clean400/403/404 fallback to complete exact ID/name list with no name wire hint.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialFindDefaultFallbackAndAllPages",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Default absent nil,nil, strict absent NotFoundError, duplicate AmbiguousError, direct seeded malformed-JSON success has no fallback; accepted nonobject errors do not fallback; later-page error overrides unique first-page match. Shared FindIdentity reused.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialFindDefaultFallbackAndAllPages",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "Native generated ABI remains unchanged; capture owned identity client facts and callback policy before physical requests. OperationError preserves original cause and accepted handling errors keep real ResponseError proof.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialFindDefaultFallbackAndAllPages",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        },
+        {
+          "behavior": "GET400/403/404 and Delete404 observe rejected Read/Close/context/source faults through shared REST; only clean rejection may establish ignoreMissing/fallback. Identical native retry stop-hook return remains a clean status; mixed retry errors preserve causes and stop after one physical request.",
+          "tests": [
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialFindDefaultFallbackAndAllPages",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialOptionsOwnInputsAndRejectBeforeHTTP",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialRejectedResponseFailuresStopDeleteAndFind",
+            "identity/v3/credentials/python_records_test.go:TestPythonCredentialCleanRejectionsRemainEligibleAfterNativeRetryHook"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/credentials-python.md"
+      ],
+      "differences": [
+        "Correct generic Credential /credentials binding; candidate inventory also proposes ec2credentials, but /users/{user_id}/credentials/OS-EC2 is a distinct native API and is not used to close this Python operation.",
+        "Bounded Go profile uses explicit escaped UTF-8 string IDs and owned record fields, not Resource/Munch/same-instance reuse/cache/session/subclass/Connection arbitrary hook behavior; location null. Full mutable Resource surface and Source update_credential are separately pending.",
+        "Library source/route/header guards and valid JSON policy, concrete nonnegative typed limit/caps; arbitrary Python adapter/microversion/kwargs/JMESPath are outside this callable Go profile.",
+        "Dictionary links.next is an intentional Go compatibility extension because pinned Source generic paginator ignores that shape. Fixed REST rejects cross-origin/path/new-page-key/filter changes, conflicting continuations and marker cycles; does not claim Source arbitrary version-prefix/cross-path behavior.",
+        "JSON filters distinguish bool and number; malformed nested nonobjects do not match instead of Source attribute-error behavior."
       ],
       "remaining": []
     }

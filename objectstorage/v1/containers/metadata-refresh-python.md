@@ -35,7 +35,7 @@ JSON-domain 입력은 공통 `cloudfilter.PythonString`으로 `None`, `True`, `F
 | `python:object_store/v1/set_container_metadata` | `21e83b033927c89bb1a9bc33a3c02f9568f7641f4c0feb92293a5116439e2569` | `TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues`, `TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay` |
 | `python:object_store/v1/delete_container_metadata` | `11b38c4d607fa533f5ebb1c6986282857a09d2a7754eae747f7d49beb832b844` | `TestSwiftPythonContainerMetadataEmptyAndPrefixedDeleteFollowSourcePOST` |
 
-공통 회귀는 `TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned`, `TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy`입니다. 테스트는 기존 package transport/body와 public Gophercloud testhelper 기반 `internal/testcloud`를 재사용합니다. 새 HTTP 엔진은 없습니다. Source getter `get_container_metadata`는 이미 판정된 행으로 중복 집계하지 않습니다. 구현/회귀는 작성했으며 집중 Go/race 실행과 중앙 review 갱신은 부모 runner가 진행합니다.
+공통 회귀는 `TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned`, `TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy`입니다. 테스트는 기존 package transport/body와 public Gophercloud testhelper 기반 `internal/testcloud`를 재사용합니다. 새 HTTP 엔진은 없습니다. Source getter `get_container_metadata`는 이미 판정된 행으로 중복 집계하지 않습니다. 집중 race 실행과 중앙 review 갱신을 완료했습니다. 전체 검증 근거는 [지원 판정대장](../../../docs/sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 기록합니다.
 
 컨테이너 setter에는 실제 Source 선택 인자 `refresh`를 `WithMetadataRefresh(false)`로 제공합니다. 기본과 nil은 true이고 나중 scalar 옵션이 앞선 값을 바꿉니다. `WithMetadataRefreshOpts`는 전체 config를 소유 복사하고 교체합니다. setter의 일반 헤더는 `WithMetadataRefreshHeader(s)`, 삭제는 기존 `WithMetadataHeader(s)`를 사용합니다. 옵션 factory와 callback 결과는 pointer/map을 독립 복사해 반복·동시 재사용합니다.
 
