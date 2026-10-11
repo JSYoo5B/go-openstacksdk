@@ -40,6 +40,9 @@ func (f *RejectedResponseFaults) Err() error {
 type RejectionPolicy struct {
 	Codes              []int
 	PreserveCleanRetry bool
+	// StopFaultRetryCallbacks prevents caller hooks after observed physical,
+	// source or context faults. The zero value preserves native hook behavior.
+	StopFaultRetryCallbacks bool
 }
 
 // DoJSONGuardedRejections observes Read/Close and source failures only for the
@@ -88,7 +91,7 @@ func doJSONGuardedRejections(ctx context.Context, source *gophercloud.ServiceCli
 	if policy.PreserveCleanRetry {
 		cleanRetry = selected
 	}
-	return doJSONGuarded(ctx, client, guard, method, endpoint, body, headers, fixedHeaders, absentHeaders, cleanRetry, codes...)
+	return doJSONGuarded(ctx, client, guard, method, endpoint, body, headers, fixedHeaders, absentHeaders, cleanRetry, policy.StopFaultRetryCallbacks, codes...)
 }
 
 type rejectedResponseTransport func(*http.Request) (*http.Response, error)

@@ -46,7 +46,7 @@ func DoJSON(ctx context.Context, source *gophercloud.ServiceClient, method, endp
 // callbacks, authentication and accepted read/Close failures. Its nil-guard
 // form retains DoJSON's existing behavior.
 func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, nil, nil, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, false, nil, nil, false, codes...)
 }
 
 // DoJSONGuardedHeaders additionally fixes operation-owned headers through native
@@ -54,7 +54,7 @@ func DoJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 // Neutron revision, not for ordinary caller headers whose source precedence and
 // retry policy are intentionally retained by DoJSONGuarded.
 func DoJSONGuardedHeaders(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, codes ...int) (*Response, error) {
-	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, nil, nil, codes...)
+	return doJSONGuarded(ctx, source, sourceGuard, method, endpoint, body, headers, true, nil, nil, false, codes...)
 }
 
 // RequestHeaderPolicy fixes selected header values and required absence across
@@ -65,7 +65,7 @@ type RequestHeaderPolicy struct {
 	Absent []string
 }
 
-func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, absentHeaders []string, cleanRetryRejections []int, codes ...int) (*Response, error) {
+func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourceGuard func(context.Context) error, method, endpoint string, body any, headers map[string]string, fixedHeaders bool, absentHeaders []string, cleanRetryRejections []int, stopFaultRetryCallbacks bool, codes ...int) (*Response, error) {
 	if ctx == nil {
 		return nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption)
 	}
@@ -116,8 +116,10 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 		client.ProviderClient.RetryFunc = func(ctx context.Context, method, endpoint string, options *gophercloud.RequestOpts, original error, count uint) error {
 			// A physical response or captured source failure is already terminal.
 			// Check it before exposing the rejection to the caller retry hook.
-			if sourceErr := checkSource(); sourceErr != nil || ctx.Err() != nil {
-				return responseContextError(ctx, joinResponseErrors(original, sourceErr))
+			if stopFaultRetryCallbacks {
+				if sourceErr := checkSource(); sourceErr != nil || ctx.Err() != nil {
+					return responseContextError(ctx, joinResponseErrors(original, sourceErr))
+				}
 			}
 			callbackErr := retry(ctx, method, endpoint, options, original, count)
 			ownershipErr := responseRequestOwnership(options, expectedBody, expectedHeaders, expectedAbsent)
