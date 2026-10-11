@@ -12,31 +12,31 @@ Go 쪽은 `extensions/vpnaas/*`, `extensions/bgp/peers`, `extensions/bgp/speaker
 | `delete_vpn_service` | `services.API.Remove(ctx, resource.ID(id))` | 대응 |
 | `get_vpn_service` | `services.API.Get` | 미해결 |
 | `find_vpn_service` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `vpn_services` | `services.API.List` | 대응 |
+| `vpn_services` | `services.API.List` | 미해결 |
 | `update_vpn_service` | `services.API.Update` | 대응 |
 | `create_vpn_endpoint_group` | `endpointgroups.API.Create` | 대응 |
 | `delete_vpn_endpoint_group` | `endpointgroups.API.Remove` | 대응 |
 | `get_vpn_endpoint_group` | `endpointgroups.API.Get` | 미해결 |
 | `find_vpn_endpoint_group` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `vpn_endpoint_groups` | `endpointgroups.API.List` | 대응 |
+| `vpn_endpoint_groups` | `endpointgroups.API.List` | 미해결 |
 | `update_vpn_endpoint_group` | `endpointgroups.API.Update` | 대응 |
 | `create_vpn_ike_policy` | `ikepolicies.API.Create` | 대응 |
 | `delete_vpn_ike_policy` | `ikepolicies.API.Remove` | 대응 |
 | `get_vpn_ike_policy` | `ikepolicies.API.Get` | 미해결 |
 | `find_vpn_ike_policy` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `vpn_ike_policies` | `ikepolicies.API.List` | 대응 |
+| `vpn_ike_policies` | `ikepolicies.API.List` | 미해결 |
 | `update_vpn_ike_policy` | `ikepolicies.API.Update` | 대응 |
 | `create_vpn_ipsec_policy` | `ipsecpolicies.API.Create` | 대응 |
 | `delete_vpn_ipsec_policy` | `ipsecpolicies.API.Remove` | 대응 |
 | `get_vpn_ipsec_policy` | `ipsecpolicies.API.Get` | 미해결 |
 | `find_vpn_ipsec_policy` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `vpn_ipsec_policies` | `ipsecpolicies.API.List` | 대응 |
+| `vpn_ipsec_policies` | `ipsecpolicies.API.List` | 미해결 |
 | `update_vpn_ipsec_policy` | `ipsecpolicies.API.Update` | 대응 |
 | `create_vpn_ipsec_site_connection` | `siteconnections.API.Create` | 대응 |
 | `delete_vpn_ipsec_site_connection` | `siteconnections.API.Remove` | 대응 |
 | `get_vpn_ipsec_site_connection` | `siteconnections.API.Get` | 미해결 |
 | `find_vpn_ipsec_site_connection` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `vpn_ipsec_site_connections` | `siteconnections.API.List` | 대응 |
+| `vpn_ipsec_site_connections` | `siteconnections.API.List` | 미해결 |
 | `update_vpn_ipsec_site_connection` | `siteconnections.API.Update` | 미해결 |
 | `create_bgp_peer` | `peers.API.Create` | 대응 |
 | `delete_bgp_peer` | `peers.API.Remove` | 대응 |
@@ -60,7 +60,7 @@ Go 쪽은 `extensions/vpnaas/*`, `extensions/bgp/peers`, `extensions/bgp/speaker
 | `delete_bgpvpn` | `bgpvpns.API.Remove` | 대응 |
 | `get_bgpvpn` | `bgpvpns.API.Get` | 미해결 |
 | `find_bgpvpn` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
-| `bgpvpns` | `bgpvpns.API.List` | 대응 |
+| `bgpvpns` | `bgpvpns.API.List` | 미해결 |
 | `update_bgpvpn` | `bgpvpns.API.Update` | 대응 |
 | `create_bgpvpn_network_association` | `bgpvpns.API.CreateNetworkAssociation` | 대응 |
 | `delete_bgpvpn_network_association` | `resource.IgnoreMissing(api.DeleteNetworkAssociation(...))` | 대응 |
@@ -153,3 +153,4 @@ Python `vpn_endpoint_groups(type="cidr")`는 `type`을 `endpoint_type` query로 
 - `update_bgp_speaker`: 두 advertise flag를 빼고 수정 요청을 보낼 수 없습니다.
 - `update_vpn_ipsec_site_connection`: `local_id=""`, `peer_cidrs=[]` 같은 빈 값을 보낼 수 없습니다.
 - `create_bgpvpn`: `local_pref=0`을 생성 요청에 넣을 수 없습니다.
+- `vpn_services`, `vpn_endpoint_groups`, `vpn_ike_policies`, `vpn_ipsec_policies`, `vpn_ipsec_site_connections`, `bgpvpns`: Python은 QueryParameters에 없는 Body 속성 인자를 각 페이지에서 로컬로 거르지만, 이 바인딩에는 SDK 로컬 Body 필터가 없어 호출자가 직접 걸러야 합니다. 다른 서비스와 같은 기준으로 미해결로 둡니다.

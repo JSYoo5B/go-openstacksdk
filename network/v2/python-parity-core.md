@@ -10,7 +10,7 @@
 | `add_dhcp_agent_to_network` | `agents.API.ScheduleDHCPNetwork(ctx, agentID, ScheduleDHCPNetworkOpts{NetworkID})` | go_mapping |
 | `add_gateway_network_to_speaker` | `speakers.API.AddGatewayNetwork(ctx, id, AddGatewayNetworkOpts{NetworkID})` | go_mapping |
 | `add_ip_to_port` | `floatingips.API.Update(ctx, ipID, UpdateOpts{PortID: &portID})` | go_mapping |
-| `agents` | `agents.API.List(ctx, WithListOptions, WithListQuery)`, `All(ctx)` | go_mapping |
+| `agents` | `agents.API.List(ctx, WithListOptions, WithListQuery)`, `All(ctx)` | unresolved |
 | `availability_zones` | 없음 | unresolved |
 | `create_local_ip` | 없음 | unresolved |
 | `create_local_ip_association` | 없음 | unresolved |
@@ -26,8 +26,8 @@
 | `delete_port_binding` | 없음 | unresolved |
 | `delete_segment` | `segments.API.Remove(ctx, resource.ID(id))` | go_mapping |
 | `dhcp_agent_hosting_networks` | `agents.API.ListDHCPNetworks(ctx, agentID)` (query 불가) | unresolved |
-| `extensions` | `extensions.API.List(ctx)` | go_mapping |
-| `find_available_ip` | `floatingips.API.List(ctx)`에서 첫 빈 `PortID`에서 중단 | go_mapping |
+| `extensions` | `extensions.API.List(ctx)` | unresolved |
+| `find_available_ip` | `floatingips.API.List(ctx)`에서 첫 빈 `PortID`에서 중단 | unresolved |
 | `find_extension` | `extensions.API.Get(ctx, alias)` (목록 fallback 없음) | unresolved |
 | `find_local_ip` | 없음 | unresolved |
 | `find_local_ip_association` | 없음 | unresolved |
@@ -42,20 +42,20 @@
 | `get_network_ip_availability` | `networkipavailabilities.API.Get(ctx, networkID)` (`fields` 불가) | unresolved |
 | `get_network_segment_range` | 없음 | unresolved |
 | `get_segment` | `segments.API.Get(ctx, id)` (`fields` 불가) | unresolved |
-| `get_subnet_ports` | `ports.API.All(ctx)` 후 `FixedIPs`의 subnet ID로 선택 | go_mapping |
+| `get_subnet_ports` | `ports.API.All(ctx)` 후 `FixedIPs`의 subnet ID로 선택 | unresolved |
 | `get_trunk_subports` | `trunks.API.GetSubports(ctx, id)` | go_mapping |
 | `local_ip_associations` | 없음 | unresolved |
 | `local_ips` | 없음 | unresolved |
 | `network_hosting_dhcp_agents` | 없음 | unresolved |
-| `network_ip_availabilities` | `networkipavailabilities.API.List(ctx, WithListOptions, WithListQuery)` | go_mapping |
+| `network_ip_availabilities` | `networkipavailabilities.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
 | `network_segment_ranges` | 없음 | unresolved |
 | `onboard_network_subnets` | 없음 | unresolved |
 | `port_bindings` | 없음 | unresolved |
-| `ports` | `ports.API.List(ctx, WithListOptions, WithListQuery)` | go_mapping |
+| `ports` | `ports.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
 | `remove_dhcp_agent_from_network` | `agents.API.RemoveDHCPNetwork(ctx, agentID, networkID)` | go_mapping |
 | `remove_gateway_network_from_speaker` | `speakers.API.RemoveGatewayNetwork(ctx, id, RemoveGatewayNetworkOpts{NetworkID})` | go_mapping |
 | `remove_ip_from_port` | `floatingips.API.Update(ctx, ipID, UpdateOpts{PortID: &empty})` | go_mapping |
-| `segments` | `segments.API.List(ctx, WithListOptions, WithListQuery)` | go_mapping |
+| `segments` | `segments.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
 | `service_providers` | 없음 | unresolved |
 | `update_agent` | `agents.API.Update(ctx, id, UpdateOpts, WithUpdateField)` | go_mapping |
 | `update_local_ip` | 없음 | unresolved |
@@ -142,3 +142,4 @@ Neutron proxy의 `get_*`는 `fields` 인자를 받아 Body 속성 이름을 wire
 - `get_agent`, `get_segment`, `get_network_ip_availability`: `fields` 선택 조회 option이 없습니다.
 - `find_segment`, `find_extension`, `find_network_ip_availability`: Python의 ID 조회 뒤 목록 fallback을 `**query`와 함께 재현하는 helper가 없습니다.
 - `wait_for_status`, `wait_for_delete`: Go collection이 없는 Neutron Resource에는 waiter가 없습니다.
+- `agents`, `extensions`, `network_ip_availabilities`, `ports`, `segments`, `get_subnet_ports`, `find_available_ip`: Python이 Body 속성으로 행을 로컬에서 거르거나 첫 행에서 멈추는 동작, 또는 `segments_links`·`*_links` 페이지 순회를 SDK가 대신하지 않습니다. 호출자가 결과 행을 직접 걸러야만 재현되므로 다른 서비스와 같은 기준으로 미해결로 둡니다.
