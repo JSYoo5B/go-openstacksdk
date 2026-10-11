@@ -114,6 +114,11 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 	}
 	if retry := client.ProviderClient.RetryFunc; retry != nil {
 		client.ProviderClient.RetryFunc = func(ctx context.Context, method, endpoint string, options *gophercloud.RequestOpts, original error, count uint) error {
+			// A physical response or captured source failure is already terminal.
+			// Check it before exposing the rejection to the caller retry hook.
+			if sourceErr := checkSource(); sourceErr != nil || ctx.Err() != nil {
+				return responseContextError(ctx, joinResponseErrors(original, sourceErr))
+			}
 			callbackErr := retry(ctx, method, endpoint, options, original, count)
 			ownershipErr := responseRequestOwnership(options, expectedBody, expectedHeaders, expectedAbsent)
 			sourceErr := checkSource()
