@@ -10,7 +10,7 @@
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 진행 (2026-10-11): 의존성 없는 서비스의 3 worker 슬롯을 계속 채워 병렬 구현 중. 전체1,216/3,362·핵심1,142/2,292.** ApplicationCredential/AccessRule8개·Neutron Body mutation/기본 삭제12개·Cinder volume summary1개를 새로 구현해 집중 race와 Source/계약 판정검사를 통과했습니다. 구현·회귀·비교 문서를 작은 서비스 커밋으로 수시 push합니다. Backup metadata4개는 명시적 Python 호환 프로파일을 구현하고 race8그룹을 통과했지만 stock Cinder에 child route가 없어 미해결 수에 유지합니다. 다음 작업은 Keystone generic credential5개의 중앙 검증, Neutron port/subnet/router/ip8개, Swift metadata7개와 Nova 핵심 user 후보입니다. 중앙 runner는 동결한 커밋의 불변 스냅샷에서 전체 gate를 검증하여 다른 에이전트의 다음 독립 구현을 계속 진행합니다. SDK-R1/C1/S1과 전체 목표는 active입니다.
+**현재 진행 (2026-10-11): 의존성 없는 서비스의 3 worker 슬롯을 계속 채워 병렬 구현 중. 전체1,216/3,362·핵심1,142/2,292.** ApplicationCredential/AccessRule8개·Neutron Body mutation/기본 삭제12개·Cinder volume summary1개를 새로 구현해 집중 race와 Source/계약 판정검사를 통과했습니다. 구현·회귀·비교 문서를 작은 서비스 커밋으로 수시 push합니다. Backup metadata4개는 명시적 Python 호환 프로파일을 구현하고 race8그룹을 통과했지만 stock Cinder에 child route가 없어 미해결 수에 유지합니다. 다음 작업은 Keystone generic credential5개의 중앙 검증, Neutron port/subnet/router/ip8개, Swift metadata7개와 Nova 핵심 user 후보입니다. 중앙 runner는 동결한 `f48a283b` 불변 스냅샷의 전체155개 실제 test package gate를 확인했습니다. 첫 loopback 연결 오류 후 코드 변경 없이 package 병렬도4로 재검증해 PASS이며, 다른 에이전트의 다음 독립 구현은 계속 진행합니다. SDK-R1/C1/S1과 전체 목표는 active입니다.
 
 서비스 사이 의존성이 없는 구현은 서비스별 에이전트가 동시에 진행합니다. 공통 기능은 먼저 확정해 재사용하고, 담당 파일을 나눠 구현·서비스별 테스트·Python 비교 문서를 준비합니다. 생성기 통합·판정 JSON·자동 집계·전체 검사·commit/push는 한곳에서 순서대로 처리합니다.
 
