@@ -84464,6 +84464,1680 @@
       "remaining": [
         "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/service_providers/{id} with the changed service_provider attributes."
       ]
+    },
+    {
+      "operation": "python:network/v2/create_load_balancer",
+      "source_fingerprint": "9267364455a9a02d61e75800e606cd8427c5f5c10e49064ac267fb25b3e6ceac",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/loadbalancers with a \"loadbalancer\" body that also carries unknown attributes); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_load_balancer",
+      "source_fingerprint": "01686042e3767f14febfcd2a618051b408f384fbd9768cdb23ca9bbe7e756be4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/loadbalancers/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_load_balancer",
+      "source_fingerprint": "5253a4c90bc93b06c1f2be9db10c85e08526c6276699ed4d2ad6813bc52c655f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/loadbalancers matched on ID or name); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_load_balancer",
+      "source_fingerprint": "00e112a9d28558ed38e89998ae3057ba1d22013b2c185cceb384c6fa624b01e9",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers/{id}); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/load_balancers",
+      "source_fingerprint": "f1c87e5622c20e40b0c68c6d35d54a253fc15c9506578303df3491dbe636807b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/loadbalancers with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_load_balancer",
+      "source_fingerprint": "f9e1af013ccf6213e0cc2a920105e188896cf43b09179639766b48b34fba0b5c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/loadbalancers/{id} with the changed attributes in a \"loadbalancer\" body); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_listener",
+      "source_fingerprint": "272556b8811fe2b1c3302246c742e338f0fbf2e5d03f41319936429e4e53b98c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/listeners with a \"listener\" body that also carries unknown attributes); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_listener",
+      "source_fingerprint": "e70721cd8d7dcf69d159525c215e25d1cd7fddbe9d746ba4b424e29d89639a31",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/listeners/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_listener",
+      "source_fingerprint": "00e8a753d260934f6871a8dad3a9a6e3f69ceb753ba9d808a3229e62fe992ded",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/listeners matched on ID or name); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_listener",
+      "source_fingerprint": "8ec7387e1d70a39c4e87677a2ed549090c1d6c0df9b67955b54360398abae793",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners/{id}); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/listeners",
+      "source_fingerprint": "4bd9fe05c832ec9e3cd4ad419da1f6f7bddba80272b974ffe317e2c6fdbb33dd",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/listeners with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_listener",
+      "source_fingerprint": "6c31e24f9932c63f70b9e08bbff5c38f7ba9844830e644af426d8f95a25ca10b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/listeners/{id} with the changed attributes in a \"listener\" body); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_pool",
+      "source_fingerprint": "fe22c40f2a38a9c7e65efcdb8e6e68021b821c16a0e6bd08ebea4fdba4e6bbd1",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/pools with a \"pool\" body that also carries unknown attributes); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_pool",
+      "source_fingerprint": "80619583593f6964f18740bcd1b61df9d8774b8c96a2a3e2ed231ce55fb525de",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/pools/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_pool",
+      "source_fingerprint": "52a6ba20be9cece3d5d5811f11a3d6f65e5096b5e51b891a940174719b18208f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/pools matched on ID or name); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_pool",
+      "source_fingerprint": "2ea3b755022e9b67fb646ed6cde6213242690f5068ee021d16cdfdc95c2a38d2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{id} with an optional fields query); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/pools",
+      "source_fingerprint": "347d0301dbf2b1483106b3589b8abaeea9f1ee448dd36ee118812e1fd9ae9d98",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_pool",
+      "source_fingerprint": "38c5919acd335e968975d400ce729d8d4bae11a79535bd58b83ee81c00b33067",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/pools/{id} with the changed attributes in a \"pool\" body); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_pool_member",
+      "source_fingerprint": "33ea7b9a30f69b50b3c1acef36e3db8e6dca7762be5da1151397ac9272858ae2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/pools/{pool_id}/members under the pool resolved from the pool argument with a \"member\" body that also carries unknown attributes); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_pool_member",
+      "source_fingerprint": "438f3b624267d1fcbff1af1553443a98de83f20773b5e5e72168d685247e0b7e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_pool_member",
+      "source_fingerprint": "0cc0cff1dd8502174b432fdf05037e71e7a18dce2525578a26795813e12c4bb0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument followed, after 400/403/404, by a list of /v2.0/lbaas/pools/{pool_id}/members matched on ID or name); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_pool_member",
+      "source_fingerprint": "ee3a7f751e31640924b3667ed755cd2986e89301684b447a2a618aff1c1ca3c0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members/{id} with an optional fields query under the pool resolved from the pool argument); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/pool_members",
+      "source_fingerprint": "5e6106e07fc3908ca56cef5ab0142cb67070993f683bb9eaf1d19aace93877ab",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/pools/{pool_id}/members under the pool resolved from the pool argument with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_pool_member",
+      "source_fingerprint": "5af2cf3cf17961c13ab3e3d16db1ef3077736ec5020b85b411551af51520c74c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/pools/{pool_id}/members/{id} under the pool resolved from the pool argument with the changed attributes in a \"member\" body); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_health_monitor",
+      "source_fingerprint": "eb469a63c417096c990ef95d45382fff9ab91c236e7d551ad2ad8ee2873bc5d7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (POST /v2.0/lbaas/healthmonitors with a \"healthmonitor\" body that also carries unknown attributes); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_health_monitor",
+      "source_fingerprint": "19fd1c64f9120c82b179aa307c88a400ecb60a8de73156a72a6fe6640f9394cf",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (DELETE /v2.0/lbaas/healthmonitors/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_health_monitor",
+      "source_fingerprint": "569585fc22bb505b2ffdb98bf2a571847f5280d712fbb2a7a260302eae38d1c2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors/{id} followed, after 400/403/404, by a list of /v2.0/lbaas/healthmonitors matched on ID or name); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_health_monitor",
+      "source_fingerprint": "e413e2098a6f44748552bd6a94c6709adc8d55f034d151f10a921b8583196177",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors/{id}); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/health_monitors",
+      "source_fingerprint": "69c91087931b1279864934e323bc6b80585aa495454de6e7f93502bcc5aa5363",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (GET /v2.0/lbaas/healthmonitors with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_health_monitor",
+      "source_fingerprint": "4ef08d418e336db7704f071fb0641bab5065f1cd53a652466dea7c37e00bcd53",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron LBaaS v2 route that Python uses (PUT /v2.0/lbaas/healthmonitors/{id} with the changed attributes in a \"healthmonitor\" body); an SDK-owned call would be needed.",
+        "The loadbalancer/v2 Octavia facades use the same relative v2.0/lbaas paths but are bound to the load-balancer catalog endpoint, lack Neutron-only fields such as pool status, status_description, vip_id and health_monitor_status, and are not an SDK contract for the Neutron network endpoint."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_flavor",
+      "source_fingerprint": "4d40ecfeed55562424edb8102659e60420ce3de65f82a2e67978e77faf326cc4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (POST /v2.0/flavors with a \"flavor\" body that also carries unknown attributes); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_flavor",
+      "source_fingerprint": "3b1e275aff1a006f5d8c03524c39ed8a37fcef3a1ba034f250f40a6eaaa96ad7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (DELETE /v2.0/flavors/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_flavor",
+      "source_fingerprint": "0319d3c18e83c04e490cc6ec1ab5e3a4984abc47add04937321ba6230f38b9c2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (GET /v2.0/flavors/{id} followed, after 400/403/404, by a list of /v2.0/flavors matched on ID or name); an SDK-owned call would be needed.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_flavor",
+      "source_fingerprint": "2a37053a92006a64c93edfc426a600ede1968ab6bf0bdb21ae4e63a1c52f27e2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (GET /v2.0/flavors/{id} with an optional fields query); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/flavors",
+      "source_fingerprint": "f659de7b3494dd7933047e93fa73c98b82d491b610244c2181951eb3c61168d7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (GET /v2.0/flavors with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_flavor",
+      "source_fingerprint": "ede20b58f21ee60f1c4620d05e88e40c7e4a44492dcddba9c6982779d28d57c5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron flavors route that Python uses (PUT /v2.0/flavors/{id} with the changed attributes in a \"flavor\" body); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_service_profile",
+      "source_fingerprint": "4433203c7f6a412b4be44b9e974cdffe76b9f83f912a378e0e37eabe50008614",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (POST /v2.0/service_profiles with a \"service_profile\" body that also carries unknown attributes); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_service_profile",
+      "source_fingerprint": "9c44c0079e7ffcd5e40e9994c71c22bbeefe3269c9bfd5e8ab2a1e42497b40d2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (DELETE /v2.0/service_profiles/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_service_profile",
+      "source_fingerprint": "e0f0f9a9fb7ccc9cbaf4ae1386b935eda76cb9e9930f6cbcfd49ce0415f7d411",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (GET /v2.0/service_profiles/{id} followed, after 400/403/404, by a list of /v2.0/service_profiles matched on ID or name); an SDK-owned call would be needed.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_service_profile",
+      "source_fingerprint": "33e41870b21a1792e5b816b3ef1c70c22d00452f58465d9382d2e37ded473044",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (GET /v2.0/service_profiles/{id} with an optional fields query); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/service_profiles",
+      "source_fingerprint": "5d5d79d0ceeb4caa700636156c3d735569ef4ae44a471bcb25cc6b87f996ff19",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (GET /v2.0/service_profiles with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_service_profile",
+      "source_fingerprint": "02be77512c27d7767e673fd7a88ec8b8434c739b878d7ea6ef2d0d9a2316aef7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron service profile route that Python uses (PUT /v2.0/service_profiles/{id} with the changed attributes in a \"service_profile\" body); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_metering_label",
+      "source_fingerprint": "2d4e74286be2afb9aeb10d36e686cb1b1e96ad1164110caeeb86eb00882286e3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (POST /v2.0/metering/metering-labels with a \"metering_label\" body that also carries unknown attributes); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_metering_label",
+      "source_fingerprint": "e996664f63cd8051038414bb79bc466c0f1e9ad73d6312c1109fc5a982a71e50",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (DELETE /v2.0/metering/metering-labels/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_metering_label",
+      "source_fingerprint": "094d6deebfcd1c77e4c4e4743e314cd2e6aacd95308f77620bd5c4d9edb0b607",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-labels/{id} followed, after 400/403/404, by a list of /v2.0/metering/metering-labels matched on ID or name); an SDK-owned call would be needed.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_metering_label",
+      "source_fingerprint": "4f616cf53ebbb034dc73e512099334b845133c980aef3717c66296442820136d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-labels/{id} with an optional fields query); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/metering_labels",
+      "source_fingerprint": "ee9875817897aa21026a9dd93314bce5cbcbb2a095314621d73b6f5e10710238",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-labels with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_metering_label",
+      "source_fingerprint": "df8e13e28589f7ac5400f7021c9f711c0bdb7811bd304cadabd21c1947edb1f4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (PUT /v2.0/metering/metering-labels/{id} with the changed attributes in a \"metering_label\" body); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_metering_label_rule",
+      "source_fingerprint": "fb46c7b807bdb5d569808a5fec601e2d2061b265c9049829489bc159b42ade0e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (POST /v2.0/metering/metering-label-rules with a \"metering_label_rule\" body that also carries unknown attributes); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_metering_label_rule",
+      "source_fingerprint": "12ce7f6bd2b9bf22264a8b4bc3f75f1e57c6eff0f06d520441ac6973382d69cd",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (DELETE /v2.0/metering/metering-label-rules/{id} with ignore_missing=True turning 404 into None); an SDK-owned call would be needed.",
+        "No Remove or resource.IgnoreMissing wrapper exists for this route, so the Python ignore_missing=True default cannot be reproduced."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_metering_label_rule",
+      "source_fingerprint": "20cf9acddf9e63700c0227dab7e96c6b9726cb5bb5d0ad2f27b699f36c7386e6",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-label-rules/{id} followed, after 400/403/404, by a list of /v2.0/metering/metering-label-rules matched on ID or name); an SDK-owned call would be needed.",
+        "No SDK find helper reproduces the Python GET-by-ID then list fallback for this resource."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_metering_label_rule",
+      "source_fingerprint": "8fcaef48aa50d6fee167fbfbfdda4d46f0846b7b38ebf575d62fa9404042641b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-label-rules/{id} with an optional fields query); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/metering_label_rules",
+      "source_fingerprint": "9ce7e0641380c8ff4e5ef70b875ef94358be05deb4c417b8508d11c0a29a997b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (GET /v2.0/metering/metering-label-rules with mapped server query, local Body filters and next-link pagination); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_metering_label_rule",
+      "source_fingerprint": "85677ce9f417b8968be8a6abf36d553218bf81c42419b35c787f244b5b7516c2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Neutron metering route that Python uses (PUT /v2.0/metering/metering-label-rules/{id} with the changed attributes in a \"metering_label_rule\" body); an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:network/v2/associate_flavor_with_service_profile",
+      "source_fingerprint": "ead215dbc7e6b83637c5bacb5f49ce48e32898965f02d75de35c1fad71a0a6b1",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST /v2.0/flavors/{flavor_id}/service_profiles with a {\"service_profile\": {\"id\": ...}} body; an SDK-owned call would be needed.",
+        "Python returns the raw response JSON as a dict without raising on HTTP error statuses (Proxy raise_exc=False), which no Go API reproduces."
+      ]
+    },
+    {
+      "operation": "python:network/v2/disassociate_flavor_from_service_profile",
+      "source_fingerprint": "495ae981030a4cb0666958dd75c5cb6d02c5f1cd31b505841d65f0f0fcf305da",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE /v2.0/flavors/{flavor_id}/service_profiles/{service_profile_id}; an SDK-owned call would be needed.",
+        "Python returns None without raising on HTTP error statuses (Proxy raise_exc=False), which no Go API reproduces."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_ip",
+      "source_fingerprint": "944e3882773bd76edb4d8074c29c4f95d74d20702f126d804943939ce6cd0f0e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find(resource.ID(x), resource.WithIgnoreMissing()) sends only GET /v2.0/floatingips/{x}, decodes the floating IP or returns nil on 404, and without WithIgnoreMissing returns ErrNotFound; Find(resource.Name(x)) and Resources.FindIdentity return ErrUnsupported without HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_parity_ips_test.go:TestPythonIPsFindIPOnlyReproducesTheIDLookup"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [
+        "Python defaults to ignore_missing=True and returns None; Go needs resource.WithIgnoreMissing() for the same nil result."
+      ],
+      "remaining": [
+        "The floating IP binding has no SDK find helper: after GET /floatingips/{id} fails with 400, 403 or 404, Python lists every /floatingips page without a name query and matches ID or floating_ip_address with duplicate detection, while Go Find(resource.Name) and Resources.FindIdentity return ErrUnsupported without HTTP.",
+        "Go Find(resource.ID) treats only 404 as missing and returns 400/403 as errors instead of falling back to the list."
+      ]
+    },
+    {
+      "operation": "python:network/v2/ips",
+      "source_fingerprint": "41df84be140e3a67b73b7dc72813f926847171d112c36b7658c2331fb3919d6c",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "All with no options sends GET /v2.0/floatingips with Accept application/json and follows floatingips_links, WithQuery forwards query-mapped keys such as floating_network_id and status, and WithName or WithBodyFilter return ErrUnsupported without HTTP.",
+          "tests": [
+            "network/v2/extensions/layer3/floatingips/python_parity_ips_test.go:TestPythonIPsListServerQueryAndPagesButNoLocalBodyFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-lbaas-metering.md"
+      ],
+      "differences": [
+        "Go resource.WithStatus sends the status query and also filters case-insensitively in memory, whereas Python status is only a server query; resource.WithQuery(\"status\", v) matches Python."
+      ],
+      "remaining": [
+        "Python filters declared Body attributes that are not query-mapped (name meaning floating_ip_address, dns_name, dns_domain, qos_policy_id, port_details and similar) locally and discards unknown keys; the floating IP collection rejects resource.WithName and resource.WithBodyFilter with ErrUnsupported and forwards every WithQuery key to the server."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_tap_mirror",
+      "source_fingerprint": "ae2ca79db771fab46ba307cf4651a160ece13686bcd3602b5a5ce96d284edb0d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create POSTs taas/tap_mirrors with a tap_mirror envelope holding name, description, port_id, mirror_type, remote_ip, string-quoted directions and project_id or other extension keys added through WithCreateField, decodes the created mirror, and rejects an extension that collides with a core key before HTTP.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorCreateBody"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python sends only the attributes passed in attrs; Go always sends name, port_id, mirror_type, remote_ip and directions even when empty and omits only empty description and tenant_id. Neutron requires port_id, mirror_type, remote_ip and directions and defaults name to an empty string, so valid calls produce the same result.",
+        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers.",
+        "Go accepts only 201 and 202 for create; Python accepts any non-error status."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_tap_mirror",
+      "source_fingerprint": "f50f701a2dad5bd15d2f6c1ec9f252aa77be2302b6c7ef8f5f6127deab476ad0",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get sends GET taas/tap_mirrors/{id} without a query, which is Python's request for fields=None, decodes the mirror and returns the native 404 error.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorGetWithoutFields"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers."
+      ],
+      "remaining": [
+        "Python get_tap_mirror(fields=[...]) maps Body attribute names to wire names and sends repeated fields query keys, returning a sparse Resource; tapmirrors has no GetWithFields and API.Get accepts no query, so no public Go call sends the fields selection."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_tap_mirror",
+      "source_fingerprint": "a5ffdd1217980c2bc658ca6d56baf55073bda5e0a848b170f883159ec48880af",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+      ],
+      "contracts": [
+        {
+          "behavior": "Chaining Find by ID with WithIgnoreMissing and then Find by Name sends GET taas/tap_mirrors/{value} and, after 404 only, GET taas/tap_mirrors?name={value}, returning the single match, nil or resource.ErrNotFound by option and resource.ErrAmbiguous for duplicate names, while a GET 400 or 403 is returned without the list request.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorFindChain"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python defaults ignore_missing=True and emits a deprecation warning; Go Find by Name defaults to resource.ErrNotFound unless resource.WithIgnoreMissing is passed."
+      ],
+      "remaining": [
+        "Python Resource.find falls back to the name list after a GET 400 or 403 as well as 404; the Go Find chain returns the 400 or 403 error and the tapmirrors collection does not opt into FindIdentity, whose compatible fallback would cover it.",
+        "Python forwards **query to both the GET and the name list request; Collection.Find accepts only LookupOption values, so no query can be added to either request."
+      ]
+    },
+    {
+      "operation": "python:network/v2/tap_mirrors",
+      "source_fingerprint": "ca2bd3320221ca69fc8d2b877cf11fe4a40869d39c10cc93ffbe0e512f69a0ca",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithName",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize"
+      ],
+      "contracts": [
+        {
+          "behavior": "All sends GET taas/tap_mirrors with name, project_id and limit query values, follows the tap_mirrors_links next href with marker and decodes each mirror; a full page without links ends the listing after one request.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorListQueryAndPaging"
+          ]
+        },
+        {
+          "behavior": "resource.WithQuery and tapmirrors.WithListQuery keep one value per key, so repeated fields or sort_key values collapse to the last value.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorListQueryAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every WithQuery or WithListQuery key to the server and leaves Body filtering to the caller except exact name through resource.WithName.",
+        "Python continues with marker=<last id> after a full limit page without links; Go follows only tap_mirrors_links.",
+        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers."
+      ],
+      "remaining": [
+        "Python encodes list values for fields, sort_key and sort_dir as repeated query keys; ListOpts has none of these keys and both WithListQuery and resource.WithQuery replace a key with one value, so no public Go option sends repeated fields or sort keys."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_tap_mirror",
+      "source_fingerprint": "fc70e36ea13915583fbe6ffd4b16fb09395ed4281cf5feac84405ffb3cfdb546",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update PUTs taas/tap_mirrors/{id} with a tap_mirror envelope holding the pointer name and description values and extension keys from WithUpdateField, and decodes the updated mirror.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorUpdateBody"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python skips the request when no attribute is dirty; Go Update with empty UpdateOpts still sends PUT {\"tap_mirror\":{}}, so the caller omits the call instead.",
+        "Go accepts only 200 for update; Python accepts any non-error status.",
+        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_tap_mirror",
+      "source_fingerprint": "fbc9965a59a998c4a5bc2174540cfb12006a5669368b7241373301051d3db233",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove by ID and resource.IgnoreMissing around Delete each send one DELETE taas/tap_mirrors/{id}, return nil for 204 and 404 and return a 409 error, while Remove with WithMissingError reports a 404 as resource.ErrNotFound and plain Delete returns the native 404.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [
+        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
+        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
+        "Neutron has no microversion, so neither SDK sends a version header.",
+        "Python returns None; Go returns only an error. Go accepts 202 and 204 as success; Python accepts any non-error status."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/create_tap_flow",
+      "source_fingerprint": "437f98ddbfe0f46a49f53c0874203dafe6858b423c8d8fe0c0e9987d0d4364c5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /taas/tap_flows with {\"tap_flow\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_tap_flow",
+      "source_fingerprint": "780e14bdfe61543237f12d6f621f16c0eada8b4eb2775fce3c9cd8a91888f844",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /taas/tap_flows/{id} with optional fields."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_tap_flow",
+      "source_fingerprint": "ae05f28c8a540aec63ca4863cc575d1443bd468180ecdcc40e010fc5b0daf675",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /taas/tap_flows/{name_or_id} and after 400/403/404 lists /taas/tap_flows?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/tap_flows",
+      "source_fingerprint": "0ad2427c3f8a117bc7838e0bbf79c34d7b773b516824179088270312aa6d2241",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /taas/tap_flows with declared query keys and follows tap_flows_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_tap_flow",
+      "source_fingerprint": "13acfb79ab94c37d8c3b45f5b7bf5b5867fc6eb9e1091d3e802b3eb4467bb189",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /taas/tap_flows/{id} with {\"tap_flow\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_tap_flow",
+      "source_fingerprint": "14dbb4bd61f75aca31ba7c38069ac2e8f312a0dd6478647cb66a289861262eb0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_flows (tap-as-a-service tap flow) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /taas/tap_flows/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_tap_service",
+      "source_fingerprint": "871f1efc19e054231e578a44cfa9004fb5e2311eedbc7319f017988504d6fb4b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /taas/tap_services with {\"tap_service\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_tap_service",
+      "source_fingerprint": "514fec193eb480425c83a139576e1390d673a815fe06fc8930ae7895fa44abd4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /taas/tap_services/{id} with optional fields."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_tap_service",
+      "source_fingerprint": "5ebaa73a414647fb91ae45740e819ab9b3e5be7f961ac4193e3f540b3df9789b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /taas/tap_services/{name_or_id} and after 400/403/404 lists /taas/tap_services?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/tap_services",
+      "source_fingerprint": "fd6f3738bcae37c8ea0fa1102ea8856a0af3d2cf85895852f771c30178cb8880",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /taas/tap_services with declared query keys and follows tap_services_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_tap_service",
+      "source_fingerprint": "8f6cccf99642e0714331f996fad24e16b676af9cc24fc44d81080599d4ef8972",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /taas/tap_services/{id} with {\"tap_service\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_tap_service",
+      "source_fingerprint": "00c32ad3667af247b6d9b4837ede38302713b26ce54a676b5c5d369e0f91145b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /taas/tap_services (tap-as-a-service tap service) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /taas/tap_services/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_sfc_flow_classifier",
+      "source_fingerprint": "92ce37009f18e5d9c1ef0bd435f143cad21c2077845e8ccab148bf67d9ded7d6",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /sfc/flow_classifiers with {\"flow_classifier\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_sfc_flow_classifier",
+      "source_fingerprint": "faf6ee1b8d9e1754a596bf0245b9d04612efd5a392a9c9f4c329d154f9927545",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/flow_classifiers/{id}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_sfc_flow_classifier",
+      "source_fingerprint": "62563cb2819656ebb44974a685c6a9d1c500ded61584cbcf495bb5df1f4f1b6b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/flow_classifiers/{name_or_id} and after 400/403/404 lists /sfc/flow_classifiers?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/sfc_flow_classifiers",
+      "source_fingerprint": "8d4c6b6f5265bbed3a40b106f793274a38263748e3238006b2b9a2391e2d58b9",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /sfc/flow_classifiers with declared query keys and follows flow_classifiers_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_sfc_flow_classifier",
+      "source_fingerprint": "eadd7b3805c937033d80f190b6856490fa1c934e9f865dd82c7444842c427c4b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /sfc/flow_classifiers/{id} with {\"flow_classifier\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_sfc_flow_classifier",
+      "source_fingerprint": "2f0d605e7280fb048313841eb07e9eb9299769c1dd9fe6f9064cef3692866aaa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/flow_classifiers (networking-sfc flow classifier) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/flow_classifiers/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_sfc_port_chain",
+      "source_fingerprint": "97ebd02b99518ba40b64bde59ecbac163337713ae4b5fc791e95a55a9dd176d0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /sfc/port_chains with {\"port_chain\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_sfc_port_chain",
+      "source_fingerprint": "c001e82298d264e020c24678555fa577f5f221dba919898b22259dd7bd14eae8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_chains/{id}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_sfc_port_chain",
+      "source_fingerprint": "7dd48c696bfa6fe4bfd4c275cffcaa4c9920de4cd0b63e353a93637e5e278182",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_chains/{name_or_id} and after 400/403/404 lists /sfc/port_chains?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/sfc_port_chains",
+      "source_fingerprint": "1f189bde5dc719f26808baab9fda513de605132d0597d22c8f13d15599855aa4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /sfc/port_chains with declared query keys and follows port_chains_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_sfc_port_chain",
+      "source_fingerprint": "b78e7c4bfb1bd88b8296cc56f7797c772f391fc4cf3c815d29f777904646c2e1",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /sfc/port_chains/{id} with {\"port_chain\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_sfc_port_chain",
+      "source_fingerprint": "28d7af24a995519183709e20d2a06e3ef3e20e616c88b750f6fcf9774b40b2c2",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_chains (networking-sfc port chain) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/port_chains/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_sfc_port_pair",
+      "source_fingerprint": "d43313c590cb13c6bdf5be389639e7c6181b4210da522e9c146b02abd8aedd72",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /sfc/port_pairs with {\"port_pair\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_sfc_port_pair",
+      "source_fingerprint": "ad97ce08650eaf4c772d77dc0ea098d2c4b4d075edbcfed1072130748f91a825",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_pairs/{id}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_sfc_port_pair",
+      "source_fingerprint": "e4cb2c1fd46883e2437efb0c9c71e11efef8a45ba8f7884c2a149a2dfd753b05",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_pairs/{name_or_id} and after 400/403/404 lists /sfc/port_pairs?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/sfc_port_pairs",
+      "source_fingerprint": "151e8824b7ed555cd7815616d3ead2a393fa69e5f2e1db3a7e76a02fe750f8cb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /sfc/port_pairs with declared query keys and follows port_pairs_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_sfc_port_pair",
+      "source_fingerprint": "6a967f2f3fc8aaa95554ec1edba6d24a0e7265d509f168eff4b499403249f74f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /sfc/port_pairs/{id} with {\"port_pair\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_sfc_port_pair",
+      "source_fingerprint": "fa6f3edcfc1fab4745538e6e7c89cd9000f8b5905ca7b4a70a36007d53913f86",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pairs (networking-sfc port pair) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/port_pairs/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_sfc_port_pair_group",
+      "source_fingerprint": "83c11eccd4920aa6ec0900602747b9b279089933df162641974d01ac0fefa6b4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /sfc/port_pair_groups with {\"port_pair_group\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_sfc_port_pair_group",
+      "source_fingerprint": "717fc970e05dbd97fe4bf8d4d8f4953ce61cfa0c77bbb48647553244b50dd377",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_pair_groups/{id}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_sfc_port_pair_group",
+      "source_fingerprint": "a15b89f2f57981c2d2ba0f1ef7b3a84761cf94ad7f524ad7d3edb95cce45fb06",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/port_pair_groups/{name_or_id} and after 400/403/404 lists /sfc/port_pair_groups?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/sfc_port_pair_groups",
+      "source_fingerprint": "e6d78b7baff97e1c11cc59935f238d6328078547ea2caa9d105e9776f60d3fde",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /sfc/port_pair_groups with declared query keys and follows port_pair_groups_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_sfc_port_pair_group",
+      "source_fingerprint": "663631de27c1803d0fc601d872c9baeb5e7ee24e1292d837e54bc92bf8cf18a6",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /sfc/port_pair_groups/{id} with {\"port_pair_group\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_sfc_port_pair_group",
+      "source_fingerprint": "2e8d9fd6db1fdbc5ceb9ee689096cd8721b086d46ec8c02a4578d1a62bdd2c70",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/port_pair_groups (networking-sfc port pair group) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/port_pair_groups/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:network/v2/create_sfc_service_graph",
+      "source_fingerprint": "16bb0b1a831fcc7d94c7e2d1e9e01cf9b96e74d1b7d502843a23e13783eb5625",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends POST /sfc/service_graphs with {\"service_graph\": attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_sfc_service_graph",
+      "source_fingerprint": "6b07baf3baf9120ab8fb4a8b1ce5f6c9e1561919eeba220f1df8bd8d6588470c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/service_graphs/{id}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_sfc_service_graph",
+      "source_fingerprint": "1bc32507f2c12c973fcf9de2441a865c5fea8c113ffcd6ea04ff16d3a7d87bbb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends GET /sfc/service_graphs/{name_or_id} and after 400/403/404 lists /sfc/service_graphs?name=, returning None by default when nothing matches."
+      ]
+    },
+    {
+      "operation": "python:network/v2/sfc_service_graphs",
+      "source_fingerprint": "41f45c842b5142df6e41c80f9d6985d4bfbedebe440bae15e215228e43eb3e27",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python lists GET /sfc/service_graphs with declared query keys and follows service_graphs_links."
+      ]
+    },
+    {
+      "operation": "python:network/v2/update_sfc_service_graph",
+      "source_fingerprint": "9e3d43c8ee93a36be35023f6341218dc697e1706a14af5876575737fa225d043",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends PUT /sfc/service_graphs/{id} with {\"service_graph\": dirty attrs}."
+      ]
+    },
+    {
+      "operation": "python:network/v2/delete_sfc_service_graph",
+      "source_fingerprint": "000aaa847db23567f9db519c1520059a56aa60630b03337e58aa7ffd9aa5e950",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "network/v2/python-parity-sfc-tap.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/service_graphs/{id} and ignores 404 by default."
+      ]
     }
   ]
 }
