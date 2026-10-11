@@ -156,7 +156,7 @@ func TestPythonVolumeListDefaultUsesDetailRouteOnly(t *testing.T) {
 		t.Fatalf("%v %+v", ids, *calls)
 	}
 	first, _ := url.ParseQuery((*calls)[0].query)
-	// There is no public List variant for details=False (GET /volumes).
+	// Existing List retains the detail default; ListSummary handles details=False.
 	if (*calls)[0].path != pythonVolumeBase+"/detail" || !reflect.DeepEqual(first, url.Values{"all_tenants": {"True"}, "name": {"data"}, "status": {"available"}}) || (*calls)[1].query != "marker=vol-1" {
 		t.Fatalf("%+v", *calls)
 	}
