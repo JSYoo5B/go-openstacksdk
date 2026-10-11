@@ -46,7 +46,7 @@ container 이름은 `url.PathEscape`로 escape해 `ResourceBase` 아래 경로 s
 
 container와 object 이름은 각각 `url.PathEscape`로 escape하므로 object 이름의 `/`도 `%2F`가 됩니다. 빈 이름과 `/`가 든 container 이름은 HTTP 전에 오류입니다.
 
-`Create`는 `ETag`와 `NoETag`가 모두 비어 있으면 본문 전체를 읽어 MD5를 계산해 `ETag` header로 보냅니다. 명시한 `ETag`는 그대로 보내며, `NoETag`는 소문자 key를 지우는 native 구현이라 명시 `ETag`를 지우지 못합니다. `Content`가 nil이고 ETag 계산이 필요하면 native 구현이 nil reader를 읽다가 **panic**합니다. SDK가 이 경로를 막지 않으므로 이 호출의 판정은 미완료이며, 빈 객체는 빈 reader를 주거나 SDK의 `CreateObject`를 사용합니다.
+`Create`는 `ETag`와 `NoETag`가 모두 비어 있으면 본문 전체를 읽어 MD5를 계산해 `ETag` header로 보냅니다. 명시한 `ETag`는 그대로 보내며, `NoETag`는 소문자 key를 지우는 native 구현이라 명시 `ETag`를 지우지 못합니다. 최종 옵션을 적용한 뒤 `Content`가 nil이면 SDK가 빈 reader를 기본값으로 넣어 빈 객체 PUT과 empty MD5 계산을 수행합니다. interface 안에 nil pointer가 들어 있는 typed nil reader는 HTTP 전에 `ErrInvalidOption`입니다. [생성 기본값 가이드](objects/create-defaults-python.md)의 `WithCreateBytes`는 입력 bytes를 복사하고 호출마다 새 reader를 만들어 재사용할 수 있습니다. 파일·SLO/DLO·업로드 단계 증거는 기존 `CreateObject`가 제공합니다.
 
 `Get`과 `Download`의 header 결과는 `X-Static-Large-Object`를 bool로, `X-Delete-At`을 Unix 시각으로 읽습니다. `Download`의 조건부 시각은 RFC1123으로 보내고, 반환값 `*request.Download`는 응답 body를 소유하므로 호출자가 닫아야 합니다. `Update`의 pointer header는 빈 값과 false도 보냅니다.
 
