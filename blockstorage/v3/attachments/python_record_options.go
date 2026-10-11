@@ -19,8 +19,8 @@ import (
 type RecordCreateOpts struct {
 	Fields  map[string]json.RawMessage
 	Headers map[string]string
-	// ModeSupported supplies the discovered supports_microversion("3.54")
-	// result when a configured version cannot establish it (empty or latest).
+	// ModeSupported optionally overrides Source supports_microversion("3.54").
+	// Nil performs guarded Cinder discovery automatically for falsey mode.
 	ModeSupported *bool
 }
 type RecordCreateOption func(*RecordCreateOpts) error

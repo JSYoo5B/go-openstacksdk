@@ -12,6 +12,14 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
+// DiscoveryObservation is an accepted capability response. It is independent
+// of the attachment POST acknowledgement and never supplies attachment fields.
+type DiscoveryObservation struct {
+	Envelope   json.RawMessage
+	Header     http.Header
+	StatusCode int
+}
+
 // AttachmentRecord separates the declared Python-shaped view from literal
 // HTTP fields. Resource includes nullable defaults; Wire never gains defaults.
 type AttachmentRecord struct {
@@ -19,6 +27,7 @@ type AttachmentRecord struct {
 	Envelope       json.RawMessage
 	Header         http.Header
 	StatusCode     int
+	Discovery      []DiscoveryObservation
 	fields         map[string]json.RawMessage
 }
 

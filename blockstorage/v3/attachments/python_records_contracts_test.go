@@ -99,14 +99,20 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 	for _, version := range []string{"3.0", "3.27", "3.53", "3.54", "3.71", "3.80"} {
 		for _, value := range []any{nil, false, 0, "", []any{}, "rw"} {
 			t.Run(fmt.Sprintf("mode_%s_%#v", version, value), func(t *testing.T) {
-				api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(204, "") })
-				api.RawClient().Microversion = version
+				api, calls, _ := attachmentModeFixture(t, version, "3.90", "3.0", func(*http.Request) *http.Response { return pythonAttachmentWire(204, "") })
 				v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("attach_mode", value))
 				if err != nil {
 					t.Fatal(err)
 				}
 				var envelope map[string]map[string]json.RawMessage
-				_ = json.Unmarshal([]byte((*calls)[0].body), &envelope)
+				_ = json.Unmarshal([]byte((*calls)[len(*calls)-1].body), &envelope)
+				expectedCalls := 2
+				if value == "rw" {
+					expectedCalls = 1
+				}
+				if len(*calls) != expectedCalls || len(v.Discovery) != expectedCalls-1 {
+					t.Fatal("mode capability request/proof", v, *calls)
+				}
 				present := version == "3.0" || version == "3.27" || version == "3.53" || value == "rw"
 				_, got := envelope["attachment"]["mode"]
 				if got != present {
@@ -118,19 +124,25 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 		}
 	}
 	for _, version := range []string{"", "latest"} {
-		api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{}`) })
-		api.RawClient().Microversion = version
-		if _, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false)); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		api, calls, _ := attachmentModeFixture(t, version, "3.90", "3.0", func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{}`) })
+		value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
+		if err != nil || len(*calls) != 2 || len(value.Discovery) != 1 {
+			t.Fatal(value, err, *calls)
 		}
-		if _, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(true)); err != nil || strings.Contains((*calls)[0].body, `"mode"`) {
-			t.Fatal(err, *calls)
+		present := strings.Contains((*calls)[1].body, `"mode":false`)
+		if present != (version == "latest") {
+			t.Fatal("Source selected-default support", version, *calls)
 		}
 		*calls = nil
-		if _, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(false)); err != nil || !strings.Contains((*calls)[0].body, `"mode":false`) {
-			t.Fatal(err, *calls)
+		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(true)); err != nil || len(*calls) != 1 || strings.Contains((*calls)[0].body, `"mode"`) || len(value.Discovery) != 0 {
+			t.Fatal(value, err, *calls)
+		}
+		*calls = nil
+		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(false)); err != nil || len(*calls) != 1 || !strings.Contains((*calls)[0].body, `"mode":false`) || len(value.Discovery) != 0 {
+			t.Fatal(value, err, *calls)
 		}
 	}
+
 }
 
 func TestPythonAttachmentRecordCreateAliasOrderAndPreparation(t *testing.T) {

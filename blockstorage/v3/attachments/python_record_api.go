@@ -8,7 +8,6 @@ import (
 	"iter"
 	"net/http"
 	"slices"
-	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -16,14 +15,16 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type pythonAttachmentPrepared struct {
-	ctx    context.Context
-	source *cloudread.Source
-	guard  func(context.Context) error
+	ctx       context.Context
+	source    *cloudread.Source
+	guard     func(context.Context) error
+	discovery []DiscoveryObservation
 }
 
 func pythonAttachmentCodes() []int {
@@ -97,19 +98,72 @@ func pythonAttachmentCreateFields(policy RecordCreateOpts, volume string) (map[s
 	fields["volume_id"] = raw
 	return fields, nil
 }
-func pythonAttachmentModeSupport(version string, explicit *bool) (bool, error) {
+
+// modeSupport keeps the advertised range test separate from the selected
+// default, as Source supports_microversion does. A finite default is no proof
+// that the server advertises the required version within both range bounds.
+func (p *pythonAttachmentPrepared) modeSupport(explicit *bool) (bool, error) {
 	if explicit != nil {
-		return *explicit, nil
+		return *explicit, p.guard(p.ctx)
 	}
-	parts := strings.Split(version, ".")
-	if len(parts) == 2 {
-		major, e1 := strconv.Atoi(parts[0])
-		minor, e2 := strconv.Atoi(parts[1])
-		if e1 == nil && e2 == nil && major == 3 && minor >= 0 {
-			return minor >= 54, nil
+	selected := p.source.Client.Microversion
+	discovered, err := microversions.Read(p.ctx, p.source, microversions.CinderProfile)
+	for _, response := range discovered.Responses {
+		p.discovery = append(p.discovery, DiscoveryObservation{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode})
+	}
+	if err = errors.Join(err, p.guard(p.ctx)); err != nil {
+		return false, err
+	}
+	supported, err := microversions.Supports(discovered.Maximum, discovered.Minimum, selected, "3.54")
+	if err != nil {
+		return false, p.discoveryFailure(err)
+	}
+	if selected == "" {
+		version, selectErr := microversions.SelectVersion(discovered.Maximum, discovered.Minimum, "3.71")
+		if selectErr != nil {
+			return false, p.discoveryFailure(selectErr)
+		}
+		if err := p.source.WithPolicy(p.ctx, &version, nil); err != nil {
+			return false, p.discoveryFailure(err)
 		}
 	}
-	return false, pythonAttachmentInvalid("a falsey attachment mode needs a numeric Cinder microversion or explicit ModeSupported capability")
+	if err := p.guard(p.ctx); err != nil {
+		return false, p.discoveryFailure(err)
+	}
+	return supported, nil
+}
+func (p *pythonAttachmentPrepared) discoveryFailure(err error) error {
+	if len(p.discovery) == 0 {
+		return err
+	}
+	observed := p.discovery[len(p.discovery)-1]
+	return (&rest.Response{Body: bytes.Clone(observed.Envelope), Header: observed.Header.Clone(), StatusCode: observed.StatusCode}).Fail(err)
+}
+func (p *pythonAttachmentPrepared) proof(value *AttachmentRecord) *AttachmentRecord {
+	if value == nil {
+		return nil
+	}
+	value.Discovery = make([]DiscoveryObservation, len(p.discovery))
+	for i, observed := range p.discovery {
+		value.Discovery[i] = DiscoveryObservation{Envelope: bytes.Clone(observed.Envelope), Header: observed.Header.Clone(), StatusCode: observed.StatusCode}
+	}
+	return value
+}
+func (p *pythonAttachmentPrepared) discoveryResult(err error) (*AttachmentRecord, error) {
+	if len(p.discovery) == 0 {
+		return nil, err
+	}
+	return p.proof(&AttachmentRecord{}), err
+}
+func (p *pythonAttachmentPrepared) create(payload map[string]json.RawMessage) (*rest.Response, error) {
+	headers := rest.RequestHeaderPolicy{Values: make(map[string]string)}
+	if version := p.source.Client.Microversion; version != "" {
+		headers.Values["OpenStack-API-Version"] = "volume " + version
+		headers.Values["X-OpenStack-Volume-API-Version"] = version
+	} else {
+		headers.Absent = []string{"OpenStack-API-Version", "X-OpenStack-Volume-API-Version"}
+	}
+	return rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, http.MethodPost, p.source.Client.ServiceURL("attachments"), map[string]any{"attachment": payload}, headers, rest.RejectionPolicy{Codes: pythonAttachmentRejections(), PreserveCleanRetry: true}, pythonAttachmentCodes()...)
 }
 
 // CreateRecord reserves a volume without an instance by default. It accepts
@@ -155,28 +209,30 @@ func (a *API) CreateRecord(ctx context.Context, volumeID string, options ...Reco
 			return nil, pythonAttachmentWrap(ctx, op, truthErr)
 		}
 		if !truthy {
-			supported, supportErr := pythonAttachmentModeSupport(p.source.Client.Microversion, policy.ModeSupported)
+			supported, supportErr := p.modeSupport(policy.ModeSupported)
 			if supportErr != nil {
-				return nil, pythonAttachmentWrap(ctx, op, supportErr)
+				value, failure := p.discoveryResult(supportErr)
+				return value, pythonAttachmentWrap(ctx, op, failure)
 			}
 			if supported {
 				delete(payload, "mode")
 			}
 		}
 	}
-	response, err := rest.DoJSONGuardedRejections(ctx, &p.source.Client, p.guard, http.MethodPost, p.source.Client.ServiceURL("attachments"), map[string]any{"attachment": payload}, nil, rest.RejectionPolicy{Codes: pythonAttachmentRejections(), PreserveCleanRetry: true}, pythonAttachmentCodes()...)
+	response, err := p.create(payload)
 	if err != nil {
 		if response == nil {
-			return nil, pythonAttachmentWrap(ctx, op, err)
+			value, failure := p.discoveryResult(err)
+			return value, pythonAttachmentWrap(ctx, op, failure)
 		}
 		v := &AttachmentRecord{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode}
-		return v, pythonAttachmentWrap(ctx, op, err)
+		return p.proof(v), pythonAttachmentWrap(ctx, op, err)
 	}
 	value, err := pythonAttachmentFromResponse(response, fields)
 	if err = errors.Join(err, p.guard(ctx)); err != nil {
 		err = response.Fail(err)
 	}
-	return value, pythonAttachmentWrap(ctx, op, err)
+	return p.proof(value), pythonAttachmentWrap(ctx, op, err)
 }
 
 // ListRecords uses the Source summary /attachments route and follows
