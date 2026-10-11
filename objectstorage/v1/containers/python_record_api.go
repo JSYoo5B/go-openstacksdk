@@ -137,6 +137,12 @@ func (a *API) CreateRecord(ctx context.Context, name string, attrs map[string]an
 	if err = errors.Join(conversionErr, p.check(ctx)); err != nil {
 		return nil, wrap(err)
 	}
+	// Source __init__ calls to_dict before create can send HTTP. Validate its
+	// typed seed getters now, without replacing raw header/request values.
+	_, _, descriptorErr := recordDescriptors(bodySeed, headerSeed)
+	if err = errors.Join(descriptorErr, p.check(ctx)); err != nil {
+		return nil, wrap(err)
+	}
 	cfg, err := applyRecordOptions(ctx, p, RecordCreateOpts{Headers: make(map[string]string)}, copyRecordCreate, slices.Clone(options))
 	if err = p.finish(ctx, cfg.Headers, err); err != nil {
 		return nil, wrap(err)

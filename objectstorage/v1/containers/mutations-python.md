@@ -63,7 +63,9 @@ func main() {
 | `ignore_missing=False` | `WithRecordDeleteIgnoreMissing(false)` | 404 원래 HTTP 오류 유지 |
 | strict ACK convenience | 기존 `CreateContainer`·`DeleteContainer` | 생성201/202·삭제204의 기존 좁은 성공 규칙 |
 
-`CreateRecord`의 attrs는 Container에 선언된 Body·Header 이름을 받습니다. Header의 wire 이름도 대소문자 구분 없이 받으며 `count`·`bytes`는 Body, `object_count`·`bytes_used`는 Header seed입니다. `name`은 이미 필수 argument이므로 attrs에서 중복 지정하면 사전 오류이고, `id`는 Source `Container.new`처럼 별도의 route override로 쓰지 않습니다. unknown attrs는 Source처럼 무시하며 unknown attribute에 들어 있는 custom JSON callback도 호출하지 않습니다.
+`CreateRecord`의 attrs는 Container에 선언된 Body·Header 이름을 정확한 대소문자로 받습니다. `READ_ACL`·`OBJECT_COUNT` 같은 다른 casing의 semantic 이름은 unknown attrs로 무시합니다. 실제 Header의 wire 이름은 대소문자 구분 없이 받으며 `count`·`bytes`는 Body, `object_count`·`bytes_used`는 Header seed입니다. `name`은 이미 필수 argument이므로 attrs에서 중복 지정하면 사전 오류이고, `id`는 Source `Container.new`처럼 별도의 route override로 쓰지 않습니다. unknown attrs는 Source처럼 무시하며 unknown attribute에 들어 있는 custom JSON callback도 호출하지 않습니다.
+
+Source constructor가 `to_dict()`에서 읽는 count·bytes·integer Header·bool Header descriptor는 options와 HTTP 전에 동일하게 검증합니다. 예를 들어 `count="²"` 또는 `object_count="²"`는 사전 변환 오류로 실패하며 요청하지 않습니다. 검증이 성공해도 raw seed와 실제 요청 spelling은 변환하지 않으므로 `object_count="0010"`은 Header에 `0010`으로 전송하고 Resource getter만 정수 10을 제공합니다. 사전 오류에는 서버 응답 receipt를 만들지 않습니다.
 
 Body는 서버에 보내지 않습니다. Source `_transform_create_request`가 body를 None으로 바꾸지만, 해당 Body seed는 생성 결과에 남습니다. 일반 Header scalar는 JSON-domain Python `str()` spelling을 사용하므로 null→`None`, bool→`True`·`False`이며 string list는 `", "`로 join합니다. Header list의 null·number는 사전 오류입니다. nil attrs와 nil/null/빈 metadata 모두 bodyless PUT을 수행하고, 명시한 false·빈 문자열·null Header는 생략하지 않습니다.
 

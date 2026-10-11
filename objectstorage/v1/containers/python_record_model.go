@@ -41,7 +41,7 @@ var recordHeaderFields = []recordHeaderField{
 
 func recordHeader(key string) (recordHeaderField, bool) {
 	for _, decl := range recordHeaderFields {
-		if strings.EqualFold(key, decl.field) || strings.EqualFold(key, decl.wire) {
+		if key == decl.field || strings.EqualFold(key, decl.wire) {
 			return decl, true
 		}
 	}
@@ -74,6 +74,41 @@ func recordHeaderString(raw json.RawMessage) (string, error) {
 	}
 	return cloudfilter.PythonString(raw)
 }
+
+// recordDescriptors validates the same typed seed descriptors Source accesses
+// during Resource construction. Callers retain raw seeds and request spellings.
+func recordDescriptors(body, headers map[string]json.RawMessage) (map[string]json.RawMessage, map[string]json.RawMessage, error) {
+	convertedBody := cloneRecordFields(body)
+	for _, key := range []string{"count", "bytes"} {
+		if raw, present := body[key]; present {
+			value, err := jsonfilter.DescriptorIntegerJSON(raw)
+			if err != nil {
+				return nil, nil, err
+			}
+			convertedBody[key] = value
+		}
+	}
+	convertedHeaders := cloneRecordFields(headers)
+	for _, decl := range recordHeaderFields {
+		raw, present := headers[decl.field]
+		if !present {
+			continue
+		}
+		var err error
+		switch decl.kind {
+		case "int":
+			raw, err = jsonfilter.DescriptorIntegerJSON(raw)
+		case "bool":
+			raw, err = jsonfilter.BooleanJSON(raw)
+		}
+		if err != nil {
+			return nil, nil, err
+		}
+		convertedHeaders[decl.field] = raw
+	}
+	return convertedBody, convertedHeaders, nil
+}
+
 func recordProjection(response *rest.Response, bodySeed, headerSeed map[string]json.RawMessage) (*ContainerRecord, error) {
 	if response == nil {
 		return nil, nil
@@ -117,33 +152,9 @@ func recordProjection(response *rest.Response, bodySeed, headerSeed map[string]j
 			record.Metadata[strings.ToLower(key[len("x-container-meta-"):])] = values[0]
 		}
 	}
-	convertedBody := cloneRecordFields(body)
-	for _, key := range []string{"count", "bytes"} {
-		if raw, present := body[key]; present {
-			value, err := jsonfilter.DescriptorIntegerJSON(raw)
-			if err != nil {
-				return record, err
-			}
-			convertedBody[key] = value
-		}
-	}
-	convertedHeaders := cloneRecordFields(headers)
-	for _, decl := range recordHeaderFields {
-		raw, present := headers[decl.field]
-		if !present {
-			continue
-		}
-		var err error
-		switch decl.kind {
-		case "int":
-			raw, err = jsonfilter.DescriptorIntegerJSON(raw)
-		case "bool":
-			raw, err = jsonfilter.BooleanJSON(raw)
-		}
-		if err != nil {
-			return record, err
-		}
-		convertedHeaders[decl.field] = raw
+	convertedBody, convertedHeaders, err := recordDescriptors(body, headers)
+	if err != nil {
+		return record, err
 	}
 	view := make(map[string]json.RawMessage)
 	for _, key := range []string{"name", "id", "count", "bytes"} {

@@ -32,11 +32,11 @@ func recordOperation(t *testing.T, err error, operation string) {
 
 func TestPythonContainerRecordCreatesHeadersAndDeclaredProjection(t *testing.T) {
 	calls := 0
-	attrs := map[string]any{"count": false, "bytes": "۱۲", "is_newest": false, "is_content_type_detected": false, "read_ACL": []string{".r:*", "user:read"}, "versions_location": nil, "content_type": "input/type", "id": "ignored", "unknown": make(chan int), "metadata": map[string]any{"Book": true, "content_type": nil, "X-Container-Meta-Exact": []any{false, 0, nil}, "x-container-meta-low": "double-prefix"}}
+	attrs := map[string]any{"count": false, "bytes": "۱۲", "is_newest": false, "is_content_type_detected": false, "read_ACL": []string{".r:*", "user:read"}, "READ_ACL": make(chan int), "OBJECT_COUNT": make(chan int), "x-container-write": []string{"user:write"}, "X-CoNtAiNeR-ByTeS-UsEd": "0005", "versions_location": nil, "content_type": "input/type", "id": "ignored", "unknown": make(chan int), "metadata": map[string]any{"Book": true, "content_type": nil, "X-Container-Meta-Exact": []any{false, 0, nil}, "x-container-meta-low": "double-prefix"}}
 	client := containerMetadataClient(func(r *http.Request) (*http.Response, error) {
 		calls++
 		containerMetadataNoBody(t, r)
-		if r.Method != "PUT" || r.Header.Get("X-Newest") != "False" || r.Header.Get("X-Detect-Content-Type") != "False" || r.Header.Get("X-Container-Read") != ".r:*, user:read" || r.Header.Get("X-Versions-Location") != "None" || r.Header.Get("Content-Type") != "input/type" || r.Header.Get("X-Container-Meta-Book") != "True" || r.Header.Get("X-Container-Meta-Content_type") != "None" || r.Header.Get("X-Container-Meta-Exact") != "[False, 0, None]" || r.Header.Get("X-Container-Meta-X-Container-Meta-Low") != "double-prefix" {
+		if r.Method != "PUT" || r.Header.Get("X-Newest") != "False" || r.Header.Get("X-Detect-Content-Type") != "False" || r.Header.Get("X-Container-Read") != ".r:*, user:read" || r.Header.Get("X-Container-Write") != "user:write" || r.Header.Get("X-Container-Bytes-Used") != "0005" || r.Header.Get("X-Versions-Location") != "None" || r.Header.Get("Content-Type") != "input/type" || r.Header.Get("X-Container-Meta-Book") != "True" || r.Header.Get("X-Container-Meta-Content_type") != "None" || r.Header.Get("X-Container-Meta-Exact") != "[False, 0, None]" || r.Header.Get("X-Container-Meta-X-Container-Meta-Low") != "double-prefix" {
 			t.Errorf("headers=%v", r.Header)
 		}
 		response := containerMetadataResponse(204, `{"name":"response-name","count":"7","bytes":null,"unknown":{"opaque":true}}`)
@@ -55,13 +55,51 @@ func TestPythonContainerRecordCreatesHeadersAndDeclaredProjection(t *testing.T) 
 	for key, want := range map[string]string{"name": `"response-name"`, "id": `"response-name"`, "count": "7", "object_count": "9", "bytes": "null", "bytes_used": "12", "content_type": `"response/type"`, "is_content_type_detected": "true", "is_newest": "false", "versions_location": "null", "meta_temp_url_key": `"actual-secret"`, "location": "null"} {
 		recordView(t, result, key, want)
 	}
-	if string(result.SeedBody["count"]) != "false" || string(result.Wire.Body["unknown"]) != `{"opaque":true}` || result.Resource.Body["unknown"] != nil {
+	if string(result.SeedBody["count"]) != "false" || string(result.SeedHeaders["bytes_used"]) != `"0005"` || string(result.Wire.Body["unknown"]) != `{"opaque":true}` || result.Resource.Body["unknown"] != nil {
 		t.Fatal(result)
 	}
 	result.Resource.Body["name"][1] = 'X'
 	if string(result.Wire.Body["name"]) != `"response-name"` || string(result.SeedBody["name"]) == string(result.Resource.Body["name"]) {
 		t.Fatal("record carriers alias")
 	}
+}
+
+func TestPythonContainerRecordSeedDescriptorsFailBeforeOptionsAndHTTP(t *testing.T) {
+	for _, key := range []string{"count", "bytes", "object_count", "bytes_used", "x-container-object-count", "X-Container-Bytes-Used"} {
+		t.Run(key, func(t *testing.T) {
+			calls, options := 0, 0
+			client := containerMetadataClient(func(*http.Request) (*http.Response, error) {
+				calls++
+				t.Fatal("invalid constructor descriptor sent HTTP")
+				return nil, errors.New("unexpected HTTP")
+			})
+			result, err := containers.New(client).CreateRecord(context.Background(), containerMetadataName,
+				map[string]any{key: "²"}, func(*containers.RecordCreateOpts) error { options++; return nil })
+			var physical *resource.ResponseError
+			if result != nil || err == nil || calls != 0 || options != 0 || errors.As(err, &physical) {
+				t.Fatalf("result=%+v err=%v calls=%d options=%d physical=%+v", result, err, calls, options, physical)
+			}
+			recordOperation(t, err, "CreateRecord")
+		})
+	}
+	// Seed conversion is validation only: the caller's raw header spelling is
+	// sent and retained even though the result's descriptor getter is an int.
+	calls := 0
+	client := containerMetadataClient(func(r *http.Request) (*http.Response, error) {
+		calls++
+		if r.Header.Get("X-Container-Object-Count") != "0010" || r.Header.Get("X-Newest") != "false" {
+			t.Fatal(r.Header)
+		}
+		return containerMetadataResponse(201, ""), nil
+	})
+	attrs := map[string]any{"count": "۱۲", "object_count": "0010", "is_newest": "false"}
+	result, err := containers.New(client).CreateRecord(context.Background(), containerMetadataName, attrs)
+	if err != nil || calls != 1 || attrs["object_count"] != "0010" || string(result.SeedHeaders["object_count"]) != `"0010"` {
+		t.Fatal(result, err, calls, attrs)
+	}
+	recordView(t, result, "count", "12")
+	recordView(t, result, "object_count", "10")
+	recordView(t, result, "is_newest", "true")
 }
 
 func TestPythonContainerRecordOpaqueSuccessRetainsSeedsAndAliasDefaults(t *testing.T) {
