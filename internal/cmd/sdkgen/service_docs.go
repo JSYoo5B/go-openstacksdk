@@ -187,6 +187,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출은 [native OAuth1·EC2 token 호출](native-oauth1-ec2.md)에 설명합니다.\n\n")
 		out.WriteString("`Policies`의 생성·조회·수정·삭제와 federation mapping 삭제가 Python Proxy와 어떻게 대응하는지, identity provider·protocol·service provider 경로가 왜 미해결인지는 [Python policy·federation 대응](python-parity-federation.md)에 정리했습니다.\n\n")
 		out.WriteString("endpoint·region·service·limit·registered limit·project endpoint의 openstacksdk Proxy 메서드별 Go 대응과 endpoint group·domain config 등 미해결 사유는 [identity v3 catalog Python 대응](python-parity-catalog.md)에 정리했습니다.\n\n")
+		out.WriteString("domain·group·project·user·role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 Python Proxy 대응과 미해결 목록은 [Python/Go 사용자·role 할당 비교](python-parity-users.md)에 설명합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`Servers.FindRecord`는 ID/name 검색과 Source 서버·중첩 리소스 필드를 제공합니다. [서버 검색 Python/Go 비교](server-find-python.md)에 기본 missing·단계별 버전·HTTP 증거를 설명합니다.\n\n")
 		out.WriteString("`Servers.ClearPassword/Restore/LockWithOptions/UnshelveWithOptions`와 직접 fixed/floating IP action은 Source 본문·선택 인자를 제공합니다. [서버 user action 비교](servers/python-user-actions.md)에 버전 상한과 host admin 조건을 설명합니다.\n\n")

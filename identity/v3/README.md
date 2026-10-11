@@ -39,6 +39,8 @@ OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출�
 
 endpoint·region·service·limit·registered limit·project endpoint의 openstacksdk Proxy 메서드별 Go 대응과 endpoint group·domain config 등 미해결 사유는 [identity v3 catalog Python 대응](python-parity-catalog.md)에 정리했습니다.
 
+domain·group·project·user·role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 Python Proxy 대응과 미해결 목록은 [Python/Go 사용자·role 할당 비교](python-parity-users.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
