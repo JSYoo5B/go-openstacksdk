@@ -485,3 +485,159 @@ func TestPythonCinderMessageConcurrentOwnedOptionsAndLiveReauthentication(t *tes
 		t.Fatal(v, err, reauths, *calls, tokens)
 	}
 }
+
+func TestPythonCinderMessageTransportExposedInterimStatus(t *testing.T) {
+	for _, operation := range []string{"GET", "LIST", "DELETE"} {
+		t.Run(operation, func(t *testing.T) {
+			body := `{"message":{"id":"actual"}}`
+			if operation == "LIST" {
+				body = `{"messages":[{"id":"actual"}]}`
+			}
+			api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(199, body) })
+			var err error
+			switch operation {
+			case "GET":
+				var value *messages.MessageRecord
+				value, err = api.GetRecord(context.Background(), "requested")
+				if value == nil || value.StatusCode != 199 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "actual" {
+					t.Fatal(value, err)
+				}
+				messageField(t, value, "id", `"actual"`)
+			case "LIST":
+				var values []*messages.MessageRecord
+				values, err = collectMessages(api.ListRecords(context.Background()))
+				if len(values) != 1 || values[0].StatusCode != 199 || string(values[0].Envelope) != body || values[0].Header.Get("X-Request-Id") != "actual" {
+					t.Fatal(values, err)
+				}
+			case "DELETE":
+				err = api.DeleteRecord(context.Background(), "requested")
+			}
+			if err != nil || len(*calls) != 1 {
+				t.Fatal(operation, err, *calls)
+			}
+		})
+	}
+}
+
+func TestPythonCinderMessageRetryReservedHeaderAbsenceAndSelectedOmission(t *testing.T) {
+	cases := []struct {
+		name, key, value string
+		omit             bool
+	}{
+		{"authorization", "aUtHoRiZaTiOn", "Bearer retry", false},
+		{"service token", "x-service-token", "retry", false},
+		{"host", "Host", "foreign.invalid", false},
+		{"cookie", "Cookie", "session=retry", false},
+		{"content length", "Content-Length", "1", false},
+		{"transfer encoding", "Transfer-Encoding", "chunked", false},
+		{"connection", "Connection", "close", false},
+		{"trailer", "Trailer", "X-Retry", false},
+		{"te", "te", "trailers", false},
+		{"upgrade", "Upgrade", "websocket", false},
+		{"foreign Nova version", "x-openstack-nova-api-version", "2.95", false},
+		{"omit selected version", "OpenStack-API-Version", "", true},
+		{"omit selected legacy version", "X-OpenStack-Volume-API-Version", "", true},
+	}
+	for _, operation := range []string{"GET", "LIST", "DELETE"} {
+		for _, version := range []string{"", "3.3"} {
+			for _, tc := range cases {
+				if tc.omit && version == "" {
+					continue
+				}
+				t.Run(operation+"/"+version+"/"+tc.name, func(t *testing.T) {
+					body := `{"retry":"original rejection"}`
+					closes, callbacks := 0, 0
+					callbackCause := errors.New("retry callback cause")
+					api, calls := messageAPI(t, version, func(*http.Request) *http.Response {
+						response := messageWire(503, body)
+						response.Body = &messageFaultBody{data: []byte(body), onClose: func() { closes++ }}
+						return response
+					})
+					api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
+						callbacks++
+						if tc.omit {
+							opts.OmitHeaders = append(opts.OmitHeaders, tc.key)
+						} else {
+							opts.MoreHeaders[tc.key] = tc.value
+						}
+						return callbackCause
+					}
+					var err error
+					switch operation {
+					case "GET":
+						value, failure := api.GetRecord(context.Background(), "requested")
+						err = failure
+						if value != nil && value.Resource != nil {
+							t.Fatal("rejected response became Resource", value)
+						}
+					case "LIST":
+						values, failure := collectMessages(api.ListRecords(context.Background()))
+						err = failure
+						if len(values) != 0 {
+							t.Fatal("rejected list yielded records", values)
+						}
+					case "DELETE":
+						err = api.DeleteRecord(context.Background(), "requested")
+					}
+					var native gophercloud.ErrUnexpectedResponseCode
+					if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callbackCause) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 || closes != 1 || callbacks != 1 {
+						t.Fatal(err, native, *calls, closes, callbacks)
+					}
+					wantMethod := http.MethodGet
+					wantPath := messageBase + "/requested"
+					if operation == "DELETE" {
+						wantMethod = http.MethodDelete
+					} else if operation == "LIST" {
+						wantPath = messageBase
+					}
+					if native.Method != wantMethod || !strings.HasSuffix(native.URL, wantPath) || (*calls)[0].headers.Get("X-Auth-Token") != "test-token" || (*calls)[0].body != "" || api.RawClient().Microversion != version || len(api.RawClient().MoreHeaders) != 0 {
+						t.Fatal("lost actual method/route or mutated caller", native, *calls, api.RawClient())
+					}
+				})
+			}
+		}
+	}
+}
+
+func TestPythonCinderMessageRetryOrdinaryHeadersAndLiveTokenRemainAvailable(t *testing.T) {
+	for _, operation := range []string{"GET", "LIST", "DELETE"} {
+		t.Run(operation, func(t *testing.T) {
+			count := 0
+			var tokens []string
+			api, calls := messageAPI(t, "3.3", func(r *http.Request) *http.Response {
+				count++
+				tokens = append(tokens, r.Header.Get("X-Auth-Token"))
+				if r.Header.Get("OpenStack-API-Version") != "volume 3.3" || r.Header.Get("X-OpenStack-Volume-API-Version") != "3.3" {
+					t.Fatal(r.Header)
+				}
+				if count == 1 {
+					return messageWire(503, `{"temporary":true}`)
+				}
+				if r.Header.Get("X-Retry-Probe") != "ordinary" {
+					t.Fatal("ordinary retry header lost", r.Header)
+				}
+				if operation == "LIST" {
+					return messageWire(200, `{"messages":[{"id":"actual"}]}`)
+				}
+				return messageWire(200, `{"message":{"id":"actual"}}`)
+			})
+			api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
+				opts.MoreHeaders["X-Retry-Probe"] = "ordinary"
+				api.RawClient().SetToken("fresh")
+				return nil
+			}
+			var err error
+			switch operation {
+			case "GET":
+				_, err = api.GetRecord(context.Background(), "requested")
+			case "LIST":
+				_, err = collectMessages(api.ListRecords(context.Background()))
+			case "DELETE":
+				err = api.DeleteRecord(context.Background(), "requested")
+			}
+			if err != nil || len(*calls) != 2 || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) || len(api.RawClient().MoreHeaders) != 0 {
+				t.Fatal(err, *calls, tokens, api.RawClient().MoreHeaders)
+			}
+		})
+	}
+}

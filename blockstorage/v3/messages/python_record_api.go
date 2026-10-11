@@ -87,8 +87,8 @@ func recordID(id string) error {
 	}
 	return nil
 }
-func recordCodes(first int) []int {
-	values := make([]int, 200)
+func recordCodes(first, end int) []int {
+	values := make([]int, end-first)
 	for i := range values {
 		values[i] = first + i
 	}
@@ -98,14 +98,21 @@ func recordWrap(ctx context.Context, op string, err error) error {
 	return request.Wrap(op, "messages", cloudread.ContextError(ctx, err))
 }
 func (p *recordPrepared) read(method, target string) (*rest.Response, error) {
-	policy := rest.RequestHeaderPolicy{Values: make(map[string]string)}
+	// Keep the initial cloudread auth/framing/foreign-service exclusions fixed
+	// through retry hooks and physical attempts. X-Auth-Token remains the live
+	// provider's responsibility; ordinary retry headers retain native policy.
+	policy := rest.RequestHeaderPolicy{Values: make(map[string]string), Absent: []string{
+		"Authorization", "X-Service-Token", "Host", "Cookie", "Content-Length",
+		"Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade",
+		"X-OpenStack-Nova-API-Version",
+	}}
 	if version := p.source.Client.Microversion; version != "" {
 		policy.Values["OpenStack-API-Version"] = "volume " + version
 		policy.Values["X-OpenStack-Volume-API-Version"] = version
 	} else {
-		policy.Absent = []string{"OpenStack-API-Version", "X-OpenStack-Volume-API-Version"}
+		policy.Absent = append(policy.Absent, "OpenStack-API-Version", "X-OpenStack-Volume-API-Version")
 	}
-	return rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, nil, policy, rest.RejectionPolicy{Codes: recordCodes(400), PreserveCleanRetry: true}, recordCodes(200)...)
+	return rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, target, nil, policy, rest.RejectionPolicy{Codes: recordCodes(400, 600), PreserveCleanRetry: true}, recordCodes(100, 400)...)
 }
 
 // GetRecord reads one literal ID without list fallback. The default recognizes
@@ -194,7 +201,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 		}
 		offset := query.Has("offset") && !query.Has("marker")
 		var page *rest.Response
-		spec := rest.CollectionSpec[MessageRecord]{Client: &p.source.Client, Path: "messages", Kind: "messages", PluralKey: "messages", Metadata: recordMetadata, Validate: p.guard, SourceGuard: p.guard, ListCodes: recordCodes(200), ReadPage: func(_ context.Context, target string, _ ...int) (*rest.Response, error) {
+		spec := rest.CollectionSpec[MessageRecord]{Client: &p.source.Client, Path: "messages", Kind: "messages", PluralKey: "messages", Metadata: recordMetadata, Validate: p.guard, SourceGuard: p.guard, ListCodes: recordCodes(100, 400), ReadPage: func(_ context.Context, target string, _ ...int) (*rest.Response, error) {
 			return p.read(http.MethodGet, target)
 		}, ValidateResponse: func(r *rest.Response) error { page = r; return p.guard(ctx) }, ValidateItem: func(v *MessageRecord) error {
 			v.Envelope = bytes.Clone(page.Body)
