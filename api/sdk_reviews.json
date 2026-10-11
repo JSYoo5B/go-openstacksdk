@@ -3153,9 +3153,10 @@
     {
       "operation": "python:block_storage/v3/get_quota_set_defaults",
       "source_fingerprint": "c01e982612cb31f0b74be256c5b20eb0ba8ac362a662677a349af9fe4ec2128d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Defaults"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Defaults",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.InProject"
       ],
       "contracts": [
         {
@@ -3176,18 +3177,25 @@
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
+        },
+        {
+          "behavior": "get_quota_set_defaults(project) maps to InProject(resource.ID(project)) and ProjectQuotaScope.Defaults, which sends GET /os-quota-sets/<project>/defaults without query and decodes the default limits and per-volume-type keys.",
+          "tests": [
+            "blockstorage/v3/quotasets/python_rejudge_test.go:TestPythonRejudgeQuotaSetDefaults"
+          ]
         }
-      ],
-      "differences": [
-        "Go returns an independent typed/raw response object associated with a fixed project scope rather than mutating a Python QuotaSet Resource."
       ],
       "documentation": [
         "blockstorage/v3/quotasets/README.md"
       ],
-      "remaining": [
-        "Audit inherited common QuotaSet/Resource fetch translation, descriptor coercion, dict/location views, cache/skip_cache and microversion/adapter behavior; native typed/raw responses are not a full mapping of the Python Resource object.",
-        "Python Project/Resource input coercion and dynamic base_path/resource_response_key fetch options have not been mapped or fully audited."
-      ]
+      "differences": [
+        "Go returns an independent typed/raw response object associated with a fixed project scope rather than mutating a Python QuotaSet Resource.",
+        "Python accepts a Project Resource or a project ID; Go fixes the project once with API.InProject (resource.ID needs no request).",
+        "Python normalizes nested limit/in_use/reserved values into a QuotaSet Resource with usage and reservation attributes; Go decodes the typed QuotaSet fields and keeps every quota field, including per-volume-type keys, as raw JSON in Body.",
+        "Go has no client-side GET response cache; every call sends the request.",
+        "QuotaSet declares no maximum microversion, so Python sends no negotiated version; Go sends the configured client microversion when one is set."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/revert_quota_set",
@@ -3220,13 +3228,14 @@
     {
       "operation": "python:block_storage/v3/update_quota_set",
       "source_fingerprint": "b53cf06abbf44082600d6fa0abb4110ad03c472e199c89b211c357a3cef95c09",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateField",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithUpdateForce",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithVolumeTypeQuota"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithVolumeTypeQuota",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.InProject"
       ],
       "contracts": [
         {
@@ -3236,26 +3245,36 @@
             "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions",
             "api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaTypedLimitsRetainIntegerPrecision"
           ]
+        },
+        {
+          "behavior": "update_quota_set(project, volumes=5, gigabytes=0, volumes_lvm=3, force=True) maps to ProjectQuotaScope.Update with typed limits, WithVolumeTypeQuota and WithUpdateForce(true) (or WithUpdateField for other keys), sending PUT /os-quota-sets/<project> {\"quota_set\":{...}} with only those keys.",
+          "tests": [
+            "blockstorage/v3/quotasets/python_rejudge_test.go:TestPythonRejudgeQuotaSetUpdate"
+          ]
         }
-      ],
-      "differences": [
-        "Go protects core fields and does not require callers to implement a builder or track dirty Resource state; response metadata is returned independently."
       ],
       "documentation": [
         "blockstorage/v3/quotasets/README.md"
       ],
-      "remaining": [
-        "Python Project/QuotaSet input coercion, deprecated QuotaSet/project_id signature, dropped deprecated query and warnings have not been mapped.",
-        "Audit inherited Proxy._update/Resource.commit and common QuotaSet dirty-body filtering (reservation/usage), unknown-body attributes, response normalization and dict/cache behavior."
-      ]
+      "differences": [
+        "Go protects core fields and does not require callers to implement a builder or track dirty Resource state; response metadata is returned independently.",
+        "Python skips the PUT when no attribute is dirty; Go Update with empty options still sends PUT {\"quota_set\":{}}.",
+        "The deprecated QuotaSet or project_id signature only warns and drops the query argument, sending the same PUT; Go takes the project once with API.InProject.",
+        "Python never sends reservation or usage; Go has no input for them.",
+        "Go cannot send JSON null for a typed limit; Cinder rejects null limits.",
+        "Python normalizes nested limit/in_use/reserved values into a QuotaSet Resource with usage and reservation attributes; Go decodes the typed QuotaSet fields and keeps every quota field, including per-volume-type keys, as raw JSON in Body.",
+        "QuotaSet declares no maximum microversion, so Python sends no negotiated version; Go sends the configured client microversion when one is set."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_quota",
       "source_fingerprint": "6dda91626f6b0e9d6998d3e51893c2fa3a209d546d3ecebb1df11d4f1fd14ef2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Get",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject"
       ],
       "contracts": [
         {
@@ -3277,29 +3296,38 @@
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaCancellationPreservesCause"
           ]
+        },
+        {
+          "behavior": "get_quota(project) maps to InProject(resource.ID(project)) (no HTTP) and ProjectQuotaScope.Get, which sends GET /quotas/<project> and decodes the limits; details=True maps to Detail, which sends GET /quotas/<project>/details.json and decodes used/reserved/limit; a 404 is resource.ErrNotFound like NotFoundException.",
+          "tests": [
+            "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaGet"
+          ]
         }
-      ],
-      "differences": [
-        "Go Detail retains native /details.json routing; pinned Python QuotaDetails uses /details.",
-        "Native detail triples remain typed in Go; Python quota properties use plural attribute names and dictionary usage values."
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
-      "remaining": [
-        "Audit Python Quota/QuotaDetails input Resource conversion, project_id/tenant_id alternate identity aliases and extension quota descriptors absent from the native model.",
-        "Audit inherited Resource fetch/query/cache, response normalization and adapter/microversion behavior; raw extension preservation does not implement those semantics."
-      ]
+      "differences": [
+        "Go Detail retains native /details.json routing; pinned Python QuotaDetails uses /details.",
+        "Native detail triples remain typed in Go; Python quota properties use plural attribute names and dictionary usage values.",
+        "The Detail path carries the .json format suffix that the Neutron API reference documents; Neutron serves it from the same quota details resource as the Python /details path.",
+        "Python accepts a Quota Resource or a project ID and uses plural attribute names (networks, floating_ips, health_monitors, ...); Go fixes the project once with API.InProject (resource.ID needs no request) and uses the Gophercloud field names (Network, FloatingIP, ...), with other quota keys such as healthmonitor only in the raw Body.",
+        "Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.",
+        "Go has no client-side GET response cache; every call sends the request.",
+        "Neutron has no microversion, so neither side sends a version header."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_quota",
       "source_fingerprint": "5e9d08802b0733700655b61b454ca0ede2bd7143eff1455e9171fe09f6c32cd8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithQuotaOptions",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateCheckLimit",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject"
       ],
       "contracts": [
         {
@@ -3309,26 +3337,35 @@
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata"
           ]
+        },
+        {
+          "behavior": "update_quota(project, networks=10, ports=0, health_monitors=7, check_limit=False) maps to ProjectQuotaScope.Update with typed Network/Port, WithUpdateField(\"healthmonitor\", 7) and WithUpdateCheckLimit(false), sending PUT /quotas/<project> {\"quota\":{...}} with only those keys and no id.",
+          "tests": [
+            "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaUpdate"
+          ]
         }
-      ],
-      "differences": [
-        "Go uses fixed scopes, protected native fields and optional explicit check_limit booleans rather than mutating a dirty Python Quota object."
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
-      "remaining": [
-        "Python plural property aliases, tenant/project alternate identities and extension quota descriptors require mapping beyond raw WithUpdateField keys.",
-        "Audit Resource/Proxy input coercion, unknown-body/dirty-field commit behavior, removal of id from the request body and response/dict/cache normalization."
-      ]
+      "differences": [
+        "Go uses fixed scopes, protected native fields and optional explicit check_limit booleans rather than mutating a dirty Python Quota object.",
+        "Python accepts plural attribute names or wire keys; Go uses typed UpdateOpts fields for the native limits and WithUpdateField with the wire key (healthmonitor, listener, loadbalancer, l7policy, pool, router_route) for the others.",
+        "Python skips the PUT when no attribute is dirty; Go Update with empty options still sends PUT {\"quota\":{}}.",
+        "Go cannot send JSON null for a typed limit; Neutron rejects null limits.",
+        "Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.",
+        "Neutron has no microversion, so neither side sends a version header."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_quota",
       "source_fingerprint": "dfabda66a6e82531821c7b7723351533e871758b26949cad921b00d976e0c225",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject"
       ],
       "contracts": [
         {
@@ -3338,25 +3375,33 @@
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy",
             "api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaSuccessCodesMatchNativePolicy"
           ]
+        },
+        {
+          "behavior": "delete_quota(project) maps to ProjectQuotaScope.Delete with WithDeleteIgnoreMissing(true): DELETE /quotas/<project>, 404 returns nil, 409 is returned, and the default strict Delete raises resource.ErrNotFound like ignore_missing=False.",
+          "tests": [
+            "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaDelete"
+          ]
         }
-      ],
-      "differences": [
-        "Go defaults to strict 404; Python defaults ignore_missing=True, represented by WithDeleteIgnoreMissing(true).",
-        "Go returns deletion metadata while Python returns None."
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
-      "remaining": [
-        "Audit inherited Proxy._delete/Resource.delete and Quota/project_id/tenant_id Resource input identity coercion and adapter behavior; native request tests alone do not establish full Python parity."
-      ]
+      "differences": [
+        "Go defaults to strict 404; Python defaults ignore_missing=True, represented by WithDeleteIgnoreMissing(true).",
+        "Go returns deletion metadata while Python returns None.",
+        "Python accepts a Quota Resource or a project ID; Go fixes the project once with API.InProject (resource.ID needs no request).",
+        "Python accepts any non-error status; Go accepts the native 202 and 204.",
+        "Neutron has no microversion, so neither side sends a version header."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_quota_default",
       "source_fingerprint": "d9c43cdb87c7c9bf105b3c6306122fd00c5e26af4feb4bf740439e6819f31e0e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Defaults"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Defaults",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.InProject"
       ],
       "contracts": [
         {
@@ -3376,24 +3421,31 @@
           "tests": [
             "api/neutron_quota_defaults_test.go:TestNeutronQuotaDefaultsCancellationAndPreflight"
           ]
+        },
+        {
+          "behavior": "get_quota_default(project) maps to ProjectQuotaScope.Defaults, which sends GET /quotas/<project>/default and decodes the default limits with ProjectID fixed to the requested project.",
+          "tests": [
+            "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaDefault"
+          ]
         }
-      ],
-      "differences": [
-        "Go uses the already resolved project scope and returns a native typed/raw response with copied metadata instead of constructing and mutating a Python QuotaDefault URI Resource.",
-        "A missing response project identity is not inserted into raw Body; the request target is available separately as ProjectID."
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
-      "remaining": [
-        "Audit Python Quota/QuotaDefault Resource input conversion, URI and alternate project_id/tenant_id descriptor behavior, plural attribute coercion and disabled mutation/list capability inheritance.",
-        "Inherited Resource.fetch/cache/skip_cache/dict/location and adapter behavior remain unaudited; raw extension preservation does not implement those contracts."
-      ]
+      "differences": [
+        "Go uses the already resolved project scope and returns a native typed/raw response with copied metadata instead of constructing and mutating a Python QuotaDefault URI Resource.",
+        "A missing response project identity is not inserted into raw Body; the request target is available separately as ProjectID.",
+        "Python accepts a Quota Resource or a project ID and uses plural attribute names (networks, floating_ips, health_monitors, ...); Go fixes the project once with API.InProject (resource.ID needs no request) and uses the Gophercloud field names (Network, FloatingIP, ...), with other quota keys such as healthmonitor only in the raw Body.",
+        "Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.",
+        "Go has no client-side GET response cache; every call sends the request.",
+        "Neutron has no microversion, so neither side sends a version header."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/quotas",
       "source_fingerprint": "5160f0ad2c8f297aa8fe13f639e4d88bb909d0102f3d319c56fb5a46fd72f97a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.ListProjects",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.AllProjects",
@@ -3436,20 +3488,28 @@
           "tests": [
             "api/neutron_quotas_list_test.go:TestNeutronQuotasListCancellationAndPartialIteration"
           ]
+        },
+        {
+          "behavior": "quotas() maps to AllProjects or ListProjects, which send one GET /quotas without query and return each row with its limits and project_id.",
+          "tests": [
+            "network/v2/extensions/quotas/python_rejudge_test.go:TestPythonRejudgeQuotaList"
+          ]
         }
-      ],
-      "differences": [
-        "The actual Neutron quota controller and DB driver return a single array of projects with quota overrides, with default limits merged into each row; this is not a list of every Keystone project.",
-        "Pinned Proxy.quotas documents no supported quota query. Go provides local filter/consumption options and no server paging/filter/projection helpers or generic Resource.list limit/marker fallback.",
-        "Go requires safe unambiguous row identity and independent native/raw metadata; it does not return Python descriptor-backed Quota Resource objects. Recognized continuation is rejected rather than guessed or followed."
       ],
       "documentation": [
         "network/v2/extensions/quotas/README.md"
       ],
-      "remaining": [
-        "Audit inherited Quota/Resource.list query mapping, iterator identity/alias normalization, descriptor coercion, unknown-attribute and dict/location/cache behavior before declaring whole-operation parity.",
-        "Python generic Resource pagination/body/header-link fallback, adapter behavior and arbitrary query handling are not mapped; Go intentionally follows the documented single-array server policy."
-      ]
+      "differences": [
+        "The actual Neutron quota controller and DB driver return a single array of projects with quota overrides, with default limits merged into each row; this is not a list of every Keystone project.",
+        "Pinned Proxy.quotas documents no supported quota query. Go provides local filter/consumption options and no server paging/filter/projection helpers or generic Resource.list limit/marker fallback.",
+        "Go requires safe unambiguous row identity and independent native/raw metadata; it does not return Python descriptor-backed Quota Resource objects. Recognized continuation is rejected rather than guessed or followed.",
+        "Python Resource.list would follow quotas_links, a Link header or limit/marker continuation if a server returned it; Neutron returns the quota list as one unpaginated array, and Go rejects recognized continuation metadata instead of following it.",
+        "Python quotas(**query) sends limit/marker to the server and filters other Quota Body attributes locally; Go offers only the local WithListProjectID and WithListMaxItems options, and the pinned proxy documents no supported query.",
+        "Go requires a valid project_id or tenant_id in every row; Neutron always returns them.",
+        "Python translates the response into a Quota Resource (descriptor type coercion, project_id alternate ID with tenant_id alias, unknown attributes kept through _allow_unknown_attrs_in_body); Go decodes the native typed limits, keeps every quota field as raw JSON in Body and fixes ProjectID to the requested project.",
+        "Neutron has no microversion, so neither side sends a version header."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_quotas",
@@ -11342,7 +11402,7 @@
     {
       "operation": "python:identity/v3/find_domain",
       "source_fingerprint": "cb66dcf1492a34ab0ed6d5c09f4dca866cc5afdc6bb5654cc48b0bf1e0f228aa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions",
@@ -11414,25 +11474,31 @@
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases",
             "api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal"
           ]
+        },
+        {
+          "behavior": "Pinned find_domain defaults map to Domains.FindIdentity: an ID sends one GET /domains/<id>; a name sends that GET (404) and then GET /domains?name=<name>; no match returns nil for ignore_missing=True and resource.ErrNotFound with WithIdentityFindIgnoreMissing(false).",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeFindDomain"
+          ]
         }
+      ],
+      "documentation": [
+        "docs/finding-identities.md",
+        "resource/README.md"
       ],
       "differences": [
         "The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.",
         "Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.",
         "Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.",
         "Pinned find_domain (openstack/identity/v3/_proxy.py:259-276) accepts only string name_or_id and ignore_missing. Those direct inputs are implemented; Go Query and fallback-policy controls are extensions, not missing Python Resource inputs or **query arguments.",
-        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP."
+        "The audited common-list bridge now forwards explicit raw wire status instead of silently dropping it. This also affects ordinary Resources.List/All raw query, while a statusless model still rejects typed WithStatus before HTTP.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Go decodes the native GetResult and requires a safe nonblank result ID instead of merging a seeded Domain Resource through Resource.fetch/_translate_response; missing or invalid JSON fails in Go, and descriptor defaults/coercion and retained unknown Resource fields differ.",
+        "The list fallback keeps the native Keystone pager (links.next) instead of Python Resource._get_next_link RFC Link-header and limit/marker continuation; Keystone returns next null for domain lists, so the default requests are the same.",
+        "Domain inherits _max_microversion=None, so neither side negotiates a microversion.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "documentation": [
-        "docs/finding-identities.md",
-        "resource/README.md"
-      ],
-      "remaining": [
-        "Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.",
-        "Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.",
-        "Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.",
-        "Domain inherits _max_microversion=None; no automatic maximum negotiation is caused by this resource. The remaining comparison is configured session/adapter policy plus the reachable cache, response translation and inherited continuation behavior above, not an undeclared Resource-input or **query API."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_role",
@@ -32758,22 +32824,11 @@
     {
       "operation": "python:network/v2/update_trunk",
       "source_fingerprint": "a2d7ee9ac21cd63abcf193f85a3fe02f21c5f59a00267fd1dce4a4e3fc1bca09",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateOptions",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithUpdateField"
-      ],
-      "documentation": [
-        "network/v2/revision-updates.md"
-      ],
-      "differences": [
-        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
-        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.",
-        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate."
-      ],
-      "remaining": [
-        "Python kwargs aliases, descriptor coercion, mutable Resource identity/dirty/cache/no-op commit and adapter/session/error policies are not reproduced wholesale."
       ],
       "contracts": [
         {
@@ -32795,8 +32850,26 @@
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeStatusesAndConflict",
             "api/neutron_revision_contracts_test.go:TestNeutronRevisionContractsNativeReplayKeepsSerializedCondition"
           ]
+        },
+        {
+          "behavior": "update_trunk(trunk, name=..., description=\"\", is_admin_state_up=False, x_vendor=1) maps to Update with typed Name/Description/AdminStateUp pointers and WithUpdateField(\"x_vendor\", 1), sending PUT /trunks/<id> {\"trunk\":{...}} with only those keys and no If-Match header, and decodes the updated trunk.",
+          "tests": [
+            "network/v2/extensions/trunks/python_rejudge_test.go:TestPythonRejudgeTrunkUpdate"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "network/v2/revision-updates.md"
+      ],
+      "differences": [
+        "Go updates a concrete ID with typed UpdateOpts and permitted body fields and returns a native typed value/error. Python accepts ID or existing mutable Resource, applies attrs/descriptor state and commits that Resource.",
+        "Typed Go RevisionNumber nil/zero/signed semantics use the existing native conditional-header capability without a new public helper. This pinned Python resource does not inherit NetworkResource, so forwarded if_revision binds the helper but does not generate If-Match; the Go conditional capability is a native extension difference.",
+        "Go preserves raw native MoreHeaders/OmitHeaders/callback override and retry behavior and reports native412 without SDK unconditional fallback; generic Python adapter/session and mutable/dirty header behavior remain separate.",
+        "Python skips the PUT when no attribute is dirty; Go Update with empty UpdateOpts still sends PUT {\"trunk\":{}}.",
+        "Python attribute names (is_admin_state_up, project_id with tenant_id alias) map to the typed AdminStateUp field or WithUpdateField wire keys; Go cannot send JSON null for name, description or admin_state_up, which Neutron rejects.",
+        "Go accepts only 200 for the update; Python accepts any non-error status."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/extensions/subnetpools.Update",
@@ -100008,7 +100081,7 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/delete_domain",
       "source_fingerprint": "85abdabc1cba2ef265dc731ef8963568c7ca65b4e7d220765f0ef553ab5fc117",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Delete",
@@ -100026,6 +100099,12 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "delete_domain(name_or_id=...) maps to Domains.FindIdentity (GET /domains/<x>, then GET /domains?name=<x>) followed by PATCH /domains/<id> {\"domain\":{\"enabled\":false}} and DELETE /domains/<id>; a missing domain sends only the two lookups and a DELETE 404 is returned as an error like ignore_missing=False.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudDeleteDomainByName"
+          ]
         }
       ],
       "documentation": [
@@ -100033,11 +100112,15 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns False when name_or_id finds nothing and re-raises SDKException from the disable or delete; Go returns errors from Update and Delete."
+        "Python returns False when name_or_id finds nothing and re-raises SDKException from the disable or delete; Go returns errors from Update and Delete.",
+        "Python raises SDKException before HTTP when neither domain_id nor name_or_id is given; Go has no combined helper and the caller passes the ID to Update/Delete or the name to FindIdentity.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_domains",
@@ -100249,7 +100332,7 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/delete_group",
       "source_fingerprint": "51dace7991428383ca7e6b8f03ab3f193387138eff1fdffa274999728ed50ebd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Remove"
@@ -100260,6 +100343,12 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Groups, Roles, Projects and Users FindIdentity followed by Remove(resource.ID(id)) send GET /<kind>/<name> and GET /<kind>?name=<name> (with domain_id on both when WithIdentityFindQuery adds it) and then DELETE /<kind>/<id>; 204 and 404 return nil like the Proxy delete default ignore_missing=True, 409 is returned, and a missing row sends no DELETE.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenRemove"
+          ]
         }
       ],
       "documentation": [
@@ -100267,11 +100356,15 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409.",
+        "delete_group calls find_group without domain_id, so the Go call uses FindIdentity without WithIdentityFindQuery.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_roles",
@@ -100370,16 +100463,23 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/update_role",
       "source_fingerprint": "ed5a8682cf703c8a3ead3bd4a95289815e021d9ab03e1a2f7d41f74cb199aea6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
           "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Roles, Projects and Users FindIdentity followed by Update send the two lookups (domain_id on both when given) and then PATCH /<kind>/<id> with only the caller-supplied keys (enabled/description, name, email through Extra); a missing row sends no PATCH, and WithIdentityFindIgnoreMissing(false) returns resource.ErrNotFound like update_project ignore_missing=False.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenUpdate"
           ]
         }
       ],
@@ -100390,25 +100490,36 @@
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python returns False when the role is missing; the Go lookup returns a nil row.",
         "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "update_role also forwards domain_id to Proxy.update_role; Python sends it only when it differs from the found role, and Go sends it only when the caller adds it through UpdateOpts.Extra.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/delete_role",
       "source_fingerprint": "a068d5936427ef1c6e9ce2036a81d9d46a7a0daee7b0b2d864a4d553aa085c57",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Remove"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
           "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Groups, Roles, Projects and Users FindIdentity followed by Remove(resource.ID(id)) send GET /<kind>/<name> and GET /<kind>?name=<name> (with domain_id on both when WithIdentityFindQuery adds it) and then DELETE /<kind>/<id>; 204 and 404 return nil like the Proxy delete default ignore_missing=True, 409 is returned, and a missing row sends no DELETE.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenRemove"
           ]
         }
       ],
@@ -100417,11 +100528,15 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns False when the role is missing and re-raises SDKException from the delete."
+        "Python returns False when the role is missing and re-raises SDKException from the delete.",
+        "Python re-raises SDKException from the delete; Go returns the error (for example 409), and Remove returns nil for 404 like the Proxy delete_role default ignore_missing=True.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_role_assignments",
@@ -100617,16 +100732,24 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/update_project",
       "source_fingerprint": "45320f603a09c0cddf9fe71d0b34af6056a2b3a753e9c226d73d41f042573edc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
           "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Roles, Projects and Users FindIdentity followed by Update send the two lookups (domain_id on both when given) and then PATCH /<kind>/<id> with only the caller-supplied keys (enabled/description, name, email through Extra); a missing row sends no PATCH, and WithIdentityFindIgnoreMissing(false) returns resource.ErrNotFound like update_project ignore_missing=False.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenUpdate"
           ]
         }
       ],
@@ -100637,11 +100760,15 @@
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python finds with ignore_missing=False and raises NotFoundException for a missing project.",
         "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Python maps the enabled argument to is_enabled; Go sets UpdateOpts.Enabled, and other keyword attributes go into typed fields or UpdateOpts.Extra.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_project",
@@ -100672,16 +100799,23 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/delete_project",
       "source_fingerprint": "da416ebf0d9209915ebf95ab2513fd0f1906548f466adc7dfcfdd4e0ba88e349",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Remove"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
           "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Groups, Roles, Projects and Users FindIdentity followed by Remove(resource.ID(id)) send GET /<kind>/<name> and GET /<kind>?name=<name> (with domain_id on both when WithIdentityFindQuery adds it) and then DELETE /<kind>/<id>; 204 and 404 return nil like the Proxy delete default ignore_missing=True, 409 is returned, and a missing row sends no DELETE.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenRemove"
           ]
         }
       ],
@@ -100690,11 +100824,14 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_users",
@@ -100806,16 +100943,23 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/update_user",
       "source_fingerprint": "cf4062650f58603107bf05587e09d8f5aadd7cef1f9cef8998c84d3eba21954e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
           "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Roles, Projects and Users FindIdentity followed by Update send the two lookups (domain_id on both when given) and then PATCH /<kind>/<id> with only the caller-supplied keys (enabled/description, name, email through Extra); a missing row sends no PATCH, and WithIdentityFindIgnoreMissing(false) returns resource.ErrNotFound like update_project ignore_missing=False.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenUpdate"
           ]
         }
       ],
@@ -100826,16 +100970,21 @@
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "The default_project keyword is not a User attribute, so Python drops it from the PATCH.",
         "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Python raises SDKException when the user is missing; Go FindIdentity returns a nil row and no PATCH is sent.",
+        "email has no typed UpdateOpts field, so Go sends it through UpdateOpts.Extra; Python drops domain_id=None before the PATCH and sends domain_id only when it differs from the found user.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_user",
       "source_fingerprint": "7f6ec06a9a85d02b81ebc9e65cd4c8f99de97eec8b27388461afd920cd6b429f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity"
@@ -100852,33 +101001,11 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
-        }
-      ],
-      "documentation": [
-        "identity/python-cloud-parity.md"
-      ],
-      "differences": [
-        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python raises SDKException before HTTP when domain_id is missing; Go sends the request without domain_id.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
-      ],
-      "remaining": [
-        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced. The default_project argument depends on that lookup to set default_project_id."
-      ]
-    },
-    {
-      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_user",
-      "source_fingerprint": "881103304fdc44d86a849554d16187fc8fc3533a9719232aeb6dfdd892e3d93f",
-      "status": "unresolved",
-      "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Remove"
-      ],
-      "contracts": [
+        },
         {
-          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "behavior": "With default_project, create_user maps to Projects.FindIdentity (GET /projects/<p>, then GET /projects?name=<p>) followed by POST /users with default_project_id set from the found project, or without that key when the project is missing.",
           "tests": [
-            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudCreateUserDefaultProject"
           ]
         }
       ],
@@ -100887,16 +101014,57 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+        "Python raises SDKException before HTTP when domain_id is missing; Go sends the request without domain_id.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_user",
+      "source_fingerprint": "881103304fdc44d86a849554d16187fc8fc3533a9719232aeb6dfdd892e3d93f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Groups, Roles, Projects and Users FindIdentity followed by Remove(resource.ID(id)) send GET /<kind>/<name> and GET /<kind>?name=<name> (with domain_id on both when WithIdentityFindQuery adds it) and then DELETE /<kind>/<id>; 204 and 404 return nil like the Proxy delete default ignore_missing=True, 409 is returned, and a missing row sends no DELETE.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudFindThenRemove"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/add_user_to_group",
       "source_fingerprint": "7d46577f4aac559939c429efc620d17bb5f093eb2de1cb2ba2d4b204cd83b774",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AddToGroup",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
@@ -100914,6 +101082,12 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Users.FindIdentity then Groups.FindIdentity (each GET by name then name list, without domain_id like get_user/get_group) followed by AddToGroup, IsMemberOfGroup or RemoveFromGroup send PUT, HEAD or DELETE /groups/<g>/users/<u>; a missing group stops before the membership request and HEAD 404 reports false.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudUserGroupMembership"
+          ]
         }
       ],
       "documentation": [
@@ -100921,17 +101095,19 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python raises SDKException when the user or group is missing."
+        "Python raises SDKException when the user or group is missing.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/is_user_in_group",
       "source_fingerprint": "ee269ef8cd36c15fad4722365d3114b32f50e90d5b89fcae57102c34c13f3e21",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.IsMemberOfGroup",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
@@ -100949,6 +101125,12 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Users.FindIdentity then Groups.FindIdentity (each GET by name then name list, without domain_id like get_user/get_group) followed by AddToGroup, IsMemberOfGroup or RemoveFromGroup send PUT, HEAD or DELETE /groups/<g>/users/<u>; a missing group stops before the membership request and HEAD 404 reports false.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudUserGroupMembership"
+          ]
         }
       ],
       "documentation": [
@@ -100956,17 +101138,19 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python raises SDKException when the user or group is missing."
+        "Python raises SDKException when the user or group is missing.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/remove_user_from_group",
       "source_fingerprint": "e9c0f6ebccad6278918b5c5304ad66b7e93376cd9c82a4628af35eb39a3c17aa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.RemoveFromGroup",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
@@ -100984,6 +101168,12 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Users.FindIdentity then Groups.FindIdentity (each GET by name then name list, without domain_id like get_user/get_group) followed by AddToGroup, IsMemberOfGroup or RemoveFromGroup send PUT, HEAD or DELETE /groups/<g>/users/<u>; a missing group stops before the membership request and HEAD 404 reports false.",
+          "tests": [
+            "identity/v3/python_rejudge_test.go:TestPythonRejudgeCloudUserGroupMembership"
+          ]
         }
       ],
       "documentation": [
@@ -100991,12 +101181,14 @@
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python raises SDKException when the user or group is missing."
+        "Python raises SDKException when the user or group is missing.",
+        "Python Proxy.request can serve the find GET from the connection response cache when caching is enabled; Go has no client-side GET response cache, so every FindIdentity call sends its GET and list requests.",
+        "Python translates responses into seeded openstacksdk Resources (Resource.fetch/_translate_response descriptor coercion and retained unknown attributes); Go decodes the native Gophercloud identity v3 models and requires a safe nonblank ID in every consumed row.",
+        "In the name-list fallback Go follows Keystone links.next while Python Resource.list does not follow the Keystone links dict or use limit/marker continuation without a limit; Keystone returns next null for these lists, so the default requests are the same.",
+        "Names unsafe for a raw member URL (for example containing \"/\") are looked up by the list request only in Go, while Python sends the direct GET first and falls back after its 404.",
+        "Duplicate name matches raise DuplicateResource in Python and resource.ErrAmbiguous in Go."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     }
   ]
 }
