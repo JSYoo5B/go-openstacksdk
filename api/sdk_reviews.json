@@ -83911,6 +83911,559 @@
         "Base stock Neutron27 mutation permissions are project ADMIN_OR_PROJECT_MEMBER; wildcard target * create/update is separate admin-only attribute branch. Operator/deprecated/default/extension/backend role grants require actual cloud evidence.",
         "This leaf updates an immutable literal-ID seed. Source updating an existing mutable Resource with previously clean/dirty attrs is a separate remaining lifecycle contract. Empty dirty Body is a no-op even with transport-only header/version options."
       ]
+    },
+    {
+      "operation": "python:identity/v3/create_policy",
+      "source_fingerprint": "c13404f4c83a4a7dfa07089e1492350391311b80a5902e1d0368db4edd900101",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "Create sends POST policies with {\"policy\": {blob, type, ...Extra}} carrying the same keys as Python's dirty Policy attributes and decodes id, type, blob and links with project_id and user_id in Extra.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyCreateGetUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Go requires non-empty type and a non-nil blob and rejects a type longer than 255 characters before HTTP; Python sends the request and Keystone rejects it with 400.",
+        "Python exposes project_id and user_id as attributes; Go returns them in Policy.Extra.",
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "Keystone v3 has no microversion; neither side sends a microversion header."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/delete_policy",
+      "source_fingerprint": "c6467c8f3679b4348ace5dc18ae70c6f542e8d27d9d8ba45bdd845f967a5b6bd",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Remove",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Remove and resource.IgnoreMissing(Delete) send one DELETE policies/{id}, return nil on 204 and 404 like ignore_missing=True and keep 409; WithMissingError reports resource.ErrNotFound and plain Delete keeps the 404 like ignore_missing=False.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/find_policy",
+      "source_fingerprint": "6df808a66138d765e6d9e83b80c65f57b1ca01686ba093cb8815302bd60edfee",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Find with resource.ID sends only GET policies/{id}, turns 404 into nil with WithIgnoreMissing, returns 400 and 403 without a list fallback, and Name lookup and FindIdentity return resource.ErrUnsupported before HTTP.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyFindHasNoListFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python find_policy also emits a RemovedInSDK50Warning deprecation warning."
+      ],
+      "remaining": [
+        "Python Resource.find falls back after GET 400/403/404 to listing GET policies and matching id or name; the policy collection has no Name binding or FindIdentity opt-in, so Go has no call that performs the list fallback or matches the name."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_policy",
+      "source_fingerprint": "35ea2d18cbc92d8c242f739bbbbbb578c498105363cf08e2ff78b3d56172d994",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID"
+      ],
+      "contracts": [
+        {
+          "behavior": "Get and Find(resource.ID) send GET policies/{id}, decode the same policy fields and report a 404 as a Gophercloud 404 or resource.ErrNotFound like Python NotFoundException.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyCreateGetUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
+        "Python exposes project_id and user_id as attributes; Go returns them in Policy.Extra.",
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/policies",
+      "source_fingerprint": "8a24ce431b16d5f4dd6ebc96080bb3901c0702b2e1c837f5e5d4889d5bc4281d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "List sends GET policies without a query and follows links.next, All forwards type, limit and marker as wire query, and WithBodyFilter and WithName return resource.ErrUnsupported.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyListFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python sends type as a local filter after GET policies; Go sends it as the server-side type query, which Keystone applies with the same result."
+      ],
+      "remaining": [
+        "Policy declares only limit and marker as query parameters, so Python filters known Body attributes such as project_id, user_id and blob locally; the policy collection has no Body filter binding and Keystone ignores those query keys, so Go cannot reproduce the filtered result."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_policy",
+      "source_fingerprint": "e3e8095257053c5cb111656f278fca25d7bc3ec51e4bd9149abc8a548290e956",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH policies/{id} with {\"policy\": {...}} holding only the given type, blob and Extra keys, including an empty blob via WithUpdateField and null via Extra, and decodes the updated policy.",
+          "tests": [
+            "identity/v3/policies/python_parity_test.go:TestPythonPolicyCreateGetUpdate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python skips the request when no attribute changed; Go always sends PATCH, with {\"policy\": {}} for empty options.",
+        "Empty Type and Blob are omitted by UpdateOpts; an empty blob is sent through WithUpdateField and an empty type through Extra.",
+        "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/create_mapping",
+      "source_fingerprint": "312f68b283ed75270e08709ff14ecaa46a2dbd04e65675c0bfa1e4f2ae46f771",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.CreateMapping",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithCreateMappingField"
+      ],
+      "contracts": [
+        {
+          "behavior": "CreateMapping sends PUT OS-FEDERATION/mappings/{id} with id and schema_version in the mapping envelope via WithCreateMappingField, as Python does, but the decoded Mapping drops schema_version and unknown rule keys.",
+          "tests": [
+            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError."
+      ],
+      "remaining": [
+        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result.",
+        "rules is a typed core field of the generated mapping opts, so Python's arbitrary JSON rule list cannot be sent and WithCreateMappingField/WithUpdateMappingField reject a rules extension before HTTP."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_mapping",
+      "source_fingerprint": "ccc890dc692081d91238b2bd75ad91f87d667b973d849e71c6eb636dcafeb13f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.DeleteMapping",
+        "github.com/JSYoo5B/go-openstacksdk/resource.IgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "resource.IgnoreMissing(DeleteMapping) sends one DELETE OS-FEDERATION/mappings/{id}, returns nil on 204 and 404 like ignore_missing=True and keeps 409; plain DeleteMapping keeps the 404 like ignore_missing=False.",
+          "tests": [
+            "identity/v3/federation/python_parity_test.go:TestPythonMappingDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
+        "Python accepts any status below 400; the generated Go call accepts only the native codes (create 201, get/update 200, delete 202/204) and reports others as gophercloud.ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "Mappings have no resource.Collection, so the ignore_missing default needs the explicit resource.IgnoreMissing wrapper."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:identity/v3/find_mapping",
+      "source_fingerprint": "4ed82288f49bf72b10322c9ef0c9c773f633e193f69b8b5663d9c677a1206a93",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "The generated federation API has no resource.Collection or Find helper for mappings, so Go has no call that sends GET OS-FEDERATION/mappings/{name_or_id} and falls back after 400/403/404 to listing and matching the id, returning None by default."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_mapping",
+      "source_fingerprint": "53da90f30942da7f84da861e1e70d02fe5b49c13c6bae9cb93a4837281abc19b",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.GetMapping"
+      ],
+      "contracts": [
+        {
+          "behavior": "GetMapping sends the same GET OS-FEDERATION/mappings/{id} as Python, but the decoded Mapping drops schema_version and unknown rule keys.",
+          "tests": [
+            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/mappings",
+      "source_fingerprint": "9b5b37b93a9257a6fd8e160eb134a25e9cf5000a96c93c603b5ae8ce3737adb9",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.ListMappings"
+      ],
+      "contracts": [
+        {
+          "behavior": "ListMappings sends GET OS-FEDERATION/mappings without a query and decodes rows without schema_version or unknown rule keys.",
+          "tests": [
+            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "ListMappings takes no options, so Go cannot send Python's limit and marker query or apply Python's local Body filters such as schema_version.",
+        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_mapping",
+      "source_fingerprint": "85da40c5a480b59317af7e7963f39f40bc84e44852cece75ab2d1b02672302da",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.UpdateMapping",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithUpdateMappingField"
+      ],
+      "contracts": [
+        {
+          "behavior": "UpdateMapping sends PATCH OS-FEDERATION/mappings/{id} and always includes rules, as null when empty, so a schema_version-only update differs from Python's body.",
+          "tests": [
+            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "UpdateMappingOpts.Rules has no omitempty, so Go cannot send Python's PATCH that omits rules (for example only schema_version), and Python sends nothing when no attribute changed.",
+        "rules is a typed core field of the generated mapping opts, so Python's arbitrary JSON rule list cannot be sent and WithCreateMappingField/WithUpdateMappingField reject a rules extension before HTTP.",
+        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_identity_provider",
+      "source_fingerprint": "e137e3fc2fd1358dc7b1f453d708d8b6d6bef8c2983e65fe88d427b5459729a4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/identity_providers/{id} with {\"identity_provider\": {...}} after removing id from the body."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_identity_provider",
+      "source_fingerprint": "498744b91686039c6858076393f914d9970f8de40846694695f6a4d8efc89571",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/identity_providers/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_identity_provider",
+      "source_fingerprint": "3902e5b6b86676760f85d62d86d6e76ea1bc84c4f4317b3d077d767e96e4de9e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{name_or_id} and after 400/403/404 lists GET OS-FEDERATION/identity_providers matching the id."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_identity_provider",
+      "source_fingerprint": "541b7aa7eaa19c1dbbc7ffeb85da2878fc06c6fe2eba45480541c9d480a86700",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{id}."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/identity_providers",
+      "source_fingerprint": "21b89ec3c234eed2aedf7c45c3b5c33f9822c5df9d191758450c3ab6e4449ce7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers with id, enabled, limit and marker query and local Body filters."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_identity_provider",
+      "source_fingerprint": "551ab3582a44a6f11464463bfe4ff5b7c5a4ad8d3464aeb09e966004da3c5fef",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/identity_providers/{id} with the changed identity_provider attributes."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_federation_protocol",
+      "source_fingerprint": "afc7d66ad5582febb7e26433c40794339a3f8884c289d3bab6ef349296c459b5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with {\"protocol\": {\"mapping_id\": ...}} after removing id from the body."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_federation_protocol",
+      "source_fingerprint": "5659720582342b4b3a4ec030e3917e06c82612fe1f1ab6b303840653cb723475",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_federation_protocol",
+      "source_fingerprint": "495053f30ae8239588f97943456ff91a275a033fd8aaf3493aa751849ea1ebda",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{name_or_id} and after 400/403/404 lists the protocols matching the id."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_federation_protocol",
+      "source_fingerprint": "8b806db2a76aa1d635d98079aa4fb00dba1884ec0daf7c6debd2cf69a3b0de4c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/federation_protocols",
+      "source_fingerprint": "9fe1f700cf80e605a68deecd5a67747c5ea58dc9f24536fc2ffea07e9a7aaffe",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols with id, limit and marker query."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_federation_protocol",
+      "source_fingerprint": "ba9b6987c382756dff489289f3fd3b35aedfb626be3b1a21363bfd0e31bf5453",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with the changed protocol attributes."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/create_service_provider",
+      "source_fingerprint": "3f7bb780001dfd10bb15986f1a2501340f7910ffcf2dc4d7813e94d63b817851",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/service_providers/{id} with {\"service_provider\": {...}} after removing id from the body."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/delete_service_provider",
+      "source_fingerprint": "8e7486039f2ea70741fe46e03adc50becae5bb72478aa414eef692e7f9134bb9",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/service_providers/{id} and ignores 404 by default."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/find_service_provider",
+      "source_fingerprint": "9ca557dd74ec0b87c32d1c03628c67eb4d81f3d7acd50d28286c7b03926c2ec0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers/{name_or_id} and after 400/403/404 lists GET OS-FEDERATION/service_providers matching the id."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/get_service_provider",
+      "source_fingerprint": "69ca4dd6b83529fa18fe385c3991c954d4970ac7a434ed908e5619aca02fa56c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers/{id}."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/service_providers",
+      "source_fingerprint": "acaa7528ee7361fda76afa109613a27de1bd0a8cf9f53c1a5b97a2166fed59c9",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers with id, enabled, limit and marker query and local Body filters."
+      ]
+    },
+    {
+      "operation": "python:identity/v3/update_service_provider",
+      "source_fingerprint": "e5de5ea1ee6d1cf10d67cb7dd2df606b33532efbf788cd3460fa9eeb774d1ccf",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/v3/python-parity-federation.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/service_providers/{id} with the changed service_provider attributes."
+      ]
     }
   ]
 }
