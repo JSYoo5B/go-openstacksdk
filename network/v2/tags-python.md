@@ -150,6 +150,12 @@ func main() {
 결과의 `Resource`를 다음 연산에 넘기면 Python Resource의 cache에 해당하는 상태를 이어갑니다.
 입력 객체를 변경하거나 remote parent를 자동 조회하지 않습니다.
 
+이 local tag 상태는 Python Proxy의 HTTP response cache와 별개입니다. 고정 Source는
+Connection cache를 켜고 해당 resource expiration을 설정하면 `get_tags`·`check_tag`의
+GET을 공유 response cache에서 반환할 수 있고, 변경 요청은 해당 cache prefix를 무효화합니다.
+Go 태그 API는 공유 HTTP response cache를 구현하지 않으므로 GET은 항상 transport를 사용하며,
+Python cache hit의 zero-HTTP 동작이나 공유 cache 무효화를 제공하지 않습니다.
+
 `GetTags`는 응답의 `tags`가 있으면 cache를 교체합니다. 누락은 기존 cache 유지,
 []는 빈 cache, null은 nil cache입니다. `ObservedTags`는 GET이 실제 tags 필드를 해석한
 경우에만 true입니다. unknown 응답 필드는 `Body`에 그대로 남습니다. Go는 응답을 JSON object로,
@@ -174,6 +180,15 @@ Source compatibility를 구별합니다. 다른 kind에 이 옵션을 적용하�
 `WithTagField`로 JSON extension을 줄 수 있습니다. nil/false/0/빈 배열도 보존합니다.
 `tags`는 typed 인수가 소유하고 query·secondary argument·bodyless method의 Body extension은
 HTTP 전에 거부합니다. 인증·route·framing header는 SDK 소유입니다.
+
+선택한 generic API version 값(또는 version 미선택 시 header 부재), Neutron에 해당하지 않는
+Nova·Cinder version header 부재, 인증·framing header 제약은 native retry의 모든 실제 시도에서
+유지합니다. bulk JSON의 `Content-Type`은 service/option에서 선택한 값 또는 기본
+`application/json`을 유지합니다. retry가 이 값을 변경·삭제하거나 `OmitHeaders`로 숨기면
+첫 실제 rejected response의 status/body/header와 callback 원인을 보존하고 재전송 전에 거부합니다.
+ordinary `X-Retry` 같은 header는 native retry 정책을 유지하며, bodyless `Content-Type`도 고정하지
+않습니다. `X-Auth-Token`은 shared provider의 live token을 매 시도 반영하므로 frozen header로
+취급하거나 부재를 강제하지 않습니다.
 
 ID와 개별 tag는 literal segment로 escaping하므로 `/`, `%`가 경로를 바꾸지 않습니다.
 빈 ID/tag·dot segment·잘못된 UTF-8·control 문자는 HTTP 전에 거부하는 Go 개선입니다.

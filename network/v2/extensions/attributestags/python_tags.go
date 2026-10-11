@@ -263,6 +263,36 @@ func cloneTagConfig(c *request.Config[TagOpts]) {
 		c.Arguments = make(map[string]any)
 	}
 }
+
+// headerPolicy keeps protocol and auth/framing exclusions through native retry
+// hooks. The shared live X-Auth-Token stays owned by fixedrequest authentication;
+// ordinary headers retain native retry policy instead of being frozen wholesale.
+func (p *preparedTag) headerPolicy(body bool) rest.RequestHeaderPolicy {
+	policy := rest.RequestHeaderPolicy{
+		Values: make(map[string]string),
+		Absent: []string{
+			"Authorization", "X-Service-Token", "Cookie", "Host",
+			"Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade",
+			"X-OpenStack-Nova-API-Version", "X-OpenStack-Volume-API-Version",
+		},
+	}
+	if p.source.Client.Microversion == "" {
+		policy.Absent = append(policy.Absent, "OpenStack-API-Version")
+	} else {
+		policy.Values["OpenStack-API-Version"] = "network " + p.source.Client.Microversion
+	}
+	if body {
+		contentType := "application/json"
+		for key, value := range p.source.Client.MoreHeaders {
+			if strings.EqualFold(key, "Content-Type") {
+				contentType = value
+			}
+		}
+		policy.Values["Content-Type"] = contentType
+	}
+	return policy
+}
+
 func (p *preparedTag) do(method string, tags []string, body bool) (*TagResult, error) {
 	var payload any
 	if body {
@@ -282,7 +312,7 @@ func (p *preparedTag) do(method string, tags []string, body bool) (*TagResult, e
 		return nil, err
 	}
 	accepted, rejected := tagCodes()
-	response, err := rest.DoJSONGuardedRejections(p.ctx, &p.source.Client, p.guard, method, p.target, payload, nil, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true}, accepted...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(p.ctx, &p.source.Client, p.guard, method, p.target, payload, p.headerPolicy(body), rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true}, accepted...)
 	if response == nil {
 		return nil, err
 	}
