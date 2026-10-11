@@ -17,7 +17,7 @@ Cinder v2 API는 Cinder 자체에서 오래전에 deprecated된 legacy API입니
 
 v2 `List`는 요약 경로 `snapshots`를 **한 페이지로만** 읽습니다. page가 `SinglePageBase`라 `snapshots_links`를 따라가지 않으며, `ListOpts`에도 `Limit`·`Marker`·`Sort` 같은 paging 필드가 없습니다.
 
-`WaitForStatus`는 v3과 같은 native 구현이라 `snapshot` key가 없는 응답에서 panic합니다. SDK가 막지 않으므로 이 판정은 미완료이고, SDK의 `WaitForState`·`WaitForAvailable`을 사용합니다.
+`WaitForStatus`는 v3과 같은 polling 규칙을 따르며, native 구현이 panic하는 `snapshot` key 없는 응답은 SDK helper가 `resource.ErrUnsupported`를 감싼 오류로 바꿉니다.
 
 ## backup·transfer·availability zone
 
