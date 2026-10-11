@@ -12935,7 +12935,7 @@
     {
       "operation": "python:network/v2/address_groups",
       "source_fingerprint": "541504636050e8c6aa24401acf760df460c5a661219bc9cb033ff1a4137878f8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.New",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.All",
@@ -12953,7 +12953,17 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithStatus",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
         "github.com/JSYoo5B/go-openstacksdk.Connection.Network",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.NetworkV2"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.NetworkV2",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithRecordListPaginated"
       ],
       "contracts": [
         {
@@ -13050,6 +13060,48 @@
             "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupRawDependencyLoaderPreservesNumbersAndNativeLinkHelpers",
             "internal/cmd/sdkgen/address_group_filters_test.go:TestAddressGroupBodyFilterAcceptsActualCompiledNativeSchemasAndOwnMethods"
           ]
+        },
+        {
+          "behavior": "Lazy bodyless GET at /address-groups follows the actual Source server QueryParameters including fields unchanged, list-only local id/tenant_id/addresses filters, no identity/name hint and discarded unknown values without MarshalJSON. Source list Accept defaults application/json over captured Accept, explicit option Accept overrides. Existing exact six descriptors/project alias/list conversion/null defaults/unknown extensions are reused with independent Resource/Wire/whole Envelope/Header/status channels; no tag/NetworkResource headers are synthesized.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListSourceProjectionQueryAndEvidence"
+          ]
+        },
+        {
+          "behavior": "Frozen common Engine.List/REST pager supplies plural/body/RFCLink/versioned-path/short-page marker continuation, retained actual scalar JSON marker conversion, complete pagination, raw caps before local filters, single page/break without next request and late native/page errors. SourceFindPolicy opt-in uses binary64 next truthiness; ±1e-400 stop cleanly while truthy nonstring next retains exact actual whole page proof. Dictionary next links are an explicit Go improvement; changed origin/path/filter/cycle are errors.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListPaginationCapsNextTruthinessAndLateErrors"
+          ]
+        },
+        {
+          "behavior": "Actual final200..399 representations, strict other native status errors, singular plural-object/array schema, missing/null/malformed/nonobject/UTF8 page faults, constructor cls null/false plus connection/microversion/_synchronized errors and Source recursive dict truthiness remain proven. Exact-decimal local numeric comparison is separately bounded from Python binary64 truthiness and kept explicitly documented.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListConstructorDecodeAndLocalFilterFailures"
+          ]
+        },
+        {
+          "behavior": "Read+Close/cancel cause/source-changed-and-restored-on-Close on accepted/rejected list responses preserve every physical cause, original whole body/Header/status, close exactly once, perform exactly one actual HTTP and never become empty/success/retry.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListPhysicalFaultsRetainActualProofWithoutReplay"
+          ]
+        },
+        {
+          "behavior": "Native retry cannot alter/delete/Omit selected protocol version or add absent/foreign version, auth/framing or JSON to the bodyless GET. Original native503 proof and optional callback cause stay visible with no resend. Ordinary new retry Header/live-token/reauthentication changes remain native; exactly owned route/query is reused.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListRetryHeadersVersionAndReauthOwnership"
+          ]
+        },
+        {
+          "behavior": "Source capture precedes callbacks; bulk maps/raw JSON/headers/version/options and retained callback results are independently owned, invalid context/options/control/header/JSON/paging/source values fail before actual HTTP with causes, unknown bulk raw values are discarded. Immutable options produce independent records under8 concurrent calls.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListOptionsPreflightSnapshotsAndConcurrentReuse"
+          ]
+        },
+        {
+          "behavior": "Direct List per-call explicit version applies to every list page, replacing captured matching version headers on only the private operation. Explicit empty means version absence; original selected client/default/header stay unchanged and no class discovery is added.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListExplicitVersionOwnsEveryPageAndOriginalHeaders"
+          ]
         }
       ],
       "documentation": [
@@ -13058,7 +13110,8 @@
         "network/README.md",
         "resource/README.md",
         "docs/listing.md",
-        "internal/cmd/sdkgen/README.md"
+        "internal/cmd/sdkgen/README.md",
+        "network/v2/address-group-list-python.md"
       ],
       "differences": [
         "Complete declared classification is provided through concrete SDK-owned semantic and explicit Body options. Query name/description/project_id stay server-only and tenant_id remains local, distinct from project_id's descriptor alias. WithName has its own hint and local predicate; raw query keys are explicit wire extensions and semantic filtering does not change typed List or FindIdentity.",
@@ -13066,15 +13119,17 @@
         "Matching retains original id/tenant_id/addresses values and exact large unknown tenant JSON; returned values remain the five-field native model. Raw null array elements differ from the native empty-string projection. Python addresses(type=list) may wrap non-list response values into lists; the native decoder instead rejects incompatible known fields before matching and before a cap.",
         "Exact JSON equality distinguishes bools from numbers and strings from numbers. Recursive object subsets preserve the pinned empty-actual-object nonmatch; nonobject actual values are nonmatches rather than potential Python attribute-access errors. Arrays require complete order/length/element equality and do not normalize CIDRs or apply object-subset matching inside arrays.",
         "Native200/204/300, plural-links continuation and foreign URL following remain intact. Empty application/json204 can fail with native EOF. Local caps count raw rows like the pinned implementation but do not infer its wire limit; first-page/break stop before continuation and All discards partial rows on terminal failures. No same-origin/fixed-query or synthesized marker policy is added.",
-        "Raw Body selectors run only for consumed selected fields after native whole-page decoding. A consumed null row is invalid on the Body lane; query-only null rows preserve the native zero model. SDK comparisons do not replace Python Resource defaults/alias/unknown response state or provide a tracked/cache lifecycle. Source/manifest/native drift fails closed without activating additional native resources or identity capabilities."
+        "Raw Body selectors run only for consumed selected fields after native whole-page decoding. A consumed null row is invalid on the Body lane; query-only null rows preserve the native zero model. SDK comparisons do not replace Python Resource defaults/alias/unknown response state or provide a tracked/cache lifecycle. Source/manifest/native drift fails closed without activating additional native resources or identity capabilities.",
+        "One bounded direct Source list callable mapping reuses existing AddressGroupFindRecord (public AddressGroupListRecord alias), verified six Body/query tables and frozen common neutronfind.Engine.List with SourceFindPolicy=true. Existing Find/native Get/Create/Update/Delete/actions are not changed or recounted.",
+        "Go JSON-domain inputs/results and concrete options own source/policy/route/version/header/paging state. Full Python mutable Resource dirty/cache/session/Adapter/Connection/computed location and object subclass behavior remain global tasks, rather than being claimed through one list row. Literal observed unknown location follows existing record model; complete Connection-derived location calculation is not synthesized.",
+        "Shared local equality retains exact decimal JSON numeric values, not Python JSON binary64 equality; integer9007199254740992 versus filter9007199254740993.0 is explicitly different. Scalar dict/next/pagination truthiness does use Source binary64 underflow/overflow. Raw Wire/Envelope numbers remain exact. Shared Requests repr/Unicode numeric representation runtime boundaries stay documented.",
+        "Bulk maps sort filter keys while individual options preserve insertion order. SDK constructor/route/session/cache/Computed-location controls, deprecated jmespath_filters and __conflicting_attrs overload are rejected instead of being silently mapped into Body/server query; mutable/restoration/JMESPath compatibility remains separately tracked.",
+        "Owned standard links:{next:URL} compatibility extends pinned Source dict-loop behavior. Origin/path/filter/cycle changes are rejected; scalar markers must expand to one nonempty transport value. Limit/max_items are finite nonnegative Go integers and typed pagination is bool; raw paginated follows JSON truthiness, rather than arbitrary Python object controls.",
+        "Go handles final service representations200..399 and retains other actual native status evidence; arbitrary Python Adapter returning final1xx is outside the engine policy. Explicit empty per-call version means absent version headers and immutable retry contracts are library-owned Go behavior.",
+        "Stock Neutron27.0.0 get_address_group policy permits admin/owning-project reader or shared groups and has no service-only branch. Source unknown shared/tags/all_projects query does not grant roles. SDK fixtures do not establish live endpoint/backend/policy acceptance.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
       ],
-      "remaining": [
-        "Complete mutable Python Resource state, Body/URI defaults/coercion, seeded unknown attrs, project_id descriptor fallback/alias projection and returned Resource properties remain beyond declared list classification. AddressGroup directly inherits Resource without TagMixin or NetworkResource; raw matching does not add its complete cache/dirty lifecycle or permissive response model.",
-        "Pinned Proxy.request optional GET caching(cache_enabled/skip_cache), resource/session injection and inherited per-call header/microversion/base_path/allow_unknown_params controls remain separate from retaining configured native clients. Direct Proxy._list fixes the session to itself; AddressGroup inherits _max_microversion=None and no class-specific maximum negotiation gap is claimed.",
-        "Resource._get_next_link includes address_groups_links/body links, RFC Link headers and truthy limit/marker fallback beyond the native plural-links pager. Python continuation-query merging, dynamic Resource.id markers and max_items limit hints/page-end observations remain different from native advertised URL/cycle behavior; complete inherited continuation remains open.",
-        "Deprecated Proxy._list jmespath_filters and its __conflicting_attrs restoration branch(openstack/proxy.py:896-902) remain outside the declared semantic API. Source hashes verify these branches but do not map their runtime behavior.",
-        "Native schema/status/whole-page/empty204 error behavior and selected raw JSON equality do not complete Python list-descriptor coercion or generic response error/default policy. Ordinary semantic options intentionally do not implement local Body classification for native typed List or FindIdentity; those inherited Resource contracts require independent review."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/networks",
@@ -15650,7 +15705,7 @@
     {
       "operation": "python:network/v2/trunks",
       "source_fingerprint": "f9f0437ef04f6d19557301c694d2fcf32748d8cc86d216185963f1f654214f88",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.New",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.All",
@@ -15667,7 +15722,17 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
         "github.com/JSYoo5B/go-openstacksdk.Connection.Network",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.NetworkV2"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.NetworkV2",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithRecordListPaginated"
       ],
       "contracts": [
         {
@@ -15766,6 +15831,74 @@
             "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkDependenciesGuardInheritedLinksWholePageNumbersCodesAndRoute",
             "internal/cmd/sdkgen/trunk_filters_test.go:TestTrunkBodyFiltersAcceptActualCompiledPlainNestedAndRequestMethodGraph"
           ]
+        },
+        {
+          "behavior": "Lazy generator and complete AllRecords use the original selected service without GET/identity enrichment; repeated ID/name rows remain separate. AllRecords discards partial rows on late page/HTTP/cancellation/source errors.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordLateErrorsDiscardAllAndDuplicatesStayRows",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordOptionOwnershipLazyReuseAndPreflight"
+          ]
+        },
+        {
+          "behavior": "Reviewed Trunk Resource+TagMixin effective10 Body descriptors reused directly: missingnull/tags[], explicitnull, project_id alias absence, ordered canonical/wire alias overwrite, CPython boolean truthiness, untyped nested subport list elements and unknown extension/timestamp/raw precision; no NetworkResource revision/Header descriptors.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordDescriptorsSubportsTagsAndIndependentProof"
+          ]
+        },
+        {
+          "behavior": "Exact14 server declarations and tag aliases use canonical query presence before wire aliases includingnull; Source LIST fields values remain original. Unknown kwargs discard before value serialization/validation. id/tenant_id alone are declared nonquery local Body filters.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordDeclaredQueryAliasesAndUnknownDiscard",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordLocalFiltersAliasesAndOrderedFailure"
+          ]
+        },
+        {
+          "behavior": "Ordered local recursive dict filtering keeps Source falsey/empty-dict/truthy-scalar/mapping.get error and bool-number equality; decimal truthiness is CPython binary64 while local comparison retains documented exact-decimal JSON profile.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordLocalFiltersAliasesAndOrderedFailure",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordConcurrentSnapshotsAndPaginationTruthiness"
+          ]
+        },
+        {
+          "behavior": "Raw-row cap precedes filters and avoids unconsumed bad rows/next; first-page hint, explicitzero-limit/cap, paginated truthiness, consumerbreak and short-page retained Wire marker are owned by existing REST paging. Mutating Resource IDs never changes cursor.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordRawCapMarkerAndConsumerStop",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordConcurrentSnapshotsAndPaginationTruthiness"
+          ]
+        },
+        {
+          "behavior": "Source plural/top-level/HTTP/relative-versioned continuations and dictionary compatibility use fixed origin/collection/filter/cursor guards. Top-level next binary64 underflow terminates with actual page preserved; truthy nonstrings and retargeting failures retain whole-page receipt.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordPagingRepresentationsAndSourceNextTruthiness",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordFixedContinuationGuardsAndWholePageReceipt"
+          ]
+        },
+        {
+          "behavior": "Go acceptedfinal200..399, representation-required204 and no ignored ordinary LIST400/403/404. Malformed/missing/null/scalar rows and cls/connection/microversion/_synchronized existing-constructor collisions fail with actual acceptedstatus/body/header proof. Source final<400 informational boundary is documented.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordMalformedConstructorStatusAndPermissionProof"
+          ]
+        },
+        {
+          "behavior": "Concrete map/raw/pointer/order/header snapshots and per-iteration capture beforecallbacks are reusable and concurrent. Retained callback state cannot mutate active request. Source/API replacement, nil/canceled context, negative controls, malformed known JSON, unsafe keys and unsupported route/session/JMESPath/unknown-parameter controls fail beforeHTTP. Known JSON builder failures add ErrInvalidOption while preserving caller marshal causes before physical HTTP.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordOptionOwnershipLazyReuseAndPreflight",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordConcurrentSnapshotsAndPaginationTruthiness",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordKnownMarshalErrorsPreflightAndUnknownDiscard"
+          ]
+        },
+        {
+          "behavior": "Standalone explicit microversion governs every page and empty removes versionheader; matching configured header is replaced only on ownedcopy. LIST Accept defaultsjson with explicit safe override. Retry route/body/header/absence/version guards preserve native rejection/custom cause; clean retry and reauthentication retain live token.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordExplicitAndAbsentVersionsAcrossPages",
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordNativeRetryOwnershipAndCleanReauthentication"
+          ]
+        },
+        {
+          "behavior": "Physical accepted200 and rejected400/401/403/404/409/429/500/503 mixed Read/Close/customCancel/stickySource errors preserve all causes, actualreceipt, exactlyoneClose/HTTP and no retry/reauth replay under willing callbacks. Unauthorized response follows the actual native ErrUnableToReauthenticate.ErrOriginal receipt and ErrReauth physical/source/cancel causes; the native error intentionally has no Unwrap.",
+          "tests": [
+            "network/v2/extensions/trunks/python_list_contracts_test.go:TestPythonTrunkListRecordPhysicalMixedFaultsNoReplayAndActualReceipt"
+          ]
         }
       ],
       "documentation": [
@@ -15773,21 +15906,27 @@
         "network/v2/README.md",
         "resource/README.md",
         "network/v2/extensions/trunks/listing/README.md",
-        "internal/cmd/sdkgen/README.md"
+        "internal/cmd/sdkgen/README.md",
+        "network/v2/trunk-list-python.md"
       ],
       "differences": [
         "Go uses frozen concrete WithFilter/WithFilters and explicit Body options instead of Python kwargs and mutable descriptors. Bulk canonical keys win by presence and individual options are last-wins. Raw WithQuery remains an independent explicit wire extension; unknown semantic names discard. Trunk project query and deprecated tenant local Body stay separate.",
         "Original JSON comparison occurs only after native whole-page extraction. Known string/bool/int/nested Subport/time fields can reject before matching, including later rows past a cap. Returned models remain native projections; original local id/tenant spelling/presence does not expand native model permissiveness.",
         "All two local descriptors are untyped JSON: no bool/int/list formatter is added. Go does not coerce caller JSON values and distinguishes bool from numbers; Python equality differs. Dictionary subset and ordered-array machinery is shared but native known local strings limit which returned domains reach matching. Queried sub_ports/is_admin_state_up response coercion does not become local filtering.",
         "Semantic query arrays become repeated scalar URL values rather than arbitrary Python container formatting; nil/empty arrays retain key presence while omitting values. Reserved source controls do not expose caller session/headers/microversion/base_path or JMESPath overrides.",
-        "Go raw cap counts before filtering like Python but omits its limit hint and stops continuation immediately. Native whole-page decoding/HTTP200204300/foreign following/inherited links.next and JSON-empty204 EOF remain. Body-consumed null rows reject; query-only native zero rows remain."
+        "Go raw cap counts before filtering like Python but omits its limit hint and stops continuation immediately. Native whole-page decoding/HTTP200204300/foreign following/inherited links.next and JSON-empty204 EOF remain. Body-consumed null rows reject; query-only native zero rows remain.",
+        "Concrete immutable TrunkListRecord is an alias of existing TrunkFindRecord and reuses its reviewed Body/query inventory through shared Source opt-in Engine.List. It does not complete mutable Python Resource/cache/dirty/session/subclass/Connection lifecycles or independently change earlier Get/Find/CRUD/Subport mappings.",
+        "Each list iteration physically observes pages, retaining live selected provider auth. Pinned optional Proxy cache_enabled GET caching/invalidation remains the separate shared session/cache foundation; no response cache or cache parity is claimed for this finite named record API.",
+        "Python kwargs become concrete functional options with snapshotted JSON and sorted bulk Go map keys. Sequential query/local filter order is retained; unknown kwargs discard before serialization. allow_unknown_params/JMESPath/conflicting-attrs/route/session/runtime constructor controls are explicit preflighterrors, not an unrestricted Python adapter surface.",
+        "Public Trunk sub_ports/tag list descriptors preserve scalar wrapping/null and untyped nested JSON. Gophercloud native Subport typed extraction, timestamps and revision remain independently callable native surfaces. Raw extension unknown values remain separate actual Wire and Resource JSON; plain/computed/control shadowing and automatic Connection current_location are not full Python equivalence.",
+        "Source integer versus bool interoperability is retained by shared exact-decimal equality plus bool-number matching; scalar fraction/exponent truthiness uses binary64. Full CPython float rounding/nonfinite/custom-object comparison is not claimed.",
+        "Common Engine completion range is final200..399. Source exceptions.raise_from_response accepts final<400, so exposed informational100..199 representations are outside this Go profile; ordinary clients consume interim1xx. Every rejected400..599 actualphysical cause remains observable.",
+        "Same-origin fixed-collection/filter continuation and one nonempty Wire marker query value intentionally restrict Python continuation retargeting. Dictionary links are explicit compatibility. Caps/single-page observe only their declared scope; AllRecords discards partials on late failure rather than claiming unseen-page success.",
+        "Trunk has no class maximum microversion: no discovery is introduced and captured selected/absent version remains. Safe explicit Headers/microversion options own LIST policy and do not grant project/admin authority. Stock Neutron27 project ADMIN_OR_PROJECT_READER classifies the list as core user; live deployment policy remains actual server enforcement.",
+        "Trunk List opts StopFaultRetryCallbacks explicitly and independently of shared Source projection policy. Gophercloud unauthorized reauthentication guard errors retain receipt/cause in ErrOriginal/ErrReauth public fields, as v2.15.0 intentionally does not Unwrap those two independent errors.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
       ],
-      "remaining": [
-        "Complete eager/seeded Resource descriptor defaults, project response alias fallback, unknown Body storage, mutable Resource/cache/dirty lifecycle and arbitrary subclasses remain distinct from selected raw-row filtering. Trunk inherits Resource+TagMixin, not NetworkResource; revision-aware if-match behavior is not claimed.",
-        "Pinned Proxy.request optional GET cache, adapter/session injection and per-call headers/microversion/base_path remain separate. Direct Proxy.trunks fixes its session to Proxy; Trunk declares no class maximum microversion, so no class-specific maximum negotiation gap is asserted.",
-        "Python Resource._get_next_link advertised/top-level/RFC Link header and limit/marker fallbacks, limit hints and inherited cache/retry/session behavior remain outside native links.next guards. Full descriptor conversion/equality and query container formatting are not replicated.",
-        "Deprecated Proxy._list jmespath_filters and explicit __conflicting_attrs restoration have no corresponding ordinary Go expression/recovery option. Existing native List, Get/Ref/FindIdentity, CRUD, tags and subport APIs are separate contracts. This ordinary-list mapping remains partial and unresolved, not full Proxy parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:blockstorage/v2/snapshots.UpdateMetadata",
@@ -27943,14 +28082,25 @@
     {
       "operation": "python:image/v2/image_tasks",
       "source_fingerprint": "f40e1f6467074035027cadf33d0211ec8aca2c0a079f9664f14be1347597ce87",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllImageTasks",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksOpts",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeader",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksMaxItems"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListImageTasksMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.TaskRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.AllTaskRecords",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsQuery",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLocation",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsLimit",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMarker",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithTaskRecordsPaginated"
       ],
       "contracts": [
         {
@@ -28015,25 +28165,105 @@
             "image/image_tasks_contracts_test.go:TestImageTaskContractsFixedRouteAndParentIdentity",
             "internal/cmd/sdkgen/glance_image_tasks_test.go:TestGlanceImageAssociatedTasksPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "Literal parent escaped once with no parent lookup; Source image_id Body local filter excludes missing/null/foreign rows and keeps returned image_id separate from fixed parent.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsLiteralParentAndSourceBodyFilter",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsRawDescriptorsDefaultsAndProof"
+          ]
+        },
+        {
+          "behavior": "Owned untyped Source16 Body/default/computed location projection, arbitrary scalar/list/null input/result/date/deleted/large integers, unknown/self/actualheaders only Wire, independent Resource/Wire/Envelope/Header/discovery receipt.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsRawDescriptorsDefaultsAndProof",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsLocationUsesCurrentScopeNotOwner"
+          ]
+        },
+        {
+          "behavior": "Pinned tasks envelope list/singleton, strict Go JSON/UTF8/wrongshape, Source list constructor collisions retain actual accepted wholepage status/body/headers and nonnil empty success.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsEnvelopeSingletonAndConstructorProof"
+          ]
+        },
+        {
+          "behavior": "Canonical Body local filtering, unknown discard, limit/marker server query, Source dict truthiness/subset/mapping.get errors and bool-number equality; binary64 decimal underflow with documented exact decimal equality profile.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsLocalFiltersUnknownAndQueryControls"
+          ]
+        },
+        {
+          "behavior": "Retained inherited list plural/next/HTTP links/exact v2 alias/dictionarycompatibility, stop-onempty, shortpage marker, raw cap before filters and unconsumed invalid row/next, falsey binary64 next, origin/collection/filter/cycle and latepage actual error proof.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsMarkerCapsAndUnconsumedRows",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsContinuationAndLateErrors"
+          ]
+        },
+        {
+          "behavior": "Lazy per-execution concrete owned opts/rawbytes/pointers/maps/location/optionslice and retainedcallback isolation, reusable concurrent outputs, invalid control/header/query/identity/cap before HTTP; cancellation/source/type causes retained.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsLazySnapshotsReusableAndConcurrent",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsPreflightAndContextCauses",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsLocationUsesCurrentScopeNotOwner"
+          ]
+        },
+        {
+          "behavior": "Captured selected microversion preserved; absent default finite major2 discovery/Source2.17 ceiling, API v2.17 ID does not imply microversion maximum, explicit empty/selectedlatest policies and separate actual discovery proof; explicit list headers never leak into discovery.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsSelectedVersionAndAcceptOwnership",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsDiscoveryCeilingAndAPIMinorIsNotMicroversion",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsDiscoveryFailuresRetainActualProof"
+          ]
+        },
+        {
+          "behavior": "Parent missing/denied statuses remain actual errors, no ignore_missing/find fallback; bounded Go final200..399 versus pinned Source<400, native informational199 rejection proof.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsMissingErrorsAndBoundedStatuses"
+          ]
+        },
+        {
+          "behavior": "Source LIST AcceptJSON default/explicit safe override; clean native retry/reauth fixed route/query/body/version; invalid body/header/custom callback/required-absent auth/framing/foreign version and Omitversion preserve original native rejection and causes before resend. OkCodes hook changes can allow retry2 but final actual response remains checked against original200..399 acceptance, including actual second400 rejection.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsSelectedVersionAndAcceptOwnership",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsNativeRetryAndReauthentication",
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsRetryForbiddenHeadersAndOmittedVersion"
+          ]
+        },
+        {
+          "behavior": "Accepted/rejected physical Read/Close/both/cancel/transient Source restored errors preserve actual envelope/body/header/status, all causes and exactly one physical Close; no resend/fallback.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsPhysicalProofAndStickySource"
+          ]
+        },
+        {
+          "behavior": "Unselected If-Match/If-None-Match/If-Modified-Since/If-Unmodified-Since stay required-absent during retry; captured/per-call selected values remain fixed and changed/omitted conditions fail before resend. Actual original503/body/header and custom callback cause survive independently.",
+          "tests": [
+            "image/v2/images/python_tasks_contracts_test.go:TestPythonImageTasksRecordsConditionalHeadersAreOwned"
+          ]
         }
       ],
       "documentation": [
-        "image/image-tasks.md"
+        "image/image-tasks.md",
+        "image/v2/image-tasks-python.md"
       ],
       "differences": [
         "Pinned Python Resource._get_id uses literalstring or Resource.id despite name prose. Go requires Ref and offers explicit Name resolver with native exactlookup requests; absent/ambiguous/forbidden parent errors remainerrors.",
         "Pinned Python mutableResource/untypedBody/sessionAdapter/configuredcache/microversion/generalpager behavior is broader than fixed concrete functionoptions and independentlyowned canonical ImageTaskInfo. No Resource dirty/cache/session or same-object parity claim.",
         "SQL JSONEncodedDict reads arbitraryJSON and Python Body values are untyped, while unchanged TaskInfo restricts Input/Result to nullable objects. Nonobject response values are owned200 decode errors, not full JSON parity; literal date/boolshape semantics are explicitGo policy.",
         "Actual endpoint is finite queryfree fullDBrow response. Go ignores passive next/Link/schema regardlesstype and applieslocalcap only; Python generalResource list mayusebodyfilters/max_items-to-limit hints and broaderpagercontinuation. Server visibility/expiry/deletion/order and authorization remainserver-owned.",
-        "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence."
+        "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence.",
+        "Pinned image_tasks proxy accepts only image selector and does no name lookup despite prose. Go literal UTF8 string selector and concrete Query/Headers/Microversion/Location/list controls are explicit SDK conveniences inspired by inherited Resource.list, not extra Python proxy kwargs. Invalid positional/constructor controls are rejected rather than runtime Python call errors.",
+        "Declared ImageTasks untyped16 Body fields plus computed location are owned snapshots separate from actual row/wholepage receipt. Mutable Resource/dirty/cache/same-object/class/subclass/session and global discovery caching remain independent shared SDK foundations; this named record does not claim them complete.",
+        "Default current location uses recorded native Keystone auth scope without HTTP; cloud/region/auth-config names are not invented. Optional CloudLocation is snapshotted and preserves explicit zone. Task owner is not a project descriptor and does not overwrite current location.",
+        "Existing typed image.Service.ImageTasks remains unchanged: finite queryfree HTTP200, typed ImageTaskInfo scalar/date/bool/object limits and explicit Ref Name resolver. New images.API.TaskRecords provides Source literal parent, mandatory image_id Body localfilter, untyped JSON and retained pager as a sibling.",
+        "Sequential Query and literal response dictionary order is preserved; bulk maps/new callback keys are sorted because Go maps have no kwargs insertion order. Source dict truthiness uses binary64 decimals while equality uses shared exact decimal JSON plus bool-number behavior, not arbitrary Python float rounding/nonfinite/runtime objects.",
+        "Go typed/raw limit requires one nonnegative machine integer and marker one nonblank UTF8 value. Safe literal route, request origin/collection/filter/protocol and retry ownership reject broad Source callback/continuation retargeting. Exact relative /v2/images/parent/tasks alias is supported; dictionary links are explicit Go compatibility. Cap bounds raw rows before local filtering and may omit later matches.",
+        "Selected client or explicit Microversion is preserved. Absent default uses finite eligible Glance major2 advertisement and ceiling2.17; API minor ID is not maxmicroversion and bounds-free stock Glance stays headerless. No minimum2.12 feature gate, Schema lookup, automatic task wait/cleanup or persistent KSA/session cache is claimed.",
+        "Pinned Source raise_from_response returns for status<400; Go intentionally accepts final200..399 and rejects informational100..199 with actual native receipt. Strict UTF8 differs from Requests replacement decoding, and malformed/empty/wrongshape list JSON remains a terminal accepted-response error.",
+        "Stock policy evidence is pinned Glance controller57f7dd9 get_image check plus official Glance2025.2 policy documentation, not a claim that57f7dd9 is a31.0.0 release tag. Image-scoped tasks is user reader subject to visibility; external /tasks tasks_api_access admin is outscope. Fixture and compile validation is distinct from live deployment behavior.",
+        "Conditional request headers are fixed if captured or explicitly selected, and otherwise required absent; callback injection/retargeting is a bounded Go guard. Native OkCodes hook changes are not blanket preflight-rejected: replay may occur, with final response checked against original200..399 range and actual outside-range receipt retained."
       ],
-      "remaining": [
-        "Pinned Python Resource._get_id uses literalstring or Resource.id despite name prose. Go requires Ref and offers explicit Name resolver with native exactlookup requests; absent/ambiguous/forbidden parent errors remainerrors.",
-        "Pinned Python mutableResource/untypedBody/sessionAdapter/configuredcache/microversion/generalpager behavior is broader than fixed concrete functionoptions and independentlyowned canonical ImageTaskInfo. No Resource dirty/cache/session or same-object parity claim.",
-        "SQL JSONEncodedDict reads arbitraryJSON and Python Body values are untyped, while unchanged TaskInfo restricts Input/Result to nullable objects. Nonobject response values are owned200 decode errors, not full JSON parity; literal date/boolshape semantics are explicitGo policy.",
-        "Actual endpoint is finite queryfree fullDBrow response. Go ignores passive next/Link/schema regardlesstype and applieslocalcap only; Python generalResource list mayusebodyfilters/max_items-to-limit hints and broaderpagercontinuation. Server visibility/expiry/deletion/order and authorization remainserver-owned.",
-        "Official API since2.12 and Python max2.17 do not imply a client minimum/version capability gate. No discovery/Schema/timecoercion/automatic wait/task cleanup/livecloud or wholeSDK completion evidence."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_image",
@@ -68916,7 +69146,24 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.API.WaitForStatus",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.New",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Container",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Order",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Secret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForContainer",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForOrder",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute"
       ],
       "contracts": [
         {
@@ -68930,20 +69177,78 @@
           "tests": [
             "keymanager/v1/orders/python_parity_test.go:TestPythonOrderWaitForStatus"
           ]
+        },
+        {
+          "behavior": "Owned concrete Container/Order/Secret constructors snapshot synchronized Resource and physical evidence; cached lower-equivalent nullable/empty/string status returns without HTTP and inputs/results do not alias.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCachedStatesAndIndependentTargetSnapshot",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitNormalizedComparisonIsNotUnicodeEqualFold"
+          ]
+        },
+        {
+          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2, explicit timeout zero/negative exhausts before polling, zero interval shortens the pause. Compound callback/cancel/source errors retain the last accepted receipt.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeoutsAndZeroIntervalPolicy",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal"
+          ]
+        },
+        {
+          "behavior": "Guarded common REST preserves rejected and accepted Read/Close, sticky source change and custom cancellation causes with actual status/body/header; native RetryFunc nil does not replay faulty physical responses. Clean503 retries retain owned selected version/headers and live token.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCompoundPhysicalFaultsRetainActualProofAndNeverReplay",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCleanNativeRetryPreservesSelectedPolicyAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "State normalization preserves Python Unicode lower, null and empty values. Source failure ERROR defaults and explicit empty failures disable detection; callback0 occurs only on nonterminal observations. Declared custom nullable string attributes are available.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitNormalizedComparisonIsNotUnicodeEqualFold",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitNullableAndInvalidSelectedAttributesKeepProof",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitFailureDefaultsExplicitEmptyAndCustomAttribute"
+          ]
+        },
+        {
+          "behavior": "Synchronized descriptor values persist on omission, incoming null/false/zero replaces prior values, malformed generic metadata leaves existing view and records actual response, and fixed RequestID does not follow returned id/HREF.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitSynchronizedSeedMergeAndGenericMalformedBody"
+          ]
+        },
+        {
+          "behavior": "Secret polling follows prior Resource payload_content_type before current response content_types.default. Current payload_content_type alone does not choose the first payload. Complete metadata+payload success precedes status completion and binary/text proof is owned.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerSecretWaitPayloadSelectionUsesPreviousSynchronizedResource",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerSecretWaitMetadataDefaultPayloadAndStrictFailures"
+          ]
+        },
+        {
+          "behavior": "Option/state preflight, clone isolation and captured source/header/version ownership prevent HTTP when the owned contract is invalid.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitOptionOwnershipAndPreflight"
+          ]
         }
       ],
       "documentation": [
-        "keymanager/v1/python-parity.md"
+        "keymanager/v1/python-parity.md",
+        "keymanager/v1/waits-python.md"
       ],
       "differences": [
         "Go defaults to a five-minute timeout and a failure predicate matching error prefixes, fail or failed suffixes and killed; Python waits forever with failures=['ERROR'], which Go reproduces with WithUnlimitedWait and WithFailureStates(\"ERROR\").",
         "Python coerces interval=0 to 0.1 seconds; Go WithPollInterval accepts only positive durations.",
-        "Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError."
+        "Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError.",
+        "Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. Arbitrary class/subtyping remains SDK-R1; known concrete target gaps are tracked separately as remaining.",
+        "Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.",
+        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. Negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
+        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. Nil Timeout is omission; explicit Unlimited removes the deletion SDK limit. Explicit zero/negative timeout fails before first GET unless a cached status already matches. Zero interval uses Source 100ms/min-positive-timeout pause.",
+        "Fixed original route, selected microversion or absence and reserved headers survive native attempts. Python mutable response id can change subsequent fetch routing; Go preserves RequestID and leaves response id/HREF passive. Live auth token and ordinary native retry headers remain native.",
+        "Source custom Secret.fetch does not raise HTTP errors itself; Go admits100..399 and rejects400..599 strictly with full physical causes, so payload404 cannot establish metadata absence. Accepted UTF-8 text is decoded strictly, opaque bytes remain Payload plus JSON base64 Resource values.",
+        "Container/Order generic malformed/empty JSON preserves synchronized attributes as Source ValueError handling does; valid JSON null/nonobject fails. Secret malformed JSON fails. Go requires valid UTF-8 metadata and eagerly projects finite declared casts/aliases using the existing shared projector.",
+        "Source projectors provide nullable descriptor defaults and locationnull; canonical wire aliases win deterministically. Unknown metadata is retained only in Wire. No Connection location/session HTTP cache, dirty-resource commit or arbitrary Python runtime value parity is claimed.",
+        "Clean metadata404 deletion returns an owned original Resource view plus the new404 proof channels rather than Source object identity. Fetched deleted returns the updated view. Errors retain last actual evidence but return Resource=nil."
       ],
       "remaining": [
-        "Python accepts any key manager Resource; Go waits exist only for containers, orders and secrets, not for secret stores, ACLs, consumers or quotas.",
-        "Python Secret waits use the custom Secret.fetch, which can also GET the payload; Go secrets WaitFor polls only the metadata GET.",
-        "Python returns the given Resource without HTTP when its cached status already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource."
+        "Known fetchable SecretStore status/custom-attribute/deletion targets need concrete route and raw Source projection; existing common ProjectRecord covers only containers/orders/secrets.",
+        "Known fetchable SecretACL and ordinary Quota have no status descriptor but Source allows their other declared string attributes and clean404 deletion polling. Their requires_id/envelope/URI rules and concrete constructors are not implemented by this finite-three package.",
+        "Admin ProjectQuota target is deferred to core admin phase; it must be added or explicitly handled before claiming whole proxy Resource target coverage."
       ]
     },
     {
@@ -68956,7 +69261,22 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.WaitForDeletion",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.API.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.New",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Container",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Order",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Secret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForContainer",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForOrder",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion"
       ],
       "contracts": [
         {
@@ -68964,17 +69284,62 @@
           "tests": [
             "keymanager/v1/orders/python_parity_test.go:TestPythonOrderWaitForDelete"
           ]
+        },
+        {
+          "behavior": "Owned concrete Container/Order/Secret constructors snapshot synchronized Resource and physical evidence; cached lower-equivalent nullable/empty/string status returns without HTTP and inputs/results do not alias.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCachedStatesAndIndependentTargetSnapshot",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitNormalizedComparisonIsNotUnicodeEqualFold"
+          ]
+        },
+        {
+          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2, explicit timeout zero/negative exhausts before polling, zero interval shortens the pause. Compound callback/cancel/source errors retain the last accepted receipt.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeoutsAndZeroIntervalPolicy",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal"
+          ]
+        },
+        {
+          "behavior": "Guarded common REST preserves rejected and accepted Read/Close, sticky source change and custom cancellation causes with actual status/body/header; native RetryFunc nil does not replay faulty physical responses. Clean503 retries retain owned selected version/headers and live token.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCompoundPhysicalFaultsRetainActualProofAndNeverReplay",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCleanNativeRetryPreservesSelectedPolicyAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Deletion always performs the first metadata GET even when cached deleted. A clean metadata404 returns original Resource with actual404 evidence, fetched deleted returns fetched Resource; null/nonstring/forbidden/server errors are terminal.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDeletionOriginalAndFetchedReturnContracts"
+          ]
+        },
+        {
+          "behavior": "Secret payload404 is a terminal marked payload failure rather than absence of the Secret. Metadata and payload native proof stay separate, and ACTIVE metadata cannot complete status wait when payload failed.",
+          "tests": [
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerSecretWaitMetadataDefaultPayloadAndStrictFailures",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCompoundPhysicalFaultsRetainActualProofAndNeverReplay"
+          ]
         }
       ],
       "documentation": [
-        "keymanager/v1/python-parity.md"
+        "keymanager/v1/python-parity.md",
+        "keymanager/v1/waits-python.md"
       ],
       "differences": [
-        "Go defaults to a five-minute timeout while the key manager Proxy default is wait=120; resource.WithTimeout reproduces it."
+        "Go defaults to a five-minute timeout while the key manager Proxy default is wait=120; resource.WithTimeout reproduces it.",
+        "Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. Arbitrary class/subtyping remains SDK-R1; known concrete target gaps are tracked separately as remaining.",
+        "Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.",
+        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. Negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
+        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. Nil Timeout is omission; explicit Unlimited removes the deletion SDK limit. Explicit zero/negative timeout fails before first GET unless a cached status already matches. Zero interval uses Source 100ms/min-positive-timeout pause.",
+        "Fixed original route, selected microversion or absence and reserved headers survive native attempts. Python mutable response id can change subsequent fetch routing; Go preserves RequestID and leaves response id/HREF passive. Live auth token and ordinary native retry headers remain native.",
+        "Source custom Secret.fetch does not raise HTTP errors itself; Go admits100..399 and rejects400..599 strictly with full physical causes, so payload404 cannot establish metadata absence. Accepted UTF-8 text is decoded strictly, opaque bytes remain Payload plus JSON base64 Resource values.",
+        "Container/Order generic malformed/empty JSON preserves synchronized attributes as Source ValueError handling does; valid JSON null/nonobject fails. Secret malformed JSON fails. Go requires valid UTF-8 metadata and eagerly projects finite declared casts/aliases using the existing shared projector.",
+        "Source projectors provide nullable descriptor defaults and locationnull; canonical wire aliases win deterministically. Unknown metadata is retained only in Wire. No Connection location/session HTTP cache, dirty-resource commit or arbitrary Python runtime value parity is claimed.",
+        "Clean metadata404 deletion returns an owned original Resource view plus the new404 proof channels rather than Source object identity. Fetched deleted returns the updated view. Errors retain last actual evidence but return Resource=nil."
       ],
       "remaining": [
-        "Python accepts any key manager Resource; Go deletion waits exist only for containers, orders and secrets.",
-        "Python returns the original Resource on deletion; Go returns only an error."
+        "Known fetchable SecretStore status/custom-attribute/deletion targets need concrete route and raw Source projection; existing common ProjectRecord covers only containers/orders/secrets.",
+        "Known fetchable SecretACL and ordinary Quota have no status descriptor but Source allows their other declared string attributes and clean404 deletion polling. Their requires_id/envelope/URI rules and concrete constructors are not implemented by this finite-three package.",
+        "Admin ProjectQuota target is deferred to core admin phase; it must be added or explicitly handled before claiming whole proxy Resource target coverage."
       ]
     },
     {
@@ -80049,6 +80414,811 @@
         "Bulk unordered Go seed aliases use canonical priority; ordered HTTP aliases retain Source last-value-wins. Boolean/paginated/top-level-next fraction/exponent truthiness uses binary64 (underflow false, overflow true), integer descriptors use shared Unicode16 digit tables and binary64 truncation. Local equality preserves exact JSON decimal arithmetic rather than Python float rounding; host Unicode/runtime integer-string cap and non-JSON objects are not asserted equivalent.",
         "Same-origin fixed-collection continuations, escaped immutable member routes, passive response IDs and one nonempty retained Wire marker query value are explicit Go guards. Arbitrary base_path, resource_type, connection/session, protocol, JMESPath and constructor-control overrides are rejected. Raw cap stops without an extra GET; inherited unrestricted Python adapter behavior is outside this mapping.",
         "Source raise_from_response accepts final statuses below400; this lane accepts transport-exposed100..399, while ordinary HTTP clients handle interim1xx. Accepted projection failures can return an owned partial receipt plus actual ResponseError, distinct from success. All400..599 physical rejections are observed, and compound Read/Close/source/cancel/retry errors retain proof and never turn into fallback/missing/replay."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_group",
+      "source_fingerprint": "19e9166d585b3f5c2ff8712977e9e4b7604f57bc0ddd36a37743f65a0e0c7562",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal escaped member GET runs before list and returns successful Source untyped/null/numeric id/name without synthetic string validation; known descriptors and unknown raw proof are the existing Group record profile.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordDirectUntypedProjectionAndLiteralIdentity"
+          ]
+        },
+        {
+          "behavior": "Only a clean physical400/403/404 can fall back. The fixed Group mapping has no server name query; details defaults true with /groups/detail and false uses /groups. Every page is checked by exact string id OR name, including advertised forward offset continuation and ID-only matches.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordCleanFallbackHasNoServerNameQuery",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordCleanRetryOriginalKeepsFallback"
+          ]
+        },
+        {
+          "behavior": "IgnoreMissing defaults true and suppresses only logical absence after a successful complete list. Strict false returns ErrNotFound; actual list403/404/503 remains native status/body/header and is never suppressed.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordMissingRequiresSuccessfulList"
+          ]
+        },
+        {
+          "behavior": "A second matching row, including identical id, raises AmbiguousError with the actual accepted duplicate page. A later rejection/read/Close or constructor error discards the earlier candidate and preserves actual physical evidence.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordLateDuplicatesKeepAcceptedPage",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordLateFailureDoesNotReturnFirstMatch",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordAcceptedErrorsAndListConstructorAreTerminal"
+          ]
+        },
+        {
+          "behavior": "Rejected member read/Close400/403/404 cannot become clean fallback or invoke RetryFunc; accepted202 read errors containing nested400/403/404 likewise remain terminal actual202 response errors with original close/native causes and zero retry hooks.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordRejectedReadCloseNeverFallsBack",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordAcceptedPhysicalCausesCannotBecomeFallback"
+          ]
+        },
+        {
+          "behavior": "Bool/string pointers, per-call header maps and retained custom option pointers are owned snapshots for both phases. Nil context/API/option, blank identity, invalid version and reserved headers fail before discovery. Option errors, original source mutation and custom cancellation causes join rather than replace one another. Default/nil Headers become a fresh empty owned map for the first custom callback; repeated GET-to-LIST runs, retained callback mutation and an independent original-header snapshot preserve ownership.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordOptionsOwnBothPhaseSnapshots",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordPreflightAndStickyOriginalSource",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordFirstCustomHeaderOptionOwnsDefaultAndNilMaps"
+          ]
+        },
+        {
+          "behavior": "A single original cloudread capture guards both private per-phase copies. GET-only microversion override never propagates to fallback, which retains the original selected version. Empty override inherits original. Captured Accept applies to GET while Source LIST defaultapplication/json overrides it unless per-call Accept is supplied.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordGetOverrideFallbackOriginalVersionAndHeaders"
+          ]
+        },
+        {
+          "behavior": "Absent original version negotiates to at most3.38 and records actual discovery separately. A default GET reuses the original negotiation for fallback; an explicit GET override does not fabricate discovery and fallback negotiates the original default. Discovery403 is terminal and cannot be mistaken for member403 fallback.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordDiscoveryEvidenceFollowsEachVersionPhase",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordDiscoveryDenialCannotBecomeMemberFallback"
+          ]
+        },
+        {
+          "behavior": "A transient source endpoint mutation between actual Read and Close stays sticky despite restoration and preserves the accepted200 receipt.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordAcceptedTransientSourceMutationKeepsReceipt"
+          ]
+        },
+        {
+          "behavior": "Library-owned selected version values/all three version-header roles, reserved authentication/framing absence and owned OmitHeaders checks apply to native RetryFunc. Mutation stops before second HTTP with original503 evidence. Ordinary X-Retry and live provider token refresh remain supported; clean RetryFunc-return-original404 retains fallback.",
+          "tests": [
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordNativeRetryOwnsVersionAndPreservesOrdinaryHeaders",
+            "blockstorage/v3/groups/python_find_test.go:TestPythonCinderGroupFindRecordCleanRetryOriginalKeepsFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-find-python.md",
+        "blockstorage/v3/groups-python.md"
+      ],
+      "differences": [
+        "The fixed proxy exposes name_or_id, ignore_missing and details only. Go additionally exposes typed GET-only inherited Resource.find microversion and ordinary per-call headers, without arbitrary kwargs/query/route/session controls.",
+        "Go accepts a literal nonblank UTF-8 string and rejects dot segments/Unicode controls before HTTP. Details/IgnoreMissing are owned typed nullable bool options rather than Python dynamically truthy values. Python deprecation warnings are not emitted.",
+        "Group records are independent JSON-domain snapshots; Source mutable Resource/Munch/subclasses, Connection-derived computed location, persistent dirty state and response-cache hits/invalidation remain shared SDK-R1/C1/S1 boundaries. location=null and every Find makes HTTP.",
+        "Reuses the committed Group declared body/list descriptors, null defaults, exact wire numeric preservation and guarded MarkerOrOffsetPagination. Go uses strict origin/project/filter locks, forward single-family cursors and dictionary-link compatibility extensions.",
+        "Terminal physical/source/cancel/callback faults are explicitly preserved and clean fallback is narrower than arbitrary Python transport customization. Owned version/reserved headers survive native callbacks; ordinary retry headers and live X-Auth-Token refresh retain native policy.",
+        "The explicit empty GET override is a documented Go inherit-default policy. Pinned Source Resource.fetch forwards an explicitly empty microversion string; this Go option is not claimed as identical underlying fetch behavior."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_group_snapshot",
+      "source_fingerprint": "53f82e6edc36aeb5dac16c8107147ba63e6c2dc324a2777d2425a63b97e237c2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindLocation",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMaxItems"
+      ],
+      "contracts": [
+        {
+          "behavior": "Pinned named default ignore_missing=True/details=True; one escaped literal member GET, clean400/403/404 fallback, no automatic server/local name query, exact ID-or-name scan, default nil only after complete successful list; strict logical absence has no suppressed native GET cause.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNameFilter",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDefaultMissingStrictAndListRejection"
+          ]
+        },
+        {
+          "behavior": "Successful GET retains eight untyped descriptors/constructor seed, accepts passive null/nonstring/different response ID, tolerates cls as unknown Wire; ordinary fields/JSON expansion and special all_projects are bounded underlying Resource.find Go extensions, with constructor collisions/null/false/zero and invalid cap/query rejected before discovery/HTTP.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDirectSuccessUntypedIDAndSeed",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindReservedAndMalformedInputPrecedesHTTP"
+          ]
+        },
+        {
+          "behavior": "Common identity engine observes every page before unique success; second match returns Ambiguous, late HTTP/row/unsafe link/physical failure returns only actual terminal receipt, no candidate success. Shared marker-or-offset pager and raw cap reuse existing reader; single-page/raw-cap options document bounded search.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindCompletePagesDuplicateAndLateFailure",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindLatePhysicalListFailureKeepsActualPage",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindPagingControlsOffsetAndRawCap"
+          ]
+        },
+        {
+          "behavior": "GET-only explicit microversion, including empty absence, never leaks into separately prepared LIST service/default ceiling3.29; copied private source headers/aliases and one original sticky guard protect both phases. Actual discovery observations remain separate and original client remains unchanged.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindGetOnlyMicroversionAndIndependentDiscovery"
+          ]
+        },
+        {
+          "behavior": "Captured service precedes callback, immutable configs are copied around options, location/descriptor constructor preflight precedes discovery/GET; successful declared/wire/envelope/header evidence is independent, nil/invalid contexts and source/cancel errors preserve their causes.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindQuerySeedFieldsScopeAndOwnedSnapshots",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindCapturedSourceOptionCancellationAndNil",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDeclaredLocationAndEvidenceDoNotAlias"
+          ]
+        },
+        {
+          "behavior": "Read/Close/source/context faults on accepted and rejected statuses cannot replay/fallback/ignore/call native retry callback; late physical LIST faults preserve actual partial page. Clean native retry retains headers/version/route; attempted owned header/source mutation keeps native rejection and policy causes.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindPhysicalRejectionsCannotFallbackReplayOrIgnore",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindLatePhysicalListFailureKeepsActualPage",
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindCleanRetryAndOwnedHeaders"
+          ]
+        },
+        {
+          "behavior": "Find completes captured GET policy/discovery before entering shared identity lookup. A clean discovery400/403 remains a preparation failure with actual native status/body/header and receipt, exactly one discovery HTTP and zero member/list requests; it cannot become member absence, repeat fallback discovery or successful missing. Public GetRecord still owns its prior preparation and transport behavior.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDiscoveryRejectionNeverBecomesMemberFallback"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-snapshot-find-python.md"
+      ],
+      "differences": [
+        "The exact named Source Proxy accepts only name_or_id, ignore_missing and details. Headers/location/GET-only microversion/JSON Query/bounded paging are explicit Go extensions exposing a finite underlying Resource.find profile; named Python **query parity is not claimed.",
+        "One original cloudread capture owns both phase copies. Defaults independently discover ceiling3.29 rather than implement Python Adapter/session discovery cache; explicit service/per-call defaults are retained and empty GET-only header absence is a documented Go option.",
+        "Go validates blank/dot/control/invalid-UTF8 literal identity and owns escaping fixed member segments. Full mutable Resource/subclass/session/Adapter/cache/dirty/custom-routing/method-control/constructor overloads and Python default-warning behavior are outside this mapping.",
+        "Only eight untyped descriptors and computed recorded-auth/owned location form the declared model; unknown attrs remain Wire/Envelope. Passive response IDs never rewrite routing. Go returns actual terminal HTTP receipt as an extension, not a successful Resource or current backend proof.",
+        "Underlying JSON Query uses stable Go key order, Requests scalar/list/object expansion, known Body seeds/local predicates and known server aliases; all_projects is bool/null and GET-excluded. Reserved constructor/control keys reject presence even null/false/zero. Query factories snapshot/marshal at creation before API capture; API callback-time source changes remain guarded.",
+        "Shared local predicate uses exact decimal equality, not Python JSON binary64 rounding. Actual9007199254740992 versus filter9007199254740993.0 can differ from Source after floating decode. Recursive dictionary/truthiness/bool-number Source matching remains shared.",
+        "Finite shared pager rejects changed origin/collection/filter/cycles, supports advertised marker/offset with one cursor family and nonnegative uint64 offset, does not increment explicit offset automatically, and bounds raw cap/limit; standard RFC Link support is an explicit improvement over pinned Source Requests uri lookup. Paginated=false/raw cap bound search and do not establish global uniqueness.",
+        "Fixture tests and authenticated-cloud/backend acceptance are separate. Existing four GroupSnapshot get/list/create/delete and native operations are reused, not recounted; no admin status/reset operation is promoted."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/find_qos_bandwidth_limit_rule",
+      "source_fingerprint": "57dea302705f4f3f3c0c75668e4bdb3863f771713baf96eb84574ea3b2b67743",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitFindHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET-first uses literal escaped parent and rule, fixed qos_policy_id in member query, raw original kwargs and constructor Body seeds. Only clean400/403/404 fallback to same parent; no default name server hint. Default logical absence is nil and explicit ignore_missing false returns ErrNotFound only after complete successful search.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitGetNoFallbackAndFindMissingCompleteSearch",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitFindBodySeedsAndListLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Exact ID/name list search sees later duplicates/errors before success. Parent URI seed is excluded from Body; actual member unknown qos_policy_id is projected through fixed URI while Wire keeps raw receipt. Only limit/marker are server query fields and declared Body kwargs are local filters.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitFindLaterDuplicateAndListFailureRemainTerminal",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitFindBodySeedsAndListLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Find per-call microversion governs member only and fallback retains captured selected default including canonical selected header alias. Clean native retry succeeds and unsafe retry request/header/version/status mutations preserve original proof.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy"
+          ]
+        },
+        {
+          "behavior": "Exact class Resource MRO has untyped max_kbps/max_burst_kbps/direction plus inherited id/name, all missing null, unknown received Body retained, no invented TagMixin/NetworkResource Header/default descriptors. Actual literal row, parent URI and physical response snapshots remain separate.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns"
+          ]
+        },
+        {
+          "behavior": "Final200..399 completion and every actual400..599 native rejection preserve status/body/header. Accepted malformed shape, Read/Close/custom cancellation/captured Source faults preserve actual receipt and causes; one physical Close. Faulty404 never becomes clean fallback.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitAllStatusAndMalformedReceiptBoundaries",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitPhysicalReadCloseCancelAndSourceProof"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot JSON/maps/pointers/callback outputs, capture fixed selected Source before callbacks, reject nil/malformed parent/proxy/constructor/route controls before HTTP. Safe owned headers/version do not mutate the selected client or enable retry route/status/auth/version changes.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitOptionSnapshotsAndPreflight",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/qos-bandwidth-limit-records-python.md"
+      ],
+      "differences": [
+        "Parent-first Go argument order follows existing native rule APIs. Parent policy is a literal ID; Python Resource instance/dirty/cache/session/Connection lifecycles are represented by immutable record snapshots, not fully reimplemented. QoSPolicyID exposes URI state separately from the default Body/to_dict view.",
+        "JSON-domain options and deterministic sorted bulk map keys replace arbitrary Python kwargs/runtime objects. Source default QueryParameters only limit/marker; max_kbps/max_burst_kbps/direction/id/name local filtering differs from native upstream rule LIST query builders.",
+        "Local numeric equality uses shared exact-decimal JSON, with bool-number equality and CPython float truthiness/falsey next handling. All CPython binary64 rounding/nonfinite/custom-object comparisons are not claimed.",
+        "HTTP200..399 is the completion success range; Source final<400 informational100..199 is outside this profile. Actual400..599 and accepted/rejected physical causes stay observable.",
+        "Paging restricts same origin, fixed parent collection and original filters; exact versioned-path alias only. Dictionary continuation links are a Go compatibility extension, and rewritten/foreign Source continuations are errors with actual proof.",
+        "Safe Header options and Get Microversion options are explicit Go conveniences absent from the public pinned get proxy. Find per-call version applies to GET only; fallback keeps captured selected default and standalone List version controls all pages.",
+        "Stock Neutron27 get_policy_bandwidth_limit_rule is project-scoped ADMIN_OR_PARENT_OWNER_READER. Shared QoSPolicy visibility does not alone grant rule read access; fixture403 preservation does not prove live deployment authorization. Other rule kinds/Create/Update/Delete are excluded from this wave.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ]
+    },
+    {
+      "operation": "python:network/v2/find_qos_dscp_marking_rule",
+      "source_fingerprint": "42b767fb5e0829ca3aaf018b80569331992c46849ec2482da3e03d03205181b4",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.FindDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingFindIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "Required qos_policy_id is Source constructor URI and member fetch parameter: GET forwards it plus original kwargs, no parent GET. All_projects is consumed separately. Bound URI is removed from Body defaults. GET unknown Body seeds remain Source-shaped while response explicit values override them; caller bound policy/identity kwargs collision fails before HTTP.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots"
+          ]
+        },
+        {
+          "behavior": "GET-first clean400/403/404 fallback scans exact ID or name across all pages for complete uniqueness and default ignore-missing. No name server hint is invented because Source inherits limit/marker-only QueryParameters. dscp_mark/name/id are local filters; unknown/member-only kwargs are dropped on fallback. List errors/duplicate/later page rejection remain visible; clean empty search alone yields defaultnil or strictErrNotFound.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindCleanFallbackLocalFiltersAndNoNameHint",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindCompletesUniquenessAndMissingSearch"
+          ]
+        },
+        {
+          "behavior": "Owned engine SourceFindPolicy retains ordered local predicates, constructor/default/unknown response behavior and guarded raw-row cap/paging; local dictionary scalar faults cannot become missing. Actual Source kwargs use provided JSON request values, with documented shared exact-decimal rather than binary64-rounding equality policy.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListOrderedDictionaryFiltersAndExactNumbers",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListPagingBoundsAndConstructorProof"
+          ]
+        },
+        {
+          "behavior": "Bound policy literal ID controls escaped parent/member path without parent GET or name resolution. Source URI is exposed as independent PolicyID, not invented Body default. id/name/dscp_mark are untyped with null defaults, inherited location null and no foreign Neutron tags/Header/revision/timestamp descriptors. Unknown Body extension and exact original JSON values/Wire/self/evidence are owned independently.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI"
+          ]
+        },
+        {
+          "behavior": "Captured selected Neutron source and concrete JSON/header/pointer options remain owned across option callbacks, retained configs, physical Read/Close, cancellation, native clean retry and live authentication. Accepted physical failures keep actual response proof; rejected400..599 retain native method/URL/status/body/Header and physical causes, one request/Close and no lookup fallback or manufactured decoded Resource.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPhysicalFaultsPreventFallbackAndKeepEvidence",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Selected/default network microversion is retained without invented discovery/ceiling; explicit Find version affects GET only and fallback retains Source service default. Get/List explicit version owns its invocation. Fixed source bodyless method/path/query and network version/absence plus auth/framing/foreign Nova/Cinder headers prevent native retry injection while ordinary retry Header/live provider tokens work.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingVersionsAndRetryHeadersRemainSelected"
+          ]
+        },
+        {
+          "behavior": "Public Gophercloud testhelper HTTP fixture and existing nativeRuleAPI/transport are reused. Concurrent factory reuse, actual escaped member path and query-free GET are fixture-proven; no additional transport or paging engine is implemented.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Source Computed location remains ownednull for GET/Find/List even if physical response includes forged object, false, zero, emptystring or null. The actual rawlocation and wholepage Envelope stay in independent Wire/receipt, and RawResource.Clone plus mutation of cloned/original wire/header cannot contaminate Resource view or original physical Envelope. Shared SourceFindPolicy projection enforces computed ownership rather than treating location as ordinary unknown Body.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingComputedLocationStaysOwnedAcrossReads"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/dscp-marking-python.md"
+      ],
+      "differences": [
+        "Actual generated leaf is network/v2/extensions/qos/rules; no dscpmarking subpackage exists. Exactly three unresolved named Source operations are mapped; existing native typed DSCP CRUD/List and generated parent Collection are not recounted. Shared neutronfind.Engine Get/Find/List with SourceFindPolicy plus cloudread/REST owns transport/pagination/defaults, with no new engine/mock server.",
+        "Pinned QoSDSCPMarkingRule directly inherits Resource, allows unknown Body and declares untyped dscp_mark and URI qos_policy_id. Go exposes URI as PolicyID separately from Source-shaped Body; original response URI-looking values remain in Wire while member Resource getters reflect bound parent. Actual response location remains raw in Wire/Envelope while owned Resource computed location is null across GET/Find/List; no server location-to-Body leakage. Mutable Resource/Munch parent seeds/dirty-state/cache/Connection/location synthesis/general Adapter/session remain global SDK-R1/C1/S1.",
+        "Source Proxy parent _get_resource seeds identity without parent HTTP; Go accepts a validated literal parentID string and escapes parent/child once. Blank/dot/control/invalidUTF8 parent/child, caller bound kwargs, arbitrary base_path/session/constructor overrides are explicit Go guards. Shared policy read is not shared rule-read authority.",
+        "Source get_qos_dscp_marking_rule signature is query-free. Additional Go concrete GetQuery/Header/Microversion options are transport extensions and never become response Body seed. Find GET forwards original kwargs including required qos_policy_id while fallback/list classify only inherited limit/marker and actual local Body properties; user-supplied QoS policy/identity required kwargs collisions are rejected.",
+        "Shared Engine accepted200..399 is narrower than pinned generic raise_from_response valid100..399 for transport-exposed1xx. Existing SDK-C1 exact-decimal JSON equality preserves numeric evidence rather than complete CPython binary64 equality. API profiles retain these explicit shared policies; no fake selected microversion limit/discovery or network rule scalar casts are invented.",
+        "Pinned Neutron27 get_policy_dscp_marking_rule uses ADMIN_OR_PARENT_OWNER_READER/project scope for collection and member. The shared_qos_policy condition belongs to get_policy, not rule read. Actual HTTP/RBAC/deployment extension errors remain server observations; local fixtures do not establish authenticated cloud acceptance or writable project-manager/admin parity.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/find_rbac_policy",
+      "source_fingerprint": "7138a4cd22f94002ef304e99fabfb9f839bd7cc9e28cc3a482dceddff0b46e28",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindMicroversion"
+      ],
+      "contracts": [
+        {
+          "behavior": "GET-first passes original kwargs to member query and constructor seed, then clean400/403/404 alone allow complete unique exact ID/name list search. No automatic name server hint exists for RBAC mapping. Default clean missing is nil and explicit strict missing is ErrNotFound.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordCleanFallbackMissingAndCompleteUniqueness",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordNativeClean404RetryStillFallsBackOnce"
+          ]
+        },
+        {
+          "behavior": "Member requested fields remain untransposed Find kwargs while fallback LIST transposes target_project_id alias separately and applies declared tenant_id filters. Per-call override affects GET only; LIST returns to configured version.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint"
+          ]
+        },
+        {
+          "behavior": "Constructor/route options preflight, actual body defaults and arbitrary extensions reuse Source projector; physical404 or any read/Close/cancel/source failure stays terminal rather than hidden fallback/missing.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof"
+          ]
+        },
+        {
+          "behavior": "Presence of bound rbac_policy, name_or_id or ignore_missing query controls is rejected before HTTP and before evaluating their JSON value, including null/false/zero. Typed IgnoreMissing remains the public control.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordBoundArgumentsFailBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "An actual unknown response microversion is retained unchanged in Wire while the Source runtime attribute in Resource reflects the selected member version string or null; response values never control routing or request version.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/rbac-policy-python.md"
+      ],
+      "differences": [
+        "Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.",
+        "The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.",
+        "Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.",
+        "Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.",
+        "Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.",
+        "Unknown list kwargs are discarded before value evaluation; id/name/tenant_id are local declared Body filters even if the server can filter additional fields. Source arbitrary extension query filtering is not inferred from readable unknown Body extensions.",
+        "Local ordinary JSON number equality uses exact decimals rather than Source binary64 rounding/underflow:9007199254740992 versus9007199254740993.0 is unequal, and1e-4000 versus0 is unequal. Source float truthiness is separately preserved for dict filters/paginated/next controls.",
+        "Ordered functional query options preserve kwargs insertion order; bulk Query maps are sorted. Constructor canonical/wire aliases can therefore differ from unordered Python mappings.",
+        "Pagination keeps fixed origin/path/initial filters and detects loops, validates numeric controls, and requires one nonempty wire ID marker query value. Source permissive adapter and arbitrary iterable/object marker encoding are not fully reproduced. Dictionary links are a Go extension.",
+        "Pinned ignore_missing default true/deprecation warning is kept as behavior; Go emits no Python warning. GET unknown kwargs are preserved JSON-domain constructor/query values and discarded on list fallback.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_qos_bandwidth_limit_rule",
+      "source_fingerprint": "af821d7ed32e3e0be2535aa1272cf7f54dd544e6c48bd7808df65e53c93ef503",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitGetHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Exact public get proxy constructs literal parent URI without a parent fetch or member parent query, performs one rule GET, seeds only identity, and returns every actual member error without fallback or ignore-missing. Get has no Source query kwargs; safe Header/version convenience is explicit Go extension.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitGetNoFallbackAndFindMissingCompleteSearch"
+          ]
+        },
+        {
+          "behavior": "URI qos_policy_id is outside default to_dict unless member response introduces an unknown Body key, then Source getattr(URI) projects the bound parent. Literal raw unknown values, untyped defaults and actual response metadata remain separately owned.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView"
+          ]
+        },
+        {
+          "behavior": "Exact class Resource MRO has untyped max_kbps/max_burst_kbps/direction plus inherited id/name, all missing null, unknown received Body retained, no invented TagMixin/NetworkResource Header/default descriptors. Actual literal row, parent URI and physical response snapshots remain separate.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns"
+          ]
+        },
+        {
+          "behavior": "Final200..399 completion and every actual400..599 native rejection preserve status/body/header. Accepted malformed shape, Read/Close/custom cancellation/captured Source faults preserve actual receipt and causes; one physical Close. Faulty404 never becomes clean fallback.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitAllStatusAndMalformedReceiptBoundaries",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitPhysicalReadCloseCancelAndSourceProof"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot JSON/maps/pointers/callback outputs, capture fixed selected Source before callbacks, reject nil/malformed parent/proxy/constructor/route controls before HTTP. Safe owned headers/version do not mutate the selected client or enable retry route/status/auth/version changes.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitOptionSnapshotsAndPreflight",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/qos-bandwidth-limit-records-python.md"
+      ],
+      "differences": [
+        "Parent-first Go argument order follows existing native rule APIs. Parent policy is a literal ID; Python Resource instance/dirty/cache/session/Connection lifecycles are represented by immutable record snapshots, not fully reimplemented. QoSPolicyID exposes URI state separately from the default Body/to_dict view.",
+        "JSON-domain options and deterministic sorted bulk map keys replace arbitrary Python kwargs/runtime objects. Source default QueryParameters only limit/marker; max_kbps/max_burst_kbps/direction/id/name local filtering differs from native upstream rule LIST query builders.",
+        "Local numeric equality uses shared exact-decimal JSON, with bool-number equality and CPython float truthiness/falsey next handling. All CPython binary64 rounding/nonfinite/custom-object comparisons are not claimed.",
+        "HTTP200..399 is the completion success range; Source final<400 informational100..199 is outside this profile. Actual400..599 and accepted/rejected physical causes stay observable.",
+        "Paging restricts same origin, fixed parent collection and original filters; exact versioned-path alias only. Dictionary continuation links are a Go compatibility extension, and rewritten/foreign Source continuations are errors with actual proof.",
+        "Safe Header options and Get Microversion options are explicit Go conveniences absent from the public pinned get proxy. Find per-call version applies to GET only; fallback keeps captured selected default and standalone List version controls all pages.",
+        "Stock Neutron27 get_policy_bandwidth_limit_rule is project-scoped ADMIN_OR_PARENT_OWNER_READER. Shared QoSPolicy visibility does not alone grant rule read access; fixture403 preservation does not prove live deployment authorization. Other rule kinds/Create/Update/Delete are excluded from this wave.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ]
+    },
+    {
+      "operation": "python:network/v2/get_qos_dscp_marking_rule",
+      "source_fingerprint": "d33352e15b8e25476a5c385da0b4013742a4c915e9856e3940d8358cc8c5eb30",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingGetMicroversion"
+      ],
+      "contracts": [
+        {
+          "behavior": "One query-free named default GET at the bound policy/member path; no parent lookup, fallback or404 ignore. Optional Go transport query does not seed Body: accepted blank/malformed JSON keeps identity/defaults while actual null/scalar/wrong singular/invalidUTF8 are response evidence errors. Source getter has no kwargs; wider Go query/Header/version extensions are explicit.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetPartialReceiptsWithoutQuerySeedsOrFallback"
+          ]
+        },
+        {
+          "behavior": "Bound policy literal ID controls escaped parent/member path without parent GET or name resolution. Source URI is exposed as independent PolicyID, not invented Body default. id/name/dscp_mark are untyped with null defaults, inherited location null and no foreign Neutron tags/Header/revision/timestamp descriptors. Unknown Body extension and exact original JSON values/Wire/self/evidence are owned independently.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI"
+          ]
+        },
+        {
+          "behavior": "Captured selected Neutron source and concrete JSON/header/pointer options remain owned across option callbacks, retained configs, physical Read/Close, cancellation, native clean retry and live authentication. Accepted physical failures keep actual response proof; rejected400..599 retain native method/URL/status/body/Header and physical causes, one request/Close and no lookup fallback or manufactured decoded Resource.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPhysicalFaultsPreventFallbackAndKeepEvidence",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Selected/default network microversion is retained without invented discovery/ceiling; explicit Find version affects GET only and fallback retains Source service default. Get/List explicit version owns its invocation. Fixed source bodyless method/path/query and network version/absence plus auth/framing/foreign Nova/Cinder headers prevent native retry injection while ordinary retry Header/live provider tokens work.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingVersionsAndRetryHeadersRemainSelected"
+          ]
+        },
+        {
+          "behavior": "Public Gophercloud testhelper HTTP fixture and existing nativeRuleAPI/transport are reused. Concurrent factory reuse, actual escaped member path and query-free GET are fixture-proven; no additional transport or paging engine is implemented.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Source Computed location remains ownednull for GET/Find/List even if physical response includes forged object, false, zero, emptystring or null. The actual rawlocation and wholepage Envelope stay in independent Wire/receipt, and RawResource.Clone plus mutation of cloned/original wire/header cannot contaminate Resource view or original physical Envelope. Shared SourceFindPolicy projection enforces computed ownership rather than treating location as ordinary unknown Body.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingComputedLocationStaysOwnedAcrossReads"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/dscp-marking-python.md"
+      ],
+      "differences": [
+        "Actual generated leaf is network/v2/extensions/qos/rules; no dscpmarking subpackage exists. Exactly three unresolved named Source operations are mapped; existing native typed DSCP CRUD/List and generated parent Collection are not recounted. Shared neutronfind.Engine Get/Find/List with SourceFindPolicy plus cloudread/REST owns transport/pagination/defaults, with no new engine/mock server.",
+        "Pinned QoSDSCPMarkingRule directly inherits Resource, allows unknown Body and declares untyped dscp_mark and URI qos_policy_id. Go exposes URI as PolicyID separately from Source-shaped Body; original response URI-looking values remain in Wire while member Resource getters reflect bound parent. Actual response location remains raw in Wire/Envelope while owned Resource computed location is null across GET/Find/List; no server location-to-Body leakage. Mutable Resource/Munch parent seeds/dirty-state/cache/Connection/location synthesis/general Adapter/session remain global SDK-R1/C1/S1.",
+        "Source Proxy parent _get_resource seeds identity without parent HTTP; Go accepts a validated literal parentID string and escapes parent/child once. Blank/dot/control/invalidUTF8 parent/child, caller bound kwargs, arbitrary base_path/session/constructor overrides are explicit Go guards. Shared policy read is not shared rule-read authority.",
+        "Source get_qos_dscp_marking_rule signature is query-free. Additional Go concrete GetQuery/Header/Microversion options are transport extensions and never become response Body seed. Find GET forwards original kwargs including required qos_policy_id while fallback/list classify only inherited limit/marker and actual local Body properties; user-supplied QoS policy/identity required kwargs collisions are rejected.",
+        "Shared Engine accepted200..399 is narrower than pinned generic raise_from_response valid100..399 for transport-exposed1xx. Existing SDK-C1 exact-decimal JSON equality preserves numeric evidence rather than complete CPython binary64 equality. API profiles retain these explicit shared policies; no fake selected microversion limit/discovery or network rule scalar casts are invented.",
+        "Pinned Neutron27 get_policy_dscp_marking_rule uses ADMIN_OR_PARENT_OWNER_READER/project scope for collection and member. The shared_qos_policy condition belongs to get_policy, not rule read. Actual HTTP/RBAC/deployment extension errors remain server observations; local fixtures do not establish authenticated cloud acceptance or writable project-manager/admin parity.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/get_rbac_policy",
+      "source_fingerprint": "480033c3903b372f663649135e66cdbe5b854b1f9d6979d8c309f017f4ff916c",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.GetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetFields",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "Literal member GET transposes nonempty public fields to wire target_tenant while preserving requested order/duplicates/unknown field names; nil/empty fields omit query and do not seed Resource. Received null/false/zero/untyped fields and unknown extensions/defaults remain independent actual proof.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordFieldsAliasesDefaultsAndOwnedEvidence",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordEnvelopeAndMissingAreTerminal"
+          ]
+        },
+        {
+          "behavior": "Source ordered canonical/wire aliases retain response input-order last value; project_id alias tenant_id applies only when absent, not explicit null. No tags/revision/timestamp/if_match Body defaults are inherited.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordsOrderedResponseAliasesAndNullPrecedence"
+          ]
+        },
+        {
+          "behavior": "Options own fields/header/raw bytes; invalid controls and canceled custom cause stop before HTTP. Accepted/rejected compound faults preserve method/status/body/header and original read/Close/sticky source/cancel causes with oneClose and no replay.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof"
+          ]
+        },
+        {
+          "behavior": "An actual unknown response microversion is retained unchanged in Wire while the Source runtime attribute in Resource reflects the selected member version string or null; response values never control routing or request version.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/rbac-policy-python.md"
+      ],
+      "differences": [
+        "Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.",
+        "The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.",
+        "Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.",
+        "Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.",
+        "Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.",
+        "Source _get_with_fields is exposed through typed []string Fields. Other constructor/fetch kwargs are unavailable on this public get callable. Default404 remains terminal with no list fallback.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/qos_bandwidth_limit_rules",
+      "source_fingerprint": "934e2ebce7500d479a7369dee2f5239f3242549c67f1518f9ee91db5d5c1f05f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy list uses fixed literal parent without lookup. Only default limit/marker transpose to server query; Body id/name/direction/bandwidth fields filter locally. Unknown kwargs including fields/tags are discarded before transport-value evaluation, even function/malformed unknown values.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop"
+          ]
+        },
+        {
+          "behavior": "Source list injects URI parent then consumes it outside Body; Wire owns foreign original row value and whole page proof. Positive raw cap counts before filtering, limit=0 plus cap creates limit hint; single page and early break avoid another request.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListRawCapSinglePageAndEarlyStop"
+          ]
+        },
+        {
+          "behavior": "Complete pager handles short-page ID marker fallback, relative and exact versioned continuations, Source falsey float next and malformed truthy next proofs. Parent/origin/filter retargeting fails with actual page evidence; iterator yields earlier rows but All drops partial rows after late failure.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListContinuationCannotChangeParentOrFilters",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListMarkerFallbackAndFalseyNumericNext",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListPartialIterationAndAllDropLateError"
+          ]
+        },
+        {
+          "behavior": "Exact class Resource MRO has untyped max_kbps/max_burst_kbps/direction plus inherited id/name, all missing null, unknown received Body retained, no invented TagMixin/NetworkResource Header/default descriptors. Actual literal row, parent URI and physical response snapshots remain separate.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitMemberLiteralRoutesSourceQueryAndURIView",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitListLazyQueryLocalFiltersAndUnknowns"
+          ]
+        },
+        {
+          "behavior": "Final200..399 completion and every actual400..599 native rejection preserve status/body/header. Accepted malformed shape, Read/Close/custom cancellation/captured Source faults preserve actual receipt and causes; one physical Close. Faulty404 never becomes clean fallback.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitAllStatusAndMalformedReceiptBoundaries",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitPhysicalReadCloseCancelAndSourceProof"
+          ]
+        },
+        {
+          "behavior": "Concrete options snapshot JSON/maps/pointers/callback outputs, capture fixed selected Source before callbacks, reject nil/malformed parent/proxy/constructor/route controls before HTTP. Safe owned headers/version do not mutate the selected client or enable retry route/status/auth/version changes.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitOptionSnapshotsAndPreflight",
+            "network/v2/extensions/qos/rules/python_bandwidth_limit_records_contracts_test.go:TestPythonBandwidthLimitVersionPhasesCleanRetryAndOwnedHeaderPolicy"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/qos-bandwidth-limit-records-python.md"
+      ],
+      "differences": [
+        "Parent-first Go argument order follows existing native rule APIs. Parent policy is a literal ID; Python Resource instance/dirty/cache/session/Connection lifecycles are represented by immutable record snapshots, not fully reimplemented. QoSPolicyID exposes URI state separately from the default Body/to_dict view.",
+        "JSON-domain options and deterministic sorted bulk map keys replace arbitrary Python kwargs/runtime objects. Source default QueryParameters only limit/marker; max_kbps/max_burst_kbps/direction/id/name local filtering differs from native upstream rule LIST query builders.",
+        "Local numeric equality uses shared exact-decimal JSON, with bool-number equality and CPython float truthiness/falsey next handling. All CPython binary64 rounding/nonfinite/custom-object comparisons are not claimed.",
+        "HTTP200..399 is the completion success range; Source final<400 informational100..199 is outside this profile. Actual400..599 and accepted/rejected physical causes stay observable.",
+        "Paging restricts same origin, fixed parent collection and original filters; exact versioned-path alias only. Dictionary continuation links are a Go compatibility extension, and rewritten/foreign Source continuations are errors with actual proof.",
+        "Safe Header options and Get Microversion options are explicit Go conveniences absent from the public pinned get proxy. Find per-call version applies to GET only; fallback keeps captured selected default and standalone List version controls all pages.",
+        "Stock Neutron27 get_policy_bandwidth_limit_rule is project-scoped ADMIN_OR_PARENT_OWNER_READER. Shared QoSPolicy visibility does not alone grant rule read access; fixture403 preservation does not prove live deployment authorization. Other rule kinds/Create/Update/Delete are excluded from this wave.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ]
+    },
+    {
+      "operation": "python:network/v2/qos_dscp_marking_rules",
+      "source_fingerprint": "a32ec9820eafe86f020a80eaa9d7971298543fda1408464c8b4158df49476459",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.New",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.RawClient",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ListDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.AllDSCPMarkingRecords"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy bound policy list defaults Accept application/json. Only inherited limit/marker are server queries; class-declared id/name/dscp_mark filter locally and unknowns are discarded before marshaling. Raw MaxItems includes filtered rows and supplies falsey-limit hint; Source URI is fixed independently of physical row qos_policy_id. Declared DSCP mark is untyped and exact false/null/zero/large extension values remain owned.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListOrderedDictionaryFiltersAndExactNumbers"
+          ]
+        },
+        {
+          "behavior": "Shared list pager handles plural/singleton rows, body next and versioned route, link/count-free truthy-limit short-page marker fallback, raw caps/single-page and exact fixed policy path/filter/cycle guards. Full JSON malformed/missing/null envelope and consumed wrong/cls/connection constructor rows retain actual page proof; ignored unused bad rows and unsafe continuation after raw cap remain unevaluated.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListPagingBoundsAndConstructorProof"
+          ]
+        },
+        {
+          "behavior": "WithListQuery preserves top-level local predicate option order and raw nested dictionary order; firstfalse short-circuits later mapping faults. Shared SDK-C1 exact JSON equality intentionally does not round actual9007199254740992 to rawfilter9007199254740993.0; truthful empty dictionary/scalar and nonempty mapping errors preserve Source mechanics.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListOrderedDictionaryFiltersAndExactNumbers"
+          ]
+        },
+        {
+          "behavior": "Bound policy literal ID controls escaped parent/member path without parent GET or name resolution. Source URI is exposed as independent PolicyID, not invented Body default. id/name/dscp_mark are untyped with null defaults, inherited location null and no foreign Neutron tags/Header/revision/timestamp descriptors. Unknown Body extension and exact original JSON values/Wire/self/evidence are owned independently.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingGetLiteralPolicyRouteRawProjectionAndDefaults",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingFindBoundRequiredKwargsAndUnknownConstructorSeeds",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingListServerClassificationRawCapAndOwnedURI"
+          ]
+        },
+        {
+          "behavior": "Captured selected Neutron source and concrete JSON/header/pointer options remain owned across option callbacks, retained configs, physical Read/Close, cancellation, native clean retry and live authentication. Accepted physical failures keep actual response proof; rejected400..599 retain native method/URL/status/body/Header and physical causes, one request/Close and no lookup fallback or manufactured decoded Resource.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPhysicalFaultsPreventFallbackAndKeepEvidence",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPreflightBoundControlsCancellationAndSnapshots",
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Selected/default network microversion is retained without invented discovery/ceiling; explicit Find version affects GET only and fallback retains Source service default. Get/List explicit version owns its invocation. Fixed source bodyless method/path/query and network version/absence plus auth/framing/foreign Nova/Cinder headers prevent native retry injection while ordinary retry Header/live provider tokens work.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingVersionsAndRetryHeadersRemainSelected"
+          ]
+        },
+        {
+          "behavior": "Public Gophercloud testhelper HTTP fixture and existing nativeRuleAPI/transport are reused. Concurrent factory reuse, actual escaped member path and query-free GET are fixture-proven; no additional transport or paging engine is implemented.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingPublicFixtureAndConcurrentOwnedReuse"
+          ]
+        },
+        {
+          "behavior": "Source Computed location remains ownednull for GET/Find/List even if physical response includes forged object, false, zero, emptystring or null. The actual rawlocation and wholepage Envelope stay in independent Wire/receipt, and RawResource.Clone plus mutation of cloned/original wire/header cannot contaminate Resource view or original physical Envelope. Shared SourceFindPolicy projection enforces computed ownership rather than treating location as ordinary unknown Body.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_dscp_marking_contracts_test.go:TestPythonDSCPMarkingComputedLocationStaysOwnedAcrossReads"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/dscp-marking-python.md"
+      ],
+      "differences": [
+        "Actual generated leaf is network/v2/extensions/qos/rules; no dscpmarking subpackage exists. Exactly three unresolved named Source operations are mapped; existing native typed DSCP CRUD/List and generated parent Collection are not recounted. Shared neutronfind.Engine Get/Find/List with SourceFindPolicy plus cloudread/REST owns transport/pagination/defaults, with no new engine/mock server.",
+        "Pinned QoSDSCPMarkingRule directly inherits Resource, allows unknown Body and declares untyped dscp_mark and URI qos_policy_id. Go exposes URI as PolicyID separately from Source-shaped Body; original response URI-looking values remain in Wire while member Resource getters reflect bound parent. Actual response location remains raw in Wire/Envelope while owned Resource computed location is null across GET/Find/List; no server location-to-Body leakage. Mutable Resource/Munch parent seeds/dirty-state/cache/Connection/location synthesis/general Adapter/session remain global SDK-R1/C1/S1.",
+        "Source Proxy parent _get_resource seeds identity without parent HTTP; Go accepts a validated literal parentID string and escapes parent/child once. Blank/dot/control/invalidUTF8 parent/child, caller bound kwargs, arbitrary base_path/session/constructor overrides are explicit Go guards. Shared policy read is not shared rule-read authority.",
+        "Source get_qos_dscp_marking_rule signature is query-free. Additional Go concrete GetQuery/Header/Microversion options are transport extensions and never become response Body seed. Find GET forwards original kwargs including required qos_policy_id while fallback/list classify only inherited limit/marker and actual local Body properties; user-supplied QoS policy/identity required kwargs collisions are rejected.",
+        "Shared Engine accepted200..399 is narrower than pinned generic raise_from_response valid100..399 for transport-exposed1xx. Existing SDK-C1 exact-decimal JSON equality preserves numeric evidence rather than complete CPython binary64 equality. API profiles retain these explicit shared policies; no fake selected microversion limit/discovery or network rule scalar casts are invented.",
+        "Pinned Neutron27 get_policy_dscp_marking_rule uses ADMIN_OR_PARENT_OWNER_READER/project scope for collection and member. The shared_qos_policy condition belongs to get_policy, not rule read. Actual HTTP/RBAC/deployment extension errors remain server observations; local fixtures do not establish authenticated cloud acceptance or writable project-manager/admin parity.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/rbac_policies",
+      "source_fingerprint": "c3a926e953eb87dc454a197d8e53ac4ab98d516d148718a146cc121a907b2f9e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListPaginated"
+      ],
+      "contracts": [
+        {
+          "behavior": "Lazy list uses exactly declared query aliases and local nonquery Body filters, preserved omission/null/false/zero, Source constructor defaults and raw unknown extensions; no name hint or inherited NetworkResource/TagMixin fields.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordQueriesDefaultsAndUnknownDiscard",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordsOrderedResponseAliasesAndNullPrecedence",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordLocalFiltersExactEqualityAndFloatTruthiness"
+          ]
+        },
+        {
+          "behavior": "Raw cap and consumer break precede trailing constructor/link errors. Four presence collisions(connection/microversion/_synchronized/cls), Source link/short-page marker behavior, fixed scope and late errors preserve actual page receipt.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordPagingFormatsAndOriginalWireMarker",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordRawCapsBreakAndConstructorCollisions",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordLatePageAndContinuationErrorsKeepActualReceipt"
+          ]
+        },
+        {
+          "behavior": "LIST Accept overrides configured default with application/json or explicit operation header, explicit version governs all pages, native retry protects owned headers and permits ordinary header/fresh token retry. Physical accepted/rejected faults retain actual evidence and no replay.",
+          "tests": [
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof",
+            "network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordListHeaderAndNativeRetryOwnership"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/rbac-policy-python.md"
+      ],
+      "differences": [
+        "Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.",
+        "The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.",
+        "Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.",
+        "Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.",
+        "Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.",
+        "Unknown list kwargs are discarded before value evaluation; id/name/tenant_id are local declared Body filters even if the server can filter additional fields. Source arbitrary extension query filtering is not inferred from readable unknown Body extensions.",
+        "Local ordinary JSON number equality uses exact decimals rather than Source binary64 rounding/underflow:9007199254740992 versus9007199254740993.0 is unequal, and1e-4000 versus0 is unequal. Source float truthiness is separately preserved for dict filters/paginated/next controls.",
+        "Ordered functional query options preserve kwargs insertion order; bulk Query maps are sorted. Constructor canonical/wire aliases can therefore differ from unordered Python mappings.",
+        "Pagination keeps fixed origin/path/initial filters and detects loops, validates numeric controls, and requires one nonempty wire ID marker query value. Source permissive adapter and arbitrary iterable/object marker encoding are not fully reproduced. Dictionary links are a Go extension.",
+        "Go는 SDK-owned location view를 null로 고정하고 실제 값은 Wire에 보존한다. Source의 Computed location은 LIST constructor에 명시된 row kwargs를 받아들일 수 있으며 mutable Connection-derived location은 SDK-R1에 남는다."
       ],
       "remaining": []
     }

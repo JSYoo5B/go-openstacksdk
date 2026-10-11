@@ -3067,4 +3067,28 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 
 구현은 작은 code·test/repair·docs 커밋으로 저장했고 `6deb057e`까지 원격 push를 확인했습니다. 이후 통합·판정·진행표도 별도 커밋으로 저장합니다. 검증된 named 매핑은 generated transport 수·전체 Resource/session 동등성·실제 클라우드 acceptance와 다릅니다. SDK-R1/C1/S1·stock Backup metadata4개·alpha 기준은 미완료입니다.
 
-이번23개의 전체 불변 snapshot `make check`, 정확한 비교 Go main8개 외부 local-replace 빌드·Python AST는 진행 중입니다. 다음 검증 기록에 revision·Go 소스 SHA·실제 package 수·exit code를 남깁니다. 다음 wave4 worker의 미커밋 변경은 이번 snapshot 검사 대상에 포함하지 않습니다.
+이번23개의 정확한 비교 Go main8개 외부 local-replace 빌드와 Python AST는 `d2cd22dcb8e3f0cfb7af54f14d84382be2feaba3` snapshot에서 exit0입니다. `/private/tmp/go-openstacksdk-oct11-wave3-eight-guide-receipt.json`에 실제 consumer·fence SHA를 기록했습니다. 동일 revision의 첫 전체 `make check`는 exit2이며 REST retry callback을 너무 넓게 차단해 기존8개 package 회귀가 발생했습니다. 이 실패를 전체 PASS로 집계하지 않습니다. Go2,631개 SHA256 `666c8c32e0b90a128d25dc145db6de4e13b7a7e5490428c4eb2a0dc8872f5126`, 실패 receipt/log는 `/private/tmp/go-openstacksdk-oct11-wave3-full-receipt.json`·`...wave3-full-check.log`입니다. `82fc6bc0`에서 명시적 opt-in으로 범위를 좁히고 기존 callback·cause 검증을 유지했으며 REST/기존 core/새 Source package 회귀가 다시 PASS입니다. 후속 전체 불변 snapshot 검사는 별도 revision으로 기록합니다. 다음 worker의 미커밋 변경은 앞선 snapshot 검사 대상에 포함하지 않습니다.
+
+
+## 핵심 user 추가14개 서비스 검증
+
+2026-10-11, 추가14개를 판정해 전체1,362→1,376/3,362(40.9%)·핵심1,288→1,302/2,292(56.8%)입니다. supported0·unresolved1,985·unsupported1·reviews1,652·contracts5,657이며 catalog/pins와 기존 판정을 보존했습니다. 추가84개는 앞선26+21+23+14개이며 생성 transport 개수·새 endpoint 수·전체 Resource/session 동등성과 구분합니다.
+
+| 구현 단위 | named API | 새 계약 테스트 그룹 | 사용법 |
+|---|---:|---:|---|
+| Neutron RBAC Get/Find/List | 3 | 16 | [비교](../network/v2/rbac-policy-python.md) |
+| QoS Bandwidth limit Get/Find/List | 3 | 13 | [비교](../network/v2/qos-bandwidth-limit-records-python.md) |
+| QoS DSCP Get/Find/List | 3 | 13 | [비교](../network/v2/extensions/qos/rules/dscp-marking-python.md) |
+| AddressGroup 목록 | 1 | 7 | [비교](../network/v2/address-group-list-python.md) |
+| Trunk 목록 | 1 | 14 | [비교](../network/v2/trunk-list-python.md) |
+| Cinder Group 검색 | 1 | 17 | [비교](../blockstorage/v3/group-find-python.md) |
+| Cinder GroupSnapshot 검색 | 1 | 14 | [비교](../blockstorage/v3/group-snapshot-find-python.md) |
+| Glance image task 목록 | 1 | 17 | [비교](../image/v2/image-tasks-python.md) |
+
+모든 해당 package full race가 PASS입니다. 기존 Gophercloud 공개 testhelper·native fixtures·공통 REST/Engine/List/Find를 재사용했습니다. 동결된 교차 검토 수정만 격리한 snapshot의 최종 검사는 `/private/tmp/go-openstacksdk-oct11-wave4-repaired-leafs-full.jsonl`이며 Group40·GroupSnapshot32·QoS rule28·Glance images33·Barbican wait13개 package 그룹과 공통 엔진을 검증했습니다. 기존 서비스 facade/REST/Trunk 회귀는 `...wave4-retry-trunk-facades-full.jsonl`, RBAC/기존QoSPolicy/AddressGroup은 `...wave4-explicit-retry-records-full.jsonl`과 `...wave4-computed-location-full.jsonl`을 근거로 합니다. 초기 Trunk/finite waits 실패는 구현·fixture의 실제 원인을 수정한 뒤 전체 package를 재검증했고 기존 오류 원인·native401 응답·콜백0회 검증을 유지했습니다.
+
+교차 검토에서 Group 첫 callback의 nil header map, GroupSnapshot discovery400/403의 잘못된 member fallback, RBAC 예약 인자/멤버 선택버전, DSCP location·Wire 격리, Glance 미지정 조건부 헤더를 보완했습니다. SDK-owned location view는 null이고 실제 서버 값은 Wire에 남습니다. Source LIST의 명시 computed kwargs와 mutable Connection-derived location은 이 bounded 정책과 다르며 SDK-R1 제약으로 기록합니다. Source와 Go status/숫자·cache·lifecycle 경계는 개별 guide/review에 유지했습니다.
+
+Barbican Secret/Container/Order의 구체적 상태·삭제 대기는 별도13개 그룹 full race PASS입니다. [대기 비교](../keymanager/v1/waits-python.md)에 nil 상태, status 무제한/delete120초/interval2초, cached target·payload 조회와 실패 receipt를 설명합니다. 알려진 SecretStore/ACL/Quota 대상이 남으므로 named wait2개는 unresolved이고 이번 완료량에는 포함하지 않았습니다. 더 이상 developer-owned builder/interface를 요구하지 않는 구체적 target을 제공합니다.
+
+전체 불변 revision `make check`와 정확한 이번 가이드8개·finite wait1개 외부 main 빌드는 다음 검증 단위로 진행합니다. 서비스별 race PASS를 아직 전체 gate/실제 OpenStack 인증/Python 실행/alpha 배포 완료로 표현하지 않습니다.8개 worker는 다음 독립 core-user 조회·작업을 계속 구현 중입니다.
