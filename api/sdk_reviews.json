@@ -67550,12 +67550,19 @@
     {
       "operation": "python:block_storage/v3/find_snapshot",
       "source_fingerprint": "88e98736120edf2438720827eb09d0bb62eaef8d809c14b0a8c20647a715267f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindAllProjects",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindLimit",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMarker",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindQuery"
       ],
       "contracts": [
         {
@@ -67563,18 +67570,83 @@
           "tests": [
             "blockstorage/v3/snapshots/python_parity_test.go:TestPythonSnapshotFindHasNoIDThenNameFallback"
           ]
+        },
+        {
+          "behavior": "FindRecord always attempts one bodyless query-free member GET with the literal validated identity. Only clean native400/403/404 permit fallback, including an identical clean RetryFunc rejection;401 and mixed physical/source/cancellation/callback failures do not fall back. Default details uses /snapshots/detail, false uses /snapshots; true all_projects adds all_tenants=True only to the fallback list.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordDefaultFallbackRoutesAndAllProjects",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordMissingAndCleanNativeRetry",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordRejectedPhysicalFailuresNeverFallback"
+          ]
+        },
+        {
+          "behavior": "Fallback automatically adds name unless explicitly supplied even as null, matches exact ID OR exact name, and consumes the complete selected search to expose late duplicates and later-page errors. Default missing returns nil,nil after successful list observation, strict missing returns ErrNotFound without attaching suppressed member rejection; duplicate returns ErrAmbiguous.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordFallbackMatchesIDAndDetectsLateDuplicateOrFailure",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordMissingAndCleanNativeRetry",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordFilterDictionaryAndExplicitNullName"
+          ]
+        },
+        {
+          "behavior": "Owned SnapshotRecord exposes the15 Source Body attributes plus nullable location in Resource separately from complete Wire and actual whole HTTP Envelope/Header/StatusCode. Alias assignments follow JSON member order; missing member ID seeds only the view while explicit null/nonstring ID is preserved. Source size int conversion preserves bool, Unicode decimal strings and precise integers; BoolStr and dict metadata adaptation apply only to the view. Unknown keys and original values remain lossless in Wire.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordDirectGetAndOwnedDescriptors",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordResponseShapeAndNullableIdentity"
+          ]
+        },
+        {
+          "behavior": "Direct member translation accepts singular or flat objects; blank and malformed JSON syntax retain Source seeds. Valid nonobjects/null/invalid UTF8 and descriptor failures retain actual accepted HTTP proof. Fallback plural arrays/singleton objects are supported; null rows or Resource constructor collisions fail with the whole actual page. No native typed Snapshot coercion is imposed.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordResponseShapeAndNullableIdentity",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordAcceptedFaultAndStickySourceProof"
+          ]
+        },
+        {
+          "behavior": "Optional Go fallback Query classifies Source server mapping name/status/volume_id/project_id/limit/marker/offset/sort_dir/sort_key/sort, translates all_projects->all_tenants including wire aliases and client-alias-null precedence, and applies declared nonserver Body filters locally. Unknown/wire-only fields are ignored. Requests boolean/iterable/null encoding and Python JSON equality including bool-number equality and recursive dictionary filters are reused; a truthy scalar matches an empty dictionary but nonempty dictionary get on a scalar fails. Positional ID conflict is rejected before HTTP.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordQueryAliasesFiltersAndRawRowCap",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordFilterDictionaryAndExplicitNullName",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions"
+          ]
+        },
+        {
+          "behavior": "Raw MaxItems counts before local filtering and supplies a limit hint when missing/zero. Cap and SinglePage terminate before parsing next continuation; ordinary search stays unbounded. Shared guarded paging handles snapshots_links, top-level next, HTTP Link, singleton rows, empty-page termination and short-page marker fallback using retained wire ID. Offset-only explicit Go query uses strictly increasing offset continuation. Route/filter/cursor changes retain actual page proof.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordSinglePageMarkerFallbackAndOffsetPaging",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordQueryAliasesFiltersAndRawRowCap",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordResponseShapeAndNullableIdentity"
+          ]
+        },
+        {
+          "behavior": "Configured defaults such as3.80 are sent unchanged, reflecting Resource._get_microversion default precedence. With an absent default, shared finite bodyless/versionless Cinder discovery selects the Source Snapshot ceiling3.65 against advertised min/max on a private client. Discovery responses remain separately owned and discovery accepted Read/Close errors produce Discovery-only proof without fabricated snapshot ACK. Fixed negotiated version headers or their absence remain protected across retries and physical attempts.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordDiscoveryAndProtocolHeaderProtection",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordListPhysicalFailureAndDiscoveryOnlyProof"
+          ]
+        },
+        {
+          "behavior": "Source/client/option facts are captured and guarded across callbacks, each physical Read/Close and retries. Accepted member Read/Close/source failures return a partial SnapshotRecord plus actual ResponseError; rejected member/list bodies preserve original native status/body/header and read/close causes with one Close, preventing false fallback. Sticky source changes survive restoration; custom cancellation and callback causes remain joined. Maps/raw values/pointers/headers are copied, including retained option callbacks and concurrent reuse.",
+          "tests": [
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordRejectedPhysicalFailuresNeverFallback",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordAcceptedFaultAndStickySourceProof",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordListPhysicalFailureAndDiscoveryOnlyProof",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions",
+            "blockstorage/v3/snapshots/python_find_contracts_test.go:TestPythonSnapshotFindRecordConcurrentOptionReuse"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/snapshot-find-python.md"
       ],
       "differences": [
-        "Python matches either ID or name in the fallback list; Go Find(Name) matches names only."
+        "Go takes a validated nonblank UTF8 literal identity and returns an owned Source-shaped SnapshotRecord, rather than accepting mutable Python Resource/Munch/session objects. Resource/Wire/Envelope and Discovery are separate observation channels; Python Connection location synthesis is represented as null. Mutable Resource/subclass/cache/session/base_path behavior remains separately inventoried SDK-R1/C1/S1 scope.",
+        "The named Python find_snapshot proxy accepts only ignore_missing/details/all_projects. Optional Go Query/Limit/Marker/MaxItems/Paginated/Headers are explicit library-owned fallback controls based on inherited Resource.list behavior; member GET remains query-free. Explicit cap/single-page narrows the caller-chosen observed search and cannot guarantee absence of unobserved duplicates; default behavior consumes all pages.",
+        "Go rejects negative typed pagination controls, unsafe identities, positional ID conflicts, invalid UTF8 and forbidden authentication headers before HTTP. Fixed origin/collection/filter/version/physical-request guards intentionally reject Source callback or next-link retargeting. Dictionary links are an explicit Go compatibility extension. Offset-only controls use guarded offset continuation without Source automatic marker fallback.",
+        "A Go map has no Python kwargs order, so multiple local filters are evaluated in sorted attribute order. Literal JSON response member ordering is retained for descriptor alias precedence. Size conversion follows the audited common Unicode16/Python3.14 JSON-domain descriptor helper and arbitrary-precision integer policy.",
+        "Accepted malformed UTF8 fails instead of requests replacement decoding. Blank/malformed JSON syntax matches Source member seed behavior, while wrong valid shapes retain actual ACK errors. The SDK uses shared clean rejection observation so mixed physical or callback failures cannot be mistaken for Source clean400/403/404.",
+        "Absent defaults use finite per-operation shared Cinder discovery at Source Snapshot3.65; configured defaults are never artificially capped. Source generally relies on cached Keystone session endpoint discovery. General session caching/negotiation behavior remains SDK-S1, and authenticated Cinder RBAC deployment validation is separate from local fixtures."
       ],
-      "remaining": [
-        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
-        "Find(resource.Name) always uses snapshots/detail and cannot add all_tenants, so details=False and all_projects=True cannot be expressed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/snapshots",
@@ -67816,12 +67888,16 @@
     {
       "operation": "python:block_storage/v3/find_backup",
       "source_fingerprint": "8cddda87c02a89ecf384834fcf2c146ca0b225ec8c59251ca34b4f38bd34ea5d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindPaginated"
       ],
       "contracts": [
         {
@@ -67829,18 +67905,78 @@
           "tests": [
             "blockstorage/v3/backups/python_parity_test.go:TestPythonBackupFindHasNoIDThenNameFallback"
           ]
+        },
+        {
+          "behavior": "FindRecord sends GET first and only clean400/403/404 permit fallback; default detail and explicit summary both add the Source name query.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordFallbackCodesAndDetailsDefaults"
+          ]
+        },
+        {
+          "behavior": "Full exact string ID-or-name observation detects late duplicates and HTTP failures; raw numeric IDs are not equated with string identities and missing defaults to nil with an explicit strict option.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordExactIdentityAndLateDuplicateOrError",
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordMissingAndAcceptedTranslation"
+          ]
+        },
+        {
+          "behavior": "Owned Resource projects all23 declared Body fields plus nullable location, preserving untyped IDs/timestamps/large JSON, Source bool/int/list/dict descriptors, ordered project aliases and original Wire/Envelope/header/status.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordGetFirstOwnsSourceViewAndRawEvidence",
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordMissingAndAcceptedTranslation"
+          ]
+        },
+        {
+          "behavior": "Source explicit session default bypasses discovery without downgrading; absent default uses shared finite Cinder discovery and min(server maximum,3.64), keeping discovery proof separate and shared client policy unchanged.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordDiscoveryDefaultAndExplicitVersion",
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordDiscoveryRejectionPreservesPhysicalCauses"
+          ]
+        },
+        {
+          "behavior": "Explicit Go query extensions classify declared server filters versus Body-local JSON filters, preserve Requests iterable query expansion, snapshot caller maps and cap raw rows before local filtering.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordQueryClassesOwnedOptsAndRawCap"
+          ]
+        },
+        {
+          "behavior": "Shared linked and short-marker paging observes the complete search by default; explicit first-page/cap and offset policies prevent unintended continuation and retain scope.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordPagingShortMarkersAndOffset"
+          ]
+        },
+        {
+          "behavior": "Every member/list400..599 rejection retains physical Read/Close faults and exact native proof; accepted list faults keep ResponseError evidence, with no observation retry, suppression or fallback after mixed causes.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordRejectedAndAcceptedPhysicalCauses"
+          ]
+        },
+        {
+          "behavior": "Invalid identities/options/JSON, source-changing callbacks and cancellation fail before member/discovery HTTP, preserving caller cancellation causes.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordSelectionAndOptionFailures"
+          ]
+        },
+        {
+          "behavior": "Short-page fallback derives the marker from the retained original last-row fields decoded by the shared pager, independently of public Resource projection; untyped large integer IDs become exact Requests marker strings without changing Resource/Wire ID JSON.",
+          "tests": [
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordPagingShortMarkersAndOffset",
+            "blockstorage/v3/backups/python_find_test.go:TestPythonBackupFindRecordMarkerUsesRetainedUntypedWireID"
+          ]
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/backup-find-python.md"
       ],
       "differences": [
-        "Python's fallback list sends name=... to the server; Go Find(Name) lists every backup and compares names locally."
+        "BackupResourceRecord owns a declared Python-shaped Resource and literal Wire/Envelope/header/status rather than a mutable session-bound Python Resource. Nullable location is null; unknown fields remain in Wire.",
+        "Query/Headers/MaxItems/Paginated are explicit Go extensions beyond the pinned proxy ignore_missing/details arguments. The JSON-domain Resource query/descriptor policy is documented separately.",
+        "Go performs finite discovery per call only when no selected client default exists, rather than reusing a Python adapter discovery cache. Shared client microversion remains unchanged.",
+        "Initial offset opts into the guarded shared offset pager and disables marker fallback; unsafe origin/path/filter changes, negative limits and mixed marker/offset are rejected. Dictionary links compatibility is a Go extension.",
+        "Non-object actual values do not match an object local filter instead of raising a Python membership/get type error. Invalid UTF-8 response bytes fail with HTTP evidence.",
+        "The four Python Backup MetadataMixin child-route operations remain unresolved because stock Cinder does not register /backups/{id}/metadata. This row covers only find_backup."
       ],
-      "remaining": [
-        "Go has no helper for this resource that tries GET by ID and falls back to a list match on 400/403/404; the caller must chain Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x)), and Find(ID) does not fall back on 400 or 403.",
-        "Find(resource.Name) always uses backups/detail, so details=False cannot be expressed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/create_backup",
@@ -75852,6 +75988,230 @@
         "Go fixes the floating IP as an explicit literal parent ID in every signature and returns an owned PortForwardingRecord instead of accepting or mutating Python Resource objects; inherited mutable Resource/session parity remains the shared R1 work item.",
         "The Go descriptor view keeps location null instead of injecting connection-derived project metadata; ParentID stores the URI component separately. Unknown Body extensions and original HTTP evidence remain available.",
         "Go escapes ID path segments and rejects blank/control/dot IDs and mutable route/scope/transport controls before HTTP; pagination cannot change collection path, parent, filters or origin. Find base_path/list_base_path/microversion kwargs are rejected rather than replacing the fixed service route."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/add_addresses_to_address_group",
+      "source_fingerprint": "c077a58c0a56d1bdc3fff4ba17213b75498149fbb2627da404e80b8ba01483af",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.AddAddressesRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionSeed",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRoutesInputsAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "The declared Source Resource projection is independent of actual Wire/Envelope/header/status and submitted Input; seeded attributes survive absent response fields, typed list/bool/default/nullable descriptors and project alias rules apply without native timestamp/numeric coercion. Trunk direct Body update differs from AddressGroup envelope/alias/unknown translation.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsSourceProjectionAndActualWire",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsBodylessSuccessKeepsSourcePolicy"
+          ]
+        },
+        {
+          "behavior": "Concrete header/seed options and input JSON are snapshotted; caller and retained-callback mutation cannot alter the applied request or view. Nil options, invalid IDs, malformed seed and protected auth headers fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsSnapshotsHeaderPolicyAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Callback/custom JSON marshaler cancellation and selected-source mutation preserve callback/context/source causes before HTTP. Actual accepted/rejected physical Read/Close/cancel/source-restored-on-Close errors retain original body/status/headers and never resend or become clean missing.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsCanceledOrChangedOptionsAndMarshalAreTerminal",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsPhysicalAcceptedAndRejectedErrorsRetainProof"
+          ]
+        },
+        {
+          "behavior": "A retry hook changing submitted JSON is terminal and retains the initial native HTTP rejection; Source successful statuses 200..399, literal one-time ID escaping and clean 404 rejection remain observable.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRetryMutationKeepsOriginalRejection",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsCleanSourceStatusPolicyAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/trunk-address-actions-python.md"
+      ],
+      "differences": [
+        "Go returns an owned declared Resource view with null location and separate actual Wire/Envelope/Input/header/status rather than mutating a Python Resource; complete Connection cloud-location behavior remains separately tracked.",
+        "The explicit string route ID cannot be replaced by a cached seed. Seed aliases that collide are rejected rather than depending on Go map order; ordinary Go map iterable order is its JSON encoding order while RawMessage preserves object insertion order.",
+        "Inputs use the JSON domain; Python arbitrary iterables/custom objects are not implemented as Go builder interfaces. Optional owned headers/cache-seed are Go conveniences and retain shared auth/source protections.",
+        "AddressGroup Source translator discards self and normalizes known aliases/unknown attributes. Bodyless/non-JSON success returns a seed view with actual HTTP metadata and nil Wire."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/add_trunk_subports",
+      "source_fingerprint": "3a1668b6cd66b1db5f636c181303f25e70b71f2d4d3a68a83ee6ef89185d0dcf",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.AddSubportsRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionSeed",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRoutesInputsAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "The declared Source Resource projection is independent of actual Wire/Envelope/header/status and submitted Input; seeded attributes survive absent response fields, typed list/bool/default/nullable descriptors and project alias rules apply without native timestamp/numeric coercion. Trunk direct Body update differs from AddressGroup envelope/alias/unknown translation.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsSourceProjectionAndActualWire",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsBodylessSuccessKeepsSourcePolicy"
+          ]
+        },
+        {
+          "behavior": "Concrete header/seed options and input JSON are snapshotted; caller and retained-callback mutation cannot alter the applied request or view. Nil options, invalid IDs, malformed seed and protected auth headers fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsSnapshotsHeaderPolicyAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Callback/custom JSON marshaler cancellation and selected-source mutation preserve callback/context/source causes before HTTP. Actual accepted/rejected physical Read/Close/cancel/source-restored-on-Close errors retain original body/status/headers and never resend or become clean missing.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsCanceledOrChangedOptionsAndMarshalAreTerminal",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsPhysicalAcceptedAndRejectedErrorsRetainProof"
+          ]
+        },
+        {
+          "behavior": "A retry hook changing submitted JSON is terminal and retains the initial native HTTP rejection; Source successful statuses 200..399, literal one-time ID escaping and clean 404 rejection remain observable.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRetryMutationKeepsOriginalRejection",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsCleanSourceStatusPolicyAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/trunk-address-actions-python.md"
+      ],
+      "differences": [
+        "Go returns an owned declared Resource view with null location and separate actual Wire/Envelope/Input/header/status rather than mutating a Python Resource; complete Connection cloud-location behavior remains separately tracked.",
+        "The explicit string route ID cannot be replaced by a cached seed. Seed aliases that collide are rejected rather than depending on Go map order; ordinary Go map iterable order is its JSON encoding order while RawMessage preserves object insertion order.",
+        "Inputs use the JSON domain; Python arbitrary iterables/custom objects are not implemented as Go builder interfaces. Optional owned headers/cache-seed are Go conveniences and retain shared auth/source protections.",
+        "Source direct trunk _body.update does not normalize response aliases/unpack an envelope/collect fresh unknown attrs; those exact HTTP fields stay available in Wire. Bodyless accepted trunk responses still require JSON and return an actual-response decode error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/delete_trunk_subports",
+      "source_fingerprint": "d4d20a3a8975595bb709ba5061705309b40a70e5fc4708351a5bb89e369d3df3",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.API.RemoveSubportsRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionSeed",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks.WithSubportActionHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRoutesInputsAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "The declared Source Resource projection is independent of actual Wire/Envelope/header/status and submitted Input; seeded attributes survive absent response fields, typed list/bool/default/nullable descriptors and project alias rules apply without native timestamp/numeric coercion. Trunk direct Body update differs from AddressGroup envelope/alias/unknown translation.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsSourceProjectionAndActualWire",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsBodylessSuccessKeepsSourcePolicy"
+          ]
+        },
+        {
+          "behavior": "Concrete header/seed options and input JSON are snapshotted; caller and retained-callback mutation cannot alter the applied request or view. Nil options, invalid IDs, malformed seed and protected auth headers fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsSnapshotsHeaderPolicyAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Callback/custom JSON marshaler cancellation and selected-source mutation preserve callback/context/source causes before HTTP. Actual accepted/rejected physical Read/Close/cancel/source-restored-on-Close errors retain original body/status/headers and never resend or become clean missing.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsCanceledOrChangedOptionsAndMarshalAreTerminal",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsPhysicalAcceptedAndRejectedErrorsRetainProof"
+          ]
+        },
+        {
+          "behavior": "A retry hook changing submitted JSON is terminal and retains the initial native HTTP rejection; Source successful statuses 200..399, literal one-time ID escaping and clean 404 rejection remain observable.",
+          "tests": [
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsRetryMutationKeepsOriginalRejection",
+            "network/v2/extensions/trunks/python_actions_contracts_test.go:TestPythonTrunkActionsCleanSourceStatusPolicyAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/trunk-address-actions-python.md"
+      ],
+      "differences": [
+        "Go returns an owned declared Resource view with null location and separate actual Wire/Envelope/Input/header/status rather than mutating a Python Resource; complete Connection cloud-location behavior remains separately tracked.",
+        "The explicit string route ID cannot be replaced by a cached seed. Seed aliases that collide are rejected rather than depending on Go map order; ordinary Go map iterable order is its JSON encoding order while RawMessage preserves object insertion order.",
+        "Inputs use the JSON domain; Python arbitrary iterables/custom objects are not implemented as Go builder interfaces. Optional owned headers/cache-seed are Go conveniences and retain shared auth/source protections.",
+        "Source direct trunk _body.update does not normalize response aliases/unpack an envelope/collect fresh unknown attrs; those exact HTTP fields stay available in Wire. Bodyless accepted trunk responses still require JSON and return an actual-response decode error."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:network/v2/remove_addresses_from_address_group",
+      "source_fingerprint": "e043eef61d373196eaedb4505d34618823900000bec7ed676863ca7f566baeb2",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.API.RemoveAddressesRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionSeed",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups.WithAddressActionHeaders"
+      ],
+      "contracts": [
+        {
+          "behavior": "One envelope-free PUT uses the fixed resource/action route; explicit null/false/zero/empty and nested unknown extension values are preserved without native required-field/default coercion. Trunk removal alone follows Source list(subports) for JSON arrays, ordered object keys and Unicode strings and rejects noniterables before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRoutesInputsAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "The declared Source Resource projection is independent of actual Wire/Envelope/header/status and submitted Input; seeded attributes survive absent response fields, typed list/bool/default/nullable descriptors and project alias rules apply without native timestamp/numeric coercion. Trunk direct Body update differs from AddressGroup envelope/alias/unknown translation.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsSourceProjectionAndActualWire",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsBodylessSuccessKeepsSourcePolicy"
+          ]
+        },
+        {
+          "behavior": "Concrete header/seed options and input JSON are snapshotted; caller and retained-callback mutation cannot alter the applied request or view. Nil options, invalid IDs, malformed seed and protected auth headers fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsSnapshotsHeaderPolicyAndInvalidOptions"
+          ]
+        },
+        {
+          "behavior": "Callback/custom JSON marshaler cancellation and selected-source mutation preserve callback/context/source causes before HTTP. Actual accepted/rejected physical Read/Close/cancel/source-restored-on-Close errors retain original body/status/headers and never resend or become clean missing.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsCanceledOrChangedOptionsAndMarshalAreTerminal",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsPhysicalAcceptedAndRejectedErrorsRetainProof"
+          ]
+        },
+        {
+          "behavior": "A retry hook changing submitted JSON is terminal and retains the initial native HTTP rejection; Source successful statuses 200..399, literal one-time ID escaping and clean 404 rejection remain observable.",
+          "tests": [
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsRetryMutationKeepsOriginalRejection",
+            "network/v2/extensions/security/addressgroups/python_actions_contracts_test.go:TestPythonAddressActionsCleanSourceStatusPolicyAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/trunk-address-actions-python.md"
+      ],
+      "differences": [
+        "Go returns an owned declared Resource view with null location and separate actual Wire/Envelope/Input/header/status rather than mutating a Python Resource; complete Connection cloud-location behavior remains separately tracked.",
+        "The explicit string route ID cannot be replaced by a cached seed. Seed aliases that collide are rejected rather than depending on Go map order; ordinary Go map iterable order is its JSON encoding order while RawMessage preserves object insertion order.",
+        "Inputs use the JSON domain; Python arbitrary iterables/custom objects are not implemented as Go builder interfaces. Optional owned headers/cache-seed are Go conveniences and retain shared auth/source protections.",
+        "AddressGroup Source translator discards self and normalizes known aliases/unknown attributes. Bodyless/non-JSON success returns a seed view with actual HTTP metadata and nil Wire."
       ],
       "remaining": []
     }
