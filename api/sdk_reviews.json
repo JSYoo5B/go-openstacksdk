@@ -87134,16 +87134,28 @@
     {
       "operation": "python:identity/v3/associate_project_with_endpoint_group",
       "source_fingerprint": "5f12e257b847d2356b57b92316dacc372c81cbca4ad58d8472cacea5fd142c06",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.AssociateProject",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithReadHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "AssociateProject sends PUT OS-EP-FILTER/endpoint_groups/{id}/projects/{project_id} without query or body, accepts every status below 400 and returns 4xx with AssociateProject operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupProjectAssociation"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/create_domain_config",
@@ -87192,16 +87204,30 @@
     {
       "operation": "python:identity/v3/create_endpoint_group",
       "source_fingerprint": "cfff98fb08ea9ee43840794f5e5d5c1ea89c0a2242dcb9a7726db8c3023eb539",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithCreateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST OS-EP-FILTER/endpoint_groups, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Create POSTs OS-EP-FILTER/endpoint_groups with only the declared EndpointGroup attributes under endpoint_group (explicit null kept, unknown dropped, empty body allowed), accepts every status below 400, overlays the endpoint_group response on the request seed and returns 4xx with Create operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupCreateSendsDeclaredAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/create_limit",
@@ -87361,16 +87387,29 @@
     {
       "operation": "python:identity/v3/delete_endpoint_group",
       "source_fingerprint": "5f6b3da03ca9ee58e87b263833f32dea4193f6eb75e66774b236d6a42471de8d",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithDeleteHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE OS-EP-FILTER/endpoint_groups/{id}, ignores a clean 404 by default like ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and returns other 4xx/5xx with Delete operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupDeleteIgnoreMissing"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/delete_limit",
@@ -87512,72 +87551,160 @@
     {
       "operation": "python:identity/v3/disassociate_project_from_endpoint_group",
       "source_fingerprint": "c051ab8b2d558b6753fde03e52f4569ad3f52e50e239f649fb564f044f4ff164",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.DisassociateProject",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithReadHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects/{project_id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "DisassociateProject sends DELETE OS-EP-FILTER/endpoint_groups/{id}/projects/{project_id} without query or body, accepts every status below 400 and returns 404 and other 4xx with DisassociateProject operation context because Python has no ignore_missing here.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupProjectAssociation"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/endpoint_group_endpoints",
       "source_fingerprint": "c3b8cb886e79f65cb8b58ded4cdae6cfb1ea5f28007bab6803adacf92dd6d13c",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.ListEndpoints",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/endpoints, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ListEndpoints sends GET OS-EP-FILTER/endpoint_groups/{id}/endpoints with interface, region_id, service_id, limit and marker as wire query, filters id/name/is_enabled/links/url locally, follows an explicit limit with last-ID marker requests until an empty page and projects EndpointGroupEndpoint rows with is_enabled converted from enabled and endpoint_group_id set.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupScopedLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers, unlike Python True == 1."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/endpoint_group_projects",
       "source_fingerprint": "0d7be1cb0878f6c9315c045fac58a8a216ef9105c2011747f53dd0c73e026eea",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.ListProjects",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ListProjects sends GET OS-EP-FILTER/endpoint_groups/{id}/projects with the Project QueryParameters transposed (is_enabled as enabled=True, any_tags as repeated tags-any, domain_id), filters id/description/options/links locally, keeps unknown project keys, converts is_enabled/is_domain/options/tags and sets endpoint_group_id on each row.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupScopedLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers, unlike Python True == 1."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/endpoint_groups",
       "source_fingerprint": "6df01517c8696bab77d124143e999983cc9b5f6a553f5d7ee3f836316185cf53",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListName",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListOpts"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET OS-EP-FILTER/endpoint_groups with Accept application/json and only name as wire query, drops limit and marker because EndpointGroup excludes the pagination defaults, applies id/description/filters/links as local Body filters, turns max_items into limit with last-ID marker continuation, reads one page when paginated is false and follows top-level next.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupListQueryFiltersAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers, unlike Python True == 1."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/endpoint_projects",
       "source_fingerprint": "91702ef57a0cb7801d5d60e4e78e3635747306be6494312eaef548d787e4fc02",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.ListEndpointProjects",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoints/{endpoint_id}/projects, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ListEndpointProjects sends GET OS-EP-FILTER/endpoints/{id}/projects with the Project QueryParameters (name, marker) as wire query and sets endpoint_id on each EndpointProject view with is_domain converted.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupScopedLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers, unlike Python True == 1."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/endpoints",
@@ -87645,16 +87772,29 @@
     {
       "operation": "python:identity/v3/find_endpoint_group",
       "source_fingerprint": "c81fa24eb713e9e495f99b5a498003911604321041ace1d51cea43266e4f0ecb",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id} and the name-filtered GET OS-EP-FILTER/endpoint_groups fallback, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET OS-EP-FILTER/endpoint_groups/{x}; after a clean 400, 403 or 404 it lists OS-EP-FILTER/endpoint_groups?name={x} and matches exact ID or name, returning nil by default, resource.NotFoundError with WithFindIgnoreMissing(false) and resource.AmbiguousError for duplicates, while a 500 does not fall back.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupFindByIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Python raises DuplicateResource and NotFoundException; Go returns resource.AmbiguousError and resource.NotFoundError wrapped with Find operation context."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_region",
@@ -87763,16 +87903,28 @@
     {
       "operation": "python:identity/v3/get_endpoint_group",
       "source_fingerprint": "6993e61a257de0429d805cc8fb595ef86b6a6d616897df2c8a17b43e36e66ac7",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithReadHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET OS-EP-FILTER/endpoint_groups/{id} with the ID escaped as one segment, accepts every status below 400 with the ID seeded into the view, keeps a non-object response as ResponseError proof and returns 4xx/5xx as ErrUnexpectedResponseCode with Get operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupGetStatusesAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_limit",
@@ -87912,16 +88064,34 @@
     {
       "operation": "python:identity/v3/project_endpoint_groups",
       "source_fingerprint": "0b5024c124bc447d331916bffdace023ca47c50dfa3c1ffa88ffe8f2af79e132",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.ListProjectEndpointGroups",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListName",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET OS-EP-FILTER/projects/{project_id}/endpoint_groups, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ListProjectEndpointGroups sends GET OS-EP-FILTER/projects/{id}/endpoint_groups with only name as wire query (limit dropped like ProjectEndpointGroup's QueryParameters) and sets project_id on each EndpointGroup view.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupScopedLists"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers, unlike Python True == 1."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/project_endpoints",
@@ -88089,16 +88259,30 @@
     {
       "operation": "python:identity/v3/update_endpoint_group",
       "source_fingerprint": "007d050eb92c89eee28b1408a15119079b0f25a07d702836bb6f829a79fcf268",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-catalog.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithUpdateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PATCH OS-EP-FILTER/endpoint_groups/{endpoint_group_id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Update PATCHes OS-EP-FILTER/endpoint_groups/{id} with only declared non-id attributes under endpoint_group, overlays the response on the seeded request values, sends nothing when no declared attribute is dirty and returns 4xx with Update operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupUpdatePatchesDirtyAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location.",
+        "Go header options are an explicit extension; SDK-owned auth, host and connection headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/update_limit",
@@ -100136,87 +100320,166 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_endpoint_group",
       "source_fingerprint": "5218f00d748563daf48c5779728aabfd0efba4948bc62712f4fc460cb9b116aa",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.CloudCreate"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "CloudCreate POSTs OS-EP-FILTER/endpoint_groups with name and filters always and description only when nonempty, returning the created record or the 4xx with CloudCreate operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_cloud_test.go:TestPythonCloudEndpointGroupCreate"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/update_endpoint_group",
       "source_fingerprint": "ed7a3a2ce4569ed04e443e477e89e4df8be66aaa093b6005c70125b275516037",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithUpdateField"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "The cloud update delegates to the proxy update; Update PATCHes OS-EP-FILTER/endpoint_groups/{id} with the declared name, filters and description values under endpoint_group.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupUpdatePatchesDirtyAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Python valid_kwargs rejects keyword arguments other than name, filters and description before HTTP; Go Update follows the proxy rule and drops unknown attributes, so the caller chooses which WithUpdateField values to pass.",
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_endpoint_groups",
       "source_fingerprint": "a93b7777726736f0045b50b0b324a3e3c0c104689b276624639326c9efec252b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithListName"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "The cloud list delegates to the proxy list; List sends GET OS-EP-FILTER/endpoint_groups with name as the only wire query.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupListQueryFiltersAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Python valid_kwargs accepts only name; Go List also accepts the proxy query keywords.",
+        "Go returns a lazy iterator; the Python cloud helper returns a materialized list.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_endpoint_group",
       "source_fingerprint": "7b94c59ac2d6f9b8697e1bc1903cc66c4be77fb2ef097c4592e6cc5ad0f97bf6",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Find"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "The cloud get is find_endpoint_group(name_or_id=id) with ignore_missing True; Find sends GET by ID, falls back after 400/403/404 to the name-filtered list and returns nil when nothing matches.",
+          "tests": [
+            "identity/v3/endpointgroups/python_records_test.go:TestPythonEndpointGroupFindByIDThenName"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes an ID string, escapes it as exactly one path segment and returns an owned Record whose Resource.Body is the attribute-named to_dict view with location null instead of the Connection location."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/delete_endpoint_group",
       "source_fingerprint": "47973ef724b730107f53ca63a50772c542c82e6ab7b2de5098bb8c451d0b3d50",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.CloudDelete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithReadHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "CloudDelete runs Find with ignore_missing, returns false without DELETE when nothing matches, otherwise DELETEs the literal id argument with the 404-ignoring default and returns true; a failed DELETE returns false.",
+          "tests": [
+            "identity/v3/endpointgroups/python_cloud_test.go:TestPythonCloudEndpointGroupDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Python logs a failed DELETE and returns False; Go returns false together with the error wrapped with CloudDelete operation context.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/search_endpoint_groups",
       "source_fingerprint": "e17fb89aac9bfa009de1214da7993d7d393faaf117eb8edb57a3184afa9563f8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.CloudSearch",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithSearchExpression",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.WithSearchHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed.",
-        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
-      ]
+      "contracts": [
+        {
+          "behavior": "CloudSearch reads the complete unfiltered GET OS-EP-FILTER/endpoint_groups, then applies _utils._filter_list on the attribute views: exact or glob ID/name selection, nested dictionary filters that fail on a missing key, and the deprecated JMESPath expression returning arbitrary JSON; list errors keep operation context.",
+          "tests": [
+            "identity/v3/endpointgroups/python_cloud_test.go:TestPythonCloudEndpointGroupSearch"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/endpointgroups/README.md"
+      ],
+      "differences": [
+        "Python cloud helpers first call utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 client given to endpointgroups.New without that check.",
+        "Go returns SearchResult with the selected JSON Value, the selected records (nil for an expression) and the full Inventory; Python returns the list or the JMESPath result.",
+        "The row views carry location null, so a filter on location sees null instead of the Python Connection location.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_domain",
