@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/query"
 	"github.com/JSYoo5B/go-openstacksdk/network"
@@ -37,10 +38,13 @@ func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }
 // Dependencies connects named references to other service collections.
 // Connection supplies these resolvers automatically.
 type Dependencies struct {
-	Image   func(context.Context, resource.Ref) (string, error)
-	Network func(context.Context, resource.Ref) (string, error)
-	Port    func(context.Context, resource.Ref) (string, error)
-	Volume  func(context.Context, resource.Ref) (string, error)
+	// BackupImages is the lazy Glance service used by BackupServer.
+	// Connection supplies it so callers do not construct service builders.
+	BackupImages func(context.Context) (*image.Service, error)
+	Image        func(context.Context, resource.Ref) (string, error)
+	Network      func(context.Context, resource.Ref) (string, error)
+	Port         func(context.Context, resource.Ref) (string, error)
+	Volume       func(context.Context, resource.Ref) (string, error)
 	// DefaultNetwork is called only when neither NICs nor a mode were supplied.
 	// A zero Ref means no default; a nonzero Ref is validated and resolved like
 	// an explicit network. Connection supplies its configured policy lazily.

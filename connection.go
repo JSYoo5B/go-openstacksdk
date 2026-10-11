@@ -182,6 +182,7 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 			return nil, err
 		}
 		c.compute = compute.New(client, compute.Dependencies{
+			BackupImages:  c.Image,
 			CloudLocation: c.CurrentLocation,
 			NetworkRoles:  c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,
 			AddressCompute: c.addressComputeClient, NetworkPolicy: c.options.networkRoles, ServerAddresses: c.options.serverAddresses,
