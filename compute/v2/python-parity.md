@@ -1,8 +1,8 @@
-# Nova v2 Python proxy 대응: 서버 사용자 호출
+# Nova v2 Python proxy 대응: 서버 호출과 권한 조건
 
-이 문서는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [compute v2 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py) 가운데 서버 조회·수정·삭제와 사용자 action, server metadata·tag·IP·security group, server group, interface, volume attachment, instance action, Nova image proxy 메서드 62개를 Go 호출과 비교합니다. Python 요청은 [Proxy 공통 helper](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/proxy.py), [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py), [Server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/server.py)의 action 메서드, [MetadataMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/metadata.py)과 [TagMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/tag.py)에서 따라갔고, 각 package의 `python_parity_test.go`가 Go 쪽 요청을 고정합니다.
+이 문서는 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`의 [compute v2 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py) 가운데 서버 조회·수정·삭제와 사용자 action, server metadata·tag·IP·security group, server group, interface, volume attachment, instance action, Nova image proxy 메서드 62개를 Go 호출과 비교합니다. Python 요청은 [Proxy 공통 helper](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/proxy.py), [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py), [Server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/server.py)의 action 메서드, [MetadataMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/metadata.py)과 [TagMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/common/tag.py)에서 따라갔고, 기존 `python_parity_test.go`와 아래 개별 가이드가 참조하는 계약 테스트가 각 Go 요청의 비교 기준입니다.
 
-`go_mapping`은 모든 Python 인자의 효과를 공개 Go API로 재현할 수 있다는 뜻입니다. 이때도 아래 절의 차이는 남습니다. `unresolved`는 Go에 경로, 본문 key나 helper 동작이 없어서 같은 요청을 만들 수 없다는 뜻입니다. 표의 Go 호출은 `conn.ComputeV2(ctx)`가 돌려준 service의 필드를 기준으로 적었고, Glance 호출은 `conn.ImageV2(ctx)`의 `Images`입니다.
+`go_mapping`은 고정한 named Python 호출의 HTTP 동작·기본값·옵션에 대응하는 공개 Go API가 있다는 뜻입니다. 이때도 아래 절의 차이는 남습니다. `unresolved`는 Go에 경로, 본문 key나 helper 동작이 없어서 같은 요청을 만들 수 없다는 뜻입니다. 표의 Go 호출은 `conn.ComputeV2(ctx)`가 돌려준 service의 필드를 기준으로 적었고, Glance 호출은 `conn.ImageV2(ctx)`의 `Images`입니다. `backup_server` workflow만 `conn.Compute(ctx)`의 cloud service를 사용합니다. 표는 공개 API의 구현 대응을 설명하며 전체 검증 완료나 Python Resource/session 전체 동등성을 뜻하지 않습니다. 최종 실행 결과는 [검증 기록](../../docs/sdk-support-ledger.md)에서 별도로 확인합니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
@@ -10,28 +10,28 @@
 | `update_server` | `Servers.Update(ctx, id, opts, WithUpdateField)` | go_mapping |
 | `delete_server` | `Servers.Remove(ctx, resource.ID(id))`, `Servers.ForceDelete(ctx, id)` | go_mapping |
 | `change_server_password` | `Servers.ChangeAdminPassword(ctx, id, password)` | go_mapping |
-| `clear_server_password` | 없음 | unresolved |
+| `clear_server_password` | `Servers.ClearPassword(ctx, id)` ([가이드](servers/python-user-actions.md)) | go_mapping |
 | `reboot_server` | `Servers.Reboot(ctx, id, RebootOpts{Type})` | go_mapping |
 | `rebuild_server` | `Servers.Rebuild(ctx, id, opts, WithRebuildField)` | go_mapping |
 | `resize_server` | `Servers.Resize(ctx, id, ResizeOpts{FlavorRef})` | go_mapping |
 | `confirm_server_resize` | `Servers.ConfirmResize(ctx, id)` | go_mapping |
 | `revert_server_resize` | `Servers.RevertResize(ctx, id)` | go_mapping |
 | `create_server_image` | `Servers.CreateImage`, `Images.FindIdentity`, `Images.WaitFor` | go_mapping |
-| `backup_server` | 없음 | unresolved |
+| `backup_server` | `conn.Compute(ctx)`의 `BackupServer(ctx, id, request, options...)` ([가이드](../backup-server-python.md)) | go_mapping |
 | `pause_server` | `Servers.Pause(ctx, id)` | go_mapping |
 | `unpause_server` | `Servers.Unpause(ctx, id)` | go_mapping |
 | `suspend_server` | `Servers.Suspend(ctx, id)` | go_mapping |
 | `resume_server` | `Servers.Resume(ctx, id)` | go_mapping |
-| `lock_server` | `Servers.Lock(ctx, id)` (사유 없이만 가능) | unresolved |
+| `lock_server` | `Servers.LockWithOptions(ctx, id, servers.WithLockedReason(reason))` ([가이드](servers/python-user-actions.md)) | go_mapping |
 | `unlock_server` | `Servers.Unlock(ctx, id)` | go_mapping |
 | `rescue_server` | `Servers.Rescue(ctx, id, RescueOpts{...})` | go_mapping |
 | `unrescue_server` | `Servers.Unrescue(ctx, id)` | go_mapping |
 | `start_server` | `Servers.Start(ctx, id)` | go_mapping |
 | `stop_server` | `Servers.Stop(ctx, id)` | go_mapping |
-| `restore_server` | 없음 | unresolved |
+| `restore_server` | `Servers.Restore(ctx, id)` ([가이드](servers/python-user-actions.md)) | go_mapping |
 | `shelve_server` | `Servers.Shelve(ctx, id)` | go_mapping |
 | `shelve_offload_server` | `Servers.ShelveOffload(ctx, id)` | go_mapping |
-| `unshelve_server` | `Servers.Unshelve(ctx, id, opts, WithUnshelveField)` (일부 조합만) | unresolved |
+| `unshelve_server` | `Servers.UnshelveWithOptions(ctx, id, options...)` ([가이드](servers/python-user-actions.md)) | go_mapping |
 | `set_server_metadata` | `Servers.UpdateMetadata(ctx, id, MetadataOpts)` | go_mapping |
 | `delete_server_metadata` | key마다 `Servers.DeleteMetadatum`, keys가 없으면 `Servers.ResetMetadata(ctx, id, MetadataOpts{})` | go_mapping |
 | `server_ips` | `Servers.ListAddresses(ctx, id)`, `Servers.ListAddressesByNetwork(ctx, id, label)` | go_mapping |
@@ -41,23 +41,23 @@
 | `fetch_server_security_groups` | `SecurityGroups.ListByServer(ctx, id)` | go_mapping |
 | `add_security_group_to_server` | `SecurityGroups.AddServer(ctx, id, name)` | go_mapping |
 | `remove_security_group_from_server` | `SecurityGroups.RemoveServer(ctx, id, name)` | go_mapping |
-| `add_fixed_ip_to_server` | 없음 | unresolved |
-| `remove_fixed_ip_from_server` | 없음 | unresolved |
-| `add_floating_ip_to_server` | `compute.Service.AddIPList`는 여러 요청을 묶은 다른 workflow | unresolved |
-| `remove_floating_ip_from_server` | 없음 | unresolved |
+| `add_fixed_ip_to_server` | `Servers.AddFixedIP(ctx, id, networkID)` ([가이드](servers/python-user-actions.md)) | go_mapping |
+| `remove_fixed_ip_from_server` | `Servers.RemoveFixedIP(ctx, id, address)` ([가이드](servers/python-user-actions.md)) | go_mapping |
+| `add_floating_ip_to_server` | `Servers.AddFloatingIP(ctx, id, address, options...)` ([가이드](servers/python-user-actions.md)) | go_mapping |
+| `remove_floating_ip_from_server` | `Servers.RemoveFloatingIP(ctx, id, address)` ([가이드](servers/python-user-actions.md)) | go_mapping |
 | `create_server_group` | `ServerGroups.Create(ctx, opts, WithCreateField)` | go_mapping |
 | `get_server_group` | `ServerGroups.Get(ctx, id)` | go_mapping |
 | `delete_server_group` | `ServerGroups.Remove(ctx, resource.ID(id))` | go_mapping |
 | `server_groups` | `ServerGroups.List(ctx, WithListOptions, WithListQuery)` | go_mapping |
-| `find_server_group` | `ServerGroups.Find(ctx, resource.ID(x))`와 `resource.Name(x)`를 따로 호출 | unresolved |
+| `find_server_group` | `ServerGroups.FindRecord(ctx, nameOrID, options...)` ([가이드](python-attachments-groups.md)) | go_mapping |
 | `create_server_interface` | `AttachInterfaces.Create(ctx, serverID, opts, WithCreateField)` | go_mapping |
 | `get_server_interface` | `AttachInterfaces.Get(ctx, serverID, portID)` | go_mapping |
 | `server_interfaces` | `AttachInterfaces.List(ctx, serverID)` | go_mapping |
 | `delete_server_interface` | `AttachInterfaces.InServer(ctx, resource.ID(serverID))`의 `Delete(ctx, resource.ID(portID))` | go_mapping |
 | `create_volume_attachment` | `VolumeAttachments.Create(ctx, serverID, opts)` | go_mapping |
 | `get_volume_attachment` | `VolumeAttachments.Get(ctx, serverID, volumeID)` | go_mapping |
-| `volume_attachments` | `VolumeAttachments.List(ctx, serverID)` (query 없이만 가능) | unresolved |
-| `update_volume_attachment` | 없음 | unresolved |
+| `volume_attachments` | `VolumeAttachments.ListRecords(ctx, serverID, options...)` ([가이드](python-attachments-groups.md)) | go_mapping |
+| `update_volume_attachment` | `VolumeAttachments.UpdateRecord(ctx, serverID, volumeID, options...)` ([가이드](python-attachments-groups.md)) | go_mapping |
 | `delete_volume_attachment` | `VolumeAttachments.InServer(ctx, resource.ID(serverID))`의 `Delete(ctx, resource.ID(volumeID))` | go_mapping |
 | `get_server_action` | `InstanceActions.InServer(ctx, resource.ID(serverID))`의 `Get(ctx, requestID)` | go_mapping |
 | `get_image` | `Images.GetRecord` ([legacy 버전·사용법](nova-images-python.md)) | go_mapping |
@@ -71,13 +71,13 @@
 
 ## 공통 차이
 
-Python은 Resource 객체나 ID 문자열을 받지만 Go generated 호출은 ID 문자열을 받고, `Remove`, `Find`, `InServer`, scope의 `Delete`는 `resource.Ref`를 받습니다. 결과는 Python Resource 대신 Gophercloud typed model이라서 모델에 없는 응답 field는 남지 않습니다. 예를 들어 `attachinterfaces.Interface`에는 2.70의 `tag`가 없고, `volumeattach.VolumeAttachment`에는 2.89의 `attachment_id`와 `bdm_uuid`가 없습니다.
+Python은 Resource 객체나 ID 문자열을 받지만 Go generated 호출은 ID 문자열을 받고, `Remove`, `Find`, `InServer`, scope의 `Delete`는 `resource.Ref`를 받습니다. generated 결과는 Python Resource 대신 Gophercloud typed model이라서 모델에 없는 응답 field는 남지 않습니다. 예를 들어 `attachinterfaces.Interface`에는 2.70의 `tag`가 없고, native `volumeattach.VolumeAttachment`에는 2.89의 `attachment_id`와 `bdm_uuid`가 없습니다. 새 attachment/group `Record` API는 선언된 Python 속성의 `Resource`와 unknown field를 포함한 `Wire`, 실제 `Envelope`·`Header`·`StatusCode`를 제공합니다. mutable Resource, dirty/cache/session hooks와 전체 cloud location은 이 record의 범위에 포함되지 않습니다.
 
-Python Server action과 Server·ServerGroup·ServerInterface·VolumeAttachment·ServerAction 요청은 resource의 `_max_microversion`(Server 2.100, ServerGroup 2.64, ServerInterface 2.70, VolumeAttachment 2.89, ServerAction 2.84)과 서버 최대값 가운데 작은 값을 골라 보냅니다. Go는 Connection에 설정하거나 협상한 client microversion 하나를 모든 호출에 씁니다. 그래서 같은 header가 필요하면 `RawClient()`의 복사본에 `Microversion`을 바꿔 새 API를 만들어야 합니다. MetadataMixin, `fetch_server_security_groups`, `server_ips`는 Python이 microversion을 지정하지 않는 요청이고 Go는 이때도 client microversion을 보냅니다.
+Python Server action과 Server·ServerGroup·ServerInterface·VolumeAttachment·ServerAction 요청은 resource의 `_max_microversion`(Server 2.100, ServerGroup 2.64, ServerInterface 2.70, VolumeAttachment 2.89, ServerAction 2.84)과 서버 최대값 가운데 작은 값을 골라 보냅니다. 기존 generated Go 호출은 Connection에 설정하거나 협상한 client microversion을 씁니다. 같은 header가 필요하면 `RawClient()`의 복사본에 `Microversion`을 바꿔 새 API를 만듭니다. 새 attachment/group record는 명시된 version을 유지하고 미선택 시 공통 discovery로 각각 2.89·2.64 ceiling을 적용합니다. `BackupServer`는 Server ceiling 2.100으로 요청별 선택을 하고, 직접 사용자 action 8개는 선택한 version을 바꾸거나 추가 discovery를 하지 않습니다. MetadataMixin, `fetch_server_security_groups`, `server_ips`는 Python이 microversion을 지정하지 않는 요청이고 Go는 이때도 client microversion을 보냅니다.
 
 Python delete 계열은 `ignore_missing=True`가 기본이라 404를 무시합니다. Go에서는 `Remove(ctx, resource.ID(id))`나 scope의 `Delete(ctx, resource.ID(id))`가 같은 기본값을 갖고 `resource.WithMissingError()`가 `ignore_missing=False`에 해당합니다. generated `Delete`를 직접 부르면 404가 오류로 돌아옵니다.
 
-Python `_action`은 `Accept` header를 비워 보내고 400 미만의 모든 status를 성공으로 봅니다. Go action은 Gophercloud 기본 Accept와 action별 성공 status(대부분 201, 202)를 씁니다. Python update는 바뀐 attribute가 없으면 요청을 보내지 않지만 Go `Update`는 빈 envelope라도 PUT을 보냅니다.
+Python `_action`은 `Accept` header를 비워 보내고 400 미만의 모든 status를 성공으로 봅니다. 기존 generated Go action은 Gophercloud 기본 Accept와 action별 성공 status(대부분 201, 202)를 씁니다. 새 직접 action과 `CreateBackupAction`의 POST는 Source의 빈 Accept를 SDK가 소유하고 최종 200–399를 허용하며, 실제 거부 status·body·headers와 물리 read/Close 원인을 보존합니다. Python update는 바뀐 attribute가 없으면 요청을 보내지 않지만 Go `Update`는 빈 envelope라도 PUT을 보냅니다.
 
 ## 서버 조회·수정·삭제
 
@@ -93,7 +93,11 @@ Python `_action`은 `Accept` header를 비워 보내고 400 미만의 모든 sta
 
 `create_server_image`는 Python이 서버가 2.45를 지원하면 그 version을 고정해 `createImage`를 보내고, 응답 본문의 `image_id`나 `Location` header에서 ID를 꺼냅니다. Go `CreateImage`는 client microversion을 보내고 응답의 version header로 같은 위치를 고릅니다. 그 뒤 Python은 Glance에서 `find_image(image_id)`로 image를 읽으므로 Go도 `Images.FindIdentity(ctx, id)`를 부릅니다. `wait=True`는 `Images.WaitFor(ctx, resource.ID(id), "active", resource.WithTimeout(120*time.Second), resource.WithFailureStates("error"))`에 해당합니다. Python은 조회 결과가 없으면 계속 기다리지만 Go는 404를 바로 오류로 돌려주고, Python의 시간 초과는 `ResourceTimeout`이며 Go는 context deadline 오류입니다.
 
-`unshelve_server`는 인자가 없을 때 `{"unshelve": null}`, 가용 영역을 줄 때 `{"unshelve": {"availability_zone": ...}}`를 보내며 Go도 같습니다. 가용 영역과 함께 `host`를 주면 Go도 `WithUnshelveField("host", ...)`로 같은 본문을 만듭니다. 하지만 `host`만 주면 Go action 값이 null이라 `host`가 `unshelve` 옆 최상위에 붙고, `availability_zone=None`으로 고정 영역을 푸는 null은 typed key라서 보낼 수 없습니다. `lock_server(locked_reason=...)`도 Go `Lock`이 옵션을 받지 않아 `{"lock": null}`만 보냅니다.
+`UnshelveWithOptions`는 기본 `{"unshelve": null}`, host 단독·가용 영역 문자열·명시적 null을 action 안에 보냅니다. `WithUnshelveHost`는 2.91 이상, `WithUnshelveAvailabilityZone`는 2.77 이상, `WithUnshelveUnpinnedAvailabilityZone`는 2.91 이상에서 사용합니다. `LockWithOptions`는 기본 `{"lock": null}`을 유지하고 `WithLockedReason`으로 2.73 이상의 `locked_reason`을 보냅니다. 생략과 빈 사유를 구분합니다. generated `Unshelve`·`Lock`의 기존 입력 한계는 유지되므로 이 경우 새 API를 사용합니다. [직접 action 8개의 옵션·버전·오류 비교](servers/python-user-actions.md)에 사용법을 설명합니다.
+
+`ClearPassword`는 Nova에 저장된 암호를 bodyless DELETE로 지우며 guest 암호를 바꾸지 않습니다. `Restore`는 `{"restore": null}`을 보내고 상태 변경을 기다리지 않습니다. 네 직접 fixed/floating IP action은 목록 조회 없이 요청을 보내며 2.1–2.43에 적용됩니다. 2.44 이상은 HTTP 전에 거부합니다. `compute.Service.AddIPList`의 legacy inventory 조회 workflow와 경로가 다릅니다.
+
+`backup_server`는 cloud `BackupServer(ctx, id, compute.BackupServerRequest{...}, options...)`로 대응합니다. SDK가 `createBackup` action, image ID 추출, Glance cloud lookup과 선택적 active 대기를 묶습니다. 기본 wait=false·timeout=120초이며 Nova action 수락 증거와 Glance 조회/대기 결과를 따로 반환합니다. 하위 action만 필요하면 `Servers.CreateBackupAction`을 사용합니다. [Python/Go workflow 비교](../backup-server-python.md)에 connection의 Glance binding, 직접 client 옵션과 부분 결과를 설명합니다.
 
 ## 서버 metadata와 IP
 
@@ -113,7 +117,7 @@ Python TagMixin은 tag를 URL에 그대로 이어 붙이고 discovery로 2.26 �
 
 `server_groups(all_projects=True)`는 Python이 `all_projects=True`를 보냅니다. Go typed `AllProjects`는 `all_projects=true`를 보내므로 같은 문자열이 필요하면 `WithListQuery("all_projects", "True")`를 쓰고, `limit`은 `ListOpts.Limit`, `marker`는 `WithListQuery`로 보냅니다. Go 목록은 한 페이지만 읽고, Python은 `limit`을 채운 페이지 뒤에 marker로 다음 페이지를 더 요청할 수 있습니다.
 
-`find_server_group`은 ID GET 뒤 404·400·403이면 전체 목록에서 ID나 이름이 같은 항목을 하나 고르고, `all_projects=True`를 목록 query로 보냅니다. Go에는 이 fallback을 하는 helper가 없어서 `Find(ctx, resource.ID(x), resource.WithIgnoreMissing())`와 `Find(ctx, resource.Name(x))`를 이어 붙여야 하고, `Find`에는 `all_projects`를 넘길 수 없습니다.
+`ServerGroups.FindRecord`는 literal ID GET부터 시작하고 깨끗한 400·403·404일 때 전체 목록에서 정확한 ID 또는 이름을 찾습니다. 기본 미존재는 nil,nil이며 `WithGroupFindIgnoreMissing(false)`로 오류를 선택합니다. `WithGroupFindAllProjects(true)`는 fallback 목록에만 `all_projects=True`를 전송합니다. 뒤 페이지 오류와 중복을 확인하며 물리 read/Close·취소·source 변경이 섞인 GET 오류로는 fallback하지 않습니다. [attachment/group 비교](python-attachments-groups.md)에 옵션과 raw record 차이를 설명합니다. 기존 `Find(resource.Ref)`의 분리된 검색 계약은 그대로 유지됩니다.
 
 ## Interface와 volume attachment
 
@@ -121,23 +125,21 @@ Python TagMixin은 tag를 URL에 그대로 이어 붙이고 discovery로 2.26 �
 
 `create_volume_attachment`는 `volumeId`, `device`, `tag`, `delete_on_termination`을 같은 envelope로 보냅니다. Go는 false인 `delete_on_termination`을 생략하며 서버 기본값은 false입니다. Python의 legacy `volume_id`, `volumeId` 인자는 Go `CreateOpts.VolumeID`에 해당합니다. `delete_volume_attachment`는 인자 순서 확인을 위해 서버 ID로 `find_server`를 먼저 부르므로 `GET servers/{id}`가 한 번 더 나갑니다. 그 조회가 실패하면 Python은 두 인자를 바꿔 삭제하지만 Go scope의 `Delete`는 DELETE 하나만 보내고 인자를 바꾸지 않습니다.
 
-`volume_attachments`는 기본 호출이 같은 GET이지만 Python이 받는 `limit`과 `offset` query를 Go 목록에 넘길 수 없습니다. scope의 `List`에 query를 주면 HTTP 전에 `resource.ErrUnsupported`가 돌아옵니다. `update_volume_attachment`의 `PUT servers/{id}/os-volume_attachments/{volume}`은 Go 호출이 없습니다.
+`VolumeAttachments.ListRecords`는 고정 server의 GET에 `WithAttachmentLimit`·`WithAttachmentOffset`을 보내고 lazy page 순회·Body 필터·필터 전 raw cap을 제공합니다. native `List`와 scope의 기존 query 제약은 유지됩니다. `UpdateRecord`는 기존 volume ID를 PUT 경로에 쓰고 기본 `volumeId`도 그 ID로 유지합니다. `WithAttachmentAttribute("delete_on_termination", false)`는 명시 false를, `WithAttachmentSwapTo`는 교체 volume ID를 보냅니다. `InServer` scope에서도 `ListRecords`·`UpdateRecord`를 사용합니다. [별도 가이드](python-attachments-groups.md)에 omission/null, immutable route, discovery·반환 seed·실제 HTTP 증거를 설명합니다.
 
 ## Instance action
 
 `get_server_action`은 `GET servers/{id}/os-instance-actions/{request_id}`이며 Go `InstanceActions.InServer` scope의 `Get`이 같은 요청을 보내고 2.84 event의 `details`까지 `ActionEvent`에 남깁니다. Python의 `ignore_missing` 인자는 `_get`에 쓰이지 않아 404가 그대로 예외가 되고, Go도 `resource.ErrNotFound`를 돌려줍니다.
 
-## unresolved 목록
+## 권한 조건과 남은 공통 한계
 
-- `clear_server_password`: `DELETE servers/{id}/os-server-password`를 보내는 Go API가 없습니다.
-- `backup_server`: `createBackup` action과 그 뒤의 Glance image 조회·대기를 묶은 Go API가 없습니다.
-- `restore_server`: soft delete된 서버의 `restore` action을 보내는 Go API가 없습니다.
-- `lock_server`: Go `Lock`은 옵션을 받지 않아 2.73의 `{"lock": {"locked_reason": ...}}`를 보낼 수 없습니다.
-- `unshelve_server`: `host`만 줄 때 `host`를 action 안에 넣을 수 없고, `availability_zone=None`의 null을 보낼 수 없습니다.
-- `add_fixed_ip_to_server`, `remove_fixed_ip_from_server`: `addFixedIp`, `removeFixedIp` action을 보내는 Go API가 없습니다.
-- `add_floating_ip_to_server`: Go에는 `addFloatingIp`만 따로 보내는 호출이 없습니다. `compute.Service.AddIPList`는 Nova floating IP 목록 조회와 재검증을 거치는 다른 workflow이고 그 목록 API가 있는 2.35 이하에서만 동작합니다.
-- `remove_floating_ip_from_server`: `removeFloatingIp` action을 보내는 Go API가 없습니다.
-- `find_server_group`: ID GET 뒤 목록 fallback을 하는 helper가 없고 `all_projects`를 `Find`에 전달할 수 없습니다.
-- `volume_attachments`: `limit`과 `offset` query를 보낼 수 없습니다.
-- `update_volume_attachment`: volume attachment PUT 호출이 없습니다.
-Nova legacy `/images`와 metadata8개는 [별도 비교 가이드](nova-images-python.md)의 owned API로 완료했습니다. 일반2.35·metadata2.38 버전 상한과 raw Resource/응답·Source 차이는 해당 프로파일에 적용됩니다. Find fallback은 Source의 `/images?name=...` summary 경로입니다.
+이번에 추가한 action 8개, attachment/group 3개와 backup workflow 1개는 위의 공개 API로 대응합니다. 이 12개를 모두 순수 user API로 세지는 않습니다. [Nova 2025.2 기본 정책](https://docs.openstack.org/nova/2025.2/configuration/policy.html)과 [32.0.0 attachment controller](https://github.com/openstack/nova/blob/32.0.0/nova/api/openstack/compute/volume_attachments.py#L319-L347)를 기준으로 다음 조건을 구분합니다.
+
+- 직접 action의 일반 경로와 `createBackup`은 `project_member_or_admin`, attachment 목록과 일반 group GET/list는 `project_reader_or_admin`입니다. 실제 Glance lookup은 해당 Image 서비스 정책도 적용받습니다.
+- 명시한 nonempty unshelve host는 2.91 이상에서 추가 `unshelve_to_host` 관리자 정책이 필요합니다. zone-only 또는 지원 버전의 null-zone 요청은 일반 unshelve 정책을 사용합니다.
+- `UpdateRecord`는 2.85 이상에서 같은 volumeId의 일반 속성을 변경할 때 user 경로입니다. 2.85 미만 또는 다른 volumeId로 교체하면 `service_or_admin` swap 경로이며, stock controller는 Cinder migration 용도로 제한합니다.
+- group Find의 `all_projects=True` fallback은 관리자 정책을 사용합니다. 첫 direct GET까지 관리자 목록으로 바꾸지는 않습니다.
+
+서버 정책의 기준 release는 SDK source pin과 별개이며 실제 배포의 override·ownership·상태 검사는 서버가 판단합니다. 표의 mapping은 named 호출의 대응이며 mutable Python Resource/session, 전체 cloud location, 모든 action 및 인증된 실제 클라우드 acceptance 동등성은 별도 공통 범위입니다. 구현별 차이와 계약 테스트 참조는 [사용자 action](servers/python-user-actions.md), [attachment/group](python-attachments-groups.md), [backup workflow](../backup-server-python.md)에 남깁니다.
+
+Nova legacy `/images`와 metadata 8개는 [별도 비교 가이드](nova-images-python.md)의 owned API로 제공합니다. 일반 2.35·metadata 2.38 버전 상한과 raw Resource/응답·Source 차이는 해당 프로파일에 적용됩니다. Find fallback은 Source의 `/images?name=...` summary 경로입니다.
