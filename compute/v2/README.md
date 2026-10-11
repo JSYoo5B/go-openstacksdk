@@ -45,6 +45,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `KeyPairs.CreateKeypair`는 nullable 속성·ID/name 별칭·입력/응답 병합과 ssh view 기본값을 처리합니다. `Servers.ConsoleURL`은6개 legacy action과 실제 console raw 값을 제공합니다. [Keypair·console의 Python/Go 비교](../keypairs-console.md)에 독립 main·alias/default·응답 정책을 설명합니다.
 
+`Images`는 Nova legacy 이미지·metadata proxy의 owned Record 호출을 제공합니다. 일반 호출은 선택 버전2.35까지, metadata는2.38까지 허용하며 상한을 넘으면 HTTP 전에 ErrUnsupported입니다. [Nova 이미지의 Python/Go 비교](nova-images-python.md)에 버전·기본 목록·Find·metadata와 실제 응답 근거를 설명합니다.
+
 서버 조회·action·metadata·tag·server group·interface·volume attachment의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다.
 
 host aggregate·flavor 관리·hypervisor·compute service·migration·서버 관리자 action·진단·사용량의 openstacksdk Proxy 메서드별 Go 대응과 unresolved 사유는 [Python proxy 대응: 관리자 호출](python-parity-admin.md)에 정리했습니다.
@@ -93,6 +95,7 @@ _ = value
 | `Extensions` | [extensions](extensions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Flavors` | [flavors](flavors/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Hypervisors` | [hypervisors](hypervisors/api_generated.go) | `Resources`: ID 조회, 목록, 상태 대기 |
+| `Images` | [images](images/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `InstanceActions` | [instanceactions](instanceactions/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록 |
 | `KeyPairs` | [keypairs](keypairs/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |

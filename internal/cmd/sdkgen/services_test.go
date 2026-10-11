@@ -73,3 +73,30 @@ func TestSDKOwnedAPIsExtendRegisteredServiceWithoutNativeDeclarations(t *testing
 		t.Fatalf("manual service registry was invented: %v", err)
 	}
 }
+
+func TestNovaImageProxyExtendsComputeRegistryWithoutNativeInventory(t *testing.T) {
+	root := t.TempDir()
+	native := inventory{Version: "test-pin", Operations: []operation{{SDKPackage: "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers", Name: "Get"}}}
+	g := generator{root: root, inventory: native}
+	if err := g.generateServices(); err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(g.inventory, native) {
+		t.Fatal("owned proxy changed native inventory")
+	}
+	registry, err := os.ReadFile(filepath.Join(root, "compute/v2/service_generated.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := parser.ParseFile(token.NewFileSet(), "registry.go", registry, 0); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []string{"github.com/JSYoo5B/go-openstacksdk/compute/v2/images", "Images  *resource0.API", "Images:  resource0.New(client)", "Servers *resource1.API", "Servers: resource1.New(client)"} {
+		if !strings.Contains(string(registry), want) {
+			t.Fatalf("missing %q: %s", want, registry)
+		}
+	}
+	if len(g.collections) != 0 {
+		t.Fatal("owned proxy invented a Resource collection")
+	}
+}

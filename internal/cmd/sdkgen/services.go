@@ -104,6 +104,11 @@ func (g *generator) generateServices() error {
 			addPackage(record.Package)
 		}
 	}
+	// The Nova image proxy has no pinned native package. Register its owned API
+	// with Compute without inventing a Gophercloud operation or Collection.
+	if groups["compute/v2"] != nil {
+		groups["compute/v2"]["images"] = true
+	}
 	keys := []string{}
 	for key := range groups {
 		keys = append(keys, key)

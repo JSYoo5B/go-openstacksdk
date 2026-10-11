@@ -9,19 +9,20 @@ import (
 	resource4 "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions"
 	resource5 "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 	resource6 "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
-	resource7 "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions"
-	resource8 "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
-	resource9 "github.com/JSYoo5B/go-openstacksdk/compute/v2/limits"
-	resource10 "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations"
-	resource11 "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
-	resource12 "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles"
-	resource13 "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups"
-	resource14 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
-	resource15 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
-	resource16 "github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
-	resource17 "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
-	resource18 "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
-	resource19 "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
+	resource7 "github.com/JSYoo5B/go-openstacksdk/compute/v2/images"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/compute/v2/limits"
+	resource11 "github.com/JSYoo5B/go-openstacksdk/compute/v2/migrations"
+	resource12 "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
+	resource13 "github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles"
+	resource14 "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups"
+	resource15 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
+	resource16 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	resource17 "github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
+	resource18 "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
+	resource19 "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
+	resource20 "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -35,19 +36,20 @@ type Service struct {
 	Extensions        *resource4.API
 	Flavors           *resource5.API
 	Hypervisors       *resource6.API
-	InstanceActions   *resource7.API
-	KeyPairs          *resource8.API
-	Limits            *resource9.API
-	Migrations        *resource10.API
-	QuotaSets         *resource11.API
-	RemoteConsoles    *resource12.API
-	SecurityGroups    *resource13.API
-	ServerGroups      *resource14.API
-	Servers           *resource15.API
-	Services          *resource16.API
-	Tags              *resource17.API
-	Usage             *resource18.API
-	VolumeAttachments *resource19.API
+	Images            *resource7.API
+	InstanceActions   *resource8.API
+	KeyPairs          *resource9.API
+	Limits            *resource10.API
+	Migrations        *resource11.API
+	QuotaSets         *resource12.API
+	RemoteConsoles    *resource13.API
+	SecurityGroups    *resource14.API
+	ServerGroups      *resource15.API
+	Servers           *resource16.API
+	Services          *resource17.API
+	Tags              *resource18.API
+	Usage             *resource19.API
+	VolumeAttachments *resource20.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
@@ -59,19 +61,20 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Extensions:        resource4.New(client),
 		Flavors:           resource5.New(client),
 		Hypervisors:       resource6.New(client),
-		InstanceActions:   resource7.New(client),
-		KeyPairs:          resource8.New(client),
-		Limits:            resource9.New(client),
-		Migrations:        resource10.New(client),
-		QuotaSets:         resource11.New(client),
-		RemoteConsoles:    resource12.New(client),
-		SecurityGroups:    resource13.New(client),
-		ServerGroups:      resource14.New(client),
-		Servers:           resource15.New(client),
-		Services:          resource16.New(client),
-		Tags:              resource17.New(client),
-		Usage:             resource18.New(client),
-		VolumeAttachments: resource19.New(client),
+		Images:            resource7.New(client),
+		InstanceActions:   resource8.New(client),
+		KeyPairs:          resource9.New(client),
+		Limits:            resource10.New(client),
+		Migrations:        resource11.New(client),
+		QuotaSets:         resource12.New(client),
+		RemoteConsoles:    resource13.New(client),
+		SecurityGroups:    resource14.New(client),
+		ServerGroups:      resource15.New(client),
+		Servers:           resource16.New(client),
+		Services:          resource17.New(client),
+		Tags:              resource18.New(client),
+		Usage:             resource19.New(client),
+		VolumeAttachments: resource20.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

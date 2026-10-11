@@ -29,6 +29,8 @@ native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md
 
 Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규칙은 [noauth native client 생성](../noauth/README.md)에 설명합니다.
 
+`Volumes.ListSummary`는 `/volumes` 요약 목록과 로컬 소비 정책을 제공합니다. [요약 목록 비교](volume-summary-python.md)를 참고합니다. Backup의 [명시적 Python metadata profile](backup-metadata-python.md)은 stock Cinder에 child route가 없어 미해결 상태이며 일반 stock metadata 지원으로 집계하지 않습니다.
+
 volume·snapshot·backup·attachment·transfer·volume type·QoS·availability zone의 openstacksdk Proxy 메서드별 Go 대응과 차이, unresolved 사유는 [Python proxy 대응](python-parity.md)에 정리했습니다.
 
 ## Go 사용
