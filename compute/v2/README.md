@@ -45,6 +45,8 @@ Flavor 자동 조회는 이름 hint를 서버에 보내지 않고 `/flavors/deta
 
 `KeyPairs.CreateKeypair`는 nullable 속성·ID/name 별칭·입력/응답 병합과 ssh view 기본값을 처리합니다. `Servers.ConsoleURL`은6개 legacy action과 실제 console raw 값을 제공합니다. [Keypair·console의 Python/Go 비교](../keypairs-console.md)에 독립 main·alias/default·응답 정책을 설명합니다.
 
+`Servers.FindRecord`는 ID/name 검색과 Source 서버·중첩 리소스 필드를 제공합니다. [서버 검색 Python/Go 비교](server-find-python.md)에 기본 missing·단계별 버전·HTTP 증거를 설명합니다.
+
 `Servers.ClearPassword/Restore/LockWithOptions/UnshelveWithOptions`와 직접 fixed/floating IP action은 Source 본문·선택 인자를 제공합니다. [서버 user action 비교](servers/python-user-actions.md)에 버전 상한과 host admin 조건을 설명합니다.
 
 `VolumeAttachments.ListRecords/UpdateRecord`와 `ServerGroups.FindRecord`는 paging·raw 결과와 기본 검색을 제공합니다. [Attachment·group 비교](python-attachments-groups.md)에 volume swap 및 all-projects 권한 조건을 설명합니다.

@@ -13,6 +13,8 @@ Gophercloud v2.15.0의 objectstorage/v1 API를 하나의 인증된 서비스 객
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
+`Containers.ListRecords/AllRecords`는 Source raw 목록과 SDK 소유 페이징·필드·응답 증거를 제공합니다. [Container 목록 Python/Go 비교](containers/listing-python.md)에 query 기본값·Header·cap 정책을 설명합니다.
+
 `Containers.CreateRecord/DeleteRecord`는 생성 attrs·metadata prefix·선행 descriptor 검증·기본 missing을 SDK가 처리합니다. [Container mutation의 Python/Go 비교](containers/mutations-python.md)에 Source generic status와 seed/실제 HTTP 증거의 구분을 설명합니다.
 
 native `Objects.Create`는 nil Content를 빈 reader로 채우며 typed nil은 HTTP 전에 거부합니다. `WithCreateBytes`는 입력을 복사하고 매 호출 새 reader를 준비합니다. [빈 객체·bytes 옵션 비교](objects/create-defaults-python.md)에 native 단일 PUT과 상위 업로드의 범위를 설명합니다.

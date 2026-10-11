@@ -31,6 +31,8 @@ Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규�
 
 `Volumes.FindRecord`와 `Volumes/Snapshots.FetchMetadataRecord/GetMetadataRecord/SetMetadataRecord/DeleteMetadataRecord`는 검색·metadata 기본값과 Source 캐시 전환을 제공합니다. [Volume 검색](volume-find-python.md), [Metadata 비교](metadata-python.md)에 구체적 옵션·nil/빈 입력·순차 삭제와 부분 응답을 설명합니다.
 
+`Groups`·`GroupSnapshots`는 고정된 Cinder v3 기본값과 구체적 함수 옵션으로 generic group API를 제공합니다. [Group](groups-python.md), [Group snapshot](group-snapshots-python.md)에 Python/Go 사용법·버전·Create/Update/Delete·목록 증거를 설명합니다.
+
 `Messages.GetRecord/ListRecords/DeleteRecord`는 SDK가 기본값과 구체적 옵션을 제공하는 Cinder message API입니다. [Python/Go 비교](messages-python.md)에 Source envelope·stock 호환·기본 missing·목록 정책을 설명합니다.
 
 `Snapshots.FindRecord/Backups.FindRecord`는 GET-first와 name fallback, details·missing 기본값, raw ID/paging과 Cinder microversion 선택을 제공합니다. [Snapshot](snapshot-find-python.md), [Backup](backup-find-python.md)에 독립 Go main과 Python 비교를 설명합니다.
@@ -65,6 +67,8 @@ _ = value
 | `Attachments` | [attachments](attachments/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Backups` | [backups](backups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `Groups` | [groups](groups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `GroupSnapshots` | [groupsnapshots](groupsnapshots/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |
 | `ManageableVolumes` | [manageablevolumes](manageablevolumes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
