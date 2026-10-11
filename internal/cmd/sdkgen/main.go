@@ -158,6 +158,9 @@ func main() {
 			fatal(err)
 		}
 	}
+	if err := g.generateNeutronFieldGetters(*pythonSource); err != nil {
+		fatal(err)
+	}
 	// SDK-owned services have no Gophercloud declaration to infer. Keep their
 	// audited policy records in the same inventory without inventing native APIs.
 	g.collections = append(g.collections, sdkOwnedCollections...)
@@ -579,6 +582,9 @@ func (g *generator) generate(path string) error {
 		return err
 	}
 	if err := os.WriteFile(filepath.Join(dir, "api_generated.go"), source, 0644); err != nil {
+		return err
+	}
+	if err := g.emitNeutronDelete(pkg); err != nil {
 		return err
 	}
 	if plan != nil {
