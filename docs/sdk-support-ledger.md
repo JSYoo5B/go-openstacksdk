@@ -3020,3 +3020,14 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 `go test -race -count=1`에서 Cinder attachment19개·transfer12개·Neutron forwarding12개·Keystone trust12개 실제 package그룹이 통과했고, Cinder encryption/type/QoS는 최종 집중20개 그룹을 통과했습니다. `/private/tmp/go-openstacksdk-oct11-resume-ready-packages.jsonl`의 다른 Nova/connector 실패 package는 통과 근거에 포함하지 않으며, 두 Cinder 거부-response proof assertion 수정 후 최종 실행은 `...resume-encryption-final-focus.jsonl`, trust는 `...resume-trusts-full.jsonl`입니다. 초기 전체log에 통과와 실패가 함께 있으므로 package별 실제 terminal 상태를 근거로 기록합니다. 신규 HTTP 서버를 만들지 않고 기존 fixture·공개 Gophercloud testhelper와 공통 REST/List/FindIdentity를 재사용했습니다.
 
 [Cinder attachment](../blockstorage/v3/attachments-python.md)·[transfer](../blockstorage/v3/transfers-python.md)·[type/encryption/QoS](../blockstorage/v3/type-encryption-python.md)·[Neutron forwarding](../network/v2/port-forwarding-python.md)·[Keystone trust](../identity/v3/trusts-python.md)에 standalone Go와 Python 비교를 제공합니다. 기본 정책상 encryption 생성/수정·QoS lookup3개는 core admin이며 core user 완료로 기록하지 않습니다. 기존 완료 transfer3행의 계약은 보존하고 새 owned API 계약을 추가했습니다. catalog/pins는 그대로이며 supported0·SDK-R1/C1/S1·stock Backup metadata4개는 미완료입니다. 전체1,278/3,362·핵심1,204/2,292는 user/admin 합계입니다. 문서 외부 빌드·최종 전체 gate는 현재 병렬 묶음 통합 후 수행합니다.
+
+
+## 핵심 user 추가26개 전체 검증
+
+2026-10-11, 앞선42개 뒤 Cinder Snapshot/Backup Find2개·Neutron core Find3개·router action5개·trunk/address action4개·tag7개·Swift container2개·Barbican consumer3개를 추가해 전체1,318/3,362·핵심1,244/2,292가 됐습니다. Source named API 수이며 새로운 endpoint 수와 구분합니다. 공개 Gophercloud testhelper·기존 service fixture·guarded REST/List/FindIdentity를 재사용했고, raw paging marker·Body/Header descriptor·사전 입력 검증·모든 rejected400..599 물리 오류의 교차 검토 수정까지 포함합니다.
+
+정확한 커밋 `499fb413bbae6c111524c75ea98109cbe6f54774`을 Git archive로 분리한 불변 snapshot에서 `GOFLAGS=-p=4 make check`가 exit0입니다. 실제 Go test package157개 모두 uncached PASS이며 license 원문12개·의존 module4개, vet·race·pinned parity·progress·gofmt를 통과했습니다. Go source2,552개 SHA256 `d8e877a3c0c71a27a8c88aa3b5d7166404b7e070395e48a278e2cdad4530589d`는 정렬한 상대경로 NUL·파일 bytes NUL로 계산했습니다. catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`과 source pins는 보존했습니다. 전체 근거는 `/private/tmp/go-openstacksdk-oct11-next-full-receipt.json`과 `...next-full-check.log`입니다.
+
+같은 snapshot을 local replace로 연결한 별도 소비자 module에서 정확한 비교 가이드 main8개를 빌드했고 exit0입니다. Snapshot/Backup·Network/Port/Subnet·Router action·Trunk/Address action·Tags·Swift Container mutation·Barbican Consumer가 대상입니다. 가이드별 fence SHA와 consumer 경로는 `/private/tmp/go-openstacksdk-oct11-next-eight-guide-receipt.json`에 기록했습니다. 실제 인증/OpenStack/Python 실행, replace 없는 이 revision의 원격 설치 또는 alpha 배포의 근거로 사용하지 않습니다.
+
+이26개는 검토한 named 계약의 go_mapping이며 supported0·공유 SDK-R1/C1/S1·실클라우드 acceptance는 계속 미완료입니다. 이후 tag 재시도 header 수정·Cinder metadata 공통 seam·추가 named API·Neutron Find 엔진 리팩터링은 별도 커밋/검증 단위이며 위499fb413 전체 gate에 포함됐다고 주장하지 않습니다. 최신 지시에 따라 재시작 없이8개 worker의 독립 구현·교차 검토를 계속합니다.
