@@ -61,7 +61,7 @@ func recordKnown(key string) bool {
 }
 func recordReserved(key string) bool {
 	switch key {
-	case "self", "connection", "_synchronized", "microversion", "base_path", "resource_type", "requires_id", "error_message", "skip_cache", "resource_response_key", "resource_request_key", "params", "prepend_key":
+	case "self", "cls", "connection", "_synchronized", "microversion", "base_path", "resource_type", "requires_id", "error_message", "skip_cache", "resource_response_key", "resource_request_key", "params", "prepend_key":
 		return true
 	}
 	return false
@@ -73,7 +73,7 @@ func recordCollect(raw json.RawMessage, list bool) (map[string]json.RawMessage, 
 	}
 	fields := make(map[string]json.RawMessage)
 	for _, member := range members {
-		if list && (member.Key == "connection" || member.Key == "microversion" || member.Key == "_synchronized") {
+		if list && (member.Key == "cls" || member.Key == "connection" || member.Key == "microversion" || member.Key == "_synchronized") {
 			return nil, recordInvalid("group list constructor collides with %q", member.Key)
 		}
 		if recordKnown(member.Key) {

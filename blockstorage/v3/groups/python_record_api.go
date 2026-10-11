@@ -407,7 +407,6 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			path = "groups"
 		}
 		parsed, _ := url.Parse(p.source.Client.ServiceURL(path))
-		offset := query.Has("offset") && !query.Has("marker")
 		var page *rest.Response
 		spec := rest.CollectionSpec[GroupRecord]{Client: &p.source.Client, Path: path, Kind: "groups", PluralKey: "groups", Metadata: recordMetadata, Validate: p.guard, SourceGuard: p.guard, ListCodes: recordCodes(100, 400), ReadPage: func(_ context.Context, target string, _ ...int) (*rest.Response, error) {
 			return p.exchange(http.MethodGet, target, nil)
@@ -416,7 +415,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
 			p.proof(value)
 			return errors.Join(recordProject(value, value.fields), p.guard(ctx))
-		}, Paging: rest.PagePolicy[GroupRecord]{VersionedPath: parsed.EscapedPath(), HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, OffsetPagination: offset, MarkerFallback: !offset, Marker: recordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true}}
+		}, Paging: rest.PagePolicy[GroupRecord]{VersionedPath: parsed.EscapedPath(), HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerOrOffsetPagination: true, MarkerFallback: true, Marker: recordMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true}}
 		keys := make([]string, 0, len(filters))
 		for key := range filters {
 			keys = append(keys, key)

@@ -486,3 +486,215 @@ func TestPythonCinderGroupGetDeclaredDeprecatedAttrsSeedWithoutWireQuery(t *test
 		t.Fatal(err, *calls)
 	}
 }
+
+func TestPythonCinderGroupListClassCollisionKeepsAcceptedPageAndDirectUnknown(t *testing.T) {
+	for _, raw := range []string{`null`, `false`} {
+		t.Run(raw, func(t *testing.T) {
+			page := `{"groups":[{"id":"wire","cls":` + raw + `}],"extra":"accepted-page"}`
+			member := `{"group":{"id":"wire","cls":` + raw + `},"extra":"accepted-member"}`
+			api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
+				if r.URL.Path == groupBase+"/wire" {
+					return groupWire(200, member)
+				}
+				return groupWire(202, page)
+			})
+			values, err := collectGroups(api.ListRecords(context.Background()))
+			var proof *resource.ResponseError
+			if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 {
+				t.Fatal(values, err, proof, *calls)
+			}
+			value, err := api.GetRecord(context.Background(), "wire")
+			if err != nil || value == nil || value.Wire == nil || string(value.Wire.Body["cls"]) != raw || value.Resource.Body["cls"] != nil || string(value.Envelope) != member || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" || len(*calls) != 2 {
+				t.Fatal(value, err, *calls)
+			}
+		})
+	}
+}
+
+func TestPythonCinderGroupClassInputsAreBoundControlsBeforeDiscovery(t *testing.T) {
+	for _, raw := range []string{`null`, `false`} {
+		t.Run(raw, func(t *testing.T) {
+			var decoded any
+			if err := json.Unmarshal([]byte(raw), &decoded); err != nil {
+				t.Fatal(err)
+			}
+			fields := map[string]json.RawMessage{"cls": json.RawMessage(raw)}
+			for _, item := range []struct {
+				name   string
+				invoke func(*groups.API) error
+			}{
+				{"get_field", func(api *groups.API) error {
+					_, err := api.GetRecord(context.Background(), "id", groups.WithRecordGetField("cls", decoded))
+					return err
+				}},
+				{"get_opts", func(api *groups.API) error {
+					_, err := api.GetRecord(context.Background(), "id", groups.WithRecordGetOpts(groups.RecordGetOpts{Fields: fields}))
+					return err
+				}},
+				{"create_field", func(api *groups.API) error {
+					_, err := api.CreateRecord(context.Background(), groups.WithRecordCreateField("cls", decoded))
+					return err
+				}},
+				{"create_opts", func(api *groups.API) error {
+					_, err := api.CreateRecord(context.Background(), groups.WithRecordCreateOpts(groups.RecordCreateOpts{Fields: fields}))
+					return err
+				}},
+				{"update_field", func(api *groups.API) error {
+					_, err := api.UpdateRecord(context.Background(), "id", groups.WithRecordUpdateField("cls", decoded))
+					return err
+				}},
+				{"update_opts", func(api *groups.API) error {
+					_, err := api.UpdateRecord(context.Background(), "id", groups.WithRecordUpdateOpts(groups.RecordUpdateOpts{Fields: fields}))
+					return err
+				}},
+				{"list_query", func(api *groups.API) error {
+					_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("cls", decoded)))
+					return err
+				}},
+				{"list_opts", func(api *groups.API) error {
+					_, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListOpts(groups.RecordListOpts{Query: fields})))
+					return err
+				}},
+			} {
+				t.Run(item.name, func(t *testing.T) {
+					api, calls := groupAPI(t, "", func(*http.Request) *http.Response {
+						t.Fatal("bound cls input reached discovery or mutation HTTP")
+						return nil
+					})
+					err := item.invoke(api)
+					var proof *resource.ResponseError
+					if !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || len(*calls) != 0 {
+						t.Fatal(err, proof, *calls)
+					}
+				})
+			}
+		})
+	}
+}
+
+func TestPythonCinderGroupListAdvertisedOffsetTransitionsKeepScopeAndFallback(t *testing.T) {
+	for _, initial := range []string{"absent", "marker", "offset"} {
+		t.Run(initial, func(t *testing.T) {
+			api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
+				query := r.URL.Query()
+				if query.Has("marker") && query.Has("offset") {
+					t.Fatal("mixed cursor families", query)
+				}
+				if r.URL.Path != groupBase+"/detail" || query.Get("sort") != "id:asc" || query.Get("all_tenants") != "False" || query.Get("limit") != "2" || query.Has("name") || r.Header.Get("OpenStack-API-Version") != "volume 3.38" {
+					t.Fatal(r.URL, r.Header)
+				}
+				if query.Get("marker") == "b" {
+					return groupWire(200, `{"groups":[]}`)
+				}
+				if query.Get("offset") == "2" {
+					return groupWire(200, `{"groups":[{"id":"b","name":"other"}]}`)
+				}
+				return groupWire(200, `{"groups":[{"id":"a","name":"wanted"}],"next":"?offset=2&limit=2"}`)
+			})
+			options := []groups.RecordListOption{groups.WithRecordListLimit(2), groups.WithRecordListQuery("sort", "id:asc"), groups.WithRecordListQuery("all_projects", false), groups.WithRecordListQuery("name", "wanted")}
+			switch initial {
+			case "marker":
+				options = append(options, groups.WithRecordListMarker("initial"))
+			case "offset":
+				options = append(options, groups.WithRecordListQuery("offset", 0))
+			}
+			values, err := collectGroups(api.ListRecords(context.Background(), options...))
+			if err != nil || len(values) != 1 || len(*calls) != 3 {
+				t.Fatal(values, err, *calls)
+			}
+			groupField(t, values[0], "id", `"a"`)
+			first, _ := url.ParseQuery((*calls)[0].query)
+			switch initial {
+			case "absent":
+				if first.Has("offset") || first.Has("marker") {
+					t.Fatal(first)
+				}
+			case "marker":
+				if first.Get("marker") != "initial" || first.Has("offset") {
+					t.Fatal(first)
+				}
+			case "offset":
+				if first.Get("offset") != "0" || first.Has("marker") {
+					t.Fatal(first)
+				}
+			}
+			second, _ := url.ParseQuery((*calls)[1].query)
+			third, _ := url.ParseQuery((*calls)[2].query)
+			if second.Get("offset") != "2" || second.Has("marker") || third.Get("marker") != "b" || third.Has("offset") {
+				t.Fatal("advertised offset then raw last-row marker", second, third)
+			}
+		})
+	}
+}
+
+func TestPythonCinderGroupListOffsetContinuationRejectsScopeAndCursorRegressions(t *testing.T) {
+	for _, item := range []struct {
+		name, next  string
+		late, cycle bool
+	}{
+		{"changed_filter", "?offset=2&sort=id:desc", false, false},
+		{"changed_project_collection", "/cinder/v3/other/groups/detail?offset=2", false, false},
+		{"changed_origin", "https://wrong.example/cinder/v3/project/groups/detail?offset=2", false, false},
+		{"mixed_cursor_families", "?offset=2&marker=last", false, false},
+		{"repeat_offset", "?offset=2", true, true},
+		{"backwards_offset", "?offset=1", true, false},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			var actualBody string
+			var actualStatus int
+			api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
+				next, id := item.next, "first"
+				actualStatus = 200
+				if item.late && r.URL.Query().Get("offset") != "2" {
+					next = "?offset=2"
+				} else if item.late {
+					id, actualStatus = "second", 202
+				}
+				actualBody = `{"groups":[{"id":"` + id + `"}],"next":"` + next + `","proof":"` + item.name + `"}`
+				return groupWire(actualStatus, actualBody)
+			})
+			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("sort", "id:asc"), groups.WithRecordListQuery("all_projects", false)))
+			wantCalls := 1
+			if item.late {
+				wantCalls = 2
+			}
+			var proof *resource.ResponseError
+			var cycle *resource.PaginationCycleError
+			if len(*calls) != wantCalls || len(values) != wantCalls || !errors.As(err, &proof) || proof.StatusCode != actualStatus || string(proof.Body) != actualBody || proof.Header.Get("X-Request-Id") != "actual" || errors.As(err, &cycle) != item.cycle || !item.cycle && !errors.Is(err, resource.ErrInvalidOption) {
+				t.Fatal(values, err, proof, *calls)
+			}
+			for _, call := range *calls {
+				query, _ := url.ParseQuery(call.query)
+				if call.path != groupBase+"/detail" || query.Get("sort") != "id:asc" || query.Get("all_tenants") != "False" || call.headers.Get("OpenStack-API-Version") != "volume 3.38" {
+					t.Fatal("scope or request policy escaped before rejection", call)
+				}
+			}
+		})
+	}
+}
+
+func TestPythonCinderGroupListDeclaredNumericFiltersUseExactDecimalPolicy(t *testing.T) {
+	for _, item := range []struct {
+		name, actual, filter string
+		match                bool
+	}{
+		{"binary64_rounding_not_applied", `9007199254740992`, `9007199254740993.0`, false},
+		{"exact_integer_decimal_equality", `9007199254740993`, `9007199254740993.0`, true},
+		{"binary64_underflow_not_applied", `1e-400`, `{}`, true},
+	} {
+		t.Run(item.name, func(t *testing.T) {
+			body := `{"groups":[{"id":` + item.actual + `,"name":"wire"}]}`
+			api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(200, body) })
+			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListOpts(groups.RecordListOpts{Query: map[string]json.RawMessage{"id": json.RawMessage(item.filter)}})))
+			if err != nil || (len(values) == 1) != item.match || len(*calls) != 1 || (*calls)[0].query != "" {
+				t.Fatal(item, values, err, *calls)
+			}
+			if item.match {
+				groupField(t, values[0], "id", item.actual)
+				if string(values[0].Wire.Body["id"]) != item.actual || string(values[0].Envelope) != body || values[0].StatusCode != 200 || values[0].Header.Get("X-Request-Id") != "actual" {
+					t.Fatal("numeric filtering altered wire proof", values[0])
+				}
+			}
+		})
+	}
+}
