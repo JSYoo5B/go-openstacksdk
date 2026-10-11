@@ -99520,6 +99520,1485 @@
       "remaining": [
         "Go has no multi-cloud inventory search that returns one server or None and fails on multiple matches."
       ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_service",
+      "source_fingerprint": "0bc24519bdbb373fe2e250223ed00d843037544b79cfa367411954e37dcc1e20",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_service(name, type=..., description=...) is POST /v3/services with name, type, enabled true and description, and a missing type is sent as JSON null through CreateOpts.Extra like Python's explicit type=None.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python accepts type or service_type and sends type null when both are missing; Go needs CreateOpts.Extra{\"type\": nil} to send null because the typed Type field is always encoded.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_service",
+      "source_fingerprint": "c7c1d9708eaac400be1d04476e043af9951df6aa3bc5d3945bcc79c56809eb61",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "update_service finds the service by ID then name (GET /v3/services/<x>, then GET /v3/services?name=<x>) and sends PATCH /v3/services/<id> with only the requested fields.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "The Python list match compares the ID or the name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous.",
+        "Python raises SDKException when the service is missing; Go returns a nil row from the chain and the caller must not call Update.",
+        "Python maps service_type to type; Go callers set UpdateOpts.Type.",
+        "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_services",
+      "source_fingerprint": "f15dcc2eada4eca214a0cb28cde8a16d645f89a4a537a0032c476a66de9fbfda",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_services() is one GET /v3/services without query and decodes every row.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_services",
+      "source_fingerprint": "afb6d4de84a56fc5360ae5640139b60a55fb738e1bae29417de21804853d91ab",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "search_services lists with the same GET /v3/services as list_services before filtering locally.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_service",
+      "source_fingerprint": "e9c8109cd2117c80596aceac94c1761409d133d223bd4897360a431bc82e1df6",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_service(name_or_id) with the default filters=None sends GET /v3/services/<x>, falls back to GET /v3/services?name=<x> after 404 and returns nil when nothing matches.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "The Python list match compares the ID or the name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_services and _utils._filter_list, which needs local row filtering that no public Go helper provides."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_service",
+      "source_fingerprint": "851b7fb41d7c74b9f86fea684c1bae870c9d6c434674e71ea1f3f3ee0a4c31e9",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_service finds the service, skips the DELETE when nothing matches, and Remove ignores a DELETE 404 like ignore_missing=True while returning a 409.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityServiceHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "The Python list match compares the ID or the name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_endpoint",
+      "source_fingerprint": "651790cddf30827af99a2cd8d1afe82840f38501b80eb7628a6cdab83fce2c09",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/services.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithCreateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_endpoint resolves the service by ID or name, then POSTs one /v3/endpoints body per URL with url, interface, service_id, enabled true and region_id (JSON null when region is not given) sent through WithCreateField(\"region_id\", ...).",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "The Python list match compares the ID or the name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous.",
+        "Python expands public_url, internal_url and admin_url into one create per interface in that order and rejects url or interface combined with them before HTTP; Go callers issue one Create per interface.",
+        "Python raises SDKException when the service is missing; the Go chain returns a nil service.",
+        "Python sends interface null when url is given without interface; Go CreateOpts requires Availability, URL and ServiceID and rejects the request before HTTP.",
+        "CreateOpts.Region encodes the legacy region key, so the Python region_id key needs WithCreateField(\"region_id\", ...).",
+        "Python returns a list of Endpoint Resources; Go returns one endpoint pointer per Create call.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_endpoint",
+      "source_fingerprint": "545c83e02175b585159f2124ffbbb6347f35814ee325c5889ac907370296740a",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithUpdateField"
+      ],
+      "contracts": [
+        {
+          "behavior": "update_endpoint(endpoint_id, ...) is PATCH /v3/endpoints/<id> with service_name_or_id sent as service_id without lookup and region sent as region_id through WithUpdateField.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python sends only dirty attributes and skips the PATCH when nothing was given; Go sends an empty endpoint envelope for empty options.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_endpoints",
+      "source_fingerprint": "904de85db2ce1592de8fe12d14e78ce92eccd834930e37dd86919ede01729806",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_endpoints() is one GET /v3/endpoints without query.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_endpoints",
+      "source_fingerprint": "d654b40cea44765ec09c3cd58c2ddaa471420d01a93b3ed2714c9d347f6005e5",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "search_endpoints lists with the same GET /v3/endpoints as list_endpoints before filtering locally.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_endpoint",
+      "source_fingerprint": "00eb81c53d0480460ade35bd9f8e4df79e6aae08d08df5d9d6c19a04247297a5",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_endpoint(id) with the default filters=None sends GET /v3/endpoints/<id> and, after 404, the unfiltered GET /v3/endpoints because Endpoint declares no name query.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "The Python list match compares the ID or the name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_endpoints and _utils._filter_list, which needs local row filtering that no public Go helper provides."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_endpoint",
+      "source_fingerprint": "41516cdb1e1f1cfc8b2a4fce661416cff3d3431a4a5594bb5d554a4816b38350",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
+        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "delete_endpoint(id) looks the endpoint up first, skips the DELETE when nothing matches, and otherwise sends DELETE /v3/endpoints/<id> through Remove.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityEndpointHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.find does the ID GET and list fallback in one call and also falls back after GET 400 or 403; Go chains Find(resource.ID(x), resource.WithIgnoreMissing()) and Find(resource.Name(x), resource.WithIgnoreMissing()), which falls through only after a 404.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_endpoint_group",
+      "source_fingerprint": "5218f00d748563daf48c5779728aabfd0efba4948bc62712f4fc460cb9b116aa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_endpoint_group",
+      "source_fingerprint": "ed7a3a2ce4569ed04e443e477e89e4df8be66aaa093b6005c70125b275516037",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_endpoint_groups",
+      "source_fingerprint": "a93b7777726736f0045b50b0b324a3e3c0c104689b276624639326c9efec252b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_endpoint_group",
+      "source_fingerprint": "7b94c59ac2d6f9b8697e1bc1903cc66c4be77fb2ef097c4592e6cc5ad0f97bf6",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_endpoint_group",
+      "source_fingerprint": "47973ef724b730107f53ca63a50772c542c82e6ab7b2de5098bb8c451d0b3d50",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_endpoint_groups",
+      "source_fingerprint": "e17fb89aac9bfa009de1214da7993d7d393faaf117eb8edb57a3184afa9563f8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for the Keystone OS-EP-FILTER endpoint group routes (/OS-EP-FILTER/endpoint_groups), so an SDK-owned call would be needed.",
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_domain",
+      "source_fingerprint": "b28f3267375ce023ac536bb99ddfcefe2c9e9fdf78d3b3d176430982575e640d",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_domain is POST /v3/domains with name, enabled true and description only when it is given.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_domain",
+      "source_fingerprint": "8b42b7484f1b49845bd195d82af37e5af642968075c2c22b1ca46fcbddf42204",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "With domain_id, update_domain is PATCH /v3/domains/<id> that drops falsy name and description and keeps enabled false.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python raises SDKException when neither domain_id nor name_or_id is given or the domain is missing.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_domain",
+      "source_fingerprint": "85abdabc1cba2ef265dc731ef8963568c7ca65b4e7d220765f0ef553ab5fc117",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "With domain_id, delete_domain sends PATCH /v3/domains/<id> with enabled false and then DELETE /v3/domains/<id> without ignoring 404.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns False when name_or_id finds nothing and re-raises SDKException from the disable or delete; Go returns errors from Update and Delete."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_domains",
+      "source_fingerprint": "acfcf743b6900e97c837613a4f58b40bac35fd938a6bf94605a616494f562263",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding.",
+        "A limit filter makes Python Resource.list repeat the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_domains",
+      "source_fingerprint": "f4c9f932167e21ec98573cc630a7610e7d0d05a99588d607d330b8e584cae552",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Without name_or_id Python passes filters to list_domains server-side and does not filter locally."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding.",
+        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_domain",
+      "source_fingerprint": "f7d321798ac3f47e2d9a30ca64f3481ac3e708765d07ede3645962cfc1386dc3",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_domain(domain_id=...) is a direct GET /v3/domains/<id>, and get_domain(name_or_id=...) maps to Domains FindIdentity which sends the GET then the name list.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers",
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "The deprecated filters argument is a no-op in Python.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_groups",
+      "source_fingerprint": "c4a8213815d40d2069bd9d37241b89cc502c4ab0ecaea9dd60174e571f922ea8",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_groups() is GET /v3/groups and list_groups(domain_id=...) adds only the domain_id query.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_groups",
+      "source_fingerprint": "95f5c148d5e70b7eb135ab356955180eac3565a5a3386ea9ed49d263159d7ece",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "search_groups lists with the same GET /v3/groups (with domain_id when given) as list_groups before filtering locally.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_group",
+      "source_fingerprint": "2a9d498ef8ef8d19c70c311b6146d6b001953022338cc2e6ecc0f1c97e2260f7",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_groups and _utils._filter_list, which needs local row filtering that no public Go helper provides."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_group",
+      "source_fingerprint": "6a1e485d5a95ecf9fccc87d92b0e45f97951b2394287f7933e65f02ad495d444",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_group with a domain sends GET /v3/domains/<domain> (a 404 stops before the POST) and then POST /v3/groups with name, description when truthy and domain_id.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python passes domain to get_domain as domain_id, so only a domain ID resolves and a missing domain raises NotFoundException instead of the documented SDKException; Go Domains.Get returns the 404 error.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_group",
+      "source_fingerprint": "d07d920500c52b1d6c63e8079fe2e097dcccd4bb724caf9111fb01977a84a918",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_group",
+      "source_fingerprint": "51dace7991428383ca7e6b8f03ab3f193387138eff1fdffa274999728ed50ebd",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_roles",
+      "source_fingerprint": "a0d6952008995f5e5c4b95d56901936b82f122b37ba3ac49ba82244c91f50caa",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding.",
+        "A limit filter makes Python Resource.list repeat the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_roles",
+      "source_fingerprint": "c8fb250307ce57744731d6823162bd3664957e308f83a6a709d11d0f6c489bff",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_role",
+      "source_fingerprint": "f2245b833a4e12b364582e1a107f3fc5a6f7c2b97b870ae7f4838cfd269b05bf",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_roles and _utils._filter_list, which needs local row filtering that no public Go helper provides."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_role",
+      "source_fingerprint": "535d0ffc98f8c591ef3ab80df999de8c0db3f8d8929fb5302d48d5ff0d462b23",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_role is POST /v3/roles with name and domain_id only when it is given.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_role",
+      "source_fingerprint": "ed5a8682cf703c8a3ead3bd4a95289815e021d9ab03e1a2f7d41f74cb199aea6",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns False when the role is missing; the Go lookup returns a nil row.",
+        "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_role",
+      "source_fingerprint": "a068d5936427ef1c6e9ce2036a81d9d46a7a0daee7b0b2d864a4d553aa085c57",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns False when the role is missing and re-raises SDKException from the delete."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_role_assignments",
+      "source_fingerprint": "c1c0da71ecfd083e9afb3b9a8b3bc0792cf504b84ab8a80f16efa8892029df6e",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_role_assignments sends GET /v3/role_assignments with user.id, group.id, role.id, scope.project.id, scope.domain.id, scope.system, effective and scope.OS-INHERIT:inherited_to exactly as the Python filter renaming produces, and decodes role, scope and actor IDs.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python accepts dict or Resource values and reduces them to their id; Go takes ID strings.",
+        "Python encodes effective=True as the string True; ListAssignmentsOpts.Effective encodes true, so the exact Python spelling needs WithListAssignmentsQuery(\"effective\", \"True\"), and inherited_to has no typed field and needs WithListAssignmentsQuery(\"scope.OS-INHERIT:inherited_to\", ...).",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/grant_role",
+      "source_fingerprint": "8499bad14005f138b43ec9ba957fcc8a6f87383cb994a9a61aa5b652d411ce27",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Assign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once IDs are known, the project and user grant is HEAD /v3/projects/<p>/users/<u>/roles/<r> followed by PUT on the same path; Go Validate returns the 404 as an error.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python ignores wait and timeout and returns False when the assignment already exists."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "Python validate_*_has_*_role returns False for any non-204 HEAD; Go roles.API.Validate and osinherit.API.Validate return the 404 as an error, so deciding that the assignment is absent is caller-side work."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/revoke_role",
+      "source_fingerprint": "968dba9418444640416d1b6af1df98bc550f5e9e6c3ed333a92ab6dd3606ed8d",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Unassign",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once IDs are known, the project and user revoke is HEAD /v3/projects/<p>/users/<u>/roles/<r> followed by DELETE on the same path.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python ignores wait and timeout and returns False when the assignment does not exist."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "Python validate_*_has_*_role returns False for any non-204 HEAD; Go roles.API.Validate and osinherit.API.Validate return the 404 as an error, so deciding that the assignment is absent is caller-side work."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_projects",
+      "source_fingerprint": "645a8c510419471ab0aa5360f91526e7b8ff65b342db1a9510781aa03c8394f1",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.WithListQuery"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding.",
+        "A limit filter makes Python Resource.list repeat the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_projects",
+      "source_fingerprint": "826afabf70996f3c8f740dff90a36987fe48287b232e91895de32d39452a7700",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.All"
+      ],
+      "contracts": [],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python sends filters both to the server through list_projects and again to the local filter."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding.",
+        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_project",
+      "source_fingerprint": "ab53063cc2bbe729430c9f4d6c839751c49e1c7f8e72e812bf68ec139175af63",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_projects and _utils._filter_list, which needs local row filtering that no public Go helper provides."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_project",
+      "source_fingerprint": "45320f603a09c0cddf9fe71d0b34af6056a2b3a753e9c226d73d41f042573edc",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python finds with ignore_missing=False and raises NotFoundException for a missing project.",
+        "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_project",
+      "source_fingerprint": "5eb70c646cd7d458af2d2588f93d5c40e8e0d93c16490336fb14099a27d2f238",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Create"
+      ],
+      "contracts": [
+        {
+          "behavior": "create_project(name, domain_id) is POST /v3/projects with name, domain_id, enabled true and description null (sent through CreateOpts.Extra), and extra keyword arguments such as parent_id are added to the same body.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python always passes description, so the default body carries description null; Go omits the typed empty Description and needs CreateOpts.Extra{\"description\": nil} to send null.",
+        "Project allows unknown body attributes, so Python sends any extra keyword; Go sends them through typed CreateOpts fields or Extra.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_project",
+      "source_fingerprint": "da416ebf0d9209915ebf95ab2513fd0f1906548f466adc7dfcfdd4e0ba88e349",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/list_users",
+      "source_fingerprint": "d32ff98b24db37ac94e39a1ea9fad559c5bc311043b7a7172b2dad1cc35110ab",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.All"
+      ],
+      "contracts": [
+        {
+          "behavior": "list_users() is GET /v3/users and list_users(domain_id=..., name=...) adds exactly those two query keys.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/search_users",
+      "source_fingerprint": "335bc33c597b84e46c79990b2bc4bd3275bfb455ed3dd00827d8a3cac9092046",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "search_users lists with GET /v3/users carrying name (only for a non-UUID name_or_id) and domain_id before filtering locally.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+      ],
+      "remaining": [
+        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_user",
+      "source_fingerprint": "e224697aca52f901ed38f4639fbc724fe847396ae5940d0cda4b98bcf5d3fd30",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "With the deprecated filters argument Python runs search_users but still returns the find_user result.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/get_user_by_id",
+      "source_fingerprint": "12da6c602f68db69532b40cbdd5c4a7efd8182e03fedce1a54bfe26c79b032fc",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Get"
+      ],
+      "contracts": [
+        {
+          "behavior": "get_user_by_id is GET /v3/users/<id>, decodes the user and returns the 404 as an error.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "The deprecated normalize argument only warns in Python and has no Go counterpart.",
+        "Python raises NotFoundException; Go returns the Gophercloud 404 error.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/update_user",
+      "source_fingerprint": "cf4062650f58603107bf05587e09d8f5aadd7cef1f9cef8998c84d3eba21954e",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Update"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "The default_project keyword is not a User attribute, so Python drops it from the PATCH.",
+        "Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/create_user",
+      "source_fingerprint": "7f6ec06a9a85d02b81ebc9e65cd4c8f99de97eec8b27388461afd920cd6b429f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Without default_project, create_user is POST /v3/users with domain_id, name, enabled true, email null (sent through CreateOpts.Extra) and password or description when given.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python raises SDKException before HTTP when domain_id is missing; Go sends the request without domain_id.",
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced. The default_project argument depends on that lookup to set default_project_id."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/delete_user",
+      "source_fingerprint": "881103304fdc44d86a849554d16187fc8fc3533a9719232aeb6dfdd892e3d93f",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.Remove"
+      ],
+      "contracts": [
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python returns True or False and logs and swallows SDKException from the delete; Go returns nil when the lookup finds nothing (nil row) or the DELETE succeeds or is a 404, and returns other errors such as 409."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/add_user_to_group",
+      "source_fingerprint": "7d46577f4aac559939c429efc620d17bb5f093eb2de1cb2ba2d4b204cd83b774",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AddToGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once IDs are known, add_user_to_group is PUT /v3/groups/<g>/users/<u>.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python raises SDKException when the user or group is missing."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/is_user_in_group",
+      "source_fingerprint": "ee269ef8cd36c15fad4722365d3114b32f50e90d5b89fcae57102c34c13f3e21",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.IsMemberOfGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once IDs are known, is_user_in_group is HEAD /v3/groups/<g>/users/<u>, true for 204 and false for 404 like Group.check_user.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python raises SDKException when the user or group is missing."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
+    },
+    {
+      "operation": "python:cloud/_identity/IdentityCloudMixin/remove_user_from_group",
+      "source_fingerprint": "e9c0f6ebccad6278918b5c5304ad66b7e93376cd9c82a4628af35eb39a3c17aa",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.RemoveFromGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity"
+      ],
+      "contracts": [
+        {
+          "behavior": "Once IDs are known, remove_user_from_group is DELETE /v3/groups/<g>/users/<u>.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        },
+        {
+          "behavior": "Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery(\"domain_id\", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.",
+          "tests": [
+            "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/python-cloud-parity.md"
+      ],
+      "differences": [
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Python raises SDKException when the user or group is missing."
+      ],
+      "remaining": [
+        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
+        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
+      ]
     }
   ]
 }
