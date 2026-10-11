@@ -1998,7 +1998,7 @@
     {
       "operation": "python:compute/v2/get_quota_set_defaults",
       "source_fingerprint": "9310d7d06ea44ada7f4cacbe9d3de7163facdedb4b1e4a5fe0b13808a6875e3c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Defaults"
       ],
@@ -2020,19 +2020,26 @@
           "tests": [
             "api/nova_quota_defaults_users_test.go:TestNovaQuotaDefaultsRespectContext"
           ]
+        },
+        {
+          "behavior": "With default arguments Defaults sends one GET /os-quota-sets/{project}/defaults without a query and decodes the quota_set limits, matching Python QuotaSet.fetch with the defaults base_path.",
+          "tests": [
+            "compute/v2/quotasets/python_rejudge_test.go:TestPythonRejudgeComputeQuotaDefaultsRequest"
+          ]
         }
-      ],
-      "differences": [
-        "Go returns native typed limits plus independent raw fields and copied headers on a fixed project scope instead of mutating a Python common QuotaSet Resource.",
-        "The Go scope retains the selected Compute microversion; it does not automatically impose the Python QuotaSet maximum microversion 2.56. That maximum is not a minimum API requirement."
       ],
       "documentation": [
         "compute/v2/quotasets/README.md"
       ],
-      "remaining": [
-        "Audit inherited common QuotaSet/Resource.fetch response normalization, descriptor coercion, dict/location views and cache/skip_cache behavior; the typed/raw response is only a partial Resource mapping.",
-        "Python Project/Resource input coercion and inherited adapter/microversion selection, including the QuotaSet 2.56 maximum, remain unaudited for whole-operation parity."
-      ]
+      "differences": [
+        "Go returns native typed limits plus independent raw fields and copied headers on a fixed project scope instead of mutating a Python common QuotaSet Resource.",
+        "The Go scope retains the selected Compute microversion; it does not automatically impose the Python QuotaSet maximum microversion 2.56. That maximum is not a minimum API requirement.",
+        "Python accepts a project ID or Project Resource; Go binds the project once with quotasets.API.InProject (an ID needs no lookup).",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Go has no client-side GET response cache or skip_cache control; every call sends its request.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/get_server_password",
@@ -2132,7 +2139,7 @@
     {
       "operation": "python:compute/v2/update_quota_set",
       "source_fingerprint": "1fc7b1c9a0d757aaa6374e25feadb1d7ba4720aa362e11475fe1e2c8510dc00d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateOptions",
@@ -2181,21 +2188,30 @@
             "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserContextAndCurrentProjectKeepExplicitUser",
             "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserRedirectKeepsSamePairAndCallerPolicy"
           ]
+        },
+        {
+          "behavior": "A project-scope Update with supplied limits sends one PUT /os-quota-sets/{project} whose quota_set body holds only those limits, like Python's dirty-attribute commit, and decodes the returned limits; an empty update sends an empty quota_set.",
+          "tests": [
+            "compute/v2/quotasets/python_rejudge_test.go:TestPythonRejudgeComputeQuotaUpdateRequest"
+          ]
         }
+      ],
+      "documentation": [
+        "compute/v2/quotasets/README.md"
       ],
       "differences": [
         "Go uses explicit pointer-valued native inputs and functional options instead of Resource dirty-field commits and arbitrary attrs.",
         "The Go scope returns QuotaResource retaining native values/raw decoded fields/header; Python returns a mutable normalized QuotaSet.",
         "Python modern update accepts an optional user and attrs; Go obtains an explicit UserQuotaScope before Update and does not infer membership or permit options to replace its fixed user_id.",
-        "User request guards and concrete snapshot options are additional high-level policies; they do not implement Python legacy quota objects, Resource dirty state or arbitrary commit/query behavior."
+        "User request guards and concrete snapshot options are additional high-level policies; they do not implement Python legacy quota objects, Resource dirty state or arbitrary commit/query behavior.",
+        "When no attribute is supplied Python skips HTTP and returns its local QuotaSet; Go sends PUT {\"quota_set\":{}}, which Nova answers with the unchanged limits.",
+        "The pinned Python user= branch passes user_id to Resource.commit, whose _prepare_request does not accept it (TypeError); Go UserQuotaScope.Update sends the PUT with ?user_id=.",
+        "The deprecated Python QuotaSet/project_id overload sends the same PUT; Go expresses it through InProject(project).Update.",
+        "Python QuotaSet caps the negotiated microversion at 2.56; Go sends the configured Compute microversion.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "documentation": [
-        "compute/v2/quotasets/README.md"
-      ],
-      "remaining": [
-        "Audit and map, or explicitly retire with a documented Go policy, the deprecated QuotaSet/project_id inputs and legacy query branch; the modern explicit-user branch does not cover those paths.",
-        "Audit inherited common QuotaSet body filtering of usage/reservation, unknown attrs, dirty/clean state, commit requests, descriptor coercion and microversion selection."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:orchestration/v1/abandon_stack",
@@ -14013,7 +14029,7 @@
     {
       "operation": "python:key_manager/v1/get_project_quota",
       "source_fingerprint": "48684186e2e4ee16182c8cec785e19e236ea7130df420712671f8b8c6520747a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject",
@@ -14044,6 +14060,12 @@
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
             "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
           ]
+        },
+        {
+          "behavior": "Get sends one GET project-quotas/{project} and exposes secrets, orders, containers, consumers and cas from project_quotas, as Python _get(ProjectQuota) does.",
+          "tests": [
+            "keymanager/v1/quotas/python_rejudge_test.go:TestPythonRejudgeKeyManagerProjectQuotaGetRequest"
+          ]
         }
       ],
       "documentation": [
@@ -14052,12 +14074,12 @@
       ],
       "differences": [
         "GET fields secrets/orders/containers/consumers/cas are json.RawMessage rather than mutable untyped Python descriptors: omitted/null/large integer/unknown values and exact canonical-versus-case-variant keys remain in owned Body/Data, with actual response headers/status.",
-        "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared."
+        "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Go has no client-side GET response cache or skip_cache control; every call sends its request.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
-        "The direct Python str-or-Project input is mapped to an explicit ID scope rather than arbitrary Python Project Resource overloads. Optional inherited Proxy GET cache controls are not provided by this scope."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/update_project_quota",
@@ -14125,7 +14147,7 @@
     {
       "operation": "python:key_manager/v1/delete_project_quota",
       "source_fingerprint": "723ca95bae08e7550ba217500a3e3b74215ad01c2576c2c20ed2fbbe3a226c93",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject",
@@ -14158,6 +14180,12 @@
             "connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing",
             "internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities"
           ]
+        },
+        {
+          "behavior": "Delete sends DELETE project-quotas/{project}; by default 204 and 404 both return nil like Python ignore_missing=True, and WithDeleteIgnoreMissing(false) surfaces the 404.",
+          "tests": [
+            "keymanager/v1/quotas/python_rejudge_test.go:TestPythonRejudgeKeyManagerProjectQuotaDeleteRequest"
+          ]
         }
       ],
       "documentation": [
@@ -14166,12 +14194,11 @@
       ],
       "differences": [
         "ProjectScope accepts an explicit safe resource.ID only, without Keystone name lookup or accepting a Python Project Resource. Its fixed escaped request project is independent of response fields and the provider token project; the original ServiceClient/Provider remains shared.",
-        "The direct Python default ignore_missing=True and error-only success are retained; explicit Go missing/header options replace kwargs. Only actual HTTP absence is ignored, preserving transport/accepted-response errors containing a404 cause."
+        "The direct Python default ignore_missing=True and error-only success are retained; explicit Go missing/header options replace kwargs. Only actual HTTP absence is ignored, preserving transport/accepted-response errors containing a404 cause.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full inherited Quota/ProjectQuota Resource descriptor/default/unknown-Body/seeded/cache/dirty lifecycle and generic session/adapter/per-call base_path/microversion request controls remain separate. Raw response ownership is not a mutable cached Python Resource implementation.",
-        "Inherited Resource.delete descriptor/cached-instance behavior, base_path/microversion/params/error_message and adapter/session policies are not exposed by the fixed project scope. No project-name resolver or arbitrary Project object overload is implied."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:key_manager/v1/create_secret_consumer",
@@ -18431,7 +18458,7 @@
     {
       "operation": "python:compute/v2/wait_for_server",
       "source_fingerprint": "f7f159eedbf6fff71e3615392f4903a2513d0e266012a28cee85bfb3733cddf0",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServerState",
@@ -18509,6 +18536,12 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "The default call polls GET on the fixed resource path only, never mutates it, and applies the Python defaults: two-second interval, 120 seconds for server and delete waits, no SDK timeout for the generic status wait, and ERROR as the failure state.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
         }
       ],
       "documentation": [
@@ -18521,18 +18554,17 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Python returns the supplied Resource without HTTP when its cached status already matches the target; Go always performs a fresh GET first.",
+        "Python accepts any Resource the compute proxy can fetch; Go waits through typed resource.Collection values (compute.WaitForState and compute.WaitForDelete accept any collection).",
+        "Python raises ResourceTimeout and ResourceFailure; Go returns context deadline and wait failure errors."
       ],
-      "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance task exact396 recreation across returned task IDs under one budget, and cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct declarations with independent review status; this Proxy waiter review does not close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/wait_for_status",
       "source_fingerprint": "ba2c8bcd08be7d234d2e251c7ecc181a3ecf9f51c1b36780ff3c7e3cc7854a27",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.WaitForState",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForState",
@@ -18609,6 +18641,12 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "The default call polls GET on the fixed resource path only, never mutates it, and applies the Python defaults: two-second interval, 120 seconds for server and delete waits, no SDK timeout for the generic status wait, and ERROR as the failure state.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
         }
       ],
       "documentation": [
@@ -18621,18 +18659,17 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Python returns the supplied Resource without HTTP when its cached status already matches the target; Go always performs a fresh GET first.",
+        "Python accepts any Resource the compute proxy can fetch; Go waits through typed resource.Collection values (compute.WaitForState and compute.WaitForDelete accept any collection).",
+        "Python raises ResourceTimeout and ResourceFailure; Go returns context deadline and wait failure errors."
       ],
-      "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/wait_for_delete",
       "source_fingerprint": "7308653e716fff322aaf02f03539cd17a71c1e871f145972e07301d96548b5ed",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForDelete",
@@ -18713,6 +18750,12 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "The default call polls GET on the fixed resource path only, never mutates it, and applies the Python defaults: two-second interval, 120 seconds for server and delete waits, no SDK timeout for the generic status wait, and ERROR as the failure state.",
+          "tests": [
+            "api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets"
+          ]
         }
       ],
       "documentation": [
@@ -18725,13 +18768,12 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Python returns the supplied Resource without HTTP when its cached status already matches the target; Go always performs a fresh GET first.",
+        "Python accepts any Resource the compute proxy can fetch; Go waits through typed resource.Collection values (compute.WaitForState and compute.WaitForDelete accept any collection).",
+        "Python raises ResourceTimeout and ResourceFailure; Go returns context deadline and wait failure errors."
       ],
-      "remaining": [
-        "Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.",
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v2/wait_for_status",
@@ -19476,7 +19518,7 @@
     {
       "operation": "python:image/v2/wait_for_task",
       "source_fingerprint": "d1ea1285e0e80765a148ca12b9c3dd0541561b23a9093663ab9304781b92bbeb",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.API.WaitForTask",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/tasks.API.WaitForTaskState",
@@ -19592,14 +19634,11 @@
         "Python Task Body descriptors for input/result/time/status are untyped with defaults/cache merge. Go keeps native map/string/time.Time shape validation, exact lowercase decision keys, a required fetched status string and a safe POST id for the new route. Case aliases remain raw extensions, missing selected recreation input is rejected instead of using Python None/cached input, and explicit null input remains valid.",
         "The shared workflow timeout applies to active requests as well as pauses and remains subordinate to parent context; timeout/cancellation exposes Go context causes rather than Python ResourceTimeout. Positive duration helpers and explicit Unlimited replace Python interval-zero normalization and zero/negative wait behavior.",
         "TaskWaitResult distinguishes the latest successful observation from the latest accepted creation proof, preserves partial results/errors and uses separately owned evidence. Python normally returns the current Resource or raises; the Go result does not invent a server task after an unaccepted or undecodable response.",
-        "SDK-owned explicit header options snapshot requests and preserve original Provider transport policy. Protected auth/transport/version headers and source/route gates are deliberate Go controls rather than arbitrary session/adapter injection. No guessed task type enum, cloud schema, access permission or minimum microversion is imposed."
+        "SDK-owned explicit header options snapshot requests and preserve original Provider transport policy. Protected auth/transport/version headers and source/route gates are deliberate Go controls rather than arbitrary session/adapter injection. No guessed task type enum, cloud schema, access permission or minimum microversion is imposed.",
+        "Python returns the supplied Task without HTTP when its status already matches; Go always fetches the task first.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge."
       ],
-      "remaining": [
-        "Arbitrary supplied Task Resource subclasses, cached target0HTTP short circuit, mutable Resource identity/dirty state and fetch translation that merges omitted fields into a seed are not mapped by this fresh ID-only result API.",
-        "Resource.fetch optional cache(default skip_cache=False), negotiated session/microversion behavior, injected adapter/session and general Resource descriptor/default/coercion semantics remain outside this SDK-owned workflow.",
-        "Python untyped/null/default Task fields and arbitrary Resource attribute construction differ from native Go maps/string/time.Time and canonical response-presence gates. This review does not claim full Task Resource parity, general create attrs, schema discovery or Cloud image-import/upload workflow coverage.",
-        "Task list/find/pagination/delete and generic progress/status-attribute policies are independent declarations/capabilities; native Get/Create/List and existing generic waits are preserved rather than newly promoted by this operation review."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/import_image",
@@ -22302,7 +22341,7 @@
     {
       "operation": "python:image/v2/image_locations",
       "source_fingerprint": "eb9119449b0ef28e9fce175901f874aa38845c0a4506a760c3674c201c93444f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageLocations",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetImageLocationsOpts",
@@ -22390,6 +22429,12 @@
             "image/locations_contracts_test.go:TestImageLocationsAcceptedFailuresAndStatusPolicy",
             "image/locations_core_test.go:TestImageLocationsCoreAcceptedFailuresKeepOwnedProof"
           ]
+        },
+        {
+          "behavior": "GetImageLocations sends one GET images/{image}/locations with no query and returns each url and metadata row, as Python _list(ImageLocation) does.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageLocationsAndTaskDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -22402,14 +22447,12 @@
         "Go retains native Name pager model/body/continuation and rejected native response policy, while owning accepted response bytes/header/status and body failures. Full Python Resource/adapter/exception/cache/transport policy remains broader.",
         "Python ImageLocation._max_microversion2.17 is a framework capability hint. Go preserves existing source version policy without inventing a location microversion header, capability discovery or minimum deployment support gate.",
         "Pinned Python image_locations returns generic Resource.list with permissive nonarray-to-one-row coercion, URI attribute overlay, descriptors/filtering/cache and generic paging policies. Go reads the finite strict barearray endpoint once and retains unknown data without inventing stable location identity or collection CRUD.",
-        "Actual dedicated server GET returns all locations and strips id/status; it has no request paging or show_multiple_locations condition in this handler. Legacy image metadata locations exposure and dedicated GET permission policy are separate boundaries."
+        "Actual dedicated server GET returns all locations and strips id/status; it has no request paging or show_multiple_locations condition in this handler. Legacy image metadata locations exposure and dedicated GET permission policy are separate boundaries.",
+        "Python wraps rows in generic Resource.list and coerces a non-array body into one row; Go requires the JSON array the server returns.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full mutable supplied Resource/subclass/Munch/connection/default/descriptor/coercion/unknown-body/dirty/cache/session semantics remain unresolved; typed Ref/result objects do not implement that Python object model.",
-        "Complete Python adapter/response translation, cache invalidation, generic list pagination/filtering/query coercion and arbitrary custom transport policies remain partial. Native Name continuation/body/error policy is retained.",
-        "Queued image state, permissions, configured store and HTTP URI policy, import lock, server schema/digest/algorithm support and actual asynchronous hash validation/backend persistence are server-owned. Accepted HTTP proof does not establish deployment support or task completion.",
-        "No metadata/status gate, capability discovery, synthetic location ID, RMW/PATCH, client URL fetch, cache mutation, wait/poll/task lookup, rollback or cleanup is added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_images_schema",
@@ -24070,7 +24113,7 @@
     {
       "operation": "python:image/v2/get_image_cache",
       "source_fingerprint": "df7a1eac49355ab82b4d295d614511700615aaeddbf6bc99c4d2029edd85235c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
@@ -24133,6 +24176,12 @@
             "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
             "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24141,20 +24190,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "One snapshot of selected endpoint only; no query/limit/marker/discovery/pager/cache tracking. Driver supplies numeric epoch measurements and queued processing order; data cannot select new routes or enforce future requests."
+        "One snapshot of selected endpoint only; no query/limit/marker/discovery/pager/cache tracking. Driver supplies numeric epoch measurements and queued processing order; data cannot select new routes or enforce future requests.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/cache_delete_image",
       "source_fingerprint": "c2b2c77e0fabc501522a6b8f972fba79de2fd2d784ee60cc175254ed6aa164f4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CacheDeleteImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheDeleteOpts",
@@ -24216,6 +24264,12 @@
             "image/cache_core_test.go:TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy",
             "image/cache_contracts_test.go:TestImageCacheExactNameResolutionAndDirectIdentity"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24224,20 +24278,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Private owned404 acceptance bypasses native404 RetryFunc only with nil/true IgnoreMissing. Explicitfalse preserves native strict204/404 retry ownership. Native Name errors including logical missing never quiet. Ordinary server404 alone cannot distinguish missing image from disabled cache, so either can be quiet under this narrow default."
+        "Private owned404 acceptance bypasses native404 RetryFunc only with nil/true IgnoreMissing. Explicitfalse preserves native strict204/404 retry ownership. Native Name errors including logical missing never quiet. Ordinary server404 alone cannot distinguish missing image from disabled cache, so either can be quiet under this narrow default.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/queue_image",
       "source_fingerprint": "f34a5b5c03b6674192b8ff0546c42a44da73ac2f928998766643b5f5dcba18cf",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.QueueImage",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
@@ -24298,6 +24351,12 @@
             "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
             "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24306,20 +24365,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Actual routed server checks registry image existence and active status before cache.queue_image and worker submission despite stale controller docstring. SDK adds no metadata fetch/active gate/wait/cache completion claim;202 is asynchronous acknowledgement only."
+        "Actual routed server checks registry image existence and active status before cache.queue_image and worker submission despite stale controller docstring. SDK adds no metadata fetch/active gate/wait/cache completion claim;202 is asynchronous acknowledgement only.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/clear_cache",
       "source_fingerprint": "7cd652bcb82b1caa1fde806d180051018b29e2d594138f9570a6dc0c291491d8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.ClearCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithClearCacheOpts",
@@ -24380,6 +24438,12 @@
             "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
             "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24388,20 +24452,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Python target both also omits header. Literal both header is rejected by pinned controller although admin prose lists it; absent/empty actual wire means both. Source/option x-image-cache-clear-target aliases are reserved across all seven methods and may not bypass typed target policy."
+        "Python target both also omits header. Literal both header is rejected by pinned controller although admin prose lists it; absent/empty actual wire means both. Source/option x-image-cache-clear-target aliases are reserved across all seven methods and may not bypass typed target policy.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/cached_image_nodes",
       "source_fingerprint": "a97e90e44deabbdb9865cc7e56f63812d2a56f0efd6f37836f63ceca01e28304",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CachedImageNodes",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
@@ -24465,6 +24528,12 @@
             "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
             "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24473,20 +24542,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Pinned server requires configured cache, centralized_db driver, authorized list_cached_nodes policy and registry image existence. Node URLs are passive references; SDK does not validate hosts/follow URLs/discover drivers/fanout or apply a local capability gate."
+        "Pinned server requires configured cache, centralized_db driver, authorized list_cached_nodes policy and registry image existence. Node URLs are passive references; SDK does not validate hosts/follow URLs/discover drivers/fanout or apply a local capability gate.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/clean_cache",
       "source_fingerprint": "6dc827b7cd28b8b2bc66757d93bb1b4ce3cdd3d1c4f0ba6e61771d1e4d64889c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CleanCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
@@ -24546,6 +24614,12 @@
             "connection_image_cache_test.go:TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements",
             "internal/cmd/sdkgen/glance_cache_test.go:TestGlanceCacheManualMethodsPreserveNativeBindingsAndDocumentDefaults"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24554,20 +24628,19 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Official API history states2.18/cache-enabled for clean/prune; Python Cache max_microversion remains2.15. Go preserves supplied source version policy and adds no discovery/minimum-version gate, cap mirroring, background scheduler, automatic cleanup or backend-state proof."
+        "Official API history states2.18/cache-enabled for clean/prune; Python Cache max_microversion remains2.15. Go preserves supplied source version policy and adds no discovery/minimum-version gate, cap mirroring, background scheduler, automatic cleanup or backend-state proof.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/prune_cache",
       "source_fingerprint": "def2bfe196c22877a8bc5098bdf2f79c364aa3a7c4e1c0fbc93e6111c75ef071",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.PruneCache",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCacheOpts",
@@ -24630,6 +24703,12 @@
             "image/cache_core_test.go:TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata",
             "image/cache_core_test.go:TestImageCacheCoreMalformedModelsRetainAcceptedProof"
           ]
+        },
+        {
+          "behavior": "Each cache call with default arguments sends the same bodyless request as Python: GET cache, PUT cache/{image}, DELETE cache/{image} with 404 ignored, DELETE cache without x-image-cache-clear-target for target both, GET cache/nodes/{image}, POST cache/clean and POST cache/prune, and decodes cached/queued images, node URLs and prune counts.",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageCacheDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -24638,15 +24717,14 @@
         "image/v2/README.md"
       ],
       "differences": [
-        "Pinned Python uses mutable Cache/CachedImage Resource descriptors, conversion/default/dirty/cache/adapter/session lifecycle. Go exposes a bounded passive result and concrete owned options; complete Resource/exception/cache/session parity remains unresolved.",
         "Python queue/delete/clear/clean proxy calls return None; get returns Cache Resource and nodes/prune return typing.cast JSON without runtime schema validation. Go returns actual acknowledgements or strict canonical owned typed/raw data, preserving response causes and requiring captured exact statuses.",
-        "Only explicit actual200 files/bytes counts are returned, including zero values. Server owns configured capacity/pruning/policy/node-local behavior. Python max2.15 versus documented2.18 does not become a new Go discovery/minimum-version gate."
+        "Only explicit actual200 files/bytes counts are returned, including zero values. Server owns configured capacity/pruning/policy/node-local behavior. Python max2.15 versus documented2.18 does not become a new Go discovery/minimum-version gate.",
+        "Go accepts only the documented success status of each cache route; Python accepts any status below 400.",
+        "Python Cache caps the negotiated microversion at 2.15; Go sends the configured Image microversion and adds no capability discovery.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Full Python Resource/subclass/supplied-object/default/coercion/descriptor/dirty/cache/session/header/adapter and exception lifecycle remains unresolved.",
-        "Deployment authentication, cache enablement, node-local operations, authorization, driver, worker persistence and cache completion are server-owned; local source/HTTP/compile tests do not prove real-cloud behavior.",
-        "No discovery/version capability gate, image status prefetch, list pagination, node URL following/fanout, cache tracking, automatic cleanup/wait or inferred backend outcome added."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/add_member",
@@ -25503,7 +25581,7 @@
     {
       "operation": "python:image/v2/create_metadef_namespace",
       "source_fingerprint": "b2eb83aa678f1d6c2237a5d2033af04cd822ba52202f9d98732c8789399e57b6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Create",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithCreateOpts",
@@ -25578,6 +25656,12 @@
             "image/v2/metadefnamespaces/nested_options_test.go:TestMetadefNamespaceCreateNestedOptionsCallbackAndRawValidation",
             "image/v2/metadefnamespaces/nested_contracts_test.go:TestMetadefNamespaceNestedDefinitionsAndRawSchema"
           ]
+        },
+        {
+          "behavior": "Create with no options posts metadefs/namespaces with only the namespace key, matching Python _create(MetadefNamespace, namespace=...).",
+          "tests": [
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -25589,21 +25673,17 @@
         "Go validates root safe route80 separately from UTF8-only nested JSON names/keys/Required; it does not locally reproduce pinned schema type enums, WSME mandatory/coercion/lost-key behavior, DB length/Unicode/CSV storage or server policy. Raw input forwarding and response echo do not prove keyword precision/storage round-trip.",
         "Pinned server creates parent then associations/objects/tags/properties sequentially; Invalid400 skips cleanup and other named failures attempt best-effort cleanup that may fail protected. Auto-created global resource types can survive. SDK adds no rollback/cleanup/child requests and fixtures do not establish deployed effects.",
         "Create201 nested content is submitted WSME echo rather than fresh persisted child fetch. Canonical Namespace response stays raw for nested definitions; generated child metadata and normalized schema/Required values are not inferred.",
-        "Namespace Update remains scalar replacement and its cached Python dirty semantics remain partial; nested Update is not added despite APIref prose. No authenticated cloud execution/full SDK parity is claimed."
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Python drops properties and objects kwargs because MetadefNamespace has no such Body attributes; Go can also send them with WithCreateProperties and WithCreateObjects."
       ],
-      "remaining": [
-        "Pinned Python MetadefNamespace recognizes resource_type_associations and inherited tags, but has no properties/objects descriptors; ordinary create proxy kwargs for those two are discarded under False unknown-body flags. Go covers all four actual server containers; this server augmentation is not invented Python operation parity.",
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework remain broader than concrete snapshot Create. Go always sends an explicit requested Create without cached-state mutation.",
-        "Go validates root safe route80 separately from UTF8-only nested JSON names/keys/Required; it does not locally reproduce pinned schema type enums, WSME mandatory/coercion/lost-key behavior, DB length/Unicode/CSV storage or server policy. Raw input forwarding and response echo do not prove keyword precision/storage round-trip.",
-        "Pinned server creates parent then associations/objects/tags/properties sequentially; Invalid400 skips cleanup and other named failures attempt best-effort cleanup that may fail protected. Auto-created global resource types can survive. SDK adds no rollback/cleanup/child requests and fixtures do not establish deployed effects.",
-        "Create201 nested content is submitted WSME echo rather than fresh persisted child fetch. Canonical Namespace response stays raw for nested definitions; generated child metadata and normalized schema/Required values are not inferred.",
-        "Namespace Update remains scalar replacement and its cached Python dirty semantics remain partial; nested Update is not added despite APIref prose. No authenticated cloud execution/full SDK parity is claimed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/delete_metadef_namespace",
       "source_fingerprint": "95602a00b3c1b31d3e86efe5351b025cbb94ae13c5987313ba3ba6e1c2d96d80",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Delete",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithDeleteOpts",
@@ -25673,6 +25753,13 @@
             "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
             "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
           ]
+        },
+        {
+          "behavior": "Delete sends DELETE metadefs/namespaces/{namespace} and by default treats 404 as success like Python ignore_missing=True.",
+          "tests": [
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads",
+            "image/v2/metadefnamespaces/core_test.go:TestMetadefNamespacesCoreAcceptedBodyFailuresAndMissingOwnership"
+          ]
         }
       ],
       "documentation": [
@@ -25681,15 +25768,13 @@
       "differences": [
         "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
         "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Go actual204 acknowledgement and cause-safe private clean404 ownership differ from Python None return and generic missing/native retry policy."
+        "Go actual204 acknowledgement and cause-safe private clean404 ownership differ from Python None return and generic missing/native retry policy.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Go returns the actual 204 acknowledgement where Python returns None."
       ],
-      "remaining": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Go actual204 acknowledgement and cause-safe private clean404 ownership differ from Python None return and generic missing/native retry policy."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_metadef_namespace",
@@ -25967,7 +26052,7 @@
     {
       "operation": "python:image/v2/update_metadef_namespace",
       "source_fingerprint": "8f470305ee765783c5fa45b669ccdbe927a894ffc1a1253321acdb4425597ca4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.API.Update",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces.WithUpdateOpts",
@@ -26043,6 +26128,12 @@
             "connection_image_metadef_namespaces_test.go:TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults",
             "internal/cmd/sdkgen/glance_metadef_namespaces_test.go:TestGlanceMetadefNamespacesRegistryAndConcretePolicy"
           ]
+        },
+        {
+          "behavior": "Update with no options sends PUT metadefs/namespaces/{namespace} with body {\"namespace\": current}, the body Python builds when it adds the namespace key before commit.",
+          "tests": [
+            "image/v2/metadefnamespaces/contracts_test.go:TestMetadefNamespacesFixedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -26051,20 +26142,18 @@
       "differences": [
         "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
         "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
+        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Go can send only the scalar namespace fields; Python could also put resource_type_associations or tags in the PUT body, which Glance's namespace update ignores."
       ],
-      "remaining": [
-        "Python mutable Resource/dirty cache/same-object returns, arbitrary attrs/session/adapter/microversion and coercion framework are broader than this concrete scalar/raw leaf.",
-        "Go explicitly rejects route-breaking/control input, wrong canonical types and statuses outside201/200/204; Python generic Resource response/coercion differs.",
-        "No authenticated cloud/server policy execution or full SDK parity is claimed.",
-        "Nested definition POST attrs and Python cached Resource mutation/dirty update semantics remain outside this scalar-only create/replacement update."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/create_metadef_object",
       "source_fingerprint": "b69fbfd5b846ef8bfed703db491e7d6d0e9a5f543a1ce16d425497112b5b6398",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Create",
@@ -26132,6 +26221,12 @@
             "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Create posts metadefs/namespaces/{namespace}/objects with the name and only supplied optional fields, matching Python _create(MetadefObject, namespace_name=..., **attrs).",
+          "tests": [
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -26140,13 +26235,11 @@
       "differences": [
         "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
         "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_metadef_object",
@@ -26389,7 +26482,7 @@
     {
       "operation": "python:image/v2/update_metadef_object",
       "source_fingerprint": "38016f6c18e51ff1aecff47672b075bd4efb05eee7f784d5d462e6484540761c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Update",
@@ -26458,6 +26551,12 @@
             "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Update sends PUT metadefs/namespaces/{namespace}/objects/{name} with name and only supplied optional fields, the body a successful Python call with name=... sends.",
+          "tests": [
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -26466,20 +26565,18 @@
       "differences": [
         "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
         "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python proxy reduces object_arg to _get_id; generic dirty-only commit may no-op and omits dirty identity, whereas Go supplies current name and always sends replacement PUT."
+        "Python proxy reduces object_arg to _get_id; generic dirty-only commit may no-op and omits dirty identity, whereas Go supplies current name and always sends replacement PUT.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Python's commit leaves name out of the PUT body unless the caller passes name=..., and Glance rejects an object update without name; Go always sends the current name (WithUpdateName renames)."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python proxy reduces object_arg to _get_id; generic dirty-only commit may no-op and omits dirty identity, whereas Go supplies current name and always sends replacement PUT."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/delete_metadef_object",
       "source_fingerprint": "739d2c7638608b5ba3ad27b23433ef50a4c92845f5c0f218973f52d5b2c76983",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.Delete",
@@ -26539,6 +26636,13 @@
             "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Delete sends DELETE metadefs/namespaces/{namespace}/objects/{name} and by default treats 404 as success like Python ignore_missing=True.",
+          "tests": [
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads",
+            "image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreAcceptedBodiesAndMissingPolicy"
+          ]
         }
       ],
       "documentation": [
@@ -26547,20 +26651,18 @@
       "differences": [
         "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
         "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Go returns the actual 204 acknowledgement where Python returns the Resource or None."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/delete_all_metadef_objects",
       "source_fingerprint": "d03eed18c18c170247259a5354d8d5386f45f4a9a92a8f51d0f61286f1244d5b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.NamespaceScope.DeleteAll",
@@ -26618,6 +26720,12 @@
             "connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope",
             "internal/cmd/sdkgen/glance_metadef_objects_test.go:TestGlanceMetadefObjectsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "DeleteAll sends one DELETE metadefs/namespaces/{namespace}/objects, the request Python delete_all_objects sends.",
+          "tests": [
+            "image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsFixedScopedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -26626,15 +26734,13 @@
       "differences": [
         "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
         "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
+        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Go returns the actual 204 acknowledgement where Python returns the namespace Resource."
       ],
-      "remaining": [
-        "Python mutable Resource/descriptor/coercion, arbitrary attrs, adapter/session/version controls and cached return semantics are broader than this typed scoped API.",
-        "Go explicitly bounds literal route input, validates canonical types/UTF8 and original201/200/204 statuses; generic Python Resource response handling differs.",
-        "Server schema/policy/protection/DB defaults/RequiredCSV and real cloud side effects are not reproduced or proven by local fixtures; no full parity or authenticated cloud claim.",
-        "Python returns Resource/namespace Resource or None; Go returns actual opaque204ACK and uses cause-safe physical404 policy only for individual Delete."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/create_metadef_property",
@@ -27422,7 +27528,7 @@
     {
       "operation": "python:image/v2/add_tag_to_metadef_namespace",
       "source_fingerprint": "94f370a5162b73315e159b04652e3bdff4d1434c67f5b6025f2c279780651167",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Create",
@@ -27479,6 +27585,12 @@
             "image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource",
             "internal/cmd/sdkgen/glance_metadef_tags_test.go:TestGlanceMetadefTagsRegistryAndConcreteScope"
           ]
+        },
+        {
+          "behavior": "Create sends a bodyless POST metadefs/namespaces/{namespace}/tags/{tag}, the request Python add_tag sends.",
+          "tests": [
+            "image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -27487,18 +27599,18 @@
       "differences": [
         "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
         "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
+        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement."
       ],
-      "remaining": [
-        "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
-        "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/remove_tag_from_metadef_namespace",
       "source_fingerprint": "4e07289c71e9be5d3efd1119539526e900c744d3ac5aec4f1301b11494a8ef74",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Delete",
@@ -27548,6 +27660,13 @@
             "image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads",
             "image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "Delete sends DELETE metadefs/namespaces/{namespace}/tags/{tag} and keeps 404 as an error, as Python remove_tag does.",
+          "tests": [
+            "image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads",
+            "image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy"
+          ]
         }
       ],
       "documentation": [
@@ -27556,18 +27675,18 @@
       "differences": [
         "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
         "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
+        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement."
       ],
-      "remaining": [
-        "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
-        "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/remove_tags_from_metadef_namespace",
       "source_fingerprint": "67cf36d38ccf9ffb548d6ec70407f136c57cd19daf101149a5d6968854925091",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace",
         "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.DeleteAll",
@@ -27617,6 +27736,12 @@
             "image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads",
             "image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks"
           ]
+        },
+        {
+          "behavior": "DeleteAll sends one DELETE metadefs/namespaces/{namespace}/tags, the request Python remove_all_tags sends.",
+          "tests": [
+            "image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads"
+          ]
         }
       ],
       "documentation": [
@@ -27625,13 +27750,13 @@
       "differences": [
         "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
         "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
+        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.",
+        "Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.",
+        "Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement."
       ],
-      "remaining": [
-        "Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.",
-        "Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.",
-        "Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/metadef_resource_types",
@@ -28227,7 +28352,7 @@
     {
       "operation": "python:image/v2/get_task",
       "source_fingerprint": "a6477750099cf6a657d44bc4f1bbb6425200fac0f71852bab49ab4cc0b3c30e6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.GetTask",
         "github.com/JSYoo5B/go-openstacksdk/image.WithGetTaskOpts",
@@ -28274,6 +28399,12 @@
             "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks",
             "internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GetTask sends one GET tasks/{id} and returns id, type, status, input and result like Python _get(Task).",
+          "tests": [
+            "image/python_rejudge_test.go:TestPythonRejudgeImageLocationsAndTaskDefaultRequests"
+          ]
         }
       ],
       "documentation": [
@@ -28282,15 +28413,12 @@
       "differences": [
         "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
         "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
-        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Pinned Resource.fetch alwaysAdapterGET and canmutate same providedResource; configured Adapter cache may affect actualtransport. Go creates fresh ownedTaskInfo eachcall and strict404 canmask authorization."
+        "Pinned Resource.fetch alwaysAdapterGET and canmutate same providedResource; configured Adapter cache may affect actualtransport. Go creates fresh ownedTaskInfo eachcall and strict404 canmask authorization.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Go has no client-side GET response cache or skip_cache control; every call sends its request.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
       ],
-      "remaining": [
-        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
-        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
-        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Pinned Resource.fetch alwaysAdapterGET and canmutate same providedResource; configured Adapter cache may affect actualtransport. Go creates fresh ownedTaskInfo eachcall and strict404 canmask authorization."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/tasks",
@@ -30747,7 +30875,7 @@
     {
       "operation": "python:object_store/v1/set_account_temp_url_key",
       "source_fingerprint": "f5cc742d0c4ad8001e15781f84b62a00e2eb5094325e443eaae951fce75acb1e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts",
@@ -30794,25 +30922,29 @@
             "objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreAcceptedFailuresAndNativeHooks",
             "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "SetTempURLKey sends one POST with X-Account-Meta-Temp-URL-Key or X-Container-Meta-Temp-URL-Key (the -2 header when secondary), the metadata POST Python set_temp_url_key sends.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftSetTempURLKeyRequests"
+          ]
         }
-      ],
-      "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
-        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
-      ],
-      "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
-        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
-        "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
       "documentation": [
         "objectstorage/v1/temp_url_key.md"
-      ]
+      ],
+      "differences": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
+        "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/set_container_temp_url_key",
       "source_fingerprint": "d4ba694ba90f16f0f58ef53c45eee02a75a90df99b40115ce9f984d3b1a510ad",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyOpts",
@@ -30859,25 +30991,29 @@
             "objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreAcceptedFailuresAndNativeHooks",
             "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "SetTempURLKey sends one POST with X-Account-Meta-Temp-URL-Key or X-Container-Meta-Temp-URL-Key (the -2 header when secondary), the metadata POST Python set_temp_url_key sends.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftSetTempURLKeyRequests"
+          ]
         }
-      ],
-      "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
-        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated."
-      ],
-      "remaining": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
-        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
-        "Backend metadata timestamps/header quotas/auth/deployment normalization remain server-owned; no persistence/rollback/rotation availability guarantee."
       ],
       "documentation": [
         "objectstorage/v1/temp_url_key.md"
-      ]
+      ],
+      "differences": [
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
+        "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/get_temp_url_key",
       "source_fingerprint": "3a790a715167c416598f739e121230804015fdc95dbc0c00271ae142820e43da",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts",
@@ -30951,25 +31087,30 @@
             "objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreCapturedHeadersAndNativeSigner",
             "internal/cmd/sdkgen/swift_temp_url_key_test.go:TestSwiftTempURLKeyPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GetTempURLKey HEADs the container (when given) and then the account, preferring Temp-URL-Key-2 over Temp-URL-Key at each level, the order Python get_temp_url_key uses.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftTempURLKeySelection"
+          ]
         }
-      ],
-      "differences": [
-        "Go concrete owned result instead of mutable Resource or bytes|string cache/coercion; strictHEAD204 and full atomic metadata validation deliberately exceed Python generic handling.",
-        "Python final explicit falsey empty primary can remain empty; Go exposes nil Key with raw empty-header evidence."
-      ],
-      "remaining": [
-        "Python mutable Resource/cache/header-descriptor/string-coercion surface is not implemented.",
-        "No native signer integration/signature algorithm/time/IP/FormPOST/middleware availability or secret persistence guarantee is added.",
-        "Server/deployment policy, header normalization and consistency after mutation remain server-owned."
       ],
       "documentation": [
         "objectstorage/v1/temp_url_key.md"
-      ]
+      ],
+      "differences": [
+        "Go concrete owned result instead of mutable Resource or bytes|string cache/coercion; strictHEAD204 and full atomic metadata validation deliberately exceed Python generic handling.",
+        "Python final explicit falsey empty primary can remain empty; Go exposes nil Key with raw empty-header evidence.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Go has no client-side GET response cache or skip_cache control; every call sends its request.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/generate_form_signature",
       "source_fingerprint": "4697a11d209a95519232b9bd4b9f5ca8cc45c8b281dc97862c4ffc5a6e4f3864",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateFormSignature",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureOpts",
@@ -31036,6 +31177,12 @@
             "objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreDiscoveryAndPhaseProof",
             "internal/cmd/sdkgen/swift_signing_test.go:TestSwiftSigningPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GenerateFormSignature signs endpoint path/container/prefix, redirect, size, count and expiry with HMAC-SHA1 like Python and discovers the key from the container before the account.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftGenerateFormSignature"
+          ]
         }
       ],
       "documentation": [
@@ -31045,16 +31192,12 @@
         "Go returns structured path/full URL/digest/discovery instead of Python tuple, supports three concrete digests and explicit clock snapshot.",
         "Go rejects redirect characters/size changed by the pinned parser and safely escapes output path; Python signs its supplied literal redirect/path unchanged."
       ],
-      "remaining": [
-        "Python mutable Container/resource naming and adapter/session behavior are not reproduced by the concrete captured Service workflow.",
-        "Python integer coercion and timeout numeric behavior are deliberately narrower in Go, as are source-path/redirect validation and structured result semantics.",
-        "FormPost multipart upload, configured middleware acceptance, file rollback and browser redirect behavior remain server/caller responsibilities; no full Python SDK parity is claimed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/generate_temp_url",
       "source_fingerprint": "b3ec8eab9b83b05b2002a49f488244a00bd04146659a372a9a8b33e2057459c7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateTempURL",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLOpts",
@@ -31130,6 +31273,12 @@
             "objectstorage/v1/temp_url_core_test.go:TestTempURLCoreDiscoveryAndNativePolicy",
             "internal/cmd/sdkgen/swift_signing_test.go:TestSwiftSigningPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GenerateTempURL signs METHOD, expiry and path with HMAC-SHA1 like Python, sends nothing when the key is given and HEADs only the account when it is not.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftGenerateTempURL"
+          ]
         }
       ],
       "documentation": [
@@ -31137,13 +31286,11 @@
       ],
       "differences": [
         "Go accepts decoded UTF8 string and int64 seconds, escapes path/query once and returns structured owned result; Python accepts bytes/numeric/string timestamps and concatenates a literal query.",
-        "Go includes SHA256/SHA512, explicit time snapshot and strict masked CIDR validation, while pinned Python signs SHA1 and applies its own parsing/warning behavior."
+        "Go includes SHA256/SHA512, explicit time snapshot and strict masked CIDR validation, while pinned Python signs SHA1 and applies its own parsing/warning behavior.",
+        "Python accepts ISO 8601 strings as seconds; Go takes int64 seconds and WithGenerateTempURLAbsolute.",
+        "Go escapes the path in the returned URL and orders query keys alphabetically; Python concatenates the literal path and temp_url_sig before temp_url_expires."
       ],
-      "remaining": [
-        "Python bytes-path return type, float/string/local-time parsing and mutable adapter/session behavior are outside this concrete Go contract.",
-        "Python warning/coercion and raw URL concatenation are not equivalent to Go ASCII token, literal decoded path, UTF8 and query escaping policies.",
-        "Existing native Objects.CreateTempURL has its own primary-only lookup/complete-URL API; middleware method/digest/IP/expiry configuration and deployment rewrite are not guaranteed by client signing."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/get_object",
@@ -31250,7 +31397,7 @@
     {
       "operation": "python:object_store/v1/download_object",
       "source_fingerprint": "2db2b1bb5b1262e59535a646697f2e049cd54b6ed77ac560fb926d33a6f4ef40",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
@@ -31270,17 +31417,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize"
-      ],
-      "documentation": [
-        "objectstorage/v1/objects/read.md"
-      ],
-      "differences": [
-        "Go DownloadObject copies into a borrowed writer and returns a byte count plus metadata/evidence; Python download_object returns response.content bytes.",
-        "The concrete Go ownership/typed options replace mutable Object/attrs request preparation, while existing native Download remains available."
-      ],
-      "remaining": [
-        "Python bytes return type and mutable Resource/attrs coercion/session behavior differ from the borrowed-writer facade.",
-        "Server middleware, HTTP client decompression, payload integrity and metadata conversion equivalence are not promised."
       ],
       "contracts": [
         {
@@ -31330,8 +31466,25 @@
             "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership",
             "objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter"
           ]
+        },
+        {
+          "behavior": "DownloadObject sends one GET for the object and writes the body bytes Python download_object returns.",
+          "tests": [
+            "objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectDownloadRequest"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/read.md"
+      ],
+      "differences": [
+        "Go DownloadObject copies into a borrowed writer and returns a byte count plus metadata/evidence; Python download_object returns response.content bytes.",
+        "The concrete Go ownership/typed options replace mutable Object/attrs request preparation, while existing native Download remains available.",
+        "Go percent-encodes a slash inside the object name as %2F; Python sends it literally and Swift resolves both to the same object.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/stream_object",
@@ -31433,25 +31586,13 @@
     {
       "operation": "python:object_store/v1/get_info",
       "source_fingerprint": "aa9526170d6b61054c1731c346f0ed445879f77b27ba98786374e9d3c2b8f4a7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetInfo",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeader",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Info.UnmarshalJSON"
-      ],
-      "differences": [
-        "Go returns owned Info raw fields and actual200 evidence with atomic nullable-object sections; Python fetch mutates a fresh Resource, accepts response translation below400 and coerces non-dict known sections to empty dict.",
-        "Go derives a fixed escaped-path URL with ASCII regex, rejects query/fragment/userinfo/opaque URLs and treats semicolon as path; Python uses Unicode digits and preserves URL params/query/fragment.",
-        "Inherited Metadata timestamps and Links stay passive/nil while every root JSON field remains raw; Go does not follow capability links or synthesize signed admin query."
-      ],
-      "remaining": [
-        "Python Resource descriptor coercion, unknown-body filtering, dirty state and JSON parse/exception translation are not reproduced by the strict Go Info model.",
-        "Python URL Unicode-digit/params/query/fragment behavior and adapter/session/cache/microversion semantics remain distinct from the fixed Go source and ownership contract."
-      ],
-      "documentation": [
-        "objectstorage/v1/info.md"
       ],
       "contracts": [
         {
@@ -31505,13 +31646,31 @@
           "tests": [
             "internal/cmd/sdkgen/swift_info_test.go:TestSwiftInfoPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GetInfo sends GET /info beside the versioned endpoint and exposes the swift and slo sections, as Python Info.fetch does.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftInfoAndSegmentSize"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/info.md"
+      ],
+      "differences": [
+        "Go returns owned Info raw fields and actual200 evidence with atomic nullable-object sections; Python fetch mutates a fresh Resource, accepts response translation below400 and coerces non-dict known sections to empty dict.",
+        "Go derives a fixed escaped-path URL with ASCII regex, rejects query/fragment/userinfo/opaque URLs and treats semicolon as path; Python uses Unicode digits and preserves URL params/query/fragment.",
+        "Inherited Metadata timestamps and Links stay passive/nil while every root JSON field remains raw; Go does not follow capability links or synthesize signed admin query.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Go has no client-side GET response cache or skip_cache control; every call sends its request.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/get_object_segment_size",
       "source_fingerprint": "a9db05eace9305be3be8e1ce0cba78bd2e48ac201b0a4e454c2f912e96b426d8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetObjectSegmentSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeOpts",
@@ -31519,18 +31678,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutObjectSegmentSize"
-      ],
-      "differences": [
-        "Go uses optional non-negative int64 Size with nil default1073741824, strict exact int64 non-negative bounds and absent/null section or bound values0; Python requires positional int|None, does not preflight negative/type inputs, raises AttributeError for swift/slo None and TypeError for null bounds.",
-        "Go exposes RequestedSize, selected Size, observed bounds, optional Info and actual raw response evidence; Python returns a scalar and its404/412 fallback maximum is float2684354561.0.",
-        "Only clean physically accepted404/412 responses with read/Close/context/source checks permit integer fallback2684354561; nested native/transport statuses or accepted processing errors do not fallback. Maximum comparison remains before minimum even for inverted bounds."
-      ],
-      "remaining": [
-        "Python unrestricted numeric comparisons, float-return behavior, missing-section AttributeError/null-bound TypeError and SDK exception class semantics are outside the Go strict integer/physical-response contract.",
-        "The fresh Info operation still differs in Resource/descriptor/URL/adapter/session/cache behavior; advertised capability bounds and client selection do not guarantee middleware permissions or upload success."
-      ],
-      "documentation": [
-        "objectstorage/v1/info.md"
       ],
       "contracts": [
         {
@@ -31597,13 +31744,29 @@
           "tests": [
             "internal/cmd/sdkgen/swift_info_test.go:TestSwiftInfoPreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "GetObjectSegmentSize with no size selects 1 GiB within the /info bounds and falls back to 2684354561 after a 404, the values Python returns.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftInfoAndSegmentSize"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/info.md"
+      ],
+      "differences": [
+        "Go uses optional non-negative int64 Size with nil default1073741824, strict exact int64 non-negative bounds and absent/null section or bound values0; Python requires positional int|None, does not preflight negative/type inputs, raises AttributeError for swift/slo None and TypeError for null bounds.",
+        "Go exposes RequestedSize, selected Size, observed bounds, optional Info and actual raw response evidence; Python returns a scalar and its404/412 fallback maximum is float2684354561.0.",
+        "Only clean physically accepted404/412 responses with read/Close/context/source checks permit integer fallback2684354561; nested native/transport statuses or accepted processing errors do not fallback. Maximum comparison remains before minimum even for inverted bounds.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/delete_object",
       "source_fingerprint": "fdc3b3cda760b3f5a3722ab6160eb68bcd9b03b3041a2912330724c755e66add",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectOpts",
@@ -31618,20 +31781,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error"
-      ],
-      "documentation": [
-        "objectstorage/v1/objects/delete.md"
-      ],
-      "differences": [
-        "Go requires explicit literal container/object and returns owned Discovery/Deletion responses, nullable SLO selection, missing flag and optional Bulk; Python reuses mutable Object/container metadata and returns None.",
-        "Go uses strict nullable bool options and single true/false/1/0 HEAD header parsing; Python Header(type=bool) coerces nonempty strings with bool(value), including false.",
-        "Go requires strict SLO200 bulk JSON embedded2xx plus emptyErrors and preserves failures through actual200 ResponseError/ObjectDeleteBulkError; pinned Python Resource.delete uses has_body=False and does not inspect embedded bulk failure.",
-        "Go keeps native HEAD200/204 and DELETE202/204 compatibility; SLO202/204 is raw acknowledgement with nilBulk/unknown counts, while VersionID/Newest are explicit Go extensions applied to both phases."
-      ],
-      "remaining": [
-        "Python Resource/Object/container precedence, dirty header/metadata mutation and response translation are distinct from the explicit literal Go workflow and owned phase results.",
-        "Python descriptor coercion, mutable adapter/session/microversion/cache and NotFoundException class handling are not reproduced wholesale by strict Go preflight/physical-response policies.",
-        "HEAD/DELETE races, eventual consistency and middleware deployment/permissions remain server concerns; acknowledgement or reported bulk counts do not establish cluster-wide cleanup completion."
       ],
       "contracts": [
         {
@@ -31721,8 +31870,26 @@
           "tests": [
             "internal/cmd/sdkgen/swift_object_delete_test.go:TestSwiftObjectDeletePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "DeleteObject HEADs the object, then DELETEs it (with multipart-manifest=delete for an SLO manifest), and treats a 404 as ignored by default like Python ignore_missing=True.",
+          "tests": [
+            "objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectDeleteRequests"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/delete.md"
+      ],
+      "differences": [
+        "Go requires explicit literal container/object and returns owned Discovery/Deletion responses, nullable SLO selection, missing flag and optional Bulk; Python reuses mutable Object/container metadata and returns None.",
+        "Go uses strict nullable bool options and single true/false/1/0 HEAD header parsing; Python Header(type=bool) coerces nonempty strings with bool(value), including false.",
+        "Go requires strict SLO200 bulk JSON embedded2xx plus emptyErrors and preserves failures through actual200 ResponseError/ObjectDeleteBulkError; pinned Python Resource.delete uses has_body=False and does not inspect embedded bulk failure.",
+        "Go keeps native HEAD200/204 and DELETE202/204 compatibility; SLO202/204 is raw acknowledgement with nilBulk/unknown counts, while VersionID/Newest are explicit Go extensions applied to both phases.",
+        "For SLO manifests Go adds Accept: application/json to read the bulk report; Python sends no Accept header and ignores the body.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/create_object",
@@ -31898,7 +32065,7 @@
     {
       "operation": "python:object_store/v1/is_object_stale",
       "source_fingerprint": "2669e64b3ef742733a12e74d6f9d00af2eb3b0a2acffdc1a9128406d57f608b3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.IsObjectStale",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleOpts",
@@ -31906,20 +32073,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleMD5",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleSHA256"
-      ],
-      "documentation": [
-        "objectstorage/v1/objects/create.md"
-      ],
-      "differences": [
-        "Go requires explicit nonempty local filename and literal container/object, returns nullable Stale plus owned raw Discovery/local/remote hashes, while Python returns bool through mutable Resource metadata.",
-        "Go nativeHEAD200/204 and clean physical404 are explicit; dirty/nested404, read/Close/context/source/projection and later file errors retain real HEAD proof with no committed decision. Filename is not read for clean404 or sufficient supplied digests.",
-        "Go projects only relevant current/legacy hash headers with strict single-value/case-alias/UTF8 control validation, preserves absent versus empty and literal digest case, and corrects pinned full-header legacy fallback after BaseResource prefix stripping. Neither implementation substitutes ETag/size/date for SDK hashes.",
-        "Concrete digest/header options and callback snapshots reject malformed digests and reserved headers before HTTP and preserve fixed original source plus live auth rather than Python descriptor/adapter coercion."
-      ],
-      "remaining": [
-        "Python Resource metadata caches/mutation and session/adapter/exception policies remain distinct from fresh concrete Go HEAD evidence and nullable decision.",
-        "A stale=false decision is an observation, not an atomic lock or guarantee that a later upload will skip; CreateObject performs its own fresh comparison and server state can change between requests.",
-        "Remote digest metadata is trusted server/caller data; matching literals do not independently verify remote payload bytes or wholeSDK parity."
       ],
       "contracts": [
         {
@@ -31980,8 +32133,25 @@
           "tests": [
             "internal/cmd/sdkgen/swift_object_create_test.go:TestSwiftObjectCreatePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "IsObjectStale HEADs the object, compares x-sdk-md5 and x-sdk-sha256 metadata with the local file hashes and reports a missing object as stale, as Python does.",
+          "tests": [
+            "objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectStaleRequests"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/create.md"
+      ],
+      "differences": [
+        "Go requires explicit nonempty local filename and literal container/object, returns nullable Stale plus owned raw Discovery/local/remote hashes, while Python returns bool through mutable Resource metadata.",
+        "Go nativeHEAD200/204 and clean physical404 are explicit; dirty/nested404, read/Close/context/source/projection and later file errors retain real HEAD proof with no committed decision. Filename is not read for clean404 or sufficient supplied digests.",
+        "Go projects only relevant current/legacy hash headers with strict single-value/case-alias/UTF8 control validation, preserves absent versus empty and literal digest case, and corrects pinned full-header legacy fallback after BaseResource prefix stripping. Neither implementation substitutes ETag/size/date for SDK hashes.",
+        "Concrete digest/header options and callback snapshots reject malformed digests and reserved headers before HTTP and preserve fixed original source plus live auth rather than Python descriptor/adapter coercion.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:object_store/v1/wait_for_delete",
@@ -32233,7 +32403,7 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_directory_marker_object",
       "source_fingerprint": "0efe3c943ef3c3ecf0aba4e6aedfbdbfbebd0c4692dd7e64c5c4595497ae01e3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateDirectoryMarkerObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerOpts",
@@ -32241,21 +32411,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadataValue"
-      ],
-      "documentation": [
-        "objectstorage/v1/objects/directory-marker.md"
-      ],
-      "differences": [
-        "Pinned cloud marker sets lowercase content-type=application/directory and delegates empty string data with generate_checksums=False through cloud/canonical create_object to one raw Object PUT. Go owns explicit empty bytes at a fixed literal route and returns existing CreateObjectResult Source=bytes/Mode=ordinary/Size0 and Ordinary raw physical-attempt evidence rather than mutable Object.",
-        "Neither actual marker/data call chain creates a missing container despite the shared create_object docstring claim, nor normalizes name suffix, hashes, reads file, probes HEAD/info/stale, segments or cleans up. Go exposes only concrete Headers/Metadata options instead of Python kwargs that may bind real create controls or conflict with explicit data/checksum arguments.",
-        "Go validates canonical headers and suffix-only metadata snapshots before forcing application/directory. Python Resource case aliases depend on insertion order, unknown kwargs are not universal HTTP headers, and BaseResource system metadata can overwrite prepared Content-Type. Go strict maps deliberately differ from descriptor coercion/alias semantics.",
-        "Marker Content-Type remains owned across native callbacks and physical wire requests; X-Detect-Content-Type is rejected at options/source/native/raw boundaries because pinned Swift can otherwise ignore explicit media and guess from the route. This marker-specific policy leaves ordinary CreateObject media behavior separate.",
-        "Go preserves native physical retry/backoff/reauth/redirect evidence within one logical PUT and retains independent acknowledgement/attempt/error response snapshots.201/202 are raw acknowledgements, and accepted processing/source/context faults can return both evidence and error; no cluster/staticweb completion result is invented."
-      ],
-      "remaining": [
-        "Python mutable Object/Resource descriptor coercion, dirty/cache state, kwargs/system-metadata alias precedence and adapter/session/exception policies are not reproduced wholesale by the concrete owned Go workflow.",
-        "Server Static Web/Web Listings, permissions, replica consistency and visibility after acknowledgement require server behavior; a zero-byte directory media observation does not establish those outcomes.",
-        "This is one real cloud helper operation, not a synthetic direct Proxy declaration. The other actual cloud workflows and inherited Proxy/Resource/session/cache support remain separate unfinished scope; whole Swift SDK parity is not complete."
       ],
       "contracts": [
         {
@@ -32343,8 +32498,26 @@
           "tests": [
             "internal/cmd/sdkgen/swift_directory_marker_test.go:TestSwiftDirectoryMarkerPreservesNativeAPIs"
           ]
+        },
+        {
+          "behavior": "CreateDirectoryMarkerObject sends one PUT with an empty body and Content-Type application/directory, the request the Python cloud helper sends through create_object(data='').",
+          "tests": [
+            "objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectDirectoryMarkerRequest"
+          ]
         }
-      ]
+      ],
+      "documentation": [
+        "objectstorage/v1/objects/directory-marker.md"
+      ],
+      "differences": [
+        "Pinned cloud marker sets lowercase content-type=application/directory and delegates empty string data with generate_checksums=False through cloud/canonical create_object to one raw Object PUT. Go owns explicit empty bytes at a fixed literal route and returns existing CreateObjectResult Source=bytes/Mode=ordinary/Size0 and Ordinary raw physical-attempt evidence rather than mutable Object.",
+        "Neither actual marker/data call chain creates a missing container despite the shared create_object docstring claim, nor normalizes name suffix, hashes, reads file, probes HEAD/info/stale, segments or cleans up. Go exposes only concrete Headers/Metadata options instead of Python kwargs that may bind real create controls or conflict with explicit data/checksum arguments.",
+        "Go validates canonical headers and suffix-only metadata snapshots before forcing application/directory. Python Resource case aliases depend on insertion order, unknown kwargs are not universal HTTP headers, and BaseResource system metadata can overwrite prepared Content-Type. Go strict maps deliberately differ from descriptor coercion/alias semantics.",
+        "Marker Content-Type remains owned across native callbacks and physical wire requests; X-Detect-Content-Type is rejected at options/source/native/raw boundaries because pinned Swift can otherwise ignore explicit media and guess from the route. This marker-specific policy leaves ordinary CreateObject media behavior separate.",
+        "Go preserves native physical retry/backoff/reauth/redirect evidence within one logical PUT and retains independent acknowledgement/attempt/error response snapshots.201/202 are raw acknowledgements, and accepted processing/source/context faults can return both evidence and error; no cluster/staticweb completion result is invented.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "gophercloud:networking/v2/networks.Update",
@@ -98890,50 +99063,75 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_capabilities",
       "source_fingerprint": "0593a4fb5b01de2c7c32e3b528b5e04f32db212527280027d2f510b60223a684",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetInfo"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "GetInfo sends the same GET /info as the delegated Python get_info and returns the swift and slo sections.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftInfoAndSegmentSize"
+          ]
+        }
+      ],
       "documentation": [
         "docs/python-cloud-parity-misc.md"
       ],
-      "differences": [],
-      "remaining": [
-        "This helper only delegates to Proxy.get_info, which stays unresolved: Python Info Resource descriptor coercion, unknown-body handling and JSON exception translation are not reproduced by the strict Go Info model."
-      ]
+      "differences": [
+        "The helper only delegates to Proxy.get_info; the get_info differences apply.",
+        "Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_segment_size",
       "source_fingerprint": "4ea8276546756b3f53e391c7715f7495763bb006d93bc7d82a4eeef5df9a84e2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetObjectSegmentSize"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "GetObjectSegmentSize sends the same GET /info as the delegated Python method and returns the same selected size or fallback value.",
+          "tests": [
+            "objectstorage/v1/python_rejudge_test.go:TestPythonRejudgeSwiftInfoAndSegmentSize"
+          ]
+        }
+      ],
       "documentation": [
         "docs/python-cloud-parity-misc.md"
       ],
-      "differences": [],
-      "remaining": [
-        "This helper only delegates to Proxy.get_object_segment_size, which stays unresolved: Python float results, unrestricted numeric comparisons and the NotFound/PreconditionFailed default fallback classes differ from the strict Go integer contract."
-      ]
+      "differences": [
+        "The helper only delegates to Proxy.get_object_segment_size; Python returns the float 2684354561.0 on fallback where Go returns the integer 2684354561.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/is_object_stale",
       "source_fingerprint": "31a567eca78b3423acb4feccb6aeb6507a4ccb2ea72fb9a59eda8d1aa0ac2c40",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.IsObjectStale"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "IsObjectStale sends the same object HEAD as the delegated Python method and reaches the same stale decision.",
+          "tests": [
+            "objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectStaleRequests"
+          ]
+        }
+      ],
       "documentation": [
         "docs/python-cloud-parity-misc.md"
       ],
-      "differences": [],
-      "remaining": [
-        "This helper only delegates to Proxy.is_object_stale, which stays unresolved: Python Resource metadata cache and exception policies are not reproduced by the Go HEAD evidence and nullable decision."
-      ]
+      "differences": [
+        "The helper only delegates to Proxy.is_object_stale; Go returns a nullable Stale with HEAD evidence instead of a bool.",
+        "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_object",
