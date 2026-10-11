@@ -39,6 +39,8 @@ Neutron 9개 Update API의 `UpdateOpts.RevisionNumber`는 `If-Match: revision_nu
 
 `Subnets.Resources.List/All`의 `resource.WithFilter`/`WithFilters`는 Python 속성 이름을 서버 query 24개 또는 로컬 Body 9개로 자동 분류합니다. query의 wire 별칭을 포함한 30개 이름, bulk canonical 우선·최종값 검증·semantic 전체 교체/clear·JSON snapshot을 SDK가 처리합니다. raw query·명시 Body·page/name hint와 같은 target을 지정하면 HTTP 전에 오류이며, 알 수 없는 semantic 이름은 버립니다. 현재 이 분류는 Subnet에 연결되어 있고 [고정 Python AST manifest](../../api/openstacksdk/resources/network/v2/subnet.json)의 현재 소스 검증을 통과해야 생성됩니다. 전체 Resource/cache·상속 continuation/session·Proxy conflicting attrs·JMESPath 조건은 별도입니다. [Subnet 사용법](subnets/README.md)을 참고하세요.
 
+`SecurityGroups/SecurityRules/Trunks/AddressGroups.FindRecord`는 이름/ID 검색·기본 missing과 서비스별 descriptor를 소유합니다. [Security 검색](security-find-python.md), [Trunk/Address 검색](trunk-address-find-python.md), [Router interface/gateway](router-interfaces-python.md)에 Source·stock 차이와 owned 응답·재시도 보호를 설명합니다.
+
 `Networks/Ports/Subnets.FindRecord`는 GET-first 검색과 Source query·descriptor·기본값을 제공합니다. [핵심 검색 비교](find-core-resources-python.md), [Router route/gateway action](router-actions-python.md), [Trunk/Address group action](trunk-address-actions-python.md), [7개 Tag API](tags-python.md)에 구체적 함수 옵션과 응답·캐시·권한 분기를 설명합니다.
 
 `PortForwarding.CreateRecord/UpdateRecord/GetRecord/ListRecords/FindRecord/DeleteRecord`는 floating IP 부모 범위와 raw 필드·기본 missing 정책을 제공합니다. [Port forwarding의 두 Python 명칭 비교](port-forwarding-python.md)에 legacy/alias12개 선언과6개 동작을 설명합니다.

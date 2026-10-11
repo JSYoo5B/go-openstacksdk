@@ -29,6 +29,10 @@ native [볼륨 호출](native-volumes.md), [snapshot 호출](native-snapshots.md
 
 Keystone 없이 `auth_strategy=noauth` Cinder에 접근하는 client 생성 규칙은 [noauth native client 생성](../noauth/README.md)에 설명합니다.
 
+`Volumes.FindRecord`와 `Volumes/Snapshots.FetchMetadataRecord/GetMetadataRecord/SetMetadataRecord/DeleteMetadataRecord`는 검색·metadata 기본값과 Source 캐시 전환을 제공합니다. [Volume 검색](volume-find-python.md), [Metadata 비교](metadata-python.md)에 구체적 옵션·nil/빈 입력·순차 삭제와 부분 응답을 설명합니다.
+
+`Messages.GetRecord/ListRecords/DeleteRecord`는 SDK가 기본값과 구체적 옵션을 제공하는 Cinder message API입니다. [Python/Go 비교](messages-python.md)에 Source envelope·stock 호환·기본 missing·목록 정책을 설명합니다.
+
 `Snapshots.FindRecord/Backups.FindRecord`는 GET-first와 name fallback, details·missing 기본값, raw ID/paging과 Cinder microversion 선택을 제공합니다. [Snapshot](snapshot-find-python.md), [Backup](backup-find-python.md)에 독립 Go main과 Python 비교를 설명합니다.
 
 `Volumes.ListSummary`는 `/volumes` 요약 목록과 로컬 소비 정책을 제공합니다. [요약 목록 비교](volume-summary-python.md)를 참고합니다. Backup의 [명시적 Python metadata profile](backup-metadata-python.md)은 stock Cinder에 child route가 없어 미해결 상태이며 일반 stock metadata 지원으로 집계하지 않습니다.
@@ -63,6 +67,7 @@ _ = value
 | `Backups` | [backups](backups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |
 | `ManageableVolumes` | [manageablevolumes](manageablevolumes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QoS` | [qos](qos/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Usage·Update·Reset; List/Find/Wait 없음 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |

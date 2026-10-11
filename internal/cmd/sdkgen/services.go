@@ -109,6 +109,11 @@ func (g *generator) generateServices() error {
 	if groups["compute/v2"] != nil {
 		groups["compute/v2"]["images"] = true
 	}
+	// Cinder messages have no pinned native package; register the owned API
+	// without adding an invented operation to the transport inventory.
+	if groups["blockstorage/v3"] != nil {
+		groups["blockstorage/v3"]["messages"] = true
+	}
 	keys := []string{}
 	for key := range groups {
 		keys = append(keys, key)
