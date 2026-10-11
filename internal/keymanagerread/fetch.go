@@ -132,6 +132,12 @@ func project(wire *resource.RawResource, kind, requestID string) (*resource.RawR
 
 // projectRecord has only the finite resource's audited Body descriptors. A nil
 // requestID means creation: absent literal id derives from the full passive ref.
+// ProjectRecord reuses the owned resource projection for direct leaf list APIs.
+// A nil requestID leaves list-row identity selection to the declared fields.
+func ProjectRecord(wire *resource.RawResource, kind string, requestID *string) (*resource.RawResource, error) {
+	return projectRecord(wire, kind, requestID)
+}
+
 func projectRecord(wire *resource.RawResource, kind string, requestID *string) (*resource.RawResource, error) {
 	if wire == nil || wire.Body == nil {
 		return nil, invalid("resource body is required")
