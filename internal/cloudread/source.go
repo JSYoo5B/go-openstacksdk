@@ -109,6 +109,8 @@ func validateSourceFacts(source *gophercloud.ServiceClient, role string) (map[st
 		allowed = allowed || source.Type == "identity"
 	case "network":
 		allowed = allowed || source.Type == "network"
+	case "placement":
+		allowed = allowed || source.Type == "placement"
 	case "key-manager":
 		allowed = allowed || source.Type == "key-manager"
 	case "volume":
