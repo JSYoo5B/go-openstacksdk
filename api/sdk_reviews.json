@@ -84460,254 +84460,557 @@
     {
       "operation": "python:identity/v3/create_identity_provider",
       "source_fingerprint": "e137e3fc2fd1358dc7b1f453d708d8b6d6bef8c2983e65fe88d427b5459729a4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithCreateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/identity_providers/{id} with {\"identity_provider\": {...}} after removing id from the body."
-      ]
+      "contracts": [
+        {
+          "behavior": "Create sends PUT OS-FEDERATION/identity_providers/{id} with only the declared attributes (Python names and Body keys, is_enabled aliasing enabled) under identity_provider and without id or name, keeps explicit null, drops unknown attributes, accepts every status 200-399, overlays the response object on the request seed and wraps 4xx/5xx with Create operation context.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderCreatePutsMemberWithoutID",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python takes the member ID from the id or name attribute and fails before HTTP without one; Go takes it as an explicit argument and ignores id and name fields.",
+        "Python keeps an arbitrary value when two aliases of one Body key (for example is_enabled and enabled) are given; Go rejects conflicting alias values before HTTP.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/delete_identity_provider",
       "source_fingerprint": "498744b91686039c6858076393f914d9970f8de40846694695f6a4d8efc89571",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithDeleteHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/identity_providers/{id} and ignores 404 by default."
-      ]
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderDeleteIgnoresMissingByDefault",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_identity_provider",
       "source_fingerprint": "3902e5b6b86676760f85d62d86d6e76ea1bc84c4f4317b3d077d767e96e4de9e",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{name_or_id} and after 400/403/404 lists GET OS-FEDERATION/identity_providers matching the id."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET OS-FEDERATION/identity_providers/{name_or_id} first and, after a clean 400, 403 or 404, lists the whole unfiltered collection matching the exact id (name is the id Body key); a missing resource is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false), duplicates fail and other GET failures do not fall back.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderFindFallsBackToList",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python find_* emits deprecation warnings for ignore_missing=True (and find_identity_provider itself is deprecated); Go emits none.",
+        "A duplicate exact match returns resource.AmbiguousError instead of openstack DuplicateResource; a missing resource with ignore_missing false returns resource.NotFoundError instead of NotFoundException.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_identity_provider",
       "source_fingerprint": "541b7aa7eaa19c1dbbc7ffeb85da2878fc06c6fe2eba45480541c9d480a86700",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithGetHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{id}."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET OS-FEDERATION/identity_providers/{id}, accepts every status 200-399, decodes the identity_provider envelope or a root object into typed fields plus raw Body/Wire views, fails a non-object JSON body with resource.ResponseError and returns 404 as a native error with Get operation context.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderGetDecodesAndRejects",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/identity_providers",
       "source_fingerprint": "21b89ec3c234eed2aedf7c45c3b5c33f9822c5df9d191758450c3ab6e4449ce7",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListID",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListEnabled",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers with id, enabled, limit and marker query and local Body filters."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET OS-FEDERATION/identity_providers with Accept: application/json, Requests-encoded server query id and is_enabled/enabled (client name preferred over server name), filters name, description, domain_id, remote_ids and authorization_ttl locally after the raw row cap, ignores unknown names, follows limit-driven marker continuation until an empty page, honors max_items as a limit hint and paginated=False, and wraps errors with List operation context.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderListQueryFiltersAndPaging",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers; Python compares type-converted attribute values (True == 1, int/bool conversion).",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go returns a lazy iterator (All collects it); Python returns a generator of Resources."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/update_identity_provider",
       "source_fingerprint": "551ab3582a44a6f11464463bfe4ff5b7c5a4ad8d3464aeb09e966004da3c5fef",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.WithUpdateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/identity_providers/{id} with the changed identity_provider attributes."
-      ]
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH OS-FEDERATION/identity_providers/{id} with only the given declared attributes under identity_provider, never id or name, sends nothing when no declared attribute is given, overlays the response on the seed and wraps errors with Update operation context.",
+          "tests": [
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderUpdatePatchesDirtyAttributes",
+            "identity/v3/identityproviders/api_test.go:TestIdentityProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/identityproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python update with name= rewrites the id Body key and therefore the request path; Go always targets the ID argument and ignores id and name attributes.",
+        "Python keeps an arbitrary value when two aliases of one Body key (for example is_enabled and enabled) are given; Go rejects conflicting alias values before HTTP.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/create_federation_protocol",
       "source_fingerprint": "afc7d66ad5582febb7e26433c40794339a3f8884c289d3bab6ef349296c459b5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithCreateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with {\"protocol\": {\"mapping_id\": ...}} after removing id from the body."
-      ]
+      "contracts": [
+        {
+          "behavior": "Create sends PUT OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with both IDs escaped, only mapping_id under protocol and without id, name or idp_id, accepts every status 200-399, overlays the response on the request seed and wraps 409 with Create operation context.",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolCreatePutsMemberWithoutID",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python takes the member ID from the id or name attribute and fails before HTTP without one; Go takes it as an explicit argument and ignores id and name fields.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/delete_federation_protocol",
       "source_fingerprint": "5659720582342b4b3a4ec030e3917e06c82612fe1f1ab6b303840653cb723475",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithDeleteHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} and ignores 404 by default."
-      ]
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 500 with Delete operation context.",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python lets idp be None when protocol is a FederationProtocol instance and fails with UnboundLocalError for a string protocol without idp; Go always takes the identity provider ID as an argument and sets IdentityProviderID from it.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_federation_protocol",
       "source_fingerprint": "495053f30ae8239588f97943456ff91a275a033fd8aaf3493aa751849ea1ebda",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{name_or_id} and after 400/403/404 lists the protocols matching the id."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{name_or_id}?idp_id={idp_id} as Resource.find forwards the URI attribute to fetch, then after a clean 400, 403 or 404 lists the protocols without query matching the exact id; missing is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false).",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolFindSendsIdentityProviderQuery",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python find_* emits deprecation warnings for ignore_missing=True (and find_identity_provider itself is deprecated); Go emits none.",
+        "A duplicate exact match returns resource.AmbiguousError instead of openstack DuplicateResource; a missing resource with ignore_missing false returns resource.NotFoundError instead of NotFoundException.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_federation_protocol",
       "source_fingerprint": "8b806db2a76aa1d635d98079aa4fb00dba1884ec0daf7c6debd2cf69a3b0de4c",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithGetHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{id}."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} without query, decodes the protocol envelope into ID, MappingID and raw views and returns 4xx/5xx with Get operation context.",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python lets idp be None when protocol is a FederationProtocol instance and fails with UnboundLocalError for a string protocol without idp; Go always takes the identity provider ID as an argument and sets IdentityProviderID from it.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/federation_protocols",
       "source_fingerprint": "9fe1f700cf80e605a68deecd5a67747c5ea58dc9f24536fc2ffea07e9a7aaffe",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListID",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols with id, limit and marker query."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET OS-FEDERATION/identity_providers/{idp_id}/protocols with the identity provider escaped, Accept: application/json and only the id server query, filters name and mapping_id locally, ignores unknown names, sets IdentityProviderID on every row, follows limit-driven marker continuation on the escaped path and rejects a blank identity provider before HTTP.",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolListQueryFiltersAndPaging",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers; Python compares type-converted attribute values (True == 1, int/bool conversion).",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go returns a lazy iterator (All collects it); Python returns a generator of Resources."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/update_federation_protocol",
       "source_fingerprint": "ba9b6987c382756dff489289f3fd3b35aedfb626be3b1a21363bfd0e31bf5453",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.WithUpdateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/identity_providers/{idp_id}/protocols route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with the changed protocol attributes."
-      ]
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH OS-FEDERATION/identity_providers/{idp_id}/protocols/{id} with only mapping_id under protocol, ignores id, and sends nothing when no declared attribute is given.",
+          "tests": [
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolGetUpdateDelete",
+            "identity/v3/federationprotocols/api_test.go:TestFederationProtocolRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/federationprotocols/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python lets idp be None when protocol is a FederationProtocol instance and fails with UnboundLocalError for a string protocol without idp; Go always takes the identity provider ID as an argument and sets IdentityProviderID from it.",
+        "Python update with name= rewrites the id Body key and therefore the request path; Go always targets the ID argument and ignores id and name attributes.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/create_service_provider",
       "source_fingerprint": "3f7bb780001dfd10bb15986f1a2501340f7910ffcf2dc4d7813e94d63b817851",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithCreateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends PUT OS-FEDERATION/service_providers/{id} with {\"service_provider\": {...}} after removing id from the body."
-      ]
+      "contracts": [
+        {
+          "behavior": "Create sends PUT OS-FEDERATION/service_providers/{id} with only the declared attributes (Python names and Body keys, is_enabled aliasing enabled) under service_provider and without id or name, keeps explicit null, drops unknown attributes, accepts every status 200-399, overlays the response object on the request seed and wraps 4xx/5xx with Create operation context.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderCreatePutsMemberWithoutID",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python takes the member ID from the id or name attribute and fails before HTTP without one; Go takes it as an explicit argument and ignores id and name fields.",
+        "Python keeps an arbitrary value when two aliases of one Body key (for example is_enabled and enabled) are given; Go rejects conflicting alias values before HTTP.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/delete_service_provider",
       "source_fingerprint": "8e7486039f2ea70741fe46e03adc50becae5bb72478aa414eef692e7f9134bb9",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithDeleteHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends DELETE OS-FEDERATION/service_providers/{id} and ignores 404 by default."
-      ]
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE OS-FEDERATION/service_providers/{id}, accepts 200-399, turns a clean 404 into nil by default as ignore_missing=True, returns the 404 with WithDeleteIgnoreMissing(false) and always returns other statuses such as 409 with Delete operation context.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderDeleteIgnoresMissingByDefault",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_service_provider",
       "source_fingerprint": "9ca557dd74ec0b87c32d1c03628c67eb4d81f3d7acd50d28286c7b03926c2ec0",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers/{name_or_id} and after 400/403/404 lists GET OS-FEDERATION/service_providers matching the id."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET OS-FEDERATION/service_providers/{name_or_id} first and, after a clean 400, 403 or 404, lists the whole unfiltered collection matching the exact id (name is the id Body key); a missing resource is nil by default or resource.NotFoundError with WithFindIgnoreMissing(false), duplicates fail and other GET failures do not fall back.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderFindFallsBackToList",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python find_* emits deprecation warnings for ignore_missing=True (and find_identity_provider itself is deprecated); Go emits none.",
+        "A duplicate exact match returns resource.AmbiguousError instead of openstack DuplicateResource; a missing resource with ignore_missing false returns resource.NotFoundError instead of NotFoundException.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_service_provider",
       "source_fingerprint": "69ca4dd6b83529fa18fe385c3991c954d4970ac7a434ed908e5619aca02fa56c",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithGetHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers/{id}."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET OS-FEDERATION/service_providers/{id}, accepts every status 200-399, decodes the service_provider envelope or a root object into typed fields plus raw Body/Wire views, fails a non-object JSON body with resource.ResponseError and returns 404 as a native error with Get operation context.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderGetDecodesAndRejects",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/service_providers",
       "source_fingerprint": "acaa7528ee7361fda76afa109613a27de1bd0a8cf9f53c1a5b97a2166fed59c9",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListID",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListEnabled",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithListHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends GET OS-FEDERATION/service_providers with id, enabled, limit and marker query and local Body filters."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET OS-FEDERATION/service_providers with Accept: application/json, Requests-encoded server query id and is_enabled/enabled (client name preferred over server name), filters name, auth_url, description, relay_state_prefix and sp_url locally after the raw row cap, ignores unknown names, follows limit-driven marker continuation until an empty page, honors max_items as a limit hint and paginated=False, and wraps errors with List operation context.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderListQueryFiltersAndPaging",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Go follows Keystone's links {\"next\": url} dictionary, which the pinned Python paginator ignores, as the other SDK-owned identity lists do; top-level next, HTTP Link and limit-driven marker continuation match Python.",
+        "Local Body filters compare JSON values and distinguish booleans from numbers; Python compares type-converted attribute values (True == 1, int/bool conversion).",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion).",
+        "Go returns a lazy iterator (All collects it); Python returns a generator of Resources."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/update_service_provider",
       "source_fingerprint": "e5de5ea1ee6d1cf10d67cb7dd2df606b33532efbf788cd3460fa9eeb774d1ccf",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "identity/v3/python-parity-federation.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.WithUpdateHeaders"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 identity/v3/federation binds only OS-FEDERATION/mappings, so this SDK has no Go API for the OS-FEDERATION/service_providers route; an SDK-owned call would be needed. Python sends PATCH OS-FEDERATION/service_providers/{id} with the changed service_provider attributes."
-      ]
+      "contracts": [
+        {
+          "behavior": "Update sends PATCH OS-FEDERATION/service_providers/{id} with only the given declared attributes under service_provider, never id or name, sends nothing when no declared attribute is given, overlays the response on the seed and wraps errors with Update operation context.",
+          "tests": [
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderUpdatePatchesDirtyAttributes",
+            "identity/v3/serviceproviders/api_test.go:TestServiceProviderRejectsInvalidInputBeforeHTTP"
+          ]
+        }
+      ],
+      "documentation": [
+        "identity/v3/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
+        "Python update with name= rewrites the id Body key and therefore the request path; Go always targets the ID argument and ignores id and name attributes.",
+        "Python keeps an arbitrary value when two aliases of one Body key (for example is_enabled and enabled) are given; Go rejects conflicting alias values before HTTP.",
+        "Go header options are an explicit extension; SDK-owned auth and content headers are rejected before HTTP. Python base_path, microversion, allow_unknown_params and jmespath_filters keyword controls have no Go equivalent (Keystone v3 has no microversion)."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_load_balancer",
