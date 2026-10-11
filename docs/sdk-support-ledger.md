@@ -3044,3 +3044,27 @@ Go는 exact JSON decimal의 nonzero를 bool로 처리하므로1e-400도 true이�
 교차 검토에서 eager seed 사전 검증·LIST constructor bound 인자 충돌·Header hyphen alias·GET-only version override·모든 rejected HTTP 물리 오류 및 native retry 옵션의 reserved/version/framing 소유권을 보완했습니다. Cinder metadata Record는 기존 typed Scope의 엄격한 identity 정책을 보존하면서 별도 literal escaped scope를 공유합니다. Neutron core Find3개는 library-owned concrete Profile/Engine으로 기존39그룹과 공개 API를 유지하며 중복595줄을 공통화했습니다. 타입 참조를 callable로 집계하지 않고 선언별 실제 API/tests/docs를 연결합니다.
 
 초기 실패 실행은 지원 근거에서 제외합니다. Security fixture 이름 compile 오류, Cinder metadata literal ID와 strict Scope 충돌, Secret bytes의 RawMessage serialization 및 clean404 proof assertion은 실제 원인을 고친 뒤 해당 package full race와 최종 전체 gate로 확인했습니다. 기존 fixture·공개 Gophercloud testhelper·shared guarded REST/List/filter를 재사용했으며 새로운 HTTP harness를 만들지 않았습니다. 후속 mixed cursor·Cinder predicate export·Source Find policy/공통 List는 이 snapshot 이후 별도 진행 단위입니다.
+
+
+## 핵심 user 추가23개 서비스 검증
+
+2026-10-11에 추가23개 named API를 `go_mapping`으로 판정했습니다. 전체1,339→1,362/3,362, 핵심1,265→1,288/2,292이며 `supported`는0개입니다. 고정 catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`과 source pins를 유지했습니다. 기존 판정은 보존하고 이번23개에만 계약·차이·callable·문서를 반영했습니다.
+
+| 구현 단위 | named API | 새 계약 테스트 그룹 | 서비스 검증·사용법 |
+|---|---:|---:|---|
+| Cinder Group | 6 | 23 | full race PASS; [비교](../blockstorage/v3/groups-python.md) |
+| Cinder GroupSnapshot | 4 | 18 | full race PASS; [비교](../blockstorage/v3/group-snapshots-python.md) |
+| Nova 서버 검색 | 1 | 26 | full 서버 package race PASS; [비교](../compute/v2/server-find-python.md) |
+| Neutron AddressScope | 3 | 14 | full race PASS; [비교](../network/v2/address-scope-records-python.md) |
+| Neutron SubnetPool | 3 | 10 | full race PASS; [비교](../network/v2/subnet-pool-records-python.md) |
+| Neutron QoSPolicy | 2 | 32 | full race·기존 핵심3종 회귀 PASS; [비교](../network/v2/qos-policy-records-python.md) |
+| Barbican 목록 | 3 | 26 | container/order/secret full race PASS; [비교](../keymanager/v1/record-lists-python.md) |
+| Swift container 목록 | 1 | 17 | full race PASS; [비교](../objectstorage/v1/containers/listing-python.md) |
+
+공통 REST의 marker/offset 순회와 Source next truthiness hook, Neutron Source opt-in Find/List/Get, Cinder local filter·Barbican projector 재사용을 추가했습니다. 새 HTTP 서버나 transport framework를 만들지 않고 public Gophercloud testhelper·기존 `internal/testcloud`와 native fixtures를 재사용했습니다. 정상 clean HTTP 오류의 retry는 유지하며 이미 관측한 Read/Close·source·cancel 오류는 retry callback 전에 차단합니다.
+
+첫 검증·교차 검토에서 드러난 결함을 수정했습니다. Nova 정수 descriptor는 bool을 유지하고 Unicode decimal·큰 정수·float 변환을 기존 Source helper로 처리합니다. `cls` 생성자 충돌, Source LIST Accept, GET-only 버전 override와 원래 fallback LIST 버전, numeric next underflow, Cinder advertised offset과 marker 전환, Swift 실제 native rejection의 부분 receipt 및 terminal fault callback을 회귀로 확인했습니다. Python binary64와 Go exact-decimal 비교 차이와 일부 HTTP100..199의 Go 경계는 각 guide/review에 명시합니다.
+
+구현은 작은 code·test/repair·docs 커밋으로 저장했고 `6deb057e`까지 원격 push를 확인했습니다. 이후 통합·판정·진행표도 별도 커밋으로 저장합니다. 검증된 named 매핑은 generated transport 수·전체 Resource/session 동등성·실제 클라우드 acceptance와 다릅니다. SDK-R1/C1/S1·stock Backup metadata4개·alpha 기준은 미완료입니다.
+
+이번23개의 전체 불변 snapshot `make check`, 정확한 비교 Go main8개 외부 local-replace 빌드·Python AST는 진행 중입니다. 다음 검증 기록에 revision·Go 소스 SHA·실제 package 수·exit code를 남깁니다. 다음 wave4 worker의 미커밋 변경은 이번 snapshot 검사 대상에 포함하지 않습니다.
