@@ -52,11 +52,14 @@ type QueryPair struct{ Name, Wire string }
 type Profile struct {
 	Kind, Path, Singular, Plural string
 	IDKey, NameKey               string
-	Body, Headers                []Descriptor
-	Query                        []QueryPair
-	PreserveUnknownBody          bool
-	NameQueryHint                bool
-	VersionedPath                string
+	// AlternateIDKey supplies a physical list marker only when IDKey is absent.
+	// An explicit primary null/false/empty value retains precedence.
+	AlternateIDKey      string
+	Body, Headers       []Descriptor
+	Query               []QueryPair
+	PreserveUnknownBody bool
+	NameQueryHint       bool
+	VersionedPath       string
 	// SourceFindPolicy opts new leaf profiles into ordered constructor aliases,
 	// CPython float truthiness and GET-only find microversion overrides.
 	// Existing bindings keep their reviewed baseline until explicitly migrated.
@@ -298,9 +301,9 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 			}
 		}
 	}
-	// Source's Computed location cannot be supplied by an unknown wire member.
-	// These profiles own a null connection view; baseline bindings retain their
-	// previously reviewed treatment of response extensions.
+	// Source profiles expose the SDK-owned connection view as null, including
+	// list-row computed kwargs; raw extensions stay in Wire. Baseline bindings
+	// retain their previously reviewed treatment of response extensions.
 	if _, exists := body["location"]; e.profile.SourceFindPolicy || !exists {
 		body["location"] = json.RawMessage("null")
 	}
@@ -374,7 +377,10 @@ func (e *Engine) findMarker(value *Record) (string, error) {
 	if value == nil || value.Wire == nil {
 		return "", findInvalid("list marker requires a response identity")
 	}
-	raw := value.Wire.Body[e.profile.IDKey]
+	raw, present := value.Wire.Body[e.profile.IDKey]
+	if !present && e.profile.AlternateIDKey != "" {
+		raw = value.Wire.Body[e.profile.AlternateIDKey]
+	}
 	if len(raw) == 0 {
 		return "", findInvalid("list marker requires a response identity")
 	}

@@ -252,3 +252,72 @@ func TestSourceComputedLocationIgnoresResponseExtensionAndKeepsWire(t *testing.T
 		}
 	}
 }
+
+func TestAlternatePhysicalMarkerIsOptInAndPrimaryPresenceWins(t *testing.T) {
+	cases := []struct {
+		name, row, want string
+		alternate       bool
+	}{
+		{"opt-in", `{"type":"alternate"}`, "alternate", true},
+		{"baseline", `{"type":"alternate"}`, "", false},
+		{"primary", `{"id":"primary","type":"alternate"}`, "primary", true},
+		{"null", `{"id":null,"type":"alternate"}`, "", true},
+		{"empty", `{"id":"","type":"alternate"}`, "", true},
+		{"false", `{"id":false,"type":"alternate"}`, "False", true},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			client := cloud.Client("network", "/neutron/v2.0/")
+			profile := policyProfile(true)
+			if tc.alternate {
+				profile.AlternateIDKey = "type"
+			}
+			profile.Body[0].Alias = "type"
+			profile.Query = append(profile.Query, neutronfind.QueryPair{Name: "limit", Wire: "limit"})
+			calls := 0
+			body := `{"records":[` + tc.row + `]}`
+			cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+				calls++
+				if calls == 1 {
+					if req.URL.Query().Get("marker") != "" {
+						t.Fatal(req.URL)
+					}
+					return policyWire(200, body), nil
+				}
+				if calls != 2 || tc.want == "" || req.URL.Query().Get("marker") != tc.want {
+					t.Fatal("alternate marker changed primary presence", req.URL, calls, tc.want)
+				}
+				return policyWire(200, `{"records":[]}`), nil
+			})
+			engine, err := neutronfind.New(context.Background(), client, profile, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rows := 0
+			var got error
+			for value, cause := range engine.List(context.Background(), neutronfind.Options{Query: map[string]json.RawMessage{"limit": json.RawMessage("1")}}) {
+				if cause != nil {
+					got = cause
+					break
+				}
+				if value != nil {
+					rows++
+				}
+			}
+			if rows != 1 {
+				t.Fatal(rows, got)
+			}
+			if tc.want != "" {
+				if got != nil || calls != 2 {
+					t.Fatal(got, calls)
+				}
+				return
+			}
+			var proof *resource.ResponseError
+			if !errors.Is(got, resource.ErrInvalidOption) || !errors.As(got, &proof) || calls != 1 || proof.StatusCode != 200 || string(proof.Body) != body {
+				t.Fatal(got, calls, proof)
+			}
+		})
+	}
+}
