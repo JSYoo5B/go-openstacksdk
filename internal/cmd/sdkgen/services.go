@@ -46,7 +46,7 @@ func registryField(path string) string {
 		"metadefproperties":    "MetadefProperties",
 		"metadeftags":          "MetadefTags",
 		"metadefresourcetypes": "MetadefResourceTypes",
-		"nodegroups":           "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo", "profiletypes": "ProfileTypes", "policytypes": "PolicyTypes", "clusterpolicies": "ClusterPolicies", "clusterattributes": "ClusterAttributes", "vmoves": "VMoves", "secretstores": "SecretStores", "secretconsumers": "SecretConsumers", "secretacls": "SecretACLs",
+		"nodegroups":           "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo", "profiletypes": "ProfileTypes", "policytypes": "PolicyTypes", "clusterpolicies": "ClusterPolicies", "clusterattributes": "ClusterAttributes", "vmoves": "VMoves", "secretstores": "SecretStores", "secretconsumers": "SecretConsumers", "secretacls": "SecretACLs", "identityproviders": "IdentityProviders", "federationprotocols": "FederationProtocols", "serviceproviders": "ServiceProviders",
 		"apiversions": "APIVersions", "servergroups": "ServerGroups", "keypairs": "KeyPairs", "secgroups": "SecurityGroups", "instanceactions": "InstanceActions", "remoteconsoles": "RemoteConsoles", "attachinterfaces": "AttachInterfaces", "volumeattach": "VolumeAttachments", "availabilityzones": "AvailabilityZones", "quotasets": "QuotaSets", "quotaclasssets": "QuotaClassSets",
 		"extensions": "", "layer3": "", "bgp": "BGP", "qos": "QoS", "fwaas_v2": "Firewall", "vpnaas": "VPN", "taas": "TaaS", "networkipavailabilities": "NetworkIPAvailabilities", "rbacpolicies": "RBACPolicies", "subnetpools": "SubnetPools", "addressscopes": "AddressScopes", "floatingips": "FloatingIPs", "extraroutes": "ExtraRoutes", "portforwarding": "PortForwarding", "bgpvpns": "BGPVPNs", "attributestags": "AttributeTags", "tapmirrors": "TapMirrors", "addressgroups": "AddressGroups", "endpointgroups": "EndpointGroups", "siteconnections": "SiteConnections", "ipsecpolicies": "IPsecPolicies", "ikepolicies": "IKEPolicies", "ruletypes": "RuleTypes",
 		"flavorprofiles": "FlavorProfiles", "l7policies": "L7Policies", "l7rules": "L7Rules", "loadbalancers": "LoadBalancers", "volumetypes": "VolumeTypes", "volumetransfers": "VolumeTransfers", "volumegroups": "VolumeGroups", "group_types": "GroupTypes", "groupsnapshots": "GroupSnapshots", "consistencygroups": "ConsistencyGroups", "consistencygroupsnapshots": "ConsistencyGroupSnapshots", "recordsets": "RecordSets", "imagedata": "ImageData", "imageimport": "ImageImport", "roleassignments": "RoleAssignments", "registeredlimits": "RegisteredLimits", "applicationcredentials": "ApplicationCredentials", "domainconfigs": "DomainConfigs", "domainroles": "DomainRoles", "projectroles": "ProjectRoles", "userpassword": "UserPassword", "trusts": "Trusts", "portgroups": "PortGroups", "bulkdelete": "BulkDelete", "softwareconfigs": "SoftwareConfigs", "softwaredeployments": "SoftwareDeployments", "stacktemplates": "StackTemplates", "sharetypes": "ShareTypes", "sharenetworks": "ShareNetworks", "shareinstances": "ShareInstances", "sharereplicas": "ShareReplicas", "sharesnapshots": "ShareSnapshots", "sharegroups": "ShareGroups", "sharegroup_types": "ShareGroupTypes", "sharegroup_snapshots": "ShareGroupSnapshots", "securityservices": "SecurityServices", "shareaccessrules": "ShareAccessRules", "resourceproviders": "ResourceProviders", "resourceclasses": "ResourceClasses", "allocationcandidates": "AllocationCandidates", "crontriggers": "CronTriggers", "clustertemplates": "ClusterTemplates", "clusterstacks": "ClusterStacks",
@@ -118,9 +118,13 @@ func (g *generator) generateServices() error {
 		groups["blockstorage/v3"]["consistencygroups"] = true
 		groups["blockstorage/v3"]["consistencygroupsnapshots"] = true
 	}
-	// Keystone OS-EP-FILTER endpoint groups have no pinned native package.
+	// Keystone OS-EP-FILTER endpoint groups and OS-FEDERATION providers and
+	// protocols have no pinned native package.
 	if groups["identity/v3"] != nil {
 		groups["identity/v3"]["endpointgroups"] = true
+		groups["identity/v3"]["identityproviders"] = true
+		groups["identity/v3"]["federationprotocols"] = true
+		groups["identity/v3"]["serviceproviders"] = true
 	}
 	// Finite owned waits extend Barbican without inventing native operations.
 	if groups["keymanager/v1"] != nil {

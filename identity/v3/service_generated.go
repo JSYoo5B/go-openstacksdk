@@ -11,20 +11,23 @@ import (
 	resource6 "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups"
 	resource7 "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints"
 	resource8 "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation"
-	resource9 "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
-	resource10 "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits"
-	resource11 "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1"
-	resource12 "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit"
-	resource13 "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
-	resource14 "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints"
-	resource15 "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
-	resource16 "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
-	resource17 "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
-	resource18 "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
-	resource19 "github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
-	resource20 "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens"
-	resource21 "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts"
-	resource22 "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
+	resource11 "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders"
+	resource12 "github.com/JSYoo5B/go-openstacksdk/identity/v3/limits"
+	resource13 "github.com/JSYoo5B/go-openstacksdk/identity/v3/oauth1"
+	resource14 "github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit"
+	resource15 "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
+	resource16 "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints"
+	resource17 "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
+	resource18 "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions"
+	resource19 "github.com/JSYoo5B/go-openstacksdk/identity/v3/registeredlimits"
+	resource20 "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
+	resource21 "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders"
+	resource22 "github.com/JSYoo5B/go-openstacksdk/identity/v3/services"
+	resource23 "github.com/JSYoo5B/go-openstacksdk/identity/v3/tokens"
+	resource24 "github.com/JSYoo5B/go-openstacksdk/identity/v3/trusts"
+	resource25 "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -40,20 +43,23 @@ type Service struct {
 	EndpointGroups         *resource6.API
 	Endpoints              *resource7.API
 	Federation             *resource8.API
-	Groups                 *resource9.API
-	Limits                 *resource10.API
-	Oauth1                 *resource11.API
-	Osinherit              *resource12.API
-	Policies               *resource13.API
-	Projectendpoints       *resource14.API
-	Projects               *resource15.API
-	Regions                *resource16.API
-	RegisteredLimits       *resource17.API
-	Roles                  *resource18.API
-	Services               *resource19.API
-	Tokens                 *resource20.API
-	Trusts                 *resource21.API
-	Users                  *resource22.API
+	FederationProtocols    *resource9.API
+	Groups                 *resource10.API
+	IdentityProviders      *resource11.API
+	Limits                 *resource12.API
+	Oauth1                 *resource13.API
+	Osinherit              *resource14.API
+	Policies               *resource15.API
+	Projectendpoints       *resource16.API
+	Projects               *resource17.API
+	Regions                *resource18.API
+	RegisteredLimits       *resource19.API
+	Roles                  *resource20.API
+	ServiceProviders       *resource21.API
+	Services               *resource22.API
+	Tokens                 *resource23.API
+	Trusts                 *resource24.API
+	Users                  *resource25.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
@@ -67,20 +73,23 @@ func New(client *gophercloud.ServiceClient) *Service {
 		EndpointGroups:         resource6.New(client),
 		Endpoints:              resource7.New(client),
 		Federation:             resource8.New(client),
-		Groups:                 resource9.New(client),
-		Limits:                 resource10.New(client),
-		Oauth1:                 resource11.New(client),
-		Osinherit:              resource12.New(client),
-		Policies:               resource13.New(client),
-		Projectendpoints:       resource14.New(client),
-		Projects:               resource15.New(client),
-		Regions:                resource16.New(client),
-		RegisteredLimits:       resource17.New(client),
-		Roles:                  resource18.New(client),
-		Services:               resource19.New(client),
-		Tokens:                 resource20.New(client),
-		Trusts:                 resource21.New(client),
-		Users:                  resource22.New(client),
+		FederationProtocols:    resource9.New(client),
+		Groups:                 resource10.New(client),
+		IdentityProviders:      resource11.New(client),
+		Limits:                 resource12.New(client),
+		Oauth1:                 resource13.New(client),
+		Osinherit:              resource14.New(client),
+		Policies:               resource15.New(client),
+		Projectendpoints:       resource16.New(client),
+		Projects:               resource17.New(client),
+		Regions:                resource18.New(client),
+		RegisteredLimits:       resource19.New(client),
+		Roles:                  resource20.New(client),
+		ServiceProviders:       resource21.New(client),
+		Services:               resource22.New(client),
+		Tokens:                 resource23.New(client),
+		Trusts:                 resource24.New(client),
+		Users:                  resource25.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

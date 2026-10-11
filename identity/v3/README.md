@@ -45,6 +45,8 @@ openstacksdk cloud 계층의 사용자·프로젝트·그룹·역할·도메인�
 
 Keystone OS-EP-FILTER endpoint group의 생성·조회·수정·삭제·목록·find와 project·endpoint 연결은 SDK 소유 [`EndpointGroups`](endpointgroups/README.md)에 설명합니다.
 
+Keystone OS-FEDERATION identity provider·protocol·service provider는 SDK 소유 [`IdentityProviders`](identityproviders/README.md), [`FederationProtocols`](federationprotocols/README.md), [`ServiceProviders`](serviceproviders/README.md)에 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -75,7 +77,9 @@ _ = value
 | `EndpointGroups` | [endpointgroups](endpointgroups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Endpoints` | [endpoints](endpoints/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Federation` | [federation](federation/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `FederationProtocols` | [federationprotocols](federationprotocols/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Groups` | [groups](groups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `IdentityProviders` | [identityproviders](identityproviders/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Limits` | [limits](limits/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Oauth1` | [oauth1](oauth1/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Osinherit` | [osinherit](osinherit/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
@@ -85,6 +89,7 @@ _ = value
 | `Regions` | [regions](regions/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `RegisteredLimits` | [registeredlimits](registeredlimits/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Roles` | [roles](roles/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `ServiceProviders` | [serviceproviders](serviceproviders/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Services` | [services](services/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Tokens` | [tokens](tokens/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Trusts` | [trusts](trusts/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |

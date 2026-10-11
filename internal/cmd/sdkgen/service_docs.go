@@ -190,6 +190,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("domain·group·project·user·role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 Python Proxy 대응과 미해결 목록은 [Python/Go 사용자·role 할당 비교](python-parity-users.md)에 설명합니다.\n\n")
 		out.WriteString("openstacksdk cloud 계층의 사용자·프로젝트·그룹·역할·도메인·서비스·endpoint helper(`conn.create_user` 등)별 Go 대응과 미해결 사유는 [identity cloud helper Python 대응](../python-cloud-parity.md)에 정리했습니다.\n\n")
 		out.WriteString("Keystone OS-EP-FILTER endpoint group의 생성·조회·수정·삭제·목록·find와 project·endpoint 연결은 SDK 소유 [`EndpointGroups`](endpointgroups/README.md)에 설명합니다.\n\n")
+		out.WriteString("Keystone OS-FEDERATION identity provider·protocol·service provider는 SDK 소유 [`IdentityProviders`](identityproviders/README.md), [`FederationProtocols`](federationprotocols/README.md), [`ServiceProviders`](serviceproviders/README.md)에 설명합니다.\n\n")
 	case "compute/v2":
 		out.WriteString("`Servers.FindRecord`는 ID/name 검색과 Source 서버·중첩 리소스 필드를 제공합니다. [서버 검색 Python/Go 비교](server-find-python.md)에 기본 missing·단계별 버전·HTTP 증거를 설명합니다.\n\n")
 		out.WriteString("`Servers.ClearPassword/Restore/LockWithOptions/UnshelveWithOptions`와 직접 fixed/floating IP action은 Source 본문·선택 인자를 제공합니다. [서버 user action 비교](servers/python-user-actions.md)에 버전 상한과 host admin 조건을 설명합니다.\n\n")
