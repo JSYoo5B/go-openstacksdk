@@ -37,6 +37,8 @@ OAuth1 consumer·위임 흐름·access token과 EC2·S3 token의 native 호출�
 
 `Policies`의 생성·조회·수정·삭제와 federation mapping 삭제가 Python Proxy와 어떻게 대응하는지, identity provider·protocol·service provider 경로가 왜 미해결인지는 [Python policy·federation 대응](python-parity-federation.md)에 정리했습니다.
 
+endpoint·region·service·limit·registered limit·project endpoint의 openstacksdk Proxy 메서드별 Go 대응과 endpoint group·domain config 등 미해결 사유는 [identity v3 catalog Python 대응](python-parity-catalog.md)에 정리했습니다.
+
 ## Go 사용
 
 ```go
