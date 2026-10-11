@@ -86138,6 +86138,729 @@
       "remaining": [
         "Gophercloud v2.15.0 has no binding for /sfc/service_graphs (networking-sfc service graph) and this SDK exposes no Go API for it, so an SDK-owned call would be needed. Python sends DELETE /sfc/service_graphs/{id} and ignores 404 by default."
       ]
+    },
+    {
+      "operation": "python:block_storage/v3/services",
+      "source_fingerprint": "05c18ae79b540084ae7a6366318dd25776ed77e66ffff58abd749eba9fa94695",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListQuery"
+      ],
+      "contracts": [
+        {
+          "behavior": "Services.List sends GET os-services with no query by default, binary/host from ListOpts and limit/marker through WithListQuery exactly as the Service QueryParameters do, carries the configured microversion header, and decodes the service fields Python exposes.",
+          "tests": [
+            "blockstorage/v3/services/python_parity_test.go:TestPythonServicesListMatchesProxyQuery"
+          ]
+        },
+        {
+          "behavior": "Body attributes that Python filters locally (status, zone, ...) are applied by the Go caller over the unfiltered GET os-services rows.",
+          "tests": [
+            "blockstorage/v3/services/python_parity_test.go:TestPythonServicesListLocalFilterIsCallerSide"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python sends only binary, host, limit and marker as server query, filters other Service Body attributes locally and drops unknown keys; Go sends every ListOpts/WithListQuery value to the server and leaves local filtering to the caller.",
+        "Python negotiates min(3.32, server maximum) for the list; Go sends the configured client microversion.",
+        "Python follows services_links if present; Go reads a single page (Cinder does not paginate os-services).",
+        "Go Service has no backend_state field and no name alias for binary, and decodes updated_at only in the zone-less layout; Python returns Service resources with every Body attribute."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/backend_pools",
+      "source_fingerprint": "23c2cbe576444a9f1477ad02d71908f41277e0142e25a29611a21b2e52d1c014",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "SchedulerStats.List with WithListQuery(\"detail\", \"True\") sends Python's exact GET scheduler-stats/get_pools?detail=True (ListOpts.Detail sends detail=true, the Go default omits detail), adds limit/marker as query, and decodes pool name and typed capabilities.",
+          "tests": [
+            "blockstorage/v3/schedulerstats/python_parity_test.go:TestPythonBackendPoolsDetailQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python always sends detail=True from Pools.base_path; the Go default omits detail and returns name-only pools unless WithListQuery(\"detail\", \"True\") or ListOpts.Detail (lowercase true) is given.",
+        "Python sends only limit and marker as server query, filters name/capabilities locally and drops tenant_id; Go ListOpts.TenantID sends tenant_id to the server.",
+        "Python keeps the whole capabilities dict; Go Capabilities decodes only declared fields and converts infinite/unknown capacity strings.",
+        "Pools has no _max_microversion so Python uses the session default; Go sends the configured client microversion. Go reads a single page."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/extensions",
+      "source_fingerprint": "2fe194e0e42c9f2c5bc2c805fa8520d6bae6a099b1b5bed85c53f0e6f61ba794",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/common/extensions.New",
+        "github.com/JSYoo5B/go-openstacksdk/common/extensions.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3.Service.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "common/extensions built on the Cinder service RawClient sends GET {cinder endpoint}/extensions and decodes alias, name, description, links and updated like the Python Extension resource.",
+          "tests": [
+            "blockstorage/v3/python_parity_test.go:TestPythonCinderExtensionsList"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [
+        "The Cinder service struct has no extensions field; Go callers build common/extensions.New from Service.RawClient().",
+        "Python updated_at maps to the Go Updated string; Go also decodes namespace.",
+        "Extension has no _max_microversion so Python uses the session default; Go sends the configured client microversion and reads a single page."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/manage_volume",
+      "source_fingerprint": "6023b9cd161e53cc6d088381565dcfccd1ffeb6104051db20363fbaf570b8d7f",
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ManageExisting",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3.Service.RawClient"
+      ],
+      "contracts": [
+        {
+          "behavior": "ManageExisting with every Python argument set posts the same {\"volume\": {...}} body to manageable_volumes, carries a 3.71 header when the client is set to Python's fixed Volume._max_microversion, and decodes the 202 volume.",
+          "tests": [
+            "blockstorage/v3/manageablevolumes/python_parity_test.go:TestPythonManageVolumeRequest"
+          ]
+        },
+        {
+          "behavior": "With only host and ref, Go omits the null name/description/volume_type/availability_zone/metadata and false bootable that Python sends, and an explicit null for a typed key is rejected before HTTP.",
+          "tests": [
+            "blockstorage/v3/manageablevolumes/python_parity_test.go:TestPythonManageVolumeRequest"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python always sends name, description, volume_type, availability_zone and metadata (null when unset) and bootable=false; Go omits empty values, which Cinder reads as the same defaults, and cannot send an explicit null for these typed keys.",
+        "Go Ref is map[string]string, so non-string ref values that Python's dict accepts cannot be sent.",
+        "Python fixes the microversion header at 3.71 and falls back to os-volume-manage when the server lacks 3.8; Go sends the configured client microversion (copy RawClient with Microversion 3.71 to match) and has no legacy path.",
+        "Python returns a Volume resource from the response; Go returns the Gophercloud volumes.Volume whose timestamps decode only in the zone-less layout."
+      ],
+      "remaining": []
+    },
+    {
+      "operation": "python:block_storage/v3/find_service",
+      "source_fingerprint": "bae630a2fa248c000f7a06354e609c553c299ad4db040f6a3b0a6d28f1a174b8",
+      "status": "unresolved",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithListOptions"
+      ],
+      "contracts": [
+        {
+          "behavior": "Services.List with ListOpts.Host sends the same GET os-services?host=... list phase that find_service sends, and matching by binary name is left to the caller.",
+          "tests": [
+            "blockstorage/v3/services/python_parity_test.go:TestPythonServiceFindListPhase"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [
+        "Python Service.find skips the GET-by-ID phase and goes directly to the list; Go Services.List can send that list request but the caller must match rows."
+      ],
+      "remaining": [
+        "Go has no helper that lists os-services with the Python query, matches name_or_id against the ID or binary name with the host filter, raises on duplicates and returns nil by default for ignore_missing=True."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/enable_service",
+      "source_fingerprint": "eac5ef42ec17207d8f51610c41d6362ec011f07a05bfbe9ca53e6391e3000bd4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/enable with the Service binary and host and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/disable_service",
+      "source_fingerprint": "315d23d7cc4c920bf064808a3cc86a20231aafc993cabb493af3c73d57669b96",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/disable, or os-services/disable-log-reason with disabled_reason when a reason is given and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/thaw_service",
+      "source_fingerprint": "306973574d6c433d760ff9782990032466a5fddd1cb49d6e520279d1c85ac2aa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/thaw with the service host and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/freeze_service",
+      "source_fingerprint": "b98a2289cd3a66971c0cdd647b9478068e377e9b018fdcc499be5e5d179a1c08",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/freeze with the service host and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/failover_service",
+      "source_fingerprint": "13e1fde5d545bbaba52a1d929ef6e8c423c706e65fefe33f81b3c17649c69d8d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/failover (os-services/failover_host below 3.26) with host and optional cluster/backend_id and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/set_service_log_levels",
+      "source_fingerprint": "f2b9ea036a858682a77e07d7654f8451c7ec6b26e89a6eae7ecaf8c2709b7055",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/set-log at microversion 3.32+ with level, binary (empty string default), server and prefix and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_service_log_levels",
+      "source_fingerprint": "b7311f57f6e89c589d757799442000d522bd06333b5b3f993f98ba15311f47c4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-services/get-log at microversion 3.32+ returning log_levels entries and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/cleanup_service_workers",
+      "source_fingerprint": "40d49a8fdba75f95bbb2cdf06322aaf1520bc1ded3100372df7e73b1e09e160b",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT workers/cleanup at microversion 3.24+ with the eight filter keys (is_up defaults to false) and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_capabilities",
+      "source_fingerprint": "7c7a8f519d41b63569c1900d11cc74fb5818e13518885b3c623b19a0846dc063",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET capabilities/{host} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/manageable_volumes",
+      "source_fingerprint": "d73dda398aaf801c5a0bf6779abe654e151b5142eb38641ff5b835088ce6944e",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET manageable_volumes (or manageable_volumes/detail when details=True) with host/cluster/marker/limit/offset/sort query and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/manageable_snapshots",
+      "source_fingerprint": "6331f38bbc12d78821697fb51e2911c8203efc41ffa0f927bada3e06ddebb05a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET manageable_snapshots (or manageable_snapshots/detail when details=True) with host/cluster/marker/limit/offset/sort query and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/manage_snapshot",
+      "source_fingerprint": "8509664bb77d3d7db5ae6bc374e52a0b96eaa458fa5549a83920ac1235167642",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST manageable_snapshots (os-snapshot-manage below 3.8) with a snapshot envelope at the fixed 3.65 header and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/unmanage_snapshot",
+      "source_fingerprint": "ca008fa9004642d6a70d0b02c17406313d616cc736bd070633140f1e38aaa217",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST snapshots/{id}/action with {\"os-unmanage\": null} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/summary",
+      "source_fingerprint": "7ed92e7ebe6216f4da46321c1e770e00f00d0d7c646054558b9a84efeb089943",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET volumes/summary?all_tenants=... at microversion 3.12+ reading the volume-summary envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_cluster",
+      "source_fingerprint": "eb836a8a30bc0ed95a8985d87fe857380b74940db32873c80e7f335d0c679dc7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET clusters/{name} at microversion 3.7+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/find_cluster",
+      "source_fingerprint": "9902179a37ad28b83c134153368679331cd50c6c15916c7551eb7ad990d0a4df",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET clusters/{name} followed by the clusters/detail list fallback and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/clusters",
+      "source_fingerprint": "fb5373c6e203a9273b96bf48a21ffe1ab69b3524640c0c13f9f94b56cbaae31d",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET clusters/detail (details=True default) or clusters with the Cluster QueryParameters and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/enable_cluster",
+      "source_fingerprint": "5be2dbacfdfb0425d6e47a477087d1a8780a8728f0c36aeab4bf83d66608debe",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT clusters/enable with name and optional binary and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/disable_cluster",
+      "source_fingerprint": "dcc1a37190b5595fb033aa6c3a3c3eec23e1b9339e371e6290662906cd0346aa",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT clusters/disable with name, optional binary and disabled_reason and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_group_type",
+      "source_fingerprint": "52258650e38b2779a7f0e8e1ce04b34f956b97c963a510766bc252077bd6f9e5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET group_types/{id} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/find_group_type",
+      "source_fingerprint": "6f2c064201e5577f03d450680e1d95649c7e40f60dc0bd42071d1311522bed5a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET group_types/{id} followed by the group_types list fallback, both with is_public=none and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/group_types",
+      "source_fingerprint": "f3c6f9875df1696f76c32122d4f4aa4b71eb5dab06052869beed0847a17bd3ac",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET group_types with the GroupType QueryParameters and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/create_group_type",
+      "source_fingerprint": "2f868c773b8251cbac23740943e1b282db6ec244aa4e7a72437323181e996d8a",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST group_types with a group_type envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_group_type",
+      "source_fingerprint": "160a5b982057430f59dcbaeb8d297a174ddb283ea3b60d9be3444650f740820c",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT group_types/{id} with the changed group_type attributes and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_group_type",
+      "source_fingerprint": "d10109f1fa6a6e33e638554b6c51f29359e94a73dc484282c30c0c7bfb71104f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE group_types/{id} ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/fetch_group_type_group_specs",
+      "source_fingerprint": "830a3ec8563ed6312cee311b4280c8be46c7a2f4426c4bb898061f23955088f8",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET group_types/{id}/group_specs and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/create_group_type_group_specs",
+      "source_fingerprint": "50bc67ddb96ea33ef4f96497e81276eba2c9848ed8bdd6103db27a34b3e77829",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST group_types/{id}/group_specs with a group_specs envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_group_type_group_specs_property",
+      "source_fingerprint": "d755660bced0e7b99809b0e5a1c7d4074edbb9314ca7da31a66e18ce57669a00",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET group_types/{id}/group_specs/{prop} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_group_type_group_specs_property",
+      "source_fingerprint": "79afe7282d15d4eba954117bb5ac5cf063beff81c4cec02603f6f84d5301406f",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT group_types/{id}/group_specs/{prop} with {prop: val} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/delete_group_type_group_specs_property",
+      "source_fingerprint": "8a732e6d9bb09b70918f57606077c14f11de5980e9c8fedc30ab8480f923b035",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE group_types/{id}/group_specs/{prop} ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/default_types",
+      "source_fingerprint": "f4730d2b2b455e0393a261b96b1da484193bb6b908f93179b6bfafef1085e3f7",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET default-types at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/show_default_type",
+      "source_fingerprint": "452e02715ab4bba4f42faa004bf037f91f1c75b68e89a7a7637aa647822b28f3",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET default-types/{project_id} at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/set_default_type",
+      "source_fingerprint": "95f8d260203defa8e2e3af7a064d995d3ab81bbb0f294b7c77d5bc399af168a4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT default-types/{project_id} with {\"default_type\": {\"volume_type\": ...}} at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/unset_default_type",
+      "source_fingerprint": "98fb0b9d7442c5e96fec1fa4d9164c0872e0fbb2b93aac2a04220b9515220396",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for DELETE default-types/{project_id} at microversion 3.67+ ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/get_quota_class_set",
+      "source_fingerprint": "b0b28cbbbc37985786d74a70b5be3c6ab04b3a70018733cd234a21103e4f5900",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET os-quota-class-sets/{id} (default id 'default') and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/update_quota_class_set",
+      "source_fingerprint": "486978c3249607f14de9d2020ce43edc02950786e27609650d872a075c0351a4",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for PUT os-quota-class-sets/{id} with the changed quota_class_set attributes and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/resource_filters",
+      "source_fingerprint": "2f8b45563cc4e29201dffb06babf5d4b040b1b042fa3f8b02bb6b69fd9ba9ac0",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for GET resource_filters?resource=... at microversion 3.33+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/reset_group_status",
+      "source_fingerprint": "4db98fdf8f1822f32813a6ccbc55d26e8b621351f9ff5af4b5a536e7da4c7a68",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST groups/{id}/action with {\"reset_status\": {\"status\": ...}} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/reset_group_state",
+      "source_fingerprint": "181ef6af778ee1f1252641fe18b310f0c470be731b1a76b9689ad46f50d169c5",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST groups/{id}/action with {\"reset_status\": {\"status\": ...}} (deprecated alias of reset_group_status) and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/reset_group_snapshot_status",
+      "source_fingerprint": "e0d48e7e9626c75f61a265ad126431a1bcce569a526d6eb8701263f6c6c40deb",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST group_snapshots/{id}/action with {\"reset_status\": {\"status\": ...}} and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
+    },
+    {
+      "operation": "python:block_storage/v3/reset_group_snapshot_state",
+      "source_fingerprint": "ea84a2bb19b3935f5cc1f65c9470886b364ff7b15edcdcb86dac0f2bd929e2ad",
+      "status": "unresolved",
+      "go_api": [],
+      "contracts": [],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md"
+      ],
+      "differences": [],
+      "remaining": [
+        "Gophercloud v2.15.0 has no binding for POST group_snapshots/{id}/action with {\"reset_status\": {\"status\": ...}} (deprecated alias of reset_group_snapshot_status) and this SDK has no owned call for it, so an SDK-owned call would be needed."
+      ]
     }
   ]
 }
