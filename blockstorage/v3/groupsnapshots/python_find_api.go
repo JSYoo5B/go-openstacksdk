@@ -130,6 +130,11 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		return nil, recordWrap(ctx, op, err)
 	}
 	getPhase, listPhase := p.findPhase(), p.findPhase()
+	// Only a member rejection belongs to the identity fallback policy. Policy,
+	// constructor and version discovery errors remain preparation failures.
+	if err := errors.Join(getPhase.prepare(cfg.Microversion, cfg.Headers, cfg.Location, false), p.guard(ctx)); err != nil {
+		return getPhase.proof(findErrorReceipt(err)), recordWrap(ctx, op, err)
+	}
 	var failure *GroupSnapshotRecord
 	listStarted := false
 	collection := resource.NewCollection(resource.Adapter[GroupSnapshotRecord]{
@@ -142,7 +147,7 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		},
 		Name: func(v *GroupSnapshotRecord) string { return findText(v, "name") },
 		Get: func(_ context.Context, id string) (*GroupSnapshotRecord, error) {
-			v, err := getPhase.getRecord(id, seed, query, RecordReadOpts{Headers: cfg.Headers, Microversion: cfg.Microversion, Location: cfg.Location})
+			v, err := getPhase.getPrepared(id, seed, query)
 			if err != nil {
 				failure = v
 				if failure == nil {

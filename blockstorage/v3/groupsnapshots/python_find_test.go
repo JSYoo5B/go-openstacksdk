@@ -483,3 +483,20 @@ func TestPythonGroupSnapshotFindDeclaredLocationAndEvidenceDoNotAlias(t *testing
 		t.Fatal(value)
 	}
 }
+
+func TestPythonGroupSnapshotFindDiscoveryRejectionNeverBecomesMemberFallback(t *testing.T) {
+	for _, code := range []int{400, 403} {
+		body := `{"discovery":"actual denied"}`
+		api, calls := snapshotAPI(t, "", func(r *http.Request) *http.Response {
+			if r.URL.Path != "/cinder/v3/" {
+				t.Fatal("discovery rejection reached member/list", r.URL)
+			}
+			return snapshotWire(code, body)
+		})
+		value, err := api.FindRecord(context.Background(), "data")
+		var native gophercloud.ErrUnexpectedResponseCode
+		if value == nil || value.Resource != nil || value.Wire != nil || value.StatusCode != code || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "actual-group-snapshot" || !errors.As(err, &native) || native.Actual != code || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "actual-group-snapshot" || len(*calls) != 1 || (*calls)[0].path != "/cinder/v3/" || len(value.Discovery) != 0 {
+			t.Fatal(code, value, err, native, *calls)
+		}
+	}
+}

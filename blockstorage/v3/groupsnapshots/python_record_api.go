@@ -234,6 +234,12 @@ func (p *recordPrepared) getRecord(id string, seed map[string]json.RawMessage, q
 	if err := errors.Join(p.prepare(cfg.Microversion, cfg.Headers, cfg.Location, false), p.guard(p.ctx)); err != nil {
 		return nil, err
 	}
+	return p.getPrepared(id, seed, query)
+}
+
+// getPrepared exchanges only a member GET. Find performs policy/discovery
+// before its identity engine so a rejected discovery is never member absence.
+func (p *recordPrepared) getPrepared(id string, seed map[string]json.RawMessage, query url.Values) (*GroupSnapshotRecord, error) {
 	target := p.source.Client.ServiceURL("group_snapshots", url.PathEscape(id))
 	if len(query) != 0 {
 		target += "?" + query.Encode()
