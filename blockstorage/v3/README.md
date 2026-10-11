@@ -19,6 +19,8 @@ Gophercloud v2.15.0의 blockstorage/v3 API를 하나의 인증된 서비스 객�
 
 서버·볼륨 자동 조회는 `resource.WithIdentityFindDetails(false)`로 fallback summary 목록을, `resource.WithIdentityFindAllProjects(true)`로 목록의 cross-project 검색을 선택합니다. 기본값은 details=true·all_projects=false이며 GET은 바꾸지 않습니다. 명시적 AllProjects와 raw all_tenants query의 충돌은 요청 전에 거부합니다.
 
+`Groups`의 [replication action](group-replication-python.md), `ConsistencyGroups`의 [legacy group API](consistency-groups-python.md), `ConsistencyGroupSnapshots`의 [legacy snapshot API](consistency-group-snapshots-python.md)는 구체적 함수 옵션과 실제 응답 증거를 제공합니다. Source 요청 결함·stock 기본값·버전·권한 차이는 각 가이드에 기록합니다.
+
 `Volumes.MetadataIn(ctx, ref)`와 `Snapshots.MetadataIn(ctx, ref)`는 ID 또는 이름을 한 번 해석해 Get·Merge·Replace·DeleteKeys를 같은 방식으로 제공합니다. Merge는 POST 병합, Replace는 PUT 전체 교체이며 nil/빈 map도 명시적 metadata 객체를 보냅니다. DeleteKeys의 nil은 전체 삭제, 빈 slice는 요청 없음, 그 외에는 입력 순서대로 삭제하고 실패 전 결과를 반환합니다. 실제 metadata·원문·헤더·성공 코드를 반환하며 Resource cache를 만들지 않습니다. [공통 metadata 사용법](../metadata/README.md), [Volume](volumes/README.md), [Snapshot](snapshots/README.md)에 Python 대응·ETag·옵션·부분 성공을 설명합니다. Backup metadata 하위 경로는 이 범위에 포함하지 않습니다.
 
 `conn.BlockStorageProjectQuotas(ctx, project)`와 `CurrentBlockStorageProjectQuotas(ctx)`는 Cinder quota를 고정된 프로젝트 singleton으로 제공합니다. 별도 defaults·usage 조회와 볼륨 타입 quota, DELETE 200·명시적 force 계약은 [프로젝트 quota 사용법](quotasets/README.md)을 참고합니다.
@@ -69,6 +71,8 @@ _ = value
 | `Attachments` | [attachments](attachments/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Backups` | [backups](backups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `ConsistencyGroups` | [consistencygroups](consistencygroups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `ConsistencyGroupSnapshots` | [consistencygroupsnapshots](consistencygroupsnapshots/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Groups` | [groups](groups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `GroupSnapshots` | [groupsnapshots](groupsnapshots/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |

@@ -5,61 +5,67 @@ import (
 	resource0 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
 	resource1 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/availabilityzones"
 	resource2 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
-	resource3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
-	resource4 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
-	resource5 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
-	resource6 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
-	resource7 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages"
-	resource8 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
-	resource9 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
-	resource10 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats"
-	resource11 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
-	resource12 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
-	resource13 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
-	resource14 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
-	resource15 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
+	resource3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups"
+	resource4 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
+	resource5 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
+	resource6 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
+	resource7 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
+	resource8 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
+	resource9 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages"
+	resource10 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
+	resource11 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
+	resource12 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats"
+	resource13 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
+	resource14 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	resource15 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
+	resource16 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	resource17 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
-	client            *gophercloud.ServiceClient
-	Attachments       *resource0.API
-	AvailabilityZones *resource1.API
-	Backups           *resource2.API
-	Groups            *resource3.API
-	GroupSnapshots    *resource4.API
-	Limits            *resource5.API
-	ManageableVolumes *resource6.API
-	Messages          *resource7.API
-	QoS               *resource8.API
-	QuotaSets         *resource9.API
-	SchedulerStats    *resource10.API
-	Services          *resource11.API
-	Snapshots         *resource12.API
-	Transfers         *resource13.API
-	Volumes           *resource14.API
-	VolumeTypes       *resource15.API
+	client                    *gophercloud.ServiceClient
+	Attachments               *resource0.API
+	AvailabilityZones         *resource1.API
+	Backups                   *resource2.API
+	ConsistencyGroups         *resource3.API
+	ConsistencyGroupSnapshots *resource4.API
+	Groups                    *resource5.API
+	GroupSnapshots            *resource6.API
+	Limits                    *resource7.API
+	ManageableVolumes         *resource8.API
+	Messages                  *resource9.API
+	QoS                       *resource10.API
+	QuotaSets                 *resource11.API
+	SchedulerStats            *resource12.API
+	Services                  *resource13.API
+	Snapshots                 *resource14.API
+	Transfers                 *resource15.API
+	Volumes                   *resource16.API
+	VolumeTypes               *resource17.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
-		Attachments:       resource0.New(client),
-		AvailabilityZones: resource1.New(client),
-		Backups:           resource2.New(client),
-		Groups:            resource3.New(client),
-		GroupSnapshots:    resource4.New(client),
-		Limits:            resource5.New(client),
-		ManageableVolumes: resource6.New(client),
-		Messages:          resource7.New(client),
-		QoS:               resource8.New(client),
-		QuotaSets:         resource9.New(client),
-		SchedulerStats:    resource10.New(client),
-		Services:          resource11.New(client),
-		Snapshots:         resource12.New(client),
-		Transfers:         resource13.New(client),
-		Volumes:           resource14.New(client),
-		VolumeTypes:       resource15.New(client),
+		Attachments:               resource0.New(client),
+		AvailabilityZones:         resource1.New(client),
+		Backups:                   resource2.New(client),
+		ConsistencyGroups:         resource3.New(client),
+		ConsistencyGroupSnapshots: resource4.New(client),
+		Groups:                    resource5.New(client),
+		GroupSnapshots:            resource6.New(client),
+		Limits:                    resource7.New(client),
+		ManageableVolumes:         resource8.New(client),
+		Messages:                  resource9.New(client),
+		QoS:                       resource10.New(client),
+		QuotaSets:                 resource11.New(client),
+		SchedulerStats:            resource12.New(client),
+		Services:                  resource13.New(client),
+		Snapshots:                 resource14.New(client),
+		Transfers:                 resource15.New(client),
+		Volumes:                   resource16.New(client),
+		VolumeTypes:               resource17.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

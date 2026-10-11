@@ -13,7 +13,7 @@ Gophercloud v2.15.0의 keymanager/v1 API를 하나의 인증된 서비스 객체
 
 전체 API 호출 지원과 openstacksdk의 리소스 객체·복합 작업 지원은 별도로 추적합니다. Python 입력 별칭을 자동으로 Go 필드에 적용하지 않습니다. 기본 응답 모델은 Gophercloud 타입을 사용하며 SDK가 추가한 모델은 서비스별로 설명합니다. 수정한 응답이 자동 저장되지는 않습니다.
 
-`Waits.WaitForStatus/WaitForDelete`는 concrete Secret·Container·Order target을 대기합니다. [대기 Python/Go 비교](waits-python.md)에 nil 상태·시간 기본값·payload 오류와 남은 SecretStore/ACL/Quota 범위를 설명합니다. named wait2개는 아직 unresolved입니다.
+`Waits.WaitForStatus/WaitForDelete`는 concrete Secret·Container·Order·SecretStore target을 대기합니다. [대기 Python/Go 비교](waits-python.md)에 nil 상태·시간 기본값·payload 오류와 남은 ACL/Quota 범위를 설명합니다. [SecretStore 대기](secret-store-waits-python.md)에 flat metadata·기본값·실제 응답 증거를 설명합니다. named wait2개는 아직 unresolved입니다.
 
 `Containers/Orders/Secrets.ListRecords/AllRecords`는 Source 필드·함수 옵션과 marker/offset 페이징을 제공합니다. [Barbican 목록 Python/Go 비교](record-lists-python.md)에 wire query·로컬 필터·응답 증거를 설명합니다.
 
