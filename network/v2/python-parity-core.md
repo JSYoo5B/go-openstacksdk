@@ -35,13 +35,13 @@
 | `find_network_segment_range` | 없음 | unresolved |
 | `find_segment` | `segments.API.Find`를 ID와 이름으로 따로 호출 (query 불가) | unresolved |
 | `get_advertised_routes_of_speaker` | `speakers.API.GetAdvertisedRoutes(ctx, id)` | go_mapping |
-| `get_agent` | `agents.API.Get(ctx, id)` (`fields` 불가) | unresolved |
+| `get_agent` | `agents.API.GetWithFields(ctx, id, fields...)` | go_mapping |
 | `get_auto_allocated_topology` | 없음 | unresolved |
 | `get_local_ip` | 없음 | unresolved |
 | `get_local_ip_association` | 없음 | unresolved |
-| `get_network_ip_availability` | `networkipavailabilities.API.Get(ctx, networkID)` (`fields` 불가) | unresolved |
+| `get_network_ip_availability` | `networkipavailabilities.API.GetWithFields(ctx, networkID, fields...)` | go_mapping |
 | `get_network_segment_range` | 없음 | unresolved |
-| `get_segment` | `segments.API.Get(ctx, id)` (`fields` 불가) | unresolved |
+| `get_segment` | `segments.API.GetWithFields(ctx, id, fields...)` | go_mapping |
 | `get_subnet_ports` | `ports.API.All(ctx)` 후 `FixedIPs`의 subnet ID로 선택 | unresolved |
 | `get_trunk_subports` | `trunks.API.GetSubports(ctx, id)` | go_mapping |
 | `local_ip_associations` | 없음 | unresolved |
@@ -77,7 +77,7 @@ Python delete 계열은 `ignore_missing=True`가 기본이라 404를 무시합�
 
 Python update는 바뀐 attribute가 없으면 요청을 보내지 않지만 Go `Update`는 빈 envelope라도 PUT을 보냅니다. Go option 구조체는 nil과 빈 core field를 생략하고 `WithUpdateField`로 core key를 덮을 수 없으므로, Python에서 `None`을 넘겨 JSON null을 보내는 동작은 재현하지 않습니다.
 
-Neutron proxy의 `get_*`는 `fields` 인자를 받아 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query로 보냅니다. 이 단원의 agent, segment, network IP availability package에는 `GetWithFields` 같은 선택 조회 helper가 없어서 이 인자를 보낼 수 없습니다. 그래서 세 `get_*` 메서드는 unresolved이며, `fields` 없이 부르는 기본 요청은 Go `Get`과 같습니다.
+Neutron proxy의 `get_*`는 `fields` 인자를 받아 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query로 보냅니다. agent, segment, network IP availability package에는 sdkgen이 만든 `GetWithFields(ctx, id, fields...)`는 Python `_get_with_fields`처럼 Resource 상속 체인의 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query를 같은 키로 반복해서 보냅니다. 선언되지 않은 이름, 중복, 순서는 그대로 두고, 필드를 주지 않으면 query 없이 `Get`과 같은 GET을 보냅니다. 성공 상태는 Python 읽기처럼 200부터 399까지 받고, 일부 필드만 담긴 응답은 Gophercloud 모델로 decode되어 빠진 필드가 zero 값이 됩니다. 실패는 `resource.OperationError`로 감싼 native 오류로 돌아오므로 `gophercloud.ResponseCodeIs(err, 404)`로 Python의 `NotFoundException`을 구분합니다. 예를 들어 agent의 `is_alive`, `configuration`, `last_heartbeat_at`은 `alive`, `configurations`, `heartbeat_timestamp`로 나갑니다. network IP availability의 native decoder는 `total_ips`와 `used_ips`가 없으면 실패하므로, 선택 조회에서는 응답에 없는 두 값을 빈 문자열로 둡니다. 명시적인 null이나 잘못된 타입은 여전히 오류입니다.
 
 ## Agent와 DHCP 스케줄링
 
@@ -139,7 +139,6 @@ Neutron proxy의 `get_*`는 `fields` 인자를 받아 Body 속성 이름을 wire
 - `network_hosting_dhcp_agents`, `onboard_network_subnets`: `networks/{id}/dhcp-agents`와 `subnetpools/{id}/onboard_network_subnets` binding이 없습니다.
 - `create_ports`: bulk port 생성 호출이 없습니다.
 - `dhcp_agent_hosting_networks`: Go 호출이 query를 받지 않고 `networks_links`를 따라가지 않습니다.
-- `get_agent`, `get_segment`, `get_network_ip_availability`: `fields` 선택 조회 option이 없습니다.
 - `find_segment`, `find_extension`, `find_network_ip_availability`: Python의 ID 조회 뒤 목록 fallback을 `**query`와 함께 재현하는 helper가 없습니다.
 - `wait_for_status`, `wait_for_delete`: Go collection이 없는 Neutron Resource에는 waiter가 없습니다.
 - `agents`, `extensions`, `network_ip_availabilities`, `ports`, `segments`, `get_subnet_ports`, `find_available_ip`: Python이 Body 속성으로 행을 로컬에서 거르거나 첫 행에서 멈추는 동작, 또는 `segments_links`·`*_links` 페이지 순회를 SDK가 대신하지 않습니다. 호출자가 결과 행을 직접 걸러야만 재현되므로 다른 서비스와 같은 기준으로 미해결로 둡니다.

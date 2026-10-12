@@ -7,7 +7,7 @@
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
 | [`create_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9066) | `api.Create(ctx, tapmirrors.CreateOpts{...}, tapmirrors.WithCreateField(k, v)...)` | 대응 |
-| [`get_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9110) | `api.Get(ctx, id)` (fields 없음만) | 미해결 |
+| [`get_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9110) | `api.GetWithFields(ctx, id, fields...)` | 대응 |
 | [`find_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9096) | `api.Find(ctx, resource.ID(x), resource.WithIgnoreMissing())` 뒤 `api.Find(ctx, resource.Name(x))` | 미해결 |
 | [`tap_mirrors`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9138) | `api.All(ctx, resource.WithQuery(k, v)...)`, `api.List(ctx, tapmirrors.WithListQuery(k, v)...)` | 미해결 |
 | [`update_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9130) | `api.Update(ctx, id, tapmirrors.UpdateOpts{...}, tapmirrors.WithUpdateField(k, v)...)` | 대응 |
@@ -77,7 +77,7 @@ Python 결과는 `TapMirror` Resource이고 `project_id`가 비어 있으면 `te
 
 ### 조회와 검색
 
-`get_tap_mirror(tap_mirror)`처럼 `fields`를 생략한 호출은 `api.Get(ctx, id)`와 같은 GET을 보냅니다. 그러나 `fields=["name", ...]`를 주면 Python은 Body 속성 이름을 wire 이름으로 바꿔 `?fields=name&fields=...`를 붙이고 일부 필드만 담긴 Resource를 돌려줍니다. `tapmirrors`에는 다른 Neutron 패키지에 있는 `GetWithFields`가 생성되지 않았고 `Get`은 query를 받지 않습니다.
+`get_tap_mirror(tap_mirror)`처럼 `fields`를 생략한 호출은 `api.Get(ctx, id)`와 같은 GET을 보냅니다. `fields=["name", ...]`를 주면 Python은 Body 속성 이름을 wire 이름으로 바꿔 `?fields=name&fields=...`를 붙이고 일부 필드만 담긴 Resource를 돌려줍니다. Go에서는 sdkgen이 만든 `GetWithFields(ctx, id, fields...)`는 Python `_get_with_fields`처럼 Resource 상속 체인의 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query를 같은 키로 반복해서 보냅니다. 선언되지 않은 이름, 중복, 순서는 그대로 두고, 필드를 주지 않으면 query 없이 `Get`과 같은 GET을 보냅니다. 성공 상태는 Python 읽기처럼 200부터 399까지 받고, 일부 필드만 담긴 응답은 Gophercloud 모델로 decode되어 빠진 필드가 zero 값이 됩니다. 실패는 `resource.OperationError`로 감싼 native 오류로 돌아오므로 `gophercloud.ResponseCodeIs(err, 404)`로 Python의 `NotFoundException`을 구분합니다.
 
 `find_tap_mirror(name_or_id)`는 먼저 `GET /taas/tap_mirrors/{name_or_id}`를 보내고 404, 400, 403이면 `?name=`으로 목록을 조회해 ID나 이름이 같은 행 하나를 고릅니다. 기본값은 `ignore_missing=True`라서 찾지 못하면 None을 돌려줍니다. Go에서 가장 가까운 방법은 `api.Find(ctx, resource.ID(x), resource.WithIgnoreMissing())`가 nil이면 `api.Find(ctx, resource.Name(x), resource.WithIgnoreMissing())`를 부르는 것입니다. 이렇게 하면 404 뒤의 이름 검색과 중복 이름 거부(`resource.ErrAmbiguous`)는 같지만 400과 403에서는 Go가 목록으로 넘어가지 않고 오류를 반환합니다. Python의 `**query`는 GET과 목록 요청 모두에 붙는데, `Find`는 `LookupOption`만 받으므로 이 query를 보낼 수 없습니다. 이 binding은 `FindIdentity`에도 참여하지 않습니다.
 
@@ -107,7 +107,6 @@ networking-sfc 자원은 `/sfc` 아래에 있습니다. Python 정의는 [`sfc_f
 
 ## 미해결 메서드
 
-- `get_tap_mirror`: `fields`를 `?fields=` 반복 query로 보내는 Go API가 없습니다. `fields`를 생략한 요청만 `Get`으로 재현됩니다.
 - `find_tap_mirror`: Go 검색은 GET 400과 403 뒤에 목록으로 넘어가지 않고, `**query`를 GET과 목록 요청에 붙일 수 없습니다.
 - `tap_mirrors`: `fields`, `sort_key`, `sort_dir`의 반복 값을 보낼 수 없습니다.
 - `create_tap_flow`, `get_tap_flow`, `find_tap_flow`, `tap_flows`, `update_tap_flow`, `delete_tap_flow`: `/taas/tap_flows`에 대한 Gophercloud binding과 SDK 소유 호출이 없습니다.

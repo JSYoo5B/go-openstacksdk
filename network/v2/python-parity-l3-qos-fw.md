@@ -40,13 +40,13 @@
 | `create_firewall_group(**attrs)` | `FirewallGroups.Create(ctx, groups.CreateOpts{...}, WithCreateField(...))` | 대응 |
 | `update_firewall_group(firewall_group, **attrs)` | `FirewallGroups.Update(ctx, id, groups.UpdateOpts{...})`, `RemoveIngressPolicy`, `RemoveEgressPolicy` | 대응 |
 | `delete_firewall_group(firewall_group, ignore_missing=True)` | `FirewallGroups.Remove(ctx, resource.ID(id))` | 대응 |
-| `get_firewall_group(firewall_group, *, fields=None)` | `FirewallGroups.Get(ctx, id)` (fields 없음) | 미해결 |
+| `get_firewall_group(firewall_group, *, fields=None)` | `FirewallGroups.GetWithFields(ctx, id, fields...)` | 대응 |
 | `find_firewall_group(name_or_id, ignore_missing=True, **query)` | `FirewallGroups.Find(ctx, resource.ID(v), resource.WithIgnoreMissing())` 다음 `Find(ctx, resource.Name(v), ...)` | 대응 |
 | `firewall_groups(**query)` | `FirewallGroups.List(ctx, WithListOptions(groups.ListOpts{...}), WithListQuery(...))` | 대응 |
 | `create_firewall_policy(**attrs)` | `FirewallPolicies.Create(ctx, policies.CreateOpts{...})` | 대응 |
 | `update_firewall_policy(firewall_policy, **attrs)` | `FirewallPolicies.Update(ctx, id, policies.UpdateOpts{...})` | 대응 |
 | `delete_firewall_policy(firewall_policy, ignore_missing=True)` | `FirewallPolicies.Remove(ctx, resource.ID(id))` | 대응 |
-| `get_firewall_policy(firewall_policy, *, fields=None)` | `FirewallPolicies.Get(ctx, id)` (fields 없음) | 미해결 |
+| `get_firewall_policy(firewall_policy, *, fields=None)` | `FirewallPolicies.GetWithFields(ctx, id, fields...)` | 대응 |
 | `find_firewall_policy(name_or_id, ignore_missing=True, **query)` | `FirewallPolicies.Find` ID 다음 Name | 대응 |
 | `firewall_policies(**query)` | `FirewallPolicies.List(ctx, WithListOptions(policies.ListOpts{...}), WithListQuery(...))` | 대응 |
 | `insert_rule_into_policy(firewall_policy, firewall_rule, insert_after=None, insert_before=None)` | `FirewallPolicies.InsertRule(ctx, id, InsertRuleOpts{...})` (위치 필수) | 미해결 |
@@ -54,7 +54,7 @@
 | `create_firewall_rule(**attrs)` | `FirewallRules.Create(ctx, rules.CreateOpts{Protocol, Action, ...})` | 대응 |
 | `update_firewall_rule(firewall_rule, **attrs)` | `FirewallRules.Update(ctx, id, rules.UpdateOpts{...})` | 대응 |
 | `delete_firewall_rule(firewall_rule, ignore_missing=True)` | `FirewallRules.Remove(ctx, resource.ID(id))` | 대응 |
-| `get_firewall_rule(firewall_rule, *, fields=None)` | `FirewallRules.Get(ctx, id)` (fields 없음) | 미해결 |
+| `get_firewall_rule(firewall_rule, *, fields=None)` | `FirewallRules.GetWithFields(ctx, id, fields...)` | 대응 |
 | `find_firewall_rule(name_or_id, ignore_missing=True, **query)` | `FirewallRules.Find` ID 다음 Name | 대응 |
 | `firewall_rules(**query)` | `FirewallRules.List(ctx, WithListOptions(rules.ListOpts{...}), WithListQuery(...))` | 대응 |
 | `create_conntrack_helper(router, **attrs)` | 없음 | 미해결 |
@@ -80,7 +80,7 @@
 | `security_groups_default_statefulness(**query)` | 없음 | 미해결 |
 | `update_security_groups_default_statefulness(..., **attrs)` | 없음 | 미해결 |
 
-대응 29개, 미해결 33개입니다.
+대응 32개, 미해결 30개입니다.
 
 ## 공통 차이
 
@@ -124,7 +124,7 @@ err = resource.IgnoreMissing(net.QoSRules.DeleteBandwidthLimitRule(ctx, policyID
 
 삭제는 `Remove(ctx, resource.ID(id))`가 Python 기본값처럼 404를 무시하고, `resource.WithMissingError()`를 주면 `resource.ErrNotFound`를 돌려줍니다. 409 같은 다른 오류는 숨기지 않습니다.
 
-조회에서 Python `get_firewall_*`은 `fields`를 주면 `?fields=...`를 붙입니다. Go `Get`에는 이 query를 보낼 방법이 없어서 세 get 메서드는 미해결로 남겼습니다. `fields=None`인 기본 호출은 Go `Get`과 같은 요청이며, 404는 Python의 `NotFoundException`처럼 오류로 돌아옵니다.
+조회에서 Python `get_firewall_*`은 `fields`를 주면 `?fields=...`를 붙입니다. 세 FWaaS package에는 sdkgen이 만든 `GetWithFields(ctx, id, fields...)`는 Python `_get_with_fields`처럼 Resource 상속 체인의 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query를 같은 키로 반복해서 보냅니다. 선언되지 않은 이름, 중복, 순서는 그대로 두고, 필드를 주지 않으면 query 없이 `Get`과 같은 GET을 보냅니다. 성공 상태는 Python 읽기처럼 200부터 399까지 받고, 일부 필드만 담긴 응답은 Gophercloud 모델로 decode되어 빠진 필드가 zero 값이 됩니다. 실패는 `resource.OperationError`로 감싼 native 오류로 돌아오므로 `gophercloud.ResponseCodeIs(err, 404)`로 Python의 `NotFoundException`을 구분합니다.
 
 목록은 `List`에 `WithListOptions`와 `WithListQuery`를 함께 씁니다. Python QueryParameters에 있는 키(`name`, `status`, `project_id`, `fields`, `firewall_rules`, `firewall_policy_id` 등)는 그대로 query로 나갑니다. Python은 query에 없는 Body 속성, 예를 들어 group의 `admin_state_up`을 받은 행에서 직접 걸러 내는데, Go `ListOpts.AdminStateUp`은 그 값을 서버 query로 보냅니다. Python bool은 `True`/`False`로 인코딩되므로 같은 문자열이 필요하면 `WithListQuery("shared", "False")`를 씁니다. `WithListQuery`는 키마다 값을 하나만 보내므로 `fields=["id","name"]`처럼 같은 키를 반복하는 query는 만들 수 없습니다. 반면 `ListOpts.Ports`는 값마다 `ports=`를 반복합니다. 다음 페이지는 `firewall_groups_links`를 따라갑니다.
 
@@ -147,7 +147,6 @@ Python은 ID GET이 400이나 403이어도 목록으로 넘어가지만 Go `Find
 
 - `update_router_in_agent`: Gophercloud v2.15.0에는 `PUT /agents/{agent_id}/l3-routers/{router_id}` 바인딩이 없어서 SDK 소유 호출이 필요합니다.
 - `create_/update_/delete_qos_minimum_packet_rate_rule`, `create_/update_/delete_qos_packet_rate_limit_rule`: Gophercloud v2.15.0에는 `minimum_packet_rate_rules`, `packet_rate_limit_rules`의 쓰기 바인딩이 없습니다. 이 SDK에는 조회용 Record 헬퍼만 있습니다.
-- `get_firewall_group`, `get_firewall_policy`, `get_firewall_rule`: `Get`에 `fields` query를 보낼 옵션이 없습니다. routers의 `GetWithFields` 같은 헬퍼가 필요합니다.
 - `insert_rule_into_policy`: 위치 없는 기본 호출과 null 위치 키를 보낼 수 없습니다.
 - conntrack helper 5개(`/routers/{router_id}/conntrack_helpers`), NDP proxy 6개(`/ndp_proxies`), 기본 보안 그룹 규칙 5개(`/default-security-group-rules`), 보안 그룹 기본 statefulness 6개(`/security-groups-default-statefulness`): Gophercloud v2.15.0에 이 경로의 바인딩이 전혀 없어서 SDK 소유 호출이 필요합니다.
 

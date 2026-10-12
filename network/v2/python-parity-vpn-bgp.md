@@ -10,31 +10,31 @@ Go 쪽은 `extensions/vpnaas/*`, `extensions/bgp/peers`, `extensions/bgp/speaker
 |---|---|---|
 | `create_vpn_service` | `services.API.Create` | 대응 |
 | `delete_vpn_service` | `services.API.Remove(ctx, resource.ID(id))` | 대응 |
-| `get_vpn_service` | `services.API.Get` | 미해결 |
+| `get_vpn_service` | `services.API.GetWithFields` | 대응 |
 | `find_vpn_service` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `vpn_services` | `services.API.List` | 미해결 |
 | `update_vpn_service` | `services.API.Update` | 대응 |
 | `create_vpn_endpoint_group` | `endpointgroups.API.Create` | 대응 |
 | `delete_vpn_endpoint_group` | `endpointgroups.API.Remove` | 대응 |
-| `get_vpn_endpoint_group` | `endpointgroups.API.Get` | 미해결 |
+| `get_vpn_endpoint_group` | `endpointgroups.API.GetWithFields` | 대응 |
 | `find_vpn_endpoint_group` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `vpn_endpoint_groups` | `endpointgroups.API.List` | 미해결 |
 | `update_vpn_endpoint_group` | `endpointgroups.API.Update` | 대응 |
 | `create_vpn_ike_policy` | `ikepolicies.API.Create` | 대응 |
 | `delete_vpn_ike_policy` | `ikepolicies.API.Remove` | 대응 |
-| `get_vpn_ike_policy` | `ikepolicies.API.Get` | 미해결 |
+| `get_vpn_ike_policy` | `ikepolicies.API.GetWithFields` | 대응 |
 | `find_vpn_ike_policy` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `vpn_ike_policies` | `ikepolicies.API.List` | 미해결 |
 | `update_vpn_ike_policy` | `ikepolicies.API.Update` | 대응 |
 | `create_vpn_ipsec_policy` | `ipsecpolicies.API.Create` | 대응 |
 | `delete_vpn_ipsec_policy` | `ipsecpolicies.API.Remove` | 대응 |
-| `get_vpn_ipsec_policy` | `ipsecpolicies.API.Get` | 미해결 |
+| `get_vpn_ipsec_policy` | `ipsecpolicies.API.GetWithFields` | 대응 |
 | `find_vpn_ipsec_policy` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `vpn_ipsec_policies` | `ipsecpolicies.API.List` | 미해결 |
 | `update_vpn_ipsec_policy` | `ipsecpolicies.API.Update` | 대응 |
 | `create_vpn_ipsec_site_connection` | `siteconnections.API.Create` | 대응 |
 | `delete_vpn_ipsec_site_connection` | `siteconnections.API.Remove` | 대응 |
-| `get_vpn_ipsec_site_connection` | `siteconnections.API.Get` | 미해결 |
+| `get_vpn_ipsec_site_connection` | `siteconnections.API.GetWithFields` | 대응 |
 | `find_vpn_ipsec_site_connection` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `vpn_ipsec_site_connections` | `siteconnections.API.List` | 미해결 |
 | `update_vpn_ipsec_site_connection` | `siteconnections.API.Update` | 미해결 |
@@ -58,27 +58,27 @@ Go 쪽은 `extensions/vpnaas/*`, `extensions/bgp/peers`, `extensions/bgp/speaker
 | `remove_bgp_speaker_from_dragent` | `agents.API.RemoveBGPSpeaker` | 대응 |
 | `create_bgpvpn` | `bgpvpns.API.Create` | 미해결 |
 | `delete_bgpvpn` | `bgpvpns.API.Remove` | 대응 |
-| `get_bgpvpn` | `bgpvpns.API.Get` | 미해결 |
+| `get_bgpvpn` | `bgpvpns.API.GetWithFields` | 대응 |
 | `find_bgpvpn` | `Find(resource.ID)` 뒤 `Find(resource.Name)` | 미해결 |
 | `bgpvpns` | `bgpvpns.API.List` | 미해결 |
 | `update_bgpvpn` | `bgpvpns.API.Update` | 대응 |
 | `create_bgpvpn_network_association` | `bgpvpns.API.CreateNetworkAssociation` | 대응 |
 | `delete_bgpvpn_network_association` | `resource.IgnoreMissing(api.DeleteNetworkAssociation(...))` | 대응 |
-| `get_bgpvpn_network_association` | `bgpvpns.API.GetNetworkAssociation` | 미해결 |
+| `get_bgpvpn_network_association` | `bgpvpns.API.GetNetworkAssociationWithFields` | 대응 |
 | `bgpvpn_network_associations` | `bgpvpns.API.ListNetworkAssociations` | 대응 |
 | `create_bgpvpn_port_association` | `bgpvpns.API.CreatePortAssociation` | 대응 |
 | `delete_bgpvpn_port_association` | `resource.IgnoreMissing(api.DeletePortAssociation(...))` | 대응 |
-| `get_bgpvpn_port_association` | `bgpvpns.API.GetPortAssociation` | 미해결 |
+| `get_bgpvpn_port_association` | `bgpvpns.API.GetPortAssociationWithFields` | 대응 |
 | `find_bgpvpn_port_association` | 없음 (`GetPortAssociation`, `ListPortAssociations`를 직접 조합) | 미해결 |
 | `update_bgpvpn_port_association` | `bgpvpns.API.UpdatePortAssociation` | 대응 |
 | `bgpvpn_port_associations` | `bgpvpns.API.ListPortAssociations` | 대응 |
 | `create_bgpvpn_router_association` | `bgpvpns.API.CreateRouterAssociation` | 대응 |
 | `delete_bgpvpn_router_association` | `resource.IgnoreMissing(api.DeleteRouterAssociation(...))` | 대응 |
-| `get_bgpvpn_router_association` | `bgpvpns.API.GetRouterAssociation` | 미해결 |
+| `get_bgpvpn_router_association` | `bgpvpns.API.GetRouterAssociationWithFields` | 대응 |
 | `update_bgpvpn_router_association` | `bgpvpns.API.UpdateRouterAssociation` | 대응 |
 | `bgpvpn_router_associations` | `bgpvpns.API.ListRouterAssociations` | 대응 |
 
-69개 중 45개가 대응이고 24개가 미해결입니다. Neutron은 microversion을 쓰지 않으므로 이 범위에서는 microversion 차이가 없습니다.
+69개 중 48개가 대응이고 21개가 미해결입니다. Neutron은 microversion을 쓰지 않으므로 이 범위에서는 microversion 차이가 없습니다.
 
 ## 공통 차이
 
@@ -90,7 +90,7 @@ Python 메서드는 Resource 객체나 ID 문자열을 받고 수정 가능한 R
 
 `find_*`는 Python에서 한 번의 호출이 ID로 GET하고, 400·403·404면 목록으로 넘어가서 ID나 이름이 같은 행을 찾습니다. Go에서는 `API.Find(ctx, resource.ID(x), resource.WithIgnoreMissing())`가 nil을 돌려줄 때 `API.Find(ctx, resource.Name(x))`를 이어 부르는 두 단계가 필요합니다. `WithIgnoreMissing`은 404만 nil로 바꾸므로 400이나 403 뒤에는 호출자가 이름 조회로 넘어가야 합니다. Go 이름 조회는 이름만 비교하고 중복이면 `resource.ErrAmbiguous`를 돌려주며, Python은 `DuplicateResource`를 냅니다. Python `find_*`는 `**query`를 ID GET과 목록 양쪽에 넘기는데 `Find`에는 query를 넘길 방법이 없습니다. 그래서 기본 인자로 부른 경우의 요청만 같고, 모든 `find_*`는 미해결로 남깁니다.
 
-`get_*`에 `fields`가 있는 메서드는 Python이 attribute 이름을 서버 이름으로 바꿔 `fields` query를 반복해서 보냅니다. Gophercloud v2.15.0의 generated `Get`은 ID만 받고 이 resource들에는 SDK 소유의 field getter가 없어서, `fields`를 쓰는 호출은 재현할 수 없습니다. BGP peer와 speaker의 `get_*`에는 `fields`가 없으므로 대응입니다.
+`get_*`에 `fields`가 있는 메서드는 Python이 attribute 이름을 서버 이름으로 바꿔 `fields` query를 반복해서 보냅니다. VPNaaS 다섯 package와 `bgpvpns`에는 sdkgen이 만든 `GetWithFields(ctx, id, fields...)`는 Python `_get_with_fields`처럼 Resource 상속 체인의 Body 속성 이름을 wire 이름으로 바꾼 뒤 `fields` query를 같은 키로 반복해서 보냅니다. 선언되지 않은 이름, 중복, 순서는 그대로 두고, 필드를 주지 않으면 query 없이 `Get`과 같은 GET을 보냅니다. 성공 상태는 Python 읽기처럼 200부터 399까지 받고, 일부 필드만 담긴 응답은 Gophercloud 모델로 decode되어 빠진 필드가 zero 값이 됩니다. 실패는 `resource.OperationError`로 감싼 native 오류로 돌아오므로 `gophercloud.ResponseCodeIs(err, 404)`로 Python의 `NotFoundException`을 구분합니다. 예를 들어 VPN service와 IPsec site connection의 `is_admin_state_up`은 `admin_state_up`으로 나갑니다. BGP VPN association은 `GetNetworkAssociationWithFields(ctx, bgpvpnID, id, fields...)`처럼 BGP VPN ID를 먼저 받아 `bgpvpn/bgpvpns/{bgpvpn_id}/network_associations/{id}`로 보내며, Python은 이 자리에 BgpVpn Resource나 ID를 받습니다. BGP peer와 speaker의 `get_*`에는 `fields`가 없으므로 기존 `Get`으로 대응합니다.
 
 목록에서 Python은 resource의 `QueryParameters`에 있는 key만 서버 query로 보내고, 그 밖의 Body attribute keyword는 받아 온 행을 로컬에서 거릅니다. Go `API.List`는 `WithListOptions`와 `WithListQuery`로 준 key를 모두 서버에 보냅니다. 서버 필터와 로컬 필터의 결과가 같다면 같은 행을 얻지만, 로컬 필터를 원하면 호출자가 반복문에서 직접 걸러야 합니다.
 
@@ -144,7 +144,6 @@ Python `vpn_endpoint_groups(type="cidr")`는 `type`을 `endpoint_type` query로 
 
 ## 미해결 메서드
 
-- `get_vpn_service`, `get_vpn_endpoint_group`, `get_vpn_ike_policy`, `get_vpn_ipsec_policy`, `get_vpn_ipsec_site_connection`, `get_bgpvpn`, `get_bgpvpn_network_association`, `get_bgpvpn_port_association`, `get_bgpvpn_router_association`: generated `Get`은 ID만 받으므로 `fields` query를 보내려면 SDK 소유 getter가 필요합니다.
 - `find_vpn_service`, `find_vpn_endpoint_group`, `find_vpn_ike_policy`, `find_vpn_ipsec_policy`, `find_vpn_ipsec_site_connection`, `find_bgp_peer`, `find_bgp_speaker`: 기본 인자의 두 단계 조회는 같은 요청을 보내지만, `Find`가 query를 받지 않아 `**query`를 넘길 수 없습니다.
 - `find_bgpvpn`: query를 넘길 수 없을 뿐 아니라 이름 조회가 `?name=` 없이 목록을 받습니다.
 - `find_bgpvpn_port_association`: association용 collection이나 find helper가 없어서 ID 조회, 목록 대체, ignore_missing, 중복 검사를 호출자가 직접 만들어야 합니다.
