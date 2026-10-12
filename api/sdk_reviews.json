@@ -74455,28 +74455,60 @@
     {
       "operation": "python:compute/v2/find_aggregate",
       "source_fingerprint": "f14399f18ef77fd15d8c47c1716b64a82d02cf3fd2275be73f7d52cb7918bb14",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID) rejects a non-numeric reference before HTTP and Find(resource.Name) lists os-aggregates and matches names only, so the ID-then-list fallback exists only as separate calls.",
+          "behavior": "find_aggregate sends GET /os-aggregates/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_aggregate lists /os-aggregates and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "IdentityLiteralGet sends the literal identity through the query getter even though the native Get takes an integer, so os-aggregates/rack-a is requested before the list; explicit Find(resource.ID) keeps its numeric check.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute",
+            "resource/find_identity_name_test.go:TestCollectionFindIdentityLiteralGetUsesQueryHookWithoutQuery"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no aggregate helper that tries GET os-aggregates/{name_or_id} and falls back to a list match on 400/403/404; Find(resource.ID(x)) fails with ErrInvalidOption for names, so the caller must branch on the error and call Find(resource.Name(x))."
-      ]
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.",
+        "Pinned find_aggregate declares no **query; a Go caller query reaches the GET but the native single-page list rejects it with ErrUnsupported."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/aggregate_precache_images",
@@ -84189,28 +84221,58 @@
     {
       "operation": "python:identity/v3/find_policy",
       "source_fingerprint": "6df808a66138d765e6d9e83b80c65f57b1ca01686ba093cb8815302bd60edfee",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find with resource.ID sends only GET policies/{id}, turns 404 into nil with WithIgnoreMissing, returns 400 and 403 without a list fallback, and Name lookup and FindIdentity return resource.ErrUnsupported before HTTP.",
+          "behavior": "find_policy sends GET /policies/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "identity/v3/policies/python_parity_test.go:TestPythonPolicyFindHasNoListFallback"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_policy lists /policies without a name query and matches the row ID only, because Keystone returns no name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "An IdentityName that returns an empty string makes FindIdentity match IDs only in the list fallback.",
+          "tests": [
+            "resource/find_identity_name_test.go:TestCollectionFindIdentityNameOverrideMatchesAlternateFieldOrIDOnly"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python find_policy also emits a RemovedInSDK50Warning deprecation warning."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "The native model has no name field, so a nonstandard name key in a Keystone response is not compared; Python Resource.name would match it.",
+        "Pinned find_policy declares no **query; Go still accepts resource.WithIdentityFindQuery, which Python cannot send."
       ],
-      "remaining": [
-        "Python Resource.find falls back after GET 400/403/404 to listing GET policies and matching id or name; the policy collection has no Name binding or FindIdentity opt-in, so Go has no call that performs the list fallback or matches the name."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_policy",
@@ -86224,31 +86286,66 @@
     {
       "operation": "python:network/v2/find_ip",
       "source_fingerprint": "944e3882773bd76edb4d8074c29c4f95d74d20702f126d804943939ce6cd0f0e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.FindIdentity"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), resource.WithIgnoreMissing()) sends only GET /v2.0/floatingips/{x}, decodes the floating IP or returns nil on 404, and without WithIgnoreMissing returns ErrNotFound; Find(resource.Name(x)) and Resources.FindIdentity return ErrUnsupported without HTTP.",
+          "behavior": "find_ip sends GET /floatingips/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/layer3/floatingips/python_parity_ips_test.go:TestPythonIPsFindIPOnlyReproducesTheIDLookup"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_ip lists /floatingips without a name query and matches the row ID or floating_ip_address (Python FloatingIP.name); any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /floatingips list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
+          ]
+        },
+        {
+          "behavior": "resource.Adapter.IdentityName lets FindIdentity compare floating_ip_address while explicit Find(resource.Name) stays unsupported.",
+          "tests": [
+            "resource/find_identity_name_test.go:TestCollectionFindIdentityNameOverrideMatchesAlternateFieldOrIDOnly"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python defaults to ignore_missing=True and returns None; Go needs resource.WithIgnoreMissing() for the same nil result."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request.",
+        "Only FindIdentity compares floating_ip_address; Find(ctx, resource.Name(x)) still returns ErrUnsupported because the native model has no Name field."
       ],
-      "remaining": [
-        "The floating IP binding has no SDK find helper: after GET /floatingips/{id} fails with 400, 403 or 404, Python lists every /floatingips page without a name query and matches ID or floating_ip_address with duplicate detection, while Go Find(resource.Name) and Resources.FindIdentity return ErrUnsupported without HTTP.",
-        "Go Find(resource.ID) treats only 404 as missing and returns 400/403 as errors instead of falling back to the list."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/ips",
@@ -86360,36 +86457,59 @@
     {
       "operation": "python:network/v2/find_tap_mirror",
       "source_fingerprint": "a5ffdd1217980c2bc658ca6d56baf55073bda5e0a848b170f883159ec48880af",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Chaining Find by ID with WithIgnoreMissing and then Find by Name sends GET taas/tap_mirrors/{value} and, after 404 only, GET taas/tap_mirrors?name={value}, returning the single match, nil or resource.ErrNotFound by option and resource.ErrAmbiguous for duplicate names, while a GET 400 or 403 is returned without the list request.",
+          "behavior": "find_tap_mirror sends GET /taas/tap_mirrors/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorFindChain"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_tap_mirror lists /taas/tap_mirrors?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /taas/tap_mirrors list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-sfc-tap.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
-        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
-        "Neutron has no microversion, so neither SDK sends a version header.",
-        "Python defaults ignore_missing=True and emits a deprecation warning; Go Find by Name defaults to resource.ErrNotFound unless resource.WithIgnoreMissing is passed."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "Python Resource.find falls back to the name list after a GET 400 or 403 as well as 404; the Go Find chain returns the 400 or 403 error and the tapmirrors collection does not opt into FindIdentity, whose compatible fallback would cover it.",
-        "Python forwards **query to both the GET and the name list request; Collection.Find accepts only LookupOption values, so no query can be added to either request."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/tap_mirrors",
@@ -89626,33 +89746,58 @@
     {
       "operation": "python:identity/v3/find_region",
       "source_fingerprint": "ff96aaca6fc042d37784edc9a17e2ee7c5e80a454ec8c295a4c84a496ed99f4f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.New",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET regions/{x} and returns nil on 404, while Find(resource.Name(x)) fails with resource.ErrUnsupported before HTTP.",
+          "behavior": "find_region sends GET /regions/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "identity/v3/regions/python_parity_test.go:TestPythonRegionFindByIDOnly"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_region lists /regions without a name query and matches the row ID only, because Keystone returns no name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "An IdentityName that returns an empty string makes FindIdentity match IDs only in the list fallback.",
+          "tests": [
+            "resource/find_identity_name_test.go:TestCollectionFindIdentityNameOverrideMatchesAlternateFieldOrIDOnly"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-catalog.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
-        "Python find_region emits a RemovedInSDK50Warning deprecation warning; Go has no deprecation signal."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "The native model has no name field, so a nonstandard name key in a Keystone response is not compared; Python Resource.name would match it.",
+        "Pinned find_region declares no **query; Go still accepts resource.WithIdentityFindQuery, which Python cannot send."
       ],
-      "remaining": [
-        "The regions collection has no name selector, so after a missing ID Go cannot send the unfiltered GET regions fallback that Python matches by ID or name.",
-        "Python also falls back after GET 400 or 403; Go returns those errors."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_service",
@@ -94685,30 +94830,59 @@
     {
       "operation": "python:network/v2/find_segment",
       "source_fingerprint": "2fb550873c648a318460abccb947884cd0787ec737b8b1501a8e09ed27e6e396",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) followed by Find(resource.Name(x)) sends GET segments/{x} and then GET segments?name=x without any other query.",
+          "behavior": "find_segment sends GET /segments/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/segments/python_parity_core_test.go:TestPythonParityCoreSegmentFindChainWithoutQuery"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_segment lists /segments?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /segments list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404; Go Find with WithIgnoreMissing returns nil only for 404."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "Python passes its **query to both the member GET and the list fallback; Go Find accepts no query, and the segments package has no FindIdentity helper that carries one."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_segment",
@@ -97242,31 +97416,59 @@
     {
       "operation": "python:network/v2/find_vpn_service",
       "source_fingerprint": "0ebc7caec7bc887de29deaecb04ba7db824a3efeb034af35cf42aa8dd940bbe9",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET vpn/vpnservices/{x} and returns nil on 404, and Find(resource.Name(x)) sends GET vpn/vpnservices?name={x} and returns the unique name match, matching Python's requests when no query keywords are passed; without WithIgnoreMissing both return resource.ErrNotFound.",
+          "behavior": "find_vpn_service sends GET /vpn/vpnservices/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceFindChainAndGetWithoutFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_vpn_service lists /vpn/vpnservices?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /vpn/vpnservices list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_vpn_service forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/vpn_services",
@@ -97426,31 +97628,59 @@
     {
       "operation": "python:network/v2/find_vpn_endpoint_group",
       "source_fingerprint": "94a92c2f47b2c9b2e113b5385f24789890a06fc74ba6927d4d24ecc61a322b53",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET vpn/endpoint-groups/{x} and returns nil on 404, and Find(resource.Name(x)) sends GET vpn/endpoint-groups?name={x} and returns the unique name match, matching Python's requests when no query keywords are passed; without WithIgnoreMissing both return resource.ErrNotFound.",
+          "behavior": "find_vpn_endpoint_group sends GET /vpn/endpoint-groups/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupFindChainAndGetWithoutFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_vpn_endpoint_group lists /vpn/endpoint-groups?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /vpn/endpoint-groups list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_vpn_endpoint_group forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/vpn_endpoint_groups",
@@ -97611,31 +97841,59 @@
     {
       "operation": "python:network/v2/find_vpn_ike_policy",
       "source_fingerprint": "8feb4dab66dcded5a016873659bdb8eef277a72cae9595cdc53b6ff3edaa9c51",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET vpn/ikepolicies/{x} and returns nil on 404, and Find(resource.Name(x)) sends GET vpn/ikepolicies?name={x} and returns the unique name match, matching Python's requests when no query keywords are passed; without WithIgnoreMissing both return resource.ErrNotFound.",
+          "behavior": "find_vpn_ike_policy sends GET /vpn/ikepolicies/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyFindChainAndGetWithoutFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_vpn_ike_policy lists /vpn/ikepolicies?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /vpn/ikepolicies list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_vpn_ike_policy forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/vpn_ike_policies",
@@ -97798,31 +98056,59 @@
     {
       "operation": "python:network/v2/find_vpn_ipsec_policy",
       "source_fingerprint": "2c8bcb765c288b0d887ec57554f2585b1376c2d1aa8e350b45f8a59fcaffad82",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET vpn/ipsecpolicies/{x} and returns nil on 404, and Find(resource.Name(x)) sends GET vpn/ipsecpolicies?name={x} and returns the unique name match, matching Python's requests when no query keywords are passed; without WithIgnoreMissing both return resource.ErrNotFound.",
+          "behavior": "find_vpn_ipsec_policy sends GET /vpn/ipsecpolicies/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyFindChainAndGetWithoutFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_vpn_ipsec_policy lists /vpn/ipsecpolicies?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /vpn/ipsecpolicies list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_vpn_ipsec_policy forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/vpn_ipsec_policies",
@@ -97983,31 +98269,59 @@
     {
       "operation": "python:network/v2/find_vpn_ipsec_site_connection",
       "source_fingerprint": "f67b0afdbda66afcf963880466d78ab6f17bfccf4982541a0dd9eacfde0c3aed",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET vpn/ipsec-site-connections/{x} and returns nil on 404, and Find(resource.Name(x)) sends GET vpn/ipsec-site-connections?name={x} and returns the unique name match, matching Python's requests when no query keywords are passed; without WithIgnoreMissing both return resource.ErrNotFound.",
+          "behavior": "find_vpn_ipsec_site_connection sends GET /vpn/ipsec-site-connections/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionFindChainAndGetWithoutFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_vpn_ipsec_site_connection lists /vpn/ipsec-site-connections?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /vpn/ipsec-site-connections list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request."
       ],
-      "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_vpn_ipsec_site_connection forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/vpn_ipsec_site_connections",
@@ -98202,28 +98516,55 @@
       "source_fingerprint": "7e30bd6400e79f4792f47947357480b1ff70d5162f9a6f75c7249fa66d6ef2dd",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET bgp-peers/{x} and returns nil on 404, and Find(resource.Name(x)) sends the unfiltered GET bgp-peers like Python and matches the name locally, failing with resource.ErrAmbiguous on duplicates.",
+          "behavior": "find_bgp_peer sends GET /bgp-peers/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/bgp/peers/python_parity_test.go:TestPythonBGPPeerFindChainWithoutQuery"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_bgp_peer lists /bgp-peers without a name query and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "A caller query reaches the member GET, but the list fallback stops with ErrUnsupported before HTTP because the native BGP pager takes no query.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model."
       ],
       "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_bgp_peer forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
+        "Python forwards **query to the list fallback, where every key except limit and marker leaves the wire and known Body attributes filter the rows locally; the native BGP pager takes no query and no SDK option applies that local Body filter, so FindIdentity rejects a caller query on the list fallback with ErrUnsupported."
       ]
     },
     {
@@ -98362,28 +98703,55 @@
       "source_fingerprint": "81eb325705c1721e584bf6d0750aa854c58c9d14332babb8bfa59baa092fbe66",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET bgp-speakers/{x} and returns nil on 404, and Find(resource.Name(x)) sends the unfiltered GET bgp-speakers like Python and matches the name locally.",
+          "behavior": "find_bgp_speaker sends GET /bgp-speakers/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/bgp/speakers/python_parity_test.go:TestPythonBGPSpeakerListAndFindHaveNoQuery"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_bgp_speaker lists /bgp-speakers without a name query and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "A caller query reaches the member GET, but the list fallback stops with ErrUnsupported before HTTP because the native BGP pager takes no query.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model."
       ],
       "remaining": [
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_bgp_speaker forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
+        "Python forwards **query to the list fallback, where every key except limit and marker leaves the wire and known Body attributes filter the rows locally; the native BGP pager takes no query and no SDK option applies that local Body filter, so FindIdentity rejects a caller query on the list fallback with ErrUnsupported."
       ]
     },
     {
@@ -98698,32 +99066,60 @@
     {
       "operation": "python:network/v2/find_bgpvpn",
       "source_fingerprint": "8e620d84ccda3ea52e9f64eff96b55e86de9701d9d1503e7aea92ab6003f525e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Name",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "Find(resource.ID(x), WithIgnoreMissing) sends GET bgpvpn/bgpvpns/{x} and returns nil on 404, but Find(resource.Name(x)) lists bgpvpn/bgpvpns without the name query that Python sends.",
+          "behavior": "find_bgpvpn sends GET /bgpvpn/bgpvpns/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNFindListsWithoutNameAndGetHasNoFields"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_bgpvpn lists /bgpvpn/bgpvpns?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "resource.WithIdentityFindQuery values are sent on both the member GET and the /bgpvpn/bgpvpns list fallback, before the automatic name hint.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "docs/finding-identities.md"
       ],
       "differences": [
-        "Python falls back to the list after GET 400, 403 or 404 in one call; Go needs two Find calls, and Find(resource.ID) with WithIgnoreMissing returns nil only for 404.",
-        "Python matches the list rows by ID or name and raises DuplicateResource; the Go name lookup compares only the name and returns resource.ErrAmbiguous."
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request.",
+        "The native BGPVPN ListOpts has no Name field; the SDK adds the name= hint itself, so explicit Find(resource.Name) also sends name= now."
       ],
-      "remaining": [
-        "The bgpvpns collection has no name query binding, so the Go name lookup sends GET bgpvpn/bgpvpns without ?name= and filters every row locally instead of sending Python's filtered list.",
-        "API.Find and resource.Collection.Find accept no query, so the Python **query keywords that find_bgpvpn forwards to both the ID GET and the name list cannot be sent; only the default-argument chain is verified."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_bgpvpn_network_association",
@@ -99495,48 +99891,69 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_aggregate",
       "source_fingerprint": "8f706535fe3ff233b3dc9b410e52908b75de51f12554dc5641bff3b394d69a3c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Get"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity"
       ],
       "contracts": [
         {
-          "behavior": "Go aggregate lookup has no GET-by-ID then list-by-name fallback.",
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
           "tests": [
-            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback"
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
           ]
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
-      ]
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.",
+        "Python's deprecated filters argument only emits RemovedInSDK50Warning and does not change the lookup; Go has no such argument."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/update_aggregate",
       "source_fingerprint": "7b500811c14ea87a5a2447a067690fb0349a9eb48235de4ffe58a89b773c1565",
       "status": "unresolved",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update"
       ],
       "contracts": [
         {
-          "behavior": "Go aggregate lookup has no fallback and Update cannot send availability_zone=None.",
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
           "tests": [
-            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateFindHasNoIDThenNameFallback",
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
+          ]
+        },
+        {
+          "behavior": "Update sends PUT os-aggregates/{id} with the typed name and availability_zone but rejects an explicit null availability_zone before HTTP.",
+          "tests": [
             "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateUpdateCannotSendNullAvailabilityZone"
           ]
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client."
+      ],
       "remaining": [
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET.",
         "The delegated proxy update_aggregate is unresolved because UpdateOpts cannot send availability_zone=None."
       ]
     },
@@ -99545,65 +99962,152 @@
       "source_fingerprint": "f32f637e3b8b229ecff7b1fbf538617d254a69471ad1aa65128b9b658e47f6af",
       "status": "unresolved",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete"
       ],
-      "contracts": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "contracts": [
+        {
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
+          ]
+        }
       ],
-      "differences": [],
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client."
+      ],
       "remaining": [
-        "A digit string skips the lookup and Python turns the strict DELETE 404 into False; Go Delete returns the 404, and resource.IgnoreMissing would hide the False result.",
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
+        "A digit string skips the lookup and Python turns the strict DELETE 404 into False; Go Delete returns the 404, and resource.IgnoreMissing or Remove would report success instead of the False result."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/set_aggregate_metadata",
       "source_fingerprint": "378158a854503244e3286111f8e95e7a0e6a9c5f7a72d9373536354549c19dd6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.SetMetadata"
       ],
-      "contracts": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "contracts": [
+        {
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
+          ]
+        },
+        {
+          "behavior": "set_aggregate_metadata(name_or_id, ...) resolves the aggregate like get_aggregate and then sends POST os-aggregates/{id}/action with {\"set_metadata\": {\"metadata\": ...}} through SetMetadata; a missing aggregate stops with resource.ErrNotFound before the action.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudAggregateActionsResolveTheAggregateFirst",
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
       ],
-      "differences": [],
-      "remaining": [
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
-      ]
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.",
+        "Python raises SDKException('Host aggregate ... not found.') for a missing aggregate; Go strict FindIdentity returns resource.ErrNotFound and the caller does not call SetMetadata.",
+        "Python passes the found Aggregate object; Go passes the integer ID of the found model."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/add_host_to_aggregate",
       "source_fingerprint": "77b3001b926750d63a732983f1f66a2bb2ec16e260173c9e4e52ceb7b7a967a0",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.AddHost"
       ],
-      "contracts": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "contracts": [
+        {
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
+          ]
+        },
+        {
+          "behavior": "add_host_to_aggregate(name_or_id, ...) resolves the aggregate like get_aggregate and then sends POST os-aggregates/{id}/action with {\"add_host\": {\"host\": h}} through AddHost; a missing aggregate stops with resource.ErrNotFound before the action.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudAggregateActionsResolveTheAggregateFirst",
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
       ],
-      "differences": [],
-      "remaining": [
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
-      ]
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.",
+        "Python raises SDKException('Host aggregate ... not found.') for a missing aggregate; Go strict FindIdentity returns resource.ErrNotFound and the caller does not call AddHost.",
+        "Python passes the found Aggregate object; Go passes the integer ID of the found model."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/remove_host_from_aggregate",
       "source_fingerprint": "6511eb9a5452f20e8dacad265c6003a10525438bcfbbbe66e2c2ad853b2d4a96",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.RemoveHost"
       ],
-      "contracts": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "contracts": [
+        {
+          "behavior": "get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList",
+            "api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute"
+          ]
+        },
+        {
+          "behavior": "remove_host_from_aggregate(name_or_id, ...) resolves the aggregate like get_aggregate and then sends POST os-aggregates/{id}/action with {\"remove_host\": {\"host\": h}} through RemoveHost; a missing aggregate stops with resource.ErrNotFound before the action.",
+          "tests": [
+            "compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudAggregateActionsResolveTheAggregateFirst",
+            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateHostAndMetadataActionsReturnAggregate"
+          ]
+        }
       ],
-      "differences": [],
-      "remaining": [
-        "Python get_aggregate is find_aggregate(name_or_id, ignore_missing=True), which sends GET os-aggregates/{name_or_id} and falls back to listing os-aggregates on 400/403/404; Go has no aggregate helper with that fallback, because aggregates.API.Find(resource.ID(x)) rejects non-integer names before HTTP and Find(resource.Name(x)) skips the GET."
-      ]
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.",
+        "Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.",
+        "Python raises SDKException('Host aggregate ... not found.') for a missing aggregate; Go strict FindIdentity returns resource.ErrNotFound and the caller does not call RemoveHost.",
+        "Python passes the found Aggregate object; Go passes the integer ID of the found model."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/list_hypervisors",
@@ -101439,93 +101943,206 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_rule",
       "source_fingerprint": "d5cac3aef3376cca19c30f5390647a5b5f462bc6cec6af1815e2fd46cb3f52ed",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "behavior": "find_firewall_rule sends GET /fwaas/firewall_rules/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_firewall_rule lists /fwaas/firewall_rules?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "get_firewall_rule(name_or_id, filters) sends every filter on GET /fwaas/firewall_rules/{name_or_id} and on the name list, and returns nil without error when nothing matches, as find_firewall_rule(ignore_missing=True, **filters).",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
-      "remaining": [
-        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_rules name list.",
-        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
-      ]
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request.",
+        "Python takes filters as one dict; Go takes one resource.WithIdentityFindQuery(key, value) per filter with string values, and nested dict filter values have no Go form."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_policy",
       "source_fingerprint": "75aecee4e9236b857d5c3361676da190eebe5cb9312f5478a616eb25d548bc8a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "behavior": "find_firewall_policy sends GET /fwaas/firewall_policies/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_firewall_policy lists /fwaas/firewall_policies?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "get_firewall_policy(name_or_id, filters) sends every filter on GET /fwaas/firewall_policies/{name_or_id} and on the name list, and returns nil without error when nothing matches, as find_firewall_policy(ignore_missing=True, **filters).",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
-      "remaining": [
-        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_policies name list.",
-        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
-      ]
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request.",
+        "Python takes filters as one dict; Go takes one resource.WithIdentityFindQuery(key, value) per filter with string values, and nested dict filter values have no Go form."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_group",
       "source_fingerprint": "def3908f9d4b4e4aac9c6f73d198a65d4b23a22116239e351817c792cfbff06f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Find",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
       ],
       "contracts": [
         {
-          "behavior": "The generic FWaaS Find(resource.ID) with ignore missing returns a 400 or 403 member GET as an error instead of falling back to the name list.",
+          "behavior": "find_firewall_group sends GET /fwaas/firewall_groups/{name_or_id} with the literal identity and returns that resource without listing when the GET succeeds.",
           "tests": [
-            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+            "api/find_identity_python_finds_test.go:TestPythonFindGETByIDReturnsWithoutList"
+          ]
+        },
+        {
+          "behavior": "After a member GET 400, 403 or 404 find_firewall_group lists /fwaas/firewall_groups?name={name_or_id} and matches the row ID or name; any other GET error is returned without listing.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindFallsBackAfter400403404AndMatchesIDOrPythonName",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        },
+        {
+          "behavior": "A missing resource is nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false); two matching rows are resource.ErrAmbiguous.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound",
+            "api/find_identity_python_finds_test.go:TestPythonFindDuplicateMatchesAreAmbiguous"
+          ]
+        },
+        {
+          "behavior": "The sdkgen opt-in pins the native member GET route, accepted codes, name policy and list query policy, and rejects model or signature drift.",
+          "tests": [
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedCollectionsRejectNativeShapeDrift",
+            "internal/cmd/sdkgen/identity_extended_collections_test.go:TestIdentityExtendedEmissionCarriesNamePolicyAndLiteralGet"
+          ]
+        },
+        {
+          "behavior": "get_firewall_group(name_or_id, filters) sends every filter on GET /fwaas/firewall_groups/{name_or_id} and on the name list, and returns nil without error when nothing matches, as find_firewall_group(ignore_missing=True, **filters).",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindForwardsQueryToGETAndList"
           ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "docs/finding-identities.md"
       ],
-      "differences": [],
-      "remaining": [
-        "The fwaas_v2 packages have no FindRecord or FindIdentity; Collection.Find accepts no query, so the cloud filters argument cannot be sent on the member GET or the /fwaas/firewall_groups name list.",
-        "Python falls back to the name list after a 400 or 403 member GET; Go Find(resource.ID) treats only 404 as absent."
-      ]
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model.",
+        "Python list fallback drops **query keys missing from the Resource query mapping and filters known Body attributes locally; Go sends every resource.WithIdentityFindQuery key on the wire for both the GET and the list and applies no local Body filter.",
+        "Go query values are strings; Python stringifies values such as booleans (True) when building the request.",
+        "Python takes filters as one dict; Go takes one resource.WithIdentityFindQuery(key, value) per filter with string values, and nested dict filter values have no Go form."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/delete_firewall_rule",
       "source_fingerprint": "8fbf0081d3063b1d912ac71a40b4f5f8a17906b68aa52e0acd6b54b680b8deb4",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Delete"
       ],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-a.md"
+      "contracts": [
+        {
+          "behavior": "The strict lookup of delete_firewall_rule sends the filters on GET /fwaas/firewall_rules/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        }
       ],
-      "differences": [],
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model."
+      ],
       "remaining": [
-        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
         "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
       ]
     },
@@ -101534,16 +102151,30 @@
       "source_fingerprint": "a900f823d8ae4756e9a08bd4f7f4eb69c1fda814ea14ad5525e124d61c5b9694",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Delete"
       ],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-a.md"
+      "contracts": [
+        {
+          "behavior": "The strict lookup of delete_firewall_policy sends the filters on GET /fwaas/firewall_policies/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        }
       ],
-      "differences": [],
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model."
+      ],
       "remaining": [
-        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
         "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
       ]
     },
@@ -101552,16 +102183,30 @@
       "source_fingerprint": "2b0273ba14ada5603ad13334816a475fe9453360b7ad578af8866305bbd761ed",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Delete"
       ],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-a.md"
+      "contracts": [
+        {
+          "behavior": "The strict lookup of delete_firewall_group sends the filters on GET /fwaas/firewall_groups/{name_or_id} and on the name list and reports a missing resource as resource.ErrNotFound before any DELETE.",
+          "tests": [
+            "api/find_identity_python_finds_test.go:TestPythonCloudGetFirewallForwardsFiltersToBothRequests",
+            "api/find_identity_python_finds_test.go:TestPythonFindMissingDefaultsToNilAndStrictIsNotFound"
+          ]
+        }
       ],
-      "differences": [],
+      "documentation": [
+        "docs/finding-identities.md"
+      ],
+      "differences": [
+        "Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).",
+        "Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.",
+        "Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.",
+        "Python returns a Resource object; Go returns the native typed model."
+      ],
       "remaining": [
-        "The fwaas_v2 packages have no finder that carries the cloud filters argument or the 400/403 fallback of Python find_firewall_*.",
         "Python deletes with ignore_missing=False and converts a DELETE 404 to False; API.Delete returns the 404 as an error and Remove/resource.IgnoreMissing turn it into success, so no SDK API produces the Python False result."
       ]
     },
