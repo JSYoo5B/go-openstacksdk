@@ -4,7 +4,10 @@ package floatingips
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/layer3/floatingips"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -14,10 +17,17 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[FloatingIP] {
 	return resource.NewCollection(resource.Adapter[FloatingIP]{
-		Kind:   "floatingips",
-		Get:    func(ctx context.Context, id string) (*FloatingIP, error) { return a.Get(ctx, string(id)) },
-		ID:     func(v *FloatingIP) string { return fmt.Sprint(v.ID) },
-		Status: func(v *FloatingIP) string { return fmt.Sprint(v.Status) },
+		Kind:         "floatingips",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*FloatingIP, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"floatingips", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
+		IdentityName: func(v *FloatingIP) string { return fmt.Sprint(v.FloatingIP) },
+		Get:          func(ctx context.Context, id string) (*FloatingIP, error) { return a.Get(ctx, string(id)) },
+		ID:           func(v *FloatingIP) string { return fmt.Sprint(v.ID) },
+		Status:       func(v *FloatingIP) string { return fmt.Sprint(v.Status) },
 		Failed: func(status string) bool {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
@@ -25,17 +35,23 @@ func (a *API) newResources() *resource.Collection[FloatingIP] {
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*FloatingIP, error] {
 			q = maps.Clone(q)
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*FloatingIP, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*FloatingIP, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*FloatingIP, error) {
 	return a.Resources.All(ctx, options...)

@@ -123,7 +123,7 @@ func TestOrderPythonFilterManifestKeepsInheritedQueriesAndTwoReferenceProperties
 
 func TestOrderBodyFilterNativeContractRejectsModelMetaDecoderPagerAndSourceDrift(t *testing.T) {
 	pkg, plan := orderFilterNativeFixture(t, orderFilterNativeFixtureSource)
-	if !orderBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || identityCollectionEnabled(pkg, plan, 0) {
+	if !orderBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 37 || identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	if err := validateOrderBodyNativeDeclarations(pkg, orderBodyPinnedDeclarations(t), plan); err != nil {

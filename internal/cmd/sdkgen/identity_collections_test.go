@@ -21,6 +21,9 @@ func identityCollectionFixture(t *testing.T, spec identityCollectionSpec, fields
 	if spec.rawListIterator != "" {
 		listArgs = ",opts ListOpts"
 	}
+	if spec.noListQuery {
+		listArgs = ""
+	}
 	options := `type ListOpts struct{Name string ` + "`q:\"" + query + "\"`" + `}
 type ListOptsBuilder interface{ToListQuery()(string,error)}
 func(ListOpts)ToListQuery()(string,error){return "",nil}`
@@ -40,9 +43,13 @@ func(ListOpts)ToListQuery()(string,error){return "",nil}`
 func TestIdentityCollectionsOnlyEnableAuditedMemberRoutes(t *testing.T) {
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path+"/"+spec.model, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
+			pkg, plan := identityDefaultCollectionFixture(t, spec)
 			if !identityCollectionEnabled(pkg, plan, spec.parents) || identityCollectionEnabled(pkg, plan, spec.parents+1) {
 				t.Fatal("audited parent arity was not preserved", spec, plan)
+			}
+			if identityExtendedSpec(spec) {
+				// Extended name, query and literal-GET shapes have their own drift table.
+				return
 			}
 			for _, drift := range []string{"numeric-model-id", "numeric-model-name", "missing-model-name", "numeric-request-id", "url-identity", "missing-name-query", "different-name-query", "wrong-model", "wrong-getter", "wrong-lister", "unrelated-package"} {
 				t.Run(drift, func(t *testing.T) {
@@ -121,7 +128,7 @@ func identityAdapterEnabled(t *testing.T, source []byte) bool {
 func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *testing.T) {
 	for _, spec := range identityCollectionSpecs {
 		t.Run(spec.path+"/"+spec.model, func(t *testing.T) {
-			pkg, plan := identityCollectionFixture(t, spec, "ID string;Name string", "string", identityExpectedNameQuery(spec))
+			pkg, plan := identityDefaultCollectionFixture(t, spec)
 			root := t.TempDir()
 			dir := filepath.Join(root, spec.path)
 			if err := os.MkdirAll(dir, 0755); err != nil {
@@ -161,13 +168,17 @@ func TestIdentityCollectionWrappersDelegateOwnedOptionsAndKeepScopedParents(t *t
 				requireControlledCalls(t, adapter, "resource.NewCollection(a.ResourceAdapter())")
 				adapter = controlledEmittedMethod(t, emitted, "ResourceAdapter")
 			}
-			if spec.rawListIterator == "" && (!strings.Contains(string(emitted), "config.Query[key] = append([]string(nil), values...)") || strings.Contains(string(emitted), "With"+spec.lister+"Query(key, value)")) {
+			if spec.rawListIterator == "" && !spec.noListQuery && (!strings.Contains(string(emitted), "config.Query[key] = append([]string(nil), values...)") || strings.Contains(string(emitted), "With"+spec.lister+"Query(key, value)")) {
 				t.Fatal("native adapter collapses repeated or nil query values", string(emitted))
 			}
 			if spec.parents != 0 {
 				requireControlledCalls(t, adapter, "s.api."+spec.getter+"(ctx, s.parentID, string(id))", "s.api."+controlledListName(spec.lister)+"(ctx, s.parentID, control, options...)")
 			} else if spec.rawListIterator != "" {
 				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "nativefind."+spec.rawListIterator+"(ctx, a.RawClient(), q, control)")
+			} else if spec.literalGet {
+				requireControlledCalls(t, adapter, "a.Get(ctx, parsed)", "a."+controlledListName(spec.lister)+"(ctx, control)")
+			} else if spec.noListQuery {
+				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "a."+controlledListName(spec.lister)+"(ctx, control)")
 			} else {
 				requireControlledCalls(t, adapter, "a.Get(ctx, string(id))", "a."+controlledListName(spec.lister)+"(ctx, control, options...)")
 			}

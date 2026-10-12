@@ -24,16 +24,16 @@ import (
 )
 
 func identityQueryFixtureSource(spec identityCollectionSpec) string {
-	getArgs, listArgs := "id string", ",opts ListOptsBuilder"
+	fields, idType, listArgs, nameTag := identityFixtureShape(spec)
+	getArgs := "id " + idType
 	if spec.parents != 0 {
 		getArgs = "parentID string," + getArgs
-		listArgs = ",parentID string,opts ListOptsBuilder"
-	}
-	if spec.rawListIterator != "" {
-		listArgs = ",opts ListOpts"
 	}
 	opts := "type ListOpts struct{Name string `q:\"name\"`}\ntype ListOptsBuilder interface{ToListQuery()(string,error)}\nfunc(ListOpts)ToListQuery()(string,error){return \"\",nil}"
-	source := controlledFixtureSource(spec.model, "ID string;Name string", spec.getter, getArgs, spec.lister, listArgs, opts)
+	if identityExtendedSpec(spec) && nameTag != "name" {
+		opts = strings.Replace(opts, "Name string `q:\"name\"`", "Name string `q:\""+nameTag+"\"`", 1)
+	}
+	source := controlledFixtureSource(spec.model, fields, spec.getter, getArgs, spec.lister, listArgs, opts)
 	if spec.path == "network/v2/networks" {
 		source = strings.Replace(source, "type Network struct{ID string;Name string}", "type Network struct{ID string `json:\"id\"`;Name string `json:\"name\"`;Description string `json:\"description\"`;AdminStateUp bool `json:\"admin_state_up\"`;Status string `json:\"status\"`;Subnets []string `json:\"subnets\"`;TenantID string `json:\"tenant_id\"`;UpdatedAt time.Time `json:\"-\"`;CreatedAt time.Time `json:\"-\"`;ProjectID string `json:\"project_id\"`;Shared bool `json:\"shared\"`;AvailabilityZoneHints []string `json:\"availability_zone_hints\"`;Tags []string `json:\"tags\"`;RevisionNumber int `json:\"revision_number\"`}", 1)
 		source = strings.Replace(source, "import \"context\"", "import \"context\"\nimport \"time\"", 1)
@@ -214,8 +214,25 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 		"dns/v2/recordsets":                            `[]string{"zones", s.parentID, "recordsets", id}, q, []int{200}`,
 		"loadbalancer/v2/pools":                        `[]string{"lbaas", "pools", s.parentID, "members", id}, q, []int{200}`,
 		"image/v2/images":                              `[]string{"images", id}, q, []int{200}`,
+		"network/v2/extensions/taas/tapmirrors":        `[]string{"taas", "tap_mirrors", id}, q, []int{200}`,
+		"network/v2/extensions/segments":               `[]string{"segments", id}, q, []int{200}`,
+		"network/v2/extensions/vpnaas/services":        `[]string{"vpn", "vpnservices", id}, q, []int{200}`,
+		"network/v2/extensions/vpnaas/endpointgroups":  `[]string{"vpn", "endpoint-groups", id}, q, []int{200}`,
+		"network/v2/extensions/vpnaas/ikepolicies":     `[]string{"vpn", "ikepolicies", id}, q, []int{200}`,
+		"network/v2/extensions/vpnaas/ipsecpolicies":   `[]string{"vpn", "ipsecpolicies", id}, q, []int{200}`,
+		"network/v2/extensions/vpnaas/siteconnections": `[]string{"vpn", "ipsec-site-connections", id}, q, []int{200}`,
+		"network/v2/extensions/fwaas_v2/rules":         `[]string{"fwaas", "firewall_rules", id}, q, []int{200}`,
+		"network/v2/extensions/fwaas_v2/policies":      `[]string{"fwaas", "firewall_policies", id}, q, []int{200}`,
+		"network/v2/extensions/fwaas_v2/groups":        `[]string{"fwaas", "firewall_groups", id}, q, []int{200}`,
+		"network/v2/extensions/bgpvpns":                `[]string{"bgpvpn", "bgpvpns", id}, q, []int{200}`,
+		"network/v2/extensions/bgp/peers":              `[]string{"bgp-peers", id}, q, []int{200}`,
+		"network/v2/extensions/bgp/speakers":           `[]string{"bgp-speakers", id}, q, []int{200}`,
+		"network/v2/extensions/layer3/floatingips":     `[]string{"floatingips", id}, q, []int{200}`,
+		"identity/v3/policies":                         `[]string{"policies", id}, q, []int{200}`,
+		"identity/v3/regions":                          `[]string{"regions", id}, q, []int{200}`,
+		"compute/v2/aggregates":                        `[]string{"os-aggregates", id}, q, []int{200}`,
 	}
-	if len(identityCollectionSpecs) != 20 || len(identityNativeDeclarations) != 20 {
+	if len(identityCollectionSpecs) != 37 || len(identityNativeDeclarations) != 37 {
 		t.Fatal("identity opt-in inventory must remain explicit", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 	for _, spec := range identityCollectionSpecs {
@@ -245,6 +262,8 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 			}
 			if spec.rawListIterator != "" {
 				wants = append(wants, "return nativefind."+spec.rawListIterator+"(ctx, "+receiver+".RawClient(), q, control)")
+			} else if spec.noListQuery {
+				wants = append(wants, "return "+receiver+"."+controlledListName(spec.lister)+"(ctx, control)")
 			} else {
 				wants = append(wants, "config.Query[key] = append([]string(nil), values...)")
 			}
@@ -257,7 +276,9 @@ func TestIdentityGetQueryUsesAuditedNativeRoutesCodesAndResult(t *testing.T) {
 				t.Fatal("audited query map collapsed to scalar options", body)
 			}
 			get := controlledEmittedMethod(t, source, "newResources")
-			if spec.parents == 0 {
+			if spec.literalGet {
+				requireControlledCalls(t, get, "a.Get(ctx, parsed)")
+			} else if spec.parents == 0 {
 				requireControlledCalls(t, get, "a.Get(ctx, string(id))")
 			} else {
 				requireControlledCalls(t, get, "s.api."+spec.getter+"(ctx, s.parentID, string(id))")
@@ -365,6 +386,9 @@ func resourceURL(c *gophercloud.ServiceClient, id string) string { return c.Serv
 }`
 		urls = `func memberResourceURL(c *gophercloud.ServiceClient, poolID string, memberID string) string { return c.ServiceURL(rootPath,resourcePath,poolID,memberPath,memberID) }`
 	default:
+		if decls := pinnedExtendedIdentityDeclarations(t, spec); decls != nil {
+			return decls
+		}
 		t.Fatal("missing pinned request fixture", spec)
 	}
 	urls = strings.ReplaceAll(urls, " { return", " {\n\treturn")

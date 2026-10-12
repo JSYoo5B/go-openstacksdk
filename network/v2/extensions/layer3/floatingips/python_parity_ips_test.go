@@ -45,7 +45,7 @@ func TestPythonIPsFindIPOnlyReproducesTheIDLookup(t *testing.T) {
 	if err != nil || got == nil || got.ID != "id-1" || got.FloatingIP != "203.0.113.5" || got.FloatingNetworkID != "ext" || got.Status != "ACTIVE" {
 		t.Fatal(got, err)
 	}
-	// Python would continue with an unfiltered list after this 404; Go stops.
+	// Explicit Ref ID lookup stops after this 404; FindIdentity continues.
 	missing, err := api.Find(ctx, resource.ID("203.0.113.5"), resource.WithIgnoreMissing())
 	if err != nil || missing != nil {
 		t.Fatal(missing, err)
@@ -62,12 +62,10 @@ func TestPythonIPsFindIPOnlyReproducesTheIDLookup(t *testing.T) {
 		t.Fatalf("%+v", calls)
 	}
 
-	// The name fallback on floating_ip_address has no SDK helper for this binding.
+	// Explicit Ref name lookup stays unsupported; API.FindIdentity owns the
+	// floating_ip_address fallback (python_find_identity_test.go).
 	calls = nil
 	if _, err := api.Find(ctx, resource.Name("203.0.113.5"), resource.WithIgnoreMissing()); !errors.Is(err, resource.ErrUnsupported) {
-		t.Fatal(err)
-	}
-	if _, err := api.Resources.FindIdentity(ctx, "203.0.113.5"); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	if len(calls) != 0 {

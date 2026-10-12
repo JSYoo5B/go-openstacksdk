@@ -4,7 +4,10 @@ package regions
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/regions"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -13,24 +16,36 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Region] {
 	return resource.NewCollection(resource.Adapter[Region]{
-		Kind:   "regions",
-		Get:    func(ctx context.Context, id string) (*Region, error) { return a.Get(ctx, string(id)) },
-		ID:     func(v *Region) string { return fmt.Sprint(v.ID) },
-		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
+		Kind:         "regions",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Region, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"regions", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
+		IdentityName: func(*Region) string { return "" },
+		Get:          func(ctx context.Context, id string) (*Region, error) { return a.Get(ctx, string(id)) },
+		ID:           func(v *Region) string { return fmt.Sprint(v.ID) },
+		Delete:       func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Region, error] {
 			q = maps.Clone(q)
-			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Region, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Region, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Region, error) {
 	return a.Resources.All(ctx, options...)

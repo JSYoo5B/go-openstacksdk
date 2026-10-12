@@ -559,7 +559,7 @@ func TestIdentityPoolTrunkEmissionKeepsWholeQueriesAndExistingNativeCapabilities
 			}
 		})
 	}
-	if len(identityCollectionSpecs) != 20 {
+	if len(identityCollectionSpecs) != 37 {
 		t.Fatal("audit opt-in count changed", len(identityCollectionSpecs))
 	}
 }

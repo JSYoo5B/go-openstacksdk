@@ -4,7 +4,10 @@ package siteconnections
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/vpnaas/siteconnections"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -14,7 +17,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Connection] {
 	return resource.NewCollection(resource.Adapter[Connection]{
-		Kind:      "siteconnections",
+		Kind:         "siteconnections",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Connection, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"vpn", "ipsec-site-connections", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:       func(ctx context.Context, id string) (*Connection, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *Connection) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *Connection) string { return fmt.Sprint(v.Name) },
@@ -24,21 +33,27 @@ func (a *API) newResources() *resource.Collection[Connection] {
 			status = strings.ToLower(status)
 			return strings.HasPrefix(status, "error") || strings.HasSuffix(status, "fail") || strings.HasSuffix(status, "failed") || status == "killed"
 		},
-		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
+		LocalStatus: true,
+		Delete:      func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Connection, error] {
 			q = maps.Clone(q)
-			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Connection, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Connection, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Connection, error) {
 	return a.Resources.All(ctx, options...)

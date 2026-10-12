@@ -27,6 +27,21 @@ type identityCollectionSpec struct {
 	listDefaultValue            string
 	extraSpecs                  bool
 	rawListIterator             string
+	// nameField is the native string field that carries the pinned Python
+	// Resource.name (for example floating_ip_address) when the model has no
+	// Name field. idOnly marks models whose Python name is never populated by
+	// the service, so list fallback matches IDs only.
+	nameField string
+	idOnly    bool
+	// listNameQuery is the literal list name hint for a native ListOpts that
+	// lacks a Name field while the pinned Python query mapping declares one.
+	listNameQuery string
+	// noListQuery accepts a native List without options. The list fallback
+	// then rejects caller query, as the native pager has no query input.
+	noListQuery bool
+	// literalGet sends the direct phase through the query getter for a
+	// numeric native getter, so Python's literal name_or_id reaches the route.
+	literalGet bool
 }
 
 var identityCollectionSpecs = []identityCollectionSpec{
@@ -50,6 +65,30 @@ var identityCollectionSpecs = []identityCollectionSpec{
 	{path: "network/v2/extensions/trunks", model: "Trunk", getter: "Get", lister: "List", getSegments: []string{"trunks", "$id"}, getCodes: []int{200}},
 	{path: "network/v2/extensions/qos/policies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"qos", "policies", "$id"}, getCodes: []int{200}},
 	{path: "network/v2/extensions/security/addressgroups", model: "AddressGroup", getter: "Get", lister: "List", getSegments: []string{"address-groups", "$id"}, getCodes: []int{200}},
+	// Pinned Python find_* for these resources forwards **query to the GET
+	// and to a list whose query mapping declares name (or, where noted, not).
+	{path: "network/v2/extensions/taas/tapmirrors", model: "TapMirror", getter: "Get", lister: "List", getSegments: []string{"taas", "tap_mirrors", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/segments", model: "Segment", getter: "Get", lister: "List", getSegments: []string{"segments", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/vpnaas/services", model: "Service", getter: "Get", lister: "List", getSegments: []string{"vpn", "vpnservices", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/vpnaas/endpointgroups", model: "EndpointGroup", getter: "Get", lister: "List", getSegments: []string{"vpn", "endpoint-groups", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/vpnaas/ikepolicies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"vpn", "ikepolicies", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/vpnaas/ipsecpolicies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"vpn", "ipsecpolicies", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/vpnaas/siteconnections", model: "Connection", getter: "Get", lister: "List", getSegments: []string{"vpn", "ipsec-site-connections", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/fwaas_v2/rules", model: "Rule", getter: "Get", lister: "List", getSegments: []string{"fwaas", "firewall_rules", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/fwaas_v2/policies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"fwaas", "firewall_policies", "$id"}, getCodes: []int{200}},
+	{path: "network/v2/extensions/fwaas_v2/groups", model: "Group", getter: "Get", lister: "List", getSegments: []string{"fwaas", "firewall_groups", "$id"}, getCodes: []int{200}},
+	// BGPVPN's native ListOpts has no Name, but Python's mapping sends name.
+	{path: "network/v2/extensions/bgpvpns", model: "BGPVPN", getter: "Get", lister: "List", getSegments: []string{"bgpvpn", "bgpvpns", "$id"}, getCodes: []int{200}, listNameQuery: "name"},
+	// BGP peers/speakers: no native list options and no Python name mapping.
+	{path: "network/v2/extensions/bgp/peers", model: "BGPPeer", getter: "Get", lister: "List", getSegments: []string{"bgp-peers", "$id"}, getCodes: []int{200}, noListQuery: true},
+	{path: "network/v2/extensions/bgp/speakers", model: "BGPSpeaker", getter: "Get", lister: "List", getSegments: []string{"bgp-speakers", "$id"}, getCodes: []int{200}, noListQuery: true},
+	// Python FloatingIP.name is floating_ip_address; no name query mapping.
+	{path: "network/v2/extensions/layer3/floatingips", model: "FloatingIP", getter: "Get", lister: "List", getSegments: []string{"floatingips", "$id"}, getCodes: []int{200}, nameField: "FloatingIP"},
+	// Keystone policies and regions have no name attribute or name query.
+	{path: "identity/v3/policies", model: "Policy", getter: "Get", lister: "List", getSegments: []string{"policies", "$id"}, getCodes: []int{200}, idOnly: true},
+	{path: "identity/v3/regions", model: "Region", getter: "Get", lister: "List", getSegments: []string{"regions", "$id"}, getCodes: []int{200}, idOnly: true},
+	// Nova aggregates have integer IDs; Python sends name_or_id literally.
+	{path: "compute/v2/aggregates", model: "Aggregate", getter: "Get", lister: "List", getSegments: []string{"os-aggregates", "$id"}, getCodes: []int{200}, noListQuery: true, literalGet: true},
 }
 
 func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents int) bool {
@@ -58,25 +97,18 @@ func identityCollectionEnabled(pkg *types.Package, plan *collectionPlan, parents
 }
 
 func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parents int) (identityCollectionSpec, bool) {
-	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.name != "Name" || plan.idIsURL || !isString(plan.getIDType) || plan.listInput == nil {
-		return identityCollectionSpec{}, false
-	}
-	identifier, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.id)
-	field, ok := identifier.(*types.Var)
-	if !ok || !field.IsField() || !isString(field.Type()) {
-		return identityCollectionSpec{}, false
-	}
-	name, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.name)
-	nameField, ok := name.(*types.Var)
-	if !ok || !nameField.IsField() || !isString(nameField.Type()) {
+	if plan == nil || plan.getter == nil || plan.lister == nil || plan.id != "ID" || plan.idIsURL {
 		return identityCollectionSpec{}, false
 	}
 	for _, spec := range identityCollectionSpecs {
-		if sdkPath(pkg.Path()) == spec.path && plan.modelName == spec.model && plan.getter.Name() == spec.getter && plan.lister.Name() == spec.lister && parents == spec.parents && identityGetResult(pkg, plan, parents) != nil {
+		if sdkPath(pkg.Path()) == spec.path && plan.modelName == spec.model && plan.getter.Name() == spec.getter && plan.lister.Name() == spec.lister && parents == spec.parents {
+			if !identityModelMetadataValid(spec) || !identityIdentifierValid(plan, spec) || !identityNameValid(plan, spec) || identityGetResult(pkg, plan, parents) == nil {
+				return identityCollectionSpec{}, false
+			}
 			if !identityMissingListMetadataValid(spec) || !identityFlavorMetadataValid(spec) || !identityRawListMetadataValid(spec) || plan.nameQuery != identityExpectedNameQuery(spec) {
 				return identityCollectionSpec{}, false
 			}
-			if plan.listQueryBuilder != (spec.rawListIterator == "") {
+			if (plan.listInput == nil) != spec.noListQuery || plan.listQueryBuilder != (spec.rawListIterator == "" && !spec.noListQuery) {
 				return identityCollectionSpec{}, false
 			}
 			return spec, true
@@ -85,8 +117,58 @@ func identityCollectionContract(pkg *types.Package, plan *collectionPlan, parent
 	return identityCollectionSpec{}, false
 }
 
+// Ordinary bindings keep string IDs. Only literal-GET bindings may pair a
+// numeric native getter with a numeric model ID; both are compared as text.
+func identityIdentifierValid(plan *collectionPlan, spec identityCollectionSpec) bool {
+	identifier, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, plan.id)
+	field, ok := identifier.(*types.Var)
+	if !ok || !field.IsField() {
+		return false
+	}
+	if spec.literalGet {
+		return isInteger(plan.getIDType) && isInteger(field.Type())
+	}
+	return isString(plan.getIDType) && isString(field.Type())
+}
+
+// A model either has the native Name field, carries Python's name under one
+// audited string field, or (idOnly) has no name the service populates.
+func identityNameValid(plan *collectionPlan, spec identityCollectionSpec) bool {
+	fieldName := "Name"
+	switch {
+	case spec.idOnly:
+		return plan.name == ""
+	case spec.nameField != "":
+		if plan.name != "" {
+			return false
+		}
+		fieldName = spec.nameField
+	case plan.name != "Name":
+		return false
+	}
+	name, _, _ := types.LookupFieldOrMethod(plan.model, true, nil, fieldName)
+	field, ok := name.(*types.Var)
+	return ok && field.IsField() && isString(field.Type())
+}
+
+// The extended name, query and literal-GET policies are mutually exclusive
+// with the earlier audited special cases and with each other where they overlap.
+func identityModelMetadataValid(spec identityCollectionSpec) bool {
+	extended := spec.nameField != "" || spec.idOnly || spec.listNameQuery != "" || spec.noListQuery || spec.literalGet
+	if !extended {
+		return true
+	}
+	if spec.parents != 0 || spec.rawListIterator != "" || spec.extraSpecs || spec.missingListKey != "" || spec.listDefaultKey != "" {
+		return false
+	}
+	if spec.nameField != "" && spec.idOnly || spec.listNameQuery != "" && (spec.noNameQuery || spec.noListQuery || spec.idOnly || spec.nameField != "") || spec.literalGet && !spec.noListQuery {
+		return false
+	}
+	return true
+}
+
 func identityExpectedNameQuery(spec identityCollectionSpec) string {
-	if spec.noNameQuery {
+	if spec.noNameQuery || spec.listNameQuery != "" || spec.noListQuery || spec.idOnly || spec.nameField != "" {
 		return ""
 	}
 	return "name"
@@ -614,7 +696,7 @@ func identityGetResult(pkg *types.Package, plan *collectionPlan, parents int) *t
 		return nil
 	}
 	for i := 2; i < sig.Params().Len(); i++ {
-		if !isString(sig.Params().At(i).Type()) {
+		if !isString(sig.Params().At(i).Type()) && !(i == sig.Params().Len()-1 && isInteger(sig.Params().At(i).Type()) && isInteger(plan.getIDType)) {
 			return nil
 		}
 	}
@@ -819,7 +901,29 @@ var identityNativeDeclarations = map[string]map[string]string{
 		"AddressGroupPage.IsEmpty":         "ba7bc94d31fad840c0a0c2437508ed26c1782391692a5852ef3ae2d3ed7c8054",
 		"ExtractGroups":                    "d478953739195b0391c1228d9a5b5576638a3a96fbfb93fb41042920a47cfe30",
 	},
+	"network/v2/extensions/taas/tapmirrors":        {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/segments":               {"Get": identityNeutronExtensionGetSHA, "resourceURL": "c222872fc9ca7973abbfc7fcde21b5f381ecaa1652af29a3847cd0060d50c102"},
+	"network/v2/extensions/vpnaas/services":        {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/vpnaas/endpointgroups":  {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/vpnaas/ikepolicies":     {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/vpnaas/ipsecpolicies":   {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/vpnaas/siteconnections": {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/fwaas_v2/rules":         {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/fwaas_v2/policies":      {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/fwaas_v2/groups":        {"Get": identityNeutronExtensionGetSHA, "resourceURL": identityNeutronRootResourceURLSHA},
+	"network/v2/extensions/layer3/floatingips":     {"Get": identityNeutronExtensionGetSHA, "resourceURL": "ca0246cf0e192c0133b2d43b9c5b577badf51c51344d3c5fc499d01a97ef54c8"},
+	"network/v2/extensions/bgpvpns":                {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": identityNeutronBaseResourceURLSHA},
+	"network/v2/extensions/bgp/peers":              {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": identityNeutronBaseResourceURLSHA},
+	"network/v2/extensions/bgp/speakers":           {"Get": identityNetworkGetSHA, "getURL": identityNetworkURLSHA, "resourceURL": identityNeutronBaseResourceURLSHA},
+	"identity/v3/policies":                         {"Get": "df86ee73c2260fdad2bb9524b6ef112e8f3a3769f2074de36e9b5aee4e9578c5", "getURL": "08c6856b84ac48ee4706fe5b1e97a08e0cf2fbc87c725e403c71c4dad7605ef8"},
+	"identity/v3/regions":                          {"Get": identityDefaultGetSHA, "getURL": "02ad616edd58f1d71a34db9d6b4930690a00abba5e767f7ffb827a0bc0cfdb61"},
+	"compute/v2/aggregates":                        {"Get": "f9c1f2135a2415ff630cfd1bc7a1ce3e247b7ad3b4fda33569200328178a582a", "aggregatesGetURL": "b35c898596cc61485c772f521c15d6f55dcc124b000a14d5f4ad2825fa02bf9f"},
 }
+
+// Neutron extensions whose Get is c.Get(resourceURL(c,id)) with default 200.
+const identityNeutronExtensionGetSHA = "c0787d9b62a2cda3caa71d9a5deeaa3b99842417646def58aea2161caf892fb9"
+const identityNeutronRootResourceURLSHA = "580374379e0add5a53a91deeb84368a4c6d82c41e9a0aab61807c2f491844f19"
+const identityNeutronBaseResourceURLSHA = "91c74b3dbcb30a390e24d1020db08f0c78d5abdc64cd6458d5f3bf02ec4c5dbb"
 
 var identityNativeURLConstants = map[string]map[string]string{
 	"network/v2/extensions/qos/policies":           {"resourcePath": "qos/policies"},
@@ -830,6 +934,21 @@ var identityNativeURLConstants = map[string]map[string]string{
 	"network/v2/extensions/security/groups":        {"rootPath": "security-groups"},
 	"loadbalancer/v2/pools":                        {"rootPath": "lbaas", "resourcePath": "pools", "memberPath": "members"},
 	"identity/v3/roles":                            {"rolePath": "roles"},
+	"network/v2/extensions/taas/tapmirrors":        {"rootPath": "taas", "resourcePath": "tap_mirrors"},
+	"network/v2/extensions/segments":               {"urlBaase": "segments"},
+	"network/v2/extensions/vpnaas/services":        {"rootPath": "vpn", "resourcePath": "vpnservices"},
+	"network/v2/extensions/vpnaas/endpointgroups":  {"rootPath": "vpn", "resourcePath": "endpoint-groups"},
+	"network/v2/extensions/vpnaas/ikepolicies":     {"rootPath": "vpn", "resourcePath": "ikepolicies"},
+	"network/v2/extensions/vpnaas/ipsecpolicies":   {"rootPath": "vpn", "resourcePath": "ipsecpolicies"},
+	"network/v2/extensions/vpnaas/siteconnections": {"rootPath": "vpn", "resourcePath": "ipsec-site-connections"},
+	"network/v2/extensions/fwaas_v2/rules":         {"rootPath": "fwaas", "resourcePath": "firewall_rules"},
+	"network/v2/extensions/fwaas_v2/policies":      {"rootPath": "fwaas", "resourcePath": "firewall_policies"},
+	"network/v2/extensions/fwaas_v2/groups":        {"rootPath": "fwaas", "resourcePath": "firewall_groups"},
+	"network/v2/extensions/layer3/floatingips":     {"resourcePath": "floatingips"},
+	"network/v2/extensions/bgpvpns":                {"urlBase": "bgpvpn/bgpvpns"},
+	"network/v2/extensions/bgp/peers":              {"urlBase": "bgp-peers"},
+	"network/v2/extensions/bgp/speakers":           {"urlBase": "bgp-speakers"},
+	"identity/v3/policies":                         {"policyPath": "policies"},
 }
 
 // Export data omits private URL constants. Read their literal source values,

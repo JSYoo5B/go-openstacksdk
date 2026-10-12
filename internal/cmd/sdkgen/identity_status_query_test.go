@@ -33,6 +33,10 @@ func TestIdentityAuditedBindingsRetainRawStatusWithoutInferringTypedStatus(t *te
 				if !strings.Contains(body, "return nativefind.IterateSecurityGroups(ctx, a.RawClient(), q, control)") {
 					t.Fatal(body)
 				}
+			} else if spec.noListQuery {
+				if !strings.Contains(body, "yield(nil, resource.ErrUnsupported)") {
+					t.Fatal("query-less native list accepted raw query", body)
+				}
 			} else if !strings.Contains(body, "config.Query[key] = append([]string(nil), values...)") {
 				t.Fatal("whole raw query lost", body)
 			}

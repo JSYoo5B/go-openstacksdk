@@ -4,8 +4,10 @@ package aggregates
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
 	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/compute/v2/aggregates"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -14,7 +16,14 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Aggregate] {
 	return resource.NewCollection(resource.Adapter[Aggregate]{
-		Kind: "aggregates",
+		Kind:         "aggregates",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Aggregate, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"os-aggregates", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
+		IdentityLiteralGet: true,
 		Get: func(ctx context.Context, id string) (*Aggregate, error) {
 			parsed, err := request.NumericID[int](id)
 			if err != nil {
@@ -33,7 +42,6 @@ func (a *API) newResources() *resource.Collection[Aggregate] {
 		},
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Aggregate, error] {
 			q = maps.Clone(q)
-			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*Aggregate, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
@@ -42,6 +50,11 @@ func (a *API) newResources() *resource.Collection[Aggregate] {
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Aggregate, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Aggregate, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Aggregate, error) {
 	return a.Resources.All(ctx, options...)

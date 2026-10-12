@@ -174,7 +174,7 @@ func TestPythonBGPVPNFindListsWithoutNameAndGetHasNoFields(t *testing.T) {
 		}
 		return pythonBGPVPNWire(404, `{"NeutronError":{"type":"BGPVPNNotFound"}}`)
 	})
-	// find_bgpvpn("vpn") falls back to GET bgpvpns?name=vpn; Go lists without the name query.
+	// Explicit Ref lookup: the ID GET stops on 404 and the name list sends name=.
 	if got, err := api.Find(ctx, resource.ID("vpn"), resource.WithIgnoreMissing()); err != nil || got != nil {
 		t.Fatal(got, err)
 	}
@@ -187,7 +187,7 @@ func TestPythonBGPVPNFindListsWithoutNameAndGetHasNoFields(t *testing.T) {
 	}
 	want := []pythonBGPVPNCall{
 		{http.MethodGet, pythonBGPVPNBase + "/vpn", "", ""},
-		{http.MethodGet, pythonBGPVPNBase, "", ""},
+		{http.MethodGet, pythonBGPVPNBase, "name=vpn", ""},
 		{http.MethodGet, pythonBGPVPNBase + "/vpn-1", "", ""},
 	}
 	if !reflect.DeepEqual(*calls, want) {

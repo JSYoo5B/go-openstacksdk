@@ -215,7 +215,7 @@ func TestIdentityQoSAddressEmissionKeepsRawQueriesAndBoundedCapabilities(t *test
 			}
 		})
 	}
-	if len(identityCollectionSpecs) != 20 || len(identityNativeDeclarations) != 20 {
+	if len(identityCollectionSpecs) != 37 || len(identityNativeDeclarations) != 37 {
 		t.Fatal("audited identity count changed", len(identityCollectionSpecs), len(identityNativeDeclarations))
 	}
 }

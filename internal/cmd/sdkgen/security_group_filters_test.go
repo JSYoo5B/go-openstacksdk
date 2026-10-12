@@ -129,7 +129,7 @@ func securityGroupFixtureWithRules(t *testing.T, source, ruleSource string) (*ty
 func TestSecurityGroupBodyNativeSchemaGuardsConcreteListAndBothTimestampDecoders(t *testing.T) {
 	source := securityGroupFilterFixtureSource()
 	pkg, plan := securityGroupFilterFixture(t, source)
-	if !securityGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !securityGroupBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 37 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	for name, pair := range map[string][2]string{

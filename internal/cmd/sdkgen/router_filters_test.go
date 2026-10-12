@@ -153,7 +153,7 @@ func TestRouterPythonFilterManifestKeepsRevisionOverrideQueryAliasesAndNetworkRe
 func TestRouterBodyFilterNativeContractRejectsModelBuilderDecoderAndSourceDrift(t *testing.T) {
 	source := routerFilterFixtureSource()
 	pkg, plan := routerFilterNativeFixture(t, source)
-	if !routerBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !routerBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 37 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	decls := routerBodyPinnedDeclarations(t)

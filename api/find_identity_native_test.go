@@ -14,7 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
-	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -509,7 +509,7 @@ func TestNativeFindIdentityExplicitOptInExcludesOtherBindings(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); w.WriteHeader(500) })
-	compute := aggregates.New(cloud.Client("compute", "/v2.1/project"))
+	compute := hypervisors.New(cloud.Client("compute", "/v2.1/project"))
 	loadbalancer := pools.New(cloud.Client("load-balancer", "/v2.0"))
 	if value, err := compute.Resources.FindIdentity(context.Background(), "lookup"); value != nil || !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(value, err)

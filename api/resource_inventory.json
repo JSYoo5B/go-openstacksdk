@@ -254,6 +254,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates",
     "model": "Aggregate",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -709,6 +711,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies",
     "model": "Policy",
     "find": false,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -732,6 +736,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions",
     "model": "Region",
     "find": false,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1151,6 +1157,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers",
     "model": "BGPPeer",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1158,6 +1166,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers",
     "model": "BGPSpeaker",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1165,6 +1175,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns",
     "model": "BGPVPN",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1172,6 +1184,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups",
     "model": "Group",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1179,6 +1193,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies",
     "model": "Policy",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1186,6 +1202,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules",
     "model": "Rule",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1207,6 +1225,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips",
     "model": "FloatingIP",
     "find": false,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1487,6 +1507,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments",
     "model": "Segment",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1556,6 +1578,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors",
     "model": "TapMirror",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1607,6 +1631,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups",
     "model": "EndpointGroup",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1614,6 +1640,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies",
     "model": "Policy",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1621,6 +1649,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies",
     "model": "Policy",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": false
   },
@@ -1628,6 +1658,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services",
     "model": "Service",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },
@@ -1635,6 +1667,8 @@
     "package": "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections",
     "model": "Connection",
     "find": true,
+    "identity_find": true,
+    "identity_get_query": true,
     "delete": true,
     "wait": true
   },

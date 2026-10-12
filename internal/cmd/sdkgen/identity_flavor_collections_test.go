@@ -334,7 +334,7 @@ func TestIdentityFlavorEmitsNativeDefaultsEnrichmentAndWholeQuery(t *testing.T) 
 			}
 		})
 	}
-	if len(identityCollectionSpecs) != 20 || defaults != 1 || enrichment != 1 || missing != 1 || modes != 2 {
+	if len(identityCollectionSpecs) != 37 || defaults != 1 || enrichment != 1 || missing != 1 || modes != 2 {
 		t.Fatal("explicit capability totals changed", len(identityCollectionSpecs), defaults, enrichment, missing, modes)
 	}
 	data, err := json.Marshal(collectionRecord{})

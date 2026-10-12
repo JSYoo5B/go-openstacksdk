@@ -4,7 +4,10 @@ package rules
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	request "github.com/JSYoo5B/go-openstacksdk/request"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/rules"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -13,7 +16,13 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[Rule] {
 	return resource.NewCollection(resource.Adapter[Rule]{
-		Kind:      "rules",
+		Kind:         "rules",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*Rule, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"fwaas", "firewall_rules", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:       func(ctx context.Context, id string) (*Rule, error) { return a.Get(ctx, string(id)) },
 		ID:        func(v *Rule) string { return fmt.Sprint(v.ID) },
 		Name:      func(v *Rule) string { return fmt.Sprint(v.Name) },
@@ -21,18 +30,23 @@ func (a *API) newResources() *resource.Collection[Rule] {
 		Delete:    func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*Rule, error] {
 			q = maps.Clone(q)
-			q.Del("status")
-			options := make([]ListOption, 0, len(q))
-			for key, values := range q {
-				for _, value := range values {
-					options = append(options, WithListQuery(key, value))
+			options := []ListOption{func(config *request.Config[ListOpts]) error {
+				config.Query = make(url.Values, len(q))
+				for key, values := range q {
+					config.Query[key] = append([]string(nil), values...)
 				}
-			}
+				return nil
+			}}
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Rule, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Rule, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Rule, error) {
 	return a.Resources.All(ctx, options...)

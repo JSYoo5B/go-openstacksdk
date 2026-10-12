@@ -326,6 +326,14 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 		if contract.extraSpecs {
 			e.printf("IdentityListQueryDefaults:url.Values{%q:{%q}},\nIdentityExtraSpecs:func(ctx context.Context,value *%s)(*%s,error){return nativefind.FlavorExtraSpecs(ctx,%s.RawClient(),value)},\n", contract.listDefaultKey, contract.listDefaultValue, plan.modelName, plan.modelName, receiver)
 		}
+		if contract.literalGet {
+			e.printf("IdentityLiteralGet:true,\n")
+		}
+		if contract.nameField != "" {
+			e.printf("IdentityName:func(v *%s)string{return fmt.Sprint(v.%s)},\n", plan.modelName, contract.nameField)
+		} else if contract.idOnly {
+			e.printf("IdentityName:func(*%s)string{return \"\"},\n", plan.modelName)
+		}
 		if len(parents) == 0 {
 			if mode, ok := identityListModeContract(e.pkg, plan); ok {
 				e.printf("IdentityAllProjectsQuery:\"all_tenants\",\nIterateIdentity:func(ctx context.Context,q url.Values,details bool)iter.Seq2[*%s,error]{return nativefind.%s(ctx,%s.RawClient(),q,details)},\n", plan.modelName, mode.iterator, receiver)
@@ -347,7 +355,9 @@ func emitCollectionAdapterValue(e *emitter, plan *collectionPlan, receiver strin
 	}
 	if plan.name != "" {
 		e.printf("Name:func(v *%s)string{return fmt.Sprint(v.%s)},\n", plan.modelName, plan.name)
-		if plan.nameQuery != "" {
+		if contract, ok := identityCollectionContract(e.pkg, plan, len(parents)); ok && contract.listNameQuery != "" {
+			e.printf("NameQuery:func(name string)string{return name},\nNameQueryKey:%q,\n", contract.listNameQuery)
+		} else if plan.nameQuery != "" {
 			if strings.HasSuffix(e.pkg.Path(), "/compute/v2/servers") {
 				e.use("regexp")
 				e.printf("NameQuery:func(name string)string{return \"^\"+regexp.QuoteMeta(name)+\"$\"},\n")

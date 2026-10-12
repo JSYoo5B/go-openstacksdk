@@ -4,7 +4,9 @@ package peers
 import (
 	context "context"
 	fmt "fmt"
+	nativefind "github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
 	resource "github.com/JSYoo5B/go-openstacksdk/resource"
+	upstream "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/bgp/peers"
 	iter "iter"
 	maps "maps"
 	url "net/url"
@@ -13,14 +15,19 @@ import (
 // Resources applies the SDK's shared lookup, missing-resource and wait policies.
 func (a *API) newResources() *resource.Collection[BGPPeer] {
 	return resource.NewCollection(resource.Adapter[BGPPeer]{
-		Kind:   "peers",
+		Kind:         "peers",
+		IdentityFind: true,
+		GetIdentityQuery: func(ctx context.Context, id string, q url.Values) (*BGPPeer, error) {
+			var result upstream.GetResult
+			result.Header, result.Err = nativefind.Get(ctx, a.RawClient(), []string{"bgp-peers", id}, q, []int{200}, &result.Body)
+			return result.Extract()
+		},
 		Get:    func(ctx context.Context, id string) (*BGPPeer, error) { return a.Get(ctx, string(id)) },
 		ID:     func(v *BGPPeer) string { return fmt.Sprint(v.ID) },
 		Name:   func(v *BGPPeer) string { return fmt.Sprint(v.Name) },
 		Delete: func(ctx context.Context, id string) error { return a.Delete(ctx, string(id)) },
 		IterateControlled: func(ctx context.Context, q url.Values, control resource.ListControl) iter.Seq2[*BGPPeer, error] {
 			q = maps.Clone(q)
-			q.Del("status")
 			if len(q) != 0 {
 				return func(yield func(*BGPPeer, error) bool) { yield(nil, resource.ErrUnsupported) }
 			}
@@ -29,6 +36,11 @@ func (a *API) newResources() *resource.Collection[BGPPeer] {
 }
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*BGPPeer, error) {
 	return a.Resources.Find(ctx, ref, options...)
+}
+
+// FindIdentity tries an ID request before exact ID/name fallback within this collection.
+func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*BGPPeer, error) {
+	return a.Resources.FindIdentity(ctx, identity, options...)
 }
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*BGPPeer, error) {
 	return a.Resources.All(ctx, options...)

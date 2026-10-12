@@ -36,7 +36,7 @@ func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, optio
 	if err != nil {
 		return fail(err)
 	}
-	if c == nil || !c.binding.IdentityFind || c.binding.Get == nil || c.binding.ID == nil && c.binding.IdentityResponseID == nil || c.binding.Name == nil {
+	if c == nil || !c.binding.IdentityFind || c.binding.Get == nil || c.binding.ID == nil && c.binding.IdentityResponseID == nil || c.binding.Name == nil && c.binding.IdentityName == nil || c.binding.IdentityLiteralGet && c.binding.GetIdentityQuery == nil {
 		return fail(ErrUnsupported)
 	}
 	if ctx == nil {
@@ -231,7 +231,7 @@ func (c *Collection[T]) findIdentityList(ctx context.Context, identity string, q
 		if err != nil {
 			return nil, err
 		}
-		name := c.binding.Name(value)
+		name := c.identityFindName(value)
 		if err := ctx.Err(); err != nil {
 			return nil, err
 		}
@@ -252,7 +252,7 @@ func (c *Collection[T]) findIdentityList(ctx context.Context, identity string, q
 // getIdentity retains Get's native error and missing-resource policy. The query
 // hook receives its own copy so callback mutations cannot change list fallback.
 func (c *Collection[T]) getIdentity(ctx context.Context, identity string, query url.Values) (*T, error) {
-	if len(query) == 0 {
+	if len(query) == 0 && !c.binding.IdentityLiteralGet {
 		return c.Get(ctx, identity)
 	}
 	if err := c.validateID(identity); err != nil {
@@ -266,6 +266,14 @@ func (c *Collection[T]) getIdentity(ctx context.Context, identity string, query 
 		return nil, c.wrap("get", err)
 	}
 	return value, nil
+}
+
+// identityFindName reads the comparable Python Resource.name of one row.
+func (c *Collection[T]) identityFindName(value *T) string {
+	if c.binding.IdentityName != nil {
+		return c.binding.IdentityName(value)
+	}
+	return c.binding.Name(value)
 }
 
 func validateIdentityFindInput(identity string) error {

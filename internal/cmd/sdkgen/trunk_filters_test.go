@@ -114,7 +114,7 @@ func TestTrunkPythonManifestSeparatesQuerySubportsFromIndependentJSONIdentity(t 
 func TestTrunkBodyNativeSchemaGuardsPlainModelsBuilderAndInheritedContinuation(t *testing.T) {
 	source := trunkFilterFixtureSource()
 	pkg, plan := trunkFilterFixture(t, source)
-	if !trunkBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 20 || !identityCollectionEnabled(pkg, plan, 0) {
+	if !trunkBodyNativeSchema(pkg, plan) || len(bodyFilterCollectionSpecs) != 11 || len(identityCollectionSpecs) != 37 || !identityCollectionEnabled(pkg, plan, 0) {
 		t.Fatal(plan)
 	}
 	for name, pair := range map[string][2]string{

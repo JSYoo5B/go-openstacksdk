@@ -255,9 +255,6 @@ func TestPythonPolicyFindHasNoListFallback(t *testing.T) {
 	if _, err := api.Find(ctx, resource.Name("pol-1"), resource.WithIgnoreMissing()); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
-	if _, err := api.Resources.FindIdentity(ctx, "pol-1"); !errors.Is(err, resource.ErrUnsupported) {
-		t.Fatal(err)
-	}
 	if got := recorder.snapshot(); len(got) != 0 {
 		t.Fatalf("%+v", got)
 	}

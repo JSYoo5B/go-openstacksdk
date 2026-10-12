@@ -58,6 +58,15 @@ type Adapter[T any] struct {
 	// and always attempts GET first. Nil keeps the ordinary safe-ID/name policy.
 	// The binding's Get and ValidateID still own the actual fixed member route.
 	IdentityDirectGet func(string) error
+	// IdentityName supplies the value that FindIdentity compares with the
+	// identity in list fallback when the audited model exposes Python's
+	// Resource.name under another field, or never carries one (return "").
+	// Nil uses Name. It does not change explicit Ref name lookup.
+	IdentityName func(*T) string
+	// IdentityLiteralGet sends FindIdentity's direct phase through
+	// GetIdentityQuery even without query, so a literal identity reaches a
+	// member route whose native getter only accepts numeric IDs.
+	IdentityLiteralGet bool
 	// IterateControlled lets SDK bindings apply row/page controls inside their
 	// transport iterator, before filtering and continuation processing.
 	IterateControlled func(context.Context, url.Values, ListControl) iter.Seq2[*T, error]
