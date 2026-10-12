@@ -248,6 +248,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("L3 agent 스케줄링, QoS rule 변경, FWaaS v2와 conntrack helper·NDP proxy 등 미지원 Neutron 경로의 Python 대응은 [L3·QoS·FWaaS Python 대응](python-parity-l3-qos-fw.md)에 정리했습니다.\n\n")
 		out.WriteString("agent·segment·port 목록과 floating IP 연결 등 Neutron core Python 메서드 58개의 Go 대응과 차이는 [Neutron core Python 대응](python-parity-core.md)에 정리했습니다.\n\n")
 		out.WriteString("VPNaaS·BGP·BGP VPN 메서드를 Python openstacksdk와 비교한 내용은 [VPN·BGP Python 대응](python-parity-vpn-bgp.md)에 있습니다.\n\n")
+		out.WriteString("network segment range, router NDP proxy·conntrack helper, 기본 보안 그룹 rule, 보안 그룹 기본 statefulness는 SDK 소유 package README에, QoS packet rate rule 생성·수정·삭제는 [packet rate rule 변경](extensions/qos/rules/packet-rate-mutations-python.md)에 설명합니다.\n\n")
 		out.WriteString("`conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.\n\n")
 	case "loadbalancer/v2":
 		out.WriteString("`conn.LoadBalancerProjectQuotas(ctx, project)`와 `CurrentLoadBalancerProjectQuotas(ctx)`는 Octavia quota의 프로젝트를 고정합니다. Get/Update/Reset, 전역 Defaults와 별도 ListProjects/AllProjects, 공식 lbaas 경로와 native URL의 차이는 [quota 사용법](quotas/README.md)을 참고합니다.\n\n")

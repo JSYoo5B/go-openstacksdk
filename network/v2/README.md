@@ -69,6 +69,8 @@ agent·segment·port 목록과 floating IP 연결 등 Neutron core Python 메서
 
 VPNaaS·BGP·BGP VPN 메서드를 Python openstacksdk와 비교한 내용은 [VPN·BGP Python 대응](python-parity-vpn-bgp.md)에 있습니다.
 
+network segment range, router NDP proxy·conntrack helper, 기본 보안 그룹 rule, 보안 그룹 기본 statefulness는 SDK 소유 package README에, QoS packet rate rule 생성·수정·삭제는 [packet rate rule 변경](extensions/qos/rules/packet-rate-mutations-python.md)에 설명합니다.
+
 `conn.NetworkProjectQuotas(ctx, project)`와 `CurrentNetworkProjectQuotas(ctx)`는 Neutron quota를 고정된 프로젝트 singleton으로 제공합니다. Get/Defaults/Detail/Update/Delete와 check_limit, 별도 ListProjects/AllProjects 목록·로컬 소비 옵션은 [프로젝트 quota 사용법](extensions/quotas/README.md)을 참고합니다.
 
 ## Go 사용
@@ -104,8 +106,10 @@ _ = value
 | `FirewallPolicies` | [extensions/fwaas_v2/policies](extensions/fwaas_v2/policies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `FirewallRules` | [extensions/fwaas_v2/rules](extensions/fwaas_v2/rules/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `AddressScopes` | [extensions/layer3/addressscopes](extensions/layer3/addressscopes/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `ConntrackHelpers` | [extensions/layer3/conntrackhelpers](extensions/layer3/conntrackhelpers/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `ExtraRoutes` | [extensions/layer3/extraroutes](extensions/layer3/extraroutes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `FloatingIPs` | [extensions/layer3/floatingips](extensions/layer3/floatingips/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
+| `NDPProxies` | [extensions/layer3/ndpproxies](extensions/layer3/ndpproxies/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `PortForwarding` | [extensions/layer3/portforwarding](extensions/layer3/portforwarding/api_generated.go) | `InFloatingIP(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Routers` | [extensions/layer3/routers](extensions/layer3/routers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `LocalIPAssociations` | [extensions/localipassociations](extensions/localipassociations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
@@ -113,12 +117,15 @@ _ = value
 | `MeteringLabels` | [extensions/metering/labels](extensions/metering/labels/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `MeteringRules` | [extensions/metering/rules](extensions/metering/rules/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `NetworkIPAvailabilities` | [extensions/networkipavailabilities](extensions/networkipavailabilities/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `NetworkSegmentRanges` | [extensions/networksegmentranges](extensions/networksegmentranges/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QoSPolicies` | [extensions/qos/policies](extensions/qos/policies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `QoSRules` | [extensions/qos/rules](extensions/qos/rules/api_generated.go) | `BandwidthLimitRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `DSCPMarkingRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `MinimumBandwidthRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `QoSRuleTypes` | [extensions/qos/ruletypes](extensions/qos/ruletypes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Quotas` | [extensions/quotas](extensions/quotas/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Detail·Update·Delete; List/Find/Wait 없음 |
 | `RBACPolicies` | [extensions/rbacpolicies](extensions/rbacpolicies/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `SecurityAddressGroups` | [extensions/security/addressgroups](extensions/security/addressgroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `SecurityDefaultRules` | [extensions/security/defaultrules](extensions/security/defaultrules/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SecurityDefaultStatefulness` | [extensions/security/defaultstatefulness](extensions/security/defaultstatefulness/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SecurityGroups` | [extensions/security/groups](extensions/security/groups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `SecurityRules` | [extensions/security/rules](extensions/security/rules/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Segments` | [extensions/segments](extensions/segments/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
