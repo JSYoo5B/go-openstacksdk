@@ -185,8 +185,8 @@ func TestPythonAggregateFindHasNoIDThenNameFallback(t *testing.T) {
 		}
 		return pythonAggregateWire(200, `{"aggregate":`+pythonAggregateRow+`}`)
 	})
-	// find_aggregate("rack1") first GETs os-aggregates/rack1; Go rejects the
-	// non-numeric ID before HTTP instead of falling back to the list.
+	// Explicit Ref ID lookup rejects a non-numeric ID before HTTP; the Python
+	// find_aggregate fallback is API.FindIdentity (python_cloud_find_test.go).
 	if _, err := api.Find(ctx, resource.ID("rack1"), resource.WithIgnoreMissing()); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}

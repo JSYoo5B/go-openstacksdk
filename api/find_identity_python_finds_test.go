@@ -325,6 +325,36 @@ func TestPythonFindForwardsQueryToGETAndList(t *testing.T) {
 	}
 }
 
+// Cloud get_firewall_* is find_firewall_*(name_or_id, ignore_missing=True,
+// **filters): every filter reaches the member GET and the name list.
+func TestPythonCloudGetFirewallForwardsFiltersToBothRequests(t *testing.T) {
+	for _, f := range pythonFindFixtures() {
+		if f.base != "/fwaas/firewall_rules" && f.base != "/fwaas/firewall_policies" && f.base != "/fwaas/firewall_groups" {
+			continue
+		}
+		t.Run(f.name, func(t *testing.T) {
+			filters := map[string]string{"project_id": "project-a", "shared": "False"}
+			options := []resource.IdentityFindOption{}
+			for key, value := range filters {
+				options = append(options, resource.WithIdentityFindQuery(key, value))
+			}
+			c, recorder := pythonFindServe(t, f, 404, "", pythonFindRow(f, "fw-id", "edge"))
+			if got, err := f.find(c)(context.Background(), "edge", options...); err != nil || got != "fw-id/edge" {
+				t.Fatal(got, err)
+			}
+			if got, err := f.find(c)(context.Background(), "absent", options...); err != nil || got != "" {
+				t.Fatal("get_firewall_* must return None for a missing resource", got, err)
+			}
+			get := url.Values{"project_id": {"project-a"}, "shared": {"False"}}
+			list := url.Values{"project_id": {"project-a"}, "shared": {"False"}, "name": {"edge"}}
+			want := []string{"GET " + f.prefix + f.base + "/edge?" + get.Encode(), "GET " + f.prefix + f.base + "?" + list.Encode()}
+			if calls := recorder.snapshot(); len(calls) != 4 || fmt.Sprint(calls[:2]) != fmt.Sprint(want) {
+				t.Fatal(calls)
+			}
+		})
+	}
+}
+
 // Python sends find_aggregate's name_or_id literally to os-aggregates/{x},
 // although the native getter accepts only integers.
 func TestPythonFindAggregateSendsLiteralIdentityToMemberRoute(t *testing.T) {
