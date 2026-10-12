@@ -93411,86 +93411,188 @@
     {
       "operation": "python:network/v2/create_qos_minimum_packet_rate_rule",
       "source_fingerprint": "338a6d39e783c06178fa1effd2a5a94859ddb41f604f700ec13668b29c366426",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /qos/policies/{policy_id}/minimum_packet_rate_rules; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned create call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /qos/policies/{policy_id}/minimum_packet_rate_rules sends provided attrs (null and unknown attrs kept) under minimum_packet_rate_rule, binds the escaped literal policy, projects the response with the fixed QoSPolicyID, rejects qos_policy_id before HTTP and reports rejections with operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_qos_minimum_packet_rate_rule",
       "source_fingerprint": "2469701b8f5145a42b0683cbc4add9fb453cf0fb0be361a7eb2a4bd1905fd892",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdateMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id}; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned update call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} sends only changed attrs, ignores if_revision without If-Match, the empty update sends nothing, id is rejected before HTTP and rejections keep operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_qos_minimum_packet_rate_rule",
       "source_fingerprint": "96b73aea29346ca10ee7f2137a017964af93d2e59524d935cfbcf973f8b25ec2",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeleteMinimumPacketRateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id}; the SDK only has read Record helpers for minimum_packet_rate_rules, so an SDK-owned delete call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/minimum_packet_rate_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), WithPacketRateRuleDeleteIgnoreMissing(false) or other rejections return the native status with operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonMinimumPacketRateCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID.",
+        "Python returns None; Go returns a PacketRateRuleDeleteResult with the actual receipt and IgnoredMissing."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_qos_packet_rate_limit_rule",
       "source_fingerprint": "2d0bcd240b80ef973d1c764564c737ebb0e131012ba9e884a5145dd6f09d52ef",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreatePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /qos/policies/{policy_id}/packet_rate_limit_rules; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned create call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /qos/policies/{policy_id}/packet_rate_limit_rules sends provided attrs (null and unknown attrs kept) under packet_rate_limit_rule, binds the escaped literal policy, projects the response with the fixed QoSPolicyID, rejects qos_policy_id before HTTP and reports rejections with operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_qos_packet_rate_limit_rule",
       "source_fingerprint": "f5fb94c4cedd9359624ca8e599cfae0c5bddea8c0e7e07e8056f3ffaf6f52f98",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.UpdatePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMutationOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id}; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned update call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} sends only changed attrs, ignores if_revision without If-Match, the empty update sends nothing, id is rejected before HTTP and rejections keep operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_qos_packet_rate_limit_rule",
       "source_fingerprint": "41f750e1c13bba5e864881d1400e1f35370192215e4fb411ebc2f38defe38ae5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.DeletePacketRateLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithPacketRateRuleDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id}; the SDK only has read Record helpers for packet_rate_limit_rules, so an SDK-owned delete call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE /qos/policies/{policy_id}/packet_rate_limit_rules/{rule_id} ignores a clean 404 by default (IgnoredMissing), WithPacketRateRuleDeleteIgnoreMissing(false) or other rejections return the native status with operation context.",
+          "tests": [
+            "network/v2/extensions/qos/rules/python_packet_rate_mutations_test.go:TestPythonPacketRateLimitCreateUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/qos/rules/packet-rate-mutations-python.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the QoS policy ID first and the rule ID second; Python update/delete take the rule first. The policy is never fetched, as Python _get_resource only extracts its ID.",
+        "Python returns None; Go returns a PacketRateRuleDeleteResult with the actual receipt and IgnoredMissing."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/add_router_to_agent",
@@ -93612,310 +93714,703 @@
     {
       "operation": "python:network/v2/conntrack_helpers",
       "source_fingerprint": "bdc20e3912b86947c18fa887eae5edfe9068b76fb6ef67359860a9652bbe1450",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithListPaginated"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /routers/{router_id}/conntrack_helpers, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends only limit/marker as server query, filters declared Body attrs locally, discards unknown kwargs, follows conntrack_helpers_links and marker continuation, tags rows with RouterID, rejects router_id before HTTP and reports 404 with List context.",
+          "tests": [
+            "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackListFiltersLocallyAndPages"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/conntrackhelpers/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the router ID first (Create/List/Get/Update/Delete(ctx, routerID, ...)); Python get/update/delete take the helper first and the router second. The router is never fetched, as Python _get_resource only extracts its ID.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_conntrack_helper",
       "source_fingerprint": "abdb2a10c88175185b8d81b2b713c25f6eaf7a6fe7e8d0180d00ed2924e9f825",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithCreateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /routers/{router_id}/conntrack_helpers, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /routers/{router_id}/conntrack_helpers sends only declared attrs (unknown attrs discarded because the class does not allow them), keeps undeclared response keys only in Wire, exposes RouterID, rejects router_id and blank router before HTTP and reports 409 with Create context.",
+          "tests": [
+            "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackCreateDropsUnknownAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/conntrackhelpers/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the router ID first (Create/List/Get/Update/Delete(ctx, routerID, ...)); Python get/update/delete take the helper first and the router second. The router is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_conntrack_helper",
       "source_fingerprint": "9bdf0f8d77b4228e29a03449a8725a23dd77292fc53b214a69872665be0f3e91",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithGetMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /routers/{router_id}/conntrack_helpers/{id} sends no query and reports 404 with Get context.",
+          "tests": [
+            "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/conntrackhelpers/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the router ID first (Create/List/Get/Update/Delete(ctx, routerID, ...)); Python get/update/delete take the helper first and the router second. The router is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_conntrack_helper",
       "source_fingerprint": "6e86136a5ea579f9d25a6711d86e25a0153051f09cd787a2217700971f00b1ed",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithUpdateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT sends only declared changed attrs, ignores if_revision without If-Match (not a NetworkResource), the unknown-only update sends nothing, and 404 keeps Update context.",
+          "tests": [
+            "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/conntrackhelpers/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the router ID first (Create/List/Get/Update/Delete(ctx, routerID, ...)); Python get/update/delete take the helper first and the router second. The router is never fetched, as Python _get_resource only extracts its ID."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_conntrack_helper",
       "source_fingerprint": "983614ce1d7b615a0dd7a71f0d4249de2fa7e1c236e7b944206ba1522b42005a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.WithDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /routers/{router_id}/conntrack_helpers/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "tests": [
+            "network/v2/extensions/layer3/conntrackhelpers/python_records_test.go:TestPythonConntrackGetUpdateDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/conntrackhelpers/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Go takes the router ID first (Create/List/Get/Update/Delete(ctx, routerID, ...)); Python get/update/delete take the helper first and the router second. The router is never fetched, as Python _get_resource only extracts its ID.",
+        "Python returns None; Go returns a DeleteResult with the actual status, header and body, and IgnoredMissing=true when the default ignore_missing suppressed a clean 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_ndp_proxy",
       "source_fingerprint": "a356c75fae9bd195ebd7819ba9bde6c5ecd28b6adbe2cd215d73e2b3304a7d38",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithCreateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /ndp_proxies, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /ndp_proxies sends provided attrs (null and unknown attrs kept) under ndp_proxy, keeps the untyped revision_number and unknown tenant_id, rejects constructor controls before HTTP and reports 400 with Create context.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyCreateSendsProvidedAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_ndp_proxy",
       "source_fingerprint": "cdf13b4ac73f5753e501be8a2364fac9331d38801baafc1d55b995b6bab9499b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetFields",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithGetMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /ndp_proxies/{id} sends repeated fields, escapes the literal ID and reports 404 with Get context.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_ndp_proxy",
       "source_fingerprint": "3bd06cab77f1be94d27ad946f8a9ec367206d732c8e46262d1e0cd0ace39011f",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithFindMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies/{id} with a list fallback on /ndp_proxies, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find GETs the literal ID, falls back on clean 403/404 to a complete name-hinted list that follows ndp_proxies_links, and returns nil or ErrNotFound when missing.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyFindFallsBackToCompleteNameList"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "find returns nil, nil for a clean miss by default (Python None) and resource.ErrNotFound/ErrAmbiguous instead of NotFoundException/DuplicateResource.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_ndp_proxy",
       "source_fingerprint": "bd789b5a76d75748b0eac11ea65ce7708410f42d9d4123139e317cbd7b3da7ae",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /ndp_proxies/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Python returns None; Go returns a DeleteResult with the actual status, header and body, and IgnoredMissing=true when the default ignore_missing suppressed a clean 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/ndp_proxies",
       "source_fingerprint": "6365e7654344a29b53d6950200d5f0cafc59f8c2654d27f49ccf28a3c77d6e97",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithListMaxItems"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /ndp_proxies, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List reads only the first page despite ndp_proxies_links, sends declared query parameters, filters undeclared-query Body attrs locally, rejects a paginated kwarg before HTTP and reports 500 with List context.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyListReadsOnlyTheFirstPage"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "ndp_proxies always lists with paginated=False, so Go reads only the first page; a caller paginated kwarg is the Python duplicate-keyword TypeError and Go rejects it before HTTP with resource.ErrInvalidOption.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_ndp_proxy",
       "source_fingerprint": "a8fd4f27886ec443137c90375c72907ff2651ac7dff228413c4a179d7746d29c",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.WithUpdateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /ndp_proxies/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT /ndp_proxies/{id} sends only changed attrs, the empty update sends nothing and 409 keeps Update context.",
+          "tests": [
+            "network/v2/extensions/layer3/ndpproxies/python_records_test.go:TestPythonNDPProxyGetUpdateAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/layer3/ndpproxies/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_default_security_group_rule",
       "source_fingerprint": "e7c9ecfe4d7e341c82b39cfd380226f5501e084ed99e8c2d63742bb9d7ac67f9",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithCreateIfMatch"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /default-security-group-rules, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /default-security-group-rules maps ether_type to ethertype, sends the if_match Header list joined with ', ' as If-Match, projects int/bool casts, revision_number and the if_match view, rejects non-string if_match before HTTP and reports 409 with Create context.",
+          "tests": [
+            "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleCreateMapsEtherTypeAndIfMatch"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultrules/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "if_match attrs must be a string, string list or null; Python would str() any other value while Go rejects it before HTTP."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_default_security_group_rule",
       "source_fingerprint": "b089ac0a721c9311d4d2d090a3f3809941f4e82cb3c33410334e8f7c6e3041f3",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /default-security-group-rules/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it and 204 is a plain receipt.",
+          "tests": [
+            "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleGetAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultrules/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Python returns None; Go returns a DeleteResult with the actual status, header and body, and IgnoredMissing=true when the default ignore_missing suppressed a clean 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_default_security_group_rule",
       "source_fingerprint": "729805885b7241296051e040d007c0bac50c056ba9905fb001be03deb49c2210",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithFindMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules/{id} with a list fallback on /default-security-group-rules, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find GETs the literal ID with the find query, falls back on a clean 404 to a complete list without a name hint (no name QueryParameter) and returns nil or ErrNotFound when missing.",
+          "tests": [
+            "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleFindHasNoNameHint"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultrules/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "find returns nil, nil for a clean miss by default (Python None) and resource.ErrNotFound/ErrAmbiguous instead of NotFoundException/DuplicateResource.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_default_security_group_rule",
       "source_fingerprint": "f5d4f252a6fc08e5700364242a7374fa87b21c9fcb8f6881f49024bd0664e1f4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetFields",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithGetMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /default-security-group-rules/{id} maps fields attribute names to wire names (ether_type to ethertype) and reports 404 with Get context.",
+          "tests": [
+            "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleGetAndDelete"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultrules/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/default_security_group_rules",
       "source_fingerprint": "aed5e5f5ecf550e3e6bab83d4cc2be83dd22b90274a4d6af43dbad36209e2979",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.WithListPaginated"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /default-security-group-rules, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List maps ether_type to the ethertype query, encodes bools as True, filters name locally, discards unknown kwargs, follows default_security_group_rules_links and reports 401 with List context.",
+          "tests": [
+            "network/v2/extensions/security/defaultrules/python_records_test.go:TestPythonDefaultRuleListMapsQueryAliases"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultrules/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_security_groups_default_statefulness",
       "source_fingerprint": "2c4e2d39967d7b0945f84913d98cf2f1d56acf08734ae6469f9310f8c05f9fbf",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithCreateIfMatch"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /security-groups-default-statefulness, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /security-groups-default-statefulness sends provided attrs under security_group_default_statefulness without If-Match, projects stateful/revision_number casts and unknown tenant_id, and reports 409 with Create context.",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessCreateAndGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "if_match attrs must be a string, string list or null; Python would str() any other value while Go rejects it before HTTP."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_security_groups_default_statefulness",
       "source_fingerprint": "3972d8f094c2d8e600cf1397594b60eacf72b6c879ae781af425a5434c5a458b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE ignores a clean 404 by default and WithDeleteIgnoreMissing(false) returns it with Delete context.",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Python returns None; Go returns a DeleteResult with the actual status, header and body, and IgnoredMissing=true when the default ignore_missing suppressed a clean 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_security_groups_default_statefulness",
       "source_fingerprint": "c33a8e609239ae35a9f2d12c5e06b2f32880f2532700ba408a9211f50c260056",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithFindMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness/{id} with a list fallback on /security-groups-default-statefulness, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find GETs the literal ID, falls back on a clean 404 to a complete list without a name hint and matches name, returning ErrNotFound with WithFindIgnoreMissing(false).",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "find returns nil, nil for a clean miss by default (Python None) and resource.ErrNotFound/ErrAmbiguous instead of NotFoundException/DuplicateResource.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_security_groups_default_statefulness",
       "source_fingerprint": "c0537267c5b0ce82352f25265ee4af5bb4b9a88e9046be7c54eb5fc9a859b5c5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetFields",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithGetMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /security-groups-default-statefulness/{id} sends repeated fields and reports 404 with Get context.",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessCreateAndGet"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/security_groups_default_statefulness",
       "source_fingerprint": "90f2cf0b26d9a6f55dbc8d4e6753dbc54764c214ae7d00bcb69503600edb34a7",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithListPaginated"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /security-groups-default-statefulness, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends declared query parameters, filters revision_number locally, follows security_groups_default_statefulness_links, sends Accept: application/json and reports 500 with List context.",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessDeleteListAndFind"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_security_groups_default_statefulness",
       "source_fingerprint": "674738f59f30cace000875ae02961817eea440d59d96bd5b19a78167f84f4b31",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-l3-qos-fw.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateIfMatch",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.WithUpdateRevision"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /security-groups-default-statefulness/{id}, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT sends changed attrs with If-Match: revision_number=N from if_revision overriding if_match, a dirty If-Match alone PUTs an empty envelope, null if_revision with no attrs sends nothing, id and non-integer if_revision fail before HTTP, and 412 keeps Update context.",
+          "tests": [
+            "network/v2/extensions/security/defaultstatefulness/python_records_test.go:TestPythonStatefulnessUpdateRevisionAndNoop"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/security/defaultstatefulness/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "if_match attrs must be a string, string list or null; Python would str() any other value while Go rejects it before HTTP.",
+        "if_revision must be a JSON integer (or null to omit); Python formats any value into revision_number=<value>."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/agents",
@@ -95261,86 +95756,196 @@
     {
       "operation": "python:network/v2/create_network_segment_range",
       "source_fingerprint": "624b50565632a06c56fc6271c881142bb57cd6796c103a364b83e0835ba48f71",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithCreateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST /network_segment_ranges, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "POST /network_segment_ranges sends only provided attrs (explicit null/false kept, unknown attrs kept, microversion attr dropped) under network_segment_range, an empty create sends {}, and the response projects bool/int/dict/list casts with unknown keys and null defaults.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeCreateSendsProvidedAttrs"
+          ]
+        },
+        {
+          "behavior": "Route-control attrs fail before HTTP and a 409 rejection keeps the native status with Create operation context.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeCreateSendsProvidedAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_network_segment_range",
       "source_fingerprint": "74d23b671b8272ecc4796b87bdb231e96a22ba81a9b9659c45a18c83313dad3b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithDeleteMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE /network_segment_ranges/{id}, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Bodyless DELETE ignores a clean 404 by default, WithDeleteIgnoreMissing(false) returns it, and 409 stays an error with Delete context.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeDeleteIgnoresMissingByDefault"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "Python returns None; Go returns a DeleteResult with the actual status, header and body, and IgnoredMissing=true when the default ignore_missing suppressed a clean 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_network_segment_range",
       "source_fingerprint": "41723918425018f1dafc0db7ca0cc69d55bfe4be0ef73578ec6a2a236d1d0e5b",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithFindMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /network_segment_ranges/{id} and GET /network_segment_ranges, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find GETs the literal ID first, falls back on clean 400/404 to a complete list with the name query hint plus find query, returns nil or ErrNotFound when missing, ErrAmbiguous for duplicates and never falls back on 500.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeFindFallsBackToNameList"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "find returns nil, nil for a clean miss by default (Python None) and resource.ErrNotFound/ErrAmbiguous instead of NotFoundException/DuplicateResource.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_network_segment_range",
       "source_fingerprint": "b1fa2c2493dd41bdad8ec595b54869ae225c6d5d1129e04c98babd67729823e8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetFields",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithGetMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /network_segment_ranges/{id}, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GET /network_segment_ranges/{id} with repeated fields query, escaped literal ID, 2xx decode with the ID seed and 400/403/404/500 native errors with Get context; blank IDs fail before HTTP.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeGetFieldsStatusesAndEscapedID"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/network_segment_ranges",
       "source_fingerprint": "d240c1579cdd79a84463862c234906a727d67c7dc07e6ac3f8501c841b2dd27f",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithListPaginated"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /network_segment_ranges, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends declared query parameters, filters other declared Body attrs (id) locally, discards unknown kwargs, sends Accept: application/json, follows network_segment_ranges_links and limit/marker continuation to an empty page, and paginated=False reads one page.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeListQueryFiltersAndLinksPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection.",
+        "When following next links Go keeps the original filters and fails on a link that changes them or repeats a page; Python follows the href as is. Local Body filters compare JSON numbers exactly rather than with Python float rounding."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_network_segment_range",
       "source_fingerprint": "dca2f50dae960f4f7d3c057c6b0afcc511859f2f8b1a3bae3024991a5b8193e3",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.WithUpdateMicroversion"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT /network_segment_ranges/{id}, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "PUT /network_segment_ranges/{id} sends only changed attrs; no attrs is the commit no-op without HTTP; id attr is rejected; 404 keeps native status with Update context.",
+          "tests": [
+            "network/v2/extensions/networksegmentranges/python_records_test.go:TestPythonSegmentRangeUpdatePutsChangedAttrs"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/extensions/networksegmentranges/README.md"
+      ],
+      "differences": [
+        "Go takes literal ID strings rather than ID-or-Resource values and escapes each ID as one path segment; blank, dot-segment and control-character IDs fail before HTTP.",
+        "Neutron has no microversion, so Python sends no version header; Go sends OpenStack-API-Version only when the selected client has a Microversion, and the With*Microversion/With*Headers options are Go extensions.",
+        "Go admits 200..399 as success; Python accepts any status below 400, so informational 100..199 responses differ. 400..599 return the native ErrUnexpectedResponseCode wrapped in resource.OperationError.",
+        "The SDK-owned location view is always null (raw value kept in Wire); Python fills it from the Connection."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v2/backups",
