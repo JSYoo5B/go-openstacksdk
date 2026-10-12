@@ -85871,11 +85871,33 @@
     {
       "operation": "python:network/v2/get_tap_mirror",
       "source_fingerprint": "f50f701a2dad5bd15d2f6c1ec9f252aa77be2302b6c7ef8f5f6127deab476ad0",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET taas/tap_mirrors/{id} with each Python TapMirror Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get sends GET taas/tap_mirrors/{id} without a query, which is Python's request for fields=None, decodes the mirror and returns the native 404 error.",
           "tests": [
@@ -85890,11 +85912,11 @@
         "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
         "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
         "Neutron has no microversion, so neither SDK sends a version header.",
-        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers."
+        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "Python get_tap_mirror(fields=[...]) maps Body attribute names to wire names and sends repeated fields query keys, returning a sparse Resource; tapmirrors has no GetWithFields and API.Get accepts no query, so no public Go call sends the fields selection."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_tap_mirror",
@@ -91042,11 +91064,33 @@
     {
       "operation": "python:network/v2/get_firewall_group",
       "source_fingerprint": "15972341d167b3650e14ce5b8eb31d847561029936746f961dcaa906d9d967ed",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET fwaas/firewall_groups/{id} with each Python FirewallGroup Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get(id) sends GET /fwaas/firewall_groups/{id} with no query like the fields=None default, decodes the firewall_group, and returns a 404 error where Python raises NotFoundException.",
           "tests": [
@@ -91058,11 +91102,11 @@
         "network/v2/python-parity-l3-qos-fw.md"
       ],
       "differences": [
-        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "Python get_firewall_group(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 group API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_firewall_group",
@@ -91208,11 +91252,33 @@
     {
       "operation": "python:network/v2/get_firewall_policy",
       "source_fingerprint": "693de0fd761c3f8ac78344ad4ebc2ff16a55aecc225067518531856602be0892",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET fwaas/firewall_policies/{id} with each Python FirewallPolicy Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get(id) sends GET /fwaas/firewall_policies/{id} with no query like the fields=None default, decodes the firewall_policy, and returns a 404 error where Python raises NotFoundException.",
           "tests": [
@@ -91224,11 +91290,11 @@
         "network/v2/python-parity-l3-qos-fw.md"
       ],
       "differences": [
-        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "Python get_firewall_policy(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 policy API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_firewall_policy",
@@ -91375,11 +91441,33 @@
     {
       "operation": "python:network/v2/get_firewall_rule",
       "source_fingerprint": "9f7dfccabdb56cae5ea4d742b40edca8513356a1db875fcb404b8dc285d722cd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET fwaas/firewall_rules/{id} with each Python FirewallRule Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get(id) sends GET /fwaas/firewall_rules/{id} with no query like the fields=None default, decodes the firewall_rule, and returns a 404 error where Python raises NotFoundException.",
           "tests": [
@@ -91391,11 +91479,11 @@
         "network/v2/python-parity-l3-qos-fw.md"
       ],
       "differences": [
-        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "Python get_firewall_rule(fields=[...]) sends repeated fields query values on the member GET; the fwaas_v2 rule API.Get has no option to add a query, so an SDK-owned field getter like routers.API.GetWithFields would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_firewall_rule",
@@ -92323,11 +92411,33 @@
     {
       "operation": "python:network/v2/get_agent",
       "source_fingerprint": "bdefa192003a5a6eeb0599b1a89be20eb286315ef62a80e615c6c4bc2b351b00",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET agents/{id} with each Python Agent Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get sends a bare GET agents/{id} and decodes the agent, matching get_agent without fields.",
           "tests": [
@@ -92339,11 +92449,11 @@
         "network/v2/python-parity-core.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "agents.API.Get has no fields option, so Python's fields argument, which maps Body attribute names to wire names and sends them as fields query values, cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_agent",
@@ -92542,11 +92652,33 @@
     {
       "operation": "python:network/v2/get_segment",
       "source_fingerprint": "8eb5a094d00f8a13f3074b180d49d0e0025f6a62c247c4bae9db48aa753310be",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/segments.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET segments/{id} with each Python Segment Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get sends a bare GET segments/{id} and decodes the segment, matching get_segment without fields.",
           "tests": [
@@ -92558,11 +92690,11 @@
         "network/v2/python-parity-core.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "segments.API.Get has no fields option, so Python's fields argument cannot be sent as fields query values."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/segments",
@@ -92703,11 +92835,39 @@
     {
       "operation": "python:network/v2/get_network_ip_availability",
       "source_fingerprint": "91accde4db5a0613f5963ec40e20f9ca3e17de88f5fd62bf198619e58101abeb",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET network-ip-availabilities/{network_id} with each Python NetworkIPAvailability Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "A selected response without total_ips or used_ips decodes with those counters left empty instead of failing the native big-integer decoder, while explicit null and invalid counter types still fail.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonNetworkIPAvailabilityFieldsKeepOmittedCountersEmpty"
+          ]
+        },
         {
           "behavior": "Get sends a bare GET network-ip-availabilities/{network_id} and decodes the availability, matching the call without fields.",
           "tests": [
@@ -92718,10 +92878,12 @@
       "documentation": [
         "network/v2/python-parity-core.md"
       ],
-      "differences": [],
-      "remaining": [
-        "networkipavailabilities.API.Get has no fields option, so Python's fields argument cannot be sent."
-      ]
+      "differences": [
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy.",
+        "Go reports total_ips and used_ips as decimal strings and leaves them empty when a fields selection omits them; Python leaves the omitted attributes None."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_network_ip_availability",
@@ -94672,13 +94834,35 @@
     {
       "operation": "python:network/v2/get_vpn_service",
       "source_fingerprint": "c83f6bdb89ad8e0c8b0e8da63ea0766e5a3d05e1aee947274ce3aedfec1441b1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/services.API.Get"
       ],
       "contracts": [
         {
-          "behavior": "Get sends GET vpn/vpnservices/{id} without any query and decodes the resource; no option adds a fields query.",
+          "behavior": "GetWithFields sends GET vpn/vpnservices/{id} with each Python VpnService Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "Get sends GET vpn/vpnservices/{id} without any query and decodes the resource, which is Python's fields=None request.",
           "tests": [
             "network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceProxyRequests",
             "network/v2/extensions/vpnaas/services/python_parity_test.go:TestPythonVPNServiceFindChainAndGetWithoutFields"
@@ -94689,11 +94873,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_vpn_service(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_vpn_service",
@@ -94834,13 +95018,35 @@
     {
       "operation": "python:network/v2/get_vpn_endpoint_group",
       "source_fingerprint": "bd39aca204345e6aa83d571f2a66a6420a9f7e3212780c0ad6b03a9de75aa036",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/endpointgroups.API.Get"
       ],
       "contracts": [
         {
-          "behavior": "Get sends GET vpn/endpoint-groups/{id} without any query and decodes the resource; no option adds a fields query.",
+          "behavior": "GetWithFields sends GET vpn/endpoint-groups/{id} with each Python VpnEndpointGroup Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "Get sends GET vpn/endpoint-groups/{id} without any query and decodes the resource, which is Python's fields=None request.",
           "tests": [
             "network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupProxyRequests",
             "network/v2/extensions/vpnaas/endpointgroups/python_parity_test.go:TestPythonEndpointGroupFindChainAndGetWithoutFields"
@@ -94851,11 +95057,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_vpn_endpoint_group(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_vpn_endpoint_group",
@@ -94997,13 +95203,35 @@
     {
       "operation": "python:network/v2/get_vpn_ike_policy",
       "source_fingerprint": "586e6edc1032bb665ff654a3cba3db4d38cf1e03998566a00c24864d2a19c317",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ikepolicies.API.Get"
       ],
       "contracts": [
         {
-          "behavior": "Get sends GET vpn/ikepolicies/{id} without any query and decodes the resource; no option adds a fields query.",
+          "behavior": "GetWithFields sends GET vpn/ikepolicies/{id} with each Python VpnIkePolicy Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "Get sends GET vpn/ikepolicies/{id} without any query and decodes the resource, which is Python's fields=None request.",
           "tests": [
             "network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyProxyRequests",
             "network/v2/extensions/vpnaas/ikepolicies/python_parity_test.go:TestPythonIKEPolicyFindChainAndGetWithoutFields"
@@ -95014,11 +95242,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_vpn_ike_policy(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_vpn_ike_policy",
@@ -95162,13 +95390,35 @@
     {
       "operation": "python:network/v2/get_vpn_ipsec_policy",
       "source_fingerprint": "c8a4b77f0e0600590b08ef090d6cb9624dbc79af005116b71099353fb64a57b5",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.Get"
       ],
       "contracts": [
         {
-          "behavior": "Get sends GET vpn/ipsecpolicies/{id} without any query and decodes the resource; no option adds a fields query.",
+          "behavior": "GetWithFields sends GET vpn/ipsecpolicies/{id} with each Python VpnIpsecPolicy Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "Get sends GET vpn/ipsecpolicies/{id} without any query and decodes the resource, which is Python's fields=None request.",
           "tests": [
             "network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyProxyRequests",
             "network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyFindChainAndGetWithoutFields"
@@ -95179,11 +95429,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_vpn_ipsec_policy(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_vpn_ipsec_policy",
@@ -95325,13 +95575,35 @@
     {
       "operation": "python:network/v2/get_vpn_ipsec_site_connection",
       "source_fingerprint": "d28ce1b83e2ccd5465d45e9c55c4ad9836cafa5c69096270381288dde1dc414a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Get"
       ],
       "contracts": [
         {
-          "behavior": "Get sends GET vpn/ipsec-site-connections/{id} without any query and decodes the resource; no option adds a fields query.",
+          "behavior": "GetWithFields sends GET vpn/ipsec-site-connections/{id} with each Python VpnIPSecSiteConnection Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
+        {
+          "behavior": "Get sends GET vpn/ipsec-site-connections/{id} without any query and decodes the resource, which is Python's fields=None request.",
           "tests": [
             "network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionProxyRequests",
             "network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionFindChainAndGetWithoutFields"
@@ -95342,11 +95614,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_vpn_ipsec_site_connection(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/find_vpn_ipsec_site_connection",
@@ -95964,11 +96236,33 @@
     {
       "operation": "python:network/v2/get_bgpvpn",
       "source_fingerprint": "29ec580b5a9258dfd7e10ad74724f87537a2c2b1369104e5bc04cc31ba5d216a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Get"
       ],
       "contracts": [
+        {
+          "behavior": "GetWithFields sends GET bgpvpn/bgpvpns/{id} with each Python BgpVpn Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationRejectsNativeResultAndInputDrift"
+          ]
+        },
         {
           "behavior": "Get sends GET bgpvpn/bgpvpns/{id} without any query and decodes the BGP VPN.",
           "tests": [
@@ -95981,11 +96275,11 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_bgpvpn(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_bgpvpn",
@@ -96125,11 +96419,39 @@
     {
       "operation": "python:network/v2/get_bgpvpn_network_association",
       "source_fingerprint": "df0eb0e993377dd68fb62dc27fdc08e13213ccae024d31fa764caac18c6a1aa2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetNetworkAssociationWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetNetworkAssociation"
       ],
       "contracts": [
+        {
+          "behavior": "GetNetworkAssociationWithFields sends GET bgpvpn/bgpvpns/{bgpvpn_id}/network_associations/{id} with each Python BgpVpnNetworkAssociation Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetNetworkAssociationWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetNetworkAssociationWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronChildFieldGenerationValidatesNativeParentGetter"
+          ]
+        },
+        {
+          "behavior": "The generated bgpvpns package keeps the parent BGP VPN getter and the three association field getters in one file, each with its own Python Body alias map and a parent ID route segment.",
+          "tests": [
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldRenderingGroupsParentAndChildGetters"
+          ]
+        },
         {
           "behavior": "GetNetworkAssociation sends GET bgpvpn/bgpvpns/{bgpvpn}/network_associations/{id} without any query and decodes the association.",
           "tests": [
@@ -96141,11 +96463,12 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy.",
+        "Python accepts a BgpVpn Resource or ID for the parent and an association Resource or ID; Go takes the parent BGP VPN ID string and the association ID string."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_bgpvpn_network_association(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/bgpvpn_network_associations",
@@ -96227,11 +96550,39 @@
     {
       "operation": "python:network/v2/get_bgpvpn_port_association",
       "source_fingerprint": "e8ebd6fe8b0d9e114abdfdbf94612ac9ad0324074bd5785c13555aed8f46fa64",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetPortAssociationWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetPortAssociation"
       ],
       "contracts": [
+        {
+          "behavior": "GetPortAssociationWithFields sends GET bgpvpn/bgpvpns/{bgpvpn_id}/port_associations/{id} with each Python BgpVpnPortAssociation Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetPortAssociationWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetPortAssociationWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronChildFieldGenerationValidatesNativeParentGetter"
+          ]
+        },
+        {
+          "behavior": "The generated bgpvpns package keeps the parent BGP VPN getter and the three association field getters in one file, each with its own Python Body alias map and a parent ID route segment.",
+          "tests": [
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldRenderingGroupsParentAndChildGetters"
+          ]
+        },
         {
           "behavior": "GetPortAssociation sends GET bgpvpn/bgpvpns/{bgpvpn}/port_associations/{id} without any query and decodes the association.",
           "tests": [
@@ -96243,11 +96594,12 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy.",
+        "Python accepts a BgpVpn Resource or ID for the parent and an association Resource or ID; Go takes the parent BGP VPN ID string and the association ID string."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_bgpvpn_port_association(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/bgpvpn_port_associations",
@@ -96354,11 +96706,39 @@
     {
       "operation": "python:network/v2/get_bgpvpn_router_association",
       "source_fingerprint": "08fccbdcedb0c1216708da34f7ca9ae6355c9c0a84f23d4655b13c951b4840cc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetRouterAssociationWithFields",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetRouterAssociation"
       ],
       "contracts": [
+        {
+          "behavior": "GetRouterAssociationWithFields sends GET bgpvpn/bgpvpns/{bgpvpn_id}/router_associations/{id} with each Python BgpVpnRouterAssociation Body attribute name mapped to its wire name as repeated fields query keys, keeping caller order, repeats, empty and unknown names, and decodes the selected attributes into the typed model.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersSendAliasedRepeatedFields",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldGenerationMatchesFreshPinnedSource"
+          ]
+        },
+        {
+          "behavior": "GetRouterAssociationWithFields with nil or empty fields sends the plain member GET without a query, which is Python's fields=None request, and a sparse response decodes with zero values for omitted attributes.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersWithoutFieldsSendPlainGet"
+          ]
+        },
+        {
+          "behavior": "GetRouterAssociationWithFields accepts HTTP 200 through 399 like the Python read, and returns 404 and other failures as the native gophercloud status error wrapped in resource.OperationError with the operation name.",
+          "tests": [
+            "api/neutron_python_field_getters_test.go:TestNeutronPythonFieldGettersAcceptPythonStatusesAndWrapFailures",
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronChildFieldGenerationValidatesNativeParentGetter"
+          ]
+        },
+        {
+          "behavior": "The generated bgpvpns package keeps the parent BGP VPN getter and the three association field getters in one file, each with its own Python Body alias map and a parent ID route segment.",
+          "tests": [
+            "internal/cmd/sdkgen/neutron_fields_test.go:TestNeutronFieldRenderingGroupsParentAndChildGetters"
+          ]
+        },
         {
           "behavior": "GetRouterAssociation sends GET bgpvpn/bgpvpns/{bgpvpn}/router_associations/{id} without any query and decodes the association.",
           "tests": [
@@ -96370,11 +96750,12 @@
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields."
+        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
+        "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
+        "The SDK field getter accepts HTTP 200..399 and keeps unknown field names in the query like Python; plain API.Get keeps the native status policy.",
+        "Python accepts a BgpVpn Resource or ID for the parent and an association Resource or ID; Go takes the parent BGP VPN ID string and the association ID string."
       ],
-      "remaining": [
-        "The Gophercloud v2.15.0 Get takes only the ID and the SDK has no field-limited getter for this resource, so get_bgpvpn_router_association(fields=[...]), which Python sends as repeated fields query values mapped from attribute names, cannot be sent; an SDK-owned getter would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/bgpvpn_router_associations",
