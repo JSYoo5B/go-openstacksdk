@@ -49,6 +49,8 @@ volume·snapshot·backup·attachment·transfer·volume type·QoS·availability z
 
 Python openstacksdk의 Cinder 관리 proxy(service, pool, extension, 볼륨 가져오기, cluster, group type 등) 대응은 [Cinder v3 Python 관리 proxy 대응](python-parity-admin.md)에서 확인할 수 있습니다.
 
+Cinder service의 enable·disable·freeze·thaw·failover·log level action은 [service action Python 대응](service-actions-python.md), group·group snapshot 상태 reset은 [group reset status Python 대응](group-reset-status-python.md)에 설명합니다. SDK 소유 `GroupTypes`, `DefaultTypes`, `Clusters`는 각 package README에 설명합니다.
+
 ## Go 사용
 
 ```go
@@ -73,10 +75,13 @@ _ = value
 | `Attachments` | [attachments](attachments/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Backups` | [backups](backups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `Clusters` | [clusters](clusters/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `ConsistencyGroups` | [consistencygroups](consistencygroups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `ConsistencyGroupSnapshots` | [consistencygroupsnapshots](consistencygroupsnapshots/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `DefaultTypes` | [defaulttypes](defaulttypes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Groups` | [groups](groups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `GroupSnapshots` | [groupsnapshots](groupsnapshots/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `GroupTypes` | [grouptypes](grouptypes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Limits` | [limits](limits/api_generated.go) | `Fetch(ctx)` / `InProject(ctx, parent).Get(ctx)`: 현재/고정 프로젝트의 읽기 전용 singleton; List·Find·Wait·변경 없음 |
 | `ManageableVolumes` | [manageablevolumes](manageablevolumes/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
