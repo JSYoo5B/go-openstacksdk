@@ -99,6 +99,7 @@ _ = value
 | `BGPPeers` | [extensions/bgp/peers](extensions/bgp/peers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `BGPSpeakers` | [extensions/bgp/speakers](extensions/bgp/speakers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `BGPVPNs` | [extensions/bgpvpns](extensions/bgpvpns/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `Flavors` | [extensions/flavors](extensions/flavors/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `FirewallGroups` | [extensions/fwaas_v2/groups](extensions/fwaas_v2/groups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `FirewallPolicies` | [extensions/fwaas_v2/policies](extensions/fwaas_v2/policies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `FirewallRules` | [extensions/fwaas_v2/rules](extensions/fwaas_v2/rules/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
@@ -107,6 +108,10 @@ _ = value
 | `FloatingIPs` | [extensions/layer3/floatingips](extensions/layer3/floatingips/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기, 상태 대기 |
 | `PortForwarding` | [extensions/layer3/portforwarding](extensions/layer3/portforwarding/api_generated.go) | `InFloatingIP(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Routers` | [extensions/layer3/routers](extensions/layer3/routers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `LocalIPAssociations` | [extensions/localipassociations](extensions/localipassociations/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `LocalIPs` | [extensions/localips](extensions/localips/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `MeteringLabels` | [extensions/metering/labels](extensions/metering/labels/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `MeteringRules` | [extensions/metering/rules](extensions/metering/rules/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `NetworkIPAvailabilities` | [extensions/networkipavailabilities](extensions/networkipavailabilities/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QoSPolicies` | [extensions/qos/policies](extensions/qos/policies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `QoSRules` | [extensions/qos/rules](extensions/qos/rules/api_generated.go) | `BandwidthLimitRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `DSCPMarkingRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기; `MinimumBandwidthRules(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |
@@ -117,8 +122,16 @@ _ = value
 | `SecurityGroups` | [extensions/security/groups](extensions/security/groups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `SecurityRules` | [extensions/security/rules](extensions/security/rules/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `Segments` | [extensions/segments](extensions/segments/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `ServiceProfiles` | [extensions/serviceprofiles](extensions/serviceprofiles/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SFCFlowClassifiers` | [extensions/sfc/flowclassifiers](extensions/sfc/flowclassifiers/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SFCPortChains` | [extensions/sfc/portchains](extensions/sfc/portchains/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SFCPortPairGroups` | [extensions/sfc/portpairgroups](extensions/sfc/portpairgroups/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SFCPortPairs` | [extensions/sfc/portpairs](extensions/sfc/portpairs/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `SFCServiceGraphs` | [extensions/sfc/servicegraphs](extensions/sfc/servicegraphs/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SubnetPools` | [extensions/subnetpools](extensions/subnetpools/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `TaaSTapFlows` | [extensions/taas/tapflows](extensions/taas/tapflows/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `TaaSTapMirrors` | [extensions/taas/tapmirrors](extensions/taas/tapmirrors/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
+| `TaaSTapServices` | [extensions/taas/tapservices](extensions/taas/tapservices/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Trunks` | [extensions/trunks](extensions/trunks/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `VPNEndpointGroups` | [extensions/vpnaas/endpointgroups](extensions/vpnaas/endpointgroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `VPNIKEPolicies` | [extensions/vpnaas/ikepolicies](extensions/vpnaas/ikepolicies/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |

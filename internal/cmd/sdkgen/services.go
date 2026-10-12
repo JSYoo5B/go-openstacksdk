@@ -46,7 +46,7 @@ func registryField(path string) string {
 		"metadefproperties":    "MetadefProperties",
 		"metadeftags":          "MetadefTags",
 		"metadefresourcetypes": "MetadefResourceTypes",
-		"nodegroups":           "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo", "profiletypes": "ProfileTypes", "policytypes": "PolicyTypes", "clusterpolicies": "ClusterPolicies", "clusterattributes": "ClusterAttributes", "vmoves": "VMoves", "secretstores": "SecretStores", "secretconsumers": "SecretConsumers", "secretacls": "SecretACLs", "identityproviders": "IdentityProviders", "federationprotocols": "FederationProtocols", "serviceproviders": "ServiceProviders",
+		"nodegroups":           "NodeGroups", "ec2credentials": "EC2Credentials", "ec2tokens": "EC2Tokens", "tsigkeys": "TSIGKeys", "schedulerstats": "SchedulerStats", "manageablevolumes": "ManageableVolumes", "stackevents": "StackEvents", "stackresources": "StackResources", "buildinfo": "BuildInfo", "profiletypes": "ProfileTypes", "policytypes": "PolicyTypes", "clusterpolicies": "ClusterPolicies", "clusterattributes": "ClusterAttributes", "vmoves": "VMoves", "secretstores": "SecretStores", "secretconsumers": "SecretConsumers", "secretacls": "SecretACLs", "identityproviders": "IdentityProviders", "federationprotocols": "FederationProtocols", "serviceproviders": "ServiceProviders", "sfc": "SFC", "flowclassifiers": "FlowClassifiers", "portpairs": "PortPairs", "portpairgroups": "PortPairGroups", "portchains": "PortChains", "servicegraphs": "ServiceGraphs", "serviceprofiles": "ServiceProfiles", "tapflows": "TapFlows", "tapservices": "TapServices", "localips": "LocalIPs", "localipassociations": "LocalIPAssociations",
 		"apiversions": "APIVersions", "servergroups": "ServerGroups", "keypairs": "KeyPairs", "secgroups": "SecurityGroups", "instanceactions": "InstanceActions", "remoteconsoles": "RemoteConsoles", "attachinterfaces": "AttachInterfaces", "volumeattach": "VolumeAttachments", "availabilityzones": "AvailabilityZones", "quotasets": "QuotaSets", "quotaclasssets": "QuotaClassSets",
 		"extensions": "", "layer3": "", "bgp": "BGP", "qos": "QoS", "fwaas_v2": "Firewall", "vpnaas": "VPN", "taas": "TaaS", "networkipavailabilities": "NetworkIPAvailabilities", "rbacpolicies": "RBACPolicies", "subnetpools": "SubnetPools", "addressscopes": "AddressScopes", "floatingips": "FloatingIPs", "extraroutes": "ExtraRoutes", "portforwarding": "PortForwarding", "bgpvpns": "BGPVPNs", "attributestags": "AttributeTags", "tapmirrors": "TapMirrors", "addressgroups": "AddressGroups", "endpointgroups": "EndpointGroups", "siteconnections": "SiteConnections", "ipsecpolicies": "IPsecPolicies", "ikepolicies": "IKEPolicies", "ruletypes": "RuleTypes",
 		"flavorprofiles": "FlavorProfiles", "l7policies": "L7Policies", "l7rules": "L7Rules", "loadbalancers": "LoadBalancers", "volumetypes": "VolumeTypes", "volumetransfers": "VolumeTransfers", "volumegroups": "VolumeGroups", "group_types": "GroupTypes", "groupsnapshots": "GroupSnapshots", "consistencygroups": "ConsistencyGroups", "consistencygroupsnapshots": "ConsistencyGroupSnapshots", "recordsets": "RecordSets", "imagedata": "ImageData", "imageimport": "ImageImport", "roleassignments": "RoleAssignments", "registeredlimits": "RegisteredLimits", "applicationcredentials": "ApplicationCredentials", "domainconfigs": "DomainConfigs", "domainroles": "DomainRoles", "projectroles": "ProjectRoles", "userpassword": "UserPassword", "trusts": "Trusts", "portgroups": "PortGroups", "bulkdelete": "BulkDelete", "softwareconfigs": "SoftwareConfigs", "softwaredeployments": "SoftwareDeployments", "stacktemplates": "StackTemplates", "sharetypes": "ShareTypes", "sharenetworks": "ShareNetworks", "shareinstances": "ShareInstances", "sharereplicas": "ShareReplicas", "sharesnapshots": "ShareSnapshots", "sharegroups": "ShareGroups", "sharegroup_types": "ShareGroupTypes", "sharegroup_snapshots": "ShareGroupSnapshots", "securityservices": "SecurityServices", "shareaccessrules": "ShareAccessRules", "resourceproviders": "ResourceProviders", "resourceclasses": "ResourceClasses", "allocationcandidates": "AllocationCandidates", "crontriggers": "CronTriggers", "clustertemplates": "ClusterTemplates", "clusterstacks": "ClusterStacks",
@@ -125,6 +125,19 @@ func (g *generator) generateServices() error {
 		groups["identity/v3"]["identityproviders"] = true
 		groups["identity/v3"]["federationprotocols"] = true
 		groups["identity/v3"]["serviceproviders"] = true
+	}
+	// Neutron networking-sfc, service flavors, metering, TaaS tap flows and
+	// services and local IPs have no pinned native package.
+	if groups["network/v2"] != nil {
+		for _, owned := range []string{
+			"extensions/sfc/flowclassifiers", "extensions/sfc/portpairs", "extensions/sfc/portpairgroups",
+			"extensions/sfc/portchains", "extensions/sfc/servicegraphs", "extensions/flavors",
+			"extensions/serviceprofiles", "extensions/metering/labels", "extensions/metering/rules",
+			"extensions/taas/tapflows", "extensions/taas/tapservices", "extensions/localips",
+			"extensions/localipassociations",
+		} {
+			groups["network/v2"][owned] = true
+		}
 	}
 	// Finite owned waits extend Barbican without inventing native operations.
 	if groups["keymanager/v1"] != nil {
