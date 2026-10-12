@@ -15,7 +15,7 @@ Gophercloud v2.15.0의 network/v2 API를 하나의 인증된 서비스 객체에
 
 `Networks/Subnets/Ports/Routers/SecurityGroups/SubnetPools/Trunks/QoSPolicies/SecurityAddressGroups.FindIdentity(ctx, identity, options...)`는 이름·ID 문자열을 SDK가 자동 조회합니다. 기본 GET400·403·404 뒤 목록 fallback과 정확한 ID/이름·중복 검사, `nil, nil` 미존재 기본값을 제공하며 `resource.WithIdentityFindIgnoreMissing(false)`로 strict를 선택합니다. `WithIdentityFindQuery`의 caller 필터는 GET과 fallback 목록 모두에 보존하고 자동 이름 hint는 목록에만 추가합니다. query와 fallback은 공통 concrete 옵션으로 제어합니다. [Python/Go 자동 조회 비교](../../docs/finding-identities.md)에 이 binding의 사용법·고정 부모·domain 필터·경로 정책을 설명합니다.
 
-Neutron 11종 리소스의 `GetWithFields(ctx, id, fields...)`는 Python Body 속성 이름을 wire 필드로 변환합니다. 7종 `DeleteWithOptions`는 `WithDeleteRevision`과 `WithDeleteIgnoreMissing`으로 revision 조건과 기본 미존재 무시를 제공합니다. [선택 조회·조건부 삭제의 Python/Go 비교와 독립 main](python-read-delete.md)에 리소스별 대응·옵션 소유권·typed 결과 경계를 설명합니다.
+Neutron 24개 package의 `GetWithFields(ctx, id, fields...)`와 BGP VPN association의 `Get*AssociationWithFields(ctx, bgpvpnID, id, fields...)` 등 선택 조회 27개는 Python Body 속성 이름을 wire 필드로 변환합니다. 7종 `DeleteWithOptions`는 `WithDeleteRevision`과 `WithDeleteIgnoreMissing`으로 revision 조건과 기본 미존재 무시를 제공합니다. [선택 조회·조건부 삭제의 Python/Go 비교와 독립 main](python-read-delete.md)에 리소스별 대응·옵션 소유권·typed 결과 경계를 설명합니다.
 
 Neutron 9개 Update API의 `UpdateOpts.RevisionNumber`는 `If-Match: revision_number=N` 조건을 전송합니다. nil은 조건을 생략하고 포인터 0은 명시적 revision 0입니다. `WithUpdateOptions`의 최종 값에도 적용하며 412 오류에서 조건 없이 자동 재시도하지 않습니다. [조건부 Update와 Python 비교](revision-updates.md)에 리소스별 대응, native 헤더 override와 응답 정책을 설명합니다.
 
