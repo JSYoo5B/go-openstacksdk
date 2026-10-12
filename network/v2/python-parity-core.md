@@ -14,7 +14,7 @@
 | `availability_zones` | 없음 | unresolved |
 | `create_local_ip` | 없음 | go_mapping |
 | `create_local_ip_association` | 없음 | go_mapping |
-| `create_network_segment_range` | 없음 | unresolved |
+| `create_network_segment_range` | 없음 | go_mapping |
 | `create_port_binding` | 없음 | unresolved |
 | `create_ports` | `ports.API.Create`는 한 개씩만 생성 | unresolved |
 | `create_segment` | `segments.API.Create(ctx, CreateOpts, WithCreateField)` | go_mapping |
@@ -22,7 +22,7 @@
 | `delete_auto_allocated_topology` | 없음 | unresolved |
 | `delete_local_ip` | 없음 | go_mapping |
 | `delete_local_ip_association` | 없음 | go_mapping |
-| `delete_network_segment_range` | 없음 | unresolved |
+| `delete_network_segment_range` | 없음 | go_mapping |
 | `delete_port_binding` | 없음 | unresolved |
 | `delete_segment` | `segments.API.Remove(ctx, resource.ID(id))` | go_mapping |
 | `dhcp_agent_hosting_networks` | `agents.API.ListDHCPNetworks(ctx, agentID)` (query 불가) | unresolved |
@@ -32,7 +32,7 @@
 | `find_local_ip` | 없음 | go_mapping |
 | `find_local_ip_association` | 없음 | go_mapping |
 | `find_network_ip_availability` | `networkipavailabilities.API.Get`, `List`를 직접 조합해야 함 | unresolved |
-| `find_network_segment_range` | 없음 | unresolved |
+| `find_network_segment_range` | 없음 | go_mapping |
 | `find_segment` | `segments.API.Find`를 ID와 이름으로 따로 호출 (query 불가) | unresolved |
 | `get_advertised_routes_of_speaker` | `speakers.API.GetAdvertisedRoutes(ctx, id)` | go_mapping |
 | `get_agent` | `agents.API.GetWithFields(ctx, id, fields...)` | go_mapping |
@@ -40,7 +40,7 @@
 | `get_local_ip` | 없음 | go_mapping |
 | `get_local_ip_association` | 없음 | go_mapping |
 | `get_network_ip_availability` | `networkipavailabilities.API.GetWithFields(ctx, networkID, fields...)` | go_mapping |
-| `get_network_segment_range` | 없음 | unresolved |
+| `get_network_segment_range` | 없음 | go_mapping |
 | `get_segment` | `segments.API.GetWithFields(ctx, id, fields...)` | go_mapping |
 | `get_subnet_ports` | `ports.API.All(ctx)` 후 `FixedIPs`의 subnet ID로 선택 | unresolved |
 | `get_trunk_subports` | `trunks.API.GetSubports(ctx, id)` | go_mapping |
@@ -48,7 +48,7 @@
 | `local_ips` | 없음 | go_mapping |
 | `network_hosting_dhcp_agents` | 없음 | unresolved |
 | `network_ip_availabilities` | `networkipavailabilities.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
-| `network_segment_ranges` | 없음 | unresolved |
+| `network_segment_ranges` | 없음 | go_mapping |
 | `onboard_network_subnets` | 없음 | unresolved |
 | `port_bindings` | 없음 | unresolved |
 | `ports` | `ports.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
@@ -59,7 +59,7 @@
 | `service_providers` | 없음 | unresolved |
 | `update_agent` | `agents.API.Update(ctx, id, UpdateOpts, WithUpdateField)` | go_mapping |
 | `update_local_ip` | 없음 | go_mapping |
-| `update_network_segment_range` | 없음 | unresolved |
+| `update_network_segment_range` | 없음 | go_mapping |
 | `update_segment` | `segments.API.Update(ctx, id, UpdateOpts, WithUpdateField)` | go_mapping |
 | `validate_auto_allocated_topology` | 없음 | unresolved |
 | `wait_for_delete` | `ports.API.WaitForDeletion` 등 일부 collection만 | unresolved |
@@ -128,6 +128,8 @@ Neutron proxy의 `get_*`는 `fields` 인자를 받아 Body 속성 이름을 wire
 `wait_for_delete`는 Neutron proxy에서 `wait=120`이 기본이고 404가 오면 원래 Resource를 돌려줍니다. Go `WaitForDeletion`은 기본 5분이므로 `resource.WithTimeout(120*time.Second)`로 맞추며 오류만 돌려줍니다. Python은 local IP, segment range, port binding, auto-allocated topology처럼 Go collection이 없는 Resource도 기다릴 수 있으므로 두 wait 메서드는 unresolved입니다.
 
 ## Unresolved 메서드
+
+network segment range 메서드는 SDK 소유 [network segment range](extensions/networksegmentranges/README.md) package가 추가되어 대응으로 바뀌었습니다.
 
 local IP와 local IP association 메서드는 SDK 소유 [local IP](extensions/localips/README.md)와 [local IP association](extensions/localipassociations/README.md) package가 추가되어 대응으로 바뀌었습니다.
 

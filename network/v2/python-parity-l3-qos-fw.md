@@ -31,12 +31,12 @@
 | `create_qos_minimum_bandwidth_rule(qos_policy, **attrs)` | `QoSRules.CreateMinimumBandwidthRule(ctx, policyID, CreateMinimumBandwidthRuleOpts{...})` | 대응 |
 | `update_qos_minimum_bandwidth_rule(qos_rule, qos_policy, **attrs)` | `QoSRules.UpdateMinimumBandwidthRule(ctx, policyID, ruleID, UpdateMinimumBandwidthRuleOpts{...})` | 대응 |
 | `delete_qos_minimum_bandwidth_rule(qos_rule, qos_policy, ignore_missing=True)` | `resource.IgnoreMissing(QoSRules.DeleteMinimumBandwidthRule(ctx, policyID, ruleID))` | 대응 |
-| `create_qos_minimum_packet_rate_rule(qos_policy, **attrs)` | 없음 | 미해결 |
-| `update_qos_minimum_packet_rate_rule(qos_rule, qos_policy, **attrs)` | 없음 | 미해결 |
-| `delete_qos_minimum_packet_rate_rule(qos_rule, qos_policy, ignore_missing=True)` | 없음 | 미해결 |
-| `create_qos_packet_rate_limit_rule(qos_policy, **attrs)` | 없음 | 미해결 |
-| `update_qos_packet_rate_limit_rule(qos_rule, qos_policy, **attrs)` | 없음 | 미해결 |
-| `delete_qos_packet_rate_limit_rule(qos_rule, qos_policy, ignore_missing=True)` | 없음 | 미해결 |
+| `create_qos_minimum_packet_rate_rule(qos_policy, **attrs)` | 없음 | 대응 |
+| `update_qos_minimum_packet_rate_rule(qos_rule, qos_policy, **attrs)` | 없음 | 대응 |
+| `delete_qos_minimum_packet_rate_rule(qos_rule, qos_policy, ignore_missing=True)` | 없음 | 대응 |
+| `create_qos_packet_rate_limit_rule(qos_policy, **attrs)` | 없음 | 대응 |
+| `update_qos_packet_rate_limit_rule(qos_rule, qos_policy, **attrs)` | 없음 | 대응 |
+| `delete_qos_packet_rate_limit_rule(qos_rule, qos_policy, ignore_missing=True)` | 없음 | 대응 |
 | `create_firewall_group(**attrs)` | `FirewallGroups.Create(ctx, groups.CreateOpts{...}, WithCreateField(...))` | 대응 |
 | `update_firewall_group(firewall_group, **attrs)` | `FirewallGroups.Update(ctx, id, groups.UpdateOpts{...})`, `RemoveIngressPolicy`, `RemoveEgressPolicy` | 대응 |
 | `delete_firewall_group(firewall_group, ignore_missing=True)` | `FirewallGroups.Remove(ctx, resource.ID(id))` | 대응 |
@@ -57,28 +57,28 @@
 | `get_firewall_rule(firewall_rule, *, fields=None)` | `FirewallRules.GetWithFields(ctx, id, fields...)` | 대응 |
 | `find_firewall_rule(name_or_id, ignore_missing=True, **query)` | `FirewallRules.Find` ID 다음 Name | 대응 |
 | `firewall_rules(**query)` | `FirewallRules.List(ctx, WithListOptions(rules.ListOpts{...}), WithListQuery(...))` | 대응 |
-| `create_conntrack_helper(router, **attrs)` | 없음 | 미해결 |
-| `conntrack_helpers(router, **query)` | 없음 | 미해결 |
-| `get_conntrack_helper(conntrack_helper, router)` | 없음 | 미해결 |
-| `update_conntrack_helper(conntrack_helper, router, **attrs)` | 없음 | 미해결 |
-| `delete_conntrack_helper(conntrack_helper, router, ignore_missing=True)` | 없음 | 미해결 |
-| `create_ndp_proxy(**attrs)` | 없음 | 미해결 |
-| `get_ndp_proxy(ndp_proxy, fields=None)` | 없음 | 미해결 |
-| `find_ndp_proxy(ndp_proxy_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `delete_ndp_proxy(ndp_proxy, ignore_missing=True)` | 없음 | 미해결 |
-| `ndp_proxies(**query)` | 없음 | 미해결 |
-| `update_ndp_proxy(ndp_proxy, **attrs)` | 없음 | 미해결 |
-| `create_default_security_group_rule(**attrs)` | 없음 | 미해결 |
-| `delete_default_security_group_rule(default_security_group_rule, ignore_missing=True)` | 없음 | 미해결 |
-| `find_default_security_group_rule(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_default_security_group_rule(default_security_group_rule, fields=None)` | 없음 | 미해결 |
-| `default_security_group_rules(**query)` | 없음 | 미해결 |
-| `create_security_groups_default_statefulness(**attrs)` | 없음 | 미해결 |
-| `delete_security_groups_default_statefulness(..., ignore_missing=True)` | 없음 | 미해결 |
-| `find_security_groups_default_statefulness(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_security_groups_default_statefulness(..., fields=None)` | 없음 | 미해결 |
-| `security_groups_default_statefulness(**query)` | 없음 | 미해결 |
-| `update_security_groups_default_statefulness(..., **attrs)` | 없음 | 미해결 |
+| `create_conntrack_helper(router, **attrs)` | 없음 | 대응 |
+| `conntrack_helpers(router, **query)` | 없음 | 대응 |
+| `get_conntrack_helper(conntrack_helper, router)` | 없음 | 대응 |
+| `update_conntrack_helper(conntrack_helper, router, **attrs)` | 없음 | 대응 |
+| `delete_conntrack_helper(conntrack_helper, router, ignore_missing=True)` | 없음 | 대응 |
+| `create_ndp_proxy(**attrs)` | 없음 | 대응 |
+| `get_ndp_proxy(ndp_proxy, fields=None)` | 없음 | 대응 |
+| `find_ndp_proxy(ndp_proxy_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `delete_ndp_proxy(ndp_proxy, ignore_missing=True)` | 없음 | 대응 |
+| `ndp_proxies(**query)` | 없음 | 대응 |
+| `update_ndp_proxy(ndp_proxy, **attrs)` | 없음 | 대응 |
+| `create_default_security_group_rule(**attrs)` | 없음 | 대응 |
+| `delete_default_security_group_rule(default_security_group_rule, ignore_missing=True)` | 없음 | 대응 |
+| `find_default_security_group_rule(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_default_security_group_rule(default_security_group_rule, fields=None)` | 없음 | 대응 |
+| `default_security_group_rules(**query)` | 없음 | 대응 |
+| `create_security_groups_default_statefulness(**attrs)` | 없음 | 대응 |
+| `delete_security_groups_default_statefulness(..., ignore_missing=True)` | 없음 | 대응 |
+| `find_security_groups_default_statefulness(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_security_groups_default_statefulness(..., fields=None)` | 없음 | 대응 |
+| `security_groups_default_statefulness(**query)` | 없음 | 대응 |
+| `update_security_groups_default_statefulness(..., **attrs)` | 없음 | 대응 |
 
 대응 32개, 미해결 30개입니다.
 
@@ -144,6 +144,8 @@ Python은 ID GET이 400이나 403이어도 목록으로 넘어가지만 Go `Find
 `insert_rule_into_policy`는 미해결입니다. Python은 위치를 주지 않아도 `{"firewall_rule_id": ..., "insert_after": null, "insert_before": null}`을 보내는데, Gophercloud `InsertRuleOpts`는 `InsertBefore`와 `InsertAfter` 가운데 정확히 하나를 요구하고 HTTP 전에 거부합니다. 두 키가 선언된 필드라서 `WithInsertRuleField`로 null을 넣는 것도 막힙니다. 위치 하나를 주는 호출은 Python과 같은 요청을 보내지만 null 키는 빠집니다.
 
 ## 미해결 메서드와 부족한 부분
+
+conntrack helper, NDP proxy, 기본 보안 그룹 rule, 보안 그룹 기본 statefulness 메서드와 QoS minimum packet rate·packet rate limit rule의 생성·수정·삭제는 SDK 소유 API가 추가되어 대응으로 바뀌었습니다. [conntrack helper](extensions/layer3/conntrackhelpers/README.md), [NDP proxy](extensions/layer3/ndpproxies/README.md), [기본 보안 그룹 rule](extensions/security/defaultrules/README.md), [기본 statefulness](extensions/security/defaultstatefulness/README.md), [packet rate rule 변경](extensions/qos/rules/packet-rate-mutations-python.md)에 요청과 차이를 설명합니다. 아래 목록에서 이 메서드들은 더 이상 미해결이 아닙니다.
 
 - `update_router_in_agent`: Gophercloud v2.15.0에는 `PUT /agents/{agent_id}/l3-routers/{router_id}` 바인딩이 없어서 SDK 소유 호출이 필요합니다.
 - `create_/update_/delete_qos_minimum_packet_rate_rule`, `create_/update_/delete_qos_packet_rate_limit_rule`: Gophercloud v2.15.0에는 `minimum_packet_rate_rules`, `packet_rate_limit_rules`의 쓰기 바인딩이 없습니다. 이 SDK에는 조회용 Record 헬퍼만 있습니다.
