@@ -145,6 +145,16 @@ func TestPythonLocalIPUpdateIgnoresRevisionPrecondition(t *testing.T) {
 	pythonLocalIPCheck(t, value)
 
 	calls = nil
+	condition := map[string]string{"If-Match": "revision_number=3"}
+	_, err = api.Update(context.Background(), "lip1", localips.WithUpdateField("name", "n"), localips.WithUpdateHeaders(condition))
+	if err != nil || len(calls) != 1 || calls[0].ifMatch != "revision_number=3" {
+		t.Fatal(err, calls)
+	}
+	if err = api.Delete(context.Background(), "lip1", localips.WithDeleteHeaders(condition)); err != nil || len(calls) != 2 || calls[1].ifMatch != "revision_number=3" {
+		t.Fatal(err, calls)
+	}
+
+	calls = nil
 	value, err = api.Update(context.Background(), "lip1")
 	if err != nil || len(calls) != 0 || value.ID != "lip1" || value.Wire != nil {
 		t.Fatal(value, err, calls)
