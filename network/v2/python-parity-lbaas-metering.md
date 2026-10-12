@@ -40,32 +40,32 @@ Python 원본은 [`_proxy.py`](https://github.com/openstack/openstacksdk/blob/ef
 | `get_health_monitor(hm)` | 없음 | 미해결 |
 | `health_monitors(**query)` | 없음 | 미해결 |
 | `update_health_monitor(hm, **attrs)` | 없음 | 미해결 |
-| `create_flavor(**attrs)` | 없음 | 미해결 |
-| `delete_flavor(flavor, ignore_missing=True)` | 없음 | 미해결 |
-| `find_flavor(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_flavor(flavor, fields=None)` | 없음 | 미해결 |
-| `flavors(**query)` | 없음 | 미해결 |
-| `update_flavor(flavor, **attrs)` | 없음 | 미해결 |
-| `associate_flavor_with_service_profile(flavor, service_profile)` | 없음 | 미해결 |
-| `disassociate_flavor_from_service_profile(flavor, service_profile)` | 없음 | 미해결 |
-| `create_service_profile(**attrs)` | 없음 | 미해결 |
-| `delete_service_profile(sp, ignore_missing=True)` | 없음 | 미해결 |
-| `find_service_profile(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_service_profile(sp, fields=None)` | 없음 | 미해결 |
-| `service_profiles(**query)` | 없음 | 미해결 |
-| `update_service_profile(sp, **attrs)` | 없음 | 미해결 |
-| `create_metering_label(**attrs)` | 없음 | 미해결 |
-| `delete_metering_label(label, ignore_missing=True)` | 없음 | 미해결 |
-| `find_metering_label(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_metering_label(label, fields=None)` | 없음 | 미해결 |
-| `metering_labels(**query)` | 없음 | 미해결 |
-| `update_metering_label(label, **attrs)` | 없음 | 미해결 |
-| `create_metering_label_rule(**attrs)` | 없음 | 미해결 |
-| `delete_metering_label_rule(rule, ignore_missing=True)` | 없음 | 미해결 |
-| `find_metering_label_rule(name_or_id, ignore_missing=True, **query)` | 없음 | 미해결 |
-| `get_metering_label_rule(rule, fields=None)` | 없음 | 미해결 |
-| `metering_label_rules(**query)` | 없음 | 미해결 |
-| `update_metering_label_rule(rule, **attrs)` | 없음 | 미해결 |
+| `create_flavor(**attrs)` | 없음 | 대응 |
+| `delete_flavor(flavor, ignore_missing=True)` | 없음 | 대응 |
+| `find_flavor(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_flavor(flavor, fields=None)` | 없음 | 대응 |
+| `flavors(**query)` | 없음 | 대응 |
+| `update_flavor(flavor, **attrs)` | 없음 | 대응 |
+| `associate_flavor_with_service_profile(flavor, service_profile)` | 없음 | 대응 |
+| `disassociate_flavor_from_service_profile(flavor, service_profile)` | 없음 | 대응 |
+| `create_service_profile(**attrs)` | 없음 | 대응 |
+| `delete_service_profile(sp, ignore_missing=True)` | 없음 | 대응 |
+| `find_service_profile(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_service_profile(sp, fields=None)` | 없음 | 대응 |
+| `service_profiles(**query)` | 없음 | 대응 |
+| `update_service_profile(sp, **attrs)` | 없음 | 대응 |
+| `create_metering_label(**attrs)` | 없음 | 대응 |
+| `delete_metering_label(label, ignore_missing=True)` | 없음 | 대응 |
+| `find_metering_label(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_metering_label(label, fields=None)` | 없음 | 대응 |
+| `metering_labels(**query)` | 없음 | 대응 |
+| `update_metering_label(label, **attrs)` | 없음 | 대응 |
+| `create_metering_label_rule(**attrs)` | 없음 | 대응 |
+| `delete_metering_label_rule(rule, ignore_missing=True)` | 없음 | 대응 |
+| `find_metering_label_rule(name_or_id, ignore_missing=True, **query)` | 없음 | 대응 |
+| `get_metering_label_rule(rule, fields=None)` | 없음 | 대응 |
+| `metering_label_rules(**query)` | 없음 | 대응 |
+| `update_metering_label_rule(rule, **attrs)` | 없음 | 대응 |
 | `find_ip(name_or_id, ignore_missing=True, **query)` | `floatingips.API.Find(ctx, resource.ID(id), resource.WithIgnoreMissing())` (ID 조회만) | 미해결 |
 | `ips(**query)` | `floatingips.API.All(ctx, resource.WithQuery(k, v)...)` (서버 query만) | 미해결 |
 
@@ -98,6 +98,8 @@ Go의 `floatingips.API.Find(ctx, resource.ID(x), resource.WithIgnoreMissing())`�
 `ips()`는 Go `floatingips.API.All(ctx)`와 같은 `GET /v2.0/floatingips`를 보내고 `floatingips_links`의 next 링크를 따라갑니다. `floating_network_id`, `status`처럼 Python `_query_mapping`에 있는 키는 `resource.WithQuery`로 같은 서버 query를 만들 수 있습니다. 다만 Python은 `name`(실제로는 `floating_ip_address`), `dns_name`, `qos_policy_id`처럼 query에 없는 Body 속성을 로컬에서 거르는데, 이 collection에서는 `resource.WithName`과 `resource.WithBodyFilter`가 HTTP 요청 없이 `resource.ErrUnsupported`를 돌려줍니다. Go `resource.WithStatus`는 `status` query를 보내면서 결과를 대소문자 구분 없이 한 번 더 거르므로, Python `status` 인자와 똑같이 서버 필터만 쓰려면 `resource.WithQuery("status", ...)`를 사용합니다. 테스트는 같은 파일의 `TestPythonIPsListServerQueryAndPagesButNoLocalBodyFilters`입니다. `find_floating_ip`, `floating_ips` 같은 본래 이름의 메서드는 이 문서의 범위가 아닙니다.
 
 ## 미해결 메서드와 부족한 점
+
+Neutron service flavor·service profile·metering label·metering label rule 메서드는 SDK 소유 package가 추가되어 대응으로 바뀌었습니다. [flavor](extensions/flavors/README.md), [service profile](extensions/serviceprofiles/README.md), [metering label](extensions/metering/labels/README.md), [metering rule](extensions/metering/rules/README.md) README에 요청과 차이를 설명합니다. LBaaS v2 메서드는 서버 API가 폐기되어 구현 대상에서 제외했습니다.
 
 - LBaaS v2 30개 메서드(`*_load_balancer`, `load_balancers`, `*_listener`, `listeners`, `*_pool`, `pools`, `*_pool_member`, `pool_members`, `*_health_monitor`, `health_monitors`): Gophercloud v2.15.0에는 Neutron `network` endpoint의 `/v2.0/lbaas/*` binding이 없습니다. Octavia facade는 `load-balancer` endpoint를 쓰므로 SDK가 소유한 Neutron LBaaS 호출이 따로 필요합니다.
 - Flavor 8개 메서드(`*_flavor`, `flavors`, `associate_flavor_with_service_profile`, `disassociate_flavor_from_service_profile`)와 service profile 6개 메서드(`*_service_profile`, `service_profiles`): `/v2.0/flavors`, `/v2.0/flavors/{id}/service_profiles`, `/v2.0/service_profiles` binding이 없어서 SDK가 소유한 호출이 필요합니다.

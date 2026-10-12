@@ -12,48 +12,48 @@
 | [`tap_mirrors`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9138) | `api.All(ctx, resource.WithQuery(k, v)...)`, `api.List(ctx, tapmirrors.WithListQuery(k, v)...)` | 미해결 |
 | [`update_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9130) | `api.Update(ctx, id, tapmirrors.UpdateOpts{...}, tapmirrors.WithUpdateField(k, v)...)` | 대응 |
 | [`delete_tap_mirror`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9070) | `api.Remove(ctx, resource.ID(id))` 또는 `resource.IgnoreMissing(api.Delete(ctx, id))` | 대응 |
-| [`create_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L8987) | 없음 | 미해결 |
-| [`get_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9029) | 없음 | 미해결 |
-| [`find_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9015) | 없음 | 미해결 |
-| [`tap_flows`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9057) | 없음 | 미해결 |
-| [`update_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9049) | 없음 | 미해결 |
-| [`delete_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L8991) | 없음 | 미해결 |
-| [`create_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9147) | 없음 | 미해결 |
-| [`get_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9191) | 없음 | 미해결 |
-| [`find_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9177) | 없음 | 미해결 |
-| [`tap_services`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9219) | 없음 | 미해결 |
-| [`update_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9211) | 없음 | 미해결 |
-| [`delete_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9151) | 없음 | 미해결 |
-| [`create_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9228) | 없음 | 미해결 |
-| [`get_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9310) | 없음 | 미해결 |
-| [`find_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9283) | 없음 | 미해결 |
-| [`sfc_flow_classifiers`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9347) | 없음 | 미해결 |
-| [`update_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9329) | 없음 | 미해결 |
-| [`delete_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9242) | 없음 | 미해결 |
-| [`create_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9369) | 없음 | 미해결 |
-| [`get_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9450) | 없음 | 미해결 |
-| [`find_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9423) | 없음 | 미해결 |
-| [`sfc_port_chains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9483) | 없음 | 미해결 |
-| [`update_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9467) | 없음 | 미해결 |
-| [`delete_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9382) | 없음 | 미해결 |
-| [`create_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9502) | 없음 | 미해결 |
-| [`get_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9580) | 없음 | 미해결 |
-| [`find_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9554) | 없음 | 미해결 |
-| [`sfc_port_pairs`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9613) | 없음 | 미해결 |
-| [`update_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9597) | 없음 | 미해결 |
-| [`delete_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9513) | 없음 | 미해결 |
-| [`create_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9632) | 없음 | 미해결 |
-| [`get_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9713) | 없음 | 미해결 |
-| [`find_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9686) | 없음 | 미해결 |
-| [`sfc_port_pair_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9750) | 없음 | 미해결 |
-| [`update_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9732) | 없음 | 미해결 |
-| [`delete_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9645) | 없음 | 미해결 |
-| [`create_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9770) | 없음 | 미해결 |
-| [`get_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9851) | 없음 | 미해결 |
-| [`find_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9824) | 없음 | 미해결 |
-| [`sfc_service_graphs`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9886) | 없음 | 미해결 |
-| [`update_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9868) | 없음 | 미해결 |
-| [`delete_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9783) | 없음 | 미해결 |
+| [`create_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L8987) | SDK 소유 package | 대응 |
+| [`get_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9029) | SDK 소유 package | 대응 |
+| [`find_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9015) | SDK 소유 package | 대응 |
+| [`tap_flows`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9057) | SDK 소유 package | 대응 |
+| [`update_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9049) | SDK 소유 package | 대응 |
+| [`delete_tap_flow`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L8991) | SDK 소유 package | 대응 |
+| [`create_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9147) | SDK 소유 package | 대응 |
+| [`get_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9191) | SDK 소유 package | 대응 |
+| [`find_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9177) | SDK 소유 package | 대응 |
+| [`tap_services`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9219) | SDK 소유 package | 대응 |
+| [`update_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9211) | SDK 소유 package | 대응 |
+| [`delete_tap_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9151) | SDK 소유 package | 대응 |
+| [`create_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9228) | SDK 소유 package | 대응 |
+| [`get_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9310) | SDK 소유 package | 대응 |
+| [`find_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9283) | SDK 소유 package | 대응 |
+| [`sfc_flow_classifiers`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9347) | SDK 소유 package | 대응 |
+| [`update_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9329) | SDK 소유 package | 대응 |
+| [`delete_sfc_flow_classifier`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9242) | SDK 소유 package | 대응 |
+| [`create_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9369) | SDK 소유 package | 대응 |
+| [`get_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9450) | SDK 소유 package | 대응 |
+| [`find_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9423) | SDK 소유 package | 대응 |
+| [`sfc_port_chains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9483) | SDK 소유 package | 대응 |
+| [`update_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9467) | SDK 소유 package | 대응 |
+| [`delete_sfc_port_chain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9382) | SDK 소유 package | 대응 |
+| [`create_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9502) | SDK 소유 package | 대응 |
+| [`get_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9580) | SDK 소유 package | 대응 |
+| [`find_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9554) | SDK 소유 package | 대응 |
+| [`sfc_port_pairs`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9613) | SDK 소유 package | 대응 |
+| [`update_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9597) | SDK 소유 package | 대응 |
+| [`delete_sfc_port_pair`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9513) | SDK 소유 package | 대응 |
+| [`create_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9632) | SDK 소유 package | 대응 |
+| [`get_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9713) | SDK 소유 package | 대응 |
+| [`find_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9686) | SDK 소유 package | 대응 |
+| [`sfc_port_pair_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9750) | SDK 소유 package | 대응 |
+| [`update_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9732) | SDK 소유 package | 대응 |
+| [`delete_sfc_port_pair_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9645) | SDK 소유 package | 대응 |
+| [`create_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9770) | SDK 소유 package | 대응 |
+| [`get_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9851) | SDK 소유 package | 대응 |
+| [`find_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9824) | SDK 소유 package | 대응 |
+| [`sfc_service_graphs`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9886) | SDK 소유 package | 대응 |
+| [`update_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9868) | SDK 소유 package | 대응 |
+| [`delete_sfc_service_graph`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9783) | SDK 소유 package | 대응 |
 
 판정이 "대응"이면 Python 인수의 효과를 공개 Go API로 재현할 수 있고 남은 차이는 아래에 적었습니다. "미해결"이면 Go에 경로가 없거나 Python 인수 일부를 보낼 방법이 없습니다.
 
@@ -106,6 +106,8 @@ networking-sfc 자원은 `/sfc` 아래에 있습니다. Python 정의는 [`sfc_f
 다섯 자원 모두 POST 생성, `GET {id}` 조회, PUT 수정, DELETE 삭제(기본 `ignore_missing=True`), GET-then-list 검색, 목록을 제공합니다. Gophercloud v2.15.0에는 networking-sfc 패키지가 없고 이 SDK도 해당 경로를 호출하는 Go API를 두지 않습니다.
 
 ## 미해결 메서드
+
+networking-sfc의 flow classifier·port pair·port pair group·port chain·service graph와 TaaS tap flow·tap service 메서드는 SDK 소유 package가 추가되어 대응으로 바뀌었습니다. 각 package README([flow classifier](extensions/sfc/flowclassifiers/README.md), [port pair](extensions/sfc/portpairs/README.md), [port pair group](extensions/sfc/portpairgroups/README.md), [port chain](extensions/sfc/portchains/README.md), [service graph](extensions/sfc/servicegraphs/README.md), [tap flow](extensions/taas/tapflows/README.md), [tap service](extensions/taas/tapservices/README.md))에 요청과 차이를 설명합니다. 아래 목록에서 이 메서드들은 더 이상 미해결이 아닙니다.
 
 - `find_tap_mirror`: Go 검색은 GET 400과 403 뒤에 목록으로 넘어가지 않고, `**query`를 GET과 목록 요청에 붙일 수 없습니다.
 - `tap_mirrors`: `fields`, `sort_key`, `sort_dir`의 반복 값을 보낼 수 없습니다.
