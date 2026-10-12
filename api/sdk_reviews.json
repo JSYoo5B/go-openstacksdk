@@ -87964,100 +87964,189 @@
     {
       "operation": "python:block_storage/v3/enable_service",
       "source_fingerprint": "eac5ef42ec17207d8f51610c41d6362ec011f07a05bfbe9ca53e6391e3000bd4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Enable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.NewServiceTarget",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.TargetOf"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/enable with the Service binary and host and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Enable sends PUT os-services/enable with {\"binary\", \"host\"} (null when unset) at the configured client microversion only and overlays the root response object.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceActionsSendServiceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python takes a Service instance or ID string; Go takes a ServiceTarget with Binary and Host, where nil fields reproduce the null body Python sends for an ID string.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/disable_service",
       "source_fingerprint": "315d23d7cc4c920bf064808a3cc86a20231aafc993cabb493af3c73d57669b96",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Disable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithDisableReason"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/disable, or os-services/disable-log-reason with disabled_reason when a reason is given and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Disable sends PUT os-services/disable with binary and host, or os-services/disable-log-reason with disabled_reason added for a nonempty reason.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceActionsSendServiceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python takes a Service instance or ID string; Go takes a ServiceTarget with Binary and Host.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/thaw_service",
       "source_fingerprint": "306973574d6c433d760ff9782990032466a5fddd1cb49d6e520279d1c85ac2aa",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Thaw"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/thaw with the service host and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Thaw sends PUT os-services/thaw with {\"host\": host} at the configured client microversion and wraps 400 with operation context.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceActionsSendServiceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python takes a Service instance or ID string; Go takes a ServiceTarget.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/freeze_service",
       "source_fingerprint": "b98a2289cd3a66971c0cdd647b9478068e377e9b018fdcc499be5e5d179a1c08",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Freeze"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/freeze with the service host and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Freeze sends PUT os-services/freeze with {\"host\": host} at the configured client microversion and wraps 400 with operation context.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceActionsSendServiceBodies"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python takes a Service instance or ID string; Go takes a ServiceTarget.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/failover_service",
       "source_fingerprint": "13e1fde5d545bbaba52a1d929ef6e8c423c706e65fefe33f81b3c17649c69d8d",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Failover",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverCluster",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverBackendID"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/failover (os-services/failover_host below 3.26) with host and optional cluster/backend_id and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Failover reads Cinder discovery once, sends PUT os-services/failover when 3.26 is supported (and matched by a configured microversion) or failover_host otherwise, with host plus nonempty cluster and backend_id, at the configured client microversion.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceFailoverChoosesActionBySupportedMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python takes a Service instance or ID string; Go takes a ServiceTarget.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "A discovery failure other than a clean 404/405 is returned as an error, while keystoneauth may treat unavailable endpoint data as unsupported."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/set_service_log_levels",
       "source_fingerprint": "f2b9ea036a858682a77e07d7654f8451c7ec6b26e89a6eae7ecaf8c2709b7055",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.SetLogLevels",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/set-log at microversion 3.32+ with level, binary (empty string default), server and prefix and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "SetLogLevels selects the configured microversion or min(3.32, server max), fails with ErrUnsupported before HTTP below 3.32, and sends PUT os-services/set-log with level, binary defaulting to \"\" and null server/prefix.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceLogLevelsRequireMicroversion332"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python returns None; Go returns an ActionReceipt with the actual response. Level and Binary enums are plain strings. An unsupported microversion is resource.ErrUnsupported instead of NotSupported."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_service_log_levels",
       "source_fingerprint": "b7311f57f6e89c589d757799442000d522bd06333b5b3f993f98ba15311f47c4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.GetLogLevels",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT os-services/get-log at microversion 3.32+ returning log_levels entries and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GetLogLevels sends PUT os-services/get-log at 3.32 or later with binary, server and prefix, decodes every log_levels entry's binary, host and levels, and fails with the accepted response when log_levels or an entry key is missing.",
+          "tests": [
+            "blockstorage/v3/services/python_actions_test.go:TestPythonServiceLogLevelsRequireMicroversion332"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/service-actions-python.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python returns a lazy generator of LogLevel resources that sends the request on first iteration; Go sends the request on call and returns a LogLevels slice with the actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/cleanup_service_workers",
@@ -88160,282 +88249,543 @@
     {
       "operation": "python:block_storage/v3/get_cluster",
       "source_fingerprint": "eb836a8a30bc0ed95a8985d87fe857380b74940db32873c80e7f335d0c679dc7",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Get"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET clusters/{name} at microversion 3.7+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET clusters/{name} at min(3.26, server max), seeds the requested value as id and decodes the cluster envelope, wrapping 404 with operation context.",
+          "tests": [
+            "blockstorage/v3/clusters/api_test.go:TestClusterGetNegotiatesMicroversion326"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/clusters/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/find_cluster",
       "source_fingerprint": "9902179a37ad28b83c134153368679331cd50c6c15916c7551eb7ad990d0a4df",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET clusters/{name} followed by the clusters/detail list fallback and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET clusters/{name_or_id} and after a clean 404 lists clusters/detail?name={name_or_id} matching id or name, returning nil by default and ErrNotFound with WithFindIgnoreMissing(false).",
+          "tests": [
+            "blockstorage/v3/clusters/api_test.go:TestClusterFindFallsBackToDetailListByName"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/clusters/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "The Resource location attribute and the find_* deprecation warning are not reproduced.",
+        "A missing cluster with ignore_missing=False is resource.ErrNotFound instead of NotFoundException."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/clusters",
       "source_fingerprint": "fb5373c6e203a9273b96bf48a21ffe1ab69b3524640c0c13f9f94b56cbaae31d",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListDetails",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListQuery"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET clusters/detail (details=True default) or clusters with the Cluster QueryParameters and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET clusters/detail by default or clusters with WithListDetails(false), maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.",
+          "tests": [
+            "blockstorage/v3/clusters/api_test.go:TestClusterListDetailsQueryAndLocalFilters"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/clusters/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Go returns a lazy iter.Seq2 (or All for a slice) instead of a generator; local filters compare JSON values without Python type conversion."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/enable_cluster",
       "source_fingerprint": "5be2dbacfdfb0425d6e47a477087d1a8780a8728f0c36aeab4bf83d66608debe",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Enable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.NewTarget",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.Cluster.Target"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT clusters/enable with name and optional binary and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Enable sends PUT clusters/enable with {\"name\": name} plus a nonempty binary at the configured client microversion only (no discovery) and decodes the cluster envelope.",
+          "tests": [
+            "blockstorage/v3/clusters/api_test.go:TestClusterEnableDisableUseConfiguredMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/clusters/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python takes a Cluster instance or string; Go takes a Target with Name and Binary, where a nil Name reproduces the {\"name\": null} body Python sends for a plain string."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/disable_cluster",
       "source_fingerprint": "dcc1a37190b5595fb033aa6c3a3c3eec23e1b9339e371e6290662906cd0346aa",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Disable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithDisableReason",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.NewTarget",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.Cluster.Target"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT clusters/disable with name, optional binary and disabled_reason and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Disable sends PUT clusters/disable with name, a nonempty binary and a nonempty disabled_reason at the configured client microversion and wraps 400 with operation context.",
+          "tests": [
+            "blockstorage/v3/clusters/api_test.go:TestClusterEnableDisableUseConfiguredMicroversion"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/clusters/README.md"
+      ],
+      "differences": [
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python takes a Cluster instance or string; Go takes a Target with Name and Binary, where a nil Name reproduces the {\"name\": null} body Python sends for a plain string."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_group_type",
       "source_fingerprint": "52258650e38b2779a7f0e8e1ce04b34f956b97c963a510766bc252077bd6f9e5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Get"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET group_types/{id} and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET group_types/{id} at min(3.11, server max) after one discovery GET, or at the configured microversion without discovery, and decodes the group_type envelope or root object with group_specs defaulting to {}.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGetNegotiatesMicroversion311"
+          ]
+        },
+        {
+          "behavior": "Get accepts every status below 400, wraps 400+ with operation context, fails a non-object JSON body with the accepted response and keeps the seeded id for a non-JSON body.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeStatusPolicyAndRejections"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/find_group_type",
       "source_fingerprint": "6f2c064201e5577f03d450680e1d95649c7e40f60dc0bd42071d1311522bed5a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Find",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithFindIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET group_types/{id} followed by the group_types list fallback, both with is_public=none and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Find sends GET group_types/{name_or_id}?is_public=none and after a clean 400/403/404 lists group_types?is_public=none matching exact id or name, returns nil for a missing type by default, ErrNotFound with WithFindIgnoreMissing(false), and AmbiguousError for duplicates.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeFindUsesIsPublicNone"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "The Resource location attribute and the find_* deprecation warning are not reproduced.",
+        "A missing type with ignore_missing=False is resource.ErrNotFound instead of NotFoundException; duplicates are resource.AmbiguousError instead of DuplicateResource."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/group_types",
       "source_fingerprint": "f3c6f9875df1696f76c32122d4f4aa4b71eb5dab06052869beed0847a17bd3ac",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithListPaginated"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET group_types with the GroupType QueryParameters and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List sends GET group_types with Accept application/json, maps is_public and all_projects (as all_tenants) to Requests-encoded query, filters id/name/description/group_specs locally, ignores unknown names, follows group_types_links and honors limit, marker and paginated.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeListQueryFiltersAndPaging"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Go returns a lazy iter.Seq2 (or All for a slice) instead of a generator; local filters compare JSON values without Python type conversion."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/create_group_type",
       "source_fingerprint": "2f868c773b8251cbac23740943e1b282db6ec244aa4e7a72437323181e996d8a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Create",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateField",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithCreateOpts"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST group_types with a group_type envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Create posts {\"group_type\": attrs} with only declared attributes to group_types at the negotiated 3.11 microversion and decodes the response.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeCreatePostsEnvelope"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python **attrs become WithCreateField options holding raw JSON; aliases of one Body key with different values are rejected before HTTP."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/update_group_type",
       "source_fingerprint": "160a5b982057430f59dcbaeb8d297a174ddb283ea3b60d9be3444650f740820c",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Update",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithUpdateOpts"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT group_types/{id} with the changed group_type attributes and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Update sends PUT group_types/{id} with only the dirty declared attributes, never the id, and sends neither discovery nor update HTTP when nothing is dirty.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeUpdateSendsDirtyAttributesOnly"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/delete_group_type",
       "source_fingerprint": "d10109f1fa6a6e33e638554b6c51f29359e94a73dc484282c30c0c7bfb71104f",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Delete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE group_types/{id} ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Delete sends DELETE group_types/{id}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and always returns 409 with operation context.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeDeleteIgnoresMissingByDefault"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/fetch_group_type_group_specs",
       "source_fingerprint": "830a3ec8563ed6312cee311b4280c8be46c7a2f4426c4bb898061f23955088f8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.FetchGroupSpecs"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET group_types/{id}/group_specs and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "FetchGroupSpecs sends GET group_types/{id}/group_specs at the negotiated 3.11 microversion and returns the group type seeded with the id and the response group_specs, failing a non-object or non-JSON body.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "The returned GroupType is a new value holding only the id and group_specs rather than the updated input instance."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/create_group_type_group_specs",
       "source_fingerprint": "50bc67ddb96ea33ef4f96497e81276eba2c9848ed8bdd6103db27a34b3e77829",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.CreateGroupSpecs"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST group_types/{id}/group_specs with a group_specs envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "CreateGroupSpecs posts {\"group_specs\": specs} to group_types/{id}/group_specs and defaults an absent response group_specs to {}.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "The specs are a Go map[string]any marshaled as JSON."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_group_type_group_specs_property",
       "source_fingerprint": "d755660bced0e7b99809b0e5a1c7d4074edbb9314ca7da31a66e18ce57669a00",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.GetGroupSpecsProperty"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET group_types/{id}/group_specs/{prop} and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "GetGroupSpecsProperty sends GET group_types/{id}/group_specs/{prop} and returns the prop member as raw JSON, or JSON null when the member is absent.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns the decoded value or None; Go returns a SpecProperty whose Value is raw JSON plus the actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/update_group_type_group_specs_property",
       "source_fingerprint": "79afe7282d15d4eba954117bb5ac5cf063beff81c4cec02603f6f84d5301406f",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.UpdateGroupSpecsProperty"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT group_types/{id}/group_specs/{prop} with {prop: val} and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "UpdateGroupSpecsProperty sends PUT group_types/{id}/group_specs/{prop} with {prop: val}, returns the response prop member and fails like the Python KeyError when it is absent.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns the decoded value; Go returns a SpecProperty whose Value is raw JSON plus the actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/delete_group_type_group_specs_property",
       "source_fingerprint": "8a732e6d9bb09b70918f57606077c14f11de5980e9c8fedc30ab8480f923b035",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.DeleteGroupSpecsProperty",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.WithDeleteIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE group_types/{id}/group_specs/{prop} ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "DeleteGroupSpecsProperty sends DELETE group_types/{id}/group_specs/{prop}, ignores a clean 404 by default, returns it with WithDeleteIgnoreMissing(false) and returns 403 with operation context.",
+          "tests": [
+            "blockstorage/v3/grouptypes/api_test.go:TestGroupTypeGroupSpecs"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/grouptypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/default_types",
       "source_fingerprint": "f4730d2b2b455e0393a261b96b1da484193bb6b908f93179b6bfafef1085e3f7",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.All"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET default-types at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "List checks the 3.67 support through one Cinder discovery GET (and version_match of a configured microversion), fails with ErrUnsupported and no list request otherwise, and sends GET default-types at min(3.67, server max) or the configured microversion.",
+          "tests": [
+            "blockstorage/v3/defaulttypes/api_test.go:TestDefaultTypeListRequiresMicroversion367"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/defaulttypes/README.md"
+      ],
+      "differences": [
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "An unsupported microversion is resource.ErrUnsupported instead of SDKException; Go returns a lazy iter.Seq2 instead of a generator."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/show_default_type",
       "source_fingerprint": "452e02715ab4bba4f42faa004bf037f91f1c75b68e89a7a7637aa647822b28f3",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Get"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET default-types/{project_id} at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Get sends GET default-types/{project_id} at the negotiated 3.67 microversion and decodes the default_type envelope over the seeded project id.",
+          "tests": [
+            "blockstorage/v3/defaulttypes/api_test.go:TestDefaultTypeGetSetUnset"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/defaulttypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/set_default_type",
       "source_fingerprint": "95f8d260203defa8e2e3af7a064d995d3ab81bbb0f294b7c77d5bc399af168a4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Set"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for PUT default-types/{project_id} with {\"default_type\": {\"volume_type\": ...}} at microversion 3.67+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Set sends PUT default-types/{project_id} with {\"default_type\": {\"volume_type\": id}}, or volume_type_id for an empty id as _prepare_request_body does, and wraps 404 with operation context.",
+          "tests": [
+            "blockstorage/v3/defaulttypes/api_test.go:TestDefaultTypeGetSetUnset"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/defaulttypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Python returns a mutable Resource; Go returns a typed struct with raw Body/Wire/Envelope, Header, StatusCode and Discovery evidence.",
+        "Python accepts a Type instance or ID for the volume type; Go accepts the ID string."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/unset_default_type",
       "source_fingerprint": "98fb0b9d7442c5e96fec1fa4d9164c0872e0fbb2b93aac2a04220b9515220396",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Unset",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.WithDeleteIgnoreMissing"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for DELETE default-types/{project_id} at microversion 3.67+ ignoring 404 by default and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Unset sends DELETE default-types/{project_id} at the negotiated 3.67 microversion, ignores a clean 404 like Proxy._delete and returns 403 with operation context.",
+          "tests": [
+            "blockstorage/v3/defaulttypes/api_test.go:TestDefaultTypeGetSetUnset"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/defaulttypes/README.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "WithDeleteIgnoreMissing(false) is a Go extension; Python unset_default_type always ignores a 404."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_quota_class_set",
@@ -88482,58 +88832,106 @@
     {
       "operation": "python:block_storage/v3/reset_group_status",
       "source_fingerprint": "4db98fdf8f1822f32813a6ccbc55d26e8b621351f9ff5af4b5a536e7da4c7a68",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.ResetStatusRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST groups/{id}/action with {\"reset_status\": {\"status\": ...}} and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ResetStatusRecord posts {\"reset_status\": {\"status\": status}} to groups/{id}/action at min(3.38, server max) or the configured microversion, accepts every status below 400 and wraps 400+ with operation context while keeping the actual response.",
+          "tests": [
+            "blockstorage/v3/groups/python_reset_test.go:TestGroupResetStatusRecordPostsAction"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-reset-status-python.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python returns None; Go returns a ResetStatusRecordResult with the reference and actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/reset_group_state",
       "source_fingerprint": "181ef6af778ee1f1252641fe18b310f0c470be731b1a76b9689ad46f50d169c5",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.ResetStatusRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST groups/{id}/action with {\"reset_status\": {\"status\": ...}} (deprecated alias of reset_group_status) and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "The deprecated alias sends the same POST groups/{id}/action reset_status request through ResetStatusRecord.",
+          "tests": [
+            "blockstorage/v3/groups/python_reset_test.go:TestGroupResetStatusRecordPostsAction"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-reset-status-python.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "The RemovedInSDK50Warning deprecation warning is not reproduced.",
+        "Python returns None; Go returns a ResetStatusRecordResult with the reference and actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/reset_group_snapshot_status",
       "source_fingerprint": "e0d48e7e9626c75f61a265ad126431a1bcce569a526d6eb8701263f6c6c40deb",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ResetStatusRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST group_snapshots/{id}/action with {\"reset_status\": {\"status\": ...}} and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ResetStatusRecord posts {\"reset_status\": {\"status\": status}} to group_snapshots/{id}/action with the empty Accept header of GroupSnapshot._action at min(3.29, server max) or the configured microversion, accepting every status below 400.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_reset_test.go:TestGroupSnapshotResetStatusRecordPostsActionWithEmptyAccept"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-reset-status-python.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "Per-request header options are a Go extension; authentication, microversion and content headers stay SDK owned.",
+        "Python returns None; Go returns a ResetStatusRecordResult with the reference and actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/reset_group_snapshot_state",
       "source_fingerprint": "ea84a2bb19b3935f5cc1f65c9470886b364ff7b15edcdcb86dac0f2bd929e2ad",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.ResetStatusRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for POST group_snapshots/{id}/action with {\"reset_status\": {\"status\": ...}} (deprecated alias of reset_group_snapshot_status) and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "The deprecated alias sends the same POST group_snapshots/{id}/action reset_status request with an empty Accept header through ResetStatusRecord.",
+          "tests": [
+            "blockstorage/v3/groupsnapshots/python_reset_test.go:TestGroupSnapshotResetStatusRecordPostsActionWithEmptyAccept"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/group-reset-status-python.md"
+      ],
+      "differences": [
+        "Python accepts a Resource instance or an ID string; Go accepts only the ID string and URL-escapes it as one path segment, rejecting blank, dot and control-character IDs before HTTP, while Python urljoin does not escape.",
+        "Python negotiates min(Resource max, server max) through keystoneauth discovery; Go sends the configured client microversion or performs one Cinder version discovery GET with the same cap, and the result keeps the discovery responses.",
+        "The RemovedInSDK50Warning deprecation warning is not reproduced.",
+        "Python returns None; Go returns a ResetStatusRecordResult with the reference and actual response."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/associate_endpoint_with_project",
