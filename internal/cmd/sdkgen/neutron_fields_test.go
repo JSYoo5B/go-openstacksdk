@@ -75,7 +75,7 @@ func TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(manifest.Resources) != 11 || len(manifest.Files) != 17 {
+	if len(manifest.Resources) != len(neutronFieldSpecs) || len(manifest.Files) != len(neutronFieldSourceHashes) {
 		t.Fatal("incomplete extraction", manifest)
 	}
 	for _, spec := range neutronFieldSpecs {
@@ -83,8 +83,8 @@ func TestNeutronFieldExtractionUsesBodyMROWithoutExecutingSource(t *testing.T) {
 		if spec.SDKPath == "network/v2/networks" {
 			want["revision_number"] = "custom_revision"
 		}
-		if !reflect.DeepEqual(manifest.Resources[spec.SDKPath], want) {
-			t.Fatalf("%s: got %v want %v", spec.SDKPath, manifest.Resources[spec.SDKPath], want)
+		if !reflect.DeepEqual(manifest.Resources[spec.key()], want) {
+			t.Fatalf("%s: got %v want %v", spec.key(), manifest.Resources[spec.key()], want)
 		}
 	}
 	// Parsing a synthetic tree is permitted; it cannot authorize production
@@ -179,18 +179,112 @@ func TestNeutronFieldGenerationMatchesFreshPinnedSource(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, spec := range neutronFieldSpecs {
-		got, err := renderNeutronFieldGetter(spec, manifest.Resources[spec.SDKPath])
+	for _, specs := range neutronFieldPackages() {
+		got, err := renderNeutronFieldGetters(specs, manifest.Resources)
 		if err != nil {
 			t.Fatal(err)
 		}
-		path := filepath.Join("../../..", filepath.FromSlash(spec.SDKPath), "get_fields_generated.go")
+		path := filepath.Join("../../..", filepath.FromSlash(specs[0].SDKPath), "get_fields_generated.go")
 		want, err := os.ReadFile(path)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if !bytes.Equal(got, want) {
-			t.Fatal("fresh Source field wrapper differs from checked-in Go", spec.SDKPath)
+			t.Fatal("fresh Source field wrapper differs from checked-in Go", specs[0].SDKPath)
 		}
+	}
+}
+
+const neutronChildFieldNativeFixture = `package bgpvpns
+import "context"
+import "net/http"
+import gophercloud "github.com/gophercloud/gophercloud/v2"
+type NetworkAssociation struct{ID string}
+type commonNetworkAssociationResult struct{Body any; Header http.Header; Err error}
+func(commonNetworkAssociationResult)Extract()(*NetworkAssociation,error){return nil,nil}
+type GetNetworkAssociationResult struct{commonNetworkAssociationResult}
+func GetNetworkAssociation(ctx context.Context, client *gophercloud.ServiceClient, bgpVpnID string, id string)GetNetworkAssociationResult{return GetNetworkAssociationResult{}}
+`
+
+func neutronChildFieldSpec(t *testing.T) neutronFieldSpec {
+	t.Helper()
+	for _, spec := range neutronFieldSpecs {
+		if spec.Getter == "GetNetworkAssociation" {
+			return spec
+		}
+	}
+	t.Fatal("network association field spec missing")
+	return neutronFieldSpec{}
+}
+
+func TestNeutronChildFieldGenerationValidatesNativeParentGetter(t *testing.T) {
+	spec := neutronChildFieldSpec(t)
+	path := upstreamModule + "/openstack/networking/v2/extensions/bgpvpns"
+	pkg, _ := typedCollectionFixture(t, path, neutronChildFieldNativeFixture)
+	if err := validateNeutronFieldGetter(pkg, spec); err != nil {
+		t.Fatal(err)
+	}
+	for _, change := range []struct{ name, before, after string }{
+		{"missing parent", "bgpVpnID string, id string", "id string"},
+		{"parent type", "bgpVpnID string", "bgpVpnID int"},
+		{"result type", ")GetNetworkAssociationResult{return GetNetworkAssociationResult{}}", ")commonNetworkAssociationResult{return commonNetworkAssociationResult{}}"},
+		{"typed extraction", "Extract()(*NetworkAssociation,error)", "Extract()(NetworkAssociation,error)"},
+	} {
+		t.Run(change.name, func(t *testing.T) {
+			changed := strings.Replace(neutronChildFieldNativeFixture, change.before, change.after, 1)
+			if changed == neutronChildFieldNativeFixture {
+				t.Fatal("mutation did not apply")
+			}
+			if change.name == "typed extraction" {
+				changed = strings.Replace(changed, "return nil,nil", "return NetworkAssociation{},nil", 1)
+			}
+			pkg, _ := typedCollectionFixture(t, path, changed)
+			if err := validateNeutronFieldGetter(pkg, spec); err == nil {
+				t.Fatal("native child getter drift accepted")
+			}
+		})
+	}
+}
+
+func TestNeutronFieldRenderingGroupsParentAndChildGetters(t *testing.T) {
+	var specs []neutronFieldSpec
+	for _, group := range neutronFieldPackages() {
+		if group[0].SDKPath == "network/v2/extensions/bgpvpns" {
+			specs = group
+		}
+	}
+	if len(specs) != 4 || specs[0].Getter != "" {
+		t.Fatal("bgpvpns field getters are not grouped with the top-level getter first", specs)
+	}
+	manifest := map[string]map[string]string{}
+	for _, spec := range specs {
+		manifest[spec.key()] = map[string]string{"id": "id", "project_id": "project_id"}
+	}
+	data, err := renderNeutronFieldGetters(specs, manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got := string(data)
+	for _, want := range []string{
+		"package bgpvpns\n",
+		"func (a *API) GetWithFields(ctx context.Context, id string, fields ...string) (*BGPVPN, error) {",
+		`[]string{"bgpvpn/bgpvpns", id}, fields, neutronBodyFieldNames, &result.Body)`,
+		"func (a *API) GetNetworkAssociationWithFields(ctx context.Context, parentID string, id string, fields ...string) (*NetworkAssociation, error) {",
+		"var result GetNetworkAssociationResult\n",
+		`[]string{"bgpvpn/bgpvpns", parentID, "network_associations", id}, fields, neutronNetworkAssociationBodyFieldNames, &result.Body)`,
+		`request.Wrap("GetNetworkAssociationWithFields", "bgpvpns", err)`,
+		`[]string{"bgpvpn/bgpvpns", parentID, "port_associations", id}, fields, neutronPortAssociationBodyFieldNames, &result.Body)`,
+		`[]string{"bgpvpn/bgpvpns", parentID, "router_associations", id}, fields, neutronRouterAssociationBodyFieldNames, &result.Body)`,
+	} {
+		if !strings.Contains(got, want) {
+			t.Fatalf("rendered getters miss %q:\n%s", want, got)
+		}
+	}
+	if strings.Count(got, "package ") != 1 || strings.Count(got, "import (") != 1 {
+		t.Fatal("grouped getters must share one file header", got)
+	}
+	mixed := append([]neutronFieldSpec{neutronFieldSpecs[0]}, specs[1])
+	if _, err := renderNeutronFieldGetters(mixed, manifest); err == nil {
+		t.Fatal("getters from different packages rendered into one file")
 	}
 }
