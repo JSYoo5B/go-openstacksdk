@@ -30,14 +30,27 @@
 | Keystone role | `conn.identity.find_role("reader", domain_id=domain_id)` | `identity.Roles.FindIdentity(ctx, "reader", domainQuery)` |
 | Designate recordset | `conn.dns.find_recordset(zone, "www.example.org.")` | `records.FindIdentity(ctx, "www.example.org.")`, `records`는 `RecordSets.InZone`의 반환값 |
 | Octavia member | `conn.load_balancer.find_member("backend-01", pool)` | `members.FindIdentity(ctx, "backend-01")`, `members`는 `Pools.Members`의 반환값 |
+| Neutron tap mirror | `conn.network.find_tap_mirror("mirror-01")` | `network.TaaSTapMirrors.FindIdentity(ctx, "mirror-01")` |
+| Neutron segment | `conn.network.find_segment("seg-01", network_id=net)` | `network.Segments.FindIdentity(ctx, "seg-01", netQuery)` |
+| Neutron VPN 5종 | `conn.network.find_vpn_service("vpn-01")` 등 | `network.VPNServices/VPNEndpointGroups/VPNIKEPolicies/VPNIPsecPolicies/VPNSiteConnections.FindIdentity` |
+| Neutron FWaaS v2 3종 | `conn.network.find_firewall_rule("allow-ssh")` 등 | `network.FirewallRules/FirewallPolicies/FirewallGroups.FindIdentity` |
+| Neutron BGPVPN | `conn.network.find_bgpvpn("vpn-a")` | `network.BGPVPNs.FindIdentity(ctx, "vpn-a")` |
+| Neutron BGP peer·speaker | `conn.network.find_bgp_peer("peer-a")` | `network.BGPPeers/BGPSpeakers.FindIdentity(ctx, "peer-a")` |
+| Neutron floating IP | `conn.network.find_ip("203.0.113.5")` | `network.FloatingIPs.FindIdentity(ctx, "203.0.113.5")` |
+| Keystone policy·region | `conn.identity.find_policy(policy_id)` | `identity.Policies/Regions.FindIdentity(ctx, id)` |
+| Nova aggregate | `conn.compute.find_aggregate("rack-a")` | `compute.Aggregates.FindIdentity(ctx, "rack-a")` |
 
-위 20개 리소스가 공통 자동 조회를 지원합니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
+위 37개 리소스가 공통 자동 조회를 지원합니다. 표의 VPN과 FWaaS 행은 각각 다섯 개와 세 개
+리소스를 묶어 적었습니다. 기존 상위 `conn.Compute(ctx).Servers/Flavors`,
 `conn.BlockStorage(ctx).Volumes`, `conn.Image(ctx).Images`, `conn.Network(ctx).Networks/Ports`도 같은 조회 정책을 제공합니다.
 Router·Security Group·Subnet Pool·Trunk·QoS Policy·Address Group은
 `conn.Network(ctx).API.Routers/SecurityGroups/SubnetPools/Trunks/QoSPolicies/SecurityAddressGroups`로 접근합니다.
-다른 native collection은 아직
+표 아래쪽에 추가한 리소스도 `conn.Network(ctx).API`, `conn.IdentityV3(ctx)`,
+`conn.ComputeV2(ctx)`의 같은 필드로 접근합니다. 다른 native collection은 아직
 `FindIdentity`에 `ErrUnsupported`를 반환합니다. 숫자 ID, Swift 객체 키, URL에서 추출한
-ID와 이름이 없는 리소스에 이 정책을 일괄 적용하지 않습니다. Senlin의 다섯
+ID와 이름이 없는 리소스에는 이 정책을 일괄 적용하지 않고, 개별 감사를 거친 Nova aggregate와
+Keystone policy·region만 [추가 이름·목록 정책](#추가-리소스의-이름과-목록-정책)으로
+지원합니다. Senlin의 다섯
 `FindIdentity` facade는 [전용 조회 옵션과 응답 검증](../clustering/v1/finding/README.md)을
 사용합니다.
 
@@ -559,3 +572,67 @@ Details·AllProjects·ExtraSpecs의 명시 false도 지원하지 않습니다.
 [AddressGroup](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/address_group.py#L22)는 Resource를 상속합니다.
 conditional GET cache·seeded Resource·session/microversion/header/base_path·상속 continuation의
 전체 계약은 별도 비교 범위이며 자동 부모 조회·숨김 검색·추가 GET은 넣지 않습니다.
+
+## 추가 리소스의 이름과 목록 정책
+
+표 아래쪽의 17개 리소스도 앞에서 설명한 기본값을 그대로 사용합니다. 안전한 문자열은
+member GET을 먼저 보내고 400·403·404에서 목록으로 전환합니다. 목록의 모든 행에서 ID와
+Python `Resource.name`을 원래 문자열과 비교하며, 두 행이 일치하면 `resource.ErrAmbiguous`를
+반환합니다. 찾지 못하면 기본값은 `nil, nil`이고 `resource.WithIdentityFindIgnoreMissing(false)`는
+`resource.ErrNotFound`를 반환합니다. `resource.WithIdentityFindQuery`로 지정한 값은 GET과
+목록에 모두 전달합니다. 리소스마다 다른 점은 Python의 이름 속성과 목록 query 매핑입니다.
+
+| 리소스 | 목록 이름 hint | 이름으로 비교하는 값 | caller query의 목록 전달 |
+|---|---|---|---|
+| tap mirror, segment, VPN 5종, FWaaS v2 3종 | `name=` | `name` | 전달 |
+| BGPVPN | `name=` | `name` | 전달 |
+| BGP peer, BGP speaker | 없음 | `name` | native pager가 query를 받지 않아 `ErrUnsupported` |
+| floating IP | 없음 | `floating_ip_address` | 전달 |
+| Keystone policy, region | 없음 | 없음(ID만 비교) | 전달 |
+| Nova aggregate | 없음 | `name` | native pager가 query를 받지 않아 `ErrUnsupported` |
+
+BGPVPN의 native `ListOpts`에는 이름 필드가 없지만 Python query 매핑에 `name`이 있으므로 SDK가
+목록에 `name=`을 직접 추가합니다. 같은 이유로 기존 `Find(ctx, resource.Name(x))`도 이제
+`name=`을 보냅니다. Python 목록 fallback은 query 매핑에 없는 키를 wire에서 빼고, 그 키가 모델
+Body 속성이면 받은 행을 로컬에서 거릅니다. Go는 지정한 키를 그대로 wire로 보내므로 매핑에 없는
+키는 서버 동작에 맡겨집니다. BGP peer와 speaker의 Python 매핑에는 `limit`·`marker`만 있어서
+다른 query는 모두 이 로컬 필터가 됩니다. Go native pager는 query를 전혀 받지 않으므로 caller
+query가 있으면 GET은 보내되 목록 fallback은 HTTP 전에 `ErrUnsupported`로 끝납니다. 그래서 두
+리소스는 query 없는 기본 호출만 Python과 같습니다.
+
+Python `FloatingIP.name`은 `floating_ip_address`의 별칭이라 `find_ip("203.0.113.5")`가 주소로
+찾습니다. Go도 FindIdentity의 목록 비교에만 이 주소를 사용하며 `Find(ctx, resource.Name(x))`는
+계속 `ErrUnsupported`입니다. Keystone policy와 region은 서비스가 `name`을 내려주지 않으므로
+Python에서도 ID만 일치합니다. Go native 모델에는 `name` 필드가 없어 응답에 비표준 `name`이
+있어도 비교하지 않습니다.
+
+Nova aggregate의 ID는 정수이고 native `Get`은 정수만 받습니다. Python은
+`find_aggregate("rack-a")`의 문자열을 그대로 `GET /os-aggregates/rack-a`로 보내므로 Go
+FindIdentity도 같은 문자열 경로로 GET을 보낸 뒤 404에서 `GET /os-aggregates` 목록으로
+전환합니다. 명시적인 `Find(ctx, resource.ID("rack-a"))`는 기존처럼 HTTP 전에 거부합니다.
+Python 목록 비교는 정수 `id`와 문자열 `name_or_id`를 비교하므로 숫자 문자열이 ID로 일치하지
+않지만, Go는 GET이 400·403으로 실패한 뒤 목록의 ID를 문자열로 비교해 일치시킵니다.
+
+Python cloud 계층의 `get_firewall_rule/policy/group(name_or_id, filters)`는
+`find_firewall_*(name_or_id, ignore_missing=True, **filters)`이므로 filter마다
+`resource.WithIdentityFindQuery(key, value)`를 넘깁니다. Python은 bool 같은 값을 `True`처럼
+문자열로 바꿔 보내므로 Go에서는 같은 문자열을 직접 지정합니다. `get_aggregate`는 deprecated
+`filters`를 무시하고 `find_aggregate(name_or_id, ignore_missing=True)`를 호출합니다.
+`set_aggregate_metadata`·`add_host_to_aggregate`·`remove_host_from_aggregate`는 strict
+FindIdentity로 aggregate를 찾은 뒤 `SetMetadata`·`AddHost`·`RemoveHost`에 `ID`를 넘기면 같은
+요청을 보냅니다. 찾지 못하면 Python은 `SDKException`을 내고 Go는 `ErrNotFound`를 반환합니다.
+
+고정 Python 선언은 [find_tap_mirror](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L9096),
+[find_segment](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L7192),
+[find_vpn_service](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L8592),
+[find_firewall_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L6437),
+[find_bgpvpn](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L1087),
+[find_bgp_peer](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L848),
+[find_ip](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/network/v2/_proxy.py#L2177),
+[find_policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L956),
+[find_region](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1636),
+[find_aggregate](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py#L482),
+[get_aggregate](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L1922),
+[get_firewall_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L846)입니다. microversion 협상, conditional
+GET cache, Resource descriptor 변환과 Body 로컬 필터는 다른 리소스와 마찬가지로 이 조회에
+포함하지 않습니다.

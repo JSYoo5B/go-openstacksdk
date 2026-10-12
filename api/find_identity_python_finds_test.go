@@ -314,8 +314,8 @@ func TestPythonFindForwardsQueryToGETAndList(t *testing.T) {
 					t.Fatal(got, err)
 				}
 			} else if got != "" || !errors.Is(err, resource.ErrUnsupported) {
-				// The native BGP pager takes no query; Python accepts only
-				// limit/marker there and rejects other keys.
+				// The native BGP pager takes no query; Python keeps only
+				// limit/marker on the wire and filters Body keys locally.
 				t.Fatal("query-less native list accepted caller query", got, err)
 			}
 			if calls := recorder.snapshot(); fmt.Sprint(calls) != fmt.Sprint(want) {
