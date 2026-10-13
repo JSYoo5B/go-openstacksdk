@@ -4,7 +4,7 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 quota 반복 세 번째 사이클](#2026-10-13-quota-반복-세-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 quota 반복 네 번째 사이클](#2026-10-13-quota-반복-네-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
 
@@ -3244,3 +3244,34 @@ QoS는 valid_kwargs 선검증, 매 호출 fresh 전체 qos 및 nonnull default�
 최종 전체 `make check`는 exit0이며204개 실제 test package와 race/vet/parity/progress/license/gofmt가 모두 PASS입니다. 이번 전체 gate의 최초 실행도 PASS이고 앞선 집중 실패와 구분합니다. 수정 문서 상대 파일 링크1,747개·최종 독립 main/AST8개 receipt hash를 확인했습니다. 실행 로그는 `/private/tmp/go-openstacksdk-cycle5-check-final.log`이며 고정 Source `/private/tmp/go-openstacksdk-oct13-source-9hc9ehzk`, compiled native metadata, Python3.14, `GOFLAGS=-p=1 GOMAXPROCS=2`를 사용했습니다. native/source inventory·catalog·핀과 기존 의미 있는 계약을 보존합니다. SDK-R1/C1/S1·named raw controls·실클라우드 acceptance·alpha 릴리즈는 미완료이며 생성 transport를 full parity/supported로 부르지 않습니다.
 
 기능을 작은 커밋으로 저장하고 승인된 main push를 진행했습니다. 이번 사이클은 고정8개로 종료하며 다음 후보를 합쳐 범위를 넓히지 않습니다. 시작 quota 잔여86%, 최종 조회83%이며 조회 가능한 weekly 창 reset은2026-10-20 14:03:44 KST입니다. 사용량은 계정의 다른 작업과 공유하므로 관측한 증감을 이 작업의 비용으로 단정하지 않습니다. 조회 가능한 최소 잔여가 엄격히80%를 초과하고 ordinaryUsageAllowed=true일 때만 다음 사이클을 시작하며 reset·구매·모델 변경은 하지 않습니다.
+
+## 2026-10-13 quota 반복 네 번째 사이클
+
+출발 `1c34b74e`에서 시작 잔여83%·ordinaryUsageAllowed=true를 확인한 뒤 고정4개 후보를 시작했습니다. Neutron cloud bandwidth-limit·DSCP-marking·minimum-bandwidth 규칙 create3개와 Swift cloud stream_object1개를 추가하여 **2,024→2,028개(+4), 전체2,028/3,228(62.8%)·핵심1,950/2,158(90.4%)**입니다. catalog3,362·unsupported134·supported0·reviews2,487과 기존 Source/native 핀은 그대로이고 contracts7,321→7,352(+31), 미해결1,200개(검토325·미검토875)가 남습니다. 최초 feasibility722개 대조는 매핑363·미지원133·미해결226개입니다.
+
+처음 구현 worker2개로 시작했으나 사용자의 “worker 수 줄이지 마. 80% 근처여도 최대 노력치로 해” 지시에 따라8개로 늘려 구현2·독립 Source/테스트/문서/라이선스 검토6개로 분담했습니다. 고정4개 후보 범위는 보존하고 root가 Go/gen·공통 코드·중앙 JSON/집계·Git을 순서대로 통합했습니다. 반복 작업 sdk-quota의 기존 worker 축소 문장도8개 활용으로 갱신하고 ACTIVE 상태·기존 일정과 엄격히80% 초과 시작 조건을 보존했습니다. 이후 quota 경계 근처에서도 worker 수나 노력을 줄이지 않습니다.
+
+| 단위 | 신규 매핑 | 새 테스트 그룹 | Source·검증·사용 비교 |
+|---|---:|---:|---|
+| Neutron QoS create3종 | 3 | 10 | cloud8·leaf2 집중 race, 실제 Source62cases 및 독립 감사45cases; [생성](../network/cloud-qos-rule-creates-python.md) |
+| Swift cloud stream | 1 | 24 | leaf21·cloud3 최종 race·실제 pinned Source41관측; [스트림](../objectstorage/cloud-object-stream-python.md) |
+| Connection lazy bridge | 별도 선언 추가 없음 | 4 | 서비스 lazy 발견·캐시·chunk options·nil/cancel·Close before start·immutable cleanup proof |
+| 합계 | 4 | 38 | 독립 Go main2개 build·Python AST2개 PASS |
+
+Neutron은 concrete With 옵션을 복제하고 valid kwargs를 HTTP 전에 검사합니다. qos 광고를 매번 전체 조회하고 BW/DSCP는 기본 ignore-missing policy Find 뒤 실제 미존재 오류, Minimum은 strict Find를 씁니다. BW의 nonnull direction은 정책 조회 뒤 qos-bw-limit-direction 광고를 다시 읽고 없으면 제거하며 null은 이 gate를 건너뜁니다. 필수 값0/null과 큰 JSON 정수, Source parent URI의 None/False/0 문자열 및 original raw parent view, 생성 attrs seed·nullable descriptor와 실제 Wire/Envelope/Header/status를 보존합니다. stock Neutron27의 parent-owner manager/admin 쓰기 조건과 별도 배포 권한은 구분합니다. 일반 Proxy 임의 attrs·QoS update/admin details를 이번3개 생성으로 승격하지 않습니다.
+
+Swift의 반환 interface는 SDK가 구현하며 앱에 builder 구현을 요구하지 않습니다. handle 생성·Chunks 호출은 요청하지 않고 첫 순회에서 service 발견과 GET이 실행됩니다. SDK가 기본1024바이트·owned chunks·query_string 무시·single-use·gzip/x-gzip/zlib/raw-deflate/zstd 및 역순 codec chain, 깨끗한404의 빈 결과, EOF/error/break cleanup을 소유합니다. Close/Err/Receipt는 조기 break 뒤 cleanup 원인과 복사한 실제 status/header를 제공합니다. HTTP wire chunk 경계를 Go chunk 크기로 재조립하는 선택, 문자열 입력과 positive1..16MiB 크기, Python 동적 Object/attrs·예외·chunk 값 차이를 명시합니다. 순차 Chunks/Close 계약이며 동시 blocking Read를 Close로 중단하는 새 공통 ABI는 추가하지 않습니다. 원래 Proxy stream_object/전체 mutable Resource·session 판정은 남습니다.
+
+독립 감사가 callback Close 뒤 GET/body 누수, 늦은 GET 응답 소유, unary native error snapshot, root가 public Close error snapshot을 저장해 재노출하는 오류를 발견하여 private 소유·late adoption close·반복 snapshot 방식으로 수리했습니다. Requests의 기본 Accept-Encoding을 명시해 Go 자동 gzip 해제로 원래 response header가 사라지는 것도 막았습니다. 압축된404의 decode 오류를 NotFound로 숨기던 분기와 유효한 raw deflate의 zlib처럼 보이는 prefix fallback을 수리했습니다. gzip의 partial header·truncated trailer·complete member 뒤 garbage는 clean physical EOF에서만 Source와 비교해 정규화하고 CRC·초기 magic·실제 Read/Close/source/cancel 실패는 보존합니다. 정상/404 paired cases·multiple members·raw fallback·real HTTP header·actual fault와 borrowed cleanup 회귀를 추가했습니다.
+
+최초 QoS gate `...cycle6-qos-creates-first.jsonl`은 cloud8그룹과 leaf1그룹 PASS였지만 leaf의12개 status/family 사례가 decoded fixture path와 escaped URL 기대값을 혼동해 실패했습니다. actual r.URL.EscapedPath assertion을 직접 추가하고 기존 fixture의 decoded path 기대값만 맞춘 `...cycle6-qos-creates-repaired.jsonl`의12사례가 PASS입니다. production은 바꾸지 않았고 escaping 의미를 약화하지 않았습니다. Swift first3-package gate는 PASS였으며 독립 Source gzip 대조에 따른 추가 수리 뒤 `...cycle6-swift-final.jsonl`의3 package/28새그룹도 PASS입니다. Root cleanup snapshot negative regression까지 포함됩니다.
+
+새38개는 baseline 대비 테스트 함수 차집합(`...cycle6-added-test-groups.json`)입니다. 기존 공개 Gophercloud testhelper-backed testcloud, native rule·object response/read body·transport fixture, shared REST guard/policy와 Source Engine.Mutate를 재사용했습니다. 물리401은 explicit read fault와 bounded unexpected reauth sentinel로 재귀를 막고 정상 reauth는 다음 성공 응답으로 종료합니다. 새 HTTP test framework나 기존 native status200..399 정책 변경은 없습니다. 다른 Source 프로필만100..399를 opt-in합니다.
+
+정확한 가이드 Go main2개와 Python AST2개는 `...cycle6-exact-guides/build-receipt.json`에 SHA/최종 build를 기록했습니다. gzip 편집과 겹칠 수 있던 예비 main 빌드는 최종 Source 근거로 쓰지 않고 최종 동결 뒤 둘 다 다시 빌드했습니다. Swift 실제 reference는 고정 SDK·CPython3.14.8·Requests2.34.2·urllib3 2.8.0의 Cloud/Proxy/Object/Requests/urllib3 실행이며 메모리 HTTP response/adapter를 fixture로 대체했습니다. Source41관측과 별도 감사를 실제 인증·live cloud·배포 ACL 검증으로 주장하지 않습니다.
+
+Swift 기본 zstd decoding에 필요한 klauspost/compress v1.18.0을 고정하고 module sums를 보존했습니다. 완전한 복합 module LICENSE·vendored xxhash MIT·Snappy reference BSD 원문3개를 cache/ZIP byte equality와 SHA로 확인해 보존했습니다. module 전체의 여러 패키지 조건과 실제 zstd/같은-module helper 범위를 고지하고 Gophercloud2.15·SDK Go1.25를 유지했습니다. 라이선스 gate는 원문15개·고정 Go 모듈5개 PASS이며 checker 자체를 약화하지 않았습니다.
+
+최종 전체 `make check`의 최초 실행은 exit0이며 실제 test package204개·race/vet/parity/progress/license/gofmt 모두 PASS입니다. 앞선 집중 실패와 Source 감사에 따른 수리를 전체 gate 실패로 혼동하지 않습니다. 수정 문서 상대 파일 링크1,734개와 정확한main2개/AST2개 hash도 확인했습니다. 실행 로그는 `/private/tmp/go-openstacksdk-cycle6-check-first.log`이고 고정 Source `/private/tmp/go-openstacksdk-oct13-source-9hc9ehzk`·compiled native metadata·Python3.14·`GOFLAGS=-p=1 GOMAXPROCS=2`를 사용합니다. 기능을 작은 커밋으로 저장해 승인된 main push를 진행했으며 모든 검증·문서·판정까지 마감합니다. SDK-R1/C1/S1·named raw controls·실클라우드 acceptance·alpha 릴리즈는 계속 미완료이고 생성 transport를 full parity/supported로 부르지 않습니다.
+
+중간 quota 조회는 잔여80%·ordinaryUsageAllowed=true였습니다. 시작한4개 범위는 경계에서도 완료하며 이번 실행에 새로운 사이클을 합치지 않습니다. 최종 quota 잔여78%·ordinaryUsageAllowed=true이며 조회 가능한 weekly 창 reset은2026-10-20 14:03:44 KST입니다. 이번 마감 후 새 사이클은 시작하지 않고 이후 예약 실행에서 다시 조건을 확인합니다. 계정의 다른 작업도 같은 사용량을 공유하므로 관측한 감소를 이 작업의 비용으로 단정하지 않습니다. 최소 잔여가 엄격히80%를 초과할 때만 다음 예약 사이클을 시작하고80% 이하에서는 새로운 작업을 시작하지 않습니다. 사용량 reset·크레딧 구매·모델 변경은 하지 않았습니다.

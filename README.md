@@ -52,6 +52,13 @@ Quota 반복 세 번째 사이클의 Python/Go 사용 비교:
 
 `conn.GetUserRecord(ctx, name, options...)`와 Role·Project·Group의 대응 메서드는 SDK가 캐시된 Keystone API와 location 기본값을 제공합니다. Domain은 `conn.GetDomainRecord(ctx, identity.WithDomainGetID(id))` 또는 `WithDomainGetNameOrID(name)`으로 조회 경로를 선택합니다. 명시 location은 기본값보다 우선하며 생략·null·deprecated filters의 차이는 서비스 가이드에서 비교합니다. `conn.Network(ctx)`의 QoS policy 생성·수정은 concrete With 옵션으로 호출하며, SDK가 매번 확장 광고를 확인하고 기본값을 변환하며 변경된 필드만 보냅니다. 일반 Find의 raw controls와 전체 Resource/session 동등성은 별도 잔여로 유지합니다.
 
+Quota 반복 네 번째 사이클의 Python/Go 사용 비교:
+
+- Neutron: [QoS bandwidth limit·DSCP·minimum bandwidth 규칙 생성](network/cloud-qos-rule-creates-python.md).
+- Swift: [cloud 스트림과 Connection lazy 발견·owned chunks](objectstorage/cloud-object-stream-python.md).
+
+`conn.Network(ctx)`의 세 QoS 생성 helper가 필수 값의 0/null, 옵션 검증, 확장 광고와 부모 정책 조회를 처리합니다. `conn.StreamObjectChunks(ctx, container, object, options...)`는 첫 순회에서 Swift를 발견해 캐시하고, SDK가 기본 1024바이트·압축 해제·깨끗한 404의 빈 결과·응답 cleanup을 제공합니다. 소비자는 `stream.Chunks()`를 순회하고 조기에 멈췄을 때 `stream.Err()` 또는 `Close()`로 cleanup 오류를 확인합니다. 반환 인터페이스의 구현과 연결은 SDK가 소유하므로 애플리케이션의 builder 구현이 필요하지 않습니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.
