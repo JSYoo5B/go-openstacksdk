@@ -90545,12 +90545,15 @@
     {
       "operation": "python:identity/v3/endpoints",
       "source_fingerprint": "dc68ac913c6d4b20b9d0b38e7de249ff8fcd43c43a2569af6358a75147a6dc0b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.ProxyListRecords"
       ],
       "contracts": [
         {
@@ -90558,19 +90561,38 @@
           "tests": [
             "identity/v3/endpoints/python_parity_test.go:TestPythonEndpointListQueryAndPaging"
           ]
+        },
+        {
+          "behavior": "Concrete Source Endpoint MRO owns eight Body descriptors, null defaults, bool enabled alias order, untyped links, unknown discard, separate Wire/page/header/status; query limit/marker/interface/region_id/service_id vs declared local Body filters. Python-loaded equality and raw cap precede local filtering. Source dict links ignored, root/plural/top/HTTP link precedence and limit-driven marker continue to empty page. Lazy opaque generator JMESPath preserves identity and zero HTTP until consumption. SDK-owned callback/header/microversion/route snapshots and source/context guards retain actual physical read/Close/rejection evidence without hiding faults in native auth/retry/backoff; clean retries and explicit Source status acceptance preserve old native API.",
+          "tests": [
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceMRODefaultsUntypedLinksAndActualEvidence",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOrderedEnabledAliasesAndPythonBool",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsQueriesLocalBodyFiltersAndUnknownKwargs",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceDictionaryLinksAndMarkerFallback",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceLinkPrecedenceAndMalformedPageReceipt",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsRawCapLazyBreakAndCancellation",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsMalformedAndLaterErrorDiscardPartialCollection",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOpaqueProxyJMESUsesActualGenerator",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceGuardBeforeOptionsAndAfterGeneratorCapture",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsPhysicalFaultsRetainActualProofWithoutHooks",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsCleanNativeRetryKeepsScopeQueryAndHeaders",
+            "identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceStatusOptInPreservesNativeBindings"
+          ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-catalog.md"
+        "identity/v3/python-parity-catalog.md",
+        "identity/v3/endpoints/python-records.md"
       ],
       "differences": [
-        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer."
+        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
+        "Go concrete Source record splits defaults/projection from actual Wire/page/header/status; direct ServiceClient has SDK-owned location null. Optional HTTP cache and mutable Python Resource/Connection lifecycle remain shared SDK-R1/C1; no actual cloud acceptance claim.",
+        "Go safe owned route/origin/cursor/auth guards reject Source arbitrary session/origin movement and invalid marker with actual page receipt. Generic options expose Source formal kwargs but do not permit receiver/session/auth replacement; Go JSON cannot construct arbitrary Python object operands.",
+        "Opaque generator and serializable JSON are separate result carriers. Existing native API remains separate and unchanged; this named list is not full SDK parity.",
+        "Verified Keystone27.0.0 list_endpoints is admin_required or role:reader and system_scope:all with system/project scope declarations. This is a system-reader user read, not general project-reader permission; deployments may override policy."
       ],
-      "remaining": [
-        "The endpoints List rejects raw query extensions, so the limit and marker query parameters Python maps cannot be sent.",
-        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
-        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/find_endpoint",
@@ -92790,12 +92812,27 @@
     {
       "operation": "python:identity/v3/domains",
       "source_fingerprint": "466311705604af41fdd0ed6c2901b4f015301bbacba4b92998dfe76baa912317",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListLocation"
       ],
       "contracts": [
         {
@@ -92803,20 +92840,78 @@
           "tests": [
             "identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests"
           ]
+        },
+        {
+          "behavior": "Source Domain declares raw description/links/id/name, nullable CPython bool is_enabled from enabled and dict options (nonobject {}, null preserved), unknown Body discarded from declared view but complete Wire/Envelope/header/status retained; canonical server query alias is_enabled wins enabled presence and unknown kwargs are dropped before marshal.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsDeclaredDescriptorsQueryAliasesAndOwnedProof"
+          ]
+        },
+        {
+          "behavior": "Pinned root links dictionary is ignored with links-key presence precedence, explicit null links is an iterable error with actual page proof, and short limit pages continue by raw last ID until empty. Raw max_items precedes filtering; break stops lookahead.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsSourceDictionaryLinksAndPresence",
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsFilteredMarkerRawCapAndBreak"
+          ]
+        },
+        {
+          "behavior": "Ordered recursive local filters use actual truthiness and CPython loaded float/bool/integer equality; early mismatch hides later bad shape and reached bad shape keeps physical proof.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsOrderedLoadedLocalEquality"
+          ]
+        },
+        {
+          "behavior": "Proxy expressions see an opaque unread generator, with HTTP0 null/type/literal results, identity/nested generator preservation, no invented JSON and typed InvalidOption cause for syntax/type failure; falsey/nonstrings remain lazy.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsProxyExpressionsRemainOpaqueUntilConsumed"
+          ]
+        },
+        {
+          "behavior": "Proxy formal headers/version/basepath and one-pass conflicting attrs normalization restore query/headers/version, retain original expression priority and unknown discard; bound control collisions remain HTTP0.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsProxyFormalRestorationAndBoundCollision"
+          ]
+        },
+        {
+          "behavior": "Explicit location is owned and ignores unknown wire project/location; new SourceStatusPolicy accepts valid HTTP100..399 without changing older profiles/native statuses or triggering discovery.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsLocationBeforeLocalFilterAndStatusPolicy"
+          ]
+        },
+        {
+          "behavior": "Captured options/Source/context guard each callback before and after; restoring callback cannot undo observed source mutation or custom cancellation and invalid preflight makes HTTP0/no proof.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsOwnedOptionsStickySourceAndCancellation"
+          ]
+        },
+        {
+          "behavior": "28 accepted/rejected physical Read/Close/Source restored by Close/custom cancel lanes preserve actual proof, terminal sticky causes, Close once and no retry/backoff/reauth. Native pointer401 has separately inspected value ErrOriginal and ErrReauth; no nonexistent Unwrap is assumed.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsFaultedActualRejectionsNeverFallbackOrRetry"
+          ]
+        },
+        {
+          "behavior": "Clean native401/503/429/498 retries reuse live token and owned route/query/headers with bodyless GET, preserving successful HTTP203 proof.",
+          "tests": [
+            "identity/v3/domains/python_records_test.go:TestPythonDomainRecordsCleanNativeRetryUsesLiveAuthAndCapturedHeaders"
+          ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-users.md"
+        "identity/v3/python-parity-users.md",
+        "identity/v3/domains/python-records.md"
       ],
       "differences": [
         "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
         "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
-        "Python drops unknown query names; Go sends every WithListQuery key to the server."
-      ],
-      "remaining": [
-        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
-        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported.",
-        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it."
+        "Python drops unknown query names; Go sends every WithListQuery key to the server.",
+        "SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.",
+        "Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.",
+        "Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.",
+        "Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.",
+        "HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.",
+        "Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.",
+        "Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location."
       ]
     },
     {
@@ -93248,12 +93343,20 @@
     {
       "operation": "python:identity/v3/roles",
       "source_fingerprint": "4b1f0d85dfbc834de1c92078024ee598fc63737f442b375455d9ab31e558fc1a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.RoleRecord.Clone",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListJMESPath"
       ],
       "contracts": [
         {
@@ -93261,21 +93364,69 @@
           "tests": [
             "identity/v3/roles/python_parity_test.go:TestPythonRoleListRequests"
           ]
+        },
+        {
+          "behavior": "Bodyless default roles GET and explicit SourceStatusPolicy accept actual199. Six Role Body descriptors/default/null/options-dict cast discard unknowns only from declared view and retain all actual Wire/page/header/status evidence; Clone channels are independent.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsDefaultProjectionPresenceAndIndependentPhysicalEvidence"
+          ]
+        },
+        {
+          "behavior": "Only name/domain_id/limit/marker go to the server with Requests repeated and bool/null values. Ordered local description/options/links/id filters use CPython loaded equality and recursive subset, empty-dict matches truthy scalar/list, and unknown kwargs discard before marshal.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsDeclaredQueryAndOrderedLoadedLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Explicit positive limit repeats short nonempty pages without links with last raw ID; local-excluded rows count in marker/raw cap; break stops before another request and reusable iterator repeats guarded captured calls.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsRawMarkerShortPagesCapBreakAndReusableIterator"
+          ]
+        },
+        {
+          "behavior": "Source Keystone dictionary-next is ignored, root links presence masks plural links, root null/foreign URL/query change/cycle retain actual whole page proof.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsSourceDictionaryRootPresenceAndActualContinuationGuards"
+          ]
+        },
+        {
+          "behavior": "Unconsumed Proxy generator JMESPath returns null/literals/opaque identity/nested generator before HTTP; array type errors do not consume it. Known formal options, snapshots, reserved/collision/unsafe path/cap validation, source mutation and custom callback cancel fail without fake response.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsProxyGeneratorJMESPreservesUnreadAndNestedIdentity",
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsOptionSnapshotsFormalsAndPreflightSourceGuards"
+          ]
+        },
+        {
+          "behavior": "Immutable typed location retains recorded current scope, ignores unknown project_id, and physical malformed rows/nonmapping local filter preserve accepted203 page.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsExplicitLocationOwnsCurrentScopeWithoutUnknownProjectInference",
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsMalformedRowsAndLocalFilterFaultRetainAcceptedPage"
+          ]
+        },
+        {
+          "behavior": "Accepted/rejected200/400/403/404/401/429/498/503 read/Close/both/restored-source+custom-cancel matrix keeps one physical HTTP/Close, actual native or accepted proof, all causes and zero retry/backoff/reauth. Clean401/503/429/498 preserve fixed request/version/absent conditions and live renewed token.",
+          "tests": [
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsPhysicalFaultsKeepNative401AndActualReceiptWithoutCallbacks",
+            "identity/v3/roles/python_records_test.go:TestPythonRoleRecordsCleanReauthRetryAndBackoffKeepFrozenIdentityRequest"
+          ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-users.md"
+        "identity/v3/python-parity-users.md",
+        "identity/v3/roles/python-records.md"
       ],
       "differences": [
         "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
         "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
         "Python drops unknown query names; Go sends every WithListQuery key to the server.",
-        "roles.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+        "roles.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all.",
+        "Existing native Role/List/All/Get/FindIdentity remain unchanged. Concrete functional options and SDK-owned profile descriptors/defaults/decoders avoid caller builders; declared Resource JSON and separate actual Wire/Envelope/header/status are defensively owned.",
+        "Selected Keystone v3 API is required; automatic v2 ensure_service_version conversion is not added. Standalone native client computed location is null; explicit immutable location supplies cloud/region/current project without inference. Role has no project_id/zone descriptors, unknown response facts do not replace that scope and the typed convenience normalizes zone to null.",
+        "Source root link precedence and ignored Keystone dictionary-next are opt-in on this new profile. Fixed origin/path/query/header/version, stronger cycles, representable safe markers and nonnegative Go caps are deliberate Go policies; RFC HTTP Link corrects the pinned Requests next uri/url mismatch.",
+        "Go iterator reuse repeats the captured guarded operation instead of Python generator single-use state. Pure Proxy expressions still run SDK option/source preflight; JSON serialization is separate from opaque/nested generator results.",
+        "SDK-R1/C1/S1 remain separately tracked Connection-wide synchronized Resource/runtime, optional response cache and session/version negotiation. This finite named mapping is not supported full SDK parity or authenticated live-cloud execution. No new find_role mapping or closure of its raw Resource.fetch/control/header kwargs is claimed."
       ],
-      "remaining": [
-        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
-        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/unassign_domain_role_from_group",
@@ -93635,12 +93786,27 @@
     {
       "operation": "python:identity/v3/users",
       "source_fingerprint": "0034e3925a05659812c1efaf902ce0a9196f94fe8b851bbb7246a881709fbf00",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.New",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.UserRecord.Clone",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithRecordListPaginated"
       ],
       "contracts": [
         {
@@ -93648,21 +93814,78 @@
           "tests": [
             "identity/v3/users/python_parity_test.go:TestPythonUserListRequests"
           ]
+        },
+        {
+          "behavior": "Pinned User nullable declarations/casts/defaults, canonical/wire response last-member order, untyped large password-expiration values, options missing{} vs explicitnull, federated scalar wrapping, unknown discard and independent view/wire/page/header/status/Clone match owned Source policy.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsExactDescriptorDefaultsAndResponseAliasOrder",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsLazyQueryAndUntypedView",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsOptionsDefaultNullAndNestedLoadedLocal"
+          ]
+        },
+        {
+          "behavior": "Mapped domain/name/password expiry/unique/idp/protocol/is_enabled->enabled plus inherited limit/marker preserve Requests repeated/null/bool values and canonical query precedence; declared nonquery Body kwargs run ordered loaded local filters, while unknown kwargs discard before marshal.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsDeclaredQueriesCanonicalWinsRequestsValues",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsLoadedLocalFilterAndShortCircuit",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsOptionsDefaultNullAndNestedLoadedLocal",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsUnknownDiscardBeforeEncodingAndTypedJMESBoundary"
+          ]
+        },
+        {
+          "behavior": "Lazy list defaults, Source root dictionary links ignored with key-presence precedence, short nonempty page positive-limit marker from last raw wire ID, raw prefilter max_items hint/single page/empty terminal and actual unsafe-next proof preserve the named Source list.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsDictionaryLinksIgnoredWithSourcePrecedence",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsFilteredMarkerAndRawMaxItems",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsIteratorKeepsYieldedRowsAndAllDiscards"
+          ]
+        },
+        {
+          "behavior": "Copied raw/options/header/MV/base_path and one-pass conflicting attrs, original JMES priority, constructor/formal errors, bound route/context/source guards and explicit100..399 SourceStatusPolicy operate without changing existing native API defaults or inventing discovery.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsOptionsSnapshotFormalRestorationAndHeaders",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsGuardsOptionCancellationAndContextCauses",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsSourceSuccessStatusAndHeaderNoDiscovery",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsSingletonMalformedAndConstructorEvidence"
+          ]
+        },
+        {
+          "behavior": "Opaque Source Proxy generator receives truthy JMES before HTTP; null/index/projection/type/literals/type-errors and retained/nested generator identity are distinct from materialized arrays. Omitted/falsey/nonstring filters keep lazy rows; typed iterator explicitly directs truthy string callers to polymorphic method.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserProxyListOpaqueProjectionAndRetainedGenerators",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsUnknownDiscardBeforeEncodingAndTypedJMESBoundary"
+          ]
+        },
+        {
+          "behavior": "SourceNoConnection default location null, explicit immutable configured CloudLocation retains current scope because User has no project/zone Body; default_project_id and unknown project_id/location cannot alter it. Raw receipt remains unchanged and invalid location rejects beforeHTTP.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsLocationIsExplicitImmutableAndDeclared"
+          ]
+        },
+        {
+          "behavior": "Physical200/203/401/404/429/503 read/close/mixed faults preserve actual accepted/native rejection proof plus every cause and native401 ErrOriginal/ErrReauth, oneClose/HTTP and zero Retry/Reauth. Clean401/503 preserve captured query/headers/version and live token; Close cancel preserves real receipt and caller context cause.",
+          "tests": [
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsCleanReauthenticationAndRetryKeepPolicy",
+            "identity/v3/users/python_records_test.go:TestPythonUserListRecordsCloseCancellationKeepsReceiptAndCause"
+          ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-users.md"
+        "identity/v3/python-parity-users.md",
+        "identity/v3/users/python_records.md"
       ],
       "differences": [
         "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.",
         "Python sends bool query values as True/False text; typed Go ListOpts send true/false, and WithListQuery reproduces the Python text.",
         "Python drops unknown query names; Go sends every WithListQuery key to the server.",
-        "users.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all."
+        "users.ListOpts.Filters adds a stray \"-\" query key next to the comparator filters; Python cannot send comparator filters at all.",
+        "Go owns immutable JSON descriptor records, fixed source/context/options, detached actual evidence and explicit polymorphic result instead of mutable Python Resource/session/subclass objects. Native User/List/All/membership APIs retain their current contracts.",
+        "Direct leaf/selected v3 factory has no Python Connection: computed location defaults null and immutable explicit CloudLocation is a Go convenience. No default_project_id authorization or automatic client/scope/name inference is introduced. Whole SDK-R1/C1/S1 mutable Resource/cache/session/Connection/version configuration remain tracked separately.",
+        "Go safe UTF8/fixed-origin/collection/filter/conditional-header bounds, nonnegative integer pagination, stronger cycles and valid RFC HTTP Link interoperability intentionally bound broader Source adapters and the pinned Requests uri/url link defect. Runtime constructor controls fail as concrete preflight/receipt errors rather than arbitrary Python object mutations.",
+        "iter.Seq2 can repeat the captured request on repeated iteration rather than one-shot Python generator state. Proxy pure expression still performs SDK option/source preflight; JSON carrier is absent for nested generators. No live cloud/full SDK or shared-engine supported status is claimed."
       ],
-      "remaining": [
-        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; the native pager sends only the first request.",
-        "Python applies Body attributes passed through **query that are not query parameters as local filters; this collection has no Body filter binding and resource.WithBodyFilter returns resource.ErrUnsupported."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/validate_group_has_domain_role",
@@ -103323,44 +103546,212 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_policies",
       "source_fingerprint": "6536033ca058904a39cabfc634bdc10e8334b9bea18912381c240fef710a84b6",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSPolicyRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithOperationGuard"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call collects the complete uncached Source extension alias inventory before policy reads, including later pages after an early qos match. Missing qos returns ErrUnavailableExtension with completed extension evidence; late gate permission/malformed failures remain terminal rather than cached/early-success.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyListAndSearchGateEveryCallWithoutEarlyExit"
+          ]
+        },
+        {
+          "behavior": "Cloud filters remain owned JSON snapshots and all loaded-Python falsey values become an empty kwargs mapping after the extension gate. Truthy list nonmapping filters fail after the gate before policy HTTP. No _filter_list, glob, local ID/name search or post-server name predicate is invented.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyFiltersFalseyAndMappingErrorsHappenAfterGate",
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicySearchLiteralNameAndOrderedUpdateAreNotLocalSearch"
+          ]
+        },
+        {
+          "behavior": "Existing QoSPolicy declared server aliases and tenant_id/rules local filters are owned by the library. Source Proxy lane consumes raw headers/microversion/service-relative base_path, ordered conflicting attrs and original JMES separately; raw cap precedes local filtering and malformed/bound controls retain pre-policy failures.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyRawFormalsAliasesAndLocalJSONAreOwned",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyListRawFormalsGeneratorAndOpaqueJSON"
+          ]
+        },
+        {
+          "behavior": "Actual Source cloud list(Proxy) consumes an opaque generator or iterates arbitrary array/string/dictionary result, with null/number/type errors occurring after extension discovery without policy HTTP. Nested generators preserve identity/zero policy HTTP and JSON remains absent. Dictionary keys have the explicitly reviewed Go lexical order; [z,a] Source is [a,z] Go, never claimed to match Source insertion order.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyProxyIterableAndOpaqueResultsPreserveHTTPPhases",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyListRawFormalsGeneratorAndOpaqueJSON"
+          ]
+        },
+        {
+          "behavior": "New Source Proxy profile opts into root-link precedence, CPython-loaded equality and physical fault stop without changing typed List/Get baseline. BasePath pointers/source/options are cloned and cloud operation guard remains active through leaf callbacks/retry/physical handling. Concurrent reusable options, late failures and physical read/Close/native401 faults preserve completed extension/actual policy evidence and discard partial Policies/Value/JSON; clean503 retries remain allowed and changed selected route retains original rejected503.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyReadOptionsSnapshotsCallbacksAndLateFailures",
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyPhysicalFaultsAndCleanRetryKeepActualReceipt",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxySourceLinksLoadedEqualityAndGuardAreOptIn",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyOptsSnapshotsFormalErrorsAndTypedBasePath"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-policies-python.md"
+      ],
+      "differences": [
+        "The concrete Service helper returns a QoSPolicyRecords carrier: ordinary PolicyRecord Resource views plus independent actual Wire/Envelope/Header/status, completed Extensions evidence and arbitrary list Values/JSON. A failed operation keeps completed extension evidence and no partial policy values instead of returning a Python exception with no result.",
+        "Go uses a concrete string search identity and JSON-domain filters/options. Mutable Python Resource/class/session/adapter/cache/Connection-derived location and custom objects remain shared SDK foundations; the current owned location is null. Options are library-owned snapshots, and no caller filter builder is needed.",
+        "Source cloud list(JMES dictionary) iterates insertion-order keys; the existing shared Go JMES map result is iterated in deterministic lexical order. The explicit z,a literal yields z,a in Source and a,z in Go. Arrays, Unicode strings, opaque generators and noniterable/type failures retain their actual phases.",
+        "Safe string Header maps, same-origin service-relative fixed paths/query/cycle guards, nonnegative Go raw caps and strict complete UTF8/JSON are explicit Go policies. Some lazy Source descriptor/Resource.list formal errors are validated eagerly in owned options. Unknown actual body and large integers remain raw.",
+        "Only the new Proxy/cloud lane uses Source link precedence/loaded equality/physical-fault policy. Existing typed Policies List/Get query reservations, dictionary/HTTP Link interoperability and numeric equality are preserved. Source Proxy receives the unconsumed generator, never an invented materialized resource array.",
+        "Fixed Neutron27 get_policy permits project reader for owned policies or shared policy (and admin) in project scope. Source/fake HTTP/race/main checks do not assert authenticated deployment success, enabled QoS drivers or elevated write/admin permissions."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_policies",
       "source_fingerprint": "da37d08d315cd074648fdc45569cd75dedc54547f29eeaf13313834ff7a16dd4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSPolicyRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSPolicyMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithOperationGuard"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call collects the complete uncached Source extension alias inventory before policy reads, including later pages after an early qos match. Missing qos returns ErrUnavailableExtension with completed extension evidence; late gate permission/malformed failures remain terminal rather than cached/early-success.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyListAndSearchGateEveryCallWithoutEarlyExit"
+          ]
+        },
+        {
+          "behavior": "Cloud filters remain owned JSON snapshots and all loaded-Python falsey values become an empty kwargs mapping after the extension gate. Truthy list nonmapping filters fail after the gate before policy HTTP. No _filter_list, glob, local ID/name search or post-server name predicate is invented.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyFiltersFalseyAndMappingErrorsHappenAfterGate",
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicySearchLiteralNameAndOrderedUpdateAreNotLocalSearch"
+          ]
+        },
+        {
+          "behavior": "Search seeds a truthy literal identity as server name then applies Source dict.update in insertion order. Mapping values replace the original slot, including name null/override; JSON iterable pairs include Unicode string and dictionary-key pairs, final kwargs keys must be strings and invalid pair shapes fail after completed gate before policy HTTP.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicySearchLiteralNameAndOrderedUpdateAreNotLocalSearch"
+          ]
+        },
+        {
+          "behavior": "Existing QoSPolicy declared server aliases and tenant_id/rules local filters are owned by the library. Source Proxy lane consumes raw headers/microversion/service-relative base_path, ordered conflicting attrs and original JMES separately; raw cap precedes local filtering and malformed/bound controls retain pre-policy failures.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyRawFormalsAliasesAndLocalJSONAreOwned",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyListRawFormalsGeneratorAndOpaqueJSON"
+          ]
+        },
+        {
+          "behavior": "Actual Source cloud list(Proxy) consumes an opaque generator or iterates arbitrary array/string/dictionary result, with null/number/type errors occurring after extension discovery without policy HTTP. Nested generators preserve identity/zero policy HTTP and JSON remains absent. Dictionary keys have the explicitly reviewed Go lexical order; [z,a] Source is [a,z] Go, never claimed to match Source insertion order.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyProxyIterableAndOpaqueResultsPreserveHTTPPhases",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyListRawFormalsGeneratorAndOpaqueJSON"
+          ]
+        },
+        {
+          "behavior": "New Source Proxy profile opts into root-link precedence, CPython-loaded equality and physical fault stop without changing typed List/Get baseline. BasePath pointers/source/options are cloned and cloud operation guard remains active through leaf callbacks/retry/physical handling. Concurrent reusable options, late failures and physical read/Close/native401 faults preserve completed extension/actual policy evidence and discard partial Policies/Value/JSON; clean503 retries remain allowed and changed selected route retains original rejected503.",
+          "tests": [
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyReadOptionsSnapshotsCallbacksAndLateFailures",
+            "network/cloud_qos_policies_test.go:TestCloudQoSPolicyPhysicalFaultsAndCleanRetryKeepActualReceipt",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxySourceLinksLoadedEqualityAndGuardAreOptIn",
+            "network/v2/extensions/qos/policies/python_records_proxy_contracts_test.go:TestQoSPolicyProxyOptsSnapshotsFormalErrorsAndTypedBasePath"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-policies-python.md"
+      ],
+      "differences": [
+        "The concrete Service helper returns a QoSPolicyRecords carrier: ordinary PolicyRecord Resource views plus independent actual Wire/Envelope/Header/status, completed Extensions evidence and arbitrary list Values/JSON. A failed operation keeps completed extension evidence and no partial policy values instead of returning a Python exception with no result.",
+        "Go uses a concrete string search identity and JSON-domain filters/options. Mutable Python Resource/class/session/adapter/cache/Connection-derived location and custom objects remain shared SDK foundations; the current owned location is null. Options are library-owned snapshots, and no caller filter builder is needed.",
+        "Source cloud list(JMES dictionary) iterates insertion-order keys; the existing shared Go JMES map result is iterated in deterministic lexical order. The explicit z,a literal yields z,a in Source and a,z in Go. Arrays, Unicode strings, opaque generators and noniterable/type failures retain their actual phases.",
+        "Safe string Header maps, same-origin service-relative fixed paths/query/cycle guards, nonnegative Go raw caps and strict complete UTF8/JSON are explicit Go policies. Some lazy Source descriptor/Resource.list formal errors are validated eagerly in owned options. Unknown actual body and large integers remain raw.",
+        "Only the new Proxy/cloud lane uses Source link precedence/loaded equality/physical-fault policy. Existing typed Policies List/Get query reservations, dictionary/HTTP Link interoperability and numeric equality are preserved. Source Proxy receives the unconsumed generator, never an invented materialized resource array.",
+        "Fixed Neutron27 get_policy permits project reader for owned policies or shared policy (and admin) in project scope. Source/fake HTTP/race/main checks do not assert authenticated deployment success, enabled QoS drivers or elevated write/admin permissions."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_rule_types",
       "source_fingerprint": "4fe395ec092df1535ff6117080c73fb3cc8d6bb36481d06a0629906f0cb4a78d",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSRuleTypeValues",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleTypeListFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleTypeListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithProxyListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListBasePath"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call reads the complete fresh qos alias inventory before kwargs/callbacks; missing, late HTTP failure or unhashable aliases stop the rule list and preserve actual observed Extension records. Clean HTTP403 preserves the native ErrUnexpectedResponseCode value with actual Method/URL/Body/ResponseHeader; accepted200 alias-projection faults retain ResponseError.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesFreshCompleteGateAndMissingShortCircuit",
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesGateReadsPastFirstMatchAndKeepsActualFailure"
+          ]
+        },
+        {
+          "behavior": "Source falsey JSON and binary64 underflow normalize to empty kwargs; truthy nonobjects fail after the extension gate. Original ordered JSON kwargs, header/version/path formals and one conflicting-attrs pass are library-owned.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesFalseyFiltersAndTruthyShapeAfterGate",
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOriginalKwargsOwnedHeadersVersionPathAndConflictMerge",
+            "network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyOriginalExpressionWinsAfterOneConflictPass"
+          ]
+        },
+        {
+          "behavior": "Generator JMESPath precedes list() conversion; literal arrays/objects/strings and nested generators remain polymorphic without fabricated RuleType or HTTP metadata; unused transport formals remain lazy.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesGeneratorJMESPathAndPolymorphicListConversion",
+            "network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxySourceFormalsStayLazyBehindConstantExpressions",
+            "network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyGuardsObserveEveryOptionAndOpaqueIdentity"
+          ]
+        },
+        {
+          "behavior": "Successful empty lists are nonnil; nullable aliases, drivers descriptors and unknown extensions retain separate owned Resource/Wire and actual page proof; late errors retain Inventory without success Values/RuleTypes/JSON. Late clean403 remains a native value error with the actual rejected page status/header/body/URL.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesEmptyDefaultsAliasesAndWireOwnership",
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesLatePageFailureRetainsInventoryWithoutSuccessValues"
+          ]
+        },
+        {
+          "behavior": "Every callback sees a clone and a before/after source check; cancellation, source changes, native401 physical Read/Close faults retain actual native original proof and stop faulty retry/reauth hooks.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOptionGuardsStopRestoreAndCancellationCallbacks",
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesPhysical401PreservesActualNativeFieldsAndNoHooks",
+            "network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyUnknownValuesAndCallbackMapsAreOwned"
+          ]
+        },
+        {
+          "behavior": "Existing typed raw reserved-key rejection and 200..399 admission stay unchanged; only the explicit typed BasePath and separate Proxy lanes broaden options.",
+          "tests": [
+            "network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOldStatusAndTypedRawRejectionRemainUnchanged",
+            "network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyOwnsRawFormalsAndTypedBasePathKeepsOldRawRejection"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-rule-types-python.md"
+      ],
+      "differences": [
+        "Go sorts object keys lexically when list() consumes a JMESPath object, while Python preserves insertion order; arrays and Unicode character ordering are preserved.",
+        "Existing rule type leaf keeps 200..399 versus Source synthetic100..199, nonnegative Go-integer max_items, exact-decimal id/name local equality versus Python loaded float rounding/underflow, and explicit safe origin/path/header/UTF8/continuation policy. These are documented Go policies; they are not full runtime parity.",
+        "Concrete owned JSON/client/context/options do not provide arbitrary Python class/session/operator replacement or mutable Resource/cloud configuration/cache lifecycle. Whole-project SDK-R1 remains separate; no live deployment support or whole SDK supported promotion is claimed."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_policy",
@@ -103380,32 +103771,145 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_bandwidth_limit_rules",
       "source_fingerprint": "8e94dc067dadafeb62f7d7bf75541276bfc33da746cb46de44ae4b72bf34d595",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSBandwidthLimitRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
+      "contracts": [
+        {
+          "behavior": "Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields"
+          ]
+        },
+        {
+          "behavior": "Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy"
+          ]
+        },
+        {
+          "behavior": "Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate"
+          ]
+        },
+        {
+          "behavior": "Source proxy generator JMESPath literals/Unicode/object keys/nested generator/null/type errors distinguish rule HTTP from completed prerequisite HTTP; owned base_path succeeds while existing typed raw base_path rejection stays unchanged.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary"
+          ]
+        },
+        {
+          "behavior": "CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases"
+          ]
+        },
+        {
+          "behavior": "Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof"
+          ]
+        }
+      ],
+      "differences": [
+        "Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.",
+        "SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.",
+        "JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.",
+        "Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.",
+        "Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.",
+        "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-bandwidth-python.md",
+        "network/v2/qos-bandwidth-limit-records-python.md"
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_bandwidth_limit_rules",
       "source_fingerprint": "1b521acebec1fd5202a9b97dbd8c820cf604c2bfbe604d2b34c45e56f93dd72a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSBandwidthLimitRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitProxyQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithBandwidthLimitListBasePath"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
-        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
+      "contracts": [
+        {
+          "behavior": "Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields"
+          ]
+        },
+        {
+          "behavior": "Search delegates exactly one complete list workflow, preserves identifier/glob selection and CPython loaded bool/integer local equality, applies original ordered dictionary filter after list and retains actual Inventory/proof on unknown-key failure.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSearchKeepsRuleIDPhaseAndFilterPresence"
+          ]
+        },
+        {
+          "behavior": "Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy"
+          ]
+        },
+        {
+          "behavior": "Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate"
+          ]
+        },
+        {
+          "behavior": "Source proxy generator JMESPath literals/Unicode/object keys/nested generator/null/type errors distinguish rule HTTP from completed prerequisite HTTP; owned base_path succeeds while existing typed raw base_path rejection stays unchanged.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary"
+          ]
+        },
+        {
+          "behavior": "CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases"
+          ]
+        },
+        {
+          "behavior": "Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof"
+          ]
+        },
+        {
+          "behavior": "Source search without identifier skips falsey literal values; nested generator membership consumes actual rule records before unknown-key failure, while identifier phase rejects opaque generator without rule HTTP.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSearchSourceFalseyLiteralsAndNestedMembership"
+          ]
+        }
+      ],
+      "differences": [
+        "Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.",
+        "SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.",
+        "JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.",
+        "Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.",
+        "Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.",
+        "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-bandwidth-python.md",
+        "network/v2/qos-bandwidth-limit-records-python.md"
       ]
     },
     {
@@ -103427,33 +103931,178 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_dscp_marking_rules",
       "source_fingerprint": "b0749b9cb9c403fcf0a140d3b915f5f8cd39c62f869eb28bde2af16f607dbfb4",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSDSCPMarkingRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Falsey cloud filters become empty kwargs only after extension/policy lookup; truthy nonmappings fail Source **kwargs expansion before rule HTTP. Source Body filters are local while server queries are only declared limit/marker. Full paging and CPython JSON-loaded equality are owned by the concrete Source family profile.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Reachable Proxy/Resource formals headers, microversion, paginated/max_items, nullable/empty BasePath and JSON-domain %(key)s route binding are handled by an owned family Source lane; one-pass conflicting attrs restores the URI parent and preserves original JMES expression. Formal duplicates fail before rule I/O. Legacy typed list policy remains unchanged.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceFormalFiltersAndRestoredURIBeforeJMES",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Full JMESPath evaluates the opaque generator before rule collection. Identity/default returns actual rules; array/string/dict literals return arbitrary list() values with zero rule HTTP and no invented records. Nested generators remain lazy, guarded, location-bound and represented in Values without fake JSON Value.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-dscp-python.md"
+      ],
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_dscp_marking_rules",
       "source_fingerprint": "2b4f26ae8e7482e23efd00a4eb2a5b5ae36b1029717042d9fccc84a37b38053a",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSDSCPMarkingRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyDSCPMarkingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithDSCPMarkingProxyQuery"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
-        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Falsey cloud filters become empty kwargs only after extension/policy lookup; truthy nonmappings fail Source **kwargs expansion before rule HTTP. Source Body filters are local while server queries are only declared limit/marker. Full paging and CPython JSON-loaded equality are owned by the concrete Source family profile.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Reachable Proxy/Resource formals headers, microversion, paginated/max_items, nullable/empty BasePath and JSON-domain %(key)s route binding are handled by an owned family Source lane; one-pass conflicting attrs restores the URI parent and preserves original JMES expression. Formal duplicates fail before rule I/O. Legacy typed list policy remains unchanged.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceFormalFiltersAndRestoredURIBeforeJMES",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Full JMESPath evaluates the opaque generator before rule collection. Identity/default returns actual rules; array/string/dict literals return arbitrary list() values with zero rule HTTP and no invented records. Nested generators remain lazy, guarded, location-bound and represented in Values without fake JSON Value.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Cloud search first finishes list, then uses exact ID/name or fnmatch glob and ordered/nested Source getter dictionary filtering, including loaded float precision. Unknown attributes fail lazily with actual final successful receipt; an earlier mismatch skips later invalid keys. Top-level truthy string filters remain unreachable JMES because list **kwargs fails first.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingOrderedNestedCloudFiltersAndLoadedFloatEquality",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases"
+          ]
+        },
+        {
+          "behavior": "Without identifier selection, Source skips falsey JSON literal values before dictionary lookup. Identifier get() errors happen before that skip. Unknown-key membership on a nested opaque generator consumes its actual rules before failure and retains those actual Inventory/receipts.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-dscp-python.md"
+      ],
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_dscp_marking_rule",
@@ -103474,33 +104123,178 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_qos_minimum_bandwidth_rules",
       "source_fingerprint": "ef5d87b775615c1400c57ee25723972199d9998c229ef2042ac92da051198866",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSMinimumBandwidthRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Falsey cloud filters become empty kwargs only after extension/policy lookup; truthy nonmappings fail Source **kwargs expansion before rule HTTP. Source Body filters are local while server queries are only declared limit/marker. Full paging and CPython JSON-loaded equality are owned by the concrete Source family profile.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Reachable Proxy/Resource formals headers, microversion, paginated/max_items, nullable/empty BasePath and JSON-domain %(key)s route binding are handled by an owned family Source lane; one-pass conflicting attrs restores the URI parent and preserves original JMES expression. Formal duplicates fail before rule I/O. Legacy typed list policy remains unchanged.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceFormalFiltersAndRestoredURIBeforeJMES",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Full JMESPath evaluates the opaque generator before rule collection. Identity/default returns actual rules; array/string/dict literals return arbitrary list() values with zero rule HTTP and no invented records. Nested generators remain lazy, guarded, location-bound and represented in Values without fake JSON Value.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-minimum-bandwidth-python.md"
+      ],
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_qos_minimum_bandwidth_rules",
       "source_fingerprint": "c675ad453b7ace3059a135cc9762ca2fa61066e100345c83ea20819ffa33d578",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSMinimumBandwidthRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyMinimumBandwidthRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.WithMinimumBandwidthProxyQuery"
       ],
-      "differences": [],
-      "remaining": [
-        "No Go helper first sends GET /v2.0/extensions and raises an unavailable-extension error when the qos alias is absent; Python performs this gate on every call.",
-        "No Go helper resolves policy_name_or_id with find_qos_policy and raises NotFoundException before the rule request; the caller would have to sequence and interpret the lookup.",
-        "No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows."
-      ]
+      "contracts": [
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Falsey cloud filters become empty kwargs only after extension/policy lookup; truthy nonmappings fail Source **kwargs expansion before rule HTTP. Source Body filters are local while server queries are only declared limit/marker. Full paging and CPython JSON-loaded equality are owned by the concrete Source family profile.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Reachable Proxy/Resource formals headers, microversion, paginated/max_items, nullable/empty BasePath and JSON-domain %(key)s route binding are handled by an owned family Source lane; one-pass conflicting attrs restores the URI parent and preserves original JMES expression. Formal duplicates fail before rule I/O. Legacy typed list policy remains unchanged.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceFormalFiltersAndRestoredURIBeforeJMES",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFalseyMaxItemsAndTemplateOnlyJSONArguments"
+          ]
+        },
+        {
+          "behavior": "Full JMESPath evaluates the opaque generator before rule collection. Identity/default returns actual rules; array/string/dict literals return arbitrary list() values with zero rule HTTP and no invented records. Nested generators remain lazy, guarded, location-bound and represented in Values without fake JSON Value.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Cloud search first finishes list, then uses exact ID/name or fnmatch glob and ordered/nested Source getter dictionary filtering, including loaded float precision. Unknown attributes fail lazily with actual final successful receipt; an earlier mismatch skips later invalid keys. Top-level truthy string filters remain unreachable JMES because list **kwargs fails first.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthSearchKeepsRuleIDPhaseAndFilterPresence",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthOrderedNestedCloudFiltersAndLoadedFloatEquality",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases"
+          ]
+        },
+        {
+          "behavior": "Without identifier selection, Source skips falsey JSON literal values before dictionary lookup. Identifier get() errors happen before that skip. Unknown-key membership on a nested opaque generator consumes its actual rules before failure and retains those actual Inventory/receipts.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolymorphicFalseySearchAndNestedGeneratorMembership"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-qos-minimum-bandwidth-python.md"
+      ],
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_qos_minimum_bandwidth_rule",
@@ -104590,23 +105384,30 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-rule-types-python.md"
       ],
-      "differences": [],
+      "differences": [
+        "Stock Neutron27 policy get_rule_type is project reader, but QoSPlugin.get_rule_type adds an is_admin backend check. This cloud detail helper is queued for the core-admin phase, not implemented or counted as a user-cloud read.",
+        "Pinned details ignores filters and performs two separate fresh full extension GET checks for qos then qos-rule-type-details; the existing low-level GetRecord is not the named cloud helper."
+      ],
       "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
-        "The helper also requires the qos-rule-type-details extension before GET /qos/rule-types/{type}; no SDK API performs that second check."
+        "Administrator-phase cloud helper with two fresh ordered full extension checks and filters ignored is deliberately deferred; no user-cycle admin implementation."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_bandwidth_limit_rule",
       "source_fingerprint": "dcccc53c7dc46962075f32b284799dfb094f032870260b68615a16c1c643f445",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitMicroversion"
       ],
       "contracts": [
         {
@@ -104614,14 +105415,50 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Literal rule getter gates and resolves policy once, returns raw untyped record/default location on success, and preserves native404 without rule Find fallback or ignored missing.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGetResolvesPolicyOnceAndKeeps404"
+          ]
+        },
+        {
+          "behavior": "Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy"
+          ]
+        },
+        {
+          "behavior": "Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate"
+          ]
+        },
+        {
+          "behavior": "CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases"
+          ]
+        },
+        {
+          "behavior": "Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.",
+          "tests": [
+            "network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof"
+          ]
         }
       ],
-      "documentation": [
-        "network/python-cloud-parity-a.md"
+      "differences": [
+        "Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.",
+        "SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.",
+        "JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.",
+        "Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.",
+        "Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.",
+        "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
+      "documentation": [
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-bandwidth-python.md",
+        "network/v2/qos-bandwidth-limit-records-python.md"
       ]
     },
     {
@@ -104681,12 +105518,16 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_dscp_marking_rule",
       "source_fingerprint": "498d2ef43f2ceda14cc94963ad474603cbcfd0397bcf435bf45944296a4b0534",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithDSCPMarkingCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceDSCPMarkingRecord"
       ],
       "contracts": [
         {
@@ -104694,15 +105535,57 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Named member getter resolves policy with ignore_missing=True for DSCP marking. Then one literal escaped member GET uses Source status/projection, no rule Find/list fallback or suppressed rule404. Nonstring policy identity fails with actual policy response proof.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGetResolvesPolicyOnceAndKeeps404",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingGetterPolicyStrictnessAndMalformedPolicyReceipt"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_dscp_test.go:TestCloudQoSDSCPMarkingPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-dscp-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
-      ]
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_dscp_marking_rule",
@@ -104760,12 +105643,16 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_qos_minimum_bandwidth_rule",
       "source_fingerprint": "648e6f28f46547388dd8f4bec889387d9a616092e8994eb7d24971001f347342",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetMinimumBandwidthRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithMinimumBandwidthCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetSourceMinimumBandwidthRecord"
       ],
       "contracts": [
         {
@@ -104773,15 +105660,57 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Every call consumes the full fresh qos extension inventory before GET-first exact policy Find; early qos match does not suppress later alias/page faults. Missing or ambiguous policy stops rule I/O with actual already observed gate/policy evidence, no fabricated policy response.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPolicyMissingAndAmbiguityRetainActualGate",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFreshCompleteGatePolicyNameLookupAndSourceLinkPrecedence"
+          ]
+        },
+        {
+          "behavior": "Selected original network service/client/source is captured before owned option callbacks; cancellation causes and source mutation remain terminal. Nil context/service fails before discovery or invented response. Location and raw JSON options are cloned and callbacks run once.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthFilterOwnershipCallbackGuardAndFalseyCases",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
+        },
+        {
+          "behavior": "Actual HTTP physical rule faults and late pages retain partial Inventory plus native response bytes/header/status in error, with no successful Value/Rules. Real Content-Length faults at 200/203/401/404/429/503 preserve pointer401 ErrOriginal VALUE response and ErrReauth EOF; retry/backoff/reauth fault hooks remain zero.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysical401RulePageAndLateFailurePreserveStageProof",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPhysicalLatePagesKeepActualHeaderStatusAndNoFaultHooks"
+          ]
+        },
+        {
+          "behavior": "Named member getter resolves policy with ignore_missing=False for minimum bandwidth. Then one literal escaped member GET uses Source status/projection, no rule Find/list fallback or suppressed rule404. Nonstring policy identity fails with actual policy response proof.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGetResolvesPolicyOnceAndKeeps404",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthGetterPolicyStrictnessAndMalformedPolicyReceipt"
+          ]
+        },
+        {
+          "behavior": "Rule Resource default/unknown Body, raw Wire, envelope/header/status and URI parent remain distinct. Standalone location null and owned connected current_location are applied before filtering; undeclared project_id/availability_zone cannot change the configured project/zone. Selected Rules, Values, Inventory, LastRule and JSON Value do not alias exported rule metadata/bytes.",
+          "tests": [
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthListOwnsGateParentPagingAndRawFields",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthRawFilterLocationAndResultCarriersOwnAllData",
+            "network/cloud_qos_minimum_bandwidth_test.go:TestCloudQoSMinimumBandwidthPreflightAndInvalidLocationHaveHonestEvidence"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-minimum-bandwidth-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
-      ]
+      "differences": [
+        "Go returns an owned result carrier with real Extensions/Policy/Inventory/LastRule evidence, correlated Rules/Rule and independent Values/Value; literal/opaque output never fabricates response Resource/Wire/Header/status. Failed page receipt remains in the actual error rather than a fictional failed resource.",
+        "Source kwargs are restricted to JSON-domain data, policy/rule identities to safe nonblank Go strings, HTTP headers to string-valued mappings, microversion/base_path to nullable strings and truthy max_items to nonnegative Go integers or true. Go validates these typed/ownership boundaries and service-relative URI safety before some Python dynamic errors; unsafe origin/query/fragment/traversal and non-string numeric %-route formatting are explicit errors.",
+        "Dictionary-key iterable results and key-based JMESPath functions use reviewed Go lexical order instead of Python insertion order. JMES deprecation warnings are omitted. Opaque generator repr/to_string involving Python process addresses and non-JSON dynamic object/session/mutable Resource behavior remain SDK-R1/C1/S1 scope; no equivalent process address string is fabricated.",
+        "Explicit CurrentLocation is an owned configured snapshot; the rule classes have no project_id/availability_zone descriptors, so unknown remote fields cannot override it. Root Connection wrappers may supply this library-owned option automatically. Existing paging bounds/cycle checks/HTTP Link repair and fixed request guards remain documented Go improvements. Authenticated live Neutron acceptance is separate from testhelper HTTP/Source AST proof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_minimum_bandwidth_rule",
@@ -106741,44 +107670,132 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_domains",
       "source_fingerprint": "acfcf743b6900e97c837613a4f58b40bac35fd938a6bf94605a616494f562263",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains",
+        "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Cloud list_domains expands arbitrary keyword mapping into Source query/local filters; enabled aliases and nested options survive local processing and actual yielded inventory preserves response fields.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudListKeywordQueryAliasAndLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Cloud eagerly consumes Source Proxy result by Python iterable kind. Literal list/string/object results and nested generators stay HTTP0; opaque generators are not forcibly encoded, JSON exists only for complete JSON data.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudListProxyPolymorphicResultIsUnread"
+          ]
+        },
+        {
+          "behavior": "Concrete already-v3 API factory captures Source/header state before callbacks, checks sticky selected API/source/custom cancel before and after options and prevents restore callbacks or fabricated preflight proof.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudOptionsStickySourceCancelAndHeaderSnapshot"
+          ]
+        }
+      ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/domains/python-records.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
-      ],
-      "remaining": [
-        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding.",
-        "A limit filter makes Python Resource.list repeat the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.",
+        "Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.",
+        "Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.",
+        "Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.",
+        "HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.",
+        "Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.",
+        "Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location."
       ]
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/search_domains",
       "source_fingerprint": "f4c9f932167e21ec98573cc630a7610e7d0d05a99588d607d330b8e584cae552",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains",
+        "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadNameOrID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadLocation"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "name_or_id presence is preserved with a pointer: nil forwards mapping filters to list_domains; explicit empty/nonempty first materializes unfiltered domains and applies local exact/glob identifier plus mapping/JMESPath. Name/filters stay absent from server in that branch.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudSearchIdentifierPresenceSelectsSourceBranch"
+          ]
+        },
+        {
+          "behavior": "Absent identifier kwargs expansion rejects string/false/zero/empty-string/array before HTTP; exactly None filters becomes {}. Identifier-present expression filters run on actual materialized rows and yield arbitrary scalar/null JSON with no fabricated records.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudSearchAbsentKeywordMappingVersusPresentJMESPath"
+          ]
+        },
+        {
+          "behavior": "Absent-identifier Proxy nested generator remains an iterable ValueObjects result without invented JSON; public records remain separate from opaque/literal data.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudListProxyPolymorphicResultIsUnread"
+          ]
+        },
+        {
+          "behavior": "Local loaded nested subset/glob selection keeps duplicates, CPython rounded float/bool/integer equality and selected record clones independent of physical inventory.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudLocalLoadedSubsetGlobAndIndependentRecord"
+          ]
+        },
+        {
+          "behavior": "Complete HTTP materialization precedes invalid local expression, so later503 wins and physical receipt/partial Inventory survives.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudLateHTTPPrecedesLocalFilterError"
+          ]
+        },
+        {
+          "behavior": "Explicit cloned location is applied before local selection and trusts configured current project rather than unknown wire extension.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudExplicitLocationOwnedBeforeLocalFiltering"
+          ]
+        },
+        {
+          "behavior": "Sticky Source/context options and source header snapshot stop restore callbacks and HTTP on invalid preflight.",
+          "tests": [
+            "identity/domain_record_cloud_test.go:TestPythonDomainCloudOptionsStickySourceCancelAndHeaderSnapshot"
+          ]
+        }
+      ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/domains/python-records.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Without name_or_id Python passes filters to list_domains server-side and does not filter locally."
-      ],
-      "remaining": [
-        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding.",
-        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding."
+        "Without name_or_id Python passes filters to list_domains server-side and does not filter locally.",
+        "SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.",
+        "Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.",
+        "Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.",
+        "Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.",
+        "HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.",
+        "Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.",
+        "Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location."
       ]
     },
     {
@@ -107030,44 +108047,111 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_roles",
       "source_fingerprint": "a0d6952008995f5e5c4b95d56901936b82f122b37ba3ac49ba82244c91f50caa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.All",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.ListRoles",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithRecordListQuery"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Source cloud list_roles expands ordinary Proxy kwargs into the owned list classifier, preserves server name/domain and local options filter, and exposes independent JSON Value/Roles/actual Inventory with203 header/status.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudListForwardsOwnedProxyQueryAndLocalBodyFilters"
+          ]
+        },
+        {
+          "behavior": "list() conversion preserves JSON literal lists/string iteration/object key lists and opaque nested generator with no invented HTTP/Role association. Noniterable null/number/bool and opaque array functions fail before HTTP.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudListLiteralOpaqueAndNonIterableBranchesNeverFabricateHTTP"
+          ]
+        },
+        {
+          "behavior": "Captured source headers precede list option callbacks. Actual late503 body/header/method/URL preserves prior Inventory while callback runs once; nil/canceled preflight makes zero requests.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudListOptionCallbacksSnapshotSourceAndLateNativeProof"
+          ]
+        }
+      ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/roles/python-records.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Existing native Role/List/All/Get/FindIdentity remain unchanged. Concrete functional options and SDK-owned profile descriptors/defaults/decoders avoid caller builders; declared Resource JSON and separate actual Wire/Envelope/header/status are defensively owned.",
+        "Selected Keystone v3 API is required; automatic v2 ensure_service_version conversion is not added. Standalone native client computed location is null; explicit immutable location supplies cloud/region/current project without inference. Role has no project_id/zone descriptors, unknown response facts do not replace that scope and the typed convenience normalizes zone to null.",
+        "Source root link precedence and ignored Keystone dictionary-next are opt-in on this new profile. Fixed origin/path/query/header/version, stronger cycles, representable safe markers and nonnegative Go caps are deliberate Go policies; RFC HTTP Link corrects the pinned Requests next uri/url mismatch.",
+        "Go iterator reuse repeats the captured guarded operation instead of Python generator single-use state. Pure Proxy expressions still run SDK option/source preflight; JSON serialization is separate from opaque/nested generator results.",
+        "SDK-R1/C1/S1 remain separately tracked Connection-wide synchronized Resource/runtime, optional response cache and session/version negotiation. This finite named mapping is not supported full SDK parity or authenticated live-cloud execution. No new find_role mapping or closure of its raw Resource.fetch/control/header kwargs is claimed.",
+        "RoleListResult.Value is []any and JSON is populated only if every value is JSON-representable. Object-valued Proxy expressions convert to deterministically sorted Go keys instead of Python insertion order; literal/opaque values do not acquire synthesized transport evidence."
       ],
-      "remaining": [
-        "Python forwards arbitrary filter keywords through Resource.list, which filters declared Body attributes that are not query parameters (for example description) locally on each row; the Go collection has no Body filter for this binding.",
-        "A limit filter makes Python Resource.list repeat the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/search_roles",
       "source_fingerprint": "c8fb250307ce57744731d6823162bd3664957e308f83a6a709d11d0f6c489bff",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.SearchRoles",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleSearchMicroversion"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Search lists all pages with only domain query then exact/glob ID/name and ordered recursive loaded-JSON filters. Duplicate records stay in selection, selected records clone away from actual Inventory and203 header/status.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudSearchDomainServerAndLocalGlobSubset"
+          ]
+        },
+        {
+          "behavior": "Truthful materialized string JMESPath yields arbitrary JSON and nil Roles with Expression=true. Name is selected first, empty selection is still evaluated, falsey filters retain declared rows and late HTTP fails before invalid local expression.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudSearchStringExpressionsUseMaterializedRows",
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudFalseyFiltersPreserveDeclaredRows",
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudLateHTTPFailurePrecedesInvalidLocalFilter"
+          ]
+        },
+        {
+          "behavior": "Local missing keys/shape errors occur after actual list and retain Inventory; insertion-order mismatch avoids evaluating later invalid shape. No fake HTTP error is added for purely local selection failures.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudLocalErrorsFollowEveryPageAndKeepInventory",
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudOrderedMismatchHidesUnreachedBadShape"
+          ]
+        },
+        {
+          "behavior": "Explicit typed owned location is applied before local filters and Wire remains original; source callback snapshots/mutations/nil/cancel are guarded throughout the facade and list dependency.",
+          "tests": [
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudLocationBeforeFilterAndOwnedArguments",
+            "identity/role_record_cloud_test.go:TestPythonRoleCloudOptionsGuardCallbacksAndSelectedSourceSnapshot"
+          ]
+        }
+      ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/roles/python-records.md"
       ],
       "differences": [
-        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Existing native Role/List/All/Get/FindIdentity remain unchanged. Concrete functional options and SDK-owned profile descriptors/defaults/decoders avoid caller builders; declared Resource JSON and separate actual Wire/Envelope/header/status are defensively owned.",
+        "Selected Keystone v3 API is required; automatic v2 ensure_service_version conversion is not added. Standalone native client computed location is null; explicit immutable location supplies cloud/region/current project without inference. Role has no project_id/zone descriptors, unknown response facts do not replace that scope and the typed convenience normalizes zone to null.",
+        "Source root link precedence and ignored Keystone dictionary-next are opt-in on this new profile. Fixed origin/path/query/header/version, stronger cycles, representable safe markers and nonnegative Go caps are deliberate Go policies; RFC HTTP Link corrects the pinned Requests next uri/url mismatch.",
+        "Go iterator reuse repeats the captured guarded operation instead of Python generator single-use state. Pure Proxy expressions still run SDK option/source preflight; JSON serialization is separate from opaque/nested generator results.",
+        "SDK-R1/C1/S1 remain separately tracked Connection-wide synchronized Resource/runtime, optional response cache and session/version negotiation. This finite named mapping is not supported full SDK parity or authenticated live-cloud execution. No new find_role mapping or closure of its raw Resource.fetch/control/header kwargs is claimed."
       ],
-      "remaining": [
-        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_role",
@@ -107579,7 +108663,17 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.All"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.ListUsers",
+        "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.RawAPI",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListName",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserListLocation"
       ],
       "contracts": [
         {
@@ -107587,25 +108681,61 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
           ]
+        },
+        {
+          "behavior": "Exact decorated Source cloud list accepts only domain_id/name kwargs; ordinary typed/raw null/false/repeated values are passed to owned users list while all other named kwargs fail before marshal/HTTP. No header/filter/JMES/limit Source kwargs are invented.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudListDefaultAndOnlyDeclaredSourceKwargs",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudListValidKwargsRejectBeforeMarshalerAndHTTP"
+          ]
+        },
+        {
+          "behavior": "Cloud list materializes Source rows without member/project lookup, ignores ordinary Keystone dict next, returns owned declared Value/Users and actual Inventory with no fake receipt, and successful empty list publishes nonnil Users/Inventory.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudListDefaultAndOnlyDeclaredSourceKwargs",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudListOptionSnapshotsHeadersAndCallbacksOwnMaps"
+          ]
+        },
+        {
+          "behavior": "Captured selected service/context around copied map/raw/options/header/version callbacks preserves mutable-input snapshots, initializes callback maps, stops after simultaneous option/cancel/source error and avoids fabricated HTTP evidence; explicit User location never treats default project as ownership.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudListOptionSnapshotsHeadersAndCallbacksOwnMaps",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSelectedSourceCancellationAndPreflightCannotCreateReceipt",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudLocationBeforeFilteringIgnoresDefaultProjectAndRemoteForgery"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/users/python_records.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Go owns immutable JSON descriptor records, fixed source/context/options, detached actual evidence and explicit polymorphic result instead of mutable Python Resource/session/subclass objects. Native User/List/All/membership APIs retain their current contracts.",
+        "Direct leaf/selected v3 factory has no Python Connection: computed location defaults null and immutable explicit CloudLocation is a Go convenience. No default_project_id authorization or automatic client/scope/name inference is introduced. Whole SDK-R1/C1/S1 mutable Resource/cache/session/Connection/version configuration remain tracked separately.",
+        "Go safe UTF8/fixed-origin/collection/filter/conditional-header bounds, nonnegative integer pagination, stronger cycles and valid RFC HTTP Link interoperability intentionally bound broader Source adapters and the pinned Requests uri/url link defect. Runtime constructor controls fail as concrete preflight/receipt errors rather than arbitrary Python object mutations.",
+        "iter.Seq2 can repeat the captured request on repeated iteration rather than one-shot Python generator state. Proxy pure expression still performs SDK option/source preflight; JSON carrier is absent for nested generators. No live cloud/full SDK or shared-engine supported status is claimed.",
+        "Source valid_kwargs domain_id/name restriction is represented explicitly by WithUserListQuery; typed Headers/Microversion/Location are Go transport conveniences, not extra accepted cloud kwargs. The existing native cloud mapping remains available; the new factory materializes owned Source records."
       ],
       "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/search_users",
       "source_fingerprint": "335bc33c597b84e46c79990b2bc4bd3275bfb455ed3dd00827d8a3cac9092046",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.SearchUsers",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserSearchLocation"
       ],
       "contracts": [
         {
@@ -107613,17 +108743,58 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityProjectUserHelpers"
           ]
+        },
+        {
+          "behavior": "Source UUID hex/braces/prefix/hyphen detection controls only truthy nonUUID server name hint; domain_id is truthy scope, no user/project lookup occurs. Glob name also reaches server literally before exact/glob ID/name local selection.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchExactSourceUUIDDetectionAndNameHint",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchGlobOrderedLoadedFiltersAndDeclaredMembership",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudEmptyListAndPythonNoneIdentifier"
+          ]
+        },
+        {
+          "behavior": "Search completes all list pages then applies ordered nested mapping with Source membership errors/loaded float and bool equality or materialized-row string JMESPath. Falsey filters preserve rows; reached bad-shape/unknown filters fail afterHTTP; empty identifier selection avoids reached nonmapping filter errors.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchGlobOrderedLoadedFiltersAndDeclaredMembership",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchFalseyAndReachedInvalidFilters"
+          ]
+        },
+        {
+          "behavior": "Source cloud JMESPath returns arbitrary scalar/null/list JSON separately from actual User association, retains actual observed Inventory only, and type/syntax failures never borrow accepted203 proof. This is materialized input distinct from Proxy opaque generator.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchExpressionsMaterializeThenReturnArbitraryJSON",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchOpaqueLocalErrorsNeverBorrowPhysicalProof"
+          ]
+        },
+        {
+          "behavior": "Every page precedes local evaluation, late503 wins over invalid JMES, actual body/header/status remains native rejection and prior Inventory; explicit current User location is applied before local location filtering, ignores default project/server forgery, and invalid location creates noHTTP.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSearchAllPagesBeforeLocalFailureAndLateHTTPWins",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudLocationBeforeFilteringIgnoresDefaultProjectAndRemoteForgery"
+          ]
+        },
+        {
+          "behavior": "Concrete query/filter/header/MV/location copies plus sticky source/context/options preserve custom cancellation and callback cause, stop later callbacks/HTTP, and keep null/missing/empty-list/Python None string identifier behavior.",
+          "tests": [
+            "identity/user_record_cloud_test.go:TestPythonUserCloudSelectedSourceCancellationAndPreflightCannotCreateReceipt",
+            "identity/user_record_cloud_test.go:TestPythonUserCloudEmptyListAndPythonNoneIdentifier"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/v3/users/python_records.md"
       ],
       "differences": [
-        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check."
+        "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
+        "Go owns immutable JSON descriptor records, fixed source/context/options, detached actual evidence and explicit polymorphic result instead of mutable Python Resource/session/subclass objects. Native User/List/All/membership APIs retain their current contracts.",
+        "Direct leaf/selected v3 factory has no Python Connection: computed location defaults null and immutable explicit CloudLocation is a Go convenience. No default_project_id authorization or automatic client/scope/name inference is introduced. Whole SDK-R1/C1/S1 mutable Resource/cache/session/Connection/version configuration remain tracked separately.",
+        "Go safe UTF8/fixed-origin/collection/filter/conditional-header bounds, nonnegative integer pagination, stronger cycles and valid RFC HTTP Link interoperability intentionally bound broader Source adapters and the pinned Requests uri/url link defect. Runtime constructor controls fail as concrete preflight/receipt errors rather than arbitrary Python object mutations.",
+        "iter.Seq2 can repeat the captured request on repeated iteration rather than one-shot Python generator state. Proxy pure expression still performs SDK option/source preflight; JSON carrier is absent for nested generators. No live cloud/full SDK or shared-engine supported status is claimed.",
+        "Search uses a typed Go name/domain string and raw JSON filters rather than arbitrary Python object coercion. JMESPath exact-decimal/lexical object-key/strict grammar/custom-type differences are existing explicit common-engine policies; shared dependency parity is not promoted by this row.",
+        "Value is arbitrary expression JSON with Users only for ordinary correlated selection; Inventory contains actual detached rows on later failure, whereas Python raises without returning partial rows. The selected v3 factory does not automatically negotiate an identity version or infer Connection facts."
       ],
-      "remaining": [
-        "Python filters the listed rows locally with _utils._filter_list (exact or fnmatch glob match on ID or name, nested dict filters, or a deprecated jmespath string); go-openstacksdk exposes no public helper that applies these filters to identity rows, and the identity collections have no WithFilter or WithBodyFilter binding."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_user",
