@@ -16,6 +16,7 @@ import (
 // RecordFindOpts owns Source kwargs as JSON. Omitted IgnoreMissing is true.
 // Query is member query/constructor input; fallback maps aliases separately.
 type RecordFindOpts struct {
+	ListBasePath  *string
 	IgnoreMissing *bool
 	Microversion  *string
 	Query         map[string]json.RawMessage
@@ -25,11 +26,14 @@ type RecordFindOpts struct {
 type RecordFindOption func(*RecordFindOpts) error
 
 func policyFindOptions(v RecordFindOpts) neutronfind.Options {
-	return neutronfind.Options{IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{ListBasePath: v.ListBasePath, IgnoreMissing: v.IgnoreMissing, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyPolicyFind(v RecordFindOpts) RecordFindOpts {
 	owned := neutronfind.CloneOptions(policyFindOptions(v))
-	v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
+	v.ListBasePath, v.IgnoreMissing, v.Microversion, v.Query, v.Headers, v.order = owned.ListBasePath, owned.IgnoreMissing, owned.Microversion, owned.Query, owned.Headers, owned.Order
+	if v.Headers == nil {
+		v.Headers = make(map[string]string)
+	}
 	return v
 }
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
@@ -57,7 +61,13 @@ func WithRecordFindQuery(key string, value any) RecordFindOption {
 	}
 }
 func WithRecordFindMicroversion(v string) RecordFindOption {
-	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
+	return func(c *RecordFindOpts) error {
+		x := v
+		c.Microversion = &x
+		delete(c.Query, "microversion")
+		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "microversion" })
+		return nil
+	}
 }
 func WithRecordFindHeaders(v map[string]string) RecordFindOption {
 	owned := maps.Clone(v)
@@ -183,4 +193,16 @@ func WithRecordListJMESPath(expression string) RecordListOption {
 // through Proxy callbacks, physical body handling, retries and continuation.
 func WithOperationGuard(guard func(context.Context) error) RecordListOption {
 	return func(c *RecordListOpts) error { c.operationGuard = guard; return nil }
+}
+
+// WithRecordFindListBasePath overrides only Find's fallback collection route.
+// The successful member GET does not validate or consume this route override.
+func WithRecordFindListBasePath(path string) RecordFindOption {
+	return func(c *RecordFindOpts) error {
+		value := path
+		c.ListBasePath = &value
+		delete(c.Query, "list_base_path")
+		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "list_base_path" })
+		return nil
+	}
 }
