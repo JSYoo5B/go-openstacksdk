@@ -2,19 +2,19 @@
 
 이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [IdentityCloudMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py) 메서드(shade 시절부터 이어진 `conn.create_user`, `conn.get_project` 같은 cloud 계층 helper)를 이 SDK의 공개 API와 비교합니다. cloud helper는 identity Proxy 위에 이름 또는 ID 조회, 지역 필터, domain 처리, 참과 거짓 반환을 더한 것이라서 Proxy 메서드 하나와 일대일로 맞지 않습니다. 그래서 기본 인자로 호출했을 때 Python이 보내는 요청 순서와 결과를 공개 Go API만으로 그대로 만들 수 있고, 문서화된 인자의 효과도 SDK 호출로 낼 수 있을 때만 `go_mapping`으로 판정했습니다. 호출자가 직접 행을 거르거나 404를 성공으로 바꿔야 하는 경우는 `unresolved`입니다.
 
-기존 native 호출은 `conn.Identity(ctx)`가 돌려주는 identity v3 `Service`의 필드(`Services`, `Endpoints`, `Domains`, `Groups`, `Roles`, `Projects`, `Users`)를 씁니다. 판정 근거는 [`identity/v3/python_cloud_parity_test.go`](v3/python_cloud_parity_test.go)와 [`identity/v3/python_rejudge_test.go`](v3/python_rejudge_test.go)가 고정하며, 새 읽기는 [Service 가이드](v3/services/python-records.md)·[Endpoint cloud 가이드](cloud-endpoints-python.md)·[Project 가이드](v3/projects/python-record-reads.md)·[Group 가이드](v3/groups/python-records.md)·[User 가이드](v3/users/python_records.md)·[Role 가이드](v3/roles/python-records.md)·[Domain 가이드](v3/domains/python-records.md)의 owned facade와 record tests를 사용합니다. 각 Proxy의 현행 경계는 [사용자 Proxy 문서](v3/python-parity-users.md)와 [catalog 문서](v3/python-parity-catalog.md), 기존 native 자동 조회는 [이름 또는 ID 조회 문서](../docs/finding-identities.md)를 따릅니다.
+기존 native 호출은 `conn.Identity(ctx)`가 돌려주는 identity v3 `Service`의 필드(`Services`, `Endpoints`, `Domains`, `Groups`, `Roles`, `Projects`, `Users`)를 씁니다. 판정 근거는 [`identity/v3/python_cloud_parity_test.go`](v3/python_cloud_parity_test.go)와 [`identity/v3/python_rejudge_test.go`](v3/python_rejudge_test.go)가 고정하며, 새 읽기는 [Service 가이드](v3/services/python-records.md)·[Endpoint cloud 가이드](cloud-endpoints-python.md)·[Project 가이드](v3/projects/python-record-reads.md)·[Group 가이드](v3/groups/python-records.md)·[User 가이드](v3/users/python_records.md)·[Role 가이드](v3/roles/python-records.md)·[Domain 가이드](v3/domains/python-records.md)의 owned facade와 record tests를 사용합니다. 새 cloud getter 다섯 행은 [User·Role get](cloud-user-role-get-python.md)·[Domain get](cloud-domain-get-python.md)·[Project·Group get](cloud-project-group-get-python.md) 가이드와 각각의 closed lookup/실제 응답 tests에 근거를 둡니다. 각 Proxy의 현행 경계는 [사용자 Proxy 문서](v3/python-parity-users.md)와 [catalog 문서](v3/python-parity-catalog.md), 기존 native 자동 조회는 [이름 또는 ID 조회 문서](../docs/finding-identities.md)를 따릅니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
 | [`list_projects`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L82) | `conn.ListProjects` 또는 `identity.NewProjectReadCloud(svc.Projects).ListProjects` | go_mapping |
 | [`search_projects`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L123) | `conn.SearchProjects` 또는 `identity.ProjectReadCloud.SearchProjects` | go_mapping |
-| [`get_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L155) | `Projects.FindIdentity` | unresolved |
+| [`get_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L155) | `conn.GetProjectRecord` 또는 `identity.ProjectReadCloud.GetProject` · [가이드](cloud-project-group-get-python.md) | go_mapping |
 | [`update_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L207) | `Projects.FindIdentity` (`WithIdentityFindIgnoreMissing(false)`), `Projects.Update` | go_mapping |
 | [`create_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L235) | `Projects.Create` (`Extra`로 description null) | go_mapping |
 | [`delete_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L263) | `Projects.FindIdentity`, `Projects.Remove` | go_mapping |
 | [`list_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L291) | `identity.NewUserReadCloud(svc.Users).ListUsers` | go_mapping |
 | [`search_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L305) | `identity.UserReadCloud.SearchUsers` | go_mapping |
-| [`get_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L344) | `Users.FindIdentity` | unresolved |
+| [`get_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L344) | `conn.GetUserRecord` 또는 `identity.UserReadCloud.GetUser` · [가이드](cloud-user-role-get-python.md) | go_mapping |
 | [`get_user_by_id`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L393) | `Users.Get` | go_mapping |
 | [`update_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L421) | `Users.FindIdentity`, `Users.Update` | go_mapping |
 | [`create_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L442) | `Users.Create` (`default_project`는 `Projects.FindIdentity`) | go_mapping |
@@ -45,16 +45,16 @@
 | [`delete_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1073) | `Domains.FindIdentity`, `Domains.Update`, `Domains.Delete` | go_mapping |
 | [`list_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1113) | `identity.NewDomainReadCloud(svc.Domains).ListDomains` | go_mapping |
 | [`search_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1125) | `identity.DomainReadCloud.SearchDomains` | go_mapping |
-| [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1161) | `Domains.Get`, `Domains.FindIdentity` | unresolved |
+| [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1161) | `conn.GetDomainRecord` 또는 `identity.DomainReadCloud.GetDomain` · [가이드](cloud-domain-get-python.md) | go_mapping |
 | [`list_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1209) | `Groups.List` + `groups.WithListOptions` | go_mapping |
 | [`search_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1222) | `identity.NewGroupReadCloud(svc.Groups).SearchGroups` | go_mapping |
-| [`get_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1253) | `Groups.FindIdentity` | unresolved |
+| [`get_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1253) | `conn.GetGroupRecord` 또는 `identity.GroupReadCloud.GetGroup` · [가이드](cloud-project-group-get-python.md) | go_mapping |
 | [`create_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1291) | `Domains.Get`, `Groups.Create` | go_mapping |
 | [`update_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1324) | `Groups.FindIdentity`, `Groups.Update` | unresolved |
 | [`delete_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1355) | `Groups.FindIdentity`, `Groups.Remove` | go_mapping |
 | [`list_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1380) | `identity.NewRoleReadCloud(svc.Roles).ListRoles` | go_mapping |
 | [`search_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1391) | `identity.RoleReadCloud.SearchRoles` | go_mapping |
-| [`get_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1422) | `Roles.FindIdentity` | unresolved |
+| [`get_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1422) | `conn.GetRoleRecord` 또는 `identity.RoleReadCloud.GetRole` · [가이드](cloud-user-role-get-python.md) | go_mapping |
 | [`list_role_assignments`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1503) | `Roles.ListAssignments` | go_mapping |
 | [`create_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1577) | `Roles.Create` | go_mapping |
 | [`update_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1592) | `Roles.FindIdentity`, `Roles.Update` | go_mapping |
@@ -62,7 +62,7 @@
 | [`grant_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1687) | `*.FindIdentity`, `Roles.Validate`, `Roles.Assign` | unresolved |
 | [`revoke_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1812) | `*.FindIdentity`, `Roles.Validate`, `Roles.Unassign` | unresolved |
 
-이 표의 55개 선언 중 40개가 `go_mapping`, 15개가 `unresolved`입니다. 이번 cycle4의 새 cloud search/get 네 행은 focused Identity gate PASS를 근거로 한 최종 판정입니다. 각 가이드에 독립 Python/Go main이 있고 Python AST·제한된 Source 함수 oracle의 경계가 기록되어 있습니다. 전체 cycle4 신규14행의 중앙 판정·독립 Go main9개 build·204개 test package 전체 gate는 PASS이며 이 표는 해당 Identity 선언 범위입니다. SDK-R1/C1/S1의 전체 supported 증가는 0입니다. 최종 진행량은 [중앙 지원 기록](../docs/sdk-support-ledger.md)에서 집계합니다.
+이 표의 55개 선언 중 45개가 `go_mapping`, 10개가 `unresolved`입니다. 이번 cycle5 갱신은 cloud getter 다섯 행의 새 공개 API·Source 분기·각 실행 가이드를 반영합니다. Focused Go/독립 main/전체 gate와 중앙 review·계획 집계는 root가 별도로 검증하며 문서가 진행량을 확정하지 않습니다. SDK-R1/C1/S1의 전체 supported 증가는 0입니다. 최종 진행량은 [중앙 지원 기록](../docs/sdk-support-ledger.md)에서 집계합니다.
 
 ## 공통 차이
 
@@ -145,6 +145,18 @@ Domain `SearchDomains`는 `NameOrID *string` presence를 보존합니다. Nil은
 
 User·Domain 목록은 stock system reader 또는 대상 domain reader 경로이고 일반 project reader의 전체 목록 권한을 뜻하지 않습니다. Role 기본 목록은 system reader 또는 문서화된 domain-manager 경로이며 truthy domain_id가 선택하는 domain-specific 목록은 별도 정책입니다. [User 권한](v3/users/python_records.md)·[Role 권한](v3/roles/python-records.md#권한과-지원-판정)·[Domain 권한](v3/domains/python-records.md)에 실제 정책 경계를 기록합니다. SDK는 scope/token을 바꾸지 않습니다. 새 facade의 자동 Connection bridge, response cache와 dynamic Resource lifecycle은 SDK-R1/C1/S1에 남습니다.
 
+## 새 cloud GetUser·GetRole·GetDomain·GetProject·GetGroup
+
+위 다섯 행은 새 public owned getter와 Connection bridge를 사용합니다. 각 getter의 Source signature와 closed lookup만 검토하며 full named Proxy find, 수정/삭제나 다른 후속 workflow를 함께 승격하지 않습니다. Connection bridge는 선택된 v3 API를 재사용하고 location이 명시되지 않으면 기록된 Connection facts를 채웁니다. 직접 read-cloud factory의 기본 location null, 명시적 Header/MV/location·raw domain 옵션과 실제 Wire/Envelope/header/status는 각 가이드의 독립 프로그램으로 확인할 수 있습니다.
+
+[User·Role 가이드](cloud-user-role-get-python.md)는 None/default closed finder와 filters presence 분기를 구분합니다. `get_user`는 deprecated search가 falsey이면 missing, len>1이면 ambiguity이고 길이1이면 index0을 반환하지 않고 원래 identity/domain으로 다시 find_user를 호출합니다. 따라서 `[null]` 또는 길이1 dict/string도 후속 finder에 도달할 수 있습니다. `get_role`은 search의 truthiness→len→integer index0으로 arbitrary 결과를 반환합니다. 실제 Inventory와 lookup record를 local expression JSON과 분리합니다.
+
+[Domain 가이드](cloud-domain-get-python.md)는 domain_id/ name_or_id의 omission과 precedence를 보존합니다. DomainID가 있으면 direct GET이고 404는 오류, DomainID가 없고 NameOrID가 있으면 closed name fallback·default missing을 사용합니다. deprecated filters는 경고/marker만 남기고 값 자체를 평가하지 않는 실제 Source no-op입니다. 두 identity가 모두 생략된 경우의 Source actual HTTP0 오류와 Go required-string/route bound도 가이드에 기록합니다.
+
+[Project·Group 가이드](cloud-project-group-get-python.md)는 filters omission/null과 explicit falsey 값을 구분합니다. default finder는 domain_id만 소유하고 clean400/403/404 뒤 exact ID/name을 찾습니다. Project deprecated search는 실제 list_projects의 dict(**filters) 때문에 truthy JMES string/scalar를 HTTP 전에 거부하며 truthy domain의 server override와 원래 local filters를 분리합니다. Group deprecated search는 raw domain과 materialized-list dict/JMES 및 First 선택을 유지합니다. Project literal falsey rows의 actual-truthiness-first predicate는 private local wrapper로 공통 필터를 재사용하고 HTTP Resource를 합성하지 않습니다.
+
+User 자신의 member GET이나 own-project/own-domain GET 권한이 fallback/search의 전체 목록 권한까지 보장하지 않습니다. Group/domain/system reader와 Role의 별도 persona 조건, 실제403·late native failure·Read/Close/cancel/Source cause를 가이드에서 구분합니다. safe typed identity/route/JSON bounds와 optional cache·Resource/Connection lifecycle·runtime metadata의 SDK-R1/C1/S1 잔여는 유지하며 이 named 대응을 전체 supported parity로 확대하지 않습니다.
+
 ## 이름 또는 ID로 찾는 helper
 
 `update_project`, `delete_project`, `update_user`, `delete_user`, `delete_group`, `update_role`, `delete_role`과 그룹 소속 helper는 먼저 Proxy `find_*`로 대상을 찾습니다. 이때 넘기는 값은 name_or_id, ignore_missing, domain_id뿐이라서 Proxy `find_*`의 임의 query 분류 문제는 생기지 않습니다. Go `FindIdentity`는 ID 경로 GET을 먼저 보내고 400, 403, 404이면 이름 목록으로 넘어갑니다. `resource.WithIdentityFindQuery("domain_id", id)`를 주면 두 요청에 같은 query를 붙입니다. 찾지 못하면 기본으로 nil을 돌려주는데 이것이 Python의 `ignore_missing=True`입니다. `update_project`처럼 `ignore_missing=False`로 찾는 경우는 `resource.WithIdentityFindIgnoreMissing(false)`를 주면 `resource.ErrNotFound`를 받습니다.
@@ -164,9 +176,7 @@ if err == nil && user != nil {
 
 ## 미해결 메서드
 
-- `get_project/get_group`: 기본 native FindIdentity와 새 record/검색 경로는 있지만 cloud get의 filters·single-match·missing/ambiguity 전체 workflow 판정은 이번 범위에서 갱신하지 않습니다. 두 named Proxy find의 raw control/cache remaining도 unresolved입니다.
-- `get_user/get_role`: deprecated filters를 사용하면 search/local 선택·single-match workflow가 필요하고, 이 문서의 기존 native 대응은 unresolved입니다.
-- `update_group`: 새 concrete FindRecord가 있어도 named find_group의 raw fetch control/header와 generic cache/lifecycle remaining이 남습니다. 기존 cloud update 판정도 유지합니다. `get_domain/update_domain`은 기존 find_domain와 Resource 대응 범위에서 unresolved입니다.
+- `update_group`: 새 concrete FindRecord가 있어도 named find_group의 raw fetch control/header와 generic cache/lifecycle remaining이 남습니다. 기존 cloud update 판정도 유지합니다. `update_domain`은 기존 find_domain와 Resource 대응 범위에서 unresolved이며 새 cloud GetDomain의 판정으로 수정 workflow를 완료하지 않습니다.
 - `grant_role`, `revoke_role`: domain, role, user 또는 group, project를 모두 `find_*`로 찾습니다. 또 Python `validate_*_has_*_role`은 204가 아닌 HEAD를 거짓으로 보지만 Go `roles.API.Validate`와 `osinherit.API.Validate`는 404를 오류로 돌려주므로, 할당이 없다고 판단하는 일이 호출자 몫으로 남습니다. Python은 `wait`, `timeout` 인자를 받기만 하고 쓰지 않습니다.
 
 `_utils._filter_list`의 exact/fnmatch·중첩 dict·deprecated materialized-list JMESPath는 위 Service·Endpoint·Project·Group·User·Role·Domain owned search helper가 처리합니다. 이번 Service/Endpoint cloud search/get 네 행의 과거 local filter gap은 새 facade의 검증 결과로 대체합니다. 다른 native helper와 named Find의 raw fetch kwargs·generic Resource/cache 범위는 기존 기록을 유지합니다.

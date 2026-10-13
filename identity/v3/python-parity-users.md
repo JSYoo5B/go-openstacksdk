@@ -2,13 +2,13 @@
 
 이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [identity v3 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py) 가운데 domain, group, project, user, role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 메서드가 보내는 요청을 이 SDK의 `identity/v3` 호출과 비교합니다. Keystone 요청 자체의 status, 입력 검사, decode 규칙은 [native 관리 호출 문서](native-admin-a.md)와 [native trust·사용자 본인 호출 문서](native-trusts.md)에 있고, 여기서는 Python 코드를 옮길 때 달라지는 기본값과 반환값을 정리합니다. `user_projects/user_groups`는 [사용자 membership 문서](users/memberships.md), 기존 native `FindIdentity`는 [자동 조회 비교](../../docs/finding-identities.md)를 참고합니다. 새 Project·Group·User·Role·Domain record 조회의 범위와 named find의 미해결 분기는 아래에서 구분합니다.
 
-판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 요청 판정은 `domains/groups/projects/users/roles/osinherit`의 `python_parity_test.go`에, 새 read 계약은 각 owned tests와 [Project](projects/python-record-reads.md)·[Group](groups/python-records.md)·[User](users/python_records.md)·[Group 사용자](users/python-group-records.md)·[Role](roles/python-records.md)·[Domain](domains/python-records.md) 조회 가이드에 있습니다. named find의 unresolved 사유를 concrete 옵션의 존재만으로 지우지 않습니다.
+판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 요청 판정은 `domains/groups/projects/users/roles/osinherit`의 `python_parity_test.go`에, 새 read 계약은 각 owned tests와 [Project](projects/python-record-reads.md)·[Group](groups/python-records.md)·[User](users/python_records.md)·[Group 사용자](users/python-group-records.md)·[Role](roles/python-records.md)·[Domain 목록](domains/python-records.md)·[Domain 단건 조회](../cloud-domain-get-python.md) 가이드에 있습니다. named find의 unresolved 사유를 concrete 옵션의 존재만으로 지우지 않습니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
 | [`create_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L217) | `domains.API.Create` | unresolved |
 | [`delete_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L228) | `domains.API.Remove` | go_mapping |
-| [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L278) | `domains.API.Get` | unresolved |
+| [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L278) | `domains.API.GetRecord` | go_mapping |
 | [`domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L290) | `domains.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L301) | `domains.API.Update`와 `domains.WithUpdateField("id", id)` | unresolved |
 | [`create_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L738) | `groups.API.Create` | go_mapping |
@@ -59,7 +59,7 @@
 | [`unassign_system_role_from_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2369) | `roles.API.Unassign` (`System: true`) | go_mapping |
 | [`validate_group_has_system_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2389) | `roles.API.Validate` (`System: true`) | go_mapping |
 
-이 표의 52개 선언 중 46개가 `go_mapping`, 6개가 `unresolved`입니다. 이번 cycle4의 새 group_users 한 행은 focused User package gate PASS를 근거로 한 최종 판정입니다. 독립 Python/Go main과 Source oracle의 stub 경계는 가이드에 있습니다. 전체 cycle4 신규14행의 중앙 판정·독립 Go main9개 build·204개 test package 전체 gate는 PASS입니다. 다른 Find·membership mutation·role assignment와 SDK-R1/C1/S1 판정을 유지하며 전체 supported 증가는 0입니다. 최종 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
+이 표의 52개 선언 중 47개가 `go_mapping`, 5개가 `unresolved`입니다. 이번 cycle4의 새 group_users 한 행은 focused User package gate PASS를 근거로 한 최종 판정입니다. 독립 Python/Go main과 Source oracle의 stub 경계는 가이드에 있습니다. 전체 cycle4 신규14행의 중앙 판정·독립 Go main9개 build·204개 test package 전체 gate는 PASS입니다. 다른 Find·membership mutation·role assignment와 SDK-R1/C1/S1 판정을 유지하며 전체 supported 증가는 0입니다. 최종 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
 
 ## 공통 차이
 
@@ -80,6 +80,16 @@ Python은 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d16660
 `users/roles/domains`도 `ListRecords/AllRecords/ProxyListRecords`로 `go_mapping`입니다. [User](users/python_records.md)·[Role](roles/python-records.md)·[Domain](domains/python-records.md) 가이드는 runnable Python/Go와 선언별 defaults/casts/aliases, 실제 Query/Body local 분류, nullable 값, unknown 응답 Wire 유지, raw cap·marker·Source link와 opaque Proxy expression을 제공합니다. Domain과 Role은 options dictionary를 보존하므로 기존 native 모델의 field 누락을 새 목록 경로의 미해결로 보지 않습니다. 기존 native `List/All/Get/FindIdentity`의 모델과 status/pager 정책은 유지합니다.
 
 User·Domain 목록의 system/domain reader, Role의 system reader와 domain-specific 정책은 각 가이드의 권한 감사를 따릅니다. 일반 project reader가 전체 목록을 볼 수 있다고 추정하지 않습니다. User·Role·Domain 목록 계약으로 `find_user/find_role/find_domain`, cloud get/update/create 또는 role_assignments를 추가 승격하지 않습니다. group_users는 아래 별도의 fixed-parent record 목록으로 검증합니다. Generic cache·synchronized Resource lifecycle·자동 Connection bridge는 SDK-R1/C1/S1 잔여이며 supported 증가는 0입니다.
+
+Cloud `conn.get_user/get_role`는 위 Proxy member GET과 별도입니다. 새 `identity.NewUserReadCloud(svc.Users).GetUser`·`NewRoleReadCloud(svc.Roles).GetRole`, 전체 Connection `GetUserRecord/GetRoleRecord` 및 leaf `ResolveRecord`는 named getter에서 도달하는 domain_id와 concrete headers/MV/location만 다루는 닫힌 API입니다. [Cloud User·Role getter 가이드](../cloud-user-role-get-python.md)에 None/falsey filters, User의 search 뒤에도 find하는 고정 Source 동작, Role의 entities[0] 분기와 focused race·독립 main/AST PASS 및 최종204개 test package 전체 gate PASS을 구분했습니다. 일반 `find_user/find_role(**query)`의 raw controls·Resource/cache/session 잔여는 유지하며 이 Cloud 두 선언을 위 52개 Proxy 표의 새 완료 수로 더하지 않습니다.
+
+## Domain 단건 조회
+
+`get_domain`은 [Domain 단건 조회 가이드](../cloud-domain-get-python.md)의 `domains.API.GetRecord`로 `go_mapping`입니다. Domain 목록의 SDK 소유 descriptor를 재사용해 nullable 속성·enabled→is_enabled·options dictionary와 원래 Wire/Envelope·실제 header/status를 보존합니다. ID GET 하나만 보내며 clean403/404에서 목록으로 바꾸지 않습니다. Concrete header/microversion/location 옵션은 복제하고, 기본 location은 null이며 명시한 CloudLocation만 적용합니다. 기존 native `Get`의 반환 모델과 status 정책은 유지합니다.
+
+Cloud `conn.get_domain`은 `identity.NewDomainReadCloud(svc.Domains).GetDomain`을 사용합니다. `WithDomainGetID`가 있으면 이름보다 우선해 direct GET하고, ID가 없고 `WithDomainGetNameOrID`가 있으면 닫힌 `domains.API.ResolveRecord`가 GET 우선·clean400/403/404에서 name-hinted 전체 목록 fallback·중복·기본 missing을 처리합니다. `WithDomainGetFilters`는 deprecated 값의 presence만 기록하고 JSON parse·Marshal·filter·IO를 수행하지 않습니다. 고정 Source는 두 식별자가 모두 None일 때 주석과 달리 실제 InvalidRequest/HTTP0이므로 Go도 입력 오류를 반환합니다. 빈 문자열과 numeric/object ID의 Go 경계, 실제 response proof·retry guard와 실행 가능한 Python/Go main은 가이드에 있습니다.
+
+Member GET은 stock 정책의 admin/system reader 외에 token의 own domain 또는 token project의 domain 사용자 경로도 허용하지만, fallback 목록에는 system/domain reader 권한이 필요합니다. 이 두 named getter로 full `find_domain`의 raw fetch controls를 추가 완료하지 않습니다. Generic Resource/cache·synchronized lifecycle·자동 Connection bridge는 SDK-R1/C1/S1 잔여로 유지하고 fullSDK supported 증가는 0입니다.
 
 ## domain·group·project·user·role 생성, 조회, 수정
 
@@ -104,7 +114,7 @@ Python `Proxy._update`는 ID 문자열로 새 Resource를 만들기 때문에 `i
 - Python Resource에 typed 필드가 없는 속성(user의 `email`, project의 알 수 없는 속성 등)은 `CreateOpts.Extra`, `UpdateOpts.Extra`나 `With...Field`로 envelope 안에 넣습니다. 응답에서도 이런 key는 `Extra`에 모입니다. project의 `links`도 `Extra`에 들어갑니다.
 - user의 `password_expires_at`은 Go에서 시간대 없는 Keystone 형식으로 해석한 `time.Time`입니다. Python은 문자열 그대로 두므로 끝에 `Z`가 붙은 값은 Go에서만 decode 오류가 됩니다.
 
-domain은 이 중 생성, member 조회, 수정이 모두 `unresolved`입니다. Native `domains.Domain`에는 Options/Extra가 없어 이 연산의 반환에서는 options가 버려지며, 이 세 계약은 이번 목록 구현으로 승격하지 않습니다. 새 `DomainRecord` 목록은 options를 읽을 수 있지만 member Get/Create/Update의 대체 반환 계약은 아닙니다. 요청 쪽에서는 `domains.WithCreateField("options", ...)`를 사용할 수 있지만 `domains.UpdateOpts`의 Extra/null 수정 제한은 남습니다.
+domain의 생성과 수정은 `unresolved`입니다. Native `domains.Domain`에는 Options/Extra가 없어 기존 Get/Create/Update 반환에서 options가 버려집니다. 새 member `GetRecord`는 이 필드를 보존하지만 Create/Update의 반환 계약을 바꾸지는 않습니다. 요청 쪽에서는 `domains.WithCreateField("options", ...)`를 사용할 수 있지만 `domains.UpdateOpts`의 Extra/null 수정 제한은 남습니다.
 
 ## 삭제
 
@@ -162,5 +172,5 @@ status 처리는 Python과 다릅니다. Python helper는 `Proxy.request`의 `ra
 
 - `find_project/find_group`: concrete `FindRecord` 부분 구현 외의 raw Resource.fetch control/header kwargs와 generic synchronized Resource/cache 동작이 남습니다. 위 지원 경계를 따릅니다.
 
-- `create_domain`, `get_domain`, `update_domain`: native `domains.Domain`이 `options` 응답 필드를 버립니다. `update_domain`은 typed 필드를 null로 보내는 방법도 없습니다.
+- `create_domain`, `update_domain`: native `domains.Domain`이 `options` 응답 필드를 버립니다. `update_domain`은 typed 필드를 null로 보내는 방법도 없습니다.
 - `role_assignments`: native `RoleAssignment`가 `links`와 `OS-INHERIT:inherited_to`를 버리고, marker 반복 요청과 `role`·`scope`·`user`·`group` dict 지역 filter가 없습니다.
