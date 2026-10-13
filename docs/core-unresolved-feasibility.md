@@ -2,7 +2,7 @@
 
 이 문서는 2026-10-12 기준 핵심 서비스(Keystone, Nova, Placement, Neutron, Glance, Cinder, Barbican, Swift와 해당 cloud 계층 helper)에 남아 있는 미해결 판정 722개를 구현 가능 여부에 따라 나눈 결과입니다. 판정 JSON의 `remaining` 문장과 고정 Gophercloud v2.15.0, 고정 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe` 소스를 서비스별로 다시 읽어 분류했습니다. 연산별 분류 결과는 [분류 데이터](core-unresolved-feasibility.json)에 있으며, 각 항목은 범주·작업 규모·공통 수정 이름·한 문장 설명을 가집니다.
 
-**2026-10-13 상태 갱신:** 아래722개와 분류 데이터는 10-12 최초 조사 범위를 보존한 것입니다. 현재 남은 작업 목록으로 다시 해석하지 않습니다. 현재 판정과 대조하면 이 조사 중 Go 매핑298개·미지원133개·부분/미해결291개입니다. 이번 묶음은 신규 Go 매핑19개를 추가했습니다. 최신 서비스별 수치와 다음 작업은 [구현 진행표](implementation-plan.md#현재-집계와-진행-중인-작업) 및 [판정 JSON](../api/sdk_reviews.json)을 기준으로 합니다. Python/Go 표현 차이나 upstream 결함만으로 추가 `unsupported` 판정을 확정하지 않습니다.
+**2026-10-13 상태 갱신:** 아래722개와 분류 데이터는 10-12 최초 조사 범위를 보존한 것입니다. 현재 남은 작업 목록으로 다시 해석하지 않습니다. 현재 판정과 대조하면 이 조사 중 Go 매핑316개·미지원133개·부분/미해결273개입니다. 직전 묶음19개에 이어 추가 사이클18개를 매핑했으며, Project·Group·Neutron Extension Find의 raw fetch control은 남은 범위로 보존합니다. 최신 서비스별 수치와 다음 작업은 [구현 진행표](implementation-plan.md#현재-집계와-진행-중인-작업) 및 [판정 JSON](../api/sdk_reviews.json)을 기준으로 합니다. Python/Go 표현 차이나 upstream 결함만으로 추가 `unsupported` 판정을 확정하지 않습니다.
 
 ## 요약
 

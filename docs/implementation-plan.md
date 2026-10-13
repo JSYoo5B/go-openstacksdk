@@ -8,7 +8,23 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13): 사용자 요청에 따라 현재 병렬 작업 묶음을 마무리, 전체 gate PASS.** 전체 Go 매핑은 **1,944→1,963개(+19), 1,963/3,228개(60.8%)**, 핵심은 **1,866→1,885/2,158개(87.3%)**입니다. 고정 선언3,362개와 `unsupported`134개를 보존했습니다. 새 계약 테스트260개와 독립 Go main13개를 추가·검증했고, 고정 Python Source와 compiled native metadata를 활성화한 전체 `make check`(201개 실제 test package, race/vet/parity/progress/license/gofmt)가 통과했습니다. 로컬 TCP 주소 할당 실패가 난 병렬 실행 기록을 보존하고 `GOFLAGS=-p=1 GOMAXPROCS=2`로 통과한 최종 결과를 기록합니다.
+**현재 구현 (2026-10-13, 추가 한 사이클): 개별 race·문서 예제·판정 통합 완료, 전체 gate 진행 중입니다.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트173개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 전체 `make check` 결과는 아래 마감 기록에 확정합니다.
+
+| 병렬 소유 단위 | 현재 단계 | 새 판정 후보 |
+|---|---|---:|
+| Neutron Extension | 목록·GET-first Find 구현·race PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 1 |
+| Neutron AvailabilityZone·AutoAllocatedTopology | user 정책·무시되는 kwargs·strict 삭제·race PASS·커밋/push 완료 | 4 |
+| Port cloud 목록·subnet 선택·bulk 생성 | 다형 결과·loaded 비교·flat plural body·lazy row 변환·Connection race PASS·커밋/push 완료 | 3 |
+| Swift object 검색 | 전체 목록·metadata 비교·Connection location 구현, 서비스/Connection race PASS·커밋/push 완료 | 1 |
+| Keystone limit·registered limit | Source의 untyped 필드·descriptor·목록 구현, race PASS·커밋/push 완료 | 2 |
+| Keystone Project | 목록·cloud helper 구현, leaf/Cloud 회귀 PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 3 |
+| Keystone Group | 목록·cloud 검색·Source oracle·최종 race PASS·커밋/push 완료; Find는 미해결 유지 | 2 |
+| Nova Extension·ServerAction | Compute descriptor·event Resource·지연 버전 발견·최종 race PASS·커밋/push 완료 | 2 |
+| 합계 | 개별 검증·문서 예제·생성기·판정 완료; 전체 gate 진행 중 | 18 |
+
+공통 paging의 Source link precedence, 서비스별 version header, SDK 소유 descriptor projection과 bulk 응답 변환을 재사용했습니다. `supported`와 전체 Resource/session 동등성은 별도로 추적하고, Project·Group·Neutron Extension Find의 raw controls·lifecycle은 이번 사이클의 완료 수에서 제외합니다. 개별 gate에서 native401 오류의 원인 보존, HTTP NoBody, Source의 null link/scalar 필터 오류, bulk scalar list cast, native503 retry hook의 fixture를 수정하고 실패와 최종 통과를 구분했습니다. 남은 작업은 전체 `make check`와 검증 기록·최종 문서 커밋/push입니다.
+
+**직전 사이클 (2026-10-13): 사용자 요청에 따라 현재 병렬 작업 묶음을 마무리, 전체 gate PASS.** 전체 Go 매핑은 **1,944→1,963개(+19), 1,963/3,228개(60.8%)**, 핵심은 **1,866→1,885/2,158개(87.3%)**입니다. 고정 선언3,362개와 `unsupported`134개를 보존했습니다. 새 계약 테스트260개와 독립 Go main13개를 추가·검증했고, 고정 Python Source와 compiled native metadata를 활성화한 전체 `make check`(201개 실제 test package, race/vet/parity/progress/license/gofmt)가 통과했습니다. 로컬 TCP 주소 할당 실패가 난 병렬 실행 기록을 보존하고 `GOFLAGS=-p=1 GOMAXPROCS=2`로 통과한 최종 결과를 기록합니다.
 
 | 병렬 소유 단위 | 최종 구현·검토 | 신규 Go 매핑 |
 |---|---|---:|
@@ -523,11 +539,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 1,963 (60.8%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,981 (61.4%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,265 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,247 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 6,929 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,051 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -706,25 +722,25 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,885 / 2,158 | 87.3% | 272 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,903 / 2,158 | 88.2% | 254 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 1,963 / 3,228 | 60.8% | 390 | 875 | 134 |
+| 전체 | 1,981 / 3,228 | 61.4% | 372 | 875 | 134 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 325 / 379 | 53 | 1 | 10 |
-| Compute / Nova | 274 / 333 | 59 | 0 | 0 |
+| Identity / Keystone | 332 / 379 | 46 | 1 | 10 |
+| Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 616 / 728 | 112 | 0 | 30 |
+| Network / Neutron | 624 / 728 | 104 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
 | Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |
-| Object Storage / Swift | 59 / 73 | 14 | 0 | 1 |
+| Object Storage / Swift | 60 / 73 | 13 | 0 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 
