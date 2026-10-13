@@ -1923,14 +1923,21 @@
     {
       "operation": "python:compute/v2/get_quota_set",
       "source_fingerprint": "29796a3176fa37559e9befd8cd9e0fa5a7a6953fe2c719d0d544badfdf2b2d28",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Detail",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Get",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Detail",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.GetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadQuery",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaUsage",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaReadLocation",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.GetRecord"
       ],
       "contracts": [
         {
@@ -1979,21 +1986,97 @@
             "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserPreservesCallerRedirectRejectionAndExplicitAuthHeaders",
             "api/nova_quota_defaults_users_test.go:TestNovaQuotaUserCancellationDoesNotWaitForSharedReauth"
           ]
+        },
+        {
+          "behavior": "GET project/user quota owns arbitrary Requests query and Source usage endpoint choices without rebinding from response IDs.",
+          "tests": [
+            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaRecordProjectUserUsageAndArbitraryFetchQueries"
+          ]
+        },
+        {
+          "behavior": "Default Nova version discovery selects an advertised version up to QuotaSet ceiling2.56 and retains discovery evidence separately from quota GET. Explicit or client-selected versions are uncapped.",
+          "tests": [
+            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaRecordDefaultDiscoverySelectsCeilingAndRetainsReceipts"
+          ]
+        },
+        {
+          "behavior": "Explicit empty/version overrides bypass discovery, nil/bound/base_path/requires_id controls fail before HTTP, option inputs are detached and every fetch is uncached.",
+          "tests": [
+            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaRecordExplicitVersionSkipsDiscoveryAndAllowsNoVersion"
+          ]
+        },
+        {
+          "behavior": "Source common quota translator owns known int/bool descriptor conversion and ordered limit/usage/reservation normalization, raw unknown fields, independent Resource/Wire/envelope/header metadata and fixed URI/location projections.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaRecordNormalizesUsageReservationsAndKnownDescriptors",
+            "internal/quotafetch/read_test.go:TestQuotaIntegerDescriptorUsesSourceConversionAndExactNumbers",
+            "internal/quotafetch/read_test.go:TestQuotaLocationUsesCapturedProjectAndIndependentCloudMetadata"
+          ]
+        },
+        {
+          "behavior": "Accepted200-399 bodyless/non-JSON and bare-object responses preserve actual evidence; malformed quota shapes and normalization errors retain exact accepted receipt without synthesizing Resource success.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaFreshEmptyNonJSONAndBareObjectResponses",
+            "internal/quotafetch/read_test.go:TestQuotaWrongShapeAndDictionaryOrderFailuresRetainActualResponse"
+          ]
+        },
+        {
+          "behavior": "Requests JSON-domain query encoding owns snapshots, nil/default/control classification and last functional options. Bound controls, invalid routes and requires_id are preflight failures.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaQueriesOwnJSONInputsLastOptionsAndFetchControls",
+            "internal/quotafetch/read_test.go:TestQuotaPreflightRejectsScopeCollisionsNilOptionsAndRoutes"
+          ]
+        },
+        {
+          "behavior": "Physical read/Close failures retain native401 pointer ErrOriginal/ErrReauth and all causes with one physical response and zero retry/reauth hooks; clean401/503 retain delegated Provider retries and captured query/version.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaPhysicalFaultsKeepNative401OriginalAndAllCausesWithoutHooks",
+            "internal/quotafetch/read_test.go:TestQuotaCleanReauthenticationAndRetryKeepTokenTargetAndVersion"
+          ]
+        },
+        {
+          "behavior": "Captured service source/version and request policy stay fixed through callbacks; cancellation retains cause and no invented response.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaRetryCannotReplaceSelectedVersionOrRemoveIt",
+            "internal/quotafetch/read_test.go:TestQuotaCapturedSourceAndCancellationPreventHTTP"
+          ]
+        },
+        {
+          "behavior": "Every option callback is surrounded by sticky captured-source/context/operation guards and independent snapshots; a later callback cannot hide source mutation/cancellation or mutate earlier caller-owned query maps.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaOptionsObserveSourceAndCancellationBeforeRestoringCallback",
+            "internal/quotafetch/read_test.go:TestQuotaEachCallbackBoundaryOwnsOptionsBeforeLaterAliasedMutation"
+          ]
+        },
+        {
+          "behavior": "Library-owned descriptor profiles are detached before callbacks, and the final response projection rechecks captured source/context/operation guards. Accepted Close cancellation retains actual receipt and no success Resource.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaAcceptedCloseCancellationRetainsActualReceiptWithoutResource",
+            "internal/quotafetch/read_test.go:TestQuotaProfileDescriptorSliceIsOwnedBeforeCallerOptions"
+          ]
+        },
+        {
+          "behavior": "Nova base_path is a bound proxy argument collision by presence, so public WithQuotaReadQuery rejects it without invoking a caller marshaler or doing version discovery/HTTP.",
+          "tests": [
+            "compute/v2/quotasets/python_quota_query_test.go:TestNovaQuotaBasePathPresenceRejectsWithoutInvokingCallerMarshaler"
+          ]
         }
       ],
       "differences": [
         "Go returns native typed limit/detail models plus raw fields and copied headers; Python common QuotaSet flattens limit values and separates usage/reservation dictionaries.",
         "Go references explicitly distinguish IDs from exact project names, and the scope freezes the project once.",
         "UserQuotaScope requires an explicit user reference and freezes both identities; it does not infer the current user, verify project membership, or promote project-only Defaults. Nova validates authorization and quota policy.",
-        "The user scope owns a guarded HTTP client while retaining caller transport, redirect policy and delegated provider authentication/retry behavior; this narrower tested contract does not establish parity with all inherited Python Adapter behavior."
+        "The user scope owns a guarded HTTP client while retaining caller transport, redirect policy and delegated provider authentication/retry behavior; this narrower tested contract does not establish parity with all inherited Python Adapter behavior.",
+        "New GetRecord provides Source quota normalization and owned inherited fetch controls; existing native Get/Detail/Usage retain earlier reviewed typed models.",
+        "Concrete JSON-domain Go controls validate strings/bools, UTF8 and service-origin routes; arbitrary Python-object Resource attribute/method collisions, Adapter cache/session substitution and dirty commit remain whole-project SDK-R1/C1/S1 work. Fresh GetRecord has no response cache; skip_cache is accepted as an owned non-query control.",
+        "Connection location is explicit immutable CloudLocation input; default is null. Actual server extensions are retained in Wire while fixed URI project and selected microversion own their normalized fields.",
+        "Go InProject preserves the existing single unescaped URL segment identity contract; project IDs with slash/percent are rejected before quota fetch instead of allowing Source-style route interpolation."
       ],
       "documentation": [
-        "compute/v2/quotasets/README.md"
+        "compute/v2/quotasets/README.md",
+        "compute/v2/quotasets/python-quota-query.md"
       ],
-      "remaining": [
-        "General fetch query parameters beyond the explicit user_id scope and usage endpoint selection have no scoped Go mapping.",
-        "Audit inherited common QuotaSet.fetch/Resource.fetch response normalization, cache/skip_cache behavior, descriptor coercion and maximum microversion 2.56 selection before declaring whole-operation parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/get_quota_set_defaults",
@@ -3134,10 +3217,17 @@
     {
       "operation": "python:block_storage/v3/get_quota_set",
       "source_fingerprint": "b2868bfcc4e46b34e605d872e81e32f797242308fe3efa1304c8c7b0e71ace58",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Usage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.GetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaUsage",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadLocation",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaReadBasePath"
       ],
       "contracts": [
         {
@@ -3152,19 +3242,95 @@
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound",
             "api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaCancellationAndTimeoutPreserveCause"
           ]
+        },
+        {
+          "behavior": "Default Cinder sends usage=False and usage=True stays on the same project route; known and unknown quota limits/usage/reservations are normalized with raw allocations retained.",
+          "tests": [
+            "blockstorage/v3/quotasets/python_query_test.go:TestCinderQuotaRecordUsageDefaultAndNestedNormalization"
+          ]
+        },
+        {
+          "behavior": "Inherited fetch controls are consumed rather than sent as query; explicit same-origin effective-base routes and selected versions are owned without auto discovery.",
+          "tests": [
+            "blockstorage/v3/quotasets/python_query_test.go:TestCinderQuotaRecordFetchParametersAndBasePathControls"
+          ]
+        },
+        {
+          "behavior": "Scope/query/options ownership is fixed across fresh uncached requests; caller inputs cannot mutate options and invalid bound controls fail before HTTP.",
+          "tests": [
+            "blockstorage/v3/quotasets/python_query_test.go:TestCinderQuotaRecordBoundParamsAndOptionOwnership"
+          ]
+        },
+        {
+          "behavior": "Source common quota translator owns known int/bool descriptor conversion and ordered limit/usage/reservation normalization, raw unknown fields, independent Resource/Wire/envelope/header metadata and fixed URI/location projections.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaRecordNormalizesUsageReservationsAndKnownDescriptors",
+            "internal/quotafetch/read_test.go:TestQuotaIntegerDescriptorUsesSourceConversionAndExactNumbers",
+            "internal/quotafetch/read_test.go:TestQuotaLocationUsesCapturedProjectAndIndependentCloudMetadata"
+          ]
+        },
+        {
+          "behavior": "Accepted200-399 bodyless/non-JSON and bare-object responses preserve actual evidence; malformed quota shapes and normalization errors retain exact accepted receipt without synthesizing Resource success.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaFreshEmptyNonJSONAndBareObjectResponses",
+            "internal/quotafetch/read_test.go:TestQuotaWrongShapeAndDictionaryOrderFailuresRetainActualResponse"
+          ]
+        },
+        {
+          "behavior": "Requests JSON-domain query encoding owns snapshots, nil/default/control classification and last functional options. Bound controls, invalid routes and requires_id are preflight failures.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaQueriesOwnJSONInputsLastOptionsAndFetchControls",
+            "internal/quotafetch/read_test.go:TestQuotaPreflightRejectsScopeCollisionsNilOptionsAndRoutes"
+          ]
+        },
+        {
+          "behavior": "Physical read/Close failures retain native401 pointer ErrOriginal/ErrReauth and all causes with one physical response and zero retry/reauth hooks; clean401/503 retain delegated Provider retries and captured query/version.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaPhysicalFaultsKeepNative401OriginalAndAllCausesWithoutHooks",
+            "internal/quotafetch/read_test.go:TestQuotaCleanReauthenticationAndRetryKeepTokenTargetAndVersion"
+          ]
+        },
+        {
+          "behavior": "Captured service source/version and request policy stay fixed through callbacks; cancellation retains cause and no invented response.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaRetryCannotReplaceSelectedVersionOrRemoveIt",
+            "internal/quotafetch/read_test.go:TestQuotaCapturedSourceAndCancellationPreventHTTP"
+          ]
+        },
+        {
+          "behavior": "Cinder usage defaults to False/True for concrete bool options, but raw Source usage preserves literal Requests null/number/string/list encoding instead of Nova endpoint truthiness.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestCinderQuotaRawUsageRetainsLiteralRequestsValues"
+          ]
+        },
+        {
+          "behavior": "Every option callback is surrounded by sticky captured-source/context/operation guards and independent snapshots; a later callback cannot hide source mutation/cancellation or mutate earlier caller-owned query maps.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaOptionsObserveSourceAndCancellationBeforeRestoringCallback",
+            "internal/quotafetch/read_test.go:TestQuotaEachCallbackBoundaryOwnsOptionsBeforeLaterAliasedMutation"
+          ]
+        },
+        {
+          "behavior": "Library-owned descriptor profiles are detached before callbacks, and the final response projection rechecks captured source/context/operation guards. Accepted Close cancellation retains actual receipt and no success Resource.",
+          "tests": [
+            "internal/quotafetch/read_test.go:TestQuotaAcceptedCloseCancellationRetainsActualReceiptWithoutResource",
+            "internal/quotafetch/read_test.go:TestQuotaProfileDescriptorSliceIsOwnedBeforeCallerOptions"
+          ]
         }
       ],
       "differences": [
         "Go preserves native Limit/InUse/Reserved/Allocated structures; Python common QuotaSet flattens each limit and builds separate usage/reservation dictionaries.",
-        "Go requires an explicit ID or name reference and fixes the project once instead of accepting a Python Project object."
+        "Go requires an explicit ID or name reference and fixes the project once instead of accepting a Python Project object.",
+        "New GetRecord provides Source quota normalization and owned inherited fetch controls; existing native Get/Detail/Usage retain earlier reviewed typed models.",
+        "Concrete JSON-domain Go controls validate strings/bools, UTF8 and service-origin routes; arbitrary Python-object Resource attribute/method collisions, Adapter cache/session substitution and dirty commit remain whole-project SDK-R1/C1/S1 work. Fresh GetRecord has no response cache; skip_cache is accepted as an owned non-query control.",
+        "Connection location is explicit immutable CloudLocation input; default is null. Actual server extensions are retained in Wire while fixed URI project and selected microversion own their normalized fields.",
+        "Go InProject preserves the existing single unescaped URL segment identity contract; project IDs with slash/percent are rejected before quota fetch instead of allowing Source-style route interpolation."
       ],
       "documentation": [
-        "blockstorage/v3/quotasets/README.md"
+        "blockstorage/v3/quotasets/README.md",
+        "blockstorage/v3/quotasets/python-query.md"
       ],
-      "remaining": [
-        "Additional **query fetch parameters have no scoped Go option or audited forwarding policy.",
-        "Audit inherited common QuotaSet/Resource fetch translation, descriptor coercion, dict/location views, cache/skip_cache and microversion/adapter behavior; native typed/raw responses are not a full mapping of the Python Resource object."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_quota_set_defaults",
@@ -9749,12 +9915,21 @@
     {
       "operation": "python:object_store/v1/objects",
       "source_fingerprint": "f51e8504aa80d9a53f402ea626d0bbd016572d5f6f6e44d95df7698e7f1209da",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.InContainer",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListSinglePage"
       ],
       "contracts": [
         {
@@ -9769,20 +9944,76 @@
             "api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy",
             "api/native_scope_list_controls_test.go:TestNativeScopeListControlsSwiftSubdirectoryConsumesRawCap"
           ]
+        },
+        {
+          "behavior": "Pinned Object MRO projection owns six Body, 28 Header, updated_at aka and null SDK location; ordered canonical/wire aliases, alternate name ID, untyped RawMessage metadata, container URI from call, unknowns and subdir retained in Wire, actual page receipt cloned independently. No object HEAD or synthetic metadata observation.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsDefaultRequestAndProjection",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection"
+          ]
+        },
+        {
+          "behavior": "GET escaped fixed container with format=json and operation Accept JSON; Object query mapping client alias wins wire alias, unknown queries discarded before Marshaler/DTO JSON validation, declared canonical Body filters remain local, no transport-wrapper counting. CPython loaded integer/float/bool recursive equality and float truthiness are explicit shared policy opt-ins. Empty dictionary filter matches every truthy scalar/list/mapping; falsey actual is excluded and nonempty dictionary against truthy nonmapping remains a real page error, including recursive empty filters.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType"
+          ]
+        },
+        {
+          "behavior": "Default full lazy pagination uses raw consumed count against X-Container-Object-Count, last raw row ID/name marker, truthy-limit continuation, falsey limit sent once, source body next and RFC Link interoperability, fixed origin/container/filters and SDK cycle/page bounds. Consumer changes cannot alter raw marker; raw cap includes rejected rows; empty page ends.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCountAndMarkerContinuation",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectCloudListObjectsPrefixAndCountPaging"
+          ]
+        },
+        {
+          "behavior": "Named cloud list_objects delegates same owned Source-shaped listing; prefix absent/explicit-empty/selected value remain distinct, full_listing is ignored by pinned Python and does not disable paging. Go iterator is collected by caller.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectCloudListObjectsPrefixAndCountPaging",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Actual 100..399 admitted only after page JSON/row projection; malformed accepted singleton/scalar/constructor and every 400..599 (including 404) remain terminal with actual status/header/body and OperationError, no ignore-missing.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "Mixed physical Read/Close/sticky restored source/custom cancellation faults on 200/203/401/404/429/498/503 preserve whole actual receipt, one HTTP and one Close and zero willing caller retry/reauth/backoff callbacks. Native pointer ErrUnableToReauthenticate ErrOriginal and ErrReauth are retained separately. Clean native retry/reauth/backoff preserve fixed route/headers/conditions/selected version and live token.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsPhysicalFaultsPreserveReceiptNative401AndStopHooks",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCleanRetriesPreserveRouteHeadersAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Owned concrete options clone raw bytes/maps/pointers and callback resets; invalid/reserved/unsupported Source controls fail before Marshaler/HTTP, nil Headers reset composes safely, repeated iterator consumption is independent, consumer break avoids continuation and custom cancellation during yield preserves page proof.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation"
+          ]
         }
       ],
       "documentation": [
-        "docs/listing.md"
+        "docs/listing.md",
+        "objectstorage/v1/objects/python-record-list.md"
       ],
       "differences": [
         "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
         "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.",
-        "The pinned Swift proxy explicitly forces paginated=True. First-page consumption is an explicit Go scope/Collection extension rather than a proxy keyword default mapping."
+        "The pinned Swift proxy explicitly forces paginated=True. First-page consumption is an explicit Go scope/Collection extension rather than a proxy keyword default mapping.",
+        "Go accepts literal string container names, escapes one path segment and preflights empty/slash/dot/control names; pinned Python also accepts a Container resource/name conversion and interpolates its raw name, including str(None) for an empty Resource name. No mutable Python Resource object identity/cache is exposed.",
+        "Go exposes concrete DTO/functional options and iter.Seq2; callers collect to a slice for named cloud list_objects. Pinned full_listing is ignored. Unknown queries are discarded before serialization; per-call headers/microversion/max_items have dedicated controls. Unsafe cls/self/resource_type/session and __conflicting_attrs, arbitrary base_path and deprecated JMESPath are explicitly rejected before HTTP rather than silently claiming those callable/route branches.",
+        "Go SDK-owned location is null and each row metadata map owns raw JSON values. Pinned Connection location calculation and BaseResource class-level shared metadata/dirty state remain common SDK-R1/C1/S1 contracts; actual remote fields remain in Wire and full Envelope.",
+        "Go max_items stops immediately at the raw cap while pinned Python may request the next page before stopping on its first row. Go follows interoperable RFC Link rel=next URLs while pinned _get_next_link indexes requests response.links next uri, a missing key in normal Requests output; Go rejects foreign/changed/cyclic continuations and defaults to 10000-page bound.",
+        "Go sends captured or explicit selected Swift microversion without Python server-max negotiation, and sorts query keys. Requests query/str conversion retains the reviewed shared JSON-domain representation policy and its documented primitive/runtime limits; custom Python objects are outside the Go JSON-domain API.",
+        "Fixture tests and guide builds do not prove a real Swift account/container ACL, deployment middleware/backend, auth renewal or replace-free install; actual-cloud acceptance and release gates remain pending."
       ],
-      "remaining": [
-        "Audit every Swift Object query/Body alias, Python container Resource/name conversion and response/cache/metadata semantics beyond the tested fixed-container listing.",
-        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:database/v1/databases",
@@ -13292,7 +13523,7 @@
     {
       "operation": "python:network/v2/networks",
       "source_fingerprint": "f17889d3f1c3c44a767012f35f62be8f2fe911f7c9271e5727f0b59c3d154ad7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.New",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
@@ -13311,7 +13542,21 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithName",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize",
         "github.com/JSYoo5B/go-openstacksdk/network.NewWithDependencies",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.Network"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.Network",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs"
       ],
       "contracts": [
         {
@@ -13426,6 +13671,89 @@
             "internal/cmd/sdkgen/network_filters_test.go:TestNetworkPythonFilterPinnedSourceRequiresBooleanDefaultsAndCompleteClassificationProof",
             "internal/cmd/sdkgen/network_filters_test.go:TestNetworkRawDependencyLoaderPreservesNativeTimeCodesAndNumbers"
           ]
+        },
+        {
+          "behavior": "New Source-shaped Network ListRecords/AllRecords uses the existing 29-field effective Body and 23-query inventory through a cloned private neutronfind profile; no implicit name hint, member fetch, native typed decoder, or application builder is introduced. GET is bodyless at the selected service route; actual page JSON/Header/status remains independent of canonical Resource and original Wire. AllRecords returns a nonnil empty slice on success and discards partial values on terminal errors.",
+          "tests": [
+            "network/v2/networks/python_list_records_test.go:TestPythonNetworkListRecordsDefaultRequestAndExtensionFields",
+            "network/v2/networks/python_list_records_test.go:TestPythonNetworkListRecordsQueryAliasesAndLocalBodyFilters",
+            "network/v2/networks/python_list_records_test.go:TestPythonNetworkListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "The complete 29 Body defaults plus if_match/location are projected: missing port-security/external booleans false, tags empty array, other declarations null; explicit null overrides defaults. Ordered canonical/wire response aliases are last-value-wins. Raw unknown extensions, timestamps and large integers survive; Network tenant_id has no project_id alias. Row Header canonical case/wire-insensitive spelling is distinct from whole-page HTTP Header. self is removed from Resource and remains in Wire; spoofed location remains actual Wire while the owned view is null.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsEntireBodyDefaultsAndOrderedAliases",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsDeclaredCoercionUnknownBodyAndPrivateEvidence"
+          ]
+        },
+        {
+          "behavior": "All 23 canonical query attributes and 35 accepted canonical/wire spellings are classified from the pinned profile. Canonical values win by presence, including null/false/zero; query bools use True/False and lists preserve Requests repeat/null omission. fields remain literal list strings. Body-only/header/unknown wire spellings cannot become undeclared server filters or implicit project/tenant scope.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsAllQueryNamesWireAliasesAndCanonicalPresence"
+          ]
+        },
+        {
+          "behavior": "The full 14 non-query Body descriptor inventory filters locally after owned projection, including missing/null, bool/int coercion, array wrapping and untyped dictionary subset. Predicates retain insertion order and short-circuit; actual mapping-get failure includes the original whole page. Large unknown integers retain original raw evidence and list-row callers do not seed missing query values.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsCompleteLocalDescriptorInventory",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsLocalOrderShortCircuitAndDictionaryFailureProof"
+          ]
+        },
+        {
+          "behavior": "Paging reuses inherited links/plural links/HTTP Link/limit-marker fallback and no automatic member lookup. Positive cap hints limit and counts raw excluded rows; consumer break and single-page controls avoid continuation and out-of-range constructor faults. Late errors discard AllRecords slices while iterators retain previously yielded rows. JSON envelope, UTF8, null-row/constructor/descriptor failures keep actual page status/header/body/Cause without creating caller-error or success receipts.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsContinuationRawCapsBreakAndAtomicAll",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsMalformedRowsConstructorsAndActualPage"
+          ]
+        },
+        {
+          "behavior": "Owned factories, DTO maps/raw bytes/version pointers and option callbacks are snapshotted. Initial and callback-reset nil maps are initialized, retained callback maps cannot alter the eventual request, and options are concurrently reusable. Invocation is lazy; selected source/route/version guard surrounds callbacks and cancellation retains custom causes before HTTP.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsPreflightControlPresenceAndUnknownDiscard",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsOwnedOptionsNilMapsLazinessAndConcurrentReuse",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsSourceMutationAndCanceledOptionAreSticky"
+          ]
+        },
+        {
+          "behavior": "Accepted and rejected physical read/Close/cancellation/source faults do not call native RetryFunc or ReauthFunc, use one attempt/one Close, and retain all causes. Native pointer ErrUnableToReauthenticate keeps actual method/URL/status/body/header in ErrOriginal and fault/cancel/source causes in ErrReauth. Clean503 retry and401 token renewal remain allowed; body/protocol/version/auth/conditional mutations and expanded final acceptance never fabricate success.",
+          "tests": [
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsPhysicalFaultsPreserveNative401AndNeverInvokeCallbacks",
+            "network/v2/networks/python_list_records_contracts_test.go:TestPythonNetworkListRecordsCleanRetryReauthenticationAndForbiddenMutation"
+          ]
+        },
+        {
+          "behavior": "ProxyListRecords evaluates deprecated truthy-string JMESPath against the actual opaque lazy generator rather than a collected array: projection/index/type null, literal arbitrary JSON and runtime errors all use zero HTTP; @/not_null return the generator and to_array/hash can contain that same object. Opaque identity equality, nested equality and contains preserve object identity; JSON exists only for fully serializable output, and to_string/generator marshal rejects without consumption. Generator iteration starts real list HTTP.",
+          "tests": [
+            "network/v2/networks/python_list_records_proxy_test.go:TestPythonNetworkProxyListRecordsJSONResultsDoNotReadGenerator",
+            "network/v2/networks/python_list_records_proxy_test.go:TestPythonNetworkProxyListRecordsJMESRuntimeFailuresBeforeHTTP",
+            "network/v2/networks/python_list_records_proxy_test.go:TestPythonNetworkProxyListRecordsGeneratorIdentityAndNestedResultsStayLazy",
+            "network/v2/networks/python_list_records_proxy_test.go:TestPythonNetworkListRecordsFalseyAndNonstringJMESAreIgnored"
+          ]
+        },
+        {
+          "behavior": "NormalizeProxyListOptions separates the original Proxy expression before one ordered __conflicting_attrs restore. Falsey conflict values are ignored; truthy nonobjects and restored bound arguments fail before HTTP. Original key positions and appended member order remain stable, self-restoration is not recursive, and restored jmespath_filters is discarded as Resource.list unknown attrs instead of replacing the original expression. Header/version/max_items restored formals are consumed by the SDK; allow_unknown_params is ignored because Source always validates with allow_unknown_params=True.",
+          "tests": [
+            "network/v2/networks/python_list_records_controls_test.go:TestPythonNetworkListRecordsConflictingAttrsFormalOverridesAndOriginalJMES",
+            "network/v2/networks/python_list_records_controls_test.go:TestPythonNetworkListRecordsUnknownConstructorNamesDiscardBeforeMarshal"
+          ]
+        },
+        {
+          "behavior": "Source named headers/microversion/base_path and concrete factories use owned final values, null/default semantics, cloned route/version state and fixed request metadata. Base-path continuation locks to the selected collection; foreign/query/fragment/traversal paths fail before HTTP. The new Source profile opts into CPython loaded equality for rounded floats/underflow/overflow/nested bool-number comparisons, retaining arbitrary precision integers and unchanged literal Resource/Wire/Envelope. Existing profile zero values retain old exact-decimal comparison.",
+          "tests": [
+            "network/v2/networks/python_list_records_controls_test.go:TestPythonNetworkListRecordsBasePathAndNamedHeadersVersionsUseOwnedFinalValues",
+            "network/v2/networks/python_list_records_controls_test.go:TestPythonNetworkListRecordsUsesLoadedCPythonFloatEqualityWithoutChangingRawEvidence"
+          ]
+        },
+        {
+          "behavior": "Shared Source list formal normalization independently verifies original JMES separation, one-pass ordered restoration, bound argument presence failures, falsey values, ignored unknown controls without parsing, concrete header string maps, nullable version/path and complete snapshot ownership. This closes Source kwargs through a common library contract rather than new per-service decoder/builder responsibilities.",
+          "tests": [
+            "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsPreservesOriginalExpressionAndOrderedOnePassMerge",
+            "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsFalseyConflictAndUnusedFormalIgnoreValues",
+            "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsRejectsOnlyBoundAndRestoredDuplicateArguments",
+            "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsHeaderFalseyStringMapAndNullableVersionPath",
+            "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsJMESNonstringsAreReturnedWithoutInventingQueries"
+          ]
         }
       ],
       "documentation": [
@@ -13434,7 +13762,8 @@
         "network/v2/README.md",
         "resource/README.md",
         "network/v2/networks/listing/README.md",
-        "internal/cmd/sdkgen/README.md"
+        "internal/cmd/sdkgen/README.md",
+        "network/v2/networks/python-list-records.md"
       ],
       "differences": [
         "Go uses concrete WithFilter/WithFilters and explicit WithBodyFilter options with frozen values instead of Python keyword arguments and mutable Resource objects. Semantic names follow Python properties; raw subnets/vlan_qinq/vlan_transparent are accepted only by explicit Body filters or raw wire query. Body bulk alias collisions reject; semantic bulk query canonical keys win by presence and sequential options are last-wins. Namespace conflicts reject deterministically.",
@@ -13442,14 +13771,16 @@
         "Boolean response normalization follows JSON truthiness and preserves missing/null instead of false. Go exact decimals preserve tiny nonzero truthiness where Python float parsing can underflow. Caller filters are not coerced: Go distinguishes bool/number and string/number equality. Exact-integral response policy rejects fractions/bools instead of Python integer truncation/bool-as-int, and accepts signed decimal integer strings rather than digit-only/zero fallback.",
         "Python list descriptors wrap non-list values; Go selected raw JSON does not wrap. Arrays compare complete ordered values, standalone dictionaries use recursive subset matching on nonempty objects, and unknown extension fields do not become returned native model fields. Exact timestamp text differs even when instants are equivalent.",
         "Known query scalar arrays become repeated wire values without Python formatting arbitrary containers. Nil/empty arrays omit URL values but preserve key presence. Unknown semantic names are discarded, while raw WithQuery preserves caller wire names/extensions/repeated data and does not classify aliases or Body fields.",
-        "max_items caps raw rows locally without Python Resource.list automatic limit hints. Native accepted 200/204/300, JSON-empty-204 EOF, full-page typed extraction and advertised networks_links/foreign following are retained. Explicit first page and early break avoid continuation; typed native List, FindIdentity and other CRUD are separate surfaces."
+        "max_items caps raw rows locally without Python Resource.list automatic limit hints. Native accepted 200/204/300, JSON-empty-204 EOF, full-page typed extraction and advertised networks_links/foreign following are retained. Explicit first page and early break avoid continuation; typed native List, FindIdentity and other CRUD are separate surfaces.",
+        "New record API is a sibling to existing typed List/All and semantic Collection APIs. It implements Source owned descriptors, whole-page/private receipts, paging, per-call controls and actual Proxy generator JMES results; prior exact-decimal/native typed-detection differences describe those existing surfaces and do not override the new record contracts.",
+        "Record JSON is immutable owned view rather than lazy mutable Python Resource. Every declared field is projected before row return, so an unaccessed malformed descriptor can fail earlier. Unknown Body extensions are preserved; location is still owned null rather than Python current_location or computed constructor synthesis. Shared SDK Resource/cache/lifecycle parity remains independently tracked.",
+        "Source complete kwargs behavior is implemented in the JSON domain with concrete header string-map and microversion/base-path string types. None-valued headers/adapter/subclass injection, runtime non-JSON objects and arbitrary URI percent-format are not reintroduced. Default microversion has no Network class maximum, and unknown LIST skip_cache is ignored exactly rather than inventing a per-call cache override.",
+        "Go collection continuation retains fixed service origin/path/filter/cursor guards. Per-call base_path selects a service-relative collection; empty path chooses the default whereas Source empty URI yields no request. Source arbitrary adapter retargeting and informational final100..199 remain explicit differences. Original selected clients, live tokens and approved clean retries retain source ownership.",
+        "Typed ListRecords/AllRecords yield resources only; truthy-string JMES calls use ProxyListRecords with arbitrary Value and optional JSON. Fully JSON null is JSON null, generator-containing values keep their opaque generator identity and no fabricated Wire/HTTP metadata. This mirrors the pinned generator behavior, which differs from cloud expression filtering over collected arrays.",
+        "Source general numeric equality is opt-in through PythonLoadedEquality for this new profile: float tokens use CPython binary64 rounding/nonfinite overflow/underflow, integer tokens remain arbitrary precision, nested bool-number equality is preserved. Raw actual bytes are not rewritten. The rest of the repository is not silently migrated.",
+        "Neutron27 stock get_network allows project-reader/service/shared/external/advsvc branches with separate ADMIN provider/segments attributes. SDK does not elevate access or infer all-project scope; missing user attributes retain declared defaults. Fixture/race/source/main evidence does not prove authenticated deployment policy/extension/backend behavior."
       ],
-      "remaining": [
-        "Network inherits NetworkResource and TagMixinNetwork, but classification and selected response normalization do not reproduce complete eager/seeded Resource descriptor behavior, unknown-Body storage, mutable cache/dirty lifecycle, Body defaults/alias reset state or arbitrary Resource subclass/session injection. Full descriptor coercion and Python equality beyond the documented JSON policies remain different.",
-        "Pinned Proxy.request optional GET cache (cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate. Direct Proxy._list fixes session to itself; Resource.list adapter/session injection is a different inherited surface. Network declares no class maximum microversion, so no class-specific automatic maximum negotiation gap is asserted.",
-        "Pinned Resource._get_next_link uses top-level/RFC Link-header and limit/marker continuation paths beyond native networks_links. Python limit hint, continuation controls and SDK-level session/retry/cache behavior are not closed by raw row pairing or native pager source hashes.",
-        "Deprecated Proxy._list jmespath_filters has no ordinary Go expression filter option. Its explicit __conflicting_attrs restoration branch is not implemented by the declared semantic classifier; source controls are reserved rather than accepted as field conditions."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/subnet_pools",
@@ -69631,7 +69962,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Quota",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForQuota"
       ],
       "contracts": [
         {
@@ -69707,12 +70042,60 @@
             "keymanager/v1/waits/python_secret_store_contracts_test.go:TestPythonKeymanagerSecretStoreWaitCompoundPhysicalFaultsNeverRetryOrReauthenticate",
             "keymanager/v1/waits/python_secret_store_contracts_test.go:TestPythonKeymanagerSecretStoreWaitCleanRetryReauthOwnHeadersAndLiveToken"
           ]
+        },
+        {
+          "behavior": "Partial concrete SecretACL and effective Quota target constructors own stock parent/singleton routes and do not append response IDs/HREFs or the internal current-project selector. Literal defaults have no fabricated HTTP status, byte Envelope or Wire; nullable/untyped declared values and actual envelope/object/header/status are independently owned.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitOwnsParentRouteAndSourceDictDefaults",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitOwnsNoIDRouteAndEnvelopeRawDescriptors"
+          ]
+        },
+        {
+          "behavior": "ForSecretACL snapshots actual Metadata.Body or native Read/ACLRef when Body is absent, retains immutable native SecretID, and does not fabricate Wire/Envelope. ForQuota requires original Body. Cached normalized string/null matches return before timers/HTTP and constructor/result snapshots do not alias. SecretACL URI secret_id is available for declared getattr selection without inserting it into to_dict Body.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitSnapshotsCachedNativeAndURIWithoutFakeEnvelope",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitCachedSnapshotAndNullableDefaults"
+          ]
+        },
+        {
+          "behavior": "SecretACL read descriptor preserves objects/None and converts other JSON-domain values to empty dict exactly as pinned fields._convert_type(dict); literal Wire remains raw. Incoming declared null/false/zero/object/large-integer presence overlays synchronized values; omission and generic malformed/empty JSON retain previous descriptors. Quota unwraps quotas when present and uses root-object fallback otherwise.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitRawPresenceMergeAndReadDictCoercion",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitMergesFlatFallbackAndNullPresence"
+          ]
+        },
+        {
+          "behavior": "SecretACL and ordinary Quota do not declare status; default status wait is unsupported before HTTP rather than invented null/active. Declared selected attributes must be string or null: cached non-string rejects before HTTP, fetched non-string/nonobject/envelope-invalid/UTF8-invalid retains actual proof. Numeric quota values are not converted to status strings.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitMissingStatusAndTypedAttributePreflight",
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaWaitNonobjectAndSelectedValueErrorsKeepActualProof",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitEnvelopeShapeAndNumericAttributesAreExplicitFailures"
+          ]
+        },
+        {
+          "behavior": "Status-free deletion fetches GET, ignores undeclared wire status:deleted, calls progress0 only after nonterminal accepted observations, and completes only on clean GET404 while returning the original Resource snapshot plus actual absence receipt. Status GET404 remains an error. No DELETE or configuration-deletion acknowledgement is synthesized.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaDeleteSkipsUndeclaredStatusAndRetainsOriginalAt404"
+          ]
+        },
+        {
+          "behavior": "Both finite targets reuse reader captured source/header/version and common prepared WaitPolicy. Twenty combined physical fault lanes retain actual method/URL/status/body/header and Read/Close/sticky-source/custom-cancel/context causes without retry/reauth. Native 401 pointer ErrUnableToReauthenticate exposes actual response via ErrOriginal and physical causes via ErrReauth; 404 physical faults do not prove deletion.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaPhysicalFailuresNeverBecomeAbsenceOrRetry"
+          ]
+        },
+        {
+          "behavior": "Clean 401 renewal and 503 retry remain native for both finite targets, preserve fixed stock routes and selected version/header policy, observe refreshed token and leave original client policy unmodified.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaCleanRetryReauthPreservesStockRouteAndOwnedHeaders"
+          ]
         }
       ],
       "documentation": [
         "keymanager/v1/python-parity.md",
         "keymanager/v1/waits-python.md",
-        "keymanager/v1/secret-store-waits-python.md"
+        "keymanager/v1/secret-store-waits-python.md",
+        "keymanager/v1/acl-quota-waits-python.md"
       ],
       "differences": [
         "Go defaults to a five-minute timeout and a failure predicate matching error prefixes, fail or failed suffixes and killed; Python waits forever with failures=['ERROR'], which Go reproduces with WithUnlimitedWait and WithFailureStates(\"ERROR\").",
@@ -69730,11 +70113,14 @@
         "Fixed literal/request selector routing never follows response HREF/native convenience ID; Source mutable id routing is not reproduced.",
         "Cached native Metadata.Body has no original object key order or byte envelope: sorted-key constructor aliases and no fabricated Envelope.",
         "Computed location ownednull and strict UTF8 finite JSON/declared attributes remain existing SDK-R1/C1 policies.",
-        "Both named waits remain unresolved; known SecretACL/Quota/ProjectQuota gaps independent from arbitrary runtime Resource classes."
+        "Both named waits remain unresolved; known SecretACL/Quota/ProjectQuota gaps independent from arbitrary runtime Resource classes.",
+        "Pinned generic Resource.fetch requires_id=True overrides SecretACL.requires_id=False and does not carry the public getter requires_id=False option. Generic waiting on a getter ACL/Quota with id=None fails before polling, or appends an artificial ID if set. Concrete Go targets deliberately correct this pinned request preparation defect by owning stock /secrets/{secretID}/acl and /quotas routes.",
+        "SecretACL URI secret_id is selected from immutable request scope but is not added to Resource Body/to_dict; current-project is an internal wait selector and is never a wire project/member ID or synthesized Resource.id.",
+        "No status descriptor is invented for ACL/Quota: default status waits fail preflight; deletion skips absent status and waits for clean GET404. Stock ACL deletion restores implicit default ACL GET200 and project override deletion leaves effective quota GET200; GET absence observation does not prove settings deletion.",
+        "ACL wait read projection follows Source getter dict coercion while existing native secretacls API uses its independent stock object validation. Strict UTF8, declared string/null wait attributes and owned-null computed location remain bounded SDK policies.",
+        "Both named waits remain unresolved after the two additional finite user targets; admin ProjectQuota and SDK-R1 arbitrary Resource/runtime subclass/cache/location remain outstanding."
       ],
       "remaining": [
-        "SecretACL target fetch",
-        "ordinary Quota target fetch",
         "admin ProjectQuota target fetch",
         "SDK-R1 arbitrary Python Resource/runtime subclass/cache/location"
       ]
@@ -69766,7 +70152,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore"
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretACL",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.Quota",
+        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForQuota"
       ],
       "contracts": [
         {
@@ -69822,12 +70212,60 @@
             "keymanager/v1/waits/python_secret_store_contracts_test.go:TestPythonKeymanagerSecretStoreWaitCompoundPhysicalFaultsNeverRetryOrReauthenticate",
             "keymanager/v1/waits/python_secret_store_contracts_test.go:TestPythonKeymanagerSecretStoreWaitCleanRetryReauthOwnHeadersAndLiveToken"
           ]
+        },
+        {
+          "behavior": "Partial concrete SecretACL and effective Quota target constructors own stock parent/singleton routes and do not append response IDs/HREFs or the internal current-project selector. Literal defaults have no fabricated HTTP status, byte Envelope or Wire; nullable/untyped declared values and actual envelope/object/header/status are independently owned.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitOwnsParentRouteAndSourceDictDefaults",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitOwnsNoIDRouteAndEnvelopeRawDescriptors"
+          ]
+        },
+        {
+          "behavior": "ForSecretACL snapshots actual Metadata.Body or native Read/ACLRef when Body is absent, retains immutable native SecretID, and does not fabricate Wire/Envelope. ForQuota requires original Body. Cached normalized string/null matches return before timers/HTTP and constructor/result snapshots do not alias. SecretACL URI secret_id is available for declared getattr selection without inserting it into to_dict Body.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitSnapshotsCachedNativeAndURIWithoutFakeEnvelope",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitCachedSnapshotAndNullableDefaults"
+          ]
+        },
+        {
+          "behavior": "SecretACL read descriptor preserves objects/None and converts other JSON-domain values to empty dict exactly as pinned fields._convert_type(dict); literal Wire remains raw. Incoming declared null/false/zero/object/large-integer presence overlays synchronized values; omission and generic malformed/empty JSON retain previous descriptors. Quota unwraps quotas when present and uses root-object fallback otherwise.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitRawPresenceMergeAndReadDictCoercion",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitMergesFlatFallbackAndNullPresence"
+          ]
+        },
+        {
+          "behavior": "SecretACL and ordinary Quota do not declare status; default status wait is unsupported before HTTP rather than invented null/active. Declared selected attributes must be string or null: cached non-string rejects before HTTP, fetched non-string/nonobject/envelope-invalid/UTF8-invalid retains actual proof. Numeric quota values are not converted to status strings.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLWaitMissingStatusAndTypedAttributePreflight",
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaWaitNonobjectAndSelectedValueErrorsKeepActualProof",
+            "keymanager/v1/waits/python_quota_contracts_test.go:TestPythonKeymanagerQuotaWaitEnvelopeShapeAndNumericAttributesAreExplicitFailures"
+          ]
+        },
+        {
+          "behavior": "Status-free deletion fetches GET, ignores undeclared wire status:deleted, calls progress0 only after nonterminal accepted observations, and completes only on clean GET404 while returning the original Resource snapshot plus actual absence receipt. Status GET404 remains an error. No DELETE or configuration-deletion acknowledgement is synthesized.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaDeleteSkipsUndeclaredStatusAndRetainsOriginalAt404"
+          ]
+        },
+        {
+          "behavior": "Both finite targets reuse reader captured source/header/version and common prepared WaitPolicy. Twenty combined physical fault lanes retain actual method/URL/status/body/header and Read/Close/sticky-source/custom-cancel/context causes without retry/reauth. Native 401 pointer ErrUnableToReauthenticate exposes actual response via ErrOriginal and physical causes via ErrReauth; 404 physical faults do not prove deletion.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaPhysicalFailuresNeverBecomeAbsenceOrRetry"
+          ]
+        },
+        {
+          "behavior": "Clean 401 renewal and 503 retry remain native for both finite targets, preserve fixed stock routes and selected version/header policy, observe refreshed token and leave original client policy unmodified.",
+          "tests": [
+            "keymanager/v1/waits/python_acl_contracts_test.go:TestPythonKeymanagerACLQuotaCleanRetryReauthPreservesStockRouteAndOwnedHeaders"
+          ]
         }
       ],
       "documentation": [
         "keymanager/v1/python-parity.md",
         "keymanager/v1/waits-python.md",
-        "keymanager/v1/secret-store-waits-python.md"
+        "keymanager/v1/secret-store-waits-python.md",
+        "keymanager/v1/acl-quota-waits-python.md"
       ],
       "differences": [
         "Go defaults to a five-minute timeout while the key manager Proxy default is wait=120; resource.WithTimeout reproduces it.",
@@ -69843,11 +70281,14 @@
         "Fixed literal/request selector routing never follows response HREF/native convenience ID; Source mutable id routing is not reproduced.",
         "Cached native Metadata.Body has no original object key order or byte envelope: sorted-key constructor aliases and no fabricated Envelope.",
         "Computed location ownednull and strict UTF8 finite JSON/declared attributes remain existing SDK-R1/C1 policies.",
-        "Both named waits remain unresolved; known SecretACL/Quota/ProjectQuota gaps independent from arbitrary runtime Resource classes."
+        "Both named waits remain unresolved; known SecretACL/Quota/ProjectQuota gaps independent from arbitrary runtime Resource classes.",
+        "Pinned generic Resource.fetch requires_id=True overrides SecretACL.requires_id=False and does not carry the public getter requires_id=False option. Generic waiting on a getter ACL/Quota with id=None fails before polling, or appends an artificial ID if set. Concrete Go targets deliberately correct this pinned request preparation defect by owning stock /secrets/{secretID}/acl and /quotas routes.",
+        "SecretACL URI secret_id is selected from immutable request scope but is not added to Resource Body/to_dict; current-project is an internal wait selector and is never a wire project/member ID or synthesized Resource.id.",
+        "No status descriptor is invented for ACL/Quota: default status waits fail preflight; deletion skips absent status and waits for clean GET404. Stock ACL deletion restores implicit default ACL GET200 and project override deletion leaves effective quota GET200; GET absence observation does not prove settings deletion.",
+        "ACL wait read projection follows Source getter dict coercion while existing native secretacls API uses its independent stock object validation. Strict UTF8, declared string/null wait attributes and owned-null computed location remain bounded SDK policies.",
+        "Both named waits remain unresolved after the two additional finite user targets; admin ProjectQuota and SDK-R1 arbitrary Resource/runtime subclass/cache/location remain outstanding."
       ],
       "remaining": [
-        "SecretACL target fetch",
-        "ordinary Quota target fetch",
         "admin ProjectQuota target fetch",
         "SDK-R1 arbitrary Python Resource/runtime subclass/cache/location"
       ]
@@ -75431,58 +75872,215 @@
     {
       "operation": "python:compute/v2/create_share_attachment",
       "source_fingerprint": "a48ca96655e9d0631c90abed8ba88f051bb9294f10febfc9f27694718b8c61ab",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments.API.CreateRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for POST servers/{id}/shares (microversion 2.97)."
-      ]
+      "contracts": [
+        {
+          "behavior": "Caller IDs fix both URI segments and never derive routes from returned uuid/share_id; Capture and owned config precede callbacks/discovery, request Body/header/microversion remains fixed through callbacks and clean authentication renewal. Invalid inputs and observed source changes terminate before discovery or later options.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareGetFixesParentMemberAndProxySeed",
+            "compute/v2/shareattachments/contracts_test.go:TestShareInvalidOptionsAndIdentityPrecedeDiscovery",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest",
+            "compute/v2/shareattachments/contracts_test.go:TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks"
+          ]
+        },
+        {
+          "behavior": "Selected microversion is literal and uncapped; missing selected version discovers the advertised range with Source ceiling2.97. Explicit empty override owns required version header absence without mutating shared client. Discovery receipt is separate from member response evidence.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareVersionDiscoveryCeilingAndExplicitSelection",
+            "compute/v2/shareattachments/contracts_test.go:TestShareExplicitEmptyOverrideOwnsVersionAbsence"
+          ]
+        },
+        {
+          "behavior": "Actual accepted/rejected status, body, header and all physical Read/Close causes survive. Four operations by eight statuses by three fault modes prove one HTTP/Close and zero retry, backoff or reauthentication callbacks after physical faults; native401 pointer ErrOriginal/ErrReauth preserved, while clean401 renewal keeps exact route/body/version.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest"
+          ]
+        },
+        {
+          "behavior": "POST uses share envelope containing explicit share_id and only supplied declared dirty attributes; omitted default export_location/tag stays absent in request, explicitnull and arbitrary untyped values survive. Source view merges accepted response fields over seed and retains defaults; actual Wire preserves unknown/self/exact numbers independently.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareCreateDirtyBodyAndSeededDescriptors",
+            "compute/v2/shareattachments/contracts_test.go:TestShareMemberNonJSONRetainsSeedWithoutFakeWire"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md",
+        "compute/v2/share-attachments-python.md",
+        "compute/v2/shareattachments/README.md"
+      ],
+      "differences": [
+        "Go concrete IDs use server.ID/share.ID instead of Python arbitrary Resource inputs. Literal UTF8 identity, fixed route/selected header guards and physical handling-error termination improve safety; this is not arbitrary session/base_path or Resource lifecycle parity.",
+        "Source has six untyped declared Body descriptors plus inherited id/name. Go returns independently owned Resource/Wire/Envelope/header/status, preserves seed/default/null and alternate ID presence, and supplies explicit per-call microversion options. The shared SDK-R1/C1 Connection location and optional HTTP cache contracts are separate; direct client location is null.",
+        "Official Nova31.0.0 stock policy is project reader on index/show and project member on create/delete, checked against instance project. Endpoints need2.97, request accepts share_id and optional tag, tag default belongs to Nova; asynchronous mapping receipt does not prove mount acceptance or complete Manila access workflow."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/get_share_attachment",
       "source_fingerprint": "14268e92aa64e8cbbf37382075c19de2fb11fcef940283a71d73d3df6adfb4a8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments.API.GetRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for GET servers/{id}/shares/{share_id}."
-      ]
+      "contracts": [
+        {
+          "behavior": "Caller IDs fix both URI segments and never derive routes from returned uuid/share_id; Capture and owned config precede callbacks/discovery, request Body/header/microversion remains fixed through callbacks and clean authentication renewal. Invalid inputs and observed source changes terminate before discovery or later options.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareGetFixesParentMemberAndProxySeed",
+            "compute/v2/shareattachments/contracts_test.go:TestShareInvalidOptionsAndIdentityPrecedeDiscovery",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest",
+            "compute/v2/shareattachments/contracts_test.go:TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks"
+          ]
+        },
+        {
+          "behavior": "Selected microversion is literal and uncapped; missing selected version discovers the advertised range with Source ceiling2.97. Explicit empty override owns required version header absence without mutating shared client. Discovery receipt is separate from member response evidence.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareVersionDiscoveryCeilingAndExplicitSelection",
+            "compute/v2/shareattachments/contracts_test.go:TestShareExplicitEmptyOverrideOwnsVersionAbsence"
+          ]
+        },
+        {
+          "behavior": "Actual accepted/rejected status, body, header and all physical Read/Close causes survive. Four operations by eight statuses by three fault modes prove one HTTP/Close and zero retry, backoff or reauthentication callbacks after physical faults; native401 pointer ErrOriginal/ErrReauth preserved, while clean401 renewal keeps exact route/body/version.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest"
+          ]
+        },
+        {
+          "behavior": "GET seeds Proxy member id, independently retains caller server URI and actual returned share_id/uuid. Untyped descriptors preserve null/value; missing export_location default empty and inherited fields null; nonJSON accepted body keeps seed with no fabricated Wire while parsed wrongshape returns actual receipt.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareGetFixesParentMemberAndProxySeed",
+            "compute/v2/shareattachments/contracts_test.go:TestShareMemberNonJSONRetainsSeedWithoutFakeWire",
+            "compute/v2/shareattachments/contracts_test.go:TestShareMemberParsedInvalidShapeKeepsActualReceipt"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md",
+        "compute/v2/share-attachments-python.md",
+        "compute/v2/shareattachments/README.md"
+      ],
+      "differences": [
+        "Go concrete IDs use server.ID/share.ID instead of Python arbitrary Resource inputs. Literal UTF8 identity, fixed route/selected header guards and physical handling-error termination improve safety; this is not arbitrary session/base_path or Resource lifecycle parity.",
+        "Source has six untyped declared Body descriptors plus inherited id/name. Go returns independently owned Resource/Wire/Envelope/header/status, preserves seed/default/null and alternate ID presence, and supplies explicit per-call microversion options. The shared SDK-R1/C1 Connection location and optional HTTP cache contracts are separate; direct client location is null.",
+        "Official Nova31.0.0 stock policy is project reader on index/show and project member on create/delete, checked against instance project. Endpoints need2.97, request accepts share_id and optional tag, tag default belongs to Nova; asynchronous mapping receipt does not prove mount acceptance or complete Manila access workflow."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/share_attachments",
       "source_fingerprint": "0ae71ae359253fa4c2cf63db360d1d9fc8886892ef438d4dc5999015cb272e70",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments.API.ListRecords"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for GET servers/{id}/shares."
-      ]
+      "contracts": [
+        {
+          "behavior": "Caller IDs fix both URI segments and never derive routes from returned uuid/share_id; Capture and owned config precede callbacks/discovery, request Body/header/microversion remains fixed through callbacks and clean authentication renewal. Invalid inputs and observed source changes terminate before discovery or later options.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareGetFixesParentMemberAndProxySeed",
+            "compute/v2/shareattachments/contracts_test.go:TestShareInvalidOptionsAndIdentityPrecedeDiscovery",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest",
+            "compute/v2/shareattachments/contracts_test.go:TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks"
+          ]
+        },
+        {
+          "behavior": "Selected microversion is literal and uncapped; missing selected version discovers the advertised range with Source ceiling2.97. Explicit empty override owns required version header absence without mutating shared client. Discovery receipt is separate from member response evidence.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareVersionDiscoveryCeilingAndExplicitSelection",
+            "compute/v2/shareattachments/contracts_test.go:TestShareExplicitEmptyOverrideOwnsVersionAbsence"
+          ]
+        },
+        {
+          "behavior": "Actual accepted/rejected status, body, header and all physical Read/Close causes survive. Four operations by eight statuses by three fault modes prove one HTTP/Close and zero retry, backoff or reauthentication callbacks after physical faults; native401 pointer ErrOriginal/ErrReauth preserved, while clean401 renewal keeps exact route/body/version.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest"
+          ]
+        },
+        {
+          "behavior": "List is lazy; canonical Body filters apply locally after Source raw row cap and do not become wire query. MaxItems implies Source limit hint, cap prevents nextlink lookahead, marker fallback selects id by presence before alternate share_id; nullprimary marker is terminal with page receipt. Ordinary unknown kwargs are discarded before serialization and reserved Source controls explicitly rejected before caller marshaller. Local equality uses CPython-loaded float and arbitraryprecision integer/Boolean semantics; dictionary conditions use Source actualtruthiness and recursive subset, including missing nested None and truthy nonmapping empty-filter behavior.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareListProjectionLocalCapAndLazyNoLookahead",
+            "compute/v2/shareattachments/contracts_test.go:TestShareListAlternateMarkerPresenceAndContinuation",
+            "compute/v2/shareattachments/contracts_test.go:TestShareListNullPrimaryMarkerIsTerminalWithPageReceipt",
+            "compute/v2/shareattachments/contracts_test.go:TestShareListUnknownDiscardAndControlRejectBeforeMarshaler",
+            "compute/v2/shareattachments/contracts_test.go:TestShareListActualLinksUseFixedRouteAndSinglePageStopsBeforeLink",
+            "compute/v2/shareattachments/contracts_test.go:TestShareListForeignContinuationFailsWithActualPage",
+            "compute/v2/shareattachments/contracts_test.go:TestShareSourceLoadedLocalEqualityAndDictionaryTruthiness"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md",
+        "compute/v2/share-attachments-python.md",
+        "compute/v2/shareattachments/README.md"
+      ],
+      "differences": [
+        "Go concrete IDs use server.ID/share.ID instead of Python arbitrary Resource inputs. Literal UTF8 identity, fixed route/selected header guards and physical handling-error termination improve safety; this is not arbitrary session/base_path or Resource lifecycle parity.",
+        "Source has six untyped declared Body descriptors plus inherited id/name. Go returns independently owned Resource/Wire/Envelope/header/status, preserves seed/default/null and alternate ID presence, and supplies explicit per-call microversion options. The shared SDK-R1/C1 Connection location and optional HTTP cache contracts are separate; direct client location is null.",
+        "Official Nova31.0.0 stock policy is project reader on index/show and project member on create/delete, checked against instance project. Endpoints need2.97, request accepts share_id and optional tag, tag default belongs to Nova; asynchronous mapping receipt does not prove mount acceptance or complete Manila access workflow.",
+        "Source inherits limit/marker and maxItems limit hint but stock Nova31.0.0 index schema accepts no query properties; these options may be server-rejected, default no-query listing works. Go primitive limit/marker types and same-origin/path/cursor guards are stricter than arbitrary Source kwargs.",
+        "Arbitrary JMESPath and session/routing/constructor controls explicitly fail before HTTP; shared SDK-S1 stays separate. Existing Source REST link, marker, raw cap and local filter policies are reused rather than labeling transport wrappers full SDK parity.",
+        "Source marker fallback can place null/false/empty primary id into query params. Go preserves primary presence precedence but requires nonblank string cursor and returns the actual page receipt on failure; it never silently substitutes alternate share_id. TestShareListNullPrimaryMarkerIsTerminalWithPageReceipt proves this deliberate strict continuation difference."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/delete_share_attachment",
       "source_fingerprint": "d93f7f22491a9b3d8c4630c52ba6b7ed99c09bc834d1c6e29b2cf736a5ffdeda",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "compute/v2/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments.API.DeleteRecord"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no API for DELETE servers/{id}/shares/{share_id} or its ignore_missing default."
-      ]
+      "contracts": [
+        {
+          "behavior": "Caller IDs fix both URI segments and never derive routes from returned uuid/share_id; Capture and owned config precede callbacks/discovery, request Body/header/microversion remains fixed through callbacks and clean authentication renewal. Invalid inputs and observed source changes terminate before discovery or later options.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareGetFixesParentMemberAndProxySeed",
+            "compute/v2/shareattachments/contracts_test.go:TestShareInvalidOptionsAndIdentityPrecedeDiscovery",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest",
+            "compute/v2/shareattachments/contracts_test.go:TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks"
+          ]
+        },
+        {
+          "behavior": "Selected microversion is literal and uncapped; missing selected version discovers the advertised range with Source ceiling2.97. Explicit empty override owns required version header absence without mutating shared client. Discovery receipt is separate from member response evidence.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareVersionDiscoveryCeilingAndExplicitSelection",
+            "compute/v2/shareattachments/contracts_test.go:TestShareExplicitEmptyOverrideOwnsVersionAbsence"
+          ]
+        },
+        {
+          "behavior": "Actual accepted/rejected status, body, header and all physical Read/Close causes survive. Four operations by eight statuses by three fault modes prove one HTTP/Close and zero retry, backoff or reauthentication callbacks after physical faults; native401 pointer ErrOriginal/ErrReauth preserved, while clean401 renewal keeps exact route/body/version.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks",
+            "compute/v2/shareattachments/contracts_test.go:TestShareCleanAuthenticationRenewalRetainsRequest"
+          ]
+        },
+        {
+          "behavior": "DELETE has no Body, uses server/share member route and preserves literal accepted receipt without Resource fabrication. IgnoreMissing defaults true and suppresses only clean404; strict404/conflict/physical faults return original causal errors.",
+          "tests": [
+            "compute/v2/shareattachments/contracts_test.go:TestShareDeleteDefaultOnlyCleanMissingAndBodylessSuccess",
+            "compute/v2/shareattachments/contracts_test.go:TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks"
+          ]
+        }
+      ],
+      "documentation": [
+        "compute/v2/python-parity-admin.md",
+        "compute/v2/share-attachments-python.md",
+        "compute/v2/shareattachments/README.md"
+      ],
+      "differences": [
+        "Go concrete IDs use server.ID/share.ID instead of Python arbitrary Resource inputs. Literal UTF8 identity, fixed route/selected header guards and physical handling-error termination improve safety; this is not arbitrary session/base_path or Resource lifecycle parity.",
+        "Source has six untyped declared Body descriptors plus inherited id/name. Go returns independently owned Resource/Wire/Envelope/header/status, preserves seed/default/null and alternate ID presence, and supplies explicit per-call microversion options. The shared SDK-R1/C1 Connection location and optional HTTP cache contracts are separate; direct client location is null.",
+        "Official Nova31.0.0 stock policy is project reader on index/show and project member on create/delete, checked against instance project. Endpoints need2.97, request accepts share_id and optional tag, tag default belongs to Nova; asynchronous mapping receipt does not prove mount acceptance or complete Manila access workflow."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_network",
@@ -88355,16 +88953,68 @@
     {
       "operation": "python:block_storage/v3/summary",
       "source_fingerprint": "7ed92e7ebe6216f4da46321c1e770e00f00d0d7c646054558b9a84efeb089943",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SummaryRecord",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET volumes/summary?all_tenants=... at microversion 3.12+ reading the volume-summary envelope and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Source Proxy summary preserves the initial queryless requires_id=False GET followed by all_tenants=False/True aggregate fetch; stock /volumes/summary is separate from /volumes ListSummary. First fetch only declared untyped seed survives omission; explicit null overwrites. Explicit single fetch improves redundant Source request sequence.",
+          "tests": [
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryDefaultTwoFetchesAndAllProjects",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryRetainsFirstFetchDeclaredSeedOnly",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummarySingleFetchAndFetchSpecificVersion"
+          ]
+        },
+        {
+          "behavior": "BlockStorageSummary fixed class ceiling is 3.36; discovery is used only without selected default, and selected high versions remain uncapped. Fetch override belongs only to second request; explicit empty override omits version headers. Stock availability is3.12+, actual low-version404 retained rather than invented local support.",
+          "tests": [
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummarySingleFetchAndFetchSpecificVersion",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryDiscoveryCeilingAndSelectedVersionNotClamped"
+          ]
+        },
+        {
+          "behavior": "Untyped id/name/total_size/total_count/metadata and missing-null declarations own exact arbitrary integer/false/list values. Resource/Wire/whole Envelope/Header/status, terminal fetch Requests and independent Discovery do not alias; accepted nonJSON preserves seed/default, invalid UTF8/object shape preserves actual accepted receipt.",
+          "tests": [
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryDefaultTwoFetchesAndAllProjects",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryAcceptedNonJSONAndFlatEnvelopeFallback"
+          ]
+        },
+        {
+          "behavior": "Owned JSON-domain kwargs follow Requests iterable expansion and null omission, SDK AllProjects remains authoritative. Deep query/map/raw/pointer option snapshots, nil Header-map composition and option reset are captured without changing original service. Controls and invalid Source/context/MV/header configuration reject before marshaler/discovery/HTTP. Pinned fetch headers kwarg is an ordinary Requests dictionary query and is distinct from copied typed actual HTTP Headers; query null omits and only second fetch carries query.",
+          "tests": [
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryInvalidControlsBeforeMarshalerOrHTTP",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryQuerySnapshotsRequestsExpansionAndOptionReset",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryHeadersKwargIsQueryAndTypedHeadersArePhysical"
+          ]
+        },
+        {
+          "behavior": "Actual200/203/401/404/429/503 Read,Close and mixed faults retain real body/header/status plus every cause; native401 pointer ErrUnableToReauthenticate preserves ErrOriginal/ErrReauth. Willing Retry,Backoff,Reauth stay zero after physical fault; oneHTTP/oneClose. Source read-boundary mutation is sticky after Close restore, custom cancellation is terminal. Clean401 renewal and503 retry keep selected request; body/version/foreign header/omission mutations retain first rejection and stop.",
+          "tests": [
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryPhysicalFaultsKeepNative401PublicFieldsAndNoHooks",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryCleanReauthenticationAndRetryKeepOwnedRequest",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryReadBoundaryGuardAndCancellationCannotResend",
+            "blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryRetryCannotInjectBodyOrSelectedHeaders"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/python-summary.md"
+      ],
+      "differences": [
+        "Go library defaults all_projects tofalse through functional options, while pinned Proxy.summary requires an explicit bool. Default retains Source two fetches; WithSummarySingleFetch(true) explicitly improves redundant first request and drops its seed contribution.",
+        "Standalone leaf projection uses computed locationnull with unknown/location retained only inWire, a documented SDK-R1 boundary; Python Connection-derived dynamic Resource dirty/cache/session/warning behavior remains project-level parity work.",
+        "Go Headers is a copied typed extension. Raw Source controls, unsafe route/session rewriting and duplicate all_tenants/requires_id bindings are rejected before marshaler/HTTP rather than allowing Python kwargs collisions after its firstGET. Exact envelope/header/status/fault proof and native original causes remain.",
+        "Source accepted non-JSON bodies retain seed/default. Go additionally requires UTF8 and nonnull object representations for parsed JSON; receipt-bearing error is exposed for invalidshape rather than Python attribute-method exceptions."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/get_cluster",
@@ -88938,16 +89588,91 @@
     {
       "operation": "python:block_storage/v3/resource_filters",
       "source_fingerprint": "2f8b45563cc4e29201dffb06babf5d4b040b1b042fa3f8b02bb6b69fd9ba9ac0",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.New",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ListResult",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListOptions",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListResource",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListControl",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListProxyJMESValue"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET resource_filters?resource=... at microversion 3.33+ and this SDK has no owned call for it, so an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "ExactResourceFilter declared resource str and filters list descriptor plus inherited untyped id/name; scalar-list wrapping, null defaults, complete literal unknown fields and independent row/page/header/status evidence. Source constructor collision and malformed accepted envelope retain whole page proof.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersDeclaredProjectionOwnsLiteralPageEvidence",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersDefaultsNullableListAndPythonStrings",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersBadEnvelopeAndConstructorCollisionKeepAcceptedPage"
+          ]
+        },
+        {
+          "behavior": "Source query mapping has include_pagination_defaultsFalse: resource onlyserverquery, repeated Requests/null expansion, localfilters/id/name via common Cinder MatchLocal, unknownkwargs and callerlimit/marker discarded without invokingmarshalers. Known query JSON and nil headers/callback outputs captured atowned boundaries; raw controls reject beforeanymarshal/HTTP.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersSourceQueryExpansionLocalPredicatesAndUnknownDiscard",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersControlsBeforeMarshalerAndOptionSnapshots"
+          ]
+        },
+        {
+          "behavior": "Class ceiling3.33 uses commondiscovery absentselected default, highselected retained and explicitempty override skipsdiscovery/omitsversionheaders onallpages. Low selected3.32 retainsrealstock404 rather thanfabricatedlocalUnsupported.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersDiscoveryCeilingAndExplicitVersionOmission"
+          ]
+        },
+        {
+          "behavior": "Lazy rawrow cap/limit hint operates beforelocalfilters, stops beforeunconsumedmalformedrows/next; iterator reuse/break andSinglePage retain defaults. Completefixedcollection pager preservesresourcequery and blocksforeignorigin/cycles; SourceemptyEOF/floatunderflownext falsey behavior is retained; All atomicallydropspartialrowsonfailure.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersLocalCapStopsBeforeInvalidRowsAndNext",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersPaginationPreservesFiltersAndBlocksForeignOrCycle"
+          ]
+        },
+        {
+          "behavior": "Source generator-based JMESPath is implemented by ProxyListRecords and common OpaqueIdentity. Separate ListResult explicitly improves array-row evaluation by collection before arbitrary JSON transformation; scalar/string/array/null Value has no invented HTTP proof and Records retain actual receipts. Empty expression is no-op; typed row API routes nonempty expression to polymorphic/eager APIs and eager expression failure clears result after observed pages.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersListResultSupportsArbitraryJMESPathWithoutFakeProof"
+          ]
+        },
+        {
+          "behavior": "Actual200/203/401/404/429/503 physicalRead/Close/mixed faults retainbody/header/status/cause; native401pointeroriginal/publicErrReauth remain, zeroRetryBackoffReauthcallbacks andoneHTTP/oneClose. Cleanrenewal/retry keepquery/protocol; read-boundarySource mutation stayssticky afterClose restoration and customcancel terminates. Body/version/foreign/auth/protectedomitretrymutations preservefirstrejection.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersPhysicalFaults401FieldsAndHooksStayTerminal",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersCleanRenewalAndRetryPreserveQueryAndProtocol",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersReadGuardAndCancellationSurviveCloseRestore",
+            "blockstorage/v3/resourcefilters/python_contracts_test.go:TestPythonCinderResourceFiltersRetryCannotChangeBodyVersionOrHeaderAbsence"
+          ]
+        },
+        {
+          "behavior": "Pinned Proxy JMESPath evaluation sees an opaque unconsumed generator before any version discovery/member HTTP. Projection/type return null, checked array functions fail, literal/equality preserve Source values, @ and nested array/object keep pointer identity and do not serialize as JSON. Falsey or non-string JSON filter values retain the lazy generator. Raw jmespath_filters is consumed privately and captured source remains guarded when generator starts discovery/list.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_proxy_contracts_test.go:TestPythonCinderResourceFiltersProxyExpressionsObserveOpaqueGeneratorBeforeHTTP",
+            "blockstorage/v3/resourcefilters/python_proxy_contracts_test.go:TestPythonCinderResourceFiltersProxyPreservesFalseyNonStringAndNestedGeneratorIdentity",
+            "blockstorage/v3/resourcefilters/python_proxy_contracts_test.go:TestPythonCinderResourceFiltersProxyRawQueryJMESAndLazyDiscoveryKeepCapturedSource"
+          ]
+        },
+        {
+          "behavior": "Common MatchLocalLoaded opt-in uses CPython decimal/exponent binary64 values, arbitrary integers and bool subclass equality through ordered nested Resource dictionary filters. Underflow is numeric zero and falsey, float overflow compares as infinity while adjacent big integer precision is retained, recursive array equality and dictionary subset use the same policy. Existing bindings exact-decimal policy stays unchanged.",
+          "tests": [
+            "blockstorage/v3/resourcefilters/python_proxy_contracts_test.go:TestPythonCinderResourceFiltersLoadedLocalFloatsRetainIntegerPrecisionAndNestedSubsets"
+          ]
+        }
+      ],
+      "documentation": [
+        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/resource-filters-python.md"
+      ],
+      "differences": [
+        "Standalone computed locationnull is boundedSDK-R1; literal location andunknownfields retainedinWire, PythonConnection dynamicResource dirty/cache/session remainsprojectparitywork.",
+        "Go ProxyListRecords preserves Source passing an opaque unconsumed generator into JMESPath; ListResult separately improves this by collecting declared JSON rows before evaluation. Python comparison main explicitly selects the eager list/to_dict repair. Source scalar/null/opaque nested pointer behavior is covered without service HTTP; arbitrary eager output retains actual Records separately.",
+        "Ownedpager fixesdict links.next andRequestsHTTP Link uri-key mismatch, enforces sameorigin/fixedcollection/preservedfilters/cycles andonevalidwiremarker. Sourceunsafecontinuation/routecontrols arenotreplayed; malformedcontinuation retainsactualwholepageproof."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:block_storage/v3/reset_group_status",
@@ -95140,12 +95865,26 @@
     {
       "operation": "python:network/v2/ports",
       "source_fingerprint": "b0450e6e73cc521a5c35c240b0da5b396839a3845d0f789f118338cb1abc0a7a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListOptions",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.All"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecordValues",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordListJMESPath"
       ],
       "contracts": [
         {
@@ -95153,20 +95892,185 @@
           "tests": [
             "network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortListQueryAndLinks"
           ]
+        },
+        {
+          "behavior": "Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsDefaultRequestAndExtensionFields"
+          ]
+        },
+        {
+          "behavior": "Canonical and wire server aliases, repeated Requests values, unknown kwargs discarded before JSON encoding, nested local declared Body filters.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsQueryAliasesAndLocalBodyFilters"
+          ]
+        },
+        {
+          "behavior": "Plural/HTTP link continuation, short-page limit/marker fallback, paginated false and raw row cap.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPagingLinksAndLimitMarker"
+          ]
+        },
+        {
+          "behavior": "Accepted representations and rejected statuses retain ports operation context; nil option performs no HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "Cloud search uses dict insertion-order pushdown, exact/glob ID-name matching, nested filters and arbitrary full JMESPath; unknown filter fails after real inventory.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSelectionAndPushdown"
+          ]
+        },
+        {
+          "behavior": "Explicit version and headers apply to every actual list page.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsHeadersAndMicroversionOnEveryPage"
+          ]
+        },
+        {
+          "behavior": "Partial field queries do not seed responses; Source constructor alias order/null/boolean/int/list/dict projection and independent actual Wire/Envelope/Header ownership.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPartialFieldsCoercionAndEvidenceIsolation"
+          ]
+        },
+        {
+          "behavior": "Owned runtime controls and malformed UTF-8/JSON fail before HTTP; unknown kwargs discarded without running a JSON Marshaler.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsControlsDiscardAndValidationBeforeEncoding"
+          ]
+        },
+        {
+          "behavior": "Option factories/callback maps own input snapshots and nil Headers are initialized for direct custom assignments.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsOptionsOwnMapsAndNilHeaders"
+          ]
+        },
+        {
+          "behavior": "Option failure retains simultaneous selected-client mutation or cancellation cause, and no HTTP escapes the boundary.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListAndSearchRecordOptionsGuardCancellationAndSource"
+          ]
+        },
+        {
+          "behavior": "Raw cap counts filtered rows, lazy consumer break and single-page stop avoid next page requests.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCapCountsFilteredRowsAndLazyConsumer"
+          ]
+        },
+        {
+          "behavior": "CPython float underflow next is falsey; malformed envelope/row/constructor controls and invalid next retain actual accepted page receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsContinuationTruthinessAndTerminalEvidence"
+          ]
+        },
+        {
+          "behavior": "18 accepted/rejected status plus Read/Close/mixed faults close once, invoke no retry/reauth hook, preserve actual receipt and native401 pointer ErrOriginal/ErrReauth fields.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks"
+          ]
+        },
+        {
+          "behavior": "Clean401 token renewal and clean503 retry retain selected headers/version/bodyless route/query and leave original client configuration intact.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCleanReauthenticationAndRetryKeepPolicy"
+          ]
+        },
+        {
+          "behavior": "Eager explicit expression supports scalar/array/object/null values and preserves all original Inventory on expression failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordValuesArbitraryJSONAndInventory"
+          ]
+        },
+        {
+          "behavior": "Cloud falsey filters including underflow act as absent; constructor headers snapshot input and unknown dict keys retain actual inventory on local failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsFalseyFiltersHeaderSnapshotAndUnknownKeys"
+          ]
+        },
+        {
+          "behavior": "Original generator projections/index/type return null, literals/identity equality return values, typed functions/serialization/syntax fail with zero HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsSourceGeneratorExpressionsDoNoHTTP"
+          ]
+        },
+        {
+          "behavior": "Source missing/falsey/nonstring controls retain opaque generator; @/not_null/to_array preserve same lazy generator, HTTP starts only on iteration.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsPreserveReturnedAndNestedGenerators"
+          ]
+        },
+        {
+          "behavior": "Source formal header/version/base_path normalization and ordered single-pass conflicting attrs restoration; restored formal duplicates fail before HTTP and restored JMES cannot replace the original expression.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsNormalizeSourceFormalsAndConflictingAttrs"
+          ]
+        },
+        {
+          "behavior": "Source unknown non-Body control names and Header kwargs are discarded before JSON marshaling without introducing new query or transport behavior.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsSourceUnknownControlNamesDiscardBeforeMarshaler"
+          ]
+        },
+        {
+          "behavior": "Typed/raw/snapshot base_path selects service-relative collection path for every page; unsafe foreign host/query/fragment/traversal fails before HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsBasePathOwnsRouteAndLocksContinuation"
+          ]
+        },
+        {
+          "behavior": "Source-profile local filters preserve CPython float rounding, arbitrary integer precision, nested boolean/number equality, underflow and overflow comparison.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsLocalEqualityUsesSourceLoadedFloats"
+          ]
+        },
+        {
+          "behavior": "Cloud dict filters preserve list_ports polymorphic Proxy result: null/type errors perform no HTTP, @ retains actual inventory and empty literal containers return no fabricated receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsHonorsProxyJMESBeforeCloudLocalSelection"
+          ]
+        },
+        {
+          "behavior": "Raw Source formals and dedicated concrete factories use last option consistently for selected path, headers and microversion.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsFormalFactoriesAndTypedOptionsUseLastValue"
+          ]
+        },
+        {
+          "behavior": "Actual Source canonical cloud dict lookup succeeds, wire Body keys fail after real inventory, raw Connection location is snapshotted and applied before selection without modifying Wire.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSourceWireFiltersAndConnectionLocationBeforeSelection"
+          ]
+        },
+        {
+          "behavior": "Cloud second-phase SelectLoaded preserves Source numeric matches from first-phase list filtering rather than reversing rounded float/integer or nested underflow comparisons.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSecondFilterKeepsSourceLoadedNumericMatch"
+          ]
+        },
+        {
+          "behavior": "Configured CloudLocation is cloned and computed per actual resource before filtering; foreign project clears scope names, keeps original project/zone, and never fabricates Wire location.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsCloudLocationOwnsForeignProjectAndZone"
+          ]
         }
-      ],
-      "documentation": [
-        "network/v2/python-parity-core.md"
       ],
       "differences": [
         "Python transposes is_admin_state_up, is_port_security_enabled, security_group_ids and tenant_id; Go callers use the wire names through ListOpts or WithListQuery.",
         "Go ListOpts sends tags filters as one comma-separated value, while Python repeats list values.",
         "Python filters keyword arguments that are Body attributes but not QueryParameters locally after each page; Go sends WithListQuery keys to the server and the caller filters the returned rows.",
         "The native ports.Port model has no binding:*, dns_*, extra_dhcp_opts, port_security_enabled, qos_*, resource_request, trunk_details or several other Python Body fields, so those values are not returned and cannot be filtered by the caller.",
-        "Python merges the next link's query into its own query parameters; Go requests the next href exactly as Neutron returned it."
+        "Python merges the next link's query into its own query parameters; Go requests the next href exactly as Neutron returned it.",
+        "Concrete Go records expose owned declared Resource view and independent actual Wire/Envelope/Header/StatusCode. Full mutable Python Resource/cache/dirty-state/runtime subclass handling remains tracked shared SDK-R1/C1/S1, not counted as generated transport parity.",
+        "ProxyListRecords reproduces Source generator-based JMES zero-HTTP values/null/type errors/opaque identity and nested generators. ListRecordValues is explicitly eager Go expression functionality, not claimed identical to Source generator input.",
+        "ListRecords keeps a resource-only iterator and directs polymorphic truthy expressions to ProxyListRecords; falsey/nonstring Proxy controls preserve lazy records. Standard Go iter.Seq2 iteration semantics remain the owned SDK abstraction.",
+        "List routes remain within captured service endpoint; continuation preserves selected origin/collection/filter and rejects unsafe route cycles. Go dictionary/RFC link compatibility and strict validation are explicit Source differences.",
+        "Both list local filters and cloud dictionary selection opt into CPython JSON-loaded equality. Full JMESPath retains documented exact-decimal/lexical object traversal/strict grammar boundaries, and JSON-map object functions can differ from Python Port exact-typename function checks."
       ],
-      "remaining": [
-        "Python filters Body attributes that are not QueryParameters locally after each page, and several Python Body fields (binding:*, dns_*, port_security_enabled, qos_* and others) are absent from the native Port model; the ports binding has no SDK local Body filter for them."
+      "documentation": [
+        "network/v2/python-parity-core.md",
+        "network/v2/ports/python-list-records.md"
       ]
     },
     {
@@ -95517,16 +96421,75 @@
     {
       "operation": "python:network/v2/service_providers",
       "source_fingerprint": "8a1af0201ff72982a75ee58c39dd221ea4427a5f7da013196d1ba65fc0ee7e50",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/v2/python-parity-core.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.New",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListConflictingAttrs"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 has no binding for GET /service-providers, and an SDK-owned call would be needed."
-      ]
+      "contracts": [
+        {
+          "behavior": "Library-owned service provider list uses the common neutronfind engine for GET /service-providers and full Source defaults, independent actual Resource/Wire/whole-page/Header/status, raw unknown extensions and sparse rows without inventing provider IDs. Source Resource has no Neutron revision/tag/Header mixin. is_default aliases default, bool coercion follows CPython and omission/null remains null.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListOwnedDefaultsAliasesAndNoNetworkMixins"
+          ]
+        },
+        {
+          "behavior": "All six canonical query attributes including inherited limit/marker, literal fields, service_type/name and canonical is_default/default presence are server queries; id is a local Body condition and unknown caller kwargs are discarded before marshaling. Canonical null/false precedence and server-only name/default behavior remain explicit.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListFullQueriesDefaultPresenceAndLocalID"
+          ]
+        },
+        {
+          "behavior": "Actual Proxy JMES evaluation receives an opaque unconsumed generator. Projection null/literal/identity results and runtime failures occur with zero HTTP, nested generator identity remains Value with no fake JSON/evidence, and real source HTTP starts only when the generator is consumed.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderProxyJMESPreservesOpaqueGeneratorBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "Shared owned Source kwargs consume headers/version/base_path, one-pass conflicting attrs and selected collection continuation, preserving original client facts. Accepted malformed envelope/null-row/constructor failures retain actual status/body/Header. Endpoint route is service-relative and request source/token remain owned.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListSourceControlsPagingAndActualErrors"
+          ]
+        },
+        {
+          "behavior": "Raw cap counts excluded rows and stops before out-of-range constructor or invalid continuation; option callback maps remain owned through nil reset and retained callback mutation, without requiring user builders or transport classes.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListCapsAndOwnedCallbackMaps"
+          ]
+        },
+        {
+          "behavior": "Real Gophercloud testhelper HTTP transport response read/Close faults never call RetryFunc or ReauthFunc and preserve one HTTP/one Close plus all physical causes. Accepted faults retain actual ResponseError, rejected native401 pointer keeps ErrOriginal receipt and ErrReauth failures; native503 actual status/body/Header is preserved.",
+          "tests": [
+            "network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListPhysicalProofNeverReauthsOrRetries"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/v2/python-parity-core.md",
+        "network/v2/serviceproviders/README.md"
+      ],
+      "differences": [
+        "Gophercloud2.15 has no native binding for this resource; concrete SDK-owned API/profile/options reuse common reader, projection, paging and JMES engines. Source readonly capabilities are preserved and provider names do not become IDs.",
+        "Immutable eager JSON view differs from mutable Python Resource/lazy descriptors/cache/current_location; location is an owned null view and Wire remains original. None-valued headers, arbitrary adapters/subclasses/runtime non-JSON objects and URI percent-format are outside the concrete JSON option boundary, separately tracked through shared SDK foundations.",
+        "Same-origin selected collection/filter/cursor guards bound broad Source routing. Empty base_path falls back to the default in Go whereas Source empty URI returns without HTTP. Missing stock provider IDs do not become invented marker IDs; unsupported limit/marker continuation fails with actual page evidence. Explicit single-page is available.",
+        "Completed200..399 are supported, informational100..199/replacement UTF8 are explicit differences. Nativephysical/source/cancel causes and clean retry/token renewal retain actual metadata and method ownership rather than fabricating successful Resource data.",
+        "Actual Source Proxy generator JMES results are distinct from cloud filter arrays. Arbitrary JSON or nested opaque generators are returned by ProxyListRecords.Value/JSON; typed ListRecords/AllRecords remain resource iterators and redirect truthy expressions to that API.",
+        "Neutron27 stock get_service_provider is project role:reader without owner project_id because providers are not project resources. SDK does not create drivers, elevate privileges or prove actual deployment backend support; fixture/race/source/main evidence has that explicit scope."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:network/v2/get_auto_allocated_topology",
@@ -100947,31 +101910,420 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/list_ports",
       "source_fingerprint": "4d8103c9f51b11629691d3ca37804e69f6498e80af2cd412f64bc8035c59b221",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ListPorts"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsDefaultRequestAndExtensionFields"
+          ]
+        },
+        {
+          "behavior": "Canonical and wire server aliases, repeated Requests values, unknown kwargs discarded before JSON encoding, nested local declared Body filters.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsQueryAliasesAndLocalBodyFilters"
+          ]
+        },
+        {
+          "behavior": "Plural/HTTP link continuation, short-page limit/marker fallback, paginated false and raw row cap.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPagingLinksAndLimitMarker"
+          ]
+        },
+        {
+          "behavior": "Accepted representations and rejected statuses retain ports operation context; nil option performs no HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "Cloud search uses dict insertion-order pushdown, exact/glob ID-name matching, nested filters and arbitrary full JMESPath; unknown filter fails after real inventory.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSelectionAndPushdown"
+          ]
+        },
+        {
+          "behavior": "Explicit version and headers apply to every actual list page.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsHeadersAndMicroversionOnEveryPage"
+          ]
+        },
+        {
+          "behavior": "Partial field queries do not seed responses; Source constructor alias order/null/boolean/int/list/dict projection and independent actual Wire/Envelope/Header ownership.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPartialFieldsCoercionAndEvidenceIsolation"
+          ]
+        },
+        {
+          "behavior": "Owned runtime controls and malformed UTF-8/JSON fail before HTTP; unknown kwargs discarded without running a JSON Marshaler.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsControlsDiscardAndValidationBeforeEncoding"
+          ]
+        },
+        {
+          "behavior": "Option factories/callback maps own input snapshots and nil Headers are initialized for direct custom assignments.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsOptionsOwnMapsAndNilHeaders"
+          ]
+        },
+        {
+          "behavior": "Option failure retains simultaneous selected-client mutation or cancellation cause, and no HTTP escapes the boundary.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListAndSearchRecordOptionsGuardCancellationAndSource"
+          ]
+        },
+        {
+          "behavior": "Raw cap counts filtered rows, lazy consumer break and single-page stop avoid next page requests.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCapCountsFilteredRowsAndLazyConsumer"
+          ]
+        },
+        {
+          "behavior": "CPython float underflow next is falsey; malformed envelope/row/constructor controls and invalid next retain actual accepted page receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsContinuationTruthinessAndTerminalEvidence"
+          ]
+        },
+        {
+          "behavior": "18 accepted/rejected status plus Read/Close/mixed faults close once, invoke no retry/reauth hook, preserve actual receipt and native401 pointer ErrOriginal/ErrReauth fields.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks"
+          ]
+        },
+        {
+          "behavior": "Clean401 token renewal and clean503 retry retain selected headers/version/bodyless route/query and leave original client configuration intact.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCleanReauthenticationAndRetryKeepPolicy"
+          ]
+        },
+        {
+          "behavior": "Eager explicit expression supports scalar/array/object/null values and preserves all original Inventory on expression failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordValuesArbitraryJSONAndInventory"
+          ]
+        },
+        {
+          "behavior": "Cloud falsey filters including underflow act as absent; constructor headers snapshot input and unknown dict keys retain actual inventory on local failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsFalseyFiltersHeaderSnapshotAndUnknownKeys"
+          ]
+        },
+        {
+          "behavior": "Original generator projections/index/type return null, literals/identity equality return values, typed functions/serialization/syntax fail with zero HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsSourceGeneratorExpressionsDoNoHTTP"
+          ]
+        },
+        {
+          "behavior": "Source missing/falsey/nonstring controls retain opaque generator; @/not_null/to_array preserve same lazy generator, HTTP starts only on iteration.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsPreserveReturnedAndNestedGenerators"
+          ]
+        },
+        {
+          "behavior": "Source formal header/version/base_path normalization and ordered single-pass conflicting attrs restoration; restored formal duplicates fail before HTTP and restored JMES cannot replace the original expression.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsNormalizeSourceFormalsAndConflictingAttrs"
+          ]
+        },
+        {
+          "behavior": "Source unknown non-Body control names and Header kwargs are discarded before JSON marshaling without introducing new query or transport behavior.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsSourceUnknownControlNamesDiscardBeforeMarshaler"
+          ]
+        },
+        {
+          "behavior": "Typed/raw/snapshot base_path selects service-relative collection path for every page; unsafe foreign host/query/fragment/traversal fails before HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsBasePathOwnsRouteAndLocksContinuation"
+          ]
+        },
+        {
+          "behavior": "Source-profile local filters preserve CPython float rounding, arbitrary integer precision, nested boolean/number equality, underflow and overflow comparison.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsLocalEqualityUsesSourceLoadedFloats"
+          ]
+        },
+        {
+          "behavior": "Cloud dict filters preserve list_ports polymorphic Proxy result: null/type errors perform no HTTP, @ retains actual inventory and empty literal containers return no fabricated receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsHonorsProxyJMESBeforeCloudLocalSelection"
+          ]
+        },
+        {
+          "behavior": "Raw Source formals and dedicated concrete factories use last option consistently for selected path, headers and microversion.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsFormalFactoriesAndTypedOptionsUseLastValue"
+          ]
+        },
+        {
+          "behavior": "Actual Source canonical cloud dict lookup succeeds, wire Body keys fail after real inventory, raw Connection location is snapshotted and applied before selection without modifying Wire.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSourceWireFiltersAndConnectionLocationBeforeSelection"
+          ]
+        },
+        {
+          "behavior": "Cloud second-phase SelectLoaded preserves Source numeric matches from first-phase list filtering rather than reversing rounded float/integer or nested underflow comparisons.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSecondFilterKeepsSourceLoadedNumericMatch"
+          ]
+        },
+        {
+          "behavior": "Configured CloudLocation is cloned and computed per actual resource before filtering; foreign project clears scope names, keeps original project/zone, and never fabricates Wire location.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsCloudLocationOwnsForeignProjectAndZone"
+          ]
+        },
+        {
+          "behavior": "Connection uses cached Neutron service; owned per-row CurrentLocation is applied before local selection without changing actual Wire, and callbacks execute once.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation"
+          ]
+        },
+        {
+          "behavior": "Clean absent catalog returns nonnil empty list before list options; search still evaluates loaded local filters and expressions on [], including scalar/null and invalid expressions, with zero HTTP. Mixed catalog errors and cancellation remain failures.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsCatalogAbsencePrecedesListOptionsButSearchStillEvaluatesEmpty",
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsMixedCatalogFailureAndCancellationDoNotClaimEmpty"
+          ]
+        },
+        {
+          "behavior": "Invalid Connection/context fails before discovery; late-page failure preserves actual response error evidence and prevents a fabricated successful selection.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsPreflightAndLatePageFailureRetainActualEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Concrete Go records expose owned declared Resource view and independent actual Wire/Envelope/Header/StatusCode. Full mutable Python Resource/cache/dirty-state/runtime subclass handling remains tracked shared SDK-R1/C1/S1, not counted as generated transport parity.",
+        "ProxyListRecords reproduces Source generator-based JMES zero-HTTP values/null/type errors/opaque identity and nested generators. ListRecordValues is explicitly eager Go expression functionality, not claimed identical to Source generator input.",
+        "ListRecords keeps a resource-only iterator and directs polymorphic truthy expressions to ProxyListRecords; falsey/nonstring Proxy controls preserve lazy records. Standard Go iter.Seq2 iteration semantics remain the owned SDK abstraction.",
+        "List routes remain within captured service endpoint; continuation preserves selected origin/collection/filter and rejects unsafe route cycles. Go dictionary/RFC link compatibility and strict validation are explicit Source differences.",
+        "Both list local filters and cloud dictionary selection opt into CPython JSON-loaded equality. Full JMESPath retains documented exact-decimal/lexical object traversal/strict grammar boundaries, and JSON-map object functions can differ from Python Port exact-typename function checks.",
+        "Connection models clean service-catalog absence and explicit endpoint overrides; the broad Python has_service configuration-disabled service policy remains a shared SDK-C1 contract. Typed Connection.ListPorts intentionally retains record-only results; the named list_ports row remains unresolved for polymorphic iterable conversion."
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/v2/ports/python-list-records.md"
+      ],
       "remaining": [
-        "The native Port model returned by Go listing omits binding:*, dns_*, port_security_enabled, qos_policy_id, extra_dhcp_opts and other extension attributes that the Python Port Resource exposes, and Go has no full-JSON port list record API.",
-        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+        "Typed Connection.ListPorts does not perform Source list() conversion of arbitrary JSON or opaque Proxy._list results supplied by truthy jmespath_filters; literal iterable values and their Source conversion failures remain unresolved. ProxyListRecords exposes the underlying result separately."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_ports",
       "source_fingerprint": "9bc20d583d738e631442f3a1bc4c0c07eb4d96b7641bf50742b44f61ae365600",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.SearchRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchExpression",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordSearchCloudLocation",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchPorts"
       ],
-      "differences": [],
-      "remaining": [
-        "search_ports lists ports (pushing dict filters to the server, or none for a JMESPath string) and then applies _utils._filter_list locally; No public Go API applies the cloud _utils._filter_list selection (exact name or ID, fnmatch glob, nested dict or JMESPath filters) to the listed rows; the caller would have to filter rows.",
-        "The native Port model omits the extension attributes Python returns."
-      ]
+      "contracts": [
+        {
+          "behavior": "Default bodyless /ports GET and Accept header, Source binding/DNS/security/QoS/unknown fields, missing defaults and actual page evidence.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsDefaultRequestAndExtensionFields"
+          ]
+        },
+        {
+          "behavior": "Canonical and wire server aliases, repeated Requests values, unknown kwargs discarded before JSON encoding, nested local declared Body filters.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsQueryAliasesAndLocalBodyFilters"
+          ]
+        },
+        {
+          "behavior": "Plural/HTTP link continuation, short-page limit/marker fallback, paginated false and raw row cap.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPagingLinksAndLimitMarker"
+          ]
+        },
+        {
+          "behavior": "Accepted representations and rejected statuses retain ports operation context; nil option performs no HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "Cloud search uses dict insertion-order pushdown, exact/glob ID-name matching, nested filters and arbitrary full JMESPath; unknown filter fails after real inventory.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSelectionAndPushdown"
+          ]
+        },
+        {
+          "behavior": "Explicit version and headers apply to every actual list page.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsHeadersAndMicroversionOnEveryPage"
+          ]
+        },
+        {
+          "behavior": "Partial field queries do not seed responses; Source constructor alias order/null/boolean/int/list/dict projection and independent actual Wire/Envelope/Header ownership.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPartialFieldsCoercionAndEvidenceIsolation"
+          ]
+        },
+        {
+          "behavior": "Owned runtime controls and malformed UTF-8/JSON fail before HTTP; unknown kwargs discarded without running a JSON Marshaler.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsControlsDiscardAndValidationBeforeEncoding"
+          ]
+        },
+        {
+          "behavior": "Option factories/callback maps own input snapshots and nil Headers are initialized for direct custom assignments.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsOptionsOwnMapsAndNilHeaders"
+          ]
+        },
+        {
+          "behavior": "Option failure retains simultaneous selected-client mutation or cancellation cause, and no HTTP escapes the boundary.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListAndSearchRecordOptionsGuardCancellationAndSource"
+          ]
+        },
+        {
+          "behavior": "Raw cap counts filtered rows, lazy consumer break and single-page stop avoid next page requests.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCapCountsFilteredRowsAndLazyConsumer"
+          ]
+        },
+        {
+          "behavior": "CPython float underflow next is falsey; malformed envelope/row/constructor controls and invalid next retain actual accepted page receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsContinuationTruthinessAndTerminalEvidence"
+          ]
+        },
+        {
+          "behavior": "18 accepted/rejected status plus Read/Close/mixed faults close once, invoke no retry/reauth hook, preserve actual receipt and native401 pointer ErrOriginal/ErrReauth fields.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsPhysicalFailuresPreserveNative401AndStopCallbacks"
+          ]
+        },
+        {
+          "behavior": "Clean401 token renewal and clean503 retry retain selected headers/version/bodyless route/query and leave original client configuration intact.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsCleanReauthenticationAndRetryKeepPolicy"
+          ]
+        },
+        {
+          "behavior": "Eager explicit expression supports scalar/array/object/null values and preserves all original Inventory on expression failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordValuesArbitraryJSONAndInventory"
+          ]
+        },
+        {
+          "behavior": "Cloud falsey filters including underflow act as absent; constructor headers snapshot input and unknown dict keys retain actual inventory on local failure.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsFalseyFiltersHeaderSnapshotAndUnknownKeys"
+          ]
+        },
+        {
+          "behavior": "Original generator projections/index/type return null, literals/identity equality return values, typed functions/serialization/syntax fail with zero HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsSourceGeneratorExpressionsDoNoHTTP"
+          ]
+        },
+        {
+          "behavior": "Source missing/falsey/nonstring controls retain opaque generator; @/not_null/to_array preserve same lazy generator, HTTP starts only on iteration.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortProxyListRecordsPreserveReturnedAndNestedGenerators"
+          ]
+        },
+        {
+          "behavior": "Source formal header/version/base_path normalization and ordered single-pass conflicting attrs restoration; restored formal duplicates fail before HTTP and restored JMES cannot replace the original expression.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsNormalizeSourceFormalsAndConflictingAttrs"
+          ]
+        },
+        {
+          "behavior": "Source unknown non-Body control names and Header kwargs are discarded before JSON marshaling without introducing new query or transport behavior.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsSourceUnknownControlNamesDiscardBeforeMarshaler"
+          ]
+        },
+        {
+          "behavior": "Typed/raw/snapshot base_path selects service-relative collection path for every page; unsafe foreign host/query/fragment/traversal fails before HTTP.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsBasePathOwnsRouteAndLocksContinuation"
+          ]
+        },
+        {
+          "behavior": "Source-profile local filters preserve CPython float rounding, arbitrary integer precision, nested boolean/number equality, underflow and overflow comparison.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsLocalEqualityUsesSourceLoadedFloats"
+          ]
+        },
+        {
+          "behavior": "Cloud dict filters preserve list_ports polymorphic Proxy result: null/type errors perform no HTTP, @ retains actual inventory and empty literal containers return no fabricated receipt.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsHonorsProxyJMESBeforeCloudLocalSelection"
+          ]
+        },
+        {
+          "behavior": "Raw Source formals and dedicated concrete factories use last option consistently for selected path, headers and microversion.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortListRecordsFormalFactoriesAndTypedOptionsUseLastValue"
+          ]
+        },
+        {
+          "behavior": "Actual Source canonical cloud dict lookup succeeds, wire Body keys fail after real inventory, raw Connection location is snapshotted and applied before selection without modifying Wire.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSourceWireFiltersAndConnectionLocationBeforeSelection"
+          ]
+        },
+        {
+          "behavior": "Cloud second-phase SelectLoaded preserves Source numeric matches from first-phase list filtering rather than reversing rounded float/integer or nested underflow comparisons.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsSecondFilterKeepsSourceLoadedNumericMatch"
+          ]
+        },
+        {
+          "behavior": "Configured CloudLocation is cloned and computed per actual resource before filtering; foreign project clears scope names, keeps original project/zone, and never fabricates Wire location.",
+          "tests": [
+            "network/v2/ports/python_list_records_test.go:TestPythonPortSearchRecordsCloudLocationOwnsForeignProjectAndZone"
+          ]
+        },
+        {
+          "behavior": "Connection uses cached Neutron service; owned per-row CurrentLocation is applied before local selection without changing actual Wire, and callbacks execute once.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsCachedServiceAndAutomaticPerRowLocation"
+          ]
+        },
+        {
+          "behavior": "Clean absent catalog returns nonnil empty list before list options; search still evaluates loaded local filters and expressions on [], including scalar/null and invalid expressions, with zero HTTP. Mixed catalog errors and cancellation remain failures.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsCatalogAbsencePrecedesListOptionsButSearchStillEvaluatesEmpty",
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsMixedCatalogFailureAndCancellationDoNotClaimEmpty"
+          ]
+        },
+        {
+          "behavior": "Invalid Connection/context fails before discovery; late-page failure preserves actual response error evidence and prevents a fabricated successful selection.",
+          "tests": [
+            "connection_network_record_lists_test.go:TestConnectionPortRecordsPreflightAndLatePageFailureRetainActualEvidence"
+          ]
+        }
+      ],
+      "differences": [
+        "Concrete Go records expose owned declared Resource view and independent actual Wire/Envelope/Header/StatusCode. Full mutable Python Resource/cache/dirty-state/runtime subclass handling remains tracked shared SDK-R1/C1/S1, not counted as generated transport parity.",
+        "ProxyListRecords reproduces Source generator-based JMES zero-HTTP values/null/type errors/opaque identity and nested generators. ListRecordValues is explicitly eager Go expression functionality, not claimed identical to Source generator input.",
+        "ListRecords keeps a resource-only iterator and directs polymorphic truthy expressions to ProxyListRecords; falsey/nonstring Proxy controls preserve lazy records. Standard Go iter.Seq2 iteration semantics remain the owned SDK abstraction.",
+        "List routes remain within captured service endpoint; continuation preserves selected origin/collection/filter and rejects unsafe route cycles. Go dictionary/RFC link compatibility and strict validation are explicit Source differences.",
+        "Both list local filters and cloud dictionary selection opt into CPython JSON-loaded equality. Full JMESPath retains documented exact-decimal/lexical object traversal/strict grammar boundaries, and JSON-map object functions can differ from Python Port exact-typename function checks.",
+        "Connection models clean service-catalog absence and explicit endpoint overrides; the broad Python has_service configuration-disabled service policy remains a shared SDK-C1 contract. Typed Connection.ListPorts intentionally retains record-only results; the named list_ports row remains unresolved for polymorphic iterable conversion."
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/v2/ports/python-list-records.md"
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_router_interfaces",
@@ -102632,9 +103984,16 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/search_containers",
       "source_fingerprint": "d0683d72501b4e8a81a72ac2516fda44ca4a883059b362f022a778979c3f4f48",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchContainers",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchLocation",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers"
       ],
       "contracts": [
         {
@@ -102642,15 +104001,53 @@
           "tests": [
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging"
           ]
+        },
+        {
+          "behavior": "SDK collects the complete account ListRecords sequence before applying Source name/id exact-or-fnmatch identification and cloud ordered/nested mapping filters. Filters never become server prefix/query controls; duplicate rows and Source aliases remain visible.",
+          "tests": [
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchCollectsEveryPageBeforeIdentifierAndMapping",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchNameUsesFnmatchAndDeclaredAliases",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchFalseyAndLoadedMappingFilters"
+          ]
+        },
+        {
+          "behavior": "JMESPath returns arbitrary JSON null/scalar/object/list without inventing HTTP row association, while falsey filters, loaded float truthiness/equality, short-circuit field errors and invalid expression on empty identification follow shared SelectLoaded. Header bool getters use Source-loaded truthiness from raw SeedHeaders without changing old ListRecords policy or actual Wire, preserving null and nonempty string behavior.",
+          "tests": [
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchExpressionsReturnArbitraryJSONWithoutRowAssociation",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchPreservesLazyMissingAndNestedMappingFailures",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchLoadedHeaderBoolViewKeepsRawWireAndNull"
+          ]
+        },
+        {
+          "behavior": "Source is captured before callbacks; recorded/configured location is owned before HTTP and remote Wire location cannot replace it. AllRecords, selected Records, Envelope and Value are independent; late paging and guarded cancellation/source failures leave receipts without successful partial selection. Actual HTTP Content-Length faults at the second 200/203/401/404/429/503 page preserve physical body/header/status, pointer ErrOriginal/ErrReauth and zero fault retry/backoff/reauth callbacks.",
+          "tests": [
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchLocationIsOwnedAndRemoteWireCannotReplaceIt",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchMalformedLatePagePreventsSuccessfulPartialResult",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchSourceCapturePrecedesOptionsAndKeepsCancellationCause",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchOwnsRawFiltersAndHeaderNilReset",
+            "objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchPhysicalLatePageKeepsNative401AndStopsHooks"
+          ]
+        },
+        {
+          "behavior": "Connection shares the generated Swift Cloud facade and cached service client, supplies configured location before local selection, retains explicit owned per-call location, and handles DTO reset and callbacks once. Invalid/canceled connection fails without discovery or invented response.",
+          "tests": [
+            "connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchSharesFacadeAndAutomaticLocationBeforeSelection",
+            "connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPerCallLocationRemainsOwnedAndCallbackRunsOnce",
+            "connection_swift_container_records_test.go:TestConnectionSwiftContainerSearchPreflightDoesNotDiscoverOrFabricateResponse"
+          ]
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/cloud-container-search-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no public helper reproducing _utils._filter_list for containers (name or ID glob match, nested dictionary filters and JMESPath string filters); filtering the listed records is caller-side work."
-      ]
+      "differences": [
+        "Go returns ContainerSearchResult.Value plus independent correlated Records for ordinary selection and AllRecords/LastPage evidence; expressions have Expression=true and Records=nil for arbitrary JSON.",
+        "Direct clients use recorded native token project scope; Connection supplies configured cloud/region/project names with the owned location option. Unknown facts stay null and no authentication discovery is made by the helper.",
+        "Go exposes typed string names and raw JSON-domain filters and omits Python deprecation warnings. Mutable Resource/session/dirty/cache SDK-R1/C1/S1 and real authenticated cloud acceptance remain separately tracked.",
+        "Go retains existing ListRecords origin/path/filter ownership, page bound and stronger cycle detection; actual pointer401 LastPage receipt is copied from native ErrOriginal without replay."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_container",
@@ -102683,12 +104080,16 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_container",
       "source_fingerprint": "5d3d0cd6761e8623727ba69adf197700ce75ef98f2ddcd1cd5ce82ba4ddab4c9",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Find",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.CreateRecord",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.CreateContainer",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerPublic",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateHeaders"
       ],
       "contracts": [
         {
@@ -102696,16 +104097,60 @@
           "tests": [
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudCreateContainerSequence"
           ]
+        },
+        {
+          "behavior": "Default public=false owns HEAD get-or-create orchestration: existing containers return the first HEAD without changing ACL; only clean404 permits a bodyless PUT, public=true fixes .r:*,.rlistings, then a second HEAD supplies the return Resource.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerCreateOwnsGetOrCreateAndPublicDefault"
+          ]
+        },
+        {
+          "behavior": "A clean404 after successful creation returns Container nil without error and preserves both PUT and final HEAD receipts; 403/503, descriptor failure, faulty404 and retry-expanded404 remain errors without create fallback or replay.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerCreateKeepsAcknowledgementWhenSecondHeadDisappearsOrFails",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerFaultyOrExpanded404NeverEstablishesAbsence",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerDescriptorFailuresKeepActualHeadAndPreventCreate"
+          ]
+        },
+        {
+          "behavior": "Concrete library-owned options are snapshotted before callbacks and HTTP, bulk replacement restores defaults, unknown ACL and invalid/nil source/name/context/options/header conflicts fail before requests; callback-driven route changes cannot redirect a workflow.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsOwnSnapshotsAndBulkReset",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerInvalidSourceAndInputsPrecedeCallbacks",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsCannotRerouteOrReplaceOwnedACL",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerReusableOptionsAreConcurrentAndIsolated",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilOptionsAndCallbackCancellationStayBeforeHTTP",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilHeaderCallbacksCanUseOwnedTypedHelpers"
+          ]
+        },
+        {
+          "behavior": "Each actual initial HEAD, PUT, final HEAD, ACL POST, optional refresh HEAD and access HEAD keeps status/header/body evidence on accepted/rejected read, Close or combined faults; fault callbacks and renewal are blocked before exposure and no acknowledged mutation is replayed. Native pointer ErrUnableToReauthenticate retains ErrOriginal and ErrReauth and actual 401 receipt derives from ErrOriginal.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerPhysicalFaultsKeepEveryPhaseAndBlockCallbacks",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCancellationKeepsActualAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerSourceDriftIsStickyAcrossReadsAndClose",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCleanRetryCannotChangeSelectedACLOrBodylessFraming"
+          ]
+        },
+        {
+          "behavior": "Clean native 401 renewal remains available and sends the live renewed token without changing method, literal target, bodyless framing or selected public/empty-private ACL.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerClean401RenewalKeepsMethodACLAndLiveToken"
+          ]
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/cloud-containers-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no get-or-create helper: the caller must branch on a nil Find result, call CreateRecord and run a second Find, which is caller-side orchestration rather than one SDK call.",
-        "Go has no public=True switch; the caller must pass the literal read_ACL value .r:*,.rlistings to CreateRecord."
-      ]
+      "differences": [
+        "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
+        "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
+        "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Source create_container returns a Container or None; Go returns ContainerCreateResult.Container plus separate Initial/Creation/Refreshed and Existing facts. Public=false sends no operation ACL, while existing ACL is never updated."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/delete_container",
@@ -102761,10 +104206,14 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/set_container_access",
       "source_fingerprint": "4bc9f867518b8a1aa5abc523b046c1e4d0c1439b9f1cf9c678b842684670daf2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SetContainerAccess",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessHeaders"
       ],
       "contracts": [
         {
@@ -102773,24 +104222,73 @@
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost",
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError"
           ]
+        },
+        {
+          "behavior": "Only literal public/private values are accepted before callbacks/HTTP, public translates to .r:*,.rlistings and private to an explicitly present empty X-Container-Read value; cloud refresh defaults false and true explicitly performs POST then HEAD. A failed final HEAD, including clean404, remains strict and preserves the successful POST without a replay.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessOwnsTranslationAndRefreshDefault",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRejectsUnknownBeforeCallbacksOrHTTP",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRefreshFailurePreservesPostAndStrictMissing"
+          ]
+        },
+        {
+          "behavior": "POST response projection follows Source has_body=False and does not seed the requested ACL as observed state; requested policy, actual POST acknowledgement and optional observed HEAD remain separate.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessOwnsTranslationAndRefreshDefault",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerHeadAndPostIgnoreJSONBodiesButRetainPhysicalEnvelope"
+          ]
+        },
+        {
+          "behavior": "Concrete library-owned options are snapshotted before callbacks and HTTP, bulk replacement restores defaults, unknown ACL and invalid/nil source/name/context/options/header conflicts fail before requests; callback-driven route changes cannot redirect a workflow.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsOwnSnapshotsAndBulkReset",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerInvalidSourceAndInputsPrecedeCallbacks",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsCannotRerouteOrReplaceOwnedACL",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerReusableOptionsAreConcurrentAndIsolated",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilOptionsAndCallbackCancellationStayBeforeHTTP",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilHeaderCallbacksCanUseOwnedTypedHelpers"
+          ]
+        },
+        {
+          "behavior": "Each actual initial HEAD, PUT, final HEAD, ACL POST, optional refresh HEAD and access HEAD keeps status/header/body evidence on accepted/rejected read, Close or combined faults; fault callbacks and renewal are blocked before exposure and no acknowledged mutation is replayed. Native pointer ErrUnableToReauthenticate retains ErrOriginal and ErrReauth and actual 401 receipt derives from ErrOriginal.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerPhysicalFaultsKeepEveryPhaseAndBlockCallbacks",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCancellationKeepsActualAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerSourceDriftIsStickyAcrossReadsAndClose",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCleanRetryCannotChangeSelectedACLOrBodylessFraming"
+          ]
+        },
+        {
+          "behavior": "Clean native 401 renewal remains available and sends the live renewed token without changing method, literal target, bodyless framing or selected public/empty-private ACL.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerClean401RenewalKeepsMethodACLAndLiveToken"
+          ]
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/cloud-containers-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no helper translating the access names public and private into the ACL strings .r:*,.rlistings and an empty value, nor one rejecting other access names before HTTP; the caller must pass the literal read_ACL value to SetMetadataAndRefresh."
-      ]
+      "differences": [
+        "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
+        "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
+        "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Source set_container_access returns a mutable Resource; Go exposes Requested separately from actual Acknowledgement/Refreshed/Container receipts. A POST missing read_ACL does not assert that the server now has the requested ACL."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_container_access",
       "source_fingerprint": "7200cf48b8c95ff57cca6e2b7a2f8a6de91a49d8cb2e3b653207874c2ed0b9b4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.Find",
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.GetContainerAccess",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerReadHeaders"
       ],
       "contracts": [
         {
@@ -102798,15 +104296,60 @@
           "tests": [
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudGetContainerHeadAndMissingNone"
           ]
+        },
+        {
+          "behavior": "One bodyless HEAD classifies missing/empty ACL as private and exact .r:*,.rlistings as public; all other ACL strings fail with actual HEAD evidence and no value fabrication.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerGetAccessClassifiesOnlyExactObservedACL",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerHeadAndPostIgnoreJSONBodiesButRetainPhysicalEnvelope"
+          ]
+        },
+        {
+          "behavior": "Clean404 is a container-not-found error preserving native404 and actual HEAD evidence; other statuses retain native errors, and physical/cancellation/source failures carrying404 never become absence.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerGetAccessMissingAndOtherStatusesKeepEvidence",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerPhysicalFaultsKeepEveryPhaseAndBlockCallbacks"
+          ]
+        },
+        {
+          "behavior": "Concrete library-owned options are snapshotted before callbacks and HTTP, bulk replacement restores defaults, unknown ACL and invalid/nil source/name/context/options/header conflicts fail before requests; callback-driven route changes cannot redirect a workflow.",
+          "tests": [
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsOwnSnapshotsAndBulkReset",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerInvalidSourceAndInputsPrecedeCallbacks",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerOptionsCannotRerouteOrReplaceOwnedACL",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerReusableOptionsAreConcurrentAndIsolated",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilOptionsAndCallbackCancellationStayBeforeHTTP",
+            "objectstorage/cloud_containers_test.go:TestSwiftCloudContainerNilHeaderCallbacksCanUseOwnedTypedHelpers"
+          ]
+        },
+        {
+          "behavior": "Each actual initial HEAD, PUT, final HEAD, ACL POST, optional refresh HEAD and access HEAD keeps status/header/body evidence on accepted/rejected read, Close or combined faults; fault callbacks and renewal are blocked before exposure and no acknowledged mutation is replayed. Native pointer ErrUnableToReauthenticate retains ErrOriginal and ErrReauth and actual 401 receipt derives from ErrOriginal.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerPhysicalFaultsKeepEveryPhaseAndBlockCallbacks",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCancellationKeepsActualAcknowledgementWithoutReplay",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerSourceDriftIsStickyAcrossReadsAndClose",
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerCleanRetryCannotChangeSelectedACLOrBodylessFraming"
+          ]
+        },
+        {
+          "behavior": "Clean native 401 renewal remains available and sends the live renewed token without changing method, literal target, bodyless framing or selected public/empty-private ACL.",
+          "tests": [
+            "objectstorage/v1/containers/cloud_records_test.go:TestSwiftCloudContainerClean401RenewalKeepsMethodACLAndLiveToken"
+          ]
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/cloud-containers-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no helper classifying the X-Container-Read value as public or private and failing for a missing container or an unknown ACL; Find exposes only the raw header, so the classification is caller-side work."
-      ]
+      "differences": [
+        "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
+        "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
+        "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Source returns an access string and SDKException for missing or unknown ACL; Go returns ContainerAccessResult.Access plus the actual HEAD record, with ErrNotFound on clean missing and native HTTP causes retained."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_capabilities",
@@ -102925,19 +104468,87 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/list_objects",
       "source_fingerprint": "03842d4bcc31a70b6f7d3af6a6e4dc2a39ccf05c66e3924a494af64ffe7366cc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.InContainer",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List"
+        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListSinglePage"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Pinned Object MRO projection owns six Body, 28 Header, updated_at aka and null SDK location; ordered canonical/wire aliases, alternate name ID, untyped RawMessage metadata, container URI from call, unknowns and subdir retained in Wire, actual page receipt cloned independently. No object HEAD or synthetic metadata observation.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsDefaultRequestAndProjection",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection"
+          ]
+        },
+        {
+          "behavior": "GET escaped fixed container with format=json and operation Accept JSON; Object query mapping client alias wins wire alias, unknown queries discarded before Marshaler/DTO JSON validation, declared canonical Body filters remain local, no transport-wrapper counting. CPython loaded integer/float/bool recursive equality and float truthiness are explicit shared policy opt-ins. Empty dictionary filter matches every truthy scalar/list/mapping; falsey actual is excluded and nonempty dictionary against truthy nonmapping remains a real page error, including recursive empty filters.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType"
+          ]
+        },
+        {
+          "behavior": "Default full lazy pagination uses raw consumed count against X-Container-Object-Count, last raw row ID/name marker, truthy-limit continuation, falsey limit sent once, source body next and RFC Link interoperability, fixed origin/container/filters and SDK cycle/page bounds. Consumer changes cannot alter raw marker; raw cap includes rejected rows; empty page ends.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCountAndMarkerContinuation",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectCloudListObjectsPrefixAndCountPaging"
+          ]
+        },
+        {
+          "behavior": "Named cloud list_objects delegates same owned Source-shaped listing; prefix absent/explicit-empty/selected value remain distinct, full_listing is ignored by pinned Python and does not disable paging. Go iterator is collected by caller.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectCloudListObjectsPrefixAndCountPaging",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters"
+          ]
+        },
+        {
+          "behavior": "Actual 100..399 admitted only after page JSON/row projection; malformed accepted singleton/scalar/constructor and every 400..599 (including 404) remain terminal with actual status/header/body and OperationError, no ignore-missing.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsStatusesAndOperationContext"
+          ]
+        },
+        {
+          "behavior": "Mixed physical Read/Close/sticky restored source/custom cancellation faults on 200/203/401/404/429/498/503 preserve whole actual receipt, one HTTP and one Close and zero willing caller retry/reauth/backoff callbacks. Native pointer ErrUnableToReauthenticate ErrOriginal and ErrReauth are retained separately. Clean native retry/reauth/backoff preserve fixed route/headers/conditions/selected version and live token.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsPhysicalFaultsPreserveReceiptNative401AndStopHooks",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCleanRetriesPreserveRouteHeadersAndLiveToken"
+          ]
+        },
+        {
+          "behavior": "Owned concrete options clone raw bytes/maps/pointers and callback resets; invalid/reserved/unsupported Source controls fail before Marshaler/HTTP, nil Headers reset composes safely, repeated iterator consumption is independent, consumer break avoids continuation and custom cancellation during yield preserves page proof.",
+          "tests": [
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation"
+          ]
+        }
+      ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/v1/objects/python-record-list.md"
       ],
-      "differences": [],
-      "remaining": [
-        "This helper delegates to Proxy.objects, which stays unresolved: Go has no Python-shaped object record listing that reproduces the format=json query, Python count/limit/marker continuation and Object record projection, and the native Collection listing was not compared for those defaults."
-      ]
+      "differences": [
+        "Go accepts literal string container names, escapes one path segment and preflights empty/slash/dot/control names; pinned Python also accepts a Container resource/name conversion and interpolates its raw name, including str(None) for an empty Resource name. No mutable Python Resource object identity/cache is exposed.",
+        "Go exposes concrete DTO/functional options and iter.Seq2; callers collect to a slice for named cloud list_objects. Pinned full_listing is ignored. Unknown queries are discarded before serialization; per-call headers/microversion/max_items have dedicated controls. Unsafe cls/self/resource_type/session and __conflicting_attrs, arbitrary base_path and deprecated JMESPath are explicitly rejected before HTTP rather than silently claiming those callable/route branches.",
+        "Go SDK-owned location is null and each row metadata map owns raw JSON values. Pinned Connection location calculation and BaseResource class-level shared metadata/dirty state remain common SDK-R1/C1/S1 contracts; actual remote fields remain in Wire and full Envelope.",
+        "Go max_items stops immediately at the raw cap while pinned Python may request the next page before stopping on its first row. Go follows interoperable RFC Link rel=next URLs while pinned _get_next_link indexes requests response.links next uri, a missing key in normal Requests output; Go rejects foreign/changed/cyclic continuations and defaults to 10000-page bound.",
+        "Go sends captured or explicit selected Swift microversion without Python server-max negotiation, and sorts query keys. Requests query/str conversion retains the reviewed shared JSON-domain representation policy and its documented primitive/runtime limits; custom Python objects are outside the Go JSON-domain API.",
+        "Fixture tests and guide builds do not prove a real Swift account/container ACL, deployment middleware/backend, auth renewal or replace-free install; actual-cloud acceptance and release gates remain pending."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/search_objects",
@@ -103022,18 +104633,64 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object_raw",
       "source_fingerprint": "9523e7dd3b515659047b838fb041be2ed07065d1b18d3fd2c7c6684a98d1e488",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObjectRaw",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectQueryString",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectStream"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Default stream=False and query_string=None map to library-owned omitted-query buffered GET; functional concrete options allow explicit encoded query and stream=True. Literal escaped container/object, empty obj selects container, raw repeated query order stays intact, no HEAD/metadata/content decoding. Complete opaque bytes include NUL/invalid UTF8, physical body closes once, accepted HTTP100..999 alone never raises status errors.",
+          "tests": [
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawReturnsEveryStatus",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawBufferedDefaultOwnsOpaqueBytesAndAllowsContainerEndpoint",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawRejectsInputsBeforeHTTP",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawOptionBoundaryCapturesSourceBeforeCallbacks"
+          ]
+        },
+        {
+          "behavior": "Buffered physical Read/Close/sticky restored source/custom cancellation faults retain actual status/header/partial payload without replays, on 200/206/401/404/429/498/503; 401 pointer ErrUnableToReauthenticate public ErrOriginal and ErrReauth retained; willing retry/reauth/backoff hooks remain zero after physical faults. HTTP status clean versus mixed callback errors are classified separately.",
+          "tests": [
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawPhysicalFaultsPreserveActualPayloadAndNative401WithoutHooks",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawCleanNativeRenewalAndMixedCallbackErrorsStayDistinct"
+          ]
+        },
+        {
+          "behavior": "Full named stream=True branch returns accepted body before any Read, uses shared owned bodyless unread exchange, opaque bytes flow through caller-owned guarded reader, clean EOF and Close are stable and one physical Close, valid extension HTTP777 remains raw. Original admitted policy/body/header/route cannot be broadened by callbacks.",
+          "tests": [
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawStreamingIsUnreadAndGuardsOpaqueLifecycle"
+          ]
+        },
+        {
+          "behavior": "Caller stream Read/Close faults and restored source/custom cancel preserve only the current partial chunk with immutable actual status/header and all causes, despite caller mutating exported result. SDK operation wrapper retains exact EOF; no reauth/retry/backoff or resend after exposure. Early Close succeeds/idempotent and later Read is ErrClosedPipe; cancel after headers closes without a physical Read.",
+          "tests": [
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawStreamingFaultsRetainImmutableWireEvidenceAndNoReplay",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawStreamingCloseBeforeEOFAndCanceledUnreadBody"
+          ]
+        },
+        {
+          "behavior": "Clean native401 reauth and429/498 backoff renew live token while fixing URL/query/Accept/conditions/selected version. Final clean native statuses are rebuilt only from actual native bytes already read/closed. Faulty rejected Close/native pointer401 preserve evidence and stop hooks before streaming body is returned.",
+          "tests": [
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawCleanNativeRenewalAndMixedCallbackErrorsStayDistinct",
+            "objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawStreamingCleanAndFaultyNative401AndBackoff"
+          ]
+        }
+      ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/v1/objects/python-raw-get.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Go has no call that sends a GET with an arbitrary caller query string and returns the raw HTTP response; GetObject accepts only typed read options and returns decoded results."
-      ]
+      "differences": [
+        "Go returns RawObjectResponse(StatusCode,Header,Body), rather than mutable Requests Response, and configures omitted query + buffered default via concrete optional functions. The public stream branch preserves actual wire facts and close ownership rather than exposing mutable HTTP implementation state.",
+        "Go preserves one escaped opaque object name, including slash versus literal percent-escape distinction; Python urllib.parse.quote leaves object slashes unescaped. Empty obj selects the container in both. Go validates literal container/object names and already-encoded QueryString UTF8/control/space/fragment before HTTP; Requests automatic URI requoting and custom Python objects are not reproduced.",
+        "Go provider-owned clean native401 renewal and429/498 backoff occur before the final raw result. Native rejected bodies have already been consumed, so final clean statuses and failed native response evidence are rebuilt from their actual bytes, even in stream=True. Mixed callback/handling/source/context failures remain errors and never become clean raw status results.",
+        "Go streamed terminal failure proof retains current partial chunk and immutable physical status/header without buffering prior successful chunks. Buffered failures may return nonnil raw result and error together. Python transport/cache/session/Resource object ownership remain common SDK-R1/C1/S1 contracts, not a full SDK parity claim.",
+        "Fixture/guide validation does not establish live Swift ACL/backend/middleware/auth/cache or release acceptance; those project gates remain tracked."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/stream_object",
