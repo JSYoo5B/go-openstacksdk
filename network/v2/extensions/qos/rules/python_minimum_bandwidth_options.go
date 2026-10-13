@@ -73,6 +73,7 @@ func WithMinimumBandwidthFindHeaders(v map[string]string) MinimumBandwidthFindOp
 // MinimumBandwidthListOpts owns list kwargs. Query includes declared server fields,
 // nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
 type MinimumBandwidthListOpts struct {
+	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
@@ -81,10 +82,11 @@ type MinimumBandwidthListOpts struct {
 type MinimumBandwidthListOption func(*MinimumBandwidthListOpts) error
 
 func minimumBandwidthListOptions(v MinimumBandwidthListOpts) neutronfind.Options {
-	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyMinimumBandwidthList(v MinimumBandwidthListOpts) MinimumBandwidthListOpts {
 	owned := neutronfind.CloneOptions(minimumBandwidthListOptions(v))
+	v.BasePath = owned.BasePath
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	if v.Query == nil {
 		v.Query = make(map[string]json.RawMessage)
@@ -193,4 +195,9 @@ func WithMinimumBandwidthGetMicroversion(v string) MinimumBandwidthGetOption {
 func WithMinimumBandwidthGetHeaders(v map[string]string) MinimumBandwidthGetOption {
 	owned := maps.Clone(v)
 	return func(c *MinimumBandwidthGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+}
+
+// WithMinimumBandwidthListBasePath owns a service-relative route override for Proxy lists.
+func WithMinimumBandwidthListBasePath(v string) MinimumBandwidthListOption {
+	return func(c *MinimumBandwidthListOpts) error { x := v; c.BasePath = &x; return nil }
 }

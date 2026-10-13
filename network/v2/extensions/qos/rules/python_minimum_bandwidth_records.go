@@ -49,6 +49,10 @@ func minimumBandwidthWrap(ctx context.Context, op string, err error) error {
 	return request.Wrap(op, "rules", cloudread.ContextError(ctx, err))
 }
 func (a *API) minimumBandwidthEngine(ctx context.Context, parent string) (*neutronfind.Engine, error) {
+	return a.minimumBandwidthEnginePolicy(ctx, parent, false)
+}
+
+func (a *API) minimumBandwidthEnginePolicy(ctx context.Context, parent string, source bool) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
 	}
@@ -64,6 +68,7 @@ func (a *API) minimumBandwidthEngine(ctx context.Context, parent string) (*neutr
 		}
 	}
 	profile := minimumBandwidthRecordProfile
+	profile.SourceStatusPolicy, profile.SourceLinkPolicy, profile.PythonLoadedEquality = source, source, source
 	profile.Path = "qos/policies/" + url.PathEscape(parent) + "/minimum_bandwidth_rules"
 	profile.VersionedPath = "/v2.0/" + profile.Path
 	selected := a.client

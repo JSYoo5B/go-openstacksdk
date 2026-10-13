@@ -66,6 +66,7 @@ func WithDSCPMarkingFindHeaders(v map[string]string) DSCPMarkingFindOption {
 // DSCPMarkingListOpts owns list kwargs. Query includes declared server fields,
 // nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
 type DSCPMarkingListOpts struct {
+	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
@@ -74,10 +75,11 @@ type DSCPMarkingListOpts struct {
 type DSCPMarkingListOption func(*DSCPMarkingListOpts) error
 
 func dscpMarkingListOptions(v DSCPMarkingListOpts) neutronfind.Options {
-	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyDSCPMarkingList(v DSCPMarkingListOpts) DSCPMarkingListOpts {
 	owned := neutronfind.CloneOptions(dscpMarkingListOptions(v))
+	v.BasePath = owned.BasePath
 	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
@@ -196,4 +198,9 @@ func WithDSCPMarkingGetMicroversion(v string) DSCPMarkingGetOption {
 func WithDSCPMarkingGetHeaders(v map[string]string) DSCPMarkingGetOption {
 	owned := maps.Clone(v)
 	return func(c *DSCPMarkingGetOpts) error { c.Headers = maps.Clone(owned); return nil }
+}
+
+// WithDSCPMarkingListBasePath owns a service-relative route override for Proxy lists.
+func WithDSCPMarkingListBasePath(v string) DSCPMarkingListOption {
+	return func(c *DSCPMarkingListOpts) error { x := v; c.BasePath = &x; return nil }
 }

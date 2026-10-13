@@ -58,6 +58,10 @@ func dscpMarkingParentID(value string) error {
 	return nil
 }
 func (a *API) dscpMarkingEngine(ctx context.Context, parent string) (*neutronfind.Engine, error) {
+	return a.dscpMarkingEnginePolicy(ctx, parent, false)
+}
+
+func (a *API) dscpMarkingEnginePolicy(ctx context.Context, parent string, source bool) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
 	}
@@ -69,6 +73,7 @@ func (a *API) dscpMarkingEngine(ctx context.Context, parent string) (*neutronfin
 	}
 	selected := a.client
 	profile := dscpMarkingRecordProfile
+	profile.SourceStatusPolicy, profile.SourceLinkPolicy, profile.PythonLoadedEquality = source, source, source
 	profile.Path = "qos/policies/" + url.PathEscape(parent) + "/dscp_marking_rules"
 	profile.VersionedPath = "/v2.0/" + profile.Path
 	return neutronfind.New(ctx, selected, profile, func(context.Context) error {

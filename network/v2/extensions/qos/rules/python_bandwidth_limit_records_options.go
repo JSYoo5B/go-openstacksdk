@@ -66,6 +66,7 @@ func WithBandwidthLimitFindHeaders(v map[string]string) BandwidthLimitFindOption
 // BandwidthLimitListOpts owns list kwargs. Query includes declared server fields,
 // nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
 type BandwidthLimitListOpts struct {
+	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
@@ -74,11 +75,11 @@ type BandwidthLimitListOpts struct {
 type BandwidthLimitListOption func(*BandwidthLimitListOpts) error
 
 func bandwidthLimitListOptions(v BandwidthLimitListOpts) neutronfind.Options {
-	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyBandwidthLimitList(v BandwidthLimitListOpts) BandwidthLimitListOpts {
 	owned := neutronfind.CloneOptions(bandwidthLimitListOptions(v))
-	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
+	v.BasePath, v.Microversion, v.Query, v.Headers, v.order = owned.BasePath, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	return v
 }
 func WithBandwidthLimitListOpts(v BandwidthLimitListOpts) BandwidthLimitListOption {
@@ -130,6 +131,9 @@ func WithBandwidthLimitListQuery(key string, value any) BandwidthLimitListOption
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
+}
+func WithBandwidthLimitListBasePath(v string) BandwidthLimitListOption {
+	return func(c *BandwidthLimitListOpts) error { x := v; c.BasePath = &x; return nil }
 }
 func WithBandwidthLimitListMicroversion(v string) BandwidthLimitListOption {
 	return func(c *BandwidthLimitListOpts) error { x := v; c.Microversion = &x; return nil }

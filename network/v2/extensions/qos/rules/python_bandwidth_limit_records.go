@@ -50,6 +50,10 @@ func bandwidthLimitWrap(ctx context.Context, op string, err error) error {
 	return request.Wrap(op, "rules", cloudread.ContextError(ctx, err))
 }
 func (a *API) bandwidthLimitEngine(ctx context.Context, parent string) (*neutronfind.Engine, error) {
+	return a.bandwidthLimitEnginePolicy(ctx, parent, false)
+}
+
+func (a *API) bandwidthLimitEnginePolicy(ctx context.Context, parent string, source bool) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
 	}
@@ -65,6 +69,10 @@ func (a *API) bandwidthLimitEngine(ctx context.Context, parent string) (*neutron
 		}
 	}
 	profile := bandwidthLimitRecordProfile
+	profile.SourceStatusPolicy, profile.PythonLoadedEquality = source, source
+	if source {
+		profile.Body = append(slices.Clone(profile.Body), neutronfind.Descriptor{Name: "location", Wire: "location", Missing: "null", Project: func(json.RawMessage) (json.RawMessage, error) { return json.RawMessage("null"), nil }})
+	}
 	profile.Path = "qos/policies/" + url.PathEscape(parent) + "/bandwidth_limit_rules"
 	profile.VersionedPath = "/v2.0/" + profile.Path
 	selected := a.client
