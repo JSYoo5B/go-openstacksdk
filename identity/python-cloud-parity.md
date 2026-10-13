@@ -2,7 +2,7 @@
 
 이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [IdentityCloudMixin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py) 메서드(shade 시절부터 이어진 `conn.create_user`, `conn.get_project` 같은 cloud 계층 helper)를 이 SDK의 공개 API와 비교합니다. cloud helper는 identity Proxy 위에 이름 또는 ID 조회, 지역 필터, domain 처리, 참과 거짓 반환을 더한 것이라서 Proxy 메서드 하나와 일대일로 맞지 않습니다. 그래서 기본 인자로 호출했을 때 Python이 보내는 요청 순서와 결과를 공개 Go API만으로 그대로 만들 수 있고, 문서화된 인자의 효과도 SDK 호출로 낼 수 있을 때만 `go_mapping`으로 판정했습니다. 호출자가 직접 행을 거르거나 404를 성공으로 바꿔야 하는 경우는 `unresolved`입니다.
 
-기존 native 호출은 `conn.Identity(ctx)`가 돌려주는 identity v3 `Service`의 필드(`Services`, `Endpoints`, `Domains`, `Groups`, `Roles`, `Projects`, `Users`)를 씁니다. 판정 근거는 [`identity/v3/python_cloud_parity_test.go`](v3/python_cloud_parity_test.go)와 [`identity/v3/python_rejudge_test.go`](v3/python_rejudge_test.go)가 고정하며, 새 Project·Group 읽기는 [Project 가이드](v3/projects/python-record-reads.md)·[Group 가이드](v3/groups/python-records.md)의 owned facade와 record tests를 사용합니다. 각 Proxy의 현행 경계는 [사용자 Proxy 문서](v3/python-parity-users.md)와 [catalog 문서](v3/python-parity-catalog.md), 기존 native 자동 조회는 [이름 또는 ID 조회 문서](../docs/finding-identities.md)를 따릅니다.
+기존 native 호출은 `conn.Identity(ctx)`가 돌려주는 identity v3 `Service`의 필드(`Services`, `Endpoints`, `Domains`, `Groups`, `Roles`, `Projects`, `Users`)를 씁니다. 판정 근거는 [`identity/v3/python_cloud_parity_test.go`](v3/python_cloud_parity_test.go)와 [`identity/v3/python_rejudge_test.go`](v3/python_rejudge_test.go)가 고정하며, 새 읽기는 [Project 가이드](v3/projects/python-record-reads.md)·[Group 가이드](v3/groups/python-records.md)·[User 가이드](v3/users/python_records.md)·[Role 가이드](v3/roles/python-records.md)·[Domain 가이드](v3/domains/python-records.md)의 owned facade와 record tests를 사용합니다. 각 Proxy의 현행 경계는 [사용자 Proxy 문서](v3/python-parity-users.md)와 [catalog 문서](v3/python-parity-catalog.md), 기존 native 자동 조회는 [이름 또는 ID 조회 문서](../docs/finding-identities.md)를 따릅니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
@@ -12,8 +12,8 @@
 | [`update_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L207) | `Projects.FindIdentity` (`WithIdentityFindIgnoreMissing(false)`), `Projects.Update` | go_mapping |
 | [`create_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L235) | `Projects.Create` (`Extra`로 description null) | go_mapping |
 | [`delete_project`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L263) | `Projects.FindIdentity`, `Projects.Remove` | go_mapping |
-| [`list_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L291) | `Users.List` + `users.WithListOptions` | go_mapping |
-| [`search_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L305) | `Users.List` (지역 필터 없음) | unresolved |
+| [`list_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L291) | `identity.NewUserReadCloud(svc.Users).ListUsers` | go_mapping |
+| [`search_users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L305) | `identity.UserReadCloud.SearchUsers` | go_mapping |
 | [`get_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L344) | `Users.FindIdentity` | unresolved |
 | [`get_user_by_id`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L393) | `Users.Get` | go_mapping |
 | [`update_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L421) | `Users.FindIdentity`, `Users.Update` | go_mapping |
@@ -43,8 +43,8 @@
 | [`create_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1007) | `Domains.Create` | go_mapping |
 | [`update_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1031) | `Domains.Update` (이름이면 `Domains.FindIdentity`) | unresolved |
 | [`delete_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1073) | `Domains.FindIdentity`, `Domains.Update`, `Domains.Delete` | go_mapping |
-| [`list_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1113) | `Domains.All` (filters 제한) | unresolved |
-| [`search_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1125) | `Domains.All` (지역 필터 없음) | unresolved |
+| [`list_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1113) | `identity.NewDomainReadCloud(svc.Domains).ListDomains` | go_mapping |
+| [`search_domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1125) | `identity.DomainReadCloud.SearchDomains` | go_mapping |
 | [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1161) | `Domains.Get`, `Domains.FindIdentity` | unresolved |
 | [`list_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1209) | `Groups.List` + `groups.WithListOptions` | go_mapping |
 | [`search_groups`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1222) | `identity.NewGroupReadCloud(svc.Groups).SearchGroups` | go_mapping |
@@ -52,8 +52,8 @@
 | [`create_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1291) | `Domains.Get`, `Groups.Create` | go_mapping |
 | [`update_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1324) | `Groups.FindIdentity`, `Groups.Update` | unresolved |
 | [`delete_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1355) | `Groups.FindIdentity`, `Groups.Remove` | go_mapping |
-| [`list_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1380) | `Roles.All` (filters 제한) | unresolved |
-| [`search_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1391) | `Roles.List` (지역 필터 없음) | unresolved |
+| [`list_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1380) | `identity.NewRoleReadCloud(svc.Roles).ListRoles` | go_mapping |
+| [`search_roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1391) | `identity.RoleReadCloud.SearchRoles` | go_mapping |
 | [`get_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1422) | `Roles.FindIdentity` | unresolved |
 | [`list_role_assignments`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1503) | `Roles.ListAssignments` | go_mapping |
 | [`create_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1577) | `Roles.Create` | go_mapping |
@@ -62,13 +62,13 @@
 | [`grant_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1687) | `*.FindIdentity`, `Roles.Validate`, `Roles.Assign` | unresolved |
 | [`revoke_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_identity.py#L1812) | `*.FindIdentity`, `Roles.Validate`, `Roles.Unassign` | unresolved |
 
-이 표의 55개 선언 중 31개가 `go_mapping`, 24개가 `unresolved`입니다. 이번 정합성 갱신은 Project·Group·Limit 조회에 한정하며, 다른 연산의 기존 기록은 유지합니다. 전체 SDK 진행량은 [중앙 지원 기록](../docs/sdk-support-ledger.md)에서 집계합니다.
+이 표의 55개 선언 중 36개가 `go_mapping`, 19개가 `unresolved`입니다. 이번 정합성 갱신은 Project·Group에 이어 User·Role·Domain 목록·검색과 Proxy read를 반영하며, 다른 연산의 기존 기록은 유지합니다. 전체 SDK 진행량은 [중앙 지원 기록](../docs/sdk-support-ledger.md)에서 집계합니다.
 
 ## 공통 차이
 
-기존 native helper는 `conn.Identity(ctx)`의 v3 client와 Gophercloud 모델을 사용합니다. 새 ProjectReadCloud·GroupReadCloud도 이미 선택된 Keystone v3 API를 요구하며 자동 v2 전환을 추가하지 않습니다. 새 결과의 Resource.Body는 Python 속성 이름·Source descriptor를, Wire/Envelope/header/status는 실제 HTTP 증거를 보존합니다. Source 클래스가 maximum microversion discovery를 요구하지 않는 점과, 선택 서비스 기본값·명시적 Go version 옵션을 소유하는 점을 구분합니다. Connection 전체 cache·Resource lifecycle·session은 별도 SDK-R1/C1/S1 범위입니다.
+기존 native helper는 `conn.Identity(ctx)`의 v3 client와 Gophercloud 모델을 사용합니다. 새 ProjectReadCloud·GroupReadCloud·UserReadCloud·RoleReadCloud·DomainReadCloud도 이미 선택된 Keystone v3 API를 요구하며 자동 v2 전환을 추가하지 않습니다. 새 결과의 Resource.Body는 Python 속성 이름·Source descriptor를, Wire/Envelope/header/status는 실제 HTTP 증거를 보존합니다. Source 클래스가 maximum microversion discovery를 요구하지 않는 점과, 선택 서비스 기본값·명시적 Go version 옵션을 소유하는 점을 구분합니다. Connection 전체 cache·Resource lifecycle·session은 별도 SDK-R1/C1/S1 범위입니다.
 
-기존 native `All/List`는 Keystone links.next pager를 유지합니다. 새 Project·Group facade가 사용하는 record 목록은 dictionary next를 무시하는 Source 정책, root link 우선순위, explicit limit의 short-page marker fallback과 raw cap을 적용합니다. Project cloud helper의 filters에는 limit/marker 같은 Proxy query도 포함될 수 있으므로 한 번의 GET으로 고정하지 않습니다.
+기존 native `All/List`는 Keystone links.next pager를 유지합니다. 새 Identity read facade가 사용하는 record 목록은 dictionary next를 무시하는 Source 정책, root link 우선순위, explicit limit의 short-page marker fallback과 raw cap을 적용합니다. Project cloud helper의 filters에는 limit/marker 같은 Proxy query도 포함될 수 있으므로 한 번의 GET으로 고정하지 않습니다.
 
 Python의 생성 helper는 `None`으로 넘긴 인자도 Resource 속성으로 넣기 때문에 본문에 JSON null이 들어갑니다. Go typed 필드는 빈 값을 생략하므로 같은 본문을 만들려면 `CreateOpts.Extra`나 `WithCreateField`로 null을 넣어야 합니다. 다만 typed 필드와 같은 이름의 `WithCreateField`는 HTTP 전에 거부되므로 `Extra`가 있는 모델은 `Extra`를 씁니다.
 
@@ -113,7 +113,7 @@ if err == nil && found != nil {
 
 ## project와 user
 
-`create_project`는 description을 주지 않아도 `description: null`을 보내고, 나머지 keyword 인자도 Project가 모르는 속성까지 본문에 넣습니다. Go는 typed 필드와 `Extra`로 같은 본문을 만듭니다. `list_users`는 `domain_id`와 `name`만 받으므로 `users.WithListOptions(users.ListOpts{DomainID: ..., Name: ...})`와 같고, `get_user_by_id`는 `Users.Get`과 같은 `GET /v3/users/<id>`입니다. deprecated `normalize` 인자는 경고만 냅니다.
+`create_project`는 description을 주지 않아도 `description: null`을 보내고, 나머지 keyword 인자도 Project가 모르는 속성까지 본문에 넣습니다. Go는 typed 필드와 `Extra`로 같은 본문을 만듭니다. `list_users`는 `domain_id`와 `name`만 받으며 새 `UserReadCloud.ListUsers`가 Source valid_kwargs와 unknown-key preflight를 소유합니다. 기존 native `users.WithListOptions(users.ListOpts{DomainID: ..., Name: ...})`는 원래 모델 계약을 유지하고, `get_user_by_id`는 `Users.Get`과 같은 `GET /v3/users/<id>`입니다. deprecated `normalize` 인자는 경고만 냅니다.
 
 `create_user`는 domain_id가 없으면 HTTP 전에 `SDKException`을 내지만 Go는 domain_id 없이 요청을 보냅니다. domain_id를 주면 `email: null`이 들어간 본문이 나가며 Go에서는 `Extra: map[string]any{"email": nil}`로 같게 만들 수 있습니다. `default_project`를 주면 POST 전에 `get_project(default_project)`가 아래와 같은 두 조회 요청을 보내고, 찾으면 `default_project_id`를 채우며 없으면 그 key 없이 생성합니다. Go에서는 `Projects.FindIdentity` 결과가 nil이 아닐 때 `CreateOpts.DefaultProjectID`를 채우면 같은 본문이 됩니다.
 
@@ -128,6 +128,18 @@ Connection의 Project helper는 cached IdentityV3와 CurrentLocation을 local �
 Project 목록과 Group get/list는 stock policy의 system/domain reader 경로이며 일반 project reader 전체 목록 권한을 뜻하지 않습니다. Project GET은 own-project user도 허용하지만 Find fallback과 cloud 검색은 해당 목록 권한을 필요로 합니다. 정책 근거는 [Keystone28.0.0 Project](https://github.com/openstack/keystone/blob/28.0.0/keystone/common/policies/project.py#L157-L174), [Group](https://opendev.org/openstack/keystone/src/tag/28.0.0/keystone/common/policies/group.py)과 [domain 목록 controller](https://opendev.org/openstack/keystone/src/tag/28.0.0/keystone/api/groups.py)입니다.
 
 Proxy `find_project/find_group`는 concrete FindRecord 옵션·GET 우선·clean fallback·중복/missing이 있어도 **named unresolved**를 유지합니다. raw Resource.fetch control/header kwargs와 generic synchronized Resource/cache remaining을 [사용자 Proxy 지원 경계](v3/python-parity-users.md#projectgroup-record-조회와-지원-경계)에 기록합니다. 이 목록·검색 판정으로 cloud `get_project/get_group`, 수정·삭제·role helper의 후속 workflow까지 승격하지 않습니다.
+
+## User·Role·Domain 목록과 검색
+
+[User](v3/users/python_records.md)·[Role](v3/roles/python-records.md)·[Domain](v3/domains/python-records.md)의 Cloud 목록·검색은 SDK-owned facade로 `go_mapping`입니다. Proxy `users/roles/domains`는 각 `ListRecords/AllRecords/ProxyListRecords`를 사용하며 이 판정으로 cloud get/update나 named Find를 승격하지 않습니다. `go_mapping`은 concrete 호출 대응이고 전체 SDK `supported` 완료와 다릅니다.
+
+User `ListUsers`는 Source가 허용한 domain_id/name 두 키만 받습니다. `SearchUsers`는 truthy non-UUID name_or_id를 server name hint로 보내고 Source UUID normalization을 따르며, glob도 서버에는 literal hint로 전달합니다. 모든 페이지 뒤 exact/glob ID/name와 nested mapping/JMESPath를 적용하므로 서버 name 필터가 먼저 후보를 제한할 수 있습니다. Filters는 server kwargs로 펼치지 않습니다.
+
+Role `ListRoles`는 임의 keyword를 Proxy의 query/local Body 분류에 맡기고 polymorphic Proxy 반환을 Python list()처럼 소비합니다. `SearchRoles`는 domain_id만 서버에 보내 모든 행을 모은 뒤 local identifier·nested mapping 또는 truthy JMESPath를 적용합니다. 이름과 filters를 서버로 보내지 않습니다. Proxy는 unread generator에서 expression을 평가하고 Cloud search는 actual 배열에서 평가하므로 같은 expression이라도 요청 수와 결과가 다릅니다.
+
+Domain `SearchDomains`는 `NameOrID *string` presence를 보존합니다. Nil은 Source name_or_id=None처럼 mapping filters를 `list_domains(**filters)`에 전달하고, 빈 문자열 포함 nonnil은 무필터 목록을 모두 모은 뒤 local identifier·mapping/JMESPath를 평가합니다. None filters만 empty mapping으로 바뀌며 nil-identifier의 string/false/zero/empty string/array filters는 kwargs expansion 오류입니다. Nonnil branch의 local 오류보다 늦은 HTTP 오류가 먼저 반환됩니다. Opaque/nested Proxy 결과는 Value/ValueObjects, 실제 rows는 Inventory로 구분하고 expression에 Resource나 receipt를 합성하지 않습니다.
+
+User·Domain 목록은 stock system reader 또는 대상 domain reader 경로이고 일반 project reader의 전체 목록 권한을 뜻하지 않습니다. Role 기본 목록은 system reader 또는 문서화된 domain-manager 경로이며 truthy domain_id가 선택하는 domain-specific 목록은 별도 정책입니다. [User 권한](v3/users/python_records.md)·[Role 권한](v3/roles/python-records.md#권한과-지원-판정)·[Domain 권한](v3/domains/python-records.md)에 실제 정책 경계를 기록합니다. SDK는 scope/token을 바꾸지 않습니다. 새 facade의 자동 Connection bridge, response cache와 dynamic Resource lifecycle은 SDK-R1/C1/S1에 남습니다.
 
 ## 이름 또는 ID로 찾는 helper
 
@@ -153,11 +165,11 @@ if err == nil && user != nil {
 - `update_group`: 새 concrete FindRecord가 있어도 named find_group의 raw fetch control/header와 generic cache/lifecycle remaining이 남습니다. 기존 cloud update 판정도 유지합니다. `get_domain/update_domain`은 기존 find_domain와 Resource 대응 범위에서 unresolved입니다.
 - `grant_role`, `revoke_role`: domain, role, user 또는 group, project를 모두 `find_*`로 찾습니다. 또 Python `validate_*_has_*_role`은 204가 아닌 HEAD를 거짓으로 보지만 Go `roles.API.Validate`와 `osinherit.API.Validate`는 404를 오류로 돌려주므로, 할당이 없다고 판단하는 일이 호출자 몫으로 남습니다. Python은 `wait`, `timeout` 인자를 받기만 하고 쓰지 않습니다.
 
-다음 메서드는 결과를 `_utils._filter_list`로 지역에서 거릅니다. 이 함수는 ID나 이름의 정확한 일치와 fnmatch glob 일치, 중첩 dict 필터, deprecated jmespath 문자열을 처리합니다. 이번 Project·Group에는 위 owned helper가 있지만 아래 다른 native identity helper의 지역 filter 문제는 기존 미해결 범위로 남습니다.
+다음 메서드는 결과를 `_utils._filter_list`로 지역에서 거릅니다. 이 함수는 ID나 이름의 정확한 일치와 fnmatch glob 일치, 중첩 dict 필터, deprecated jmespath 문자열을 처리합니다. Project·Group·User·Role·Domain에는 위 owned helper가 있고 아래 다른 native identity helper의 지역 filter 문제는 기존 미해결 범위로 남습니다.
 
-- `search_users`, `search_roles`, `search_domains`, `search_services`, `search_endpoints`
+- `search_services`, `search_endpoints`
 - `get_service`, `get_endpoint`: deprecated `filters`를 줄 때만 해당합니다.
 
-`list_domains/list_roles`는 임의의 filter keyword를 `Resource.list`에 넘깁니다. `list_projects`는 위 concrete facade의 현행 구현을 사용합니다. Python은 query가 아닌 Body 속성(예를 들어 description)을 각 행에서 지역으로 거르고, `limit`을 주면 마지막 행 ID를 marker로 삼아 빈 페이지가 나올 때까지 다시 요청합니다. 이 두 남은 native 바인딩에는 Body 필터와 limit 기반 marker 요청이 없습니다.
+`list_domains/list_roles`의 임의 keyword·Body local filter·limit marker 처리는 위 record facade가 소유합니다. 기존 native 바인딩의 제한은 유지하지만 새 public 목록 경로의 미해결 사유로 세지 않습니다. 각 facade의 명시적 location·Go continuation 보호와 전체 cache/lifecycle 잔여는 가이드와 중앙 SDK-R1/C1/S1 계약을 따릅니다.
 
 endpoint group helper(`create_endpoint_group`, `update_endpoint_group`, `list_endpoint_groups`, `search_endpoint_groups`, `get_endpoint_group`, `delete_endpoint_group`)는 Gophercloud v2.15.0에 Keystone `/OS-EP-FILTER/endpoint_groups` 바인딩이 없어서 SDK 고유 호출이 필요합니다.

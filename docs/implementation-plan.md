@@ -8,7 +8,25 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13, 추가 한 사이클): 구현·검토·문서·전체 gate PASS, 이번 사이클 마감.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트174개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 최종 `make check`는204개 실제 test package와 race/vet/parity/progress/license/gofmt 모두 PASS입니다. 최초 vet 실패와 status 회귀, 해당 수리 후 최종 전체 통과를 [검증 기록](sdk-support-ledger.md#2026-10-13-추가-사이클-마감)에 구분했습니다.
+**현재 구현 (2026-10-13, quota 반복 첫 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `8b9eeed1`입니다. 검증한 Go 매핑은 전체 **1,981→2,002개(+21), 2,002/3,228(62.0%)**, 핵심 **1,903→1,924/2,158(89.2%)**입니다. 기존 `list_users` 매핑을 보강한 1행은 신규 수에 포함하지 않았으며, 관리자 rule-type details 1행은 unresolved로 유지합니다. 고정 catalog3,362개·unsupported134개·supported0을 보존하고 판정23행을 갱신했습니다.
+
+| 병렬 소유 단위 | 최종 구현·집중 검증·문서 | 신규 Go 매핑 |
+|---|---|---:|
+| Keystone User | proxy users·cloud 목록/검색·UUID query·location, race PASS·비교 문서·커밋/push | 2 |
+| Keystone Role | proxy roles·cloud 목록/검색·실제 권한 정책, race PASS·비교 문서·커밋/push | 3 |
+| Keystone Domain | proxy domains·presence-aware cloud 목록/검색, race PASS·비교 문서·커밋/push | 3 |
+| Keystone Endpoint | Source descriptor·페이지 링크·system reader 조회, race PASS·비교 문서·커밋/push | 1 |
+| Neutron QoS Policy | fresh 전체 extension gate·cloud 목록/검색·Source Proxy 결과, race PASS·문서·커밋/push | 2 |
+| Neutron QoS RuleType | cloud 목록·opaque 결과·Source Proxy, race PASS·문서·커밋/push; details는 admin 단계 | 1 |
+| Neutron QoS Bandwidth | 부모 policy 조회 후 목록·검색·단일 조회·opaque generator, race PASS·문서·커밋/push | 3 |
+| Neutron QoS DSCP·Minimum | 각각 목록·검색·단일 조회·strict parent getter·location, race PASS·문서·커밋/push | 6 |
+| 합계 | 새 계약 테스트156그룹·독립 Go main9개 build·Python 예제 AST 통과, 전체 gate PASS | 21 |
+
+Connection의 User·Role·Domain 조회는 캐시된 Keystone API와 기본 location을 전달하고 명시 옵션을 보존합니다. 공통 QoS extension 확인은 매 호출 전체 alias 목록을 다시 읽으며 후반 오류를 보존합니다. 기존 공개 Gophercloud testhelper·fixture·공통 guard/descriptor/filter를 재사용했습니다. 최초 User raw-query 변환 오류, Endpoint 권한 오류 assertion, QoS native 오류 carrier·페이지 링크·다형 검색 경계를 수리한 후 집중 검사를 통과했습니다. 전체 검사에서는 Role 결과 DTO2개를 API 호출 근거로 쓰던 판정 JSON 오류를 수리했으며 최종 `make check`의 실제 test package204개와 race/vet/parity/progress/license/gofmt가 모두 PASS입니다. [실행 근거](sdk-support-ledger.md#2026-10-13-quota-반복-첫-사이클)에 최초 실패와 최종 검증을 구분합니다.
+
+시작 quota 잔여97%, 최종 조회91%입니다. 한도는 계정의 다른 작업과 공유합니다. 새 사이클은 조회 가능한 창의 최소 잔여가 **엄격히80%를 초과**하고 ordinaryUsageAllowed=true일 때만 시작하며, 이미 시작한 범위는 경계를 내려가도 검증·문서·판정·커밋/push까지 마무리합니다. 모델 capacity 오류는 같은 모델에서 재개했으며 이번 범위 밖 API·새 목표·관리자 mutation은 추가하지 않았습니다. SDK-R1/C1/S1·실클라우드·외부 릴리즈의 남은 계약을 보존합니다.
+
+**직전 사이클 (2026-10-13, 추가 한 사이클): 구현·검토·문서·전체 gate PASS, 이번 사이클 마감.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트174개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 최종 `make check`는204개 실제 test package와 race/vet/parity/progress/license/gofmt 모두 PASS입니다. 최초 vet 실패와 status 회귀, 해당 수리 후 최종 전체 통과를 [검증 기록](sdk-support-ledger.md#2026-10-13-추가-사이클-마감)에 구분했습니다.
 
 | 병렬 소유 단위 | 최종 단계 | 신규 Go 매핑 |
 |---|---|---:|
@@ -539,11 +557,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 1,981 (61.4%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 2,002 (62.0%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,247 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,226 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,051 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,178 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -722,21 +740,21 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,903 / 2,158 | 88.2% | 254 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,924 / 2,158 | 89.2% | 233 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 1,981 / 3,228 | 61.4% | 372 | 875 | 134 |
+| 전체 | 2,002 / 3,228 | 62.0% | 351 | 875 | 134 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 332 / 379 | 46 | 1 | 10 |
+| Identity / Keystone | 341 / 379 | 37 | 1 | 10 |
 | Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 624 / 728 | 104 | 0 | 30 |
+| Network / Neutron | 636 / 728 | 92 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
 | Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |

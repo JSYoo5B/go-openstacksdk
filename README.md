@@ -31,6 +31,13 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 Project·Group·Neutron Extension Find는 raw 조회 옵션의 남은 계약 때문에 미해결로 추적합니다. 각 가이드의 Go 매핑은 전체 Resource/session 동등성이나 실클라우드 검증과 구분합니다.
 
+Quota 반복 사이클의 Python/Go 사용 비교:
+
+- Keystone: [User 목록·검색](identity/v3/users/python_records.md), [Role 목록·검색](identity/v3/roles/python-records.md), [Domain 목록·검색](identity/v3/domains/python-records.md), [Endpoint 목록](identity/v3/endpoints/python-records.md).
+- Neutron: [QoS policy 목록·검색](network/cloud-qos-policies-python.md), [QoS rule type 목록](network/cloud-qos-rule-types-python.md), [bandwidth limit](network/cloud-qos-bandwidth-python.md), [DSCP marking](network/cloud-qos-dscp-python.md), [minimum bandwidth](network/cloud-qos-minimum-bandwidth-python.md)의 목록·검색·조회.
+
+Connection에서는 `conn.ListUserRecords(ctx)`·`SearchUserRecords(ctx, name, options...)`, Role·Domain의 대응 메서드로 캐시된 Keystone API와 Connection location을 함께 사용합니다. Domain 검색 이름은 `identity.WithDomainReadNameOrID(name)`으로 지정하며, 옵션을 생략한 경우와 빈 문자열을 지정한 경우를 구분합니다. 명시적인 location 옵션은 Connection 기본값보다 우선합니다. Endpoint는 `conn.IdentityV3(ctx)`의 `Endpoints.ProxyListRecords`로 조회합니다. Neutron은 `conn.Network(ctx)`가 반환한 서비스의 각 QoS helper를 호출합니다. SDK가 확장 광고를 매번 확인하고 규칙의 부모 정책을 조회하며, 결과에 실제 extension·policy·응답 근거를 보존합니다. Rule type 상세 조회는 관리자 단계에 남겨 두었습니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.

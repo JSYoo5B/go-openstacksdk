@@ -1,15 +1,15 @@
 # openstacksdk identity v3 Proxy 대응: domain·group·project·user·role과 role 할당
 
-이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [identity v3 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py) 가운데 domain, group, project, user, role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 메서드가 보내는 요청을 이 SDK의 `identity/v3` 호출과 비교합니다. Keystone 요청 자체의 status, 입력 검사, decode 규칙은 [native 관리 호출 문서](native-admin-a.md)와 [native trust·사용자 본인 호출 문서](native-trusts.md)에 있고, 여기서는 Python 코드를 옮길 때 달라지는 기본값과 반환값을 정리합니다. `user_projects/user_groups`는 [사용자 membership 문서](users/memberships.md), 기존 native `FindIdentity`는 [자동 조회 비교](../../docs/finding-identities.md)를 참고합니다. 새 Project·Group record 조회의 범위와 named find의 미해결 분기는 아래에서 구분합니다.
+이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [identity v3 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py) 가운데 domain, group, project, user, role의 생성·조회·수정·삭제·목록과 group membership, 암호 변경, role 할당 메서드가 보내는 요청을 이 SDK의 `identity/v3` 호출과 비교합니다. Keystone 요청 자체의 status, 입력 검사, decode 규칙은 [native 관리 호출 문서](native-admin-a.md)와 [native trust·사용자 본인 호출 문서](native-trusts.md)에 있고, 여기서는 Python 코드를 옮길 때 달라지는 기본값과 반환값을 정리합니다. `user_projects/user_groups`는 [사용자 membership 문서](users/memberships.md), 기존 native `FindIdentity`는 [자동 조회 비교](../../docs/finding-identities.md)를 참고합니다. 새 Project·Group·User·Role·Domain record 조회의 범위와 named find의 미해결 분기는 아래에서 구분합니다.
 
-판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 요청 판정은 `domains/groups/projects/users/roles/osinherit`의 `python_parity_test.go`에, 새 Project·Group read 계약은 각 `python_records_test.go`와 [Project 조회 가이드](projects/python-record-reads.md)·[Group 조회 가이드](groups/python-records.md)에 있습니다. named find의 unresolved 사유를 concrete 옵션의 존재만으로 지우지 않습니다.
+판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 요청 판정은 `domains/groups/projects/users/roles/osinherit`의 `python_parity_test.go`에, 새 read 계약은 각 `python_records_test.go`와 [Project](projects/python-record-reads.md)·[Group](groups/python-records.md)·[User](users/python_records.md)·[Role](roles/python-records.md)·[Domain](domains/python-records.md) 조회 가이드에 있습니다. named find의 unresolved 사유를 concrete 옵션의 존재만으로 지우지 않습니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
 | [`create_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L217) | `domains.API.Create` | unresolved |
 | [`delete_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L228) | `domains.API.Remove` | go_mapping |
 | [`get_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L278) | `domains.API.Get` | unresolved |
-| [`domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L290) | `domains.API.List` | unresolved |
+| [`domains`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L290) | `domains.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_domain`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L301) | `domains.API.Update`와 `domains.WithUpdateField("id", id)` | unresolved |
 | [`create_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L738) | `groups.API.Create` | go_mapping |
 | [`delete_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L749) | `groups.API.Remove` | go_mapping |
@@ -30,13 +30,13 @@
 | [`create_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1335) | `users.API.Create` | go_mapping |
 | [`delete_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1346) | `users.API.Remove` | go_mapping |
 | [`get_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1402) | `users.API.Get` | go_mapping |
-| [`users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1429) | `users.API.List` | unresolved |
+| [`users`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1429) | `users.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_user`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1440) | `users.API.Update`와 `users.WithUpdateField("id", id)` | go_mapping |
 | [`update_password`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1452) | `users.API.ChangePassword` | go_mapping |
 | [`create_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1699) | `roles.API.Create` | go_mapping |
 | [`delete_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1710) | `roles.API.Remove` | go_mapping |
 | [`get_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1766) | `roles.API.Get` | go_mapping |
-| [`roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1778) | `roles.API.List` | unresolved |
+| [`roles`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1778) | `roles.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1788) | `roles.API.Update`와 `roles.WithUpdateField("id", id)` | go_mapping |
 | [`role_assignments_filter`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1877) | `roles.API.ListAssignmentsOnResource` | go_mapping |
 | [`role_assignments`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1983) | `roles.API.ListAssignments` | unresolved |
@@ -59,13 +59,13 @@
 | [`unassign_system_role_from_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2369) | `roles.API.Unassign` (`System: true`) | go_mapping |
 | [`validate_group_has_system_role`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2389) | `roles.API.Validate` (`System: true`) | go_mapping |
 
-이 표의 52개 선언 중 42개가 `go_mapping`, 10개가 `unresolved`입니다. 이번 정합성 갱신은 Project·Group·Limit 조회에 한정하며, 다른 연산의 기존 기록은 유지합니다. 전체 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
+이 표의 52개 선언 중 45개가 `go_mapping`, 7개가 `unresolved`입니다. 이번 정합성 갱신은 Project·Group에 이어 User·Role·Domain Proxy 목록을 반영하며, 다른 연산의 기존 기록은 유지합니다. 전체 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
 
 ## 공통 차이
 
-기존 native 호출은 ID 문자열과 Gophercloud 모델을 사용합니다. 새 Project·Group record API는 선언 속성 view와 독립적인 Wire·Envelope·실제 header/status를 제공합니다. 해당 Source 클래스는 `_max_microversion=None`이라 자체 최대 버전 discovery를 요구하지 않지만, 선택한 서비스 기본값과 명시적 per-call version은 새 concrete 옵션으로 처리합니다. Find의 per-call version은 GET에만 적용하고 fallback LIST는 원래 기본값을 사용합니다.
+기존 native 호출은 ID 문자열과 Gophercloud 모델을 사용합니다. 새 Project·Group·User·Role·Domain record API는 선언 속성 view와 독립적인 Wire·Envelope·실제 header/status를 제공합니다. 해당 Source 클래스는 `_max_microversion=None`이라 자체 최대 버전 discovery를 요구하지 않지만, 선택한 서비스 기본값과 명시적 per-call version은 새 concrete 옵션으로 처리합니다. Find의 per-call version은 GET에만 적용하고 fallback LIST는 원래 기본값을 사용합니다.
 
-Python은 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py)의 `raise_from_response`를 거쳐 400 미만 status를 모두 성공으로 받습니다. Go native 호출은 정해진 status만 받습니다. 새 Project·Group read API는 Source의 유효한 HTTP100..399 범위를 받아들이고 accepted 오류는 `ResponseError`, rejected 오류는 native HTTP proof와 실제 원인을 보존합니다. 생성은 201(project만 201, 202), 조회와 수정은 200, 삭제는 202, 204, membership·암호 변경·role 할당은 204입니다. 그래서 Python에서 성공하던 200 응답이 Go에서는 `gophercloud.ErrUnexpectedResponseCode`가 될 수 있습니다.
+Python은 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py)의 `raise_from_response`를 거쳐 400 미만 status를 모두 성공으로 받습니다. Go native 호출은 정해진 status만 받습니다. 새 record read API는 각 가이드의 유효 HTTP 정책을 따르고 accepted 오류는 `ResponseError`, rejected 오류는 native HTTP proof와 실제 원인을 보존합니다. 생성은 201(project만 201, 202), 조회와 수정은 200, 삭제는 202, 204, membership·암호 변경·role 할당은 204입니다. 그래서 Python에서 성공하던 200 응답이 Go에서는 `gophercloud.ErrUnexpectedResponseCode`가 될 수 있습니다.
 
 ## Project·Group record 조회와 지원 경계
 
@@ -74,6 +74,12 @@ Python은 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d16660
 두 `FindRecord`는 GET 우선, clean400/403/404 fallback, 모든 페이지의 exact ID/name·중복·기본 missing과 실제 오류 원인 보존을 제공합니다. 그러나 `find_project/find_group` named 판정은 **unresolved**입니다. 임의 `Resource.fetch` controls(`requires_id/base_path/skip_cache/error_message/resource_response_key`), raw `headers`의 member GET query와 fallback LIST formal header 분기, SDK의 generic synchronized Resource/cache 상태가 현재 concrete 옵션 범위와 같지 않습니다. typed `WithRecordFindHeaders`로 raw Source kwargs까지 재현한다고 주장하지 않습니다. 공통 SDK-R1/C1/S1은 별도로 추적합니다.
 
 [Keystone28.0.0 Project 정책](https://github.com/openstack/keystone/blob/28.0.0/keystone/common/policies/project.py#L157-L174)의 목록은 admin 외에 system reader 또는 대상 domain reader를 허용하고, member GET은 own-project 사용자 경로도 있습니다. Find fallback은 목록 권한을 필요로 합니다. [Group 정책](https://opendev.org/openstack/keystone/src/tag/28.0.0/keystone/common/policies/group.py)도 admin/system reader/대상 Group domain reader 경로이며 일반 project reader만으로 Group 목록을 허용한다는 뜻은 아닙니다. domain-scoped 목록의 대상·결과 제한은 [서버 controller](https://opendev.org/openstack/keystone/src/tag/28.0.0/keystone/api/groups.py)가 적용합니다.
+
+## User·Role·Domain record 목록
+
+`users/roles/domains`도 `ListRecords/AllRecords/ProxyListRecords`로 `go_mapping`입니다. [User](users/python_records.md)·[Role](roles/python-records.md)·[Domain](domains/python-records.md) 가이드는 runnable Python/Go와 선언별 defaults/casts/aliases, 실제 Query/Body local 분류, nullable 값, unknown 응답 Wire 유지, raw cap·marker·Source link와 opaque Proxy expression을 제공합니다. Domain과 Role은 options dictionary를 보존하므로 기존 native 모델의 field 누락을 새 목록 경로의 미해결로 보지 않습니다. 기존 native `List/All/Get/FindIdentity`의 모델과 status/pager 정책은 유지합니다.
+
+User·Domain 목록의 system/domain reader, Role의 system reader와 domain-specific 정책은 각 가이드의 권한 감사를 따릅니다. 일반 project reader가 전체 목록을 볼 수 있다고 추정하지 않습니다. 새 목록 계약으로 `find_user/find_role/find_domain`, cloud get/update/create, group_users 또는 role_assignments를 추가 승격하지 않습니다. Generic cache·synchronized Resource lifecycle·자동 Connection bridge는 SDK-R1/C1/S1 잔여이며 supported 증가는 0입니다.
 
 ## domain·group·project·user·role 생성, 조회, 수정
 
@@ -98,7 +104,7 @@ Python `Proxy._update`는 ID 문자열로 새 Resource를 만들기 때문에 `i
 - Python Resource에 typed 필드가 없는 속성(user의 `email`, project의 알 수 없는 속성 등)은 `CreateOpts.Extra`, `UpdateOpts.Extra`나 `With...Field`로 envelope 안에 넣습니다. 응답에서도 이런 key는 `Extra`에 모입니다. project의 `links`도 `Extra`에 들어갑니다.
 - user의 `password_expires_at`은 Go에서 시간대 없는 Keystone 형식으로 해석한 `time.Time`입니다. Python은 문자열 그대로 두므로 끝에 `Z`가 붙은 값은 Go에서만 decode 오류가 됩니다.
 
-domain은 이 중 생성, 조회, 수정이 모두 `unresolved`입니다. native `domains.Domain`에는 `Options`도 `Extra`도 없어서 Keystone이 돌려주는 `options` 객체가 버려지고, Python `Domain.options`에 해당하는 값을 어떤 공개 Go 호출로도 읽을 수 없습니다. 요청 쪽에서는 `domains.WithCreateField("options", ...)`로 options를 보낼 수 있지만, `domains.UpdateOpts`에 `Extra`가 없어서 `description`이나 `enabled`를 null로 보내는 수정도 만들 수 없습니다.
+domain은 이 중 생성, member 조회, 수정이 모두 `unresolved`입니다. Native `domains.Domain`에는 Options/Extra가 없어 이 연산의 반환에서는 options가 버려지며, 이 세 계약은 이번 목록 구현으로 승격하지 않습니다. 새 `DomainRecord` 목록은 options를 읽을 수 있지만 member Get/Create/Update의 대체 반환 계약은 아닙니다. 요청 쪽에서는 `domains.WithCreateField("options", ...)`를 사용할 수 있지만 `domains.UpdateOpts`의 Extra/null 수정 제한은 남습니다.
 
 ## 삭제
 
@@ -113,10 +119,10 @@ err = users.New(client).Remove(ctx, resource.ID("u-1"), resource.WithMissingErro
 
 ## 목록
 
-현재 `projects()/groups()`는 위 record API로 `go_mapping`입니다. 기존 native `List`만 사용하면 아래 차이가 남습니다. `domains()/users()/roles()/group_users()/role_assignments()`는 이 문서의 기존 판정에서 `unresolved`입니다. 인자 없이 부르면 Python과 Go 모두 `GET {collection}` 하나를 보내고, Python query 이름은 각 `ListOpts` 필드나 `WithListQuery`로 같은 wire key가 됩니다. 판정을 막는 동작은 다음 두 가지입니다.
+현재 `projects/groups/domains/users/roles`는 위 record API로 `go_mapping`입니다. 아래는 기존 native `List/All`의 제한이며, 새 record 목록의 구현을 미해결로 세지 않습니다. `group_users/role_assignments`는 별도 목록 계약으로 여전히 unresolved입니다. 인자 없이 부르면 Python과 native Go 모두 `GET {collection}`을 보내지만 native 경로에는 다음 차이가 남습니다.
 
 - Python `Resource.list`는 `limit`이 있으면 다음 링크가 없어도 마지막 ID를 `marker`로 붙여 빈 페이지가 나올 때까지 다시 요청합니다. Go native pager는 첫 요청만 보냅니다.
-- Python은 query 매핑에 없는 Body 속성(예: `users(email=...)`, `domains(description=...)`)을 받은 응답에 지역 filter로 적용합니다. 이 collection들에는 Body filter binding이 없어서 `resource.WithBodyFilter`는 HTTP 전에 `resource.ErrUnsupported`가 됩니다.
+- Python은 query 매핑에 없는 Body 속성(예: `users(email=...)`, `domains(description=...)`)을 받은 응답에 지역 filter로 적용합니다. 기존 native collection의 `resource.WithBodyFilter`는 HTTP 전에 `resource.ErrUnsupported`가 됩니다. 새 `WithRecordListQuery`는 선언된 nonquery Body를 로컬에서 처리합니다.
 
 나머지 차이는 판정에 영향을 주지 않지만 알아 둘 만합니다. Python은 bool 값을 `enabled=True`처럼 대문자 텍스트로 보내고 typed `ListOpts`는 `enabled=true`를 보냅니다. Python과 같은 텍스트가 필요하면 `WithListQuery("enabled", "True")`를 씁니다. Python은 Keystone `links` dict에 `rel` key가 없어서 `links.next`를 따라가지 않지만 Go pager는 따라갑니다. Python은 모르는 query 이름을 버리고 Go는 `WithListQuery` key를 모두 서버에 보냅니다.
 
@@ -157,6 +163,5 @@ status 처리는 Python과 다릅니다. Python helper는 `Proxy.request`의 `ra
 - `find_project/find_group`: concrete `FindRecord` 부분 구현 외의 raw Resource.fetch control/header kwargs와 generic synchronized Resource/cache 동작이 남습니다. 위 지원 경계를 따릅니다.
 
 - `create_domain`, `get_domain`, `update_domain`: native `domains.Domain`이 `options` 응답 필드를 버립니다. `update_domain`은 typed 필드를 null로 보내는 방법도 없습니다.
-- `domains`, `users`, `roles`: `limit`이 있을 때의 marker 반복 요청과 Body 속성 지역 filter가 없습니다. `domains`는 options 필드도 잃습니다.
 - `group_users`: `ListInGroup`에 marker 반복 요청과 User Body 속성 지역 filter가 없습니다.
 - `role_assignments`: native `RoleAssignment`가 `links`와 `OS-INHERIT:inherited_to`를 버리고, marker 반복 요청과 `role`·`scope`·`user`·`group` dict 지역 filter가 없습니다.

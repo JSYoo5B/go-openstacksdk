@@ -27,18 +27,18 @@
 | [update_router](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2309) | 없음 | 미해결 |
 | [update_subnet](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2591) | `subnets.API.FindRecord` 후 `UpdateWithAttributes` (일부) | 미해결 |
 | [update_port](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2776) | `ports.API.FindRecord` 후 `UpdateWithAttributes` (일부) | 미해결 |
-| [list_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L333) | 없음 | 미해결 |
-| [search_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L253) | 없음 | 미해결 |
+| [list_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L333) | `network.Service.ListQoSPolicyRecords` ([사용법](cloud-qos-policies-python.md)) | go_mapping · 집중 race·독립 main build PASS |
+| [search_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L253) | `network.Service.SearchQoSPolicyRecords` ([사용법](cloud-qos-policies-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [update_qos_policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1468) | 없음 | 미해결 |
-| [list_qos_rule_types](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L281) | 없음 | 미해결 |
-| [list_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1557) | 없음 | 미해결 |
-| [search_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1535) | 없음 | 미해결 |
+| [list_qos_rule_types](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L281) | `network.Service.ListQoSRuleTypeValues` ([사용법](cloud-qos-rule-types-python.md)) | go_mapping · 집중 race·독립 main build PASS |
+| [list_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1557) | `network.Service.ListQoSBandwidthLimitRules` ([사용법](cloud-qos-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
+| [search_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1535) | `network.Service.SearchQoSBandwidthLimitRules` ([사용법](cloud-qos-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [update_qos_bandwidth_limit_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1667) | 없음 | 미해결 |
-| [list_qos_dscp_marking_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1786) | 없음 | 미해결 |
-| [search_qos_dscp_marking_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1764) | 없음 | 미해결 |
+| [list_qos_dscp_marking_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1786) | `network.Service.ListQoSDSCPMarkingRules` ([사용법](cloud-qos-dscp-python.md)) | go_mapping · 집중 race·독립 main build PASS |
+| [search_qos_dscp_marking_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1764) | `network.Service.SearchQoSDSCPMarkingRules` ([사용법](cloud-qos-dscp-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [update_qos_dscp_marking_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1877) | 없음 | 미해결 |
-| [list_qos_minimum_bandwidth_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1983) | 없음 | 미해결 |
-| [search_qos_minimum_bandwidth_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1959) | 없음 | 미해결 |
+| [list_qos_minimum_bandwidth_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1983) | `network.Service.ListQoSMinimumBandwidthRules` ([사용법](cloud-qos-minimum-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
+| [search_qos_minimum_bandwidth_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1959) | `network.Service.SearchQoSMinimumBandwidthRules` ([사용법](cloud-qos-minimum-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [update_qos_minimum_bandwidth_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2073) | 없음 | 미해결 |
 | [list_firewall_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1350) | `fwaas_v2/groups.API.All` (기본 인자만) | 미해결 |
 | [list_firewall_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1079) | `fwaas_v2/policies.API.All` (기본 인자만) | 미해결 |
@@ -56,7 +56,7 @@
 | [add_auto_ip](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1394) | 없음 | 미해결 |
 | [detach_ip_from_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1214) | 없음 | 미해결 |
 
-대응 8개, 미해결 39개입니다.
+이 표의 기존 대응은 8행이며, 이번 QoS 사용자 조회 9행은 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. 나머지 30행은 기존 미해결 판정을 유지합니다. 아래 조회의 집중 race·독립 main build 결과를 확인했으며 실클라우드 인증·Python/Go 실행은 별도로 남아 있습니다.
 
 ## Subnet과 subnet pool
 
@@ -88,7 +88,13 @@
 
 ## QoS
 
-QoS helper는 모두 먼저 `GET /v2.0/extensions`로 `qos` 별칭을 확인하고, 없으면 `OpenStackCloudUnavailableExtension`을 던집니다. 규칙 helper는 이어서 `find_qos_policy`로 정책을 찾고 없으면 `NotFoundException`을 던지며, update는 `qos-default`, `qos-bw-limit-direction` 확장 검사와 현재 규칙 조회까지 거칩니다. search 계열은 `_filter_list` 로컬 선택을 추가합니다. 이 순서를 수행하는 Go helper가 없으므로 13개 모두 미해결입니다.
+B 묶음의 정책 list/search 2행, rule type list 1행, bandwidth-limit·DSCP-marking·minimum-bandwidth list/search 각 2행을 새 사용자 조회 helper에 연결했습니다. A의 단일 규칙 get 3행과 합쳐 **사용자 조회 12행**입니다. 새 network.Service helper는 conn.Network(ctx) 또는 network.New(client)로 사용하며, 각 [정책](cloud-qos-policies-python.md)·[rule types](cloud-qos-rule-types-python.md)·[bandwidth](cloud-qos-bandwidth-python.md)·[DSCP](cloud-qos-dscp-python.md)·[minimum bandwidth](cloud-qos-minimum-bandwidth-python.md) guide에 전체/서비스 단위 Go·Python 예제가 있습니다. **현재 판정은 go_mapping이며 Root 집중 race·독립 main build 검증을 통과했습니다.**
+
+매 호출은 fresh GET /extensions의 모든 페이지를 소비한 뒤 qos alias를 검사합니다. 첫 일치에서 중단하거나 앞 호출의 extension 결과를 cache하지 않고, 늦은 malformed alias·HTTP 오류와 실제 관찰한 receipt를 보존합니다. gate가 실패하면 filter 해석·정책·규칙 단계로 넘어가지 않습니다. 정책 목록과 rule type 목록은 gate 다음 각 Source Proxy list를 읽고, 규칙 목록/검색은 gate 다음 정책 GET-first ID/name lookup을 SDK가 처리합니다. missing/ambiguous policy는 규칙 요청 전에 오류입니다.
+
+정책 search_qos_policies는 _filter_list 검색이 아니라 truthy name_or_id를 server name으로 넣은 뒤 filters로 kwargs를 덮어쓰는 Source 순서를 사용합니다. BW/DSCP/minimum 규칙 search는 목록을 완전히 소비하고 rule ID/name exact·glob 및 원래 mapping filters를 추가 적용합니다. Falsey filters, declared Body 로컬 조건, raw formal controls와 generator 대상 JMESPath/list() 결과는 각 helper의 실제 Source lane을 따릅니다. Literal JSON과 opaque 결과에는 가짜 Resource/HTTP proof를 만들지 않습니다.
+
+update_qos_policy와 세 규칙 update_qos_*_rule은 B의 QoS 잔여 4행으로 유지합니다. qos-default·qos-bw-limit-direction 등 추가 확장, 현재 규칙 조회, 변경 없음과 mutable Resource commit 계약은 사용자 조회 후보를 구현했다는 이유로 닫지 않습니다. A의 관리자 get_qos_rule_type_details·create/delete 및 아직 미완성인 cloud get_qos_policy도 그 문서의 잔여로 유지합니다. 낮은 수준 native API 존재와 cloud helper 완료, 실제 배포 policy/backend 수락은 별개의 증거입니다.
 
 ## FWaaS
 
@@ -122,7 +128,7 @@ security group helper는 `secgroup_source` 설정을 따릅니다. 기본값은 
 - remove_router_interface: 두 인자가 모두 비었을 때 HTTP 전에 거부하지 않습니다.
 - update_router: extraroute 확장 검사와 변경 없음 처리 helper가 없습니다.
 - update_port, update_subnet: 변경 내용이 없을 때 PUT을 건너뛰는 helper가 없습니다.
-- QoS 13개: qos 확장 검사, 정책 조회 실패 처리, 추가 확장 검사, 로컬 검색 helper가 없습니다.
+- QoS: list/search 9행은 fresh 전체 extension gate·정책 lookup·Source 검색 단계를 소유하는 새 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. update_qos_policy와 BW/DSCP/minimum rule update 4행의 추가 확장·현재 규칙 조회·변경 계약은 미해결로 유지합니다.
 - list_firewall_groups, list_firewall_policies, list_firewall_rules: Body 전용 filter 키의 로컬 필터가 없습니다.
 - update_firewall_group, update_firewall_policy, update_firewall_rule, insert_rule_into_policy, remove_rule_from_policy: 이름/ID 조회, 참조 ID 변환, 단락 처리 helper가 없습니다.
 - get_security_group, search_security_groups, update_security_group, delete_security_group, create_security_group_rule: 전체 목록 위의 이름/ID glob 선택 helper가 없습니다.
