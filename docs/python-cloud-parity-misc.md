@@ -10,29 +10,31 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 판정은 공개 Go API가 기본 인자에서 helper의 동작 전체를 직접 수행할 때만 대응으로 봅니다. 호출자가 행을 거르거나, 결과에 따라 다음 호출을 고르거나, 404를 직접 성공으로 바꿔야 한다면 미해결로 둡니다. 아래 예제의 `containers`, `objects`는 `objectstorage/v1/containers`, `objectstorage/v1/objects` 패키지이고 `resource`는 SDK의 `resource` 패키지입니다.
 
+2026-10-13의 [object record 목록](../objectstorage/v1/objects/python-record-list.md)과 [buffered·stream raw 응답](../objectstorage/v1/objects/python-raw-get.md)은 별도 concrete 옵션으로 구현했습니다. Raw 조회의 optional query와 stream 기본값을 SDK가 소유하며, 아래 `get_object`·`stream_object`의 별도 미해결 문자 디코딩·iterator 계약은 그대로 남습니다.
+
 ## 대응 표
 
 | Python 메서드 | Go 호출 | 판정 |
 | --- | --- | --- |
 | `list_containers` | `containers.API.ListRecords(ctx, containers.WithRecordListPrefix(p))` | 대응 |
-| `search_containers` | 없음 (`ListRecords` 뒤 호출자 필터) | 미해결 |
+| `search_containers` | `Connection.SearchContainers(ctx, options...)` | go_mapping |
 | `get_container` | `containers.API.Find(ctx, resource.ID(name), resource.WithIgnoreMissing())` | 대응 |
-| `create_container` | `Find`, `CreateRecord`, `Find`를 호출자가 이어 붙임 | 미해결 |
+| `create_container` | `swift.Cloud.CreateContainer(ctx, name, options...)` | go_mapping |
 | `delete_container` | `containers.API.DeleteRecord(ctx, name)` | 대응 |
 | `update_container` | `containers.API.SetMetadataAndRefresh(ctx, name, headers, containers.WithMetadataRefresh(false))` | 대응 |
-| `set_container_access` | `SetMetadataAndRefresh`에 ACL 문자열 직접 전달 | 미해결 |
-| `get_container_access` | `Find` 결과의 `X-Container-Read`를 호출자가 해석 | 미해결 |
+| `set_container_access` | `swift.Cloud.SetContainerAccess(ctx, name, access)` | go_mapping |
+| `get_container_access` | `swift.Cloud.GetContainerAccess(ctx, name)` | go_mapping |
 | `get_object_capabilities` | `objectstorage/v1.Service.GetInfo` | 대응 |
 | `get_object_segment_size` | `objectstorage/v1.Service.GetObjectSegmentSize` | 대응 |
 | `is_object_stale` | `objects.API.IsObjectStale` | 대응 |
 | `create_object` | `objects.API.CreateObject` | 미해결 |
 | `update_object` | `objects.API.SetMetadataFromFresh(ctx, container, name, values)` | 대응 |
-| `list_objects` | `objects.API.InContainer` 뒤 `Collection.List` | 미해결 |
+| `list_objects` | `objects.API.ListRecords(ctx, container, options...)` | go_mapping |
 | `search_objects` | 없음 | 미해결 |
 | `delete_object` | `objects.API.DeleteObject(ctx, container, name)` | 대응 |
 | `delete_autocreated_image_objects` | 없음 | 미해결 |
 | `get_object_metadata` | `objects.API.HeadMetadata(ctx, container, name)` | 대응 |
-| `get_object_raw` | 없음 (`GetObject`는 임의 query를 받지 않음) | 미해결 |
+| `get_object_raw` | `objects.API.GetObjectRaw(ctx, container, name, options...)` | go_mapping |
 | `stream_object` | `objects.API.StreamObject` | 미해결 |
 | `get_object` | `objects.API.GetObject`, `objects.API.DownloadObject` | 미해결 |
 | `current_location` | `Connection.CurrentLocation()` | 대응 |
@@ -78,9 +80,9 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 `update_container`는 `set_container_metadata(..., refresh=False)`로 `POST` 한 번을 보냅니다. `SetMetadataAndRefresh`에 `WithMetadataRefresh(false)`를 주면 같은 요청이 나갑니다. 접미사 key는 `X-Container-Meta-`를 붙이고, 이미 붙은 key는 그대로 두며, `read_ACL`이나 `write_ACL` 같은 system 이름은 `X-Container-Read`, `X-Container-Write`로 바꿉니다. Python은 keyword 인자의 마지막 값이 이기지만 Go는 같은 header로 가는 key가 둘이면 요청 전에 실패합니다.
 
-`create_container`는 `HEAD`로 먼저 확인하고, 없을 때만 `PUT`과 두 번째 `HEAD`를 보냅니다. Go의 `Find`, `CreateRecord`, `Find`로 같은 요청 순서를 만들 수 있다는 점은 테스트로 확인했습니다. 그래도 있는지 보고 만들지 정하는 분기는 호출자 몫이고, `public=True`도 호출자가 `read_ACL`에 `.r:*,.rlistings`를 직접 넣어야 하므로 미해결로 둡니다. `set_container_access`와 `get_container_access`도 같은 이유입니다. Go에는 `public`, `private`를 ACL 문자열로 바꾸거나 거꾸로 해석하는 helper가 없습니다. 그래서 호출자가 `SetMetadataAndRefresh`에 ACL 값을 직접 넘기거나 `Find` 결과의 `X-Container-Read`를 직접 비교해야 합니다. 비공개 ACL은 빈 `X-Container-Read` 값으로 나가는 것까지 확인했습니다.
+`swift.Cloud.CreateContainer`가 존재 확인·조건부 생성·재조회와 public 기본값을 소유합니다. `SetContainerAccess`와 `GetContainerAccess`는 public/private ACL 변환과 해석을 처리합니다. [Source 비교와 응답 증거](../objectstorage/cloud-containers-python.md)를 참고합니다.
 
-`search_containers`는 container 목록 뒤에 `_utils._filter_list`로 이름 glob, 중첩 dictionary 조건, JMESPath 문자열을 적용합니다. 이 필터를 container에 적용하는 공개 Go helper가 없으므로 미해결입니다.
+`Connection.SearchContainers`가 전체 페이지 수집·이름 glob·중첩 dictionary·JMESPath를 처리하고 기록된 Connection location을 자동 반영합니다. 임의 JSON 결과와 실제 페이지 증거는 [검색 가이드](../objectstorage/cloud-container-search-python.md)에 설명합니다.
 
 ## Object helper
 
@@ -102,13 +104,9 @@ object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이
 
 ## 미해결 목록
 
-- `search_containers`, `search_objects`, `OpenStackInventory.search_hosts`: `_utils._filter_list`를 대신하는 공개 Go helper가 없습니다.
-- `create_container`: 있으면 돌려주고 없으면 만드는 helper가 없고, `public=True`는 호출자가 ACL 값을 직접 넣어야 합니다.
-- `set_container_access`, `get_container_access`: `public`, `private`와 ACL 문자열 사이의 변환과 잘못된 값 거부가 없습니다.
+- `search_objects`, `OpenStackInventory.search_hosts`: `_utils._filter_list`를 대신하는 공개 Go helper가 없습니다.
 - `get_object`: 기본 경로의 문자열 디코딩, `outfile` 경로를 열고 닫는 동작, 404를 `None`으로 바꾸는 동작이 없습니다.
 - `stream_object`: chunk iterator와 404를 빈 iterator로 바꾸는 동작이 없습니다.
-- `get_object_raw`: 임의 query 문자열로 `GET`을 보내고 원본 응답을 돌려주는 호출이 없습니다.
-- `list_objects`: Python과 같은 object record 목록 호출이 없고, 기존 Collection 목록은 `format=json` query와 Python 이어 받기 규칙을 기준으로 비교하지 않았습니다.
 - `create_object`: 위임하는 Proxy `create_object`가 미해결인 이유가 그대로 남습니다. large object segment 이름과 `If-None-Match` header, DLO manifest prefix가 Python 요청과 다릅니다.
 - `delete_autocreated_image_objects`: `image_api_use_tasks` 확인, `images` container 목록, `x-sdk-autocreated` metadata 확인과 삭제를 묶은 helper가 없습니다.
 - `auth_token`, `Connection.authorize`: Connection이 token을 노출하지 않습니다. token은 Gophercloud `ProviderClient`에 있고, 만료 전에 미리 다시 인증하지도 않습니다.

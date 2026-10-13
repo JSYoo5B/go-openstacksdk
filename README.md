@@ -14,6 +14,14 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 
 [Neutron 선택 조회·조건부 삭제](network/v2/python-read-delete.md)와 [Keystone 토큰 조회·확인·폐기](identity/v3/python-token-actions.md)는 서비스별 Python 대응과 독립 Go main을 제공합니다.
 
+2026-10-13에 추가한 핵심 user API의 Python/Go 사용 비교:
+
+- Neutron: [network record 목록](network/v2/networks/python-list-records.md), [port 목록·검색](network/v2/ports/python-list-records.md), [service provider 조회](network/v2/serviceproviders/README.md).
+- Swift: [object 목록](objectstorage/v1/objects/python-record-list.md), [buffered·stream raw 조회](objectstorage/v1/objects/python-raw-get.md), [container 생성·접근권한](objectstorage/cloud-containers-python.md), [container 검색](objectstorage/cloud-container-search-python.md).
+- Nova: [share attachment 생성·조회·목록·삭제](compute/v2/share-attachments-python.md), [project·user quota 조회](compute/v2/quotasets/python-quota-query.md).
+- Cinder: [volume summary](blockstorage/v3/python-summary.md), [resource filter 조회](blockstorage/v3/resource-filters-python.md), [quota 조회](blockstorage/v3/quotasets/python-query.md).
+- Barbican: [ACL·quota의 구체적인 대기 대상](keymanager/v1/acl-quota-waits-python.md). 범용 Resource 대기의 남은 계약은 계속 추적합니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.

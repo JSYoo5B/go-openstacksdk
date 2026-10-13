@@ -51,12 +51,12 @@
 | `network_segment_ranges` | 없음 | go_mapping |
 | `onboard_network_subnets` | 없음 | unresolved |
 | `port_bindings` | 없음 | unresolved |
-| `ports` | `ports.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
+| `ports` | `ports.API.ProxyListRecords(ctx, options...)` | go_mapping |
 | `remove_dhcp_agent_from_network` | `agents.API.RemoveDHCPNetwork(ctx, agentID, networkID)` | go_mapping |
 | `remove_gateway_network_from_speaker` | `speakers.API.RemoveGatewayNetwork(ctx, id, RemoveGatewayNetworkOpts{NetworkID})` | go_mapping |
 | `remove_ip_from_port` | `floatingips.API.Update(ctx, ipID, UpdateOpts{PortID: &empty})` | go_mapping |
 | `segments` | `segments.API.List(ctx, WithListOptions, WithListQuery)` | unresolved |
-| `service_providers` | 없음 | unresolved |
+| `service_providers` | `serviceproviders.API.ProxyListRecords(ctx, options...)` | go_mapping |
 | `update_agent` | `agents.API.Update(ctx, id, UpdateOpts, WithUpdateField)` | go_mapping |
 | `update_local_ip` | 없음 | go_mapping |
 | `update_network_segment_range` | 없음 | go_mapping |
@@ -64,6 +64,8 @@
 | `validate_auto_allocated_topology` | 없음 | unresolved |
 | `wait_for_delete` | `ports.API.WaitForDeletion` 등 일부 collection만 | unresolved |
 | `wait_for_status` | `ports.API.WaitFor` 등 일부 collection만 | unresolved |
+
+Network·Port·service provider의 새 Source record 목록은 [network 가이드](networks/python-list-records.md), [port 가이드](ports/python-list-records.md), [service provider 가이드](serviceproviders/README.md)를 기준으로 합니다. 아래 generated native 목록의 기존 제한은 각 `List` 호출에만 적용하며 새 `ProxyListRecords`의 lazy generator·로컬 descriptor·Source kwargs 계약과 구분합니다.
 
 ## 공통 차이
 

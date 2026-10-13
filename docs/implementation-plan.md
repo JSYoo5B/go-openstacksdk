@@ -8,20 +8,21 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13): 핵심 user 미해결 해소 재개, 작업자8개 병렬 진행.** 현재 검증 집계는 **1,944/3,228개(60.2%)·핵심1,866/2,158개(86.5%)**이며 전체 고정 선언3,362개와 `unsupported`134개는 판정 JSON에 그대로 추적합니다. 새 구현은 테스트·판정 완료 전까지 수를 올리지 않습니다. 남아 있던 worktree의 입력·응답 후보는 원본을 변경하지 않고 현재 main에 맞춰 검토·재사용합니다.
+**현재 구현 (2026-10-13): 사용자 요청에 따라 현재 병렬 작업 묶음을 마무리, 전체 gate PASS.** 전체 Go 매핑은 **1,944→1,963개(+19), 1,963/3,228개(60.8%)**, 핵심은 **1,866→1,885/2,158개(87.3%)**입니다. 고정 선언3,362개와 `unsupported`134개를 보존했습니다. 새 계약 테스트260개와 독립 Go main13개를 추가·검증했고, 고정 Python Source와 compiled native metadata를 활성화한 전체 `make check`(201개 실제 test package, race/vet/parity/progress/license/gofmt)가 통과했습니다. 로컬 TCP 주소 할당 실패가 난 병렬 실행 기록을 보존하고 `GOFLAGS=-p=1 GOMAXPROCS=2`로 통과한 최종 결과를 기록합니다.
 
-| 병렬 소유 단위 | 구현·검토 단계 | 다음 확인 |
-|---|---|---|
-| Network record 목록 | 기존 후보 재사용·Source kwargs/descriptor/JMES generator 보강 | base_path와 lazy 결과·실제 응답 검증 |
-| Port record 목록·검색 | 기존 후보 재사용·Source/Cloud 평가 구분 | 공통 opaque identity·전체 필터/페이지 검증 |
-| Swift object record 목록·raw 응답 | 기존 후보 재사용·float equality 보강 | shared streaming·callback fault 검증 |
-| Swift container cloud workflow | get-or-create/ACL concrete 기능 작성 | Source 순서·실제 HEAD/PUT/POST 검증 |
-| Nova share attachment | 독립 owned API4개 작성 | 기본 버전·user 정책·fault 검증 |
-| Cinder summary/resource filters | 독립 user read API 작성 | summary2GET·정책·선택 버전 검증 |
-| Nova/Cinder quota query | 공통 quotafetch와 두 leaf 작성 | Source query/descriptor/location 검증 |
-| Barbican ACL/Quota wait | known target2개 작성·named wait unresolved 유지 | dispatch·status없는 삭제 관찰 검증 |
+| 병렬 소유 단위 | 최종 구현·검토 | 신규 Go 매핑 |
+|---|---|---:|
+| Network record 목록·ServiceProviders | Source kwargs·descriptor·opaque generator·paging 및 서비스 등록 완료 | 2 |
+| Port record 목록·검색 | Source 목록·loaded 검색·Connection location/서비스 부재 처리 완료; cloud `list_ports`의 임의 iterable 변환은 unresolved 유지 | 2 |
+| Swift object record 목록·raw 응답 | full lazy 목록과 buffered/stream raw 조회·실제 오류 증거 완료 | 3 |
+| Swift container cloud workflow·검색 | get-or-create·ACL 변환·전체 페이지 검색·Connection 기본 location 완료 | 4 |
+| Nova share attachment | user 정책·기본/명시 버전·생성/조회/목록/삭제4개 완료 | 4 |
+| Cinder summary/resource filters | Source summary2GET·일반 query·opaque/eager 목록·서비스 등록 완료 | 2 |
+| Nova/Cinder quota query | owned fetch 옵션·descriptor·location 입력·stock reader 정책 완료 | 2 |
+| Barbican ACL/Quota wait | concrete target2개와 상태 없는 삭제 관찰 완료; admin/임의 Resource 범용 wait2행은 unresolved 유지 | 0 |
+| 합계 | 판정 JSON의 실제 상태 변화 | 19 |
 
-root는 Source pin 복원·공통 retry/backoff/stream 계약·생성기 연결·중앙판정·진행표·통합검사·작은 commit/push를 순서대로 담당합니다. 핵심 user→핵심 admin→managed user→managed admin 순서와 Swift 핵심/후속 네트워크·베어메탈 우선순위는 유지합니다.
+공통 loaded JSON equality/cloud filter, lazy generator identity, Neutron list controls, native backoff guard와 unread Reader 계약을 함께 정리했습니다. 기존 fault fixture·Gophercloud testhelper·공통 policy를 재사용했습니다. source/catalog fingerprint와 기존 계약 근거는 보존했고, 미완결 Extension 파일은 제거했으며 AvailabilityZones 등 새 서비스는 시작하지 않았습니다. 서비스별 변경을 작은 commit으로 저장하고 push합니다. 핵심 user→핵심 admin→managed user→managed admin 순서와 Swift 핵심/후속 네트워크·베어메탈 우선순위는 유지합니다. 전체 inventory·SDK-R1/C1/S1·실클라우드 acceptance·alpha 릴리즈는 미완료입니다.
 
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
@@ -522,11 +523,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 1,944 (60.2%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 1,963 (60.8%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,284 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,265 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 6,722 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 6,929 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -705,25 +706,25 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,866 / 2,158 | 86.5% | 291 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,885 / 2,158 | 87.3% | 272 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 1,944 / 3,228 | 60.2% | 409 | 875 | 134 |
+| 전체 | 1,963 / 3,228 | 60.8% | 390 | 875 | 134 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 325 / 379 | 53 | 1 | 10 |
-| Compute / Nova | 269 / 333 | 64 | 0 | 0 |
+| Compute / Nova | 274 / 333 | 59 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 612 / 728 | 116 | 0 | 30 |
+| Network / Neutron | 616 / 728 | 112 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
-| Block Storage / Cinder | 376 / 398 | 22 | 0 | 82 |
+| Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |
-| Object Storage / Swift | 52 / 73 | 21 | 0 | 1 |
+| Object Storage / Swift | 59 / 73 | 14 | 0 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 

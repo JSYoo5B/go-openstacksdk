@@ -8,6 +8,16 @@
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,765입니다.
 
+## 2026-10-13 핵심 user 병렬 묶음 마무리
+
+8개 소유 단위를 통합하여 Go 매핑1,944→1,963(+19), 핵심1,866→1,885/2,158을 판정했습니다. Nova5(share attachment4·quota1), Neutron4(network 목록·port 목록·검색·service provider), Cinder3(summary·resource filter·quota), Swift7(object 목록·raw와 cloud helper)를 추가했습니다. Barbican concrete ACL/quota wait2개는 범용 named waits의 증거만 보강했으며 신규 완료 수에 넣지 않았습니다.
+
+새 계약 테스트260개, 독립 Go main13개 빌드, Python AST 및 pinned Source 감사, 서비스 등록 재생성, Connection 자동 location/서비스 부재7개 회귀를 검증했습니다. 초기 fixture/import/null 기대값 오류, 새 필드 때문에 정렬 공백에 의존한 기존 generator test, 취소 함수 정리 누락을 발견하고 해당 검사 실패와 수정 뒤 통과를 구분했습니다. 실제 fault 증거·Read/Close/guard/custom cause·native401/429/498와 caller hook 차단은 기존 REST/HTTP fixture와 Gophercloud testhelper를 재사용해 검증했습니다.
+
+전체 `make check`(201개 실제 test package)이 PASS입니다. 최초 병렬 전체 검사는 로컬 TCP 주소 할당 오류로 실패했으며, `GOFLAGS=-p=1 GOMAXPROCS=2`로 동시 실행을 제한해 캐시된 통과 검사를 재사용한 최종 전체 검사는 race/vet/parity/progress/license/gofmt를 모두 통과했습니다. 고정 Source `/private/tmp/go-openstacksdk-oct13-source-9hc9ehzk`와 실제 compiled `GOPHERCLOUD_METADATA`를 활성화했습니다. 실행 근거는 `/private/tmp/go-openstacksdk-oct13-final-{frozen,options,rest-nova,nova,serviceproviders,bridges}.jsonl`, 예제13개 실제 빌드와 병렬 전체 실패 `/private/tmp/go-openstacksdk-oct13-final-check-repaired.log` 및 최종 PASS `/private/tmp/go-openstacksdk-oct13-final-check-serial.log`입니다. 첫 실패 기록을 최종 PASS로 부르지 않습니다.
+
+Port cloud `list_ports`는 typed Connection 목록을 제공하지만 임의 JSON/opaque 값을 Python `list()`처럼 변환하는 분기가 남아 unresolved입니다. Barbican generic wait2행도 admin ProjectQuota/임의 Resource/session 계약 때문에 unresolved입니다. Quota location은 immutable 명시 입력과 기본 null이며 Connection의 자동 location을 주장하지 않습니다. 전체 catalog3,362개·unsupported134개·기존 판정 근거와 SDK-R1/C1/S1·실클라우드/외부 릴리즈 잔여 계약을 보존합니다. [전체·서비스별 사용 가이드](../README.md)에서 이번 concrete 옵션과 Source 차이를 설명합니다.
+
 ## 미해결 재검토와 Keystone 소유 API 마감
 
 [구현 가능성 분류](core-unresolved-feasibility.md)에 따라 새 기능 없이 끝나는 항목과 SDK 소유 호출 두 묶음을 먼저 처리했습니다. 전체는1,665→1,765/3,362(+100), 핵심은1,587→1,687/2,292입니다.

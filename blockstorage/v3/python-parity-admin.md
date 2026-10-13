@@ -24,7 +24,7 @@
 | `manage_snapshot` | 없음 | unresolved |
 | `unmanage_snapshot` | 없음 | unresolved |
 | `manageable_snapshots` | 없음 | unresolved |
-| `summary` | 없음 | unresolved |
+| `summary` | `Volumes.SummaryRecord(ctx, options...)` | go_mapping |
 | `get_cluster` | 없음 | unresolved |
 | `find_cluster` | 없음 | unresolved |
 | `clusters` | 없음 | unresolved |
@@ -47,11 +47,13 @@
 | `unset_default_type` | 없음 | unresolved |
 | `get_quota_class_set` | 없음 | unresolved |
 | `update_quota_class_set` | 없음 | unresolved |
-| `resource_filters` | 없음 | unresolved |
+| `resource_filters` | `ResourceFilters.ProxyListRecords(ctx, options...)` | go_mapping |
 | `reset_group_status` | 없음 | unresolved |
 | `reset_group_state` | 없음 | unresolved |
 | `reset_group_snapshot_status` | 없음 | unresolved |
 | `reset_group_snapshot_state` | 없음 | unresolved |
+
+일반 project reader로 조회할 수 있는 [volume summary](python-summary.md)와 [resource filters](resource-filters-python.md)는 user 우선 구현에 포함했습니다. Summary는 Source의 기본 두 GET을 보존하며, `all_tenants` 권한과 명시적 single-fetch 개선을 구분합니다. Resource filters는 Source generator와 개선된 eager JSON 결과를 별도로 제공합니다.
 
 ## 공통 차이
 
@@ -100,11 +102,9 @@ Python은 인자를 주지 않아도 `name`, `description`, `volume_type`, `avai
 - Service 검색: `find_service`는 위 Service 목록 절에서 설명한 목록 비교 helper가 없습니다.
 - Capability: `get_capabilities`는 `GET capabilities/{host}`입니다.
 - 가져오기 목록과 스냅샷: `manageable_volumes`·`manageable_snapshots`는 기본 `details=False`일 때 `GET manageable_volumes`, `manageable_snapshots`를, true일 때 `/detail` 경로를 쓰며 `host`, `cluster`, `marker`, `limit`, `offset`, `sort`를 query로 보냅니다. `manage_snapshot`은 `POST manageable_snapshots`에 `snapshot` envelope을 3.65로 보내고, `unmanage_snapshot`은 `POST snapshots/{id}/action`에 `{"os-unmanage": null}`을 보냅니다. Go `ManageableVolumes`에는 volume 가져오기만 있고 `Snapshots`에는 unmanage action이 없습니다.
-- Volume 요약: `summary`는 3.12 이상에서 `GET volumes/summary?all_tenants=...`를 보내고 `volume-summary` envelope을 읽습니다. Go `Volumes.ListSummary`는 `GET volumes` 목록이라 다른 요청입니다.
 - Cluster: `get_cluster`, `find_cluster`, `clusters`, `enable_cluster`, `disable_cluster`는 3.7 이상의 `clusters` 경로를 씁니다. `clusters`의 기본값은 `details=True`라 `clusters/detail`을 읽고, enable·disable은 `PUT clusters/enable`, `clusters/disable`에 `name`과 선택적 `binary`·`disabled_reason`을 보냅니다.
 - Group type: `get_group_type`, `find_group_type`, `group_types`, `create_group_type`, `update_group_type`, `delete_group_type`는 3.11 이상의 `group_types` CRUD이며 `find_group_type`은 GET과 목록에 모두 `is_public=none`을 보냅니다. group spec 다섯 메서드는 `group_types/{id}/group_specs`와 그 아래 key 경로를 쓰고, `delete_group_type`과 `delete_group_type_group_specs_property`는 기본값 `ignore_missing=True`로 404를 무시합니다. SDK `groups` package에는 group record와 replication 호출만 있습니다.
 - Default type: `default_types`, `show_default_type`, `set_default_type`, `unset_default_type`은 3.67 미만이면 요청 없이 SDKException을 내고, 그 이상에서 `default-types`와 `default-types/{project_id}`를 씁니다. 설정은 `PUT`에 `{"default_type": {"volume_type": ...}}`을 보내고 해제는 404를 무시하는 DELETE입니다.
 - Quota class: `get_quota_class_set`은 기본 인자 `default`로 `GET os-quota-class-sets/default`를, `update_quota_class_set`은 바뀐 속성만 담은 `quota_class_set` envelope을 PUT합니다. SDK v3 `quotasets`는 project quota만 다룹니다.
-- Resource filter: `resource_filters`는 3.33 이상에서 `GET resource_filters?resource=...`를 보냅니다.
 - Group 상태 초기화: `reset_group_status`와 deprecated 별칭 `reset_group_state`는 `POST groups/{id}/action`, `reset_group_snapshot_status`와 deprecated 별칭 `reset_group_snapshot_state`는 `POST group_snapshots/{id}/action`에 `{"reset_status": {"status": ...}}`을 보냅니다. SDK `groups`·`groupsnapshots` package에는 이 action이 없습니다.
 

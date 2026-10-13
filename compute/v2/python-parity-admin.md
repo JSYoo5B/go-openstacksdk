@@ -14,12 +14,12 @@
 | `create_flavor` | `Flavors.Create(ctx, opts, WithCreateField)` | go_mapping |
 | `create_flavor_extra_specs` | `Flavors.CreateExtraSpecs(ctx, id, ExtraSpecsOpts)` | go_mapping |
 | `create_server_external_events` | 없음 | unresolved |
-| `create_share_attachment` | 없음 | unresolved |
+| `create_share_attachment` | `ShareAttachments.CreateRecord(ctx, server, share, options...)` | go_mapping |
 | `delete_aggregate` | `Aggregates.Remove(ctx, resource.ID(id))` | go_mapping |
 | `delete_flavor` | `Flavors.Remove(ctx, resource.ID(id))` | go_mapping |
 | `delete_flavor_extra_specs_property` | `Flavors.DeleteExtraSpec(ctx, id, key)` + `resource.IgnoreMissing` | go_mapping |
 | `delete_service` | `Services.Delete(ctx, id)` + `resource.IgnoreMissing` | go_mapping |
-| `delete_share_attachment` | 없음 | unresolved |
+| `delete_share_attachment` | `ShareAttachments.DeleteRecord(ctx, server, share, options...)` | go_mapping |
 | `disable_service` | `Services.Update(ctx, id, UpdateOpts{Status, DisabledReason})` (2.53 이상만) | unresolved |
 | `enable_service` | `Services.Update(ctx, id, UpdateOpts{Status})` (2.53 이상만) | unresolved |
 | `evacuate_server` | `Servers.Evacuate(ctx, id, opts)` (2.14 미만에서만 성공) | unresolved |
@@ -38,7 +38,7 @@
 | `get_quota_class_set` | 없음 | unresolved |
 | `get_server_diagnostics` | `Diagnostics.Get(ctx, serverID)` | go_mapping |
 | `get_server_migration` | 없음 | unresolved |
-| `get_share_attachment` | 없음 | unresolved |
+| `get_share_attachment` | `ShareAttachments.GetRecord(ctx, server, share, options...)` | go_mapping |
 | `get_usage` | `Usage.SingleTenant(ctx, projectID, SingleTenantOpts{Start, End})`의 첫 값 | go_mapping |
 | `hypervisors` | `Hypervisors.List(ctx, WithListOptions)` (상세 경로만) | unresolved |
 | `live_migrate_server` | `Servers.LiveMigrate(ctx, id, opts, WithLiveMigrateField)` (`"auto"` 불가) | unresolved |
@@ -49,7 +49,7 @@
 | `server_migrations` | 없음 | unresolved |
 | `services` | `Services.List(ctx, WithListOptions(ListOpts{Binary, Host}), WithListQuery)` | go_mapping |
 | `set_aggregate_metadata` | `Aggregates.SetMetadata(ctx, id, SetMetadataOpts{Metadata})` | go_mapping |
-| `share_attachments` | 없음 | unresolved |
+| `share_attachments` | `ShareAttachments.ListRecords(ctx, server, options...)` | go_mapping |
 | `trigger_server_crash_dump` | 없음 | unresolved |
 | `update_aggregate` | `Aggregates.Update(ctx, id, UpdateOpts)` (`availability_zone` null 불가) | unresolved |
 | `update_flavor` | `Flavors.Update(ctx, id, UpdateOpts{Description})` (설명 지우기 불가) | unresolved |
@@ -58,6 +58,8 @@
 | `update_service` | `Services.Update(ctx, id, UpdateOpts, WithUpdateField)` (`forced_down` false 불가) | unresolved |
 | `update_service_forced_down` | `Services.Update(ctx, id, UpdateOpts{ForcedDown: true})` (true만) | unresolved |
 | `usages` | `Usage.AllTenants(ctx, AllTenantsOpts{Start, End, Detailed})` | go_mapping |
+
+Share attachment 네 연산은 stock Nova project reader/member 경로입니다. [새 user API 가이드](share-attachments-python.md)에 2.97 기본 협상, 명시 버전, 고정 서버 범위와 실제 응답 보존을 설명합니다. 이 문서의 이전 관리자 묶음 분류에서 user 우선 구현으로 옮겼습니다.
 
 ## 공통 차이
 
@@ -157,4 +159,3 @@ flavor extra spec 삭제와 compute service 삭제는 `Remove`가 없으므로 `
 - `trigger_server_crash_dump`: `trigger_crash_dump` action을 보내는 Go API가 없습니다.
 - `create_server_external_events`: `POST os-server-external-events`를 보내는 Go API가 없습니다.
 - `get_quota_class_set`, `update_quota_class_set`: Nova `os-quota-class-sets` 경로를 호출하는 Go API가 없습니다.
-- `create_share_attachment`, `get_share_attachment`, `share_attachments`, `delete_share_attachment`: Nova `servers/{id}/shares` 경로를 호출하는 Go API가 없습니다.
