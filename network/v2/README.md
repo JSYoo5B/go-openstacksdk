@@ -95,6 +95,8 @@ _ = value
 | 서비스 필드 | API 패키지 | 공통 정책·범위 |
 |---|---|---|
 | `APIVersions` | [apiversions](apiversions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `AutoAllocatedTopologies` | [autoallocatedtopologies](autoallocatedtopologies/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `AvailabilityZones` | [availabilityzones](availabilityzones/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Extensions` | [extensions](extensions/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Agents` | [extensions/agents](extensions/agents/api_generated.go) | `Resources`: ID 조회, 목록, 삭제·삭제 대기 |
 | `AttributeTags` | [extensions/attributestags](extensions/attributestags/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
