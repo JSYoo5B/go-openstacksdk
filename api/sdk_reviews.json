@@ -93050,10 +93050,16 @@
     {
       "operation": "python:identity/v3/get_domain",
       "source_fingerprint": "83cb752c37e4ff37d0523336822d644847c8212e0ed2ac921da4e5fe3b2c5008",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.GetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordGetLocation"
       ],
       "contracts": [
         {
@@ -93061,18 +93067,48 @@
           "tests": [
             "identity/v3/domains/python_parity_test.go:TestPythonDomainCreateGetUpdateRequests"
           ]
+        },
+        {
+          "behavior": "Literal member GET uses existing private Domain Source profile/converter with six nullable raw/bool/dict descriptors, preserves options missing/null/nonobject/object and constructor ID seed/explicit response null; unknown response remains Wire and independent Envelope/header/status/Clone records actual100/199/200/203/399.",
+          "tests": [
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainGetRecordNullableRawOptionsSeedAndActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Direct rejected403/404 never falls back; actual native response proof retains method/URL/status/body/header. Accepted malformed singular envelope keeps actual ResponseError.",
+          "tests": [
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainGetRecordRejectedNeverFallsBackAndBadEnvelopeKeepsProof"
+          ]
+        },
+        {
+          "behavior": "Transport/location options snapshot maps/pointers, retain configured project despite unknown response scope, and per-callback selected source/context/cancel checks prevent restore callbacks and HTTP0 fake receipts.",
+          "tests": [
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainGetRecordOwnedOptionsLocationAndStickyGuard"
+          ]
+        },
+        {
+          "behavior": "28 physical accepted/rejected Read/Close/source restored on Close/custom cancel lanes retain immutable actual proof, Close once and zero Retry/Backoff/Reauth; native pointer401 ErrOriginal value and ErrReauth graph are separately checked. Clean401/503/429/498 uses live token and owned bodyless request.",
+          "tests": [
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainGetRecordPhysicalFaultsKeepActualProofAndNoRetry",
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainGetRecordCleanRetryPreservesLiveAuthAndFrozenRequest"
+          ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-users.md"
+        "identity/v3/python-parity-users.md",
+        "identity/cloud-domain-get-python.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer.",
-        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error."
+        "Python accepts any status below 400 and raises NotFoundException on 404; the native Get accepts only 200 and returns a Gophercloud 404 error.",
+        "SDK-owned typed Go transport/location conveniences and raw nullable Domain record preserve actual Wire/Envelope/header/status; existing native Domain Get/Create/Update and full find_domain judgments stay unchanged.",
+        "Go uses required literal nonblank UTF-8 string identity, immutable escaped path and selected native-v3 client. Source empty/numeric/false IDs may request domains/ collection; mutable Resource/dict/object inputs and unsafe raw URL composition are narrowed to documented Go/SDK-C1/S1 boundaries.",
+        "Direct Source actual both-None finder raises no-ID InvalidRequest despite misleading cloud comment; Go ErrInvalidOption preflight preserves HTTP0 instead of pretending None success.",
+        "Ignored filters are not evaluated. Source warnings.warn is represented by DeprecatedFilters presence flag; global Python warning-as-error configuration is not cloned.",
+        "Explicit immutable location is a Go convenience and default standalone view is null; automatic Connection bridge/current scope inference is absent.",
+        "Generic cache/synchronized arbitrary Resource lifecycle/session/Connection remain SDK-R1/C1/S1 differences; finite named get implementation is not full SDK supported. No arbitrary fetch controls or full Proxy.find_domain audit/row promotion."
       ],
-      "remaining": [
-        "The native domains.Domain model has no Options or Extra field, so the options object Keystone returns and Python exposes as Domain.options is discarded; no public Go call returns it."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/get_group",
@@ -108719,10 +108755,19 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_domain",
       "source_fingerprint": "f7d321798ac3f47e2d9a30ca64f3481ac3e708765d07ede3645962cfc1386dc3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Get",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.GetDomain",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetNameOrID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithDomainGetLocation"
       ],
       "contracts": [
         {
@@ -108731,19 +108776,57 @@
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityDomainGroupRoleHelpers",
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "DomainID presence wins NameOrID; nonnil direct GET ignores filters completely without marshaler/parse/IO, and records only deprecated warning presence flag. Direct missing404 is an error; nil DomainID selects closed ignore-missing finder and logical absence is nil record/no error.",
+          "tests": [
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetIDPresenceWinsAndFiltersAreNeverConsumed",
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetDirectMissingVersusClosedFinderMissing"
+          ]
+        },
+        {
+          "behavior": "Actual Source Resource.find(None)/fetch/prepare_request raises InvalidRequest before HTTP despite cloud doc comment; both identifiers omitted maps to typed preflight error/no invented proof. Empty/numeric Source route edge is deliberately narrowed to safe nonblank Go strings.",
+          "tests": [
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetBothOmittedMatchesActualNoIDPreflight"
+          ]
+        },
+        {
+          "behavior": "Closed cloud-only Domain resolver uses clean400/403/404 GET-first name hint then all-page ID OR name; repeated ID is ambiguous, list199 is accepted, late503 overrides prior match, GET-only version differs from list session default, and existing list profile remains unchanged.",
+          "tests": [
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainResolveRecordClosedCleanFallbackAbsentDuplicatesAndLateProof",
+            "identity/v3/domains/python_record_get_test.go:TestPythonDomainResolveRecordGetOnlyVersionAndProfileIsolation"
+          ]
+        },
+        {
+          "behavior": "Cloud closed fallback preserves duplicate/late native proof and ignored invalid filters, with no search/expression branch or full Proxy.find_domain mapping growth.",
+          "tests": [
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetClosedFallbackDuplicatesAndLateHTTPProof"
+          ]
+        },
+        {
+          "behavior": "Captured source/header state precedes per-callback cloned options, explicit location is projected with owned configured scope and unknown response location remains Wire; sticky source/custom cancel/nil option creates no HTTP and no fabricated receipt.",
+          "tests": [
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetOwnOptionLocationHeadersAndSourceSnapshot",
+            "identity/domain_record_get_test.go:TestPythonCloudDomainGetOptionsStickySourceCancelAndNil"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/cloud-domain-get-python.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "The deprecated filters argument is a no-op in Python.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "SDK-owned typed Go transport/location conveniences and raw nullable Domain record preserve actual Wire/Envelope/header/status; existing native Domain Get/Create/Update and full find_domain judgments stay unchanged.",
+        "Go uses required literal nonblank UTF-8 string identity, immutable escaped path and selected native-v3 client. Source empty/numeric/false IDs may request domains/ collection; mutable Resource/dict/object inputs and unsafe raw URL composition are narrowed to documented Go/SDK-C1/S1 boundaries.",
+        "Direct Source actual both-None finder raises no-ID InvalidRequest despite misleading cloud comment; Go ErrInvalidOption preflight preserves HTTP0 instead of pretending None success.",
+        "Ignored filters are not evaluated. Source warnings.warn is represented by DeprecatedFilters presence flag; global Python warning-as-error configuration is not cloned.",
+        "Explicit immutable location is a Go convenience and default standalone view is null; automatic Connection bridge/current scope inference is absent.",
+        "Generic cache/synchronized arbitrary Resource lifecycle/session/Connection remain SDK-R1/C1/S1 differences; finite named get implementation is not full SDK supported. No arbitrary fetch controls or full Proxy.find_domain audit/row promotion."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/list_groups",
@@ -108846,10 +108929,14 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_group",
       "source_fingerprint": "2a9d498ef8ef8d19c70c311b6146d6b001953022338cc2e6ecc0f1c97e2260f7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetGroupRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewGroupReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.GroupReadCloud.GetGroup",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ResolveRecord"
       ],
       "contracts": [
         {
@@ -108857,19 +108944,36 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Default/None uses a closed domain_id-only Source finder: literal GET, only clean400403404 fallback with name/domain hints, exact ID/name, default nil missing, duplicate error, GET-only per-call MV and actual descriptor/Wire/page/header/status evidence. Caller options/domain/header/location bytes snapshot before sticky API/client/provider/route/version/context/private outer guard; physical faults retain native401 ErrOriginal value and all causes with no fallback/auth/retry/backoff hiding. Group search forwards raw domain including None/false/zero and collects every Source row/page before ordered dict/loaded equality or materialized-list JMES; loaded truthiness/len/integer index0 retains false/0/empty selected values and reports duplicate/type errors without invented record receipt.",
+          "tests": [
+            "identity/group_record_get_test.go:TestCloudGetGroupNoneVersusPresentFalseySearch",
+            "identity/group_record_get_test.go:TestCloudGetGroupLateNativeFailureBeforeLocalFilter",
+            "identity/group_record_get_test.go:TestCloudGetGroupStickyOptionsCancelAndOuterGuard",
+            "identity/group_record_get_test.go:TestCloudGetGroupPhysicalCloseSourceCancelKeepActualNativeEvidence",
+            "identity/group_record_get_test.go:TestCloudGetGroupJMESFirstTruthLenAndIndexKeepsActualInventory",
+            "identity/group_record_get_test.go:TestCloudGetGroupOwnedRawDomainLocationAndLoadedNestedFilter",
+            "identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupDomainSeedAndActualSourceEvidence",
+            "identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupFallbackVersionsExactIDNameAndDefaultMissing",
+            "identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupOwnedCallbacksRawDomainAndPreflight",
+            "identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupPhysicalFaultKeepsNative401ValueAndAllCauses"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/cloud-project-group-get-python.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Generic raw Resource.fetch/header/session kwargs and mutable Resource/Connection/cache/version metadata remain SDK-R1/C1/S1. Full named Proxy find_project/find_group stays unresolved; closed ResolveRecord exposes only identity/domain_id and owned Go Header/MV/location conveniences.",
+        "Go result separates actual Inventory/record from local arbitrary JSON, with nil Value/record for missing and DeprecatedFilters marker instead of Python warning categories. Literal typed identity, safe route/cursor/blank guards and JSON-bounded operands are intentional Go bounds; no object passthrough or fabricated HTTP metadata.",
+        "Source Project truthy string JMES fails at dict(**filters) despite documentation; Group materialized JMES supports arbitrary JSON and Source First shape/errors. Private scalar wrapper is a local common-predicate adaptation and never an HTTP resource.",
+        "Verified Keystone28.0.0 Project member GET allows admin/system/domain reader and own-project user; fallback/list needs admin/system/domain reader. Group member/list allows admin/system reader or target Group domain reader. Deployment overrides and live acceptance are not established by fixtures."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_groups and _utils._filter_list, which needs local row filtering that no public Go helper provides."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_group",
@@ -109074,10 +109178,29 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_role",
       "source_fingerprint": "f2245b833a4e12b364582e1a107f3fc5a6f7c2b97b870ae7f4838cfd269b05bf",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetRoleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewRoleReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.RawAPI",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetDomainIDJSON",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetExpression",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithRoleGetLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity.RoleReadCloud.GetRole",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ResolveRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithClosedLookupDomainIDJSON"
       ],
       "contracts": [
         {
@@ -109085,19 +109208,78 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Fixed resolver sends raw nullable/false/zero/empty/repeated/object-key domain query and constructor seed, preserves actual response overwrite/descriptor defaults and independently copied view/wire/page/header/status evidence.",
+          "tests": [
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupDomainSeedRawQueryAndDescriptorEvidence"
+          ]
+        },
+        {
+          "behavior": "Source100..399 completion and only clean400/403/404 GET fallback retain name/domain hint, exact ID-or-name selection, missing nil, late page failure and immediate second-match ambiguity. Per-call MV applies GET only; fallback keeps selected source version.",
+          "tests": [
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupCleanStatusFallbackAndLiteralNameHint",
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupMissingDuplicateLatePageAndGetOnlyMicroversion"
+          ]
+        },
+        {
+          "behavior": "Closed rawdomain/header/location opts are immutable; nil/context/custom cancellation/source mutation/private guard block work without fake receipt. Malformed accepted representation retains actual response. Existing profiles/old native behavior are untouched.",
+          "tests": [
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupImmutableOptsSourceCancellationAndExplicitLocation",
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupPrivateGuardAndMalformedAcceptedReceipt"
+          ]
+        },
+        {
+          "behavior": "Physical accepted/rejected/native401 read/close/mixed matrix preserves actual body/header/status and all causes, suppresses every Retry/Reauth/Backoff callback and prevents403/404 fallback; clean renewal/retry keeps frozen domain/header/MV with live token.",
+          "tests": [
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupPhysicalFaultStopsFallbackAndNativeCallbacks",
+            "identity/v3/roles/python_closed_lookup_test.go:TestPythonRoleClosedLookupCleanAuthRetryKeepsFrozenRequest"
+          ]
+        },
+        {
+          "behavior": "None/literalnull uses fixed domain-aware finder; non-None falsey filters use search and return its first entity without a final find. Role search always forwards raw nullable/false/zero/empty/repeated domain and does not put nameOrID in server name query.",
+          "tests": [
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleFiltersNoneVersusFalseySearchAndNoFinalFind",
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleRawFalseyDomainAlwaysForwarded"
+          ]
+        },
+        {
+          "behavior": "Role full search and loaded nested/exact/glob predicates keep duplicate IDs, missing and ordered mismatch short circuit, detached actual chosen record; late HTTP precedes local failure and unvisited invalid filters on empty selection remain unvisited.",
+          "tests": [
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleFilteredGlobLoadedMappingDuplicatesAndMissing",
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleLateHTTPPrecedesLocalErrorAndKeepsActualInventory"
+          ]
+        },
+        {
+          "behavior": "Role follows truthiness/len/integer0: None/[null] returnsNone; [false]/[0] retain selected values; one-codepoint string selects itself, >1 is ambiguity, one-member object is integer-key error and truthy scalar has no len. Arbitrary expression JSON has no fake Role record.",
+          "tests": [
+            "identity/role_record_get_test.go:TestPythonCloudGetRolePolymorphicTruthLenAndIntegerZero"
+          ]
+        },
+        {
+          "behavior": "Role fixed default finder retains400/403/404 name/domain fallback, missing/duplicate/late proof and GET-only selected override; copied opts/current location and one callback preserve frozen source headers, nil/owner/caller/private guard and physical401 original/native reauth error chain with zero retry callbacks.",
+          "tests": [
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleDefaultFinderFallbackMissingDuplicateAndVersion",
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleOptsOnceOwnValuesSourceSnapshotAndLocation",
+            "identity/role_record_get_test.go:TestPythonCloudGetRoleOwnerCancellationPrivateGuardAndPhysical401"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/cloud-user-role-get-python.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "The named Cloud signatures expose only name_or_id/filters/domain_id; the SDK-owned closed resolver models that reachable subset plus concrete Go Headers/Microversion/Location. Generic named find_user/find_role **query and Resource/adapter cache/session/config lifecycle remain separate unresolved operations; no wholesale Find or supported parity promotion is claimed.",
+        "Concrete immutable JSON descriptor records/options and captured source/context replace Python mutable Resource/dirty/subclass object identity. Source loaded primitive/filter policies reuse existing owned profiles. Strict UTF8/JSON representation/safe routes/headers and bounded pagination/link repairs intentionally differ from Python arbitrary values and malformed-body no-op behavior.",
+        "Direct selected client/factory is SourceNoConnection and defaults location:null. Explicit immutable CloudLocation or root Connection getter bridge supplies current scope, while SDK-R1/C1/S1 whole Resource/Connection/session lifecycle remains tracked outside this named mapping.",
+        "Go wraps concrete invalid-option/ambiguity/native/ResponseError/cancellation causes instead of Python TypeError/KeyError/SDKException class identity or process-global deprecation warnings. Source opaque/Resource JMES function/number/representation behavior is bounded by the documented Go JSON evaluator; this is not a claim of every Python runtime object/function type match.",
+        "Inventory is only actual deprecated search rows; final closed resolver exposes only selected Lookup or an actual error receipt, not every discarded fallback candidate row. Returned record/Value is independent of search observation; expression JSON never receives invented resource/HTTP evidence.",
+        "Role filtered expression returns JSON via Value/Expression with Role=nil; ordinary entities[0] selection is a detached actual RoleRecord. Literalnull and selected [null] are success Value=null, while an error has Value=nil. DeprecatedFilters records Source non-None filter branch without warning output."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_roles and _utils._filter_list, which needs local row filtering that no public Go helper provides."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/create_role",
@@ -109445,10 +109627,14 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_project",
       "source_fingerprint": "ab53063cc2bbe729430c9f4d6c839751c49e1c7f8e72e812bf68ec139175af63",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetProjectRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.GetProject",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ResolveRecord"
       ],
       "contracts": [
         {
@@ -109456,19 +109642,37 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Default/None uses a closed domain_id-only Source finder: literal GET, only clean400403404 fallback with name/domain hints, exact ID/name, default nil missing, duplicate error, GET-only per-call MV and actual descriptor/Wire/page/header/status evidence. Caller options/domain/header/location bytes snapshot before sticky API/client/provider/route/version/context/private outer guard; physical faults retain native401 ErrOriginal value and all causes with no fallback/auth/retry/backoff hiding. Project actual list_projects kwargs-expansion precedes _filter_list: truthy nonmapping/string filters fail before HTTP; falsey filters still select deprecated branch. Truthy raw domain overrides only server domain and preserves original local filters. Private wrapper reuses common actual-truthiness-first mapping for scalar literal Proxy rows without invented metadata.",
+          "tests": [
+            "identity/project_record_get_test.go:TestCloudGetProjectNoneVersusPresentFalseySearch",
+            "identity/project_record_get_test.go:TestCloudGetProjectLateNativeFailureBeforeLocalFilter",
+            "identity/project_record_get_test.go:TestCloudGetProjectStickyOptionsCancelAndOuterGuard",
+            "identity/project_record_get_test.go:TestCloudGetProjectPhysicalCloseSourceCancelKeepActualNativeEvidence",
+            "identity/project_record_get_test.go:TestCloudGetProjectTruthyFilterKwargsExpansionFailsBeforeHTTP",
+            "identity/project_record_get_test.go:TestCloudGetProjectProxyLiteralFalseyRowsFollowDictFilterBeforeShape",
+            "identity/project_record_get_test.go:TestCloudGetProjectRawDomainTruthyOverrideKeepsOriginalLocalFilters",
+            "identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectDomainSeedAndActualSourceEvidence",
+            "identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectFallbackVersionsExactIDNameAndDefaultMissing",
+            "identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectOwnedCallbacksRawDomainAndPreflight",
+            "identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectPhysicalFaultKeepsNative401ValueAndAllCauses"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/cloud-project-group-get-python.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "Generic raw Resource.fetch/header/session kwargs and mutable Resource/Connection/cache/version metadata remain SDK-R1/C1/S1. Full named Proxy find_project/find_group stays unresolved; closed ResolveRecord exposes only identity/domain_id and owned Go Header/MV/location conveniences.",
+        "Go result separates actual Inventory/record from local arbitrary JSON, with nil Value/record for missing and DeprecatedFilters marker instead of Python warning categories. Literal typed identity, safe route/cursor/blank guards and JSON-bounded operands are intentional Go bounds; no object passthrough or fabricated HTTP metadata.",
+        "Source Project truthy string JMES fails at dict(**filters) despite documentation; Group materialized JMES supports arbitrary JSON and Source First shape/errors. Private scalar wrapper is a local common-predicate adaptation and never an HTTP resource.",
+        "Verified Keystone28.0.0 Project member GET allows admin/system/domain reader and own-project user; fallback/list needs admin/system/domain reader. Group member/list allows admin/system reader or target Group domain reader. Deployment overrides and live acceptance are not established by fixtures."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.",
-        "The deprecated filters argument (RemovedInSDK50Warning) routes through search_projects and _utils._filter_list, which needs local row filtering that no public Go helper provides."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/update_project",
@@ -109717,10 +109921,29 @@
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_user",
       "source_fingerprint": "e224697aca52f901ed38f4639fbc724fe847396ae5940d0cda4b98bcf5d3fd30",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.FindIdentity",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetUserRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity.NewUserReadCloud",
+        "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.RawAPI",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetDomainIDJSON",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetFilters",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetExpression",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WithUserGetLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity.UserReadCloud.GetUser",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupOpts",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupLocation",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.API.ResolveRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainID",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/users.WithClosedLookupDomainIDJSON"
       ],
       "contracts": [
         {
@@ -109728,19 +109951,85 @@
           "tests": [
             "identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences"
           ]
+        },
+        {
+          "behavior": "Fixed resolver sends raw nullable/false/zero/empty/repeated/object-key domain query and constructor seed, preserves actual response overwrite/descriptor defaults and independently copied view/wire/page/header/status evidence.",
+          "tests": [
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupDomainSeedRawQueryAndDescriptorEvidence"
+          ]
+        },
+        {
+          "behavior": "Source100..399 completion and only clean400/403/404 GET fallback retain name/domain hint, exact ID-or-name selection, missing nil, late page failure and immediate second-match ambiguity. Per-call MV applies GET only; fallback keeps selected source version.",
+          "tests": [
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupCleanStatusFallbackAndLiteralNameHint",
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupMissingDuplicateLatePageAndGetOnlyMicroversion"
+          ]
+        },
+        {
+          "behavior": "Closed rawdomain/header/location opts are immutable; nil/context/custom cancellation/source mutation/private guard block work without fake receipt. Malformed accepted representation retains actual response. Existing profiles/old native behavior are untouched.",
+          "tests": [
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupImmutableOptsSourceCancellationAndExplicitLocation",
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupPrivateGuardAndMalformedAcceptedReceipt"
+          ]
+        },
+        {
+          "behavior": "Physical accepted/rejected/native401 read/close/mixed matrix preserves actual body/header/status and all causes, suppresses every Retry/Reauth/Backoff callback and prevents403/404 fallback; clean renewal/retry keeps frozen domain/header/MV with live token.",
+          "tests": [
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupPhysicalFaultStopsFallbackAndNativeCallbacks",
+            "identity/v3/users/python_closed_lookup_test.go:TestPythonUserClosedLookupCleanAuthRetryKeepsFrozenRequest"
+          ]
+        },
+        {
+          "behavior": "None/literalnull filters use the fixed finder, but every other falsey value triggers deprecated search. Successful search len1 still calls find_user with original identity/domain and returns its actual different record, preserving the pinned missing-return bug and detached search/final proof.",
+          "tests": [
+            "identity/user_record_get_test.go:TestPythonCloudGetUserFiltersNoneVersusAllFalseyPresence",
+            "identity/user_record_get_test.go:TestPythonCloudGetUserPreservesSuccessfulSearchThenFindBugAndRealReceipts"
+          ]
+        },
+        {
+          "behavior": "User search omits falsey domain and supplies non-UUID server name hint; later finder always receives the same domain including None/false/0/empty. UUID normalized names skip list name hint. No arbitrary Source find kwargs are exposed.",
+          "tests": [
+            "identity/user_record_get_test.go:TestPythonCloudGetUserRawDomainTruthinessSearchVersusFixedFinder"
+          ]
+        },
+        {
+          "behavior": "User only tests search truth and len before the final finder: one-element object/string/[null]/[false]/[0] still proceeds; falsey returnsNone, >1 ambiguity and truthy scalar len error stop. No entity[0] indexing or expression-to-record evidence is invented.",
+          "tests": [
+            "identity/user_record_get_test.go:TestPythonCloudGetUserPolymorphicSearchUsesLenOnlyNeverIndexZero"
+          ]
+        },
+        {
+          "behavior": "Complete search materialization/ordered loaded local predicates preserve missing/duplicate/short-circuit/localerror and late HTTP priority; successful gate followed by missing/duplicate/late final finder keeps actual prior Inventory but no returned User/Value on error.",
+          "tests": [
+            "identity/user_record_get_test.go:TestPythonCloudGetUserSearchStopsOnMissingDuplicateLocalErrorAndLateHTTP",
+            "identity/user_record_get_test.go:TestPythonCloudGetUserSearchGateThenFinalFinderMissingFallbackAndLateFailure"
+          ]
+        },
+        {
+          "behavior": "Options execute once after selected source capture, copy mutable rawdomain/filter/header/current location, stop owner/cancel/private guard callbacks and preserve actual physical403 from the final finder without fallback/retry/reauth.",
+          "tests": [
+            "identity/user_record_get_test.go:TestPythonCloudGetUserOptionsOnceOwnedFilterDomainLocationAndFrozenSource",
+            "identity/user_record_get_test.go:TestPythonCloudGetUserOptionCancellationOwnerAndPrivateGuardStopWork",
+            "identity/user_record_get_test.go:TestPythonCloudGetUserPhysicalForbiddenNeverFindFallsThroughOrRetries"
+          ]
         }
       ],
       "documentation": [
-        "identity/python-cloud-parity.md"
+        "identity/python-cloud-parity.md",
+        "identity/cloud-user-role-get-python.md"
       ],
       "differences": [
         "Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.",
         "With the deprecated filters argument Python runs search_users but still returns the find_user result.",
-        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it)."
+        "Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).",
+        "The named Cloud signatures expose only name_or_id/filters/domain_id; the SDK-owned closed resolver models that reachable subset plus concrete Go Headers/Microversion/Location. Generic named find_user/find_role **query and Resource/adapter cache/session/config lifecycle remain separate unresolved operations; no wholesale Find or supported parity promotion is claimed.",
+        "Concrete immutable JSON descriptor records/options and captured source/context replace Python mutable Resource/dirty/subclass object identity. Source loaded primitive/filter policies reuse existing owned profiles. Strict UTF8/JSON representation/safe routes/headers and bounded pagination/link repairs intentionally differ from Python arbitrary values and malformed-body no-op behavior.",
+        "Direct selected client/factory is SourceNoConnection and defaults location:null. Explicit immutable CloudLocation or root Connection getter bridge supplies current scope, while SDK-R1/C1/S1 whole Resource/Connection/session lifecycle remains tracked outside this named mapping.",
+        "Go wraps concrete invalid-option/ambiguity/native/ResponseError/cancellation causes instead of Python TypeError/KeyError/SDKException class identity or process-global deprecation warnings. Source opaque/Resource JMES function/number/representation behavior is bounded by the documented Go JSON evaluator; this is not a claim of every Python runtime object/function type match.",
+        "Inventory is only actual deprecated search rows; final closed resolver exposes only selected Lookup or an actual error receipt, not every discarded fallback candidate row. Returned record/Value is independent of search observation; expression JSON never receives invented resource/HTTP evidence.",
+        "Pinned get_user intentionally discards the single filtered search entity and performs find_user, so a different final resource or final missing/error is preserved. SearchValue/Expression/Inventory describe the gate only; Value/User/Lookup describe the actual final resolution. Process-global deprecation warning is represented by DeprecatedFilters."
       ],
-      "remaining": [
-        "The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_identity/IdentityCloudMixin/get_user_by_id",

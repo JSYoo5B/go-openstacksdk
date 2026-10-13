@@ -8,7 +8,18 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13, quota 반복 두 번째 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `01c92efc`입니다. Go 매핑은 전체 **2,002→2,016개(+14), 2,016/3,228(62.5%)**, 핵심 **1,924→1,938/2,158(89.8%)**입니다. 후보15개 중14개를 매핑했으며 QoS policy getter의 raw headers/fetch controls는 unresolved로 유지했습니다. 고정 catalog3,362·unsupported134·supported0과 원래 판정 근거를 보존했습니다.
+**현재 구현 (2026-10-13, quota 반복 세 번째 사이클): 시작 잔여86%, worker4개·후보8개로 핵심 user 작업 진행 중.** 출발 revision은 `3caf3aeb`이며 시작 매핑은 전체2,016/3,228(62.5%)·핵심1,938/2,158(89.8%)입니다. Keystone6개 최종 집중 검증·판정 반영 후 현재 전체2,022/3,228(62.6%)·핵심1,944/2,158(90.1%)입니다. QoS2개와 전체 gate·예제 빌드는 마감 검증 중입니다. 직전 묶음의 구현·검증·문서·push가 완료되고 clean 상태임을 확인했습니다.
+
+| 소유 단위 | 고정한 이번 범위 | 단계 |
+|---|---|---|
+| Keystone User·Role | cloud get_user/get_role2개·필요한 closed resolver | 구현·Source 검토·최종 leaf/cloud race PASS·커밋 완료 |
+| Keystone Domain | Proxy get_domain·cloud get_domain2개 | 구현·leaf/cloud race PASS·비교 가이드·커밋 완료 |
+| Keystone Project·Group | cloud get_project/get_group2개·closed resolver | 구현·raw query 수리 후 cloud race PASS·커밋 완료 |
+| Neutron QoS Policy | cloud create/update2개·Source leaf mutation | 구현·첫 focused race PASS·실제 응답 경계 보완 중 |
+
+공통 계약은 기존 Source profile·descriptor·guard·REST·filter를 재사용하며, 새로운 closed helper의 호출 가능 인자만 이번 판정 대상으로 봅니다. 범용 Find의 raw query/cache/Resource 잔여는 별도 유지합니다. QoS create/update의 고정 stock policy는 project manager를 허용하고 deprecated admin-only 정책과 구분하며 실제 배포 권한을 주장하지 않습니다. root가 Go 검증·중앙 판정·문서 집계·작은 커밋과 승인된 main push를 맡습니다. 이8개 후보 범위를 마무리한 뒤 종료하며 새 후보를 추가하지 않습니다. 최소 잔여가 엄격히80%를 초과할 때만 새 사이클을 시작하는 규칙과 핵심 user→핵심 admin→매니지드 user→매니지드 admin 순서를 보존합니다.
+
+**직전 구현 (2026-10-13, quota 반복 두 번째 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `01c92efc`입니다. Go 매핑은 전체 **2,002→2,016개(+14), 2,016/3,228(62.5%)**, 핵심 **1,924→1,938/2,158(89.8%)**입니다. 후보15개 중14개를 매핑했으며 QoS policy getter의 raw headers/fetch controls는 unresolved로 유지했습니다. 고정 catalog3,362·unsupported134·supported0과 원래 판정 근거를 보존했습니다.
 
 | 병렬 소유 단위 | 구현·검증·문서 | 신규 Go 매핑 |
 |---|---|---:|
@@ -573,11 +584,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 2,016 (62.5%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 2,022 (62.6%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,212 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,206 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,279 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,307 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -756,18 +767,18 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,938 / 2,158 | 89.8% | 219 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,944 / 2,158 | 90.1% | 213 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 2,016 / 3,228 | 62.5% | 337 | 875 | 134 |
+| 전체 | 2,022 / 3,228 | 62.6% | 331 | 875 | 134 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 348 / 379 | 30 | 1 | 10 |
+| Identity / Keystone | 354 / 379 | 24 | 1 | 10 |
 | Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
 | Network / Neutron | 643 / 728 | 85 | 0 | 30 |
