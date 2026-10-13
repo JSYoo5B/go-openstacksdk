@@ -589,3 +589,58 @@ func TestSourceMutationsObserveSelectedGuardWithoutFabricatingReceipts(t *testin
 		})
 	}
 }
+
+// Source opts into the same status contract for reads and mutations. Profiles
+// that do not opt in retain the original accepted range on every method.
+func TestMutateSourceStatusOptInKeepsBaselineAndPhysicalReceipts(t *testing.T) {
+	for _, method := range []string{http.MethodPost, http.MethodPut, http.MethodDelete} {
+		for _, sourceStatus := range []bool{false, true} {
+			for _, status := range []int{199, 399, 400} {
+				t.Run(fmt.Sprintf("%s/source=%t/%d", method, sourceStatus, status), func(t *testing.T) {
+					cloud := testcloud.New(t)
+					client := cloud.Client("network", "/v2.0/")
+					raw := `{"record":{"id":"actual"},"receipt":"physical"}`
+					calls := 0
+					cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+						calls++
+						if req.Method != method {
+							t.Fatal(req.Method)
+						}
+						if method == http.MethodDelete && mutationRequestBody(t, req) != "" {
+							t.Fatal("DELETE body")
+						}
+						return mutationResponse(status, raw), nil
+					})
+					profile := mutationProfile()
+					profile.SourceStatusPolicy = sourceStatus
+					engine, err := neutronfind.New(context.Background(), client, profile, nil)
+					if err != nil {
+						t.Fatal(err)
+					}
+					id := "id"
+					if method == http.MethodPost {
+						id = ""
+					}
+					row, err := engine.Mutate(context.Background(), method, id, nil, nil, neutronfind.Options{})
+					accepted := status < 400 && (status >= 200 || sourceStatus)
+					if calls != 1 {
+						t.Fatal(calls)
+					}
+					if accepted {
+						if err != nil || row == nil || row.StatusCode != status || string(row.Envelope) != raw || row.Header.Get("X-Request-Id") != "mutation-actual" {
+							t.Fatal(row, err)
+						}
+						if method == http.MethodDelete && (row.Resource != nil || row.Wire != nil) {
+							t.Fatal("DELETE invented Resource", row)
+						}
+					} else {
+						var actual gophercloud.ErrUnexpectedResponseCode
+						if err == nil || !errors.As(err, &actual) || actual.Actual != status || string(actual.Body) != raw || actual.ResponseHeader.Get("X-Request-Id") != "mutation-actual" {
+							t.Fatal(err, actual)
+						}
+					}
+				})
+			}
+		}
+	}
+}

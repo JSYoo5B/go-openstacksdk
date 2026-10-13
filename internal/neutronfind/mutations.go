@@ -131,7 +131,7 @@ func (e *Engine) Mutate(ctx context.Context, method, identity string, body, seed
 		source.Client.MoreHeaders = maps.Clone(headers.Values)
 		payload = map[string]any{e.profile.Singular: ownedBody}
 	}
-	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, method, target, payload, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, findCodes()...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, method, target, payload, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, e.codes()...)
 	if err != nil {
 		return mutationReceipt(response), errors.Join(err, e.Check(ctx))
 	}
