@@ -720,6 +720,7 @@ func TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation(t *tes
 		t.Fatal(calls())
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
 	cause := errors.New("caller cancellation during yield")
 	received := 0
 	for record, err := range api.ListRecords(ctx, "box") {
