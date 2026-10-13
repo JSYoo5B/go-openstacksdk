@@ -16,6 +16,7 @@ import (
 // Query retains omission/null/false/zero. Microversion applies to every page.
 // Default pagination is true; max_items0 is unbounded and limit is omitted.
 type RecordListOpts struct {
+	BasePath     *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
 	Microversion *string
@@ -24,10 +25,11 @@ type RecordListOpts struct {
 type RecordListOption func(*RecordListOpts) error
 
 func recordListOptions(v RecordListOpts) neutronfind.Options {
-	return neutronfind.Options{Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Query: v.Query, Headers: v.Headers, Microversion: v.Microversion, Order: v.order}
 }
 func copyRecordListOpts(v RecordListOpts) RecordListOpts {
 	owned := neutronfind.CloneOptions(recordListOptions(v))
+	v.BasePath = owned.BasePath
 	v.Query, v.Headers, v.Microversion, v.order = owned.Query, owned.Headers, owned.Microversion, owned.Order
 	return v
 }
