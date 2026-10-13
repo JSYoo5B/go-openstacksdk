@@ -1,6 +1,6 @@
 # Cinder quota 조회: Python SDK와 Go
 
-고정한 [block storage proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/block_storage/v3/_proxy.py)의 `get_quota_set(project, usage=False, **query)`는 `scope.GetRecord(ctx, options...)`에 대응합니다. `InProject`가 project를 한 번 고정하고 쿼리·예약값·사용량과 descriptor 변환은 SDK가 맡습니다. 기존 `Get`·`Usage`는 Gophercloud 모델을 유지합니다.
+고정한 [block storage proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/block_storage/v3/_proxy.py)의 `get_quota_set(project, usage=False, **query)`는 `scope.GetRecord(ctx, options...)`에 대응합니다. `InProject`가 project를 한 번 고정하고 쿼리·예약값·사용량과 descriptor 변환은 SDK가 맡습니다. scope ID는 기존 공개 계약대로 단일 unescaped URL path segment이며 slash·percent로 scope 경로를 확장하지 않습니다. 기존 `Get`·`Usage`는 Gophercloud 모델을 유지합니다.
 
 | Python | Go |
 |---|---|
@@ -79,7 +79,7 @@ Cinder QuotaSet에는 `_max_microversion`이 없으므로 기본 조회에서 ve
 
 clean native 404에만 `resource.ErrNotFound`를 더합니다. read/Close·source 변경·취소가 섞인 404는 부재로 분류하지 않습니다. native401 `*gophercloud.ErrUnableToReauthenticate`의 `ErrOriginal`과 `ErrReauth`를 보존하고 fault가 있는 응답에 retry/reauth hook을 실행하지 않습니다. clean401/503은 원래 Provider 정책으로 재시도하면서 route·query·version을 유지합니다.
 
-Stock Cinder quota show policy의 project reader/admin 분기와 실제 deployment override를 서버가 검사합니다. GetRecord는 조회이며 quota update/reset의 admin 권한을 합성하지 않습니다. project 이름 lookup·current-project binding은 기존 Connection scope를 사용하고 토큰 문자열이나 endpoint에서 project를 추측하지 않습니다. 임의 user_id query를 보낼 수 있어도 Cinder가 사용자 quota를 지원한다고 주장하지 않습니다.
+[Cinder 27.0.0 quota 정책](https://github.com/openstack/cinder/blob/27.0.0/cinder/policies/quotas.py)의 일반·usage·default 조회는 모두 `volume_extension:quotas:show`입니다. check string의 이름은 `SYSTEM_READER_OR_PROJECT_READER`이지만 [실제 base alias](https://github.com/openstack/cinder/blob/27.0.0/cinder/policies/base.py)는 `XENA_SYSTEM_READER_OR_PROJECT_READER` → `xena_system_admin_or_project_reader`이며, 결과는 admin role 또는 대상 project가 일치하는 reader입니다. 이 변수 이름만으로 system-reader token을 허용한다고 해석하지 않습니다. [controller](https://github.com/openstack/cinder/blob/27.0.0/cinder/api/contrib/quotas.py)는 URI project를 show policy target으로 넘긴 뒤 usage를 해석하며, usage 조회에 별도 admin rule을 추가하지 않습니다. update/delete는 `RULE_ADMIN_API`인 별도 관리 API입니다. deprecated show의 admin-or-owner rule과 deployment의 enforce-new-defaults/policy override는 서버가 적용합니다. project 이름 lookup·current-project binding은 기존 Connection scope를 사용하고 토큰이나 endpoint에서 project를 추측하지 않습니다. 임의 user_id query 전달은 Cinder 사용자 quota 지원을 뜻하지 않습니다.
 
 Go는 JSON-domain Resource와 명시 `Decode`를 제공하며 Python의 임의 객체 name collision·Adapter cache/session 교체·dirty commit 전체를 재현하지 않습니다. string/bool control과 strict UTF8는 명시 Go 차이입니다. 이러한 공통 SDK-R1/C1/S1 작업과 실클라우드 acceptance는 전체 목표에 남으며 이번 named quota 조회 구현을 서비스 전체 parity로 집계하지 않습니다.
 

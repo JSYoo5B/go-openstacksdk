@@ -1,6 +1,6 @@
 # Nova quota 조회: Python SDK와 Go
 
-고정한 [compute proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py)의 `get_quota_set(project, usage=False, **query)`는 `scope.GetRecord(ctx, options...)`에 대응합니다. `InProject`가 project를 한 번 고정하고, query·응답 변환·버전 선택은 SDK가 맡습니다. 기존 `Get`·`Detail`은 Gophercloud 모델을 제공하며, 이 문서의 `GetRecord`는 Python의 공통 quota Resource 표현을 제공합니다.
+고정한 [compute proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py)의 `get_quota_set(project, usage=False, **query)`는 `scope.GetRecord(ctx, options...)`에 대응합니다. `InProject`가 project를 한 번 고정하고, query·응답 변환·버전 선택은 SDK가 맡습니다. scope ID는 기존 공개 계약대로 단일 unescaped URL path segment이며 slash·percent로 scope 경로를 확장하지 않습니다. 기존 `Get`·`Detail`은 Gophercloud 모델을 제공하며, 이 문서의 `GetRecord`는 Python의 공통 quota Resource 표현을 제공합니다.
 
 | Python | Go |
 |---|---|
@@ -77,7 +77,7 @@ func main() {
 
 ## 권한과 남은 프로젝트 범위
 
-Quota 조회 권한과 project/user 대상 검증은 Nova 정책을 따릅니다. 자기 project reader의 기본 quota 조회와 admin override를 구분하며 usage detail은 별도 stock policy를 확인해야 합니다. 실제 배포의 policy override를 SDK가 우회하거나 사용자 membership을 추정하지 않습니다. update/reset은 기존 관리 API이며 이번 조회 구현에서 확장하지 않았습니다.
+[Nova 31.0.0 quota 정책](https://github.com/openstack/nova/blob/31.0.0/nova/policies/quota_sets.py)에서 기본 조회 `show`와 usage 조회 `detail`은 모두 `PROJECT_READER_OR_ADMIN`이며 `scope_types=["project"]`입니다. [base rule](https://github.com/openstack/nova/blob/31.0.0/nova/policies/base.py)은 대상 project가 일치하는 reader 또는 admin을 허용합니다. usage detail을 admin 전용으로 분류하지 않습니다. [controller](https://github.com/openstack/nova/blob/31.0.0/nova/api/openstack/compute/quota_sets.py)는 두 경로에서 URI project를 policy target으로 넘기고 project를 검증합니다. `user_id`는 그 project 안의 quota 조회 selector이며 별도 admin rule을 추가하지 않습니다. update/delete는 `ADMIN`인 별도 관리 API로 이번 조회 구현에서 확장하지 않았습니다. deployment의 policy override·deprecated-rule 설정과 Keystone role implication은 서버가 적용하며 SDK가 사용자 membership이나 권한을 추측하지 않습니다.
 
 Go는 JSON-domain Resource와 명시적인 `Decode`를 제공합니다. Python 객체의 임의 속성·메서드 name collision, Adapter cache·session 교체·dirty commit 전체를 재현하지 않습니다. Source가 임의 객체를 받는 control은 Go에서 string/bool control로 검증하며 invalid UTF8는 actual proof와 함께 거부합니다. [공통 Resource/cache/adapter 작업](../../../docs/sdk-support-ledger.md)은 전체 SDK 목표에 남아 있고, 이 조회를 서비스 전체 parity나 실클라우드 검증으로 집계하지 않습니다.
 
