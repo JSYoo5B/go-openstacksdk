@@ -141,6 +141,7 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 			return nil
 		}
 	}
+	installGuardedBackoffCallback(client, options, checkSource, expectedBody, expectedHeaders, expectedAbsent, stopFaultRetryCallbacks)
 	wire, err := client.Request(ctx, method, endpoint, options)
 	if err != nil {
 		// Native errors already retain status/body/header and their original
@@ -172,6 +173,37 @@ func doJSONGuarded(ctx context.Context, source *gophercloud.ServiceClient, sourc
 		return result, result.Fail(bodyErr)
 	}
 	return result, nil
+}
+
+// installGuardedBackoffCallback applies the same opt-in fault and request
+// ownership boundary to native 429/498 backoff as to ordinary retry hooks.
+// Native backoff runs before the next transport attempt, so its guard must run
+// before exposing a faulty rejection to application code.
+func installGuardedBackoffCallback(client *gophercloud.ServiceClient, options *gophercloud.RequestOpts, checkSource func() error, body []byte, headers map[string]string, absent []string, stop bool) {
+	if !stop || client.ProviderClient.RetryBackoffFunc == nil {
+		return
+	}
+	original := client.ProviderClient.RetryBackoffFunc
+	client.ProviderClient.RetryBackoffFunc = func(ctx context.Context, native *gophercloud.ErrUnexpectedResponseCode, previous error, count uint) error {
+		var receipt error
+		if native != nil {
+			owned := *native
+			owned.Expected = slices.Clone(native.Expected)
+			owned.Body = bytes.Clone(native.Body)
+			owned.ResponseHeader = native.ResponseHeader.Clone()
+			receipt = owned
+		}
+		if sourceErr := checkSource(); sourceErr != nil || ctx.Err() != nil {
+			return responseContextError(ctx, joinResponseErrors(receipt, previous, sourceErr))
+		}
+		callbackErr := original(ctx, native, previous, count)
+		ownershipErr := responseRequestOwnership(options, body, headers, absent)
+		sourceErr := checkSource()
+		if callbackErr != nil || ownershipErr != nil || sourceErr != nil || ctx.Err() != nil {
+			return responseContextError(ctx, joinResponseErrors(receipt, previous, callbackErr, ownershipErr, sourceErr))
+		}
+		return nil
+	}
 }
 
 // statusPolicyError preserves native status evidence through errors.As while
