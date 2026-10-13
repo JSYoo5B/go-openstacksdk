@@ -12,15 +12,30 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 )
 
-// matchLocal follows Resource.list's ordered Body predicates, not cloud search
-// mapping membership. Missing object fields are None; only reached dictionary
-// predicates call .get, so truthy scalars match {} but fail nonempty mappings.
 // MatchLocal shares ordered Cinder Resource Body predicates with owned leaf APIs.
+// Its reviewed exact-decimal policy is unchanged; new Source-shaped readers can
+// explicitly select MatchLocalLoaded without changing existing callers.
 func MatchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (bool, error) {
 	return matchLocal(ctx, view, filters, guard)
 }
 
-func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (matched bool, err error) {
+// MatchLocalLoaded applies CPython JSON-loaded numeric equality and truthiness
+// to the same ordered Resource.list predicates and guarded recursive flow.
+// Integer tokens stay exact; decimal/exponent tokens use IEEE-754 floats.
+func MatchLocalLoaded(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (bool, error) {
+	return matchLocalWithPolicy(ctx, view, filters, guard, snapshotLocalPolicy{loaded: true})
+}
+
+type snapshotLocalPolicy struct{ loaded bool }
+
+func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error) (bool, error) {
+	return matchLocalWithPolicy(ctx, view, filters, guard, snapshotLocalPolicy{})
+}
+
+// Missing object fields are None; only reached dictionary predicates call .get,
+// so truthy scalars match {} but fail nonempty mappings. Both policies use this
+// flow, including snapshots, short-circuit order and final source/context guard.
+func matchLocalWithPolicy(ctx context.Context, view json.RawMessage, filters []cloudfilter.JSONMember, guard func() error, policy snapshotLocalPolicy) (matched bool, err error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return false, err
 	}
@@ -61,7 +76,7 @@ func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter
 		if !exists {
 			value = json.RawMessage("null")
 		}
-		matched, err := snapshotLocalValue(value, filter.Value, check)
+		matched, err := policy.value(value, filter.Value, check)
 		if err != nil {
 			return false, fmt.Errorf("Cinder resource local filter %q: %w", filter.Key, err)
 		}
@@ -75,28 +90,28 @@ func matchLocal(ctx context.Context, view json.RawMessage, filters []cloudfilter
 	return true, check()
 }
 
-func snapshotLocalValue(actual, expected json.RawMessage, check func() error) (bool, error) {
+func (policy snapshotLocalPolicy) value(actual, expected json.RawMessage, check func() error) (bool, error) {
 	if err := check(); err != nil {
 		return false, err
 	}
-	if err := snapshotQueryDocument(expected); err != nil {
+	if err := policy.document(expected); err != nil {
 		return false, err
 	}
 	if bytes.TrimSpace(expected)[0] == '{' {
-		return snapshotLocalDictionary(actual, expected, check)
+		return policy.dictionary(actual, expected, check)
 	}
-	equal, err := jsonfilter.EqualPythonJSON(actual, expected)
+	equal, err := policy.equal(actual, expected)
 	if err != nil {
 		return false, err
 	}
 	return equal, check()
 }
 
-func snapshotLocalDictionary(actual, expected json.RawMessage, check func() error) (bool, error) {
+func (policy snapshotLocalPolicy) dictionary(actual, expected json.RawMessage, check func() error) (bool, error) {
 	if err := check(); err != nil {
 		return false, err
 	}
-	truthy, err := cloudfilter.PythonTruthy(actual)
+	truthy, err := policy.truthy(actual)
 	if err != nil {
 		return false, err
 	}
@@ -126,7 +141,7 @@ func snapshotLocalDictionary(actual, expected json.RawMessage, check func() erro
 		if !exists {
 			value = json.RawMessage("null")
 		}
-		matched, err := snapshotLocalValue(value, predicate.Value, check)
+		matched, err := policy.value(value, predicate.Value, check)
 		if err != nil {
 			return false, fmt.Errorf("nested local filter %q: %w", predicate.Key, err)
 		}
@@ -138,4 +153,27 @@ func snapshotLocalDictionary(actual, expected json.RawMessage, check func() erro
 		}
 	}
 	return true, check()
+}
+
+func (policy snapshotLocalPolicy) equal(actual, expected json.RawMessage) (bool, error) {
+	if policy.loaded {
+		return jsonfilter.EqualPythonLoadedJSON(actual, expected)
+	}
+	return jsonfilter.EqualPythonJSON(actual, expected)
+}
+func (policy snapshotLocalPolicy) truthy(actual json.RawMessage) (bool, error) {
+	if policy.loaded {
+		return cloudfilter.PythonJSONTruthy(actual)
+	}
+	return cloudfilter.PythonTruthy(actual)
+}
+func (policy snapshotLocalPolicy) document(raw json.RawMessage) error {
+	if !policy.loaded {
+		return snapshotQueryDocument(raw)
+	}
+	if len(raw) == 0 {
+		return fmt.Errorf("explicit raw value must be complete JSON")
+	}
+	_, err := cloudfilter.PythonJSONTruthy(raw)
+	return err
 }

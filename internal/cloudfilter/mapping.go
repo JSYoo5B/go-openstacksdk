@@ -11,10 +11,18 @@ import (
 // consumes keys in source insertion order. An earlier mismatch can therefore
 // leave an invalid later key or nested scalar unvisited.
 func mapping(filter, actual *node, path string, guard func() error) (bool, error) {
+	return selectionPolicy{}.mapping(filter, actual, path, guard)
+}
+
+func (policy selectionPolicy) mapping(filter, actual *node, path string, guard func() error) (bool, error) {
 	if err := check(guard); err != nil {
 		return false, err
 	}
-	if !actual.truthy() {
+	truthy, err := policy.truthy(actual)
+	if err != nil {
+		return false, err
+	}
+	if !truthy {
 		return false, nil
 	}
 	if filter.kind != '{' {
@@ -31,9 +39,9 @@ func mapping(filter, actual *node, path string, guard func() error) (bool, error
 		}
 		var matches bool
 		if item.value.kind == '{' {
-			matches, err = mapping(item.value, value, fieldPath, guard)
+			matches, err = policy.mapping(item.value, value, fieldPath, guard)
 		} else {
-			matches, err = jsonfilter.EqualPythonJSON(value.raw, item.value.raw)
+			matches, err = policy.equal(value, item.value)
 		}
 		if err != nil {
 			return false, fmt.Errorf("filter %s: %w", fieldPath, err)
@@ -67,4 +75,11 @@ func mappingValue(actual *node, key, path string) (*node, error) {
 	default:
 		return nil, fmt.Errorf("filter field %s requires membership in an iterable value", path)
 	}
+}
+
+func (policy selectionPolicy) equal(actual, expected *node) (bool, error) {
+	if policy.loaded {
+		return jsonfilter.EqualPythonLoadedJSON(actual.raw, expected.raw)
+	}
+	return jsonfilter.EqualPythonJSON(actual.raw, expected.raw)
 }

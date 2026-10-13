@@ -23,6 +23,20 @@ type Result struct {
 // full JMESPath engine even when identifier selection is empty. Other truthy
 // filters are consumed lazily, in raw JSON object insertion order.
 func Select(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, guard func() error) (result Result, err error) {
+	return selectWithPolicy(rows, nameOrID, filters, guard, selectionPolicy{})
+}
+
+// SelectLoaded opts new Source-shaped workflows into CPython JSON-loaded
+// numeric equality and truthiness for ordered local mapping filters. Identifier
+// selection, JMESPath expressions, row indices and guarded ownership use Select's
+// existing flow. The zero/default Select policy remains exact decimal.
+func SelectLoaded(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, guard func() error) (result Result, err error) {
+	return selectWithPolicy(rows, nameOrID, filters, guard, selectionPolicy{loaded: true})
+}
+
+type selectionPolicy struct{ loaded bool }
+
+func selectWithPolicy(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, guard func() error, policy selectionPolicy) (result Result, err error) {
 	defer func() {
 		if observed := check(guard); observed != nil {
 			result = Result{}
@@ -69,7 +83,11 @@ func Select(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, g
 	if err != nil {
 		return Result{}, fmt.Errorf("filters: %w", err)
 	}
-	if !filter.truthy() {
+	truthy, err := policy.truthy(filter)
+	if err != nil {
+		return Result{}, fmt.Errorf("filters: %w", err)
+	}
+	if !truthy {
 		return selected(views, indices, guard)
 	}
 	if filter.kind == '"' {
@@ -77,7 +95,7 @@ func Select(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, g
 	}
 	matched := make([]int, 0, len(indices))
 	for _, index := range indices {
-		matches, err := mapping(filter, views[index], "$", guard)
+		matches, err := policy.mapping(filter, views[index], "$", guard)
 		if err != nil {
 			return Result{}, err
 		}
@@ -193,4 +211,11 @@ func expression(views []*node, indices []int, source string, guard func() error)
 		return Result{}, err
 	}
 	return Result{Value: value, Expression: true}, nil
+}
+
+func (policy selectionPolicy) truthy(value *node) (bool, error) {
+	if policy.loaded {
+		return PythonJSONTruthy(value.raw)
+	}
+	return value.truthy(), nil
 }
