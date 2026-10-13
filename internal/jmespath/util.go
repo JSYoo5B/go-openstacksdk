@@ -33,6 +33,9 @@ func isFalse(value any) bool {
 func objsEqual(left, right any) (bool, error) { return jsonEqual(left, right, false) }
 
 func jsonEqual(left, right any, ordinary bool) (bool, error) {
+	if equal, opaque, err := opaqueEqual(left, right); opaque {
+		return equal, err
+	}
 	switch left := left.(type) {
 	case nil:
 		return right == nil, nil

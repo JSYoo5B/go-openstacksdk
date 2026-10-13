@@ -89,5 +89,13 @@ argument commas and trailing commas are rejected according to the standard
 grammar. The Python 1.0.1 parser accepts some of those malformed expressions;
 this fork's stricter syntax is an explicit correction, rather than a claim that
 the Python parser rejects every same spelling.
-This engine does not implement Python Resource classes, descriptors,
-connection location, custom functions or Python object identity/equality.
+The optional `OpaqueIdentity` interface represents Source values such as an
+unconsumed Resource generator. Its `JMESPathIdentity() any` key must be a
+comparable pointer; invalid keys return errors rather than panicking. Equality
+of the same opaque pointer is true, including inside arrays/objects; different
+opaque pointers are unequal. Ordinary JSON equality remains unchanged. Opaque
+values are truthy, projections/indexes and `type` return null, array functions
+reject their type, and `@`/`not_null` preserve them without consuming them. SDK
+generator wrappers reject JSON marshaling so `to_string` cannot fabricate an
+empty object. This does not provide general Python reflection, Resource
+classes/descriptors, connection location, or custom functions.
