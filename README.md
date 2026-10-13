@@ -22,6 +22,15 @@ Gophercloud 위에 연결, 서비스, 리소스, 복합 작업의 일관된 사�
 - Cinder: [volume summary](blockstorage/v3/python-summary.md), [resource filter 조회](blockstorage/v3/resource-filters-python.md), [quota 조회](blockstorage/v3/quotasets/python-query.md).
 - Barbican: [ACL·quota의 구체적인 대기 대상](keymanager/v1/acl-quota-waits-python.md). 범용 Resource 대기의 남은 계약은 계속 추적합니다.
 
+추가 사이클의 Python/Go 사용 비교:
+
+- Neutron: [extension 목록·Find](network/v2/extensions/python-records.md), [availability zone](network/v2/availabilityzones/README.md), [auto-allocated topology 조회·삭제·검사](network/v2/autoallocatedtopologies/README.md), [Port 다형 목록·subnet 선택·bulk 생성](network/v2/ports/python-user-helpers.md).
+- Keystone: [Project 목록·cloud 검색·부분 Find](identity/v3/projects/python-record-reads.md), [Group 목록·검색·부분 Find](identity/v3/groups/python-records.md), [limit 목록](identity/v3/limits/python_records.md), [registered limit 목록](identity/v3/registeredlimits/python_records.md).
+- Nova: [서버 action 목록·event 변환](compute/v2/instanceactions/python-records.md), [extension Find](compute/v2/extensions/python-record-find.md).
+- Swift: [object 검색·Connection 기본 location](objectstorage/cloud-object-search-python.md).
+
+Project·Group·Neutron Extension Find는 raw 조회 옵션의 남은 계약 때문에 미해결로 추적합니다. 각 가이드의 Go 매핑은 전체 Resource/session 동등성이나 실클라우드 검증과 구분합니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.

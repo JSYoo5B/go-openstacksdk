@@ -17,6 +17,14 @@
 
 Neutron 27.0.0 Extension controller는 GET 목록과 alias 조회에 별도 ADMIN 정책 검사를 넣지 않습니다. 서비스의 인증/middleware/catalog 노출을 그대로 따르며 익명 접근을 보장하지 않습니다. 실제 alias 목록은 배포가 활성화한 extension입니다. SDK가 관리자 역할을 요구하거나 extension/backend를 활성화하지 않습니다. [고정 controller](https://github.com/openstack/neutron/blob/27.0.0/neutron/api/extensions.py#L100-L127).
 
+## 지원 범위와 남은 Find kwargs
+
+`extensions(**query)`의 named list 동작은 owned list/proxy 옵션으로 매핑했습니다. `FindRecord`의 기본 alias/name 검색, GET-first fallback, ignore_missing, 선택 microversion·ListBasePath와 실제 응답 증거는 구현했지만 `find_extension(**query)` 전체는 unresolved입니다. 이 Find 행은 완성된 API 개수에 포함하지 않습니다.
+
+고정 Neutron Proxy는 `**query`를 Resource.find에 전달합니다. 그중 kwargs key `headers`는 member fetch에서 HTTP header 옵션이 아니라 ordinary GET query/constructor seed이며, GET 실패 뒤 Resource.list에 넘어가면 list의 `headers` formal로 소비됩니다. 현재 shared find 엔진은 이 raw kwargs를 예약 key로 거부합니다. `WithRecordFindHeaders`의 concrete HTTP header 옵션은 이 두 단계의 Source kwargs 동작을 대체하지 않습니다.
+
+Fetch formal `requires_id`·`base_path`·`error_message`·`skip_cache`·`resource_response_key`도 named kwargs로 도달할 수 있지만 현재 shared find 엔진은 거부합니다. Source에서는 각각 member URI의 ID 포함 여부·member base path·오류 메시지·adapter cache 제어·response envelope key를 바꾸며, fallback에서는 다시 list 단계의 formal/unknown kwargs 규칙을 따릅니다. Member `base_path`와 이미 구현된 fallback-only `list_base_path`는 별도 동작입니다. 이 kwargs는 후속 공통 구현과 실제 단계별 계약 테스트가 필요합니다.
+
 ## 독립 Python
 
 ```python

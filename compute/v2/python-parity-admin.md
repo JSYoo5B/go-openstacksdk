@@ -25,7 +25,7 @@
 | `evacuate_server` | `Servers.Evacuate(ctx, id, opts)` (2.14 미만에서만 성공) | unresolved |
 | `extensions` | `Extensions.List(ctx)` | go_mapping |
 | `find_aggregate` | `Aggregates.Find(ctx, resource.ID(x))`와 `resource.Name(x)`를 따로 호출 | unresolved |
-| `find_extension` | `Extensions.Get(ctx, alias)` (목록 fallback 없음) | unresolved |
+| `find_extension` | `Extensions.FindRecord(ctx, alias, options...)` ([가이드](extensions/python-record-find.md)) | go_mapping |
 | `find_hypervisor` | `Hypervisors.Find(ctx, resource.ID(x))` (이름 조회 없음) | unresolved |
 | `find_service` | `Services.List(ctx, ...)`를 직접 걸러야 함 | unresolved |
 | `flavor_add_tenant_access` | `Flavors.AddAccess(ctx, id, AddAccessOpts{Tenant})` | go_mapping |
@@ -95,7 +95,7 @@ Python `find_*`는 ID로 GET을 먼저 보내고 404, 400, 403이면 목록에�
 
 ## Extension
 
-`extensions()`는 `GET extensions`이고 Go `Extensions.List`가 alias, 이름, namespace, `updated`, 설명, link를 그대로 읽습니다. `find_extension`은 `GET extensions/{alias}` 뒤 404이면 목록에서 alias나 이름을 찾습니다. Go `Extensions.Get`은 첫 GET만 보내고 404를 그대로 돌려주며 목록 fallback helper가 없습니다.
+`extensions()`는 `GET extensions`이고 Go `Extensions.List`가 alias, 이름, namespace, `updated`, 설명, link를 그대로 읽습니다. 새 `Extensions.FindRecord`는 GET-first 이후 400·403·404 목록 fallback, alias/name, 중복과 기본 missing 동작을 SDK가 처리하며 Compute 전용 Source descriptor와 실제 응답 증거를 제공합니다. 고정 Nova named `find_extension`은 추가 query kwargs를 받지 않습니다. 구체적인 Go query/header/version 옵션은 명시적 편의 기능이고, 전체 Resource/session lifecycle은 계속 추적합니다. stock Nova Extension 조회는 project-scope RULE_ANY라 관리자 전용이 아닙니다. [사용 비교](extensions/python-record-find.md)에 기본값과 안전한 경로·paging 차이를 설명합니다.
 
 ## Hypervisor
 
@@ -145,7 +145,7 @@ flavor extra spec 삭제와 compute service 삭제는 `Remove`가 없으므로 `
 
 ## unresolved 목록
 
-- `find_aggregate`, `find_extension`, `find_hypervisor`, `find_service`: ID GET과 목록 fallback을 묶은 helper가 없습니다. aggregate는 숫자가 아닌 ID를 HTTP 전에 거부하고, hypervisor collection은 이름 조회를 지원하지 않으며, extension과 service에는 collection lookup이 없습니다.
+- `find_aggregate`, `find_hypervisor`, `find_service`: ID GET과 목록 fallback을 묶은 helper가 없습니다. aggregate는 숫자가 아닌 ID를 HTTP 전에 거부하고, hypervisor collection은 이름 조회를 지원하지 않으며 service에는 collection lookup이 없습니다.
 - `hypervisors`: 기본값의 요약 목록 `GET os-hypervisors`와 2.53 미만의 `os-hypervisors/{pattern}/search` 경로를 보낼 수 없습니다.
 - `update_aggregate`: `availability_zone`의 null을 보낼 수 없어 가용 영역을 지울 수 없습니다.
 - `update_flavor`: description의 null이나 빈 문자열을 보낼 수 없어 설명을 지울 수 없습니다.

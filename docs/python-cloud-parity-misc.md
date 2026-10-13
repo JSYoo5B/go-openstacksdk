@@ -30,7 +30,7 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 | `create_object` | `objects.API.CreateObject` | 미해결 |
 | `update_object` | `objects.API.SetMetadataFromFresh(ctx, container, name, values)` | 대응 |
 | `list_objects` | `objects.API.ListRecords(ctx, container, options...)` | go_mapping |
-| `search_objects` | 없음 | 미해결 |
+| `search_objects` | `Connection.SearchObjects(ctx, container, options...)` | go_mapping 후보 |
 | `delete_object` | `objects.API.DeleteObject(ctx, container, name)` | 대응 |
 | `delete_autocreated_image_objects` | 없음 | 미해결 |
 | `get_object_metadata` | `objects.API.HeadMetadata(ctx, container, name)` | 대응 |
@@ -84,6 +84,11 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 `Connection.SearchContainers`가 전체 페이지 수집·이름 glob·중첩 dictionary·JMESPath를 처리하고 기록된 Connection location을 자동 반영합니다. 임의 JSON 결과와 실제 페이지 증거는 [검색 가이드](../objectstorage/cloud-container-search-python.md)에 설명합니다.
 
+`Connection.SearchObjects(ctx, container, options...)`와 `swift.Cloud.SearchObjects`는 같은 container의 전체 `Objects.ListRecords` 페이지를 수집한 뒤 name/id exact·fnmatch와 Source cloud의 ordered/nested dictionary 또는 JMESPath를 적용합니다. 호출자가 목록을 직접 필터하거나 HTTP 분기를 이어 붙이지 않습니다. [Object 검색 가이드](../objectstorage/cloud-object-search-python.md)는 `WithObjectSearchName`, `WithObjectSearchFiltersJSON`, `WithObjectSearchExpression`과 전체 Python/Go main을 제공합니다. 일반 선택은 `Records`, 임의 JSON expression 출력은 `Value`로 구분하며 `AllRecords`·`LastPage`에 실제 행·페이지 증거를 유지합니다. 뒤 페이지 실패에는 성공한 부분 검색 결과를 만들지 않습니다.
+
+이 named helper의 구현은 go_mapping 후보입니다. [서비스 계약](../objectstorage/cloud_object_search_test.go)과 [Connection 계약](../connection_swift_object_search_test.go)은 기본 직접 location=null과 Connection configured location 자동 주입, getter/URI/plain metadata 구분, complete paging·필터·physical native401 및 소유권을 검증하도록 작성했습니다. 공통 SDK-R1/C1/S1의 mutable Resource·dirty/session/cache와 실제 인증·Swift 정책/backend 실행 검증은 별도 미완료 항목이며, 검색 helper 구현으로 전체 SDK/runtime parity를 완료 처리하지 않습니다.
+
+
 ## Object helper
 
 `get_object_metadata`는 object에 `HEAD`를 보내고 `X-Object-Meta-` 뒤 이름을 소문자로 바꾼 dict를 돌려줍니다. `HeadMetadata`는 query 없는 `HEAD`를 보내고 `Metadata.Values`에 같은 key를 담습니다. 404는 두 쪽 모두 오류입니다.
@@ -104,7 +109,7 @@ object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이
 
 ## 미해결 목록
 
-- `search_objects`, `OpenStackInventory.search_hosts`: `_utils._filter_list`를 대신하는 공개 Go helper가 없습니다.
+- `OpenStackInventory.search_hosts`: `_utils._filter_list`를 대신하는 공개 Go helper가 없습니다.
 - `get_object`: 기본 경로의 문자열 디코딩, `outfile` 경로를 열고 닫는 동작, 404를 `None`으로 바꾸는 동작이 없습니다.
 - `stream_object`: chunk iterator와 404를 빈 iterator로 바꾸는 동작이 없습니다.
 - `create_object`: 위임하는 Proxy `create_object`가 미해결인 이유가 그대로 남습니다. large object segment 이름과 `If-None-Match` header, DLO manifest prefix가 Python 요청과 다릅니다.
