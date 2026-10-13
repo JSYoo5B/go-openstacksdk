@@ -142,7 +142,7 @@ func (e *Engine) Mutate(ctx context.Context, method, identity string, body, seed
 		}
 		return value, nil
 	}
-	value, err := e.findResponse(response, ownedSeed, source.Client.Microversion)
+	value, err := e.findResponse(ctx, response, ownedSeed, source.Client.Microversion)
 	if err = errors.Join(err, e.Check(ctx)); err != nil {
 		err = response.Fail(err)
 	}
@@ -168,7 +168,7 @@ func (e *Engine) ProjectSeed(ctx context.Context, seed map[string]json.RawMessag
 		return nil, err
 	}
 	value := &Record{microversion: source.Client.Microversion}
-	if err := errors.Join(e.findProject(value, owned), e.Check(ctx)); err != nil {
+	if err := errors.Join(e.findProject(ctx, value, owned), e.Check(ctx)); err != nil {
 		return nil, err
 	}
 	return value, nil

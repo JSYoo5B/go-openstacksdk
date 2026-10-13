@@ -39,8 +39,14 @@ const (
 // Descriptor preserves the ordered canonical/wire declaration, explicit null,
 // missing JSON default and an optional fallback alias from the Source MRO.
 type Descriptor struct {
-	Name, Wire     string
-	Kind           DescriptorKind
+	Name, Wire string
+	Kind       DescriptorKind
+	// ListItemKind applies the Source list_type cast without changing untyped lists.
+	ListItemKind DescriptorKind
+	// Project is a pure SDK-owned projection applied before local matching.
+	Project func(json.RawMessage) (json.RawMessage, error)
+	// Match preserves SDK-owned non-JSON Resource equality before JSON fallback.
+	Match          func(actual, wire, filter json.RawMessage) (matched, handled bool, err error)
 	Missing, Alias string
 }
 
@@ -50,7 +56,11 @@ type QueryPair struct{ Name, Wire string }
 // be declared from that class's actual MRO, never assumed for every Neutron type.
 type Profile struct {
 	Kind, Path, Singular, Plural string
-	IDKey, NameKey               string
+	// ServiceRole defaults to network for existing bindings.
+	ServiceRole string
+	// SourceLinkPolicy opts into Source link precedence and iterable semantics.
+	SourceLinkPolicy bool
+	IDKey, NameKey   string
 	// AlternateIDKey supplies a physical list marker only when IDKey is absent.
 	// An explicit primary null/false/empty value retains precedence.
 	AlternateIDKey      string
@@ -81,7 +91,12 @@ type Engine struct {
 }
 
 func New(ctx context.Context, client *gophercloud.ServiceClient, profile Profile, selectedGuard func(context.Context) error) (*Engine, error) {
-	source, err := cloudread.Capture(ctx, client, "network")
+	role := profile.ServiceRole
+	if role == "" {
+		role = "network"
+	}
+	profile.ServiceRole = role
+	source, err := cloudread.Capture(ctx, client, role)
 	if err != nil {
 		return nil, err
 	}
@@ -199,7 +214,7 @@ func (e *Engine) consumeFindBody(body map[string]json.RawMessage, members []clou
 		}
 	}
 }
-func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) error {
+func (e *Engine) findProject(ctx context.Context, value *Record, seed map[string]json.RawMessage) error {
 	body := findFields(seed)
 	headerSeed := make(map[string]json.RawMessage, len(e.profile.Headers))
 	for _, field := range e.profile.Headers {
@@ -262,7 +277,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 			body[field.Name] = json.RawMessage(field.Missing)
 			continue
 		}
-		converted, err := e.descriptorJSON(raw, field.Kind)
+		converted, err := e.projectDescriptor(ctx, raw, field)
 		if err != nil {
 			return err
 		}
@@ -290,7 +305,7 @@ func (e *Engine) findProject(value *Record, seed map[string]json.RawMessage) err
 				}
 			}
 		}
-		converted, err := e.descriptorJSON(raw, field.Kind)
+		converted, err := e.projectDescriptor(ctx, raw, field)
 		if err != nil {
 			return err
 		}
@@ -388,13 +403,13 @@ func (e *Engine) findMarker(value *Record) (string, error) {
 	}
 	return values[0], nil
 }
-func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawMessage, version string) (*Record, error) {
+func (e *Engine) findResponse(ctx context.Context, response *rest.Response, seed map[string]json.RawMessage, version string) (*Record, error) {
 	if response == nil {
 		return nil, nil
 	}
 	value := &Record{Envelope: bytes.Clone(response.Body), Header: response.Header.Clone(), StatusCode: response.StatusCode, microversion: version}
 	if !json.Valid(response.Body) {
-		return value, e.findProject(value, seed)
+		return value, e.findProject(ctx, value, seed)
 	}
 	if !utf8.Valid(response.Body) {
 		return value, findInvalid("find response must contain UTF-8 JSON")
@@ -411,7 +426,7 @@ func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawM
 		return value, err
 	}
 	value.Wire.Header, value.Wire.StatusCode = response.Header.Clone(), response.StatusCode
-	return value, e.findProject(value, seed)
+	return value, e.findProject(ctx, value, seed)
 }
 
 // Options owns Source kwargs. Omitted IgnoreMissing defaults to true.
@@ -419,7 +434,9 @@ func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawM
 // the member GET but are ignored by the list, following Source Resource.find.
 type Options struct {
 	// BasePath is an owned service-relative list route override.
-	BasePath      *string
+	BasePath *string
+	// ListBasePath changes only the Find fallback; successful GET ignores it.
+	ListBasePath  *string
 	IgnoreMissing *bool
 	Microversion  *string
 	Order         []string
@@ -444,6 +461,10 @@ func orderedFindKeys(query map[string]json.RawMessage, order []string) []string 
 	return append(keys, missing...)
 }
 func CloneOptions(value Options) Options {
+	if value.ListBasePath != nil {
+		x := *value.ListBasePath
+		value.ListBasePath = &x
+	}
 	if value.BasePath != nil {
 		x := *value.BasePath
 		value.BasePath = &x
@@ -640,7 +661,7 @@ func (e *Engine) listKeyKnown(key string) bool {
 func stripVersion(source *cloudread.Source) {
 	source.Client.MoreHeaders = maps.Clone(source.Client.MoreHeaders)
 	for key := range source.Client.MoreHeaders {
-		if strings.EqualFold(key, "OpenStack-API-Version") {
+		if strings.EqualFold(key, "OpenStack-API-Version") || strings.EqualFold(key, "X-OpenStack-Nova-API-Version") || strings.EqualFold(key, "X-OpenStack-Volume-API-Version") {
 			delete(source.Client.MoreHeaders, key)
 		}
 	}
@@ -665,14 +686,20 @@ func (e *Engine) headerPolicy(source *cloudread.Source, list bool, headers map[s
 	}
 	var absent []string
 	if source.Client.Microversion != "" {
-		values["OpenStack-API-Version"] = "network " + source.Client.Microversion
+		values["OpenStack-API-Version"] = e.profile.ServiceRole + " " + source.Client.Microversion
+		if e.profile.ServiceRole == "compute" {
+			values["X-OpenStack-Nova-API-Version"] = source.Client.Microversion
+		}
 	} else {
-		absent = append(absent, "OpenStack-API-Version")
+		absent = append(absent, "OpenStack-API-Version", "X-OpenStack-Nova-API-Version")
 	}
 	if e.profile.SourceFindPolicy {
 		// X-Auth-Token remains live and SDK-owned in fixedrequest's transport.
 		// All other source-forbidden auth/route/protocol headers remain absent.
-		absent = append(absent, "Authorization", "X-Service-Token", "Cookie", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade", "X-OpenStack-Nova-API-Version", "X-OpenStack-Volume-API-Version")
+		absent = append(absent, "Authorization", "X-Service-Token", "Cookie", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Trailer", "TE", "Upgrade", "X-OpenStack-Volume-API-Version")
+		if e.profile.ServiceRole != "compute" {
+			absent = append(absent, "X-OpenStack-Nova-API-Version")
+		}
 		// A clean retry cannot add a condition absent from the selected call.
 		for _, condition := range []string{"If-Match", "If-None-Match", "If-Modified-Since", "If-Unmodified-Since"} {
 			supplied := false
@@ -703,7 +730,7 @@ func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, poli
 		client := source.Client
 		client.MoreHeaders = maps.Clone(headerPolicy.Values)
 		var origin *rest.Response
-		spec := rest.CollectionSpec[Record]{Client: &client, Path: e.profile.Path, Kind: e.profile.Kind, PluralKey: e.profile.Plural, Metadata: findMetadata, Validate: guard, SourceGuard: guard, ListCodes: findCodes(),
+		spec := rest.CollectionSpec[Record]{Client: &client, Path: e.profile.Path, Kind: e.profile.Kind, PluralKey: e.profile.Plural, Metadata: findMetadata, Validate: guard, SourceGuard: guard, ListCodes: e.codes(),
 			ReadPage: func(pageCtx context.Context, target string, codes ...int) (*rest.Response, error) {
 				return rest.DoJSONGuardedRejectionsHeaderPolicy(pageCtx, &client, guard, http.MethodGet, target, nil, headerPolicy, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, codes...)
 			},
@@ -722,9 +749,9 @@ func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, poli
 				}
 				value.Envelope = bytes.Clone(origin.Body)
 				value.Header, value.StatusCode = value.Wire.Header.Clone(), value.Wire.StatusCode
-				return errors.Join(e.findProject(value, nil), guard(ctx))
+				return errors.Join(e.findProject(ctx, value, nil), guard(ctx))
 			},
-			Paging: rest.PagePolicy[Record]{HTTPLink: true, DictionaryLinks: true, IgnoreFalseyNext: true, MarkerFallback: true, Marker: e.findMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: e.profile.VersionedPath},
+			Paging: rest.PagePolicy[Record]{HTTPLink: true, DictionaryLinks: true, SourceLinkPolicy: e.profile.SourceLinkPolicy, IgnoreFalseyNext: true, MarkerFallback: true, Marker: e.findMarker, MarkerOnShortPage: true, AllowFirstServerLimit: true, AllowZeroLimit: true, MaxItemsLimitHint: true, StopOnEmptyPage: true, SingletonObject: true, DecodeNoContent: true, VersionedPath: e.profile.VersionedPath},
 		}
 		if e.profile.SourceFindPolicy {
 			spec.Paging.NextTruthy = e.truthy
@@ -740,7 +767,7 @@ func (e *Engine) listRecords(ctx context.Context, source *cloudread.Source, poli
 				if !exists {
 					continue
 				}
-				equal, cause := e.localMatch(value.Resource.Body[key], filter)
+				equal, cause := e.matchDescriptor(ctx, value, key, filter)
 				if cause = errors.Join(cause, guard(ctx)); cause != nil {
 					yield(nil, origin.Fail(cause))
 					return
@@ -812,13 +839,13 @@ func (e *Engine) getRecord(ctx context.Context, source *cloudread.Source, header
 	if len(query) != 0 {
 		target += "?" + query.Encode()
 	}
-	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, findCodes()...)
+	response, err := rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &source.Client, e.Check, http.MethodGet, target, nil, headers, rest.RejectionPolicy{Codes: findRejectedCodes(), PreserveCleanRetry: true, StopFaultRetryCallbacks: e.profile.StopFaultRetryCallbacks}, e.codes()...)
 	if err != nil {
 		return nil, err
 	}
 	owned := findFields(seed)
 	owned[e.profile.IDKey], _ = json.Marshal(id)
-	value, err := e.findResponse(response, owned, source.Client.Microversion)
+	value, err := e.findResponse(ctx, response, owned, source.Client.Microversion)
 	if err = errors.Join(err, e.Check(ctx)); err != nil {
 		err = response.Fail(err)
 	}
@@ -902,7 +929,15 @@ func (e *Engine) Find(ctx context.Context, identity string, policy Options) (*Re
 		return e.getRecord(ctx, &source, headerPolicy, id, getQuery, seed)
 	}
 	list := func(context.Context, url.Values) iter.Seq2[*Record, error] {
-		return e.listRecords(ctx, &listSource, policy, listQuery, filters, control)
+		selected := e
+		if policy.ListBasePath != nil {
+			var cause error
+			selected, cause = e.withListBasePath(ctx, *policy.ListBasePath)
+			if cause != nil {
+				return func(yield func(*Record, error) bool) { yield(nil, cause) }
+			}
+		}
+		return selected.listRecords(ctx, &listSource, policy, listQuery, filters, control)
 	}
 	collection := resource.NewCollection(resource.Adapter[Record]{Kind: e.profile.Kind, IdentityFind: true, ValidateID: findSegment, IdentityDirectGet: findSegment,
 		IdentityResponseID: func(value *Record) (string, error) { return findText(value, e.profile.IDKey), nil }, Name: func(value *Record) string { return findText(value, e.profile.NameKey) }, Get: get, Iterate: list})
