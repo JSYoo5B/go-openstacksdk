@@ -96777,7 +96777,7 @@
         "Captured route/header/version protection, Go error returns and retained observed inventory differ intentionally from dynamic Python exception-only return conventions.",
         "Factory/raw JSON keep explicit Source attribute order; public Go Attributes maps use lexical distinct-key order. Alias collision callers can use ordered factories or raw object.",
         "Go iterator can repeatedly project retained completed response without sending another request; Source response generator is single-use. All discards partial slice on projection error; manual iteration can retain earlier rows.",
-        "Shared SourceFindPolicy accepts valid HTTP100..399, matching Source raise_from_response below400. Physical >=400 never becomes logical success; callback OkCodes expansion cannot alter the selected policy.",
+        "Bulk explicitly opts into SDK-owned SourceStatusPolicy accepting valid HTTP100..399, matching Source raise_from_response below400; reviewed older list/find profiles retain200..399. Physical >=400 never becomes logical success; callback OkCodes expansion cannot alter the selected policy.",
         "Bulk atomicy and per-row/attribute user/admin policy remain server/plugin responsibilities; official Neutron27 Pecan validation/policy and ML2 native bulk transaction source were reviewed, no live deployment/rollback was tested."
       ],
       "documentation": [
@@ -97286,7 +97286,8 @@
       "differences": [
         "Go returns detached Source Resource/Wire with actual response metadata and uses context plus owned callback guards; optional Python Adapter cache/session and object/dirty lifecycle remain tracked whole-project SDK-R1/C1/S1.",
         "Common Neutron/REST engine owns strict UTF8, continuation origin and request/header/version policies; no live-cloud support is claimed.",
-        "Nil project uses recorded Keystone auth only, without an extra auth refresh; manual/unscoped tokens require explicit literal project instead of inferring it."
+        "Nil project uses recorded Keystone auth only, without an extra auth refresh; manual/unscoped tokens require explicit literal project instead of inferring it.",
+        "Go owned DELETE retains the reviewed mutation success policy HTTP200..399; synthetic informational100..199 is an error. Source raise_from_response only rejects400 and above. The new SourceStatusPolicy opt-in governs record reads and bulk responses, not existing mutation acceptance."
       ],
       "remaining": []
     },

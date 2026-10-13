@@ -8,9 +8,9 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13, 추가 한 사이클): 개별 race·문서 예제·판정 통합 완료, 전체 gate 진행 중입니다.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트173개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 전체 `make check` 결과는 아래 마감 기록에 확정합니다.
+**현재 구현 (2026-10-13, 추가 한 사이클): 구현·검토·문서·전체 gate PASS, 이번 사이클 마감.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트174개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 최종 `make check`는204개 실제 test package와 race/vet/parity/progress/license/gofmt 모두 PASS입니다. 최초 vet 실패와 status 회귀, 해당 수리 후 최종 전체 통과를 [검증 기록](sdk-support-ledger.md#2026-10-13-추가-사이클-마감)에 구분했습니다.
 
-| 병렬 소유 단위 | 현재 단계 | 새 판정 후보 |
+| 병렬 소유 단위 | 최종 단계 | 신규 Go 매핑 |
 |---|---|---:|
 | Neutron Extension | 목록·GET-first Find 구현·race PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 1 |
 | Neutron AvailabilityZone·AutoAllocatedTopology | user 정책·무시되는 kwargs·strict 삭제·race PASS·커밋/push 완료 | 4 |
@@ -20,9 +20,9 @@
 | Keystone Project | 목록·cloud helper 구현, leaf/Cloud 회귀 PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 3 |
 | Keystone Group | 목록·cloud 검색·Source oracle·최종 race PASS·커밋/push 완료; Find는 미해결 유지 | 2 |
 | Nova Extension·ServerAction | Compute descriptor·event Resource·지연 버전 발견·최종 race PASS·커밋/push 완료 | 2 |
-| 합계 | 개별 검증·문서 예제·생성기·판정 완료; 전체 gate 진행 중 | 18 |
+| 합계 | 개별·전체 검증, 문서 예제, 생성기, 판정·자동 집계 완료 | 18 |
 
-공통 paging의 Source link precedence, 서비스별 version header, SDK 소유 descriptor projection과 bulk 응답 변환을 재사용했습니다. `supported`와 전체 Resource/session 동등성은 별도로 추적하고, Project·Group·Neutron Extension Find의 raw controls·lifecycle은 이번 사이클의 완료 수에서 제외합니다. 개별 gate에서 native401 오류의 원인 보존, HTTP NoBody, Source의 null link/scalar 필터 오류, bulk scalar list cast, native503 retry hook의 fixture를 수정하고 실패와 최종 통과를 구분했습니다. 남은 작업은 전체 `make check`와 검증 기록·최종 문서 커밋/push입니다.
+공통 paging의 Source link precedence, 서비스별 version header, SDK 소유 descriptor projection과 bulk 응답 변환을 재사용했습니다. `supported`와 전체 Resource/session 동등성은 별도로 추적하고, Project·Group·Neutron Extension Find의 raw controls·lifecycle은 이번 사이클의 완료 수에서 제외합니다. 개별 gate에서 native401 오류의 원인 보존, HTTP NoBody, Source의 null link/scalar 필터 오류, bulk scalar list cast, native503 retry hook의 fixture를 수정했습니다. 전체 gate의 vet cleanup 누락과 Neutron199 status 회귀도 발견했으며, SourceStatusPolicy opt-in과 기존 테스트를 보존하는 회귀 검사로 수리했습니다. 실패와 최종 통과를 구분해 저장하고 서비스별 작은 커밋과 최종 문서 커밋을 main에 push합니다. 이 사이클의 추가 구현은 종료하며 전체 목표의 남은 계약은 유지합니다.
 
 **직전 사이클 (2026-10-13): 사용자 요청에 따라 현재 병렬 작업 묶음을 마무리, 전체 gate PASS.** 전체 Go 매핑은 **1,944→1,963개(+19), 1,963/3,228개(60.8%)**, 핵심은 **1,866→1,885/2,158개(87.3%)**입니다. 고정 선언3,362개와 `unsupported`134개를 보존했습니다. 새 계약 테스트260개와 독립 Go main13개를 추가·검증했고, 고정 Python Source와 compiled native metadata를 활성화한 전체 `make check`(201개 실제 test package, race/vet/parity/progress/license/gofmt)가 통과했습니다. 로컬 TCP 주소 할당 실패가 난 병렬 실행 기록을 보존하고 `GOFLAGS=-p=1 GOMAXPROCS=2`로 통과한 최종 결과를 기록합니다.
 

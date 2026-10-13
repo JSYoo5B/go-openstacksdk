@@ -4,9 +4,23 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [미해결 재검토와 Keystone 소유 API](#미해결-재검토와-keystone-소유-api-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 추가 사이클](#2026-10-13-추가-사이클-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 API 완료 수는1,765입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는1,981입니다.
+
+## 2026-10-13 추가 사이클 마감
+
+사용자의 한 사이클 추가 요청에 따라 독립 소유 단위8개를 병렬 구현했습니다. 출발 revision은 `2a3bcbdb`; 구현·서비스 검증을 통과한 변경을 작은 커밋으로 저장하고 main에 순차 push했습니다. 새 named Go 매핑은 **18개**이며 전체 **1,963→1,981/3,228(61.4%)**, 핵심 **1,885→1,903/2,158(88.2%)**입니다. Neutron8(Extension 목록·AvailabilityZone·AutoTopology3·Port 다형 cloud 목록/subnet/bulk), Keystone7(Project proxy/cloud 목록·검색3, Group 목록·검색2, Limit2), Nova2(ServerAction 목록·Extension Find), Swift1(object 검색)을 반영했습니다. catalog3,362개, unsupported134개, reviews2,487개를 보존하고 계약 근거6,929→7,051개(+122)를 기록했습니다. `supported`는0개이며 생성 transport나 whole Resource/runtime 완료로 바꾸지 않았습니다.
+
+공통 계층은 Source root link key presence·dict links·iterable 오류, service role별 header, descriptor list-item cast·event Resource projector/equality, fallback 전용 list_base_path, owned bulk POST/remote-row 변환을 제공합니다. 기존 native/legacy 프로필의 기본값은 유지하고 새 Source 프로필에서 재사용합니다. Port bulk는 NetworkResource override와 실제 pinned Python 실행으로 flat plural body를 확인했고, POST는 eager·응답 row 변환은 lazy입니다. 임의 JSON 결과는 Resource/HTTP 증거를 만들지 않으며 Connection이 Port/Project/Swift에 location snapshot과 서비스 부재 정책을 연결합니다.
+
+새 Go 테스트 함수174개를 추가했습니다. Gophercloud public testhelper·기존 testcloud/nativefixture·REST fault/retry/policy를 재사용하여 native401 오류의 ErrOriginal/ErrReauth, read/close/custom cancel/source guard, 503 RetryFunc와429/498 RetryBackoffFunc, paging·opaque JMESPath·ordered local equality·partial actual evidence를 검증했습니다. 최초 gate의 import/fixture 오류, native 오류 모델/HTTP NoBody 기대값, Source null links·truthy scalar 필터 오류, bulk list cast, 503 hook 설치 오류를 원본 실패 로그에 보존하고 해당 검사만 수정해 재실행했습니다. 새 HTTP 테스트 프레임워크나 OS/network 설정 변경은 하지 않았습니다.
+
+전체 API 판정 검토에서 Find3개(`find_project`, `find_group`, Neutron `find_extension`)는 concrete GET-first/fallback helper와 테스트가 있어도 Source의 raw `headers` GET query→fallback LIST formal 및 `requires_id/base_path/skip_cache/error_message/resource_response_key` fetch controls가 남아 **unresolved**를 유지했습니다. Nova named `find_extension`에는 추가 query kwargs가 없어 이 분기가 도달하지 않습니다. Port/Project의 literal JSON object list 변환은 Python insertion order 대신 Go lexical key order를 쓰며, 기존 Go mapping 판정 선례에 따라 코드·테스트·가이드·differences에 명시했습니다. 전체 SDK-R1/C1/S1·실클라우드 acceptance·alpha 릴리즈는 계속 미완료입니다.
+
+정확한 새 가이드의 독립 Go main11개 빌드와 Python AST11개가 PASS입니다. Python 예제의 인증된 실클라우드 실행을 주장하지 않습니다. 생성기 재실행과 generator race, catalog/source/native inventory fingerprint 보존, 연산별 API/test/doc 참조 검토, paritycheck와 자동 집계 갱신을 완료했습니다. 개별 최종 gate는 REST/common/Swift/Neutron/Keystone/Nova/root Connection 모두 PASS입니다. 최초 전체 gate는 Nova test cleanup의 누락을 vet가 발견하여 수리했고, 다음 전체 race는 기존 Neutron4개 profile의 status199 거부 계약이 바뀐 회귀를 찾았습니다. `SourceStatusPolicy`를 명시적 opt-in으로 분리해 기존 SourceFindPolicy의200..399를 보존하고 이번 새 GET/LIST profile·bulk만100..399를 선택하도록 고쳤습니다. 실제 GET/LIST status·body·header·native 오류 증거를 비교하는 공통 회귀1그룹8사례를 추가했으며, 기존 네 leaf 테스트의 기대값을 완화하지 않았습니다. 첫 두 실패 로그를 보존했으며 소스 revision `83d3dc7f`의 최종 전체 `make check`는 exit0입니다. 실제 테스트 패키지204개(캐시된 통과 결과 재사용 포함), race/vet/license/parity/progress/gofmt 모두 PASS이고, 고정 Python Source 및 compiled native metadata를 활성화했습니다. 최종 판정은 go_mapping1,981·unsupported134·unresolved1,247(reviewed372+unreviewed875), supported0입니다. 전체 Source/runtime나 authenticated real-cloud acceptance를 완료로 판정하지 않았습니다. 이번 사이클의 구현·검증·문서·기록을 마치고 추가 API 할당을 종료합니다.
+
+실행 증거: `/private/tmp/go-openstacksdk-cycle2-frozen-{first,second}.jsonl`(첫 실패 포함), `...-port-final.jsonl`, `...-nova-{first,final}.jsonl`, `...-groups-root-{final,repaired}.jsonl`, `...-generator-tests.jsonl`, `...-guide-build.log`, `...-merged-operations.json`, `...-full-check.log`(vet 실패), `...-full-check-repaired.log`(status 회귀), `...-status-regression.jsonl`, `...-full-check-final.log`(최종 전체 결과). 임시 파일의 장기 보존은 보장하지 않으므로 공개 계약 테스트·서비스별 비교 가이드·remaining·위 요약을 저장소에 함께 남깁니다. [README의 추가 사이클 가이드](../README.md)는 서비스와 Connection 사용법을 연결합니다.
 
 ## 2026-10-13 핵심 user 병렬 묶음 마무리
 
@@ -16,7 +30,7 @@
 
 전체 `make check`(201개 실제 test package)이 PASS입니다. 최초 병렬 전체 검사는 로컬 TCP 주소 할당 오류로 실패했으며, `GOFLAGS=-p=1 GOMAXPROCS=2`로 동시 실행을 제한해 캐시된 통과 검사를 재사용한 최종 전체 검사는 race/vet/parity/progress/license/gofmt를 모두 통과했습니다. 고정 Source `/private/tmp/go-openstacksdk-oct13-source-9hc9ehzk`와 실제 compiled `GOPHERCLOUD_METADATA`를 활성화했습니다. 실행 근거는 `/private/tmp/go-openstacksdk-oct13-final-{frozen,options,rest-nova,nova,serviceproviders,bridges}.jsonl`, 예제13개 실제 빌드와 병렬 전체 실패 `/private/tmp/go-openstacksdk-oct13-final-check-repaired.log` 및 최종 PASS `/private/tmp/go-openstacksdk-oct13-final-check-serial.log`입니다. 첫 실패 기록을 최종 PASS로 부르지 않습니다.
 
-Port cloud `list_ports`는 typed Connection 목록을 제공하지만 임의 JSON/opaque 값을 Python `list()`처럼 변환하는 분기가 남아 unresolved입니다. Barbican generic wait2행도 admin ProjectQuota/임의 Resource/session 계약 때문에 unresolved입니다. Quota location은 immutable 명시 입력과 기본 null이며 Connection의 자동 location을 주장하지 않습니다. 전체 catalog3,362개·unsupported134개·기존 판정 근거와 SDK-R1/C1/S1·실클라우드/외부 릴리즈 잔여 계약을 보존합니다. [전체·서비스별 사용 가이드](../README.md)에서 이번 concrete 옵션과 Source 차이를 설명합니다.
+직전 묶음 당시 Port cloud `list_ports`는 typed Connection 목록만 제공해 임의 JSON/opaque 값의 Python `list()` 변환이 unresolved였습니다. 위 추가 사이클에서 `ListPortValues/ListSourceValues`와 실제 계약을 구현해 매핑했습니다. Barbican generic wait2행도 admin ProjectQuota/임의 Resource/session 계약 때문에 unresolved입니다. Quota location은 immutable 명시 입력과 기본 null이며 Connection의 자동 location을 주장하지 않습니다. 전체 catalog3,362개·unsupported134개·기존 판정 근거와 SDK-R1/C1/S1·실클라우드/외부 릴리즈 잔여 계약을 보존합니다. [전체·서비스별 사용 가이드](../README.md)에서 이번 concrete 옵션과 Source 차이를 설명합니다.
 
 ## 미해결 재검토와 Keystone 소유 API 마감
 
