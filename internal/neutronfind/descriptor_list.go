@@ -33,7 +33,7 @@ func (e *Engine) descriptorValue(raw json.RawMessage, field Descriptor) (json.Ra
 }
 
 func (e *Engine) codes() []int {
-	if !e.profile.SourceFindPolicy {
+	if !e.profile.SourceStatusPolicy {
 		return findCodes()
 	}
 	codes := make([]int, 300)

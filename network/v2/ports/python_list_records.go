@@ -196,6 +196,10 @@ func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQue
 func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
 
 func (a *API) portListEngine(ctx context.Context) (*neutronfind.Engine, error) {
+	return a.portRecordEngine(ctx, portListProfile())
+}
+
+func (a *API) portRecordEngine(ctx context.Context, profile neutronfind.Profile) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
 	}
@@ -203,7 +207,7 @@ func (a *API) portListEngine(ctx context.Context) (*neutronfind.Engine, error) {
 		return nil, findInvalid("configured ports API required")
 	}
 	selected := a.client
-	return neutronfind.New(ctx, selected, portListProfile(), func(context.Context) error {
+	return neutronfind.New(ctx, selected, profile, func(context.Context) error {
 		if a.client != selected {
 			return findInvalid("selected ports API client changed")
 		}

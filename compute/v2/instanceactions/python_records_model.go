@@ -45,7 +45,7 @@ func findInvalid(format string, args ...any) error {
 }
 
 var actionRecordProfile = neutronfind.Profile{
-	ServiceRole: "compute", Kind: "server actions", Singular: "instanceAction", Plural: "instanceActions", IDKey: "id", NameKey: "name", AlternateIDKey: "request_id", SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
+	ServiceRole: "compute", Kind: "server actions", Singular: "instanceAction", Plural: "instanceActions", IDKey: "id", NameKey: "name", AlternateIDKey: "request_id", SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "action", Wire: "action", Missing: "null"},
 		{Name: "request_id", Wire: "request_id", Missing: "null"},

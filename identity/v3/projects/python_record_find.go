@@ -43,7 +43,7 @@ var recordFindProfile = neutronfind.Profile{
 	ServiceRole: "identity", SourceLinkPolicy: true,
 	Kind: "projects", Path: "projects", Singular: "project", Plural: "projects",
 	IDKey: "id", NameKey: "name", PreserveUnknownBody: true, NameQueryHint: true,
-	VersionedPath: "/v3/projects", SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true,
+	VersionedPath: "/v3/projects", SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "description", Wire: "description", Missing: "null"},
 		{Name: "domain_id", Wire: "domain_id", Missing: "null"},

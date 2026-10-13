@@ -26,7 +26,7 @@ func findInvalid(format string, args ...any) error {
 // Compute Extension derives from Resource directly and discards unknown Body fields.
 // id uses alias only when the actual id key is absent; explicit null wins.
 var extensionRecordProfile = neutronfind.Profile{
-	ServiceRole: "compute", Kind: "extensions", Path: "extensions", Singular: "extension", Plural: "extensions", IDKey: "id", NameKey: "name", AlternateIDKey: "alias", VersionedPath: "/v2.1/extensions", PreserveUnknownBody: false, SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
+	ServiceRole: "compute", Kind: "extensions", Path: "extensions", Singular: "extension", Plural: "extensions", IDKey: "id", NameKey: "name", AlternateIDKey: "alias", VersionedPath: "/v2.1/extensions", PreserveUnknownBody: false, SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "id", Wire: "id", Missing: "null", Alias: "alias"},
 		{Name: "name", Wire: "name", Missing: "null"},

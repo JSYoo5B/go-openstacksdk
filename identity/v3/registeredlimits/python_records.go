@@ -40,7 +40,7 @@ var recordProfile = neutronfind.Profile{
 	ServiceRole: "identity",
 	Kind:        "registered_limits", Path: "registered_limits", Singular: "registered_limit", Plural: "registered_limits",
 	IDKey: "id", NameKey: "name", VersionedPath: "/v3/registered_limits",
-	SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
+	SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "description", Wire: "description", Missing: "null"},
 		{Name: "links", Wire: "links", Missing: "null"},

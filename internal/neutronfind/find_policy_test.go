@@ -3,6 +3,8 @@ package neutronfind_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"reflect"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 type policyTransport func(*http.Request) (*http.Response, error)
@@ -122,5 +125,56 @@ func TestSourceProfileNumericNextTruthinessDoesNotChangeBaselinePager(t *testing
 				t.Fatal(calls, rows, source, final)
 			}
 		})
+	}
+}
+
+// Source constructor semantics and response acceptance are independent policies.
+// This guards the reviewed older Source list bindings while allowing new APIs
+// to reproduce raise_from_response's below-400 status boundary explicitly.
+func TestSourceInformationalStatusIsExplicitWithoutChangingExistingFindPolicy(t *testing.T) {
+	for _, sourceStatus := range []bool{false, true} {
+		for _, method := range []string{"get", "list"} {
+			for _, code := range []int{199, 400} {
+				t.Run(fmt.Sprintf("source=%t/%s/%d", sourceStatus, method, code), func(t *testing.T) {
+					cloud := testcloud.New(t)
+					calls := 0
+					body := `{"record":{"id":"one"},"records":[{"id":"one"}]}`
+					cloud.Provider.HTTPClient.Transport = policyTransport(func(req *http.Request) (*http.Response, error) {
+						calls++
+						response := policyWire(code, body)
+						response.Header.Set("X-Request-ID", "status-policy-proof")
+						return response, nil
+					})
+					profile := policyProfile(true)
+					profile.SourceStatusPolicy = sourceStatus
+					engine, err := neutronfind.New(context.Background(), cloud.Client("network", "/v2.0/"), profile, nil)
+					if err != nil {
+						t.Fatal(err)
+					}
+					var row *neutronfind.Record
+					if method == "get" {
+						row, err = engine.Get(context.Background(), "one", neutronfind.Options{})
+					} else {
+						for value, failure := range engine.List(context.Background(), neutronfind.Options{}) {
+							row, err = value, failure
+							break
+						}
+					}
+					if calls != 1 {
+						t.Fatal(calls)
+					}
+					if code == 199 && sourceStatus {
+						if err != nil || row == nil || row.StatusCode != 199 || row.Header.Get("X-Request-ID") != "status-policy-proof" || string(row.Envelope) != body {
+							t.Fatal(row, err)
+						}
+						return
+					}
+					var original gophercloud.ErrUnexpectedResponseCode
+					if err == nil || !errors.As(err, &original) || original.Actual != code || original.Method != "GET" || string(original.Body) != body || original.ResponseHeader.Get("X-Request-ID") != "status-policy-proof" {
+						t.Fatal(row, err, original)
+					}
+				})
+			}
+		}
 	}
 }

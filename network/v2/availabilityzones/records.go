@@ -49,7 +49,7 @@ func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
 func profile() neutronfind.Profile {
-	return neutronfind.Profile{Kind: "availability zones", Path: "availability_zones", VersionedPath: "/v2.0/availability_zones", Singular: "availability_zone", Plural: "availability_zones", IDKey: "id", NameKey: "name", PreserveUnknownBody: true, SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, Body: []neutronfind.Descriptor{{Name: "name", Wire: "name", Missing: "null"}, {Name: "resource", Wire: "resource", Missing: "null"}, {Name: "state", Wire: "state", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}}}
+	return neutronfind.Profile{Kind: "availability zones", Path: "availability_zones", VersionedPath: "/v2.0/availability_zones", Singular: "availability_zone", Plural: "availability_zones", IDKey: "id", NameKey: "name", PreserveUnknownBody: true, SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, Body: []neutronfind.Descriptor{{Name: "name", Wire: "name", Missing: "null"}, {Name: "resource", Wire: "resource", Missing: "null"}, {Name: "state", Wire: "state", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}}}
 }
 func (a *API) engine(ctx context.Context) (*neutronfind.Engine, error) {
 	if err := cloudread.Context(ctx); err != nil {

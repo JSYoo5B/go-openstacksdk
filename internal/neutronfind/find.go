@@ -60,7 +60,10 @@ type Profile struct {
 	ServiceRole string
 	// SourceLinkPolicy opts into Source link precedence and iterable semantics.
 	SourceLinkPolicy bool
-	IDKey, NameKey   string
+	// SourceStatusPolicy opts into valid HTTP 100..399 acceptance.
+	// Existing SourceFindPolicy bindings retain their reviewed 200..399 policy.
+	SourceStatusPolicy bool
+	IDKey, NameKey     string
 	// AlternateIDKey supplies a physical list marker only when IDKey is absent.
 	// An explicit primary null/false/empty value retains precedence.
 	AlternateIDKey      string

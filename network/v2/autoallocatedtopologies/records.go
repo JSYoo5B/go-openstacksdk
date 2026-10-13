@@ -92,7 +92,7 @@ func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }
 func profile(validate bool) neutronfind.Profile {
-	p := neutronfind.Profile{Kind: "auto allocated topology", Path: "auto-allocated-topology", Singular: "auto_allocated_topology", IDKey: "id", NameKey: "name", PreserveUnknownBody: true, SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, Body: []neutronfind.Descriptor{{Name: "project_id", Wire: "project_id", Alias: "tenant_id", Missing: "null"}, {Name: "tenant_id", Wire: "tenant_id", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}, {Name: "name", Wire: "name", Missing: "null"}}}
+	p := neutronfind.Profile{Kind: "auto allocated topology", Path: "auto-allocated-topology", Singular: "auto_allocated_topology", IDKey: "id", NameKey: "name", PreserveUnknownBody: true, SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, Body: []neutronfind.Descriptor{{Name: "project_id", Wire: "project_id", Alias: "tenant_id", Missing: "null"}, {Name: "tenant_id", Wire: "tenant_id", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}, {Name: "name", Wire: "name", Missing: "null"}}}
 	if validate {
 		p.Body = append(p.Body, neutronfind.Descriptor{Name: "dry_run", Wire: "dry_run", Missing: "null"})
 	}

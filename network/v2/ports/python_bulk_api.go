@@ -50,7 +50,9 @@ func (result *BulkPortResult) All() ([]*PortRecord, error) {
 func (a *API) CreatePorts(ctx context.Context, data []BulkPortInput, options ...BulkPortOption) (*BulkPortResult, error) {
 	const op = "CreatePorts"
 	wrap := func(err error) error { return request.Wrap(op, "ports", cloudread.ContextError(ctx, err)) }
-	engine, err := a.portListEngine(ctx)
+	profile := portListProfile()
+	profile.SourceStatusPolicy = true
+	engine, err := a.portRecordEngine(ctx, profile)
 	if err != nil {
 		return nil, wrap(err)
 	}

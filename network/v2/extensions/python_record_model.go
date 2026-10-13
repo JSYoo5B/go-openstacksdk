@@ -26,7 +26,7 @@ func findInvalid(format string, args ...any) error {
 // Extension derives from Resource directly, without NetworkResource/TagMixin.
 // id uses alias only when the actual id key is absent; explicit null wins.
 var extensionRecordProfile = neutronfind.Profile{
-	Kind: "extensions", Path: "extensions", Singular: "extension", Plural: "extensions", IDKey: "id", NameKey: "name", AlternateIDKey: "alias", VersionedPath: "/v2.0/extensions", PreserveUnknownBody: true, SourceFindPolicy: true, SourceLinkPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true,
+	Kind: "extensions", Path: "extensions", Singular: "extension", Plural: "extensions", IDKey: "id", NameKey: "name", AlternateIDKey: "alias", VersionedPath: "/v2.0/extensions", PreserveUnknownBody: true, SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true,
 	Body: []neutronfind.Descriptor{
 		{Name: "id", Wire: "id", Missing: "null", Alias: "alias"},
 		{Name: "name", Wire: "name", Missing: "null"},

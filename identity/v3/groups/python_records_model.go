@@ -50,7 +50,7 @@ func recordWrap(ctx context.Context, operation string, err error) error {
 
 var groupRecordProfile = neutronfind.Profile{
 	ServiceRole: "identity", Kind: "groups", Path: "groups", Singular: "group", Plural: "groups", IDKey: "id", NameKey: "name",
-	NameQueryHint: true, SourceFindPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true, VersionedPath: "/v3/groups",
+	NameQueryHint: true, SourceFindPolicy: true, SourceStatusPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true, SourceLinkPolicy: true, VersionedPath: "/v3/groups",
 	Body: []neutronfind.Descriptor{
 		{Name: "description", Wire: "description", Missing: "null"},
 		{Name: "domain_id", Wire: "domain_id", Missing: "null"},
