@@ -57,6 +57,12 @@ func reader(ctx context.Context, client *gophercloud.ServiceClient, guard func(c
 	return rest.DoJSONGuardedRejectionsHeaderPolicy(ctx, &copy, guard, http.MethodGet, target, nil, rest.RequestHeaderPolicy{Values: values, Absent: absent}, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, accepted...)
 }
 func fetch(ctx context.Context, source *cloudread.Source, guard func(context.Context) error, kind, id string, previous *Record) (*Record, error) {
+	if kind == secretACLKind {
+		return fetchSecretACL(ctx, source, guard, id, previous)
+	}
+	if kind == quotaKind {
+		return fetchQuota(ctx, source, guard, id, previous)
+	}
 	if kind == "secret-stores" {
 		return fetchSecretStore(ctx, source, guard, id, previous)
 	}

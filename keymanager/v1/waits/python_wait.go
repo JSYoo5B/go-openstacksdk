@@ -93,7 +93,7 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 	if err := validID(target.id); err != nil {
 		return nil, wrap(err)
 	}
-	if target.kind != "containers" && target.kind != "orders" && target.kind != "secrets" && target.kind != "secret-stores" {
+	if target.kind != "containers" && target.kind != "orders" && target.kind != "secrets" && target.kind != "secret-stores" && target.kind != secretACLKind && target.kind != quotaKind {
 		return nil, wrap(resource.ErrUnsupported)
 	}
 	config := Options{}
@@ -121,10 +121,11 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 	if deleting && (config.Attribute != nil || config.Failures != nil) {
 		return nil, wrap(fmt.Errorf("%w: deletion uses only the status descriptor", resource.ErrUnsupported))
 	}
-	if !validAttribute(target.kind, attribute) {
+	statusDeclared := validAttribute(target.kind, "status")
+	if !validAttribute(target.kind, attribute) && !(deleting && !statusDeclared) {
 		return nil, wrap(fmt.Errorf("%w: unknown declared wait attribute %q", resource.ErrUnsupported, attribute))
 	}
-	seedState, err := text(target.seed.Resource.Body[attribute])
+	seedState, err := text(waitAttribute(target.kind, target.id, target.seed, attribute))
 	// Deletion ignores cached status and always performs the first fetch.
 	if !deleting {
 		if err != nil {
@@ -199,8 +200,12 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 				return nil, err
 			}
 			current = value.Clone()
-			state, stateErr := text(value.Resource.Body[attribute])
-			if deleting && state == nil && stateErr == nil {
+			state, stateErr := text(waitAttribute(target.kind, id, value, attribute))
+			if deleting && !statusDeclared {
+				empty := ""
+				state, stateErr = &empty, nil
+			}
+			if deleting && statusDeclared && state == nil && stateErr == nil {
 				stateErr = invalid("delete status cannot be null")
 			}
 			if stateErr != nil {

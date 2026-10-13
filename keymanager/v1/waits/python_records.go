@@ -219,6 +219,12 @@ func canonicalFields(kind string, body map[string]json.RawMessage) map[string]js
 	return result
 }
 func validAttribute(kind, attribute string) bool {
+	if kind == secretACLKind {
+		return secretACLAttribute(attribute)
+	}
+	if kind == quotaKind {
+		return quotaAttribute(attribute)
+	}
 	if kind == "secret-stores" {
 		return secretStoreAttribute(attribute)
 	}
