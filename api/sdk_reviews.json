@@ -106104,12 +106104,20 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_bandwidth_limit_rule",
       "source_fingerprint": "3be5d3068bcb07f2cc69b9e44124a3f78dacab2ab0e01655ae4c5ea6721fd9a9",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateBandwidthLimitRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSBandwidthLimitRuleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudBandwidthLimitRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateMaxBurstKBPS"
       ],
       "contracts": [
         {
@@ -106117,16 +106125,78 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Required max_kbps/dscp_mark/min_kbps is positional JSON-domain data and retained by presence: zero/null/false/string/large integer are not omitted or coerced. Concrete optional kwargs/options are owned snapshots; invalid/duplicate required or bound policy/unknown keys fail before extension HTTP, with no application builder/interface responsibility.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Each call fully consumes a fresh uncached qos extension discovery before policy/rule stages. Initial alias discovery does not hide late malformed alias or later-page HTTP failures. Completed extension/policy evidence remains separate from any actual rule mutation receipt; failed gate causes no policy/rule HTTP.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCompleteGatesAndOptionalFailuresKeepStages"
+          ]
+        },
+        {
+          "behavior": "Source-only policy lookup opts existing FindSourceRecord into Source status/equality/link/fault policy without modifying legacy state.Policy or native APIs. Exact member GET follows clean400/403/404 all-page list fallback, raises missing/late ambiguity before POST, and uses the returned policy ID rather than caller identity.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateFindMissingAmbiguityAndListFallback",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture"
+          ]
+        },
+        {
+          "behavior": "Translated cloud attrs alone enter collection POST. Source Body seed/defaults merge partial response with explicit-null override; missing response required fields remain only in Resource seed while Wire/Envelope retain actual response. Bound URI parent does not enter request body; foreign response qos_policy_id remains actual Wire while Resource reads the original raw JSON URI parent. Null/false/zero URI formatting uses None/False/0 and arbitrary integer precision survives.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Source selected create microversion and owned null location override same-named response members only in Resource view; actual Wire is preserved. Source100..399 handles lookup/POST199 separately from legacy baseline. Concrete input/protocol/API/source/header snapshots are captured before caller callbacks and guard every dependent stage.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Actual rejected400/403/404/409/503 POST preserves native value ErrUnexpectedResponseCode and actual status/body/header rather than ignored missing/success. Accepted/rejected200/401/404/503 read+Close/cancel/source faults retain actual receipt/causes with zero retry/reauth hooks and explicit bounded unexpected hook fences. Native401 retains pointer ErrUnableToReauthenticate.ErrOriginal value response proof and ErrReauth even without native Unwrap.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePhysicalFailuresPreserveActualProofWithoutHooks",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Clean503 retry and401 live token renewal remain supported. Changed selected route aborts before a resend with the original503 receipt, while callback MoreHeaders mutation does not affect the captured initial/gate/policy/POST headers. Fault/cancel/source failures are not normalized to missing or successful creation.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards"
+          ]
+        },
+        {
+          "behavior": "BW accepts optional max_burst_kbps/direction only and resolves policy with ignore_missing=True before the direction gate. A nonnull direction (false/zero/empty string/array/object included) triggers a second fresh complete qos-bw-limit-direction discovery. Unavailable extension removes only direction and marks DirectionDropped; null retains direction:null with no extra gate, and HTTP/physical gate failure is never treated as unsupported direction.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateBandwidthDirectionNonnullGateAfterPolicy",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCompleteGatesAndOptionalFailuresKeepStages"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-rule-creates-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself.",
-        "No SDK helper drops direction when the qos-bw-limit-direction extension is not listed."
-      ]
+      "differences": [
+        "The concrete Go carrier exposes Rule/Wire/Envelope/Header/StatusCode, independent Policy/Extensions and DirectionDropped instead of only Python rule Resource. Policy is the independently owned actual lookup view/receipt, not Python mutable borrowed object side effects. Request seed/no-op/class state is not fabricated as server response evidence.",
+        "Required values accept complete UTF8 JSON/Go primitives with library-owned concrete With options; custom Python runtime objects, mutable Resource/class/adapter/cache/session/current_location and dynamic class attribute dispatch remain shared SDK-R1/SDK-C1/SDK-S1 foundation differences. Their supported increment remains 0. These three cloud mappings do not promote general Proxy.create raw attrs, update/delete/details or full SDK parity.",
+        "Go guards selected source/header/protocol and service-relative literal parent segments: slash/percent are escaped as one segment; blank/control/traversal identities fail preflight. Source URI %s formatting can introduce arbitrary path structure. Null/false/0 parents are explicitly preserved as None/False/0 paths with original raw URI view rather than incorrectly applying falsey policy member DELETE joining.",
+        "JSON object wire key order is not guaranteed. Raw request values are forwarded without adding native constructor requirements or type/default coercions; actual server value/range/driver validation may reject null/false/string/rates even though the pinned Source forwards them. Generic JSON float serialization/runtime-domain differences remain explicit shared foundation policy.",
+        "Fixed Neutron27 child create policies require project ADMIN_OR_PARENT_OWNER_MANAGER, distinct from historic deprecated ADMIN_ONLY. Ability to read a shared policy does not confer child creation permission. Source/runtime/mock/race/main checks do not assert authenticated backend, role, driver or deployment policy acceptance.",
+        "Actual pinned Source cloud decorator/methods + Neutron Proxy.find/create + Resource.find/new/create were imported from ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe and executed under Python3.14.8 in a bounded62-case reference. Only Adapter HTTP methods and extension generator were substituted; an independent read-only auditor additionally confirmed45 response/URI/version cases without Go/file/Git mutation. Runtime receipt is /private/tmp/go-openstacksdk-cycle6-qos-rule-creates-source.json, not a live OpenStack claim."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_bandwidth_limit_rule",
@@ -106329,12 +106399,18 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_dscp_marking_rule",
       "source_fingerprint": "1081b3fe64b6691aadc2b67a2f1986826b87a6fd9d46349d728afc710d01d84d",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateDSCPMarkingRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSDSCPMarkingRuleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudDSCPMarkingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON"
       ],
       "contracts": [
         {
@@ -106342,15 +106418,78 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Required max_kbps/dscp_mark/min_kbps is positional JSON-domain data and retained by presence: zero/null/false/string/large integer are not omitted or coerced. Concrete optional kwargs/options are owned snapshots; invalid/duplicate required or bound policy/unknown keys fail before extension HTTP, with no application builder/interface responsibility.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Each call fully consumes a fresh uncached qos extension discovery before policy/rule stages. Initial alias discovery does not hide late malformed alias or later-page HTTP failures. Completed extension/policy evidence remains separate from any actual rule mutation receipt; failed gate causes no policy/rule HTTP.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCompleteGatesAndOptionalFailuresKeepStages"
+          ]
+        },
+        {
+          "behavior": "Source-only policy lookup opts existing FindSourceRecord into Source status/equality/link/fault policy without modifying legacy state.Policy or native APIs. Exact member GET follows clean400/403/404 all-page list fallback, raises missing/late ambiguity before POST, and uses the returned policy ID rather than caller identity.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateFindMissingAmbiguityAndListFallback",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture"
+          ]
+        },
+        {
+          "behavior": "Translated cloud attrs alone enter collection POST. Source Body seed/defaults merge partial response with explicit-null override; missing response required fields remain only in Resource seed while Wire/Envelope retain actual response. Bound URI parent does not enter request body; foreign response qos_policy_id remains actual Wire while Resource reads the original raw JSON URI parent. Null/false/zero URI formatting uses None/False/0 and arbitrary integer precision survives.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Source selected create microversion and owned null location override same-named response members only in Resource view; actual Wire is preserved. Source100..399 handles lookup/POST199 separately from legacy baseline. Concrete input/protocol/API/source/header snapshots are captured before caller callbacks and guard every dependent stage.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Actual rejected400/403/404/409/503 POST preserves native value ErrUnexpectedResponseCode and actual status/body/header rather than ignored missing/success. Accepted/rejected200/401/404/503 read+Close/cancel/source faults retain actual receipt/causes with zero retry/reauth hooks and explicit bounded unexpected hook fences. Native401 retains pointer ErrUnableToReauthenticate.ErrOriginal value response proof and ErrReauth even without native Unwrap.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePhysicalFailuresPreserveActualProofWithoutHooks",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Clean503 retry and401 live token renewal remain supported. Changed selected route aborts before a resend with the original503 receipt, while callback MoreHeaders mutation does not affect the captured initial/gate/policy/POST headers. Fault/cancel/source failures are not normalized to missing or successful creation.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards"
+          ]
+        },
+        {
+          "behavior": "DSCP cloud method has no optional kwargs in pinned Python; concrete Go variadic options provide consistent SDK call syntax but any actual optional field is rejected before HTTP. Policy lookup defaults ignore_missing=True and absence becomes a cloud NotFound error before rule POST. No direction gate/default attrs are introduced.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateFindMissingAmbiguityAndListFallback"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-rule-creates-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
-      ]
+      "differences": [
+        "The concrete Go carrier exposes Rule/Wire/Envelope/Header/StatusCode, independent Policy/Extensions and DirectionDropped instead of only Python rule Resource. Policy is the independently owned actual lookup view/receipt, not Python mutable borrowed object side effects. Request seed/no-op/class state is not fabricated as server response evidence.",
+        "Required values accept complete UTF8 JSON/Go primitives with library-owned concrete With options; custom Python runtime objects, mutable Resource/class/adapter/cache/session/current_location and dynamic class attribute dispatch remain shared SDK-R1/SDK-C1/SDK-S1 foundation differences. Their supported increment remains 0. These three cloud mappings do not promote general Proxy.create raw attrs, update/delete/details or full SDK parity.",
+        "Go guards selected source/header/protocol and service-relative literal parent segments: slash/percent are escaped as one segment; blank/control/traversal identities fail preflight. Source URI %s formatting can introduce arbitrary path structure. Null/false/0 parents are explicitly preserved as None/False/0 paths with original raw URI view rather than incorrectly applying falsey policy member DELETE joining.",
+        "JSON object wire key order is not guaranteed. Raw request values are forwarded without adding native constructor requirements or type/default coercions; actual server value/range/driver validation may reject null/false/string/rates even though the pinned Source forwards them. Generic JSON float serialization/runtime-domain differences remain explicit shared foundation policy.",
+        "Fixed Neutron27 child create policies require project ADMIN_OR_PARENT_OWNER_MANAGER, distinct from historic deprecated ADMIN_ONLY. Ability to read a shared policy does not confer child creation permission. Source/runtime/mock/race/main checks do not assert authenticated backend, role, driver or deployment policy acceptance.",
+        "Actual pinned Source cloud decorator/methods + Neutron Proxy.find/create + Resource.find/new/create were imported from ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe and executed under Python3.14.8 in a bounded62-case reference. Only Adapter HTTP methods and extension generator were substituted; an independent read-only auditor additionally confirmed45 response/URI/version cases without Go/file/Git mutation. Runtime receipt is /private/tmp/go-openstacksdk-cycle6-qos-rule-creates-source.json, not a live OpenStack claim."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_dscp_marking_rule",
@@ -106553,12 +106692,19 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_qos_minimum_bandwidth_rule",
       "source_fingerprint": "7f6464d2703c5b6bc5abeb7ec25b92830c39cf34e2aee60f2e26229a2bc2c38c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.WithRecordFindIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateMinimumBandwidthRule",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.CreateQoSMinimumBandwidthRuleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.CreateCloudMinimumBandwidthRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindSourceRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleCreateDirection"
       ],
       "contracts": [
         {
@@ -106566,15 +106712,78 @@
           "tests": [
             "network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate"
           ]
+        },
+        {
+          "behavior": "Required max_kbps/dscp_mark/min_kbps is positional JSON-domain data and retained by presence: zero/null/false/string/large integer are not omitted or coerced. Concrete optional kwargs/options are owned snapshots; invalid/duplicate required or bound policy/unknown keys fail before extension HTTP, with no application builder/interface responsibility.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateValidKwargsOwnedOptionsAndRequiredRawPresence",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Each call fully consumes a fresh uncached qos extension discovery before policy/rule stages. Initial alias discovery does not hide late malformed alias or later-page HTTP failures. Completed extension/policy evidence remains separate from any actual rule mutation receipt; failed gate causes no policy/rule HTTP.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCompleteGatesAndOptionalFailuresKeepStages"
+          ]
+        },
+        {
+          "behavior": "Source-only policy lookup opts existing FindSourceRecord into Source status/equality/link/fault policy without modifying legacy state.Policy or native APIs. Exact member GET follows clean400/403/404 all-page list fallback, raises missing/late ambiguity before POST, and uses the returned policy ID rather than caller identity.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateFindMissingAmbiguityAndListFallback",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture"
+          ]
+        },
+        {
+          "behavior": "Translated cloud attrs alone enter collection POST. Source Body seed/defaults merge partial response with explicit-null override; missing response required fields remain only in Resource seed while Wire/Envelope retain actual response. Bound URI parent does not enter request body; foreign response qos_policy_id remains actual Wire while Resource reads the original raw JSON URI parent. Null/false/zero URI formatting uses None/False/0 and arbitrary integer precision survives.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Source selected create microversion and owned null location override same-named response members only in Resource view; actual Wire is preserved. Source100..399 handles lookup/POST199 separately from legacy baseline. Concrete input/protocol/API/source/header snapshots are captured before caller callbacks and guard every dependent stage.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateReturnedParentJSONURIAndActualViews",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateSourceSeedDefaultsAndWireReceipts"
+          ]
+        },
+        {
+          "behavior": "Actual rejected400/403/404/409/503 POST preserves native value ErrUnexpectedResponseCode and actual status/body/header rather than ignored missing/success. Accepted/rejected200/401/404/503 read+Close/cancel/source faults retain actual receipt/causes with zero retry/reauth hooks and explicit bounded unexpected hook fences. Native401 retains pointer ErrUnableToReauthenticate.ErrOriginal value response proof and ErrReauth even without native Unwrap.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePhysicalFailuresPreserveActualProofWithoutHooks",
+            "network/v2/extensions/qos/rules/python_cloud_creates_test.go:TestQoSCloudRuleCreateRequiredPresencePreflightAndNativeRejections"
+          ]
+        },
+        {
+          "behavior": "Clean503 retry and401 live token renewal remain supported. Changed selected route aborts before a resend with the original503 receipt, while callback MoreHeaders mutation does not affect the captured initial/gate/policy/POST headers. Fault/cancel/source failures are not normalized to missing or successful creation.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateCleanRetryRenewalSource199AndHeaderCapture",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreatePreflightCancellationAndSelectedAPIGuards"
+          ]
+        },
+        {
+          "behavior": "Minimum accepts optional direction only and resolves policy with ignore_missing=False. Missing policy raises strict find error before POST. Unlike BW, direction never triggers qos-bw-limit-direction discovery or gets dropped; raw required min_kbps and raw direction are forwarded as supplied.",
+          "tests": [
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateBandwidthDirectionNonnullGateAfterPolicy",
+            "network/cloud_qos_rule_creates_test.go:TestCloudQoSRuleCreateFindMissingAmbiguityAndListFallback"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/python-cloud-parity-a.md",
+        "network/cloud-qos-rule-creates-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "No public SDK API performs the cloud-layer per-call GET /v2.0/extensions check that raises OpenStackCloudUnavailableExtension when the qos extension is absent; a Go caller would have to list extensions with extensions.API.List and test the alias itself."
-      ]
+      "differences": [
+        "The concrete Go carrier exposes Rule/Wire/Envelope/Header/StatusCode, independent Policy/Extensions and DirectionDropped instead of only Python rule Resource. Policy is the independently owned actual lookup view/receipt, not Python mutable borrowed object side effects. Request seed/no-op/class state is not fabricated as server response evidence.",
+        "Required values accept complete UTF8 JSON/Go primitives with library-owned concrete With options; custom Python runtime objects, mutable Resource/class/adapter/cache/session/current_location and dynamic class attribute dispatch remain shared SDK-R1/SDK-C1/SDK-S1 foundation differences. Their supported increment remains 0. These three cloud mappings do not promote general Proxy.create raw attrs, update/delete/details or full SDK parity.",
+        "Go guards selected source/header/protocol and service-relative literal parent segments: slash/percent are escaped as one segment; blank/control/traversal identities fail preflight. Source URI %s formatting can introduce arbitrary path structure. Null/false/0 parents are explicitly preserved as None/False/0 paths with original raw URI view rather than incorrectly applying falsey policy member DELETE joining.",
+        "JSON object wire key order is not guaranteed. Raw request values are forwarded without adding native constructor requirements or type/default coercions; actual server value/range/driver validation may reject null/false/string/rates even though the pinned Source forwards them. Generic JSON float serialization/runtime-domain differences remain explicit shared foundation policy.",
+        "Fixed Neutron27 child create policies require project ADMIN_OR_PARENT_OWNER_MANAGER, distinct from historic deprecated ADMIN_ONLY. Ability to read a shared policy does not confer child creation permission. Source/runtime/mock/race/main checks do not assert authenticated backend, role, driver or deployment policy acceptance.",
+        "Actual pinned Source cloud decorator/methods + Neutron Proxy.find/create + Resource.find/new/create were imported from ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe and executed under Python3.14.8 in a bounded62-case reference. Only Adapter HTTP methods and extension generator were substituted; an independent read-only auditor additionally confirmed45 response/URI/version cases without Go/file/Git mutation. Runtime receipt is /private/tmp/go-openstacksdk-cycle6-qos-rule-creates-source.json, not a live OpenStack claim."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/delete_qos_minimum_bandwidth_rule",
@@ -107495,18 +107704,100 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/stream_object",
       "source_fingerprint": "8078cd6b27dc2d19ac6b55c9e2ff47e2ae28fe20b66cd7afe26a2500911243bd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.StreamObjectChunks",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.StreamObjectChunks",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamChunkSize",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamQueryString",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamCloudObject",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamOpts",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamChunkSize",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamQueryString"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Library-owned factory returns a lazy, single-use closeable binary chunk iterator; default1024 and query_string ignored even when malformed. No discovery/options/GET before iteration; connection supplies the cached Swift Cloud facade. Receipt is actual status/header and each returned chunk is independently owned.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse",
+            "objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing",
+            "connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade"
+          ]
+        },
+        {
+          "behavior": "Typed concrete ChunkSize/QueryString options and pointer snapshots require no application interface builder. Short physical reads are assembled into bounded owned chunks, nil default and explicit sizes are copied before mutation; nil/cancelled context/client/options and unsafe literal names fail without HTTP.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamChunkSizeSnapshotShortReadsAndValidation",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNilCancelledAndOptionSourceMutationBeforeHTTP",
+            "objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamNilCancelledAndClosedHandleStayLazy",
+            "connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamPreflightAndClosedHandleNeverDiscover"
+          ]
+        },
+        {
+          "behavior": "Source-valid physical100..399 status range includes199/203/204/206 and provided304 body; native400+ errors retain actual status/header/body. Only a clean404 after successful physicalRead/Close and encoded-body validation becomes empty success, retaining receipt404; mixed404 physical/decode failures remain errors.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamSourceSuccessStatusAnd304Body",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamClean404OnlyEmptyAndOtherNativeStatuses",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamMissingReadCloseFaultsAreNotSuppressed",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCompressedRejectionsValidateBeforeIgnoring404",
+            "connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamMissingReturnsActualReceipt"
+          ]
+        },
+        {
+          "behavior": "EOF/error/break/consumerClose cleans physical body once; callbackClose prevents GET; Close during GET adopts and closes late unread body plus actual receipt. Check Err/Close for early-break cleanup failure; consumerClose prevents next Read; private receipt and unary/native error snapshots resist caller header/body mutation.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamBreakClosesOnceAndRetainsCleanupFailure",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCloseFromOptionsAndConsumerStopsBeforeAnotherRead",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamConcurrentCloseDuringGETOwnsLateBody",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamPartialReadCloseAndImmutableCurrentChunkProof",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNativePolicyErrorCopiesUnaryActualReceipt",
+            "connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof"
+          ]
+        },
+        {
+          "behavior": "Bodyless GET pins selected source/provider/account route/version/header facts through options, read, Close, auth/retry. Restored source plus custom cancellation/read/Close retain actual physical partial proof; native401 physical fault keeps ErrOriginal+ErrReauth and suppresses all retry/reauth/backoff hooks. Clean401 renewal and429/498 backoff reuse fixed request.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamStickyRestoredSourceAndCancellationAfterActualRead",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNative401PhysicalFaultDoesNotInvokeHooks",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCleanNativeRenewalAndBackoffReuseFixedRoute"
+          ]
+        },
+        {
+          "behavior": "Requests baseline Accept:*/* and explicit Accept-Encoding:gzip, deflate, zstd fix request defaults without X-Newest. Owned caller override is snapshotted and native retry cannot change it. Real default Go transport preserves actual compressed Content-Encoding/Content-Length while bytes stream decoded, with no accidental auto-gzip double decoding.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamEncodingOverrideIsOwnedThroughCallbacksAndNativeRetry",
+            "objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamDefaultTransportGzipAndZstandard"
+          ]
+        },
+        {
+          "behavior": "Incremental gzip/x-gzip, zlib/rawdeflate including raw zlib-prefix fallback, zstd and reverse ordered chains up to5 match installed Requests decoder selection; unrecognized single/br remains opaque. Empty bodies yield nothing. Clean gzip truncatedtrailer/partialheader and post-complete tail normalize after actualEOF; badmagic/CRC and physical faults never become successfulEOF, including encoded404.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamRequestsCodecsAndReverseEncodingChain",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamEmptyBodiesAndMalformedCodecKeepReceipt",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamDeflateFallsBackAfterValidZlibPrefix",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamGzipCleanEOFTrailerTailHeaderAndCompressed404",
+            "objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamGzipEOFNormalizationNeverHidesPhysicalFaults"
+          ]
+        }
+      ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "docs/python-cloud-parity-misc.md",
+        "objectstorage/cloud-object-stream-python.md"
       ],
-      "differences": [],
-      "remaining": [
-        "This helper delegates to Proxy.stream_object, which stays unresolved: Python yields resp_chunk_size chunks from a Requests iterator, while Go returns an io.ReadCloser; the cloud helper also turns NotFound into an empty iterator, which Go would need caller-side 404 handling to reproduce."
-      ]
+      "differences": [
+        "This closes the named cloud fixed string container/object branch only. Python dynamically accepted mutable Object/Container, dirtyattrs, inherited metadata and arbitrary sessions are excluded typed Go semantics; Proxy.stream_object and native Objects.StreamObject review judgments are unchanged. SDK-R1/C1/S1 constructor/resource/session/cache foundations remain unsupported and supported=0.",
+        "Go ChunkSize is typed positive int1..16777216; nil selects SDK1024. Python None/negative/bool/zero/float branches and HTTP-versus-chunk-validation precedence are deliberate Go defaults/safety differences; invalidtyped options are rejected beforeGET.",
+        "Go assembles short Reads/framing pieces into owned bounded chunks, whereas Requests physicalchunked response can yield shorter wire-boundary segments; binary content and maximum requested chunk bound are preserved, not identical transportsegmentation.",
+        "CloudObjectStream/Chunks/Err/Close/Receipt are SDK-owned implementations, single-use like Source generator. SDK automatic EOF/error/breakcleanup and partialbytes+error improve Go ownership. Close may stop pendingGET and capture latebody; serialiteration/Close only, blockingRead interruption uses context rather than concurrentClose as with shared guarded reader.",
+        "Go validates safe UTF8 literalSwift names and PathEscapes complete object segment; Source utils.urljoin strips outer slashes and preserves inner object slash as path. Name/route/framing/auth/version guards and malformedtyped preflight are deliberate Go protocol policy.",
+        "Receipt exposes actual status/header snapshot plus errorchain proof without buffering successful object payload. physical Read errors retain only that current compressed/raw Read partialbytes; decoded partial bytes are yielded separately. Rejected physical bytes are already owned by nativeGophercloud and codec validation never rereads/recloses that response.",
+        "Decoder comparison uses CPython3.14.8, Requests2.34.2 andurllib3.2.8.0 with gzip/xgzip/deflate/zstd installed; zstd implementation is pinned klauspost/compressv1.18.0. Single optionalbr/unknown stays opaque as in this runtime, and optionalPython decoder installation/session customization is not genericResource/transport parity.",
+        "NativeGophercloud clean401/429/498 callbacks remain provider-owned with SDK guard; ErrUnableToReauthenticate does notUnwrap its original/reauth branches. Accepted status policy is Source100..399 and does not expand existing nativeStreamObject200/206/304 semantics. Source exception rendering/KSA authentication/cache behavior remain foundationdifferences.",
+        "Actual pinned Source execution has41 observations using real cloud/Proxy/Object/Requests/urllib3 and only memoryHTTP adapter/Connectionstub. Finalroot focused3packages passed28newgroups(leaf21/cloud3/Connection4); PythonmainAST and byteexactPython/Go guide fences passed. These are not livecloud authentication, SwiftACL or releaseacceptance. Review file is a candidate pending canonicalmerge; fullsupported count remains0."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object",

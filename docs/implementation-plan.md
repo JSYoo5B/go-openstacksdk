@@ -8,7 +8,17 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13, quota 반복 세 번째 사이클): 구현·검토·문서·전체 gate PASS, 고정8개 묶음 마감.** 출발 revision은 `3caf3aeb`이며 Go 매핑은 전체 **2,016→2,024개(+8), 2,024/3,228(62.7%)**, 핵심 **1,938→1,946/2,158(90.2%)**입니다. 새 테스트78그룹·독립 Go main4개 build·Python AST4개와 고정 Source/native metadata를 사용한204개 실제 test package 전체 `make check`가 PASS입니다. catalog3,362·unsupported134·supported0과 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. 시작 quota 잔여86%, 최신83%이며 계정의 다른 작업과 공유하는 사용량입니다. 작은 기능 커밋을 main에 push했고 마감 문서·판정도 함께 반영합니다.
+
+**현재 구현 (2026-10-13, quota 반복 네 번째 사이클): 구현·8worker 독립 검토·문서·전체 gate PASS, 고정4개 묶음 마감.** 출발 revision은 `1c34b74e`이며 Go 매핑은 전체 **2,024→2,028개(+4), 2,028/3,228(62.8%)**, 핵심 **1,946→1,950/2,158(90.4%)**입니다. 새38그룹·독립 Go main2개 build·Python AST2개와 고정 Source/native metadata를 사용한204개 실제 test package 전체 `make check`가 PASS입니다. Source catalog3,362·unsupported134·supported0, SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. zstd 응답 지원에 필요한 고정 Go dependency와 원문3개를 추가해 module5개/원문15개 라이선스 gate도 PASS입니다. 시작 quota 잔여83%, 최신78%입니다. 이후 worker8개 유지 지시를 반복 프롬프트에 반영했습니다. 이번4개 범위만 마감하고 잔여80% 이하에서는 새 사이클을 시작하지 않습니다.
+
+| 소유 단위 | 고정한 이번 범위 | 단계 |
+|---|---|---|
+| Neutron QoS Rule | cloud bandwidth limit·DSCP·minimum bandwidth create3개 | 구현·최종focused race PASS·Source62+독립45·작은커밋/main push 완료 |
+| Swift Object | cloud stream_object1개·닫힌 chunk iterator·Connection 통합 | 구현·독립lifecycle/codec 수리 후최종race/Connection PASS·커밋 완료 |
+
+공통 요청·REST guard·Source profile·converter·공개 Gophercloud testhelper와 기존 fixture를 재사용하고 새 파일 소유를 분리합니다. 사용자의 추가 지시에 따라 quota가80% 근처여도8개 worker의 구현·Source/테스트/문서/라이선스 독립 검토를 유지합니다. root가 모든 Go 검사·공통 코드·중앙 판정·집계·작은 커밋과 승인된 main push를 순서대로 처리합니다. 이4개 후보만 마무리하며 QoS update·admin details, 일반 Swift Proxy mutable Object/attrs와 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. 한도는 다른 계정 작업과 공유하며 시작한 범위는80% 아래로 내려가도 필요한 수리·검증·문서·commit/push까지 마무리합니다. 새 사이클은 조회 가능한 최소 잔여가 엄격히80%를 초과할 때만 시작합니다. [마감 검증 근거](sdk-support-ledger.md#2026-10-13-quota-반복-네-번째-사이클)에 최초 실패·수리·최종 PASS를 구분했습니다.
+
+**직전 구현 (2026-10-13, quota 반복 세 번째 사이클): 구현·검토·문서·전체 gate PASS, 고정8개 묶음 마감.** 출발 revision은 `3caf3aeb`이며 Go 매핑은 전체 **2,016→2,024개(+8), 2,024/3,228(62.7%)**, 핵심 **1,938→1,946/2,158(90.2%)**입니다. 새 테스트78그룹·독립 Go main4개 build·Python AST4개와 고정 Source/native metadata를 사용한204개 실제 test package 전체 `make check`가 PASS입니다. catalog3,362·unsupported134·supported0과 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. 시작 quota 잔여86%, 최신83%이며 계정의 다른 작업과 공유하는 사용량입니다. 작은 기능 커밋을 main에 push했고 마감 문서·판정도 함께 반영합니다.
 
 | 소유 단위 | 고정한 이번 범위 | 단계 |
 |---|---|---|
@@ -584,11 +594,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 2,024 (62.7%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 2,028 (62.8%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,204 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,200 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,321 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,352 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -767,12 +777,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,946 / 2,158 | 90.2% | 211 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,950 / 2,158 | 90.4% | 207 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 2,024 / 3,228 | 62.7% | 329 | 875 | 134 |
+| 전체 | 2,028 / 3,228 | 62.8% | 325 | 875 | 134 |
 
 **핵심 서비스**
 
@@ -781,11 +791,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Identity / Keystone | 354 / 379 | 24 | 1 | 10 |
 | Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 645 / 728 | 83 | 0 | 30 |
+| Network / Neutron | 648 / 728 | 80 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
 | Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |
-| Object Storage / Swift | 60 / 73 | 13 | 0 | 1 |
+| Object Storage / Swift | 61 / 73 | 12 | 0 | 1 |
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 
