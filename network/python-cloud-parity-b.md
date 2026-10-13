@@ -29,7 +29,7 @@
 | [update_port](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2776) | `ports.API.FindRecord` 후 `UpdateWithAttributes` (일부) | 미해결 |
 | [list_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L333) | `network.Service.ListQoSPolicyRecords` ([사용법](cloud-qos-policies-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [search_qos_policies](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L253) | `network.Service.SearchQoSPolicyRecords` ([사용법](cloud-qos-policies-python.md)) | go_mapping · 집중 race·독립 main build PASS |
-| [update_qos_policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1468) | 없음 | 미해결 |
+| [update_qos_policy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1468) | `network.Service.UpdateQoSPolicyRecord` ([사용법](cloud-qos-policy-mutations-python.md)) | go_mapping · 집중 검증 PASS |
 | [list_qos_rule_types](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L281) | `network.Service.ListQoSRuleTypeValues` ([사용법](cloud-qos-rule-types-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [list_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1557) | `network.Service.ListQoSBandwidthLimitRules` ([사용법](cloud-qos-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [search_qos_bandwidth_limit_rules](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1535) | `network.Service.SearchQoSBandwidthLimitRules` ([사용법](cloud-qos-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
@@ -56,7 +56,7 @@
 | [add_auto_ip](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1394) | 없음 | 미해결 |
 | [detach_ip_from_server](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1214) | 없음 | 미해결 |
 
-이 B 표는 47행 중 대응 범위 22행, 미해결 25행입니다. 기존 대응 8행과 QoS 조회 9행에, 이미 중앙 ledger에서 확정된 Port 목록/검색 2행 및 Cycle4 라우터 인터페이스·보안 그룹 조회 3행을 반영했습니다. Port 2행은 오래된 문서 정정이며 새 API 완료 수를 늘리지 않습니다. 새 조회 3행의 root network race는 PASS이고 독립 main build·204개 test package 전체 gate·중앙 판정도 PASS입니다. 기존 QoS 조회의 집중 race·독립 main build PASS와 이 새 범위를 구분하며 live cloud 인증·실제 Python/Go 네트워크 실행 성공을 주장하지 않습니다.
+Cycle5 정책 update1행을 더해 이 B 표는 47행 중 대응 범위23행, 미해결24행입니다. 새 정책 update의 focused race·독립 main build·중앙 판정은 PASS이며 최종204개 test package 전체 gate도 PASS입니다. 기존 대응 8행과 QoS 조회 9행에, 이미 중앙 ledger에서 확정된 Port 목록/검색 2행 및 Cycle4 라우터 인터페이스·보안 그룹 조회 3행을 반영했습니다. Port 2행은 오래된 문서 정정이며 새 API 완료 수를 늘리지 않습니다. 새 조회 3행의 root network race는 PASS이고 독립 main build·204개 test package 전체 gate·중앙 판정도 PASS입니다. 기존 QoS 조회의 집중 race·독립 main build PASS와 이 새 범위를 구분하며 live cloud 인증·실제 Python/Go 네트워크 실행 성공을 주장하지 않습니다.
 
 ## Subnet과 subnet pool
 
@@ -96,7 +96,7 @@ B 묶음의 정책 list/search 2행, rule type list 1행, bandwidth-limit·DSCP-
 
 정책 search_qos_policies는 _filter_list 검색이 아니라 truthy name_or_id를 server name으로 넣은 뒤 filters로 kwargs를 덮어쓰는 Source 순서를 사용합니다. BW/DSCP/minimum 규칙 search는 목록을 완전히 소비하고 rule ID/name exact·glob 및 원래 mapping filters를 추가 적용합니다. Falsey filters, declared Body 로컬 조건, raw formal controls와 generator 대상 JMESPath/list() 결과는 각 helper의 실제 Source lane을 따릅니다. Literal JSON과 opaque 결과에는 가짜 Resource/HTTP proof를 만들지 않습니다.
 
-update_qos_policy와 세 규칙 update_qos_*_rule은 B의 QoS 잔여 4행으로 유지합니다. qos-default·qos-bw-limit-direction 등 추가 확장, 현재 규칙 조회, 변경 없음과 mutable Resource commit 계약은 사용자 조회 후보를 구현했다는 이유로 닫지 않습니다. A의 관리자 get_qos_rule_type_details·정책/규칙 create와 raw headers/fetch controls가 남은 cloud get_qos_policy는 잔여입니다. A의 정책/규칙 delete 4행은 이번 Cycle4 대응이며 root network race PASS, 독립 main build·204개 test package 전체 gate·중앙 판정 PASS입니다. 낮은 수준 native API 존재와 cloud helper 완료, 실제 배포 policy/backend 수락은 별개의 증거입니다.
+세 규칙 update_qos_*_rule은 B의 QoS 잔여 3행으로 유지합니다. qos-bw-limit-direction 등 추가 확장, 현재 규칙 조회, 변경 없음과 mutable Resource commit 계약은 잔여입니다. update_qos_policy는 Cycle5의 `UpdateQoSPolicyRecord`가 fresh qos/qos-default gate·default 처리 뒤 None·기본 Find·raw presence/equality 변경 감지와 dirty PUT을 소유하며 [생성·수정 안내](cloud-qos-policy-mutations-python.md)에 독립 예제가 있습니다. A의 관리자 get_qos_rule_type_details·규칙 create와 raw headers/fetch controls가 남은 cloud get_qos_policy는 잔여입니다. A의 정책/규칙 delete 4행은 이번 Cycle4 대응이며 root network race PASS, 독립 main build·204개 test package 전체 gate·중앙 판정 PASS입니다. 낮은 수준 native API 존재와 cloud helper 완료, 실제 배포 policy/backend 수락은 별개의 증거입니다.
 
 ## FWaaS
 
@@ -136,7 +136,7 @@ get은 기본적으로 위 search를 사용해 missing None 또는 단일 결과
 - remove_router_interface: 두 인자가 모두 비었을 때 HTTP 전에 거부하지 않습니다.
 - update_router: extraroute 확장 검사와 변경 없음 처리 helper가 없습니다.
 - update_port, update_subnet: 변경 내용이 없을 때 PUT을 건너뛰는 helper가 없습니다.
-- QoS: list/search 9행은 fresh 전체 extension gate·정책 lookup·Source 검색 단계를 소유하는 새 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. update_qos_policy와 BW/DSCP/minimum rule update 4행의 추가 확장·현재 규칙 조회·변경 계약은 미해결로 유지합니다.
+- QoS: list/search 9행은 fresh 전체 extension gate·정책 lookup·Source 검색 단계를 소유하는 새 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. update_qos_policy는 새 `UpdateQoSPolicyRecord`로 대응하며 집중 검증을 통과했습니다. BW/DSCP/minimum rule update 3행의 추가 확장·현재 규칙 조회·변경 계약은 미해결로 유지합니다.
 - list_firewall_groups, list_firewall_policies, list_firewall_rules: Body 전용 filter 키의 로컬 필터가 없습니다.
 - update_firewall_group, update_firewall_policy, update_firewall_rule, insert_rule_into_policy, remove_rule_from_policy: 이름/ID 조회, 참조 ID 변환, 단락 처리 helper가 없습니다.
 - get_security_group/search_security_groups는 dict pushdown→전체 목록→로컬 선택, concrete Neutron/Nova 설정·정규화와 Source get branch를 소유하는 새 helper입니다. root network race PASS, 독립 main build·204개 test package 전체 gate·중앙 판정 PASS입니다. update_security_group/delete_security_group/create_security_group_rule의 쓰기 계약은 미해결입니다.
