@@ -29,21 +29,21 @@
 | [`delete_firewall_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1299) | 위와 같음 | unresolved |
 | [`create_router`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2250) | `routers.API.CreateWithAttributes` (기본값·AZ 확인 없음) | unresolved |
 | [`create_subnet`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2401) | `networks.API.FindRecord`, `subnets.API.CreateWithAttributes` (검증·기본값 없음) | unresolved |
-| [`get_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L221) | `extensions.API.List`, `qos/policies.API.FindRecord` | unresolved |
+| [`get_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L221) | `network.Service.GetQoSPolicyRecord` ([기본 조회와 잔여](cloud-qos-policy-actions-python.md)) | unresolved · raw headers/fetch controls |
 | [`create_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1435) | `qos/policies.API.CreateWithAttributes` | unresolved |
-| [`delete_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1512) | `qos/policies.API.FindRecord`, `DeleteWithOptions` | unresolved |
+| [`delete_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1512) | `network.Service.DeleteQoSPolicyRecord` ([사용법](cloud-qos-policy-actions-python.md)) | go_mapping · root network race PASS |
 | [`get_qos_rule_type_details`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L300) | `qos/ruletypes.API.GetRecord` | unresolved |
 | [`get_qos_bandwidth_limit_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1594) | `network.Service.GetQoSBandwidthLimitRule` ([사용법](cloud-qos-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [`create_qos_bandwidth_limit_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1621) | `qos/rules.API.CreateBandwidthLimitRule` | unresolved |
-| [`delete_qos_bandwidth_limit_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1723) | `qos/rules.API.DeleteBandwidthLimitRule` | unresolved |
+| [`delete_qos_bandwidth_limit_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1723) | `network.Service.DeleteQoSBandwidthLimitRule` ([사용법](cloud-qos-rule-deletes-python.md)) | go_mapping · root network race PASS |
 | [`get_qos_dscp_marking_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1819) | `network.Service.GetQoSDSCPMarkingRule` ([사용법](cloud-qos-dscp-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [`create_qos_dscp_marking_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1844) | `qos/rules.API.CreateDSCPMarkingRule` | unresolved |
-| [`delete_qos_dscp_marking_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1919) | `qos/rules.API.DeleteDSCPMarkingRule` | unresolved |
+| [`delete_qos_dscp_marking_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1919) | `network.Service.DeleteQoSDSCPMarkingRule` ([사용법](cloud-qos-rule-deletes-python.md)) | go_mapping · root network race PASS |
 | [`get_qos_minimum_bandwidth_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2018) | `network.Service.GetQoSMinimumBandwidthRule` ([사용법](cloud-qos-minimum-bandwidth-python.md)) | go_mapping · 집중 race·독립 main build PASS |
 | [`create_qos_minimum_bandwidth_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2041) | `qos/rules.API.CreateMinimumBandwidthRule` | unresolved |
-| [`delete_qos_minimum_bandwidth_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2115) | `qos/rules.API.DeleteMinimumBandwidthRule` | unresolved |
+| [`delete_qos_minimum_bandwidth_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2115) | `network.Service.DeleteQoSMinimumBandwidthRule` ([사용법](cloud-qos-rule-deletes-python.md)) | go_mapping · root network race PASS |
 
-표의 낮은 수준 resource API는 `github.com/JSYoo5B/go-openstacksdk/network/v2/` 아래이며, `routers`는 `extensions/layer3/routers`, `qos/...`와 `fwaas_v2/...`는 `extensions/` 아래입니다. 새 QoS cloud helper는 `network.Service`에 있으며 `conn.Network(ctx)` 또는 `network.New(client)`로 접근합니다. 기존 회귀는 [`python_cloud_parity_a_test.go`](python_cloud_parity_a_test.go), 새 QoS 조회 계약과 독립 main은 각 사용 guide에서 다룹니다. 이번 QoS 후보의 Go 테스트와 독립 main 검증은 아직 대기 중이며 PASS로 기록하지 않습니다.
+표의 낮은 수준 resource API는 `github.com/JSYoo5B/go-openstacksdk/network/v2/` 아래이며, `routers`는 `extensions/layer3/routers`, `qos/...`와 `fwaas_v2/...`는 `extensions/` 아래입니다. 새 QoS cloud helper는 `network.Service`에 있으며 `conn.Network(ctx)` 또는 `network.New(client)`로 접근합니다. 기존 회귀는 [`python_cloud_parity_a_test.go`](python_cloud_parity_a_test.go), 새 QoS 조회 계약과 독립 main은 각 사용 guide에서 다룹니다. 기존 QoS 사용자 조회 12행은 집중 race·독립 main build PASS입니다. Cycle4 삭제 4행은 root network race PASS이며 독립 main·전체 gate와 중앙 판정 반영은 대기 중입니다. 이 A 표는 36행 중 기존 go_mapping 17행과 이번 삭제 4행을 합쳐 대응 범위 21행, unresolved 15행입니다. 새 API 완료 수에는 이번 삭제 4행만 후보로 추가합니다.
 
 ## Network·Router·Subnet·Port 조회
 
@@ -83,7 +83,7 @@ Python docstring은 filters에 jmespath 문자열도 받는다고 적지만 실�
 
 ## QoS
 
-이번 사이클은 A/B 묶음에 걸친 **사용자 조회 12행**을 구현 후보로 갱신합니다. 정책 list/search 2개, rule type list 1개, bandwidth-limit·DSCP-marking·minimum-bandwidth의 list/search/get 각 3개입니다. 이 문서 A 표에는 단일 rule get 3행이 해당합니다. 새 cloud helper는 낮은 수준의 Get*Record와 달리 확장 확인과 정책 lookup까지 SDK가 소유합니다. **현재는 go_mapping 후보이며 Root Go 테스트·race·독립 main 검증 대기입니다. 실행되지 않은 검증을 PASS로 주장하지 않습니다.**
+이전 사이클에서 A/B 묶음에 걸친 **사용자 조회 12행**을 구현했습니다. 정책 list/search 2개, rule type list 1개, bandwidth-limit·DSCP-marking·minimum-bandwidth의 list/search/get 각 3개입니다. 이 문서 A 표에는 단일 rule get 3행이 해당합니다. 새 cloud helper는 낮은 수준의 Get*Record와 달리 확장 확인과 정책 lookup까지 SDK가 소유합니다. **기존 조회 12행은 go_mapping으로 root 집중 race·독립 main build PASS입니다. 이번 Cycle4 정책/규칙 삭제 4행은 root network race PASS이며 독립 main build·204개 test package 전체 gate·중앙 판정도 PASS입니다.**
 
 | 사용자 조회 묶음 | Go facade와 상세 guide |
 |---|---|
@@ -95,9 +95,13 @@ Python docstring은 filters에 jmespath 문자열도 받는다고 적지만 실�
 
 고정 Source처럼 각 호출은 GET /extensions의 **새 전체 목록과 모든 페이지**를 소비하여 qos alias를 확인합니다. 첫 일치 뒤에도 읽고 후반 alias 오류·HTTP 실패를 숨기지 않으며 cache하지 않습니다. 확장이 없으면 typed unavailable-extension 오류로 끝나고 정책·규칙 요청으로 넘어가지 않습니다. 규칙 helper는 그 다음 정책을 GET-first ID/name lookup으로 찾으며, 없는 정책·중복 이름은 규칙 HTTP 전에 오류입니다. Bandwidth/DSCP list/search/get와 minimum-bandwidth list/search는 ignore_missing=True 뒤 missing을 오류로 바꾸고, minimum-bandwidth get만 Source의 ignore_missing=False를 따릅니다. 단건 get의 404는 규칙 목록 fallback 없이 실제 오류로 남습니다.
 
-정책 search는 truthy 이름을 server name query로 보내고 filters가 같은 key를 덮어쓸 수 있습니다. 규칙 search는 목록을 모두 읽은 뒤 rule ID/name exact·glob와 원래 mapping 필터를 적용합니다. Source Proxy의 opaque generator/JMESPath와 literal iterable 반환, falsey filters·bound controls·실제 단계별 receipt를 각 guide에서 설명합니다. 이 후보를 전체 SDK 또는 실제 배포의 인증·권한 검증 완료로 세지 않습니다.
+정책 search는 truthy 이름을 server name query로 보내고 filters가 같은 key를 덮어쓸 수 있습니다. 규칙 search는 목록을 모두 읽은 뒤 rule ID/name exact·glob와 원래 mapping 필터를 적용합니다. Source Proxy의 opaque generator/JMESPath와 literal iterable 반환, falsey filters·bound controls·실제 단계별 receipt를 각 guide에서 설명합니다. 이 대응을 전체 SDK 또는 실제 배포의 인증·권한 검증 완료로 세지 않습니다.
 
-나머지 A의 QoS 10행은 unresolved를 유지합니다. get_qos_policy의 cloud 단위와 정책/규칙 create·delete는 이번 조회 범위에 포함하지 않습니다. get_qos_rule_type_details는 stock QoSPlugin의 실제 administrator 제한 때문에 관리자 단계로 보류합니다. 이 상세 helper는 qos와 qos-rule-type-details를 각각 새 전체 extension 목록으로 확인하고 filters는 사용하지 않습니다. create_qos_policy의 qos-default 분기, bandwidth create의 qos-bw-limit-direction 분기, 규칙 delete의 404→False 및 기타 변경·삭제 계약은 낮은 수준 native API가 있다는 이유로 완료 처리하지 않습니다.
+Cycle4에서 추가한 삭제는 [정책 delete](cloud-qos-policy-actions-python.md)와 [세 규칙 delete](cloud-qos-rule-deletes-python.md)입니다. 네 helper 모두 fresh 전체 qos extension gate와 정책 GET-first ID/name lookup을 SDK가 소유합니다. `DeleteQoSPolicyRecord`는 찾은 정책이 없으면 DELETE 없이 false이고, 찾은 뒤 proxy 기본 ignore_missing=True로 삭제하므로 그 사이 발생한 clean DELETE404도 true입니다. 세 규칙 delete는 child DELETE에 ignore_missing=False를 고정해 clean rule404만 false로 바꿉니다. missing/ambiguous policy는 false가 아닌 오류이며 bandwidth/DSCP 정책 find는 ignore_missing=True 뒤 missing을 오류로 바꾸고 minimum-bandwidth만 ignore_missing=False입니다. 규칙 GET을 삭제 전 확인으로 추가하지 않습니다. result의 `Deleted`는 오류가 없을 때 읽고, 실제 extension/policy/opaque DELETE receipt와 physical·context/native401·guard 오류를 보존합니다. 서버 정책·driver 수락이나 관리자 권한을 SDK가 대신 만들지 않습니다.
+
+A의 QoS 13행 중 단일 rule get 3행과 삭제 4행은 Go 대응이고 **6행은 unresolved**입니다. `GetQoSPolicyRecord`의 기본 조회·ordinary JSON kwargs·missing·clean400/403/404 fallback·GET-only microversion·fallback-only list_base_path는 구현했지만 named `get_qos_policy`의 raw `headers`와 `requires_id`, `base_path`, `error_message`, `skip_cache`, `resource_response_key`가 shared findKey에서 거부됩니다. Source raw headers는 member GET query/constructor seed로 가고 fallback에서는 LIST formal이므로 concrete HTTP Headers 옵션으로 대체할 수 없습니다. member base_path와 fallback-only list_base_path도 다른 계약입니다. [잔여 상세](cloud-qos-policy-actions-python.md#get-지원-범위와-정확한-remaining)를 확인하고 이 getter를 완료 수에 넣지 않습니다.
+
+관리자 `get_qos_rule_type_details`와 정책/규칙 create 4행도 유지합니다. 상세 helper의 stock QoSPlugin administrator 제한, qos/qos-rule-type-details 별도 fresh gate, create_qos_policy의 qos-default, bandwidth create의 qos-bw-limit-direction 및 기본값/변경 계약을 이번 삭제 구현으로 닫지 않습니다.
 
 ## 미해결 목록
 
@@ -106,4 +110,4 @@ Python docstring은 filters에 jmespath 문자열도 받는다고 적지만 실�
 - `delete_firewall_rule`, `delete_firewall_policy`, `delete_firewall_group`: 위 검색 제약에 더해, 삭제 404를 `False`로 바꾸는 SDK API가 없습니다.
 - `create_router`: `admin_state_up=True` 기본값, gateway 인수 묶음, AZ hint 검사와 `router_availability_zone` 확장 확인을 수행하는 SDK 헬퍼가 없습니다.
 - `create_subnet`: 네트워크·subnetpool 검색, cidr 조합 검증, `ip_version`·`enable_dhcp` 기본값과 gateway 변환을 수행하는 SDK 헬퍼가 없습니다.
-- QoS: 단일 규칙 조회 3행은 새 cloud helper의 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. 나머지 10행(get_qos_policy, 관리자 rule-type details, 정책/규칙 create·delete)의 cloud 단위와 추가 확장·404→False 계약은 미해결로 유지합니다. 전체 사용자 조회 12행의 상세 범위는 위 QoS 표를 참고합니다.
+- QoS: 단일 rule get 3행과 정책/규칙 delete 4행을 실제 cloud helper에 연결했습니다. unresolved는 get_qos_policy raw headers/fetch controls, 관리자 rule-type details, 정책/규칙 create 4행의 6개입니다. 새 delete의 root network race PASS와 독립 main build·204개 test package 전체 gate·중앙 판정 PASS을 구분합니다.

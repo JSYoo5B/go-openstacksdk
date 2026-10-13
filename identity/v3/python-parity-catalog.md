@@ -1,6 +1,6 @@
 # openstacksdk identity v3 catalog Proxy 대응
 
-이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [identity v3 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py) 가운데 endpoint, region, service, limit, registered limit, project endpoint, endpoint group, domain config 메서드와 공통 wait 메서드를 이 SDK의 `identity/v3` 호출과 비교합니다. Keystone 요청 자체의 status와 decode 규칙은 [native 관리자 호출 문서](native-admin-b.md)에 있고, 여기서는 Python 코드를 옮길 때 달라지는 기본값과 반환값을 정리합니다. 판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 native 판정은 `endpoints/regions/services/limits/registeredlimits/projectendpoints`의 `python_parity_test.go`에 기록하고, 새 limits·registered_limits·endpoints record 조회는 각 `python_records_test.go`와 [Limit](limits/python_records.md)·[RegisteredLimit](registeredlimits/python_records.md)·[Endpoint](endpoints/python-records.md) 가이드에 근거를 둡니다.
+이 문서는 고정한 openstacksdk 커밋 `ef55d7d`의 [identity v3 Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py) 가운데 endpoint, region, service, limit, registered limit, project endpoint, endpoint group, domain config 메서드와 공통 wait 메서드를 이 SDK의 `identity/v3` 호출과 비교합니다. Keystone 요청 자체의 status와 decode 규칙은 [native 관리자 호출 문서](native-admin-b.md)에 있고, 여기서는 Python 코드를 옮길 때 달라지는 기본값과 반환값을 정리합니다. 판정이 `go_mapping`이면 Python이 보내는 요청을 공개 Go API로 재현할 수 있다는 뜻이고, `unresolved`이면 Go에 없는 동작이 남아 있다는 뜻입니다. 기존 native 판정은 `endpoints/regions/services/limits/registeredlimits/projectendpoints`의 `python_parity_test.go`에 기록하고, 새 limits·registered_limits·endpoints·services·regions record 조회는 각 owned 계약 tests와 [Limit](limits/python_records.md)·[RegisteredLimit](registeredlimits/python_records.md)·[Endpoint](endpoints/python-records.md)·[Service](services/python-records.md)·[Region](regions/python-records.md) 가이드에 근거를 둡니다.
 
 | Python 메서드 | Go 호출 | 판정 |
 |---|---|---|
@@ -18,13 +18,13 @@
 | [`delete_region`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1605) | `regions.API.Remove` | go_mapping |
 | [`find_region`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1636) | `regions.API.Find` (ID 조회만) | unresolved |
 | [`get_region`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1660) | `regions.API.Get` | go_mapping |
-| [`regions`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1672) | `regions.API.List`, `regions.API.All` | unresolved |
+| [`regions`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1672) | `regions.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_region`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1683) | `regions.API.Update` | go_mapping |
 | [`create_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1232) | `services.API.Create` | go_mapping |
 | [`delete_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1243) | `services.API.Remove` | go_mapping |
 | [`find_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1274) | `services.API.Find`를 ID, 이름 순서로 호출 | go_mapping |
 | [`get_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1293) | `services.API.Get` | go_mapping |
-| [`services`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1305) | `services.API.List`, `services.API.All` | unresolved |
+| [`services`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1305) | `services.API.ListRecords/AllRecords/ProxyListRecords` | go_mapping |
 | [`update_service`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L1319) | `services.API.Update` | go_mapping |
 | [`create_limit`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2523) | 한 행짜리 `limits.API.BatchCreate` | go_mapping |
 | [`delete_limit`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L2548) | `limits.API.Remove` | go_mapping |
@@ -54,11 +54,11 @@
 | [`wait_for_status`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L3343) | 각 패키지의 `WaitFor` | unresolved |
 | [`wait_for_delete`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/identity/v3/_proxy.py#L3382) | 각 패키지의 `WaitForDeletion` | unresolved |
 
-이 표의 49개 선언 중 27개가 `go_mapping`, 22개가 `unresolved`입니다. 이번 정합성 갱신은 Limit·RegisteredLimit에 이어 Endpoint Proxy 목록을 반영하며, 다른 연산의 기존 기록은 유지합니다. 전체 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
+이 표의 49개 선언 중 29개가 `go_mapping`, 20개가 `unresolved`입니다. 이번 cycle4의 새 Service·Region Proxy 목록 두 행은 각각 focused gate PASS를 근거로 한 최종 판정입니다. 독립 Python/Go main과 제한된 Source oracle의 경계는 가이드에 기록했습니다. 전체 cycle4 신규14행의 중앙 판정·독립 Go main9개 build·204개 test package 전체 gate는 PASS입니다. 기존 Find·쓰기 판정과 SDK-R1/C1/S1 잔여를 유지하며 전체 supported 증가는 0입니다. 최종 SDK 진행량은 [중앙 지원 기록](../../docs/sdk-support-ledger.md)에서 집계합니다.
 
 ## 공통 차이
 
-Python Proxy는 `_create`, `_get`, `_update`, `_delete`를 거쳐 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py)의 create, fetch, commit, delete를 부르고, 응답은 `raise_from_response`로 검사해서 400 미만 status를 모두 성공으로 받습니다. 기존 native 호출은 Gophercloud가 정한 OkCodes를 유지하며 그 목록은 [native 문서](native-admin-b.md)에 있습니다. 새 Limit·RegisteredLimit record 목록은 Source HTTP100..399와 실제 read/Close/decode 오류 증거를 처리합니다. Source Limit·RegisteredLimit는 `_max_microversion=None`이라 자체 최대 버전 discovery를 요구하지 않습니다. 새 record 목록은 선택된 default/per-call microversion과 request header를 concrete 옵션으로 소유하고, 동적 session/version 협상은 별도 SDK 범위입니다.
+Python Proxy는 `_create`, `_get`, `_update`, `_delete`를 거쳐 [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py)의 create, fetch, commit, delete를 부르고, 응답은 `raise_from_response`로 검사해서 400 미만 status를 모두 성공으로 받습니다. 기존 native 호출은 Gophercloud가 정한 OkCodes를 유지하며 그 목록은 [native 문서](native-admin-b.md)에 있습니다. 새 Limit·RegisteredLimit·Endpoint·Service·Region record 목록은 각 opt-in Source HTTP 정책과 실제 read/Close/decode 오류 증거를 처리합니다. Source Limit·RegisteredLimit는 `_max_microversion=None`이라 자체 최대 버전 discovery를 요구하지 않습니다. 새 record 목록은 선택된 default/per-call microversion과 request header를 concrete 옵션으로 소유하고, 동적 session/version 협상은 별도 SDK 범위입니다.
 
 Python은 ID 문자열과 Resource 객체를 모두 받지만 Go는 ID 문자열만 받습니다. 기존 native 반환값은 Python Resource 대신 Gophercloud 모델 pointer이고, Python의 `is_enabled`는 Go에서 `Enabled`, endpoint의 `interface`는 `Availability`입니다.
 
@@ -86,7 +86,7 @@ ep, err := endpoints.New(client).Create(ctx,
 
 `find_endpoint`는 `GET endpoints/{name_or_id}`가 400, 403, 404로 실패하면 Endpoint에 name query가 없으므로 필터 없는 `GET endpoints`를 보내고 ID나 이름이 같은 행을 고릅니다. Go에서는 `Find(ctx, resource.ID(x), resource.WithIgnoreMissing())`가 nil일 때 `Find(ctx, resource.Name(x), resource.WithIgnoreMissing())`를 이어 부르면 같은 두 요청이 나갑니다. 다만 Go는 ID GET의 404만 다음 단계로 넘기고 400과 403은 오류로 돌려주며, 목록에서는 이름만 비교합니다. 이름이 겹치면 Python은 `DuplicateResource`, Go는 `resource.ErrAmbiguous`입니다.
 
-`endpoints(**query)`는 새 [Endpoint record 목록](endpoints/python-records.md)으로 `go_mapping`입니다. `ListRecords/AllRecords`가 선언된 interface/region_id/service_id·limit/marker query와 nonquery Body local filter를 SDK에서 구분하며 `ProxyListRecords`는 unread generator 대상 arbitrary JMESPath를 보존합니다. Declared nullable/cast view와 원래 Wire/Envelope/header/status를 분리하고 explicit limit marker·raw cap·Source link 우선순위를 적용합니다. 기존 native `List/All`의 세 필터·typed 모델·status/pager 제한은 그대로이고 새 목록으로 find/get/update 또는 Cloud endpoint search를 추가 승격하지 않습니다.
+`endpoints(**query)`는 새 [Endpoint record 목록](endpoints/python-records.md)으로 `go_mapping`입니다. `ListRecords/AllRecords`가 선언된 interface/region_id/service_id·limit/marker query와 nonquery Body local filter를 SDK에서 구분하며 `ProxyListRecords`는 unread generator 대상 arbitrary JMESPath를 보존합니다. Declared nullable/cast view와 원래 Wire/Envelope/header/status를 분리하고 explicit limit marker·raw cap·Source link 우선순위를 적용합니다. 기존 native `List/All`의 세 필터·typed 모델·status/pager 제한은 그대로입니다. cloud endpoint search/get은 별도의 [닫힌 cloud helper](../cloud-endpoints-python.md)로 검증했고 Proxy find/get/update는 기존 판정을 유지합니다.
 
 [Endpoint guide의 권한 감사](endpoints/python-records.md)에 따르면 stock 목록은 admin 또는 system reader 경로입니다. 일반 project reader 권한으로 전체 endpoint 목록을 허용한다는 뜻은 아닙니다. 명시적 location·고정 route/header/version·실제 오류 proof와 SDK-R1/C1/S1의 cache/lifecycle/Connection 잔여를 가이드에서 구분합니다.
 
@@ -96,11 +96,15 @@ ep, err := endpoints.New(client).Create(ctx,
 
 `find_region`은 Python에서 deprecated 경고를 내고 `GET regions/{name_or_id}` 다음에 필터 없는 `GET regions`를 보내 ID나 이름을 비교합니다. Go `regions` collection에는 이름 selector가 없어서 `Find(resource.Name(x))`는 HTTP 전에 `resource.ErrUnsupported`를 돌려주고, ID GET 하나만 재현할 수 있습니다.
 
+`regions(**query)`는 [Region record 목록](regions/python-records.md)으로 이번 named `go_mapping`입니다. id/name/description/parent_region_id/links의 Source untyped view와 실제 Wire를 분리하고 parent_region_id·limit/marker query, 나머지 선언 Body local filters, ordered loaded equality와 raw cap-before-filter를 처리합니다. dictionary next 무시·root link 우선순위·explicit limit의 short-page marker fallback·opaque Proxy JMESPath와 actual physical fault proof를 공통 엔진에서 재사용합니다. Stock Region 목록은 valid token과 system/domain/project scope를 허용하지만 정책 override는 서버가 결정합니다. 새 목록으로 find_region이나 mutable Resource/cache 계약을 추가 완료하지 않습니다.
+
 ## service
 
 `create_service`와 `update_service`는 `name`, `type`, `description`, `enabled` 가운데 넘긴 값만 보냅니다. Go `CreateOpts.Type`은 omitempty가 없어서 Python이 `type` 없이 만들 때와 달리 `"type": ""`를 항상 보냅니다. 수정의 `name`, `description`, `enabled`는 pointer라 빈 값도 보낼 수 있습니다.
 
 `find_service`는 Service가 `name` query를 지원하므로 ID GET이 실패하면 `GET services?name={name_or_id}`를 보냅니다. Go의 `Find(resource.Name(x))`도 같은 `name` query를 보낸 뒤 이름을 다시 비교하므로 두 요청이 같습니다. 400과 403 처리, 중복 오류의 차이는 endpoint와 같습니다.
+
+`services(**query)`는 [Service record 목록](services/python-records.md)으로 이번 named `go_mapping`입니다. Source description/type·name·enabled→is_enabled(bool)·untyped links와 null defaults, unknown Wire, name/type·limit/marker server query와 다른 Body의 ordered local filters를 소유합니다. Source pager·raw cap·opaque generator JMES와 immutable headers/version/route guard, accepted/rejected actual response proof도 처리합니다. 닫힌 `ResolveRecord`는 cloud get_service에 필요한 경로이고 named find_service의 임의 raw fetch kwargs 대응을 이번 신규 세 행으로 확대하지 않습니다. Stock Service GET/LIST는 admin 또는 system reader 경로이며 일반 project reader만으로 허용되지 않습니다.
 
 ## limit과 registered limit
 
@@ -141,7 +145,6 @@ Python 목록은 Keystone의 `links` 객체를 rel/href 항목으로 해석해 `
 
 ## unresolved 목록
 
-- `regions`, `services`: Python의 로컬 Body 속성 필터와 `limit` 기반 marker 반복 요청이 Go에 없습니다. `endpoints`의 새 record 목록은 이를 구현하며, native 세 필터 모델과 다른 계약입니다.
 - `project_endpoints`: Go 목록이 옵션을 받지 않아 query 필터와 페이지 인자를 보낼 수 없습니다.
 - `find_region`: region 이름 selector가 없어 ID GET 다음의 목록 fallback을 재현할 수 없습니다.
 - `create_endpoint_group`, `delete_endpoint_group`, `find_endpoint_group`, `get_endpoint_group`, `endpoint_groups`, `update_endpoint_group`, `project_endpoint_groups`, `endpoint_group_endpoints`, `endpoint_group_projects`, `associate_project_with_endpoint_group`, `disassociate_project_from_endpoint_group`: Gophercloud v2.15.0에 `OS-EP-FILTER/endpoint_groups` 경로와 `OS-EP-FILTER/projects/{project}/endpoint_groups` 경로의 binding이 없어서 SDK 소유 호출이 필요합니다.

@@ -8,7 +8,23 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**현재 구현 (2026-10-13, quota 반복 첫 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `8b9eeed1`입니다. 검증한 Go 매핑은 전체 **1,981→2,002개(+21), 2,002/3,228(62.0%)**, 핵심 **1,903→1,924/2,158(89.2%)**입니다. 기존 `list_users` 매핑을 보강한 1행은 신규 수에 포함하지 않았으며, 관리자 rule-type details 1행은 unresolved로 유지합니다. 고정 catalog3,362개·unsupported134개·supported0을 보존하고 판정23행을 갱신했습니다.
+**현재 구현 (2026-10-13, quota 반복 두 번째 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `01c92efc`입니다. Go 매핑은 전체 **2,002→2,016개(+14), 2,016/3,228(62.5%)**, 핵심 **1,924→1,938/2,158(89.8%)**입니다. 후보15개 중14개를 매핑했으며 QoS policy getter의 raw headers/fetch controls는 unresolved로 유지했습니다. 고정 catalog3,362·unsupported134·supported0과 원래 판정 근거를 보존했습니다.
+
+| 병렬 소유 단위 | 구현·검증·문서 | 신규 Go 매핑 |
+|---|---|---:|
+| Keystone Service | Proxy 목록·closed lookup·cloud 검색/조회, leaf/cloud race PASS·Source AST41·가이드 | 3 |
+| Keystone Endpoint | None/falsey 필터·cloud 검색/조회·실제 응답/위치, identity race PASS·가이드 | 2 |
+| Keystone Region·GroupUsers | profile·group scope·paging·정책, 이름 충돌 수리 후 leaf race PASS·가이드2개 | 2 |
+| Neutron QoS Policy | fresh gate·Source lookup/삭제, network/leaf race PASS·Source15·가이드; getter raw 옵션 잔여 | 1 |
+| Neutron QoS Rule | BW·DSCP·minimum 삭제·minimum strict policy·actual receipt, cloud/leaf race PASS·Source51·가이드 | 3 |
+| Neutron Security Group·Router | Neutron/Nova·dict pushdown/local 선택·기존값 bypass·owner 분류, network/leaf/Connection race PASS·Source65·가이드2개 | 3 |
+| 합계 | 새 계약 테스트119그룹·독립 Go main9개 build·Python AST9개·중앙 판정/자동 집계·204 test package 전체 gate PASS | 14 |
+
+Root가 Go 검사·공통 엔진·중앙 판정·진행표·커밋/push를 맡고 worker6개는 파일 소유를 나누어 구현했습니다. SDK가 Service/Endpoint Connection 캐시·location 기본값과 Security Group backend 선택, 기존 값의 발견 없는 반환, Router 전체 inventory 분류를 제공합니다. Source 상태코드 옵션을 mutation에도 연결하면서 기존 API의200..399 정책을 보존했습니다. 공개 Gophercloud testhelper·기존 fixture·공통 engine/guard/descriptor/filter를 재사용했습니다. 최초 GroupUsers 메서드 충돌·Service 인자 누락·root Neutron catalog fixture와 공통 status 회귀 fixture를 수리한 후 집중 race를 통과했으며 [검증 기록](sdk-support-ledger.md#2026-10-13-quota-반복-두-번째-사이클)에 실패·수리·최종 검증을 구분합니다.
+
+시작 quota 잔여91%, 최종87%입니다. 계정 사용량은 다른 작업과 공유하며 이 작업만의 비용으로 단정하지 않습니다. 이번 실행은 고정한15개 후보만 마무리하며 전체 SDK 목표를 완료로 표시하지 않습니다. 다음 사이클은 ordinaryUsageAllowed=true이고 조회 가능한 창의 최소 잔여가 엄격히80%를 초과할 때만 시작합니다. SDK-R1/C1/S1·실클라우드·릴리즈 잔여를 보존합니다.
+
+**직전 구현 (2026-10-13, quota 반복 첫 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `8b9eeed1`입니다. 검증한 Go 매핑은 전체 **1,981→2,002개(+21), 2,002/3,228(62.0%)**, 핵심 **1,903→1,924/2,158(89.2%)**입니다. 기존 `list_users` 매핑을 보강한 1행은 신규 수에 포함하지 않았으며, 관리자 rule-type details 1행은 unresolved로 유지합니다. 고정 catalog3,362개·unsupported134개·supported0을 보존하고 판정23행을 갱신했습니다.
 
 | 병렬 소유 단위 | 최종 구현·집중 검증·문서 | 신규 Go 매핑 |
 |---|---|---:|
@@ -557,11 +573,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 2,002 (62.0%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 2,016 (62.5%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,226 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,212 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,178 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,279 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -740,21 +756,21 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,924 / 2,158 | 89.2% | 233 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,938 / 2,158 | 89.8% | 219 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 2,002 / 3,228 | 62.0% | 351 | 875 | 134 |
+| 전체 | 2,016 / 3,228 | 62.5% | 337 | 875 | 134 |
 
 **핵심 서비스**
 
 | 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
-| Identity / Keystone | 341 / 379 | 37 | 1 | 10 |
+| Identity / Keystone | 348 / 379 | 30 | 1 | 10 |
 | Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 636 / 728 | 92 | 0 | 30 |
+| Network / Neutron | 643 / 728 | 85 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
 | Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |

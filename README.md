@@ -38,6 +38,13 @@ Quota 반복 사이클의 Python/Go 사용 비교:
 
 Connection에서는 `conn.ListUserRecords(ctx)`·`SearchUserRecords(ctx, name, options...)`, Role·Domain의 대응 메서드로 캐시된 Keystone API와 Connection location을 함께 사용합니다. Domain 검색 이름은 `identity.WithDomainReadNameOrID(name)`으로 지정하며, 옵션을 생략한 경우와 빈 문자열을 지정한 경우를 구분합니다. 명시적인 location 옵션은 Connection 기본값보다 우선합니다. Endpoint는 `conn.IdentityV3(ctx)`의 `Endpoints.ProxyListRecords`로 조회합니다. Neutron은 `conn.Network(ctx)`가 반환한 서비스의 각 QoS helper를 호출합니다. SDK가 확장 광고를 매번 확인하고 규칙의 부모 정책을 조회하며, 결과에 실제 extension·policy·응답 근거를 보존합니다. Rule type 상세 조회는 관리자 단계에 남겨 두었습니다.
 
+Quota 반복 두 번째 사이클의 Python/Go 사용 비교:
+
+- Keystone: [Service 목록·검색·조회](identity/v3/services/python-records.md), [Endpoint 검색·조회](identity/cloud-endpoints-python.md), [Region 목록](identity/v3/regions/python-records.md), [Group 사용자 목록](identity/v3/users/python-group-records.md).
+- Neutron: [QoS policy 조회·삭제](network/cloud-qos-policy-actions-python.md), [QoS 규칙 삭제](network/cloud-qos-rule-deletes-python.md), [Security Group 검색·조회](network/cloud-security-group-reads-python.md), [Router 인터페이스 목록](network/cloud-router-interfaces-python.md).
+
+Connection의 `SearchServiceRecords`·`GetServiceRecord`·`SearchEndpointRecords`·`GetEndpointRecord`는 캐시된 v3 API와 location을 제공합니다. `SearchSecurityGroupRecords`·`GetSecurityGroupRecord`는 기본 Neutron을 사용하며, catalog에 Neutron endpoint가 없는 경우 Nova를 선택합니다. 기존 Security Group 값을 넘기면 서비스 발견 없이 복사한 값을 반환합니다. `conn.ListRouterInterfaces(ctx, network.RouterInterfaceRouterID(id))`는 전체 port 목록에서 내부 인터페이스를 먼저, 게이트웨이를 그다음 반환합니다. 명시 location 옵션은 Connection 기본값보다 우선합니다. QoS 규칙의 clean DELETE 404는 `Deleted=false`이고, policy 조회 실패나 불완전한 응답·취소는 오류입니다. QoS policy 삭제는 찾지 못하면 false, 찾은 뒤 DELETE 404가 오면 Source 기본 정책에 따라 true입니다. QoS policy 조회의 raw headers/fetch controls는 계속 미해결로 추적합니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.
