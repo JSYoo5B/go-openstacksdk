@@ -20,9 +20,10 @@ import (
 	resource15 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
 	resource16 "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	resource17 "github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
-	resource18 "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
-	resource19 "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
-	resource20 "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
+	resource18 "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments"
+	resource19 "github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
+	resource20 "github.com/JSYoo5B/go-openstacksdk/compute/v2/usage"
+	resource21 "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -47,9 +48,10 @@ type Service struct {
 	ServerGroups      *resource15.API
 	Servers           *resource16.API
 	Services          *resource17.API
-	Tags              *resource18.API
-	Usage             *resource19.API
-	VolumeAttachments *resource20.API
+	ShareAttachments  *resource18.API
+	Tags              *resource19.API
+	Usage             *resource20.API
+	VolumeAttachments *resource21.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
@@ -72,9 +74,10 @@ func New(client *gophercloud.ServiceClient) *Service {
 		ServerGroups:      resource15.New(client),
 		Servers:           resource16.New(client),
 		Services:          resource17.New(client),
-		Tags:              resource18.New(client),
-		Usage:             resource19.New(client),
-		VolumeAttachments: resource20.New(client),
+		ShareAttachments:  resource18.New(client),
+		Tags:              resource19.New(client),
+		Usage:             resource20.New(client),
+		VolumeAttachments: resource21.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

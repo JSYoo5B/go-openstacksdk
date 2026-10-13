@@ -55,7 +55,8 @@ import (
 	resource50 "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections"
 	resource51 "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
 	resource52 "github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
-	resource53 "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
+	resource53 "github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders"
+	resource54 "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets"
 	gophercloud "github.com/gophercloud/gophercloud/v2"
 )
 
@@ -115,7 +116,8 @@ type Service struct {
 	VPNSiteConnections          *resource50.API
 	Networks                    *resource51.API
 	Ports                       *resource52.API
-	Subnets                     *resource53.API
+	ServiceProviders            *resource53.API
+	Subnets                     *resource54.API
 }
 
 func New(client *gophercloud.ServiceClient) *Service {
@@ -173,7 +175,8 @@ func New(client *gophercloud.ServiceClient) *Service {
 		VPNSiteConnections:          resource50.New(client),
 		Networks:                    resource51.New(client),
 		Ports:                       resource52.New(client),
-		Subnets:                     resource53.New(client),
+		ServiceProviders:            resource53.New(client),
+		Subnets:                     resource54.New(client),
 	}
 }
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

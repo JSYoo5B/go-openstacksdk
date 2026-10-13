@@ -114,6 +114,7 @@ _ = value
 | `ServerGroups` | [servergroups](servergroups/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `Servers` | [servers](servers/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
+| `ShareAttachments` | [shareattachments](shareattachments/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Tags` | [tags](tags/api_generated.go) | `InServer(ctx, parent)`: 문자열 집합 조회·추가·확인·교체·삭제; Collection/상태 대기 없음 |
 | `Usage` | [usage](usage/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `VolumeAttachments` | [volumeattach](volumeattach/api_generated.go) | `InServer(ctx, parent)`: ID 조회, 목록, 삭제·삭제 대기 |

@@ -147,6 +147,7 @@ _ = value
 | `VPNSiteConnections` | [extensions/vpnaas/siteconnections](extensions/vpnaas/siteconnections/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Networks` | [networks](networks/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
 | `Ports` | [ports](ports/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기 |
+| `ServiceProviders` | [serviceproviders](serviceproviders/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Subnets` | [subnets](subnets/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 
 공통 Collection은 정확한 이름 검색, 중복 이름 오류, 페이지 순회, context 취소와 HTTP 오류 보존을 적용합니다. 상태가 없는 리소스의 Wait는 `ErrUnsupported`를 반환합니다.

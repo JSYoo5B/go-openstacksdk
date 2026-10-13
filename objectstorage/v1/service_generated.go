@@ -2,6 +2,7 @@
 package v1
 
 import (
+	cloud "github.com/JSYoo5B/go-openstacksdk/objectstorage"
 	resource0 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	resource1 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 	resource2 "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
@@ -12,6 +13,7 @@ import (
 // Service shares one authenticated client across its resource APIs.
 type Service struct {
 	client     *gophercloud.ServiceClient
+	Cloud      *cloud.Cloud
 	Accounts   *resource0.API
 	Containers *resource1.API
 	Objects    *resource2.API
@@ -20,6 +22,7 @@ type Service struct {
 
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
+		Cloud:      cloud.New(client),
 		Accounts:   resource0.New(client),
 		Containers: resource1.New(client),
 		Objects:    resource2.New(client),

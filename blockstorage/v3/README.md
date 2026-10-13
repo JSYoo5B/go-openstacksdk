@@ -87,6 +87,7 @@ _ = value
 | `Messages` | [messages](messages/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `QoS` | [qos](qos/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기 |
 | `QuotaSets` | [quotasets](quotasets/api_generated.go) | `InProject(ctx, parent)`: 고정 프로젝트의 Get·Defaults·Usage·Update·Reset; List/Find/Wait 없음 |
+| `ResourceFilters` | [resourcefilters](resourcefilters/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `SchedulerStats` | [schedulerstats](schedulerstats/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Services` | [services](services/api_generated.go) | API 연산 제공; 공통 Collection 미적용 |
 | `Snapshots` | [snapshots](snapshots/api_generated.go) | `Resources`: ID 조회, 목록, 이름 조회, 삭제·삭제 대기, 상태 대기; `MetadataIn(ctx, ref)`: 고정 metadata의 Get·Merge·Replace·DeleteKeys; SDK 소유 요청·실제 metadata 응답; `WaitForState/WaitForDelete`: 서비스별 기본값·caller 옵션 |

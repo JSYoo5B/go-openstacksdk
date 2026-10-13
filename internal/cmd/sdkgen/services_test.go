@@ -91,8 +91,11 @@ func TestNovaImageProxyExtendsComputeRegistryWithoutNativeInventory(t *testing.T
 	if _, err := parser.ParseFile(token.NewFileSet(), "registry.go", registry, 0); err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"github.com/JSYoo5B/go-openstacksdk/compute/v2/images", "Images  *resource0.API", "Images:  resource0.New(client)", "Servers *resource1.API", "Servers: resource1.New(client)"} {
-		if !strings.Contains(string(registry), want) {
+	// Field alignment changes as SDK-owned resources are added. Assert the
+	// declarations and shared-client constructors independently of spacing.
+	contents := strings.Join(strings.Fields(string(registry)), " ")
+	for _, want := range []string{"github.com/JSYoo5B/go-openstacksdk/compute/v2/images", "Images *resource0.API", "Images: resource0.New(client)", "Servers *resource1.API", "Servers: resource1.New(client)", "github.com/JSYoo5B/go-openstacksdk/compute/v2/shareattachments", "ShareAttachments *resource2.API", "ShareAttachments: resource2.New(client)"} {
+		if !strings.Contains(contents, want) {
 			t.Fatalf("missing %q: %s", want, registry)
 		}
 	}
