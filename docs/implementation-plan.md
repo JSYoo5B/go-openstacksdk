@@ -8,9 +8,24 @@
 
 ## 현재 집계와 진행 중인 작업
 
+**현재 구현 (2026-10-13): 핵심 user 미해결 해소 재개, 작업자8개 병렬 진행.** 현재 검증 집계는 **1,944/3,228개(60.2%)·핵심1,866/2,158개(86.5%)**이며 전체 고정 선언3,362개와 `unsupported`134개는 판정 JSON에 그대로 추적합니다. 새 구현은 테스트·판정 완료 전까지 수를 올리지 않습니다. 남아 있던 worktree의 입력·응답 후보는 원본을 변경하지 않고 현재 main에 맞춰 검토·재사용합니다.
+
+| 병렬 소유 단위 | 구현·검토 단계 | 다음 확인 |
+|---|---|---|
+| Network record 목록 | 기존 후보 재사용·Source kwargs/descriptor/JMES generator 보강 | base_path와 lazy 결과·실제 응답 검증 |
+| Port record 목록·검색 | 기존 후보 재사용·Source/Cloud 평가 구분 | 공통 opaque identity·전체 필터/페이지 검증 |
+| Swift object record 목록·raw 응답 | 기존 후보 재사용·float equality 보강 | shared streaming·callback fault 검증 |
+| Swift container cloud workflow | get-or-create/ACL concrete 기능 작성 | Source 순서·실제 HEAD/PUT/POST 검증 |
+| Nova share attachment | 독립 owned API4개 작성 | 기본 버전·user 정책·fault 검증 |
+| Cinder summary/resource filters | 독립 user read API 작성 | summary2GET·정책·선택 버전 검증 |
+| Nova/Cinder quota query | 공통 quotafetch와 두 leaf 작성 | Source query/descriptor/location 검증 |
+| Barbican ACL/Quota wait | known target2개 작성·named wait unresolved 유지 | dispatch·status없는 삭제 관찰 검증 |
+
+root는 Source pin 복원·공통 retry/backoff/stream 계약·생성기 연결·중앙판정·진행표·통합검사·작은 commit/push를 순서대로 담당합니다. 핵심 user→핵심 admin→managed user→managed admin 순서와 Swift 핵심/후속 네트워크·베어메탈 우선순위는 유지합니다.
+
 집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
 
-**현재 구현 (2026-10-12): 미해결 해소 두 번째 단계, 사용량 한도로 작업 중지. 전체1,944/3,228(60.2%)·핵심1,866/2,158(86.5%), 전체 gate PASS.** 서버 API가 폐기된 133개를 구현 대상에서 제외했고, SDK 소유 API(networking-sfc, Neutron flavor·service profile·metering, TaaS tap flow·tap service, local IP, segment range, NDP proxy, conntrack helper, 기본 보안 그룹 rule·statefulness, QoS packet rate rule 변경, Cinder group type·default type·cluster·service action·group reset)와 공통 helper(`fields` 조회, FindIdentity fallback 확장)를 추가했습니다. 입력 표현·응답 모델·cloud extension 확인 단위는 중간에 중지해 머지하지 않았고, 일부 결과는 해당 worktree에 commit되지 않은 상태로 남아 있습니다. 변경 없는 수정 요청의 판정 기준은 아직 결정 전입니다.
+**이전 구현 (2026-10-12): 미해결 해소 두 번째 단계, 사용량 한도로 작업 중지. 전체1,944/3,228(60.2%)·핵심1,866/2,158(86.5%), 전체 gate PASS.** 서버 API가 폐기된 133개를 구현 대상에서 제외했고, SDK 소유 API(networking-sfc, Neutron flavor·service profile·metering, TaaS tap flow·tap service, local IP, segment range, NDP proxy, conntrack helper, 기본 보안 그룹 rule·statefulness, QoS packet rate rule 변경, Cinder group type·default type·cluster·service action·group reset)와 공통 helper(`fields` 조회, FindIdentity fallback 확장)를 추가했습니다. 입력 표현·응답 모델·cloud extension 확인 단위는 중간에 중지해 머지하지 않았고, 일부 결과는 해당 worktree에 commit되지 않은 상태로 남아 있습니다. 변경 없는 수정 요청의 판정 기준은 아직 결정 전입니다.
 
 **이전 구현 (2026-10-12): 핵심 서비스 Python proxy·cloud helper 판정 마감. 전체1,665/3,362(49.5%)·핵심1,587/2,292(69.2%), 전체 gate PASS.** 서비스별 worktree 에이전트 16개가 Keystone v3·Cinder v2/v3·Neutron proxy와 cloud identity·compute·network·object store helper 904개를 판정해 255개를 `go_mapping`으로 기록했고, 핵심 서비스의 미검토 선언은1개 남았습니다. 남은 핵심 작업은 unresolved 703개의 해소이며, Gophercloud 바인딩이 없는 경로의 SDK 소유 호출 작성과 find fallback·로컬 Body 필터·`fields` 조회 같은 공통 helper 보강이 중심입니다. 근거는 [판정대장의 마감 기록](sdk-support-ledger.md#핵심-python-proxycloud-판정-병렬-묶음-마감)에 정리했습니다. 미해결 722개(native 선언 포함)를 다시 읽어 [구현 가능성](core-unresolved-feasibility.md)을 나눈 결과, 566개는 구현 가능하고 130개는 서버 API가 폐기된 경로이며 26개는 구현하지 않는 항목입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
 
