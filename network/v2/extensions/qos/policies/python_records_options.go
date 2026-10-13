@@ -2,6 +2,7 @@ package policies
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"maps"
 	"slices"
@@ -66,19 +67,24 @@ func WithRecordFindHeaders(v map[string]string) RecordFindOption {
 // RecordListOpts owns list kwargs. Query includes declared server fields,
 // nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
 type RecordListOpts struct {
-	Microversion *string
-	Query        map[string]json.RawMessage
-	Headers      map[string]string
-	order        []string
+	operationGuard func(context.Context) error
+	BasePath       *string
+	Microversion   *string
+	Query          map[string]json.RawMessage
+	Headers        map[string]string
+	order          []string
 }
 type RecordListOption func(*RecordListOpts) error
 
 func policyListOptions(v RecordListOpts) neutronfind.Options {
-	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyPolicyList(v RecordListOpts) RecordListOpts {
 	owned := neutronfind.CloneOptions(policyListOptions(v))
-	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
+	v.BasePath, v.Microversion, v.Query, v.Headers, v.order = owned.BasePath, owned.Microversion, owned.Query, owned.Headers, owned.Order
+	if v.Headers == nil {
+		v.Headers = make(map[string]string)
+	}
 	return v
 }
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
@@ -95,7 +101,7 @@ func policyListIgnores(key string) bool {
 		}
 	}
 	switch key {
-	case "paginated", "max_items", "base_path", "list_base_path", "resource_type", "connection", "session", "microversion", "headers", "_synchronized", "self", "requires_id", "error_message", "skip_cache", "resource_response_key", "location", "__conflicting_attrs":
+	case "cls", "jmespath_filters", "paginated", "max_items", "base_path", "list_base_path", "resource_type", "connection", "session", "microversion", "headers", "_synchronized", "self", "requires_id", "error_message", "skip_cache", "resource_response_key", "location", "__conflicting_attrs":
 		return false
 	}
 	for _, pair := range policyRecordProfile.Query {
@@ -132,13 +138,49 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 	}
 }
 func WithRecordListMicroversion(v string) RecordListOption {
-	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
+	return func(c *RecordListOpts) error {
+		x := v
+		c.Microversion = &x
+		delete(c.Query, "microversion")
+		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "microversion" })
+		return nil
+	}
 }
 func WithRecordListHeaders(v map[string]string) RecordListOption {
 	owned := maps.Clone(v)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
+	return func(c *RecordListOpts) error {
+		c.Headers = maps.Clone(owned)
+		delete(c.Query, "headers")
+		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "headers" })
+		return nil
+	}
 }
 func WithRecordListLimit(v int) RecordListOption      { return WithRecordListQuery("limit", v) }
 func WithRecordListMarker(v string) RecordListOption  { return WithRecordListQuery("marker", v) }
 func WithRecordListMaxItems(v int) RecordListOption   { return WithRecordListQuery("max_items", v) }
 func WithRecordListPaginated(v bool) RecordListOption { return WithRecordListQuery("paginated", v) }
+
+// WithRecordListBasePath selects an owned service-relative collection path.
+// Raw Source formals belong to ProxyListRecords; the typed lane retains its
+// existing reserved-query validation.
+func WithRecordListBasePath(path string) RecordListOption {
+	return func(c *RecordListOpts) error {
+		owned := path
+		c.BasePath = &owned
+		delete(c.Query, "base_path")
+		c.order = slices.DeleteFunc(c.order, func(key string) bool { return key == "base_path" })
+		return nil
+	}
+}
+
+// WithRecordListJMESPath preserves the deprecated Proxy expression over the
+// unconsumed generator. Use ProxyListRecords for arbitrary expression results.
+func WithRecordListJMESPath(expression string) RecordListOption {
+	return WithRecordListQuery("jmespath_filters", expression)
+}
+
+// WithOperationGuard keeps a cloud workflow's source/context contract active
+// through Proxy callbacks, physical body handling, retries and continuation.
+func WithOperationGuard(guard func(context.Context) error) RecordListOption {
+	return func(c *RecordListOpts) error { c.operationGuard = guard; return nil }
+}

@@ -51,6 +51,7 @@ func WithRecordFindHeaders(v map[string]string) RecordFindOption {
 // RecordListOpts owns list kwargs. Query includes declared server fields,
 // nonquery Body filters and paginated/max_items controls. Unknowns are ignored.
 type RecordListOpts struct {
+	BasePath     *string
 	Microversion *string
 	Query        map[string]json.RawMessage
 	Headers      map[string]string
@@ -59,11 +60,11 @@ type RecordListOpts struct {
 type RecordListOption func(*RecordListOpts) error
 
 func ruleTypeListOptions(v RecordListOpts) neutronfind.Options {
-	return neutronfind.Options{Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
+	return neutronfind.Options{BasePath: v.BasePath, Microversion: v.Microversion, Query: v.Query, Headers: v.Headers, Order: v.order}
 }
 func copyRuleTypeList(v RecordListOpts) RecordListOpts {
 	owned := neutronfind.CloneOptions(ruleTypeListOptions(v))
-	v.Microversion, v.Query, v.Headers, v.order = owned.Microversion, owned.Query, owned.Headers, owned.Order
+	v.BasePath, v.Microversion, v.Query, v.Headers, v.order = owned.BasePath, owned.Microversion, owned.Query, owned.Headers, owned.Order
 	if v.Headers == nil {
 		v.Headers = make(map[string]string)
 	}
@@ -118,6 +119,12 @@ func WithRecordListQuery(key string, value any) RecordListOption {
 		c.Query[key] = bytes.Clone(owned)
 		return nil
 	}
+}
+
+// WithRecordListBasePath selects a safe service-relative list route. The raw
+// WithRecordListQuery("base_path", ...) lane keeps its existing rejection.
+func WithRecordListBasePath(v string) RecordListOption {
+	return func(c *RecordListOpts) error { x := v; c.BasePath = &x; return nil }
 }
 func WithRecordListMicroversion(v string) RecordListOption {
 	return func(c *RecordListOpts) error { x := v; c.Microversion = &x; return nil }
