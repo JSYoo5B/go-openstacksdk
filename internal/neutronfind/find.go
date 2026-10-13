@@ -66,6 +66,9 @@ type Profile struct {
 	// StopFaultRetryCallbacks is independent of Source projection policy.
 	// Zero preserves the reviewed native callback behavior of older bindings.
 	StopFaultRetryCallbacks bool
+	// PythonLoadedEquality applies CPython JSON float equality to new profiles.
+	// Existing exact-decimal profiles preserve their reviewed default.
+	PythonLoadedEquality bool
 }
 
 // Engine captures selected service facts before leaf option callbacks run.
@@ -415,6 +418,8 @@ func (e *Engine) findResponse(response *rest.Response, seed map[string]json.RawM
 // Query preserves JSON values, including arrays and null; unknown kwargs go to
 // the member GET but are ignored by the list, following Source Resource.find.
 type Options struct {
+	// BasePath is an owned service-relative list route override.
+	BasePath      *string
 	IgnoreMissing *bool
 	Microversion  *string
 	Order         []string
@@ -439,6 +444,10 @@ func orderedFindKeys(query map[string]json.RawMessage, order []string) []string 
 	return append(keys, missing...)
 }
 func CloneOptions(value Options) Options {
+	if value.BasePath != nil {
+		x := *value.BasePath
+		value.BasePath = &x
+	}
 	value.Query = findFields(value.Query)
 	value.Order = orderedFindKeys(value.Query, value.Order)
 	value.Headers = maps.Clone(value.Headers)
@@ -605,6 +614,9 @@ func (e *Engine) localMatch(actual, filter json.RawMessage) (bool, error) {
 		}
 		return true, nil
 	}
+	if e.profile.PythonLoadedEquality {
+		return jsonfilter.EqualPythonLoadedJSON(actual, filter)
+	}
 	return jsonfilter.EqualPythonJSON(actual, filter)
 }
 
@@ -757,6 +769,20 @@ func (e *Engine) List(ctx context.Context, policy Options) iter.Seq2[*Record, er
 		}
 		if err := e.Check(ctx); err != nil {
 			yield(nil, err)
+			return
+		}
+		if owned.BasePath != nil {
+			selected, err := e.withListBasePath(ctx, *owned.BasePath)
+			if err != nil {
+				yield(nil, err)
+				return
+			}
+			owned.BasePath = nil
+			for value, err := range selected.List(ctx, owned) {
+				if !yield(value, err) {
+					return
+				}
+			}
 			return
 		}
 		_, query, filters, _, control, err := e.prepareQuery(owned, "", false)
