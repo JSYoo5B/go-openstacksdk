@@ -20,6 +20,10 @@ third-party code and data retain their respective terms.
 | [golang-x-crypto-v0.55.0-LICENSE](golang-x-crypto-v0.55.0-LICENSE) | [golang.org/x/crypto v0.55.0](https://cs.opensource.google/go/x/crypto/+/v0.55.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
 | [golang-x-sys-v0.47.0-LICENSE](golang-x-sys-v0.47.0-LICENSE) | [golang.org/x/sys v0.47.0](https://cs.opensource.google/go/x/sys/+/v0.47.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
 
+| [klauspost-compress-v1.18.0-LICENSE](klauspost-compress-v1.18.0-LICENSE) | [klauspost/compress v1.18.0 LICENSE](https://github.com/klauspost/compress/blob/v1.18.0/LICENSE) | `0d9e582ee4bff57bf1189c9e514e6da7ce277f9cd3bc2d488b22fbb39a6d87cf` |
+| [klauspost-compress-v1.18.0-xxhash-LICENSE](klauspost-compress-v1.18.0-xxhash-LICENSE) | [klauspost/compress v1.18.0 zstd/internal/xxhash/LICENSE.txt](https://github.com/klauspost/compress/blob/v1.18.0/zstd/internal/xxhash/LICENSE.txt) | `f566a9f97bacdaf00d9f21dd991e81dc11201c4e016c86b470799429a1c9a79c` |
+| [klauspost-compress-v1.18.0-snapref-LICENSE](klauspost-compress-v1.18.0-snapref-LICENSE) | [klauspost/compress v1.18.0 internal/snapref/LICENSE](https://github.com/klauspost/compress/blob/v1.18.0/internal/snapref/LICENSE) | `f69f157b0be75da373605dbc8bbf142e8924ee82d8f44f11bcaf351335bf98cf` |
+
 Gophercloud and yaml originals were copied from the pinned module cache;
 OpenStackSDK and go-jmespath originals were copied from their pinned reference
 checkouts. The Python file was copied from the audited Python 3.14.8 installation.

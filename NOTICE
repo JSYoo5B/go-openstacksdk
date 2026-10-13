@@ -51,3 +51,10 @@ Owned image download imports BLAKE2 from golang.org/x/crypto v0.55.0 and
 CPU capability support from golang.org/x/sys v0.47.0. Copyright 2009 The Go
 Authors; their BSD-3-Clause terms are preserved in licenses/ and
 THIRD_PARTY_NOTICES.md. No implementation source is copied into this SDK.
+
+Swift zstd stream decoding imports github.com/klauspost/compress v1.18.0.
+Klaus Post, The Go Authors, the Snappy-Go Authors, Caleb Spare (cespare/xxhash),
+and original source credits retain their respective notices. The complete
+module license, xxhash MIT license and Snappy BSD reference license are retained
+under licenses/ and described in THIRD_PARTY_NOTICES.md. No implementation
+source from this module is copied into this SDK.

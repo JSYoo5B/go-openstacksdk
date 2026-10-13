@@ -24,5 +24,13 @@
       "yaml-v2.4.0-LICENSE.libyaml",
       "yaml-v2.4.0-NOTICE"
     ]
+  },
+  "github.com/klauspost/compress": {
+    "version": "v1.18.0",
+    "licenses": [
+      "klauspost-compress-v1.18.0-LICENSE",
+      "klauspost-compress-v1.18.0-xxhash-LICENSE",
+      "klauspost-compress-v1.18.0-snapref-LICENSE"
+    ]
   }
 }

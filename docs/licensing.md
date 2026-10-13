@@ -31,6 +31,10 @@
   간접 의존성 `golang.org/x/sys` v0.47.0의 CPU 기능 지원을 사용합니다.
   두 모듈의 BSD-3-Clause 원문과 The Go Authors 저작권을 보존합니다.
   Go 구현을 SDK에 복사하지 않으며 기존 Go 1.25 최소 버전은 유지합니다.
+- **스트림 압축 해제 의존성:** Swift의 zstd 응답에는 `klauspost/compress` v1.18.0을 사용합니다.
+  구현을 복사하지 않고 모듈로 가져오며 complete module LICENSE·vendored xxhash MIT·
+  Snappy reference BSD 원문을 별도로 보존합니다. zstd 및 같은 모듈 helper 범위와
+  다른 패키지의 Apache/MIT 조건은 통합 고지에서 구분합니다.
 - **비교·추출 기준:** 고정 OpenStackSDK 소스에서 공개 선언과 리소스 metadata를
   추출합니다. Python과 jmespath.py는 동작 비교용이며 SDK runtime에 포함하지 않습니다.
   고정 버전·출처·참조 결과의 범위는 통합 고지 문서에 구분해 기록합니다.
@@ -54,7 +58,7 @@ OpenStack, OpenInfra Foundation 및 Gophercloud의 공식 프로젝트나 승인
 
 ## 자동 점검
 
-`make license-check`는 보관한 원문 12개의 SHA-256, `go.mod`의 네 모듈과
+`make license-check`는 보관한 원문 15개의 SHA-256, `go.mod`의 다섯 모듈과
 라이선스 대응, JMESPath fork의 원본 고지 및 배포 고지 파일을 확인합니다.
 네트워크를 사용하지 않으며 `make check`에도 포함됩니다. 의존성 추가나
 버전 변경 시 원문과 적용 범위를 검토하고

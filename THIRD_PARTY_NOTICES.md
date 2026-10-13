@@ -193,3 +193,12 @@ upstream code or data incorporated by a port.
 When adding or changing copied code, translated algorithms, generated source
 metadata or external data, preserve the source/version, original notices,
 applicable license and a summary of changes alongside the affected component.
+
+
+## klauspost/compress v1.18.0: Swift stream zstd decoding
+
+- Source: [klauspost/compress v1.18.0](https://github.com/klauspost/compress/tree/v1.18.0).
+- Scope: imported Go `zstd` package and its same-module helpers; no implementation source is copied into this SDK.
+- Original notices: [complete module LICENSE](licenses/klauspost-compress-v1.18.0-LICENSE), [vendored xxhash MIT LICENSE](licenses/klauspost-compress-v1.18.0-xxhash-LICENSE), and [Snappy reference BSD LICENSE](licenses/klauspost-compress-v1.18.0-snapref-LICENSE).
+
+The zstd code retains Klaus Post and The Go Authors BSD-3-Clause notices and its Yann Collet source credits. The vendored cespare/xxhash code retains Caleb Spare's 2016 MIT notice. The imported package includes same-module Snappy support with the Snappy-Go Authors' 2011/2016 BSD-3-Clause notices. The complete module license also retains Apache-2.0 for gzhttp and MIT for readahead/filepathx; those package scopes are preserved in the original text and do not make the zstd implementation Apache-2.0. The Go module has no external non-stdlib runtime requirements and is pinned independently of the Gophercloud/OpenStackSDK source inventories.
