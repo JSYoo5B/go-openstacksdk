@@ -42,6 +42,12 @@ type PagePolicy[T any] struct {
 	// DictionaryLinks also accepts Keystone's links:{next:...} shape. This is
 	// an explicit service compatibility option; other link formats stay strict.
 	DictionaryLinks bool
+	// SourceLinkPolicy selects Resource._get_next_link JSON semantics instead
+	// of dictionary interoperability: present root links suppresses plural
+	// links, dictionaries are ignored, and the first literal next/href item
+	// wins before the top-level next fallback. HTTPLink keeps its own policy.
+	// The zero value preserves all existing formats and conflict checks.
+	SourceLinkPolicy bool
 	// MarkerOnShortPage follows every nonempty page when an explicit limit is
 	// present. Python Resource uses this rule; other APIs may stop when their
 	// returned page is shorter than the limit. An empty page always stops.
@@ -419,59 +425,69 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 		keys = []string{"links", plural + "_links"}
 	}
 	var links []string
-	for _, key := range keys {
-		if raw, exists := fields[key]; exists {
-			if policy.DictionaryLinks && len(bytes.TrimSpace(raw)) > 0 && bytes.TrimSpace(raw)[0] == '{' {
-				var values map[string]json.RawMessage
+	if policy.SourceLinkPolicy {
+		link, err := sourceJSONContinuation(fields, keys, policy.NextKey, policy.NextTruthy)
+		if err != nil {
+			return nil, err
+		}
+		if link != "" {
+			links = append(links, link)
+		}
+	} else {
+		for _, key := range keys {
+			if raw, exists := fields[key]; exists {
+				if policy.DictionaryLinks && len(bytes.TrimSpace(raw)) > 0 && bytes.TrimSpace(raw)[0] == '{' {
+					var values map[string]json.RawMessage
+					if err := json.Unmarshal(raw, &values); err != nil {
+						return nil, err
+					}
+					if value, exists := values["next"]; exists {
+						var next string
+						if err := json.Unmarshal(value, &next); err != nil {
+							return nil, err
+						}
+						if next != "" {
+							links = append(links, next)
+						}
+					}
+					continue
+				}
+				var values []resource.Link
 				if err := json.Unmarshal(raw, &values); err != nil {
 					return nil, err
 				}
-				if value, exists := values["next"]; exists {
-					var next string
-					if err := json.Unmarshal(value, &next); err != nil {
-						return nil, err
+				for _, link := range values {
+					if strings.EqualFold(link.Rel, "next") && link.Href != "" {
+						links = append(links, link.Href)
 					}
-					if next != "" {
-						links = append(links, next)
-					}
-				}
-				continue
-			}
-			var values []resource.Link
-			if err := json.Unmarshal(raw, &values); err != nil {
-				return nil, err
-			}
-			for _, link := range values {
-				if strings.EqualFold(link.Rel, "next") && link.Href != "" {
-					links = append(links, link.Href)
 				}
 			}
 		}
-	}
-	key := policy.NextKey
-	if key == "" {
-		key = "next"
-	}
-	if raw, exists := fields[key]; exists {
-		decode := true
-		if policy.IgnoreFalseyNext {
-			truthy := cloudfilter.PythonTruthy
-			if policy.NextTruthy != nil {
-				truthy = policy.NextTruthy
-			}
-			keep, err := truthy(bytes.Clone(raw))
-			if err != nil {
-				return nil, err
-			}
-			decode = keep
+		key := policy.NextKey
+		if key == "" {
+			key = "next"
 		}
-		if decode {
-			var next string
-			if err := json.Unmarshal(raw, &next); err != nil {
-				return nil, err
+		if raw, exists := fields[key]; exists {
+			decode := true
+			if policy.IgnoreFalseyNext {
+				truthy := cloudfilter.PythonTruthy
+				if policy.NextTruthy != nil {
+					truthy = policy.NextTruthy
+				}
+				keep, err := truthy(bytes.Clone(raw))
+				if err != nil {
+					return nil, err
+				}
+				decode = keep
 			}
-			if next != "" {
-				links = append(links, next)
+			if decode {
+				var next string
+				if err := json.Unmarshal(raw, &next); err != nil {
+					return nil, err
+				}
+				if next != "" {
+					links = append(links, next)
+				}
 			}
 		}
 	}
@@ -503,6 +519,88 @@ func continuation[T any](fields map[string]json.RawMessage, headers http.Header,
 		result = next
 	}
 	return result, nil
+}
+
+// sourceJSONContinuation interprets finite JSON exactly as Resource's body
+// link selection. Scope/version/header interoperability stays with continuation.
+func sourceJSONContinuation(fields map[string]json.RawMessage, keys []string, nextKey string, truthy func(json.RawMessage) (bool, error)) (string, error) {
+	if truthy == nil {
+		truthy = cloudfilter.PythonJSONTruthy
+	}
+	var selected json.RawMessage
+	for _, key := range keys {
+		if raw, present := fields[key]; present {
+			selected = raw
+			break
+		}
+	}
+	var next json.RawMessage
+	if selected != nil {
+		raw := bytes.TrimSpace(selected)
+		if len(raw) == 0 || !json.Valid(raw) {
+			return "", fmt.Errorf("Source links require complete JSON")
+		}
+		switch raw[0] {
+		case '{':
+			// Source yields {key:value} independently; no such item can contain both
+			// rel and href, so even {next:url} is ignored without decoding its value.
+		case '[':
+			var items []json.RawMessage
+			if err := json.Unmarshal(raw, &items); err != nil {
+				return "", err
+			}
+			for _, item := range items {
+				item = bytes.TrimSpace(item)
+				if len(item) == 0 || item[0] != '{' {
+					return "", fmt.Errorf("Source link item has no mapping get")
+				}
+				var fields map[string]json.RawMessage
+				if err := json.Unmarshal(item, &fields); err != nil {
+					return "", err
+				}
+				var rel string
+				if err := json.Unmarshal(fields["rel"], &rel); err != nil || rel != "next" {
+					continue
+				}
+				if href, present := fields["href"]; present {
+					next = bytes.Clone(href)
+					break
+				}
+			}
+		case '"':
+			var text string
+			if err := json.Unmarshal(raw, &text); err != nil {
+				return "", err
+			}
+			if text != "" {
+				return "", fmt.Errorf("Source string link item has no mapping get")
+			}
+		default:
+			return "", fmt.Errorf("Source links are not iterable")
+		}
+	}
+	keep, err := truthy(bytes.Clone(next))
+	if err != nil {
+		return "", err
+	}
+	if !keep {
+		if nextKey == "" {
+			nextKey = "next"
+		}
+		next = bytes.Clone(fields[nextKey])
+		keep, err = truthy(bytes.Clone(next))
+		if err != nil {
+			return "", err
+		}
+	}
+	if !keep {
+		return "", nil
+	}
+	var text string
+	if err := json.Unmarshal(next, &text); err != nil {
+		return "", fmt.Errorf("Source next link is truthy but has no string startswith: %w", err)
+	}
+	return text, nil
 }
 
 func lockContinuation(base, current, next *url.URL, rules continuationRules) error {
