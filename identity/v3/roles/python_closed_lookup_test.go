@@ -254,7 +254,7 @@ func TestPythonRoleClosedLookupPhysicalFaultStopsFallbackAndNativeCallbacks(t *t
 					retries++
 					return nil
 				}
-				fixture.Provider.ReauthFunc = func(context.Context) error { reauth++; return nil }
+				fixture.Provider.ReauthFunc = func(context.Context) error { reauth++; return errors.New("unexpected physical-fault reauthentication") }
 				fixture.Provider.RetryBackoffFunc = func(context.Context, *gophercloud.ErrUnexpectedResponseCode, error, uint) error {
 					backoff++
 					return nil
