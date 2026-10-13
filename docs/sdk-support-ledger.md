@@ -4,9 +4,9 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 추가 사이클](#2026-10-13-추가-사이클-마감)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 quota 반복 세 번째 사이클](#2026-10-13-quota-반복-세-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
-[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는1,981입니다.
+[Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
 
 ## 2026-10-13 추가 사이클 마감
 
@@ -3217,3 +3217,30 @@ baseline 대비 새 named 테스트 **119그룹**, 정확한 Go 비교 main **9�
 최종 전체 검사는 고정 Python Source/native metadata와 `GOFLAGS=-p=1 GOMAXPROCS=2 make check`로 실행했고204개 실제 test package와 race/vet/parity/progress/license/gofmt 모두 PASS(exit0)입니다. Go source가 모두 동결된 이후 수행한 log는 `/private/tmp/go-openstacksdk-cycle4-make-check-first.log`이며 이번 전체 gate에는 실패가 없습니다. 앞선 집중 gate의 최초 실패와 수리 이력은 위 기록과 구분합니다. inherited Resource/session/cache와 SDK-R1/C1/S1·실클라우드·원격 설치/alpha release 잔여는 닫지 않았습니다. 기존 비교 문서5개를 최신 callable/guide와 맞췄으며 Port list/search2개는 이미 매핑된 stale 문서 정정이고 신규14개에 포함하지 않습니다.
 
 시작 quota 잔여91%, 최종87%, ordinaryUsageAllowed=true이며 reset은2026-10-20 14:03:44 KST입니다. 사용량은 계정의 다른 작업과 공유하므로 이번 작업만의 비용으로 단정하지 않습니다. 모델 변경·usage reset·credit 구매 없이 한 묶음을 처리했습니다. 통과한 code/Connection16개 작은 커밋을 `a60e31e5`까지 main에 push했습니다. 후속 가이드·판정·진행 마감도 별도 작은 커밋으로 저장하고 push하며 새 사이클은 이 실행 안에서 추가하지 않습니다. 다음 예약 실행에서 최소 잔여가 엄격히80%를 초과할 때만 시작합니다. 전체 SDK 목표는 미완료입니다.
+
+## 2026-10-13 quota 반복 세 번째 사이클
+
+출발 `3caf3aeb`에서 시작 잔여86%를 확인한 뒤 worker4개에 고정한8개 후보를 나누었습니다. Keystone cloud User·Role·Project·Group·Domain get5개와 Proxy Domain get1개, Neutron cloud QoS policy create/update2개가 새 Go 매핑입니다. **2,016→2,024개(+8), 전체2,024/3,228(62.7%)·핵심1,946/2,158(90.2%)**입니다. catalog3,362·unsupported134·supported0·reviews2,487은 그대로이고 contracts7,279→7,321(+42), 미해결1,204개(검토329·미검토875)입니다. 최초 feasibility722개는 매핑359·미지원133·미해결230개로 대조하며 최초 조사 파일을 현재 잔여 목록으로 바꾸지 않았습니다.
+
+| 소유 단위 | 신규 매핑 | 새 계약 테스트 그룹 | 실제 검증·비교 문서 |
+|---|---:|---:|---|
+| User·Role | 2 | 31 | 최종 leaf/cloud race·Source AST79 관측; [조회](../identity/cloud-user-role-get-python.md) |
+| Domain | 2 | 13 | leaf/cloud race·Source Resource5와 cloud presence8 분기; [조회](../identity/cloud-domain-get-python.md) |
+| Project·Group | 2 | 21 | closed leaf/cloud race·Source oracle7 checks; [조회](../identity/cloud-project-group-get-python.md) |
+| QoS Policy | 2 | 10 | leaf/cloud race·실제 pinned Python26사례; [생성·수정](../network/cloud-qos-policy-mutations-python.md) |
+| Connection 통합 | 별도 선언 추가 없음 | 3 | 캐시된 v3 API·기본/명시 location·nil context·취소 원인·Domain presence 분기 |
+| 합계 | 8 | 78 | 독립 Go main4개 build·Python AST4개 PASS |
+
+SDK가 concrete With 옵션의 snapshot, None/presentfalsey 필터, SDK 소유 nullable Resource view와 실제 Wire/Envelope/Header/status를 제공합니다. User getter는 deprecated search 결과를 검사한 뒤에도 원래 finder를 호출하는 고정 Source 결함을 그대로 비교했고, Domain의 두 식별자가 None인 경우는 주석과 달리 실제 InvalidRequest/HTTP0입니다. Project의 truthy 문자열 filters는 dict(**filters)에서 실패하며 Group/Role의 JMES 선택은 arbitrary JSON과 실제 inventory를 분리합니다. Connection5개 getter는 캐시된 API와 기본 location을 전달하고 명시 입력을 보존합니다. 이 닫힌 finder들로 일반 find_user/find_role/find_domain/find_project/find_group의 raw fetch controls·Resource/cache 잔여를 추가 완료하지 않습니다.
+
+QoS는 valid_kwargs 선검증, 매 호출 fresh 전체 qos 및 nonnull default의 qos-default 광고, default 키 번역/제거, 빈 attrs POST, default 제거 뒤 빈 update의 None, 기본 조회와 private raw presence/equality ledger에 따른 dirty PUT을 SDK가 처리합니다. 공개 Resource/Wire를 바꿔도 trusted ledger가 변하지 않고 다른 API의 seed를 거부합니다. 누락 필드의 null 수정·tenant alias·raw falsey descriptor와 response unknown microversion도 비교했습니다. create/dirty update의 선택 버전과 equal update의 None 재설정 차이를 Source oracle로 발견해 새 leaf helper만 수리했습니다. stock Neutron27 project manager 쓰기와 deprecated admin-only는 구분하며 project_id/tenant_id 서버 필드·추가 권한과 backend acceptance는 별도입니다.
+
+최초 실패는 `...cycle5-identity-first.jsonl`에 보존했습니다. Group domain raw 값을 bytes.Clone 뒤 any로 전달해 base64 query가 되던 오류를 json.RawMessage cast 한 줄로 수리했습니다. Role의 physical401 fixture는 direct RoundTripper에서 Content-Length만 설정해 cleanEOF가 나왔고 same-token 재인증 재귀로 **fatal stack overflow**가 발생했습니다(timeout이 아닙니다). 명시 io.ErrUnexpectedEOF body와 예상 밖 Reauth callback의 bounded error fence로 테스트 fixture만 수리했으며 기대 zero-call·production/profile/native callback 정책을 보존했습니다. test 편집과 겹친 중간87393 PASS는 최종 증거에서 제외했고 최종 동결본 users/roles/identity race는 `...cycle5-identity-final.jsonl`에서 PASS입니다. Connection 최초 gate는 Domain 결과에 없는 Domain 필드를 참조해 build fail이었고 실제 Record 필드로 고친 `...cycle5-connection-repaired.jsonl`의3그룹이 PASS입니다.
+
+최종 QoS 집중 검사는 `...cycle5-qos-final.jsonl`에서2 package/10그룹 PASS입니다. POST/PUT physical24사례와 clean retry/reauth/route/Source199 8사례를 포함하고 기존 physical response helper·REST guard·native transport와 공개 Gophercloud testhelper-backed testcloud를 재사용했습니다. Domain·User/Role·Project/Group도 기존 fixture와 공통 cloud filter/List/Find/descriptor를 재사용했으며 새로운 HTTP test framework는 만들지 않았습니다. 새78그룹은 baseline 대비 함수 차집합(`...cycle5-added-test-groups.json`)으로 계산하며 기존 회귀를 더해 부풀리지 않습니다.
+
+문서의 정확한 Go main4개 build·Python fence AST4개는 `...cycle5-exact-guides/build-receipt.json`에 byte SHA와 결과를 기록했습니다. 동일 SHA의 이미 통과한3개 main 결과는 재사용하고 QoS main만 추가 빌드했습니다. Source oracle은 실제 pinned 함수 AST 또는 실제 cloud/Proxy/Resource import 실행과 명시된 collaborators/HTTP/extension/JMES stub 경계를 사용합니다. 전체 Python SDK 설치·실제 인증/배포 권한·실클라우드 동작이나 replace 없는 외부 consumer 검증을 주장하지 않습니다.
+
+최종 전체 `make check`는 exit0이며204개 실제 test package와 race/vet/parity/progress/license/gofmt가 모두 PASS입니다. 이번 전체 gate의 최초 실행도 PASS이고 앞선 집중 실패와 구분합니다. 수정 문서 상대 파일 링크1,747개·최종 독립 main/AST8개 receipt hash를 확인했습니다. 실행 로그는 `/private/tmp/go-openstacksdk-cycle5-check-final.log`이며 고정 Source `/private/tmp/go-openstacksdk-oct13-source-9hc9ehzk`, compiled native metadata, Python3.14, `GOFLAGS=-p=1 GOMAXPROCS=2`를 사용했습니다. native/source inventory·catalog·핀과 기존 의미 있는 계약을 보존합니다. SDK-R1/C1/S1·named raw controls·실클라우드 acceptance·alpha 릴리즈는 미완료이며 생성 transport를 full parity/supported로 부르지 않습니다.
+
+기능을 작은 커밋으로 저장하고 승인된 main push를 진행했습니다. 이번 사이클은 고정8개로 종료하며 다음 후보를 합쳐 범위를 넓히지 않습니다. 시작 quota 잔여86%, 최종 조회83%이며 조회 가능한 weekly 창 reset은2026-10-20 14:03:44 KST입니다. 사용량은 계정의 다른 작업과 공유하므로 관측한 증감을 이 작업의 비용으로 단정하지 않습니다. 조회 가능한 최소 잔여가 엄격히80%를 초과하고 ordinaryUsageAllowed=true일 때만 다음 사이클을 시작하며 reset·구매·모델 변경은 하지 않습니다.
