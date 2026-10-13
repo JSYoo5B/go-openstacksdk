@@ -203,6 +203,7 @@ func TestActionRecordsCancelAfterYieldDoesNotReadNextPage(t *testing.T) {
 		testcloud.JSON(w, 200, `{"instanceActions":[{"request_id":"one"}],"next":"`+cloud.Server.URL+`/v2.1/p/servers/server/os-instance-actions?marker=one"}`)
 	})
 	ctx, cancel := context.WithCancelCause(context.Background())
+	defer cancel(nil)
 	cause := errors.New("cancel witness")
 	var failure error
 	rows := 0
