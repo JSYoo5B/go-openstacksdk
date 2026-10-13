@@ -10,7 +10,7 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 판정은 공개 Go API가 기본 인자에서 helper의 동작 전체를 직접 수행할 때만 대응으로 봅니다. 호출자가 행을 거르거나, 결과에 따라 다음 호출을 고르거나, 404를 직접 성공으로 바꿔야 한다면 미해결로 둡니다. 아래 예제의 `containers`, `objects`는 `objectstorage/v1/containers`, `objectstorage/v1/objects` 패키지이고 `resource`는 SDK의 `resource` 패키지입니다.
 
-2026-10-13의 [object record 목록](../objectstorage/v1/objects/python-record-list.md)과 [buffered·stream raw 응답](../objectstorage/v1/objects/python-raw-get.md)은 별도 concrete 옵션으로 구현했습니다. Raw 조회의 optional query와 stream 기본값을 SDK가 소유하며, 아래 `get_object`·`stream_object`의 별도 미해결 문자 디코딩·iterator 계약은 그대로 남습니다.
+2026-10-13의 [object record 목록](../objectstorage/v1/objects/python-record-list.md)과 [buffered·stream raw 응답](../objectstorage/v1/objects/python-raw-get.md)은 별도 concrete 옵션으로 구현했습니다. Raw 조회의 optional query와 stream 기본값을 SDK가 소유하며, `get_object`의 별도 문자 디코딩·outfile 계약은 미해결로 유지합니다. [cloud 스트림](../objectstorage/cloud-object-stream-python.md)은 닫힌 문자열 입력의 SDK 소유 chunk iterator로 추가 구현했습니다.
 
 ## 대응 표
 
@@ -35,7 +35,7 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 | `delete_autocreated_image_objects` | 없음 | 미해결 |
 | `get_object_metadata` | `objects.API.HeadMetadata(ctx, container, name)` | 대응 |
 | `get_object_raw` | `objects.API.GetObjectRaw(ctx, container, name, options...)` | go_mapping |
-| `stream_object` | `objects.API.StreamObject` | 미해결 |
+| `stream_object` | `Connection.StreamObjectChunks` / `swift.Cloud.StreamObjectChunks` ([사용법](../objectstorage/cloud-object-stream-python.md)) | go_mapping |
 | `get_object` | `objects.API.GetObject`, `objects.API.DownloadObject` | 미해결 |
 | `current_location` | `Connection.CurrentLocation()` | 대응 |
 | `current_project` | `Connection.CurrentLocation()`의 `Project` | 대응 |
@@ -99,7 +99,7 @@ openstacksdk의 cloud 계층에서 object store helper, Connection 상태 helper
 
 object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이고 Go는 `%2F`로 escape합니다. Swift는 두 경로를 같은 object로 해석합니다.
 
-`get_object`, `stream_object`, `create_object`, `is_object_stale`, `get_object_capabilities`, `get_object_segment_size`, `list_objects`는 같은 이름의 Proxy 메서드에 그대로 위임합니다. 그래서 cloud helper의 판정은 위임하는 Proxy 메서드의 판정을 따릅니다. `get_object_capabilities`, `get_object_segment_size`, `is_object_stale`는 Proxy 쪽 `GetInfo`, `GetObjectSegmentSize`, `IsObjectStale`이 기본 인자에서 같은 `/info` `GET`이나 object `HEAD`를 보내고 같은 값을 돌려주므로 대응입니다. 나머지 Proxy 메서드는 미해결로 기록되어 있고, cloud helper의 기본 경로도 그 차이를 그대로 지나갑니다. 예를 들어 `get_object`는 기본값에서 `response.text`를 저장하므로 Requests가 추측한 문자 집합으로 디코딩한 문자열을 돌려주는데, Go `GetObject`는 원본 바이트를 돌려줍니다. `stream_object`는 `resp_chunk_size` 단위 iterator이고 404에서 빈 iterator가 되지만 Go `StreamObject`는 `io.ReadCloser`를 돌려주고 404를 오류로 냅니다.
+`get_object`, `create_object`, `is_object_stale`, `get_object_capabilities`, `get_object_segment_size`, `list_objects`는 같은 이름의 Proxy 메서드에 그대로 위임합니다. 그래서 cloud helper의 판정은 위임하는 Proxy 메서드의 판정을 따릅니다. `get_object_capabilities`, `get_object_segment_size`, `is_object_stale`는 Proxy 쪽 `GetInfo`, `GetObjectSegmentSize`, `IsObjectStale`이 기본 인자에서 같은 `/info` `GET`이나 object `HEAD`를 보내고 같은 값을 돌려주므로 대응입니다. 나머지 Proxy 메서드는 미해결로 기록되어 있고, cloud helper의 기본 경로도 그 차이를 그대로 지나갑니다. 예를 들어 `get_object`는 기본값에서 `response.text`를 저장하므로 Requests가 추측한 문자 집합으로 디코딩한 문자열을 돌려주는데, Go `GetObject`는 원본 바이트를 돌려줍니다. 새 cloud `StreamObjectChunks`는 기본1024·lazy GET·깨끗한404의 빈 iterator·압축 해제·owned chunks와 자동 cleanup을 처리합니다. 조기 break 뒤 Err/Close 및 실제 header/status Receipt를 제공하며, query_string은 Source처럼 무시합니다. 기존 native StreamObject와 full Proxy mutable Object/attrs 판정은 유지합니다.
 
 ## Connection 상태
 
@@ -111,7 +111,6 @@ object 이름에 `/`가 있으면 Python은 이름을 그대로 경로에 붙이
 
 - `OpenStackInventory.search_hosts`: `_utils._filter_list`를 대신하는 공개 Go helper가 없습니다.
 - `get_object`: 기본 경로의 문자열 디코딩, `outfile` 경로를 열고 닫는 동작, 404를 `None`으로 바꾸는 동작이 없습니다.
-- `stream_object`: chunk iterator와 404를 빈 iterator로 바꾸는 동작이 없습니다.
 - `create_object`: 위임하는 Proxy `create_object`가 미해결인 이유가 그대로 남습니다. large object segment 이름과 `If-None-Match` header, DLO manifest prefix가 Python 요청과 다릅니다.
 - `delete_autocreated_image_objects`: `image_api_use_tasks` 확인, `images` container 목록, `x-sdk-autocreated` metadata 확인과 삭제를 묶은 helper가 없습니다.
 - `auth_token`, `Connection.authorize`: Connection이 token을 노출하지 않습니다. token은 Gophercloud `ProviderClient`에 있고, 만료 전에 미리 다시 인증하지도 않습니다.
