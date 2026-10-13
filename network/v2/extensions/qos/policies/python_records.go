@@ -18,6 +18,9 @@ import (
 // PolicyRecord separates the declared Source view from received JSON evidence.
 // Resource owns constructor/default/alias values; Wire owns literal row fields.
 type PolicyRecord struct {
+	sourceBody     map[string]json.RawMessage
+	fromList       bool
+	sourceMutation *policyMutationSeed
 	Resource, Wire *resource.RawResource
 	Envelope       json.RawMessage
 	Header         http.Header
@@ -78,7 +81,7 @@ func policyRecord(value *neutronfind.Record) *PolicyRecord {
 	if value == nil {
 		return nil
 	}
-	return &PolicyRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode}
+	return &PolicyRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, sourceBody: policyCloudBody(value), fromList: value.FromList()}
 }
 func applyPolicyRecordOptions[T any](ctx context.Context, engine *neutronfind.Engine, initial T, clone func(T) T, options []func(*T) error) (T, error) {
 	policy := clone(initial)
