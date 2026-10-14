@@ -4,9 +4,40 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-13 quota 반복 네 번째 사이클](#2026-10-13-quota-반복-네-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 quota 반복 다섯 번째 사이클](#2026-10-15-quota-반복-다섯-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 quota 반복 다섯 번째 사이클
+
+2026-10-14 사용자의 “40%까지 사이클” 재개 지시에 따라 기존 sdk-quota를 ACTIVE로 전환하고 시작 경계를80%에서40%로 바꿨습니다. 시작 잔여62%/ordinaryUsageAllowed=true를 확인하고 **QoS update3·Router create1·Subnet create1·Swift get1**, 총6개 후보를 고정했습니다. 구현4개 소유와 독립 Source/테스트/문서 검토4개, worker8개를 활용하며 root가 통합·Go·판정·Git을 맡았습니다. 이번 범위만 마감하며 다음 실행은 새로운 조회의 최소 잔여가 엄격히40%를 초과할 때만 시작합니다.
+
+최종 named Go 매핑은 **2,028→2,033개(+5), 2,033/3,228(63.0%)**이며 핵심 **1,950→1,955/2,158(90.6%)**입니다. Source catalog3,362·unsupported134·supported0·reviews2,487과 source pin을 보존하고 계약은7,352→7,406개(+54)입니다. 미해결1,195개는 reviewed320+unreviewed875입니다. 10-12 역사적722개 조사와 대조한 상태는 mapped368/unsupported133/unresolved221이며 원래 분류를 재작성하지 않았습니다.
+
+| 단위 | 닫은 named 계약 | 판정 | 근거 |
+|---|---|---|---|
+| QoS update3 | kwargs 검증→fresh qos→policy→BW optional direction→None/strict current GET→private raw dirty PUT | go_mapping3 | Source74; cloud6/leaf4그룹 |
+| Router create | true 기본값·gateway composition·fresh AZ/list 검사·seed/actual receipt·Connection 위치 | go_mapping1 | Source90; cloud10/leaf3그룹 |
+| Subnet create | tenant raw network/pool closed lookup·기본4/false·CIDR/pool/gateway 순서·attrs/alias/header·role cache | go_mapping1 | Source127; cloud13/leaf5그룹 |
+| Swift get | eager text/owned path/borrowed writer·raw lowerheaders·clean404·codec/output 순서·close/typed cause | unresolved1 | Source65; leaf18/top3그룹 |
+
+QoS는 원래 raw Body·URI parent·GET receipt·family/API/client guard를 private seed로 소유하고 clone/no-PUT/dirty-only PUT을 제공합니다. None parent ledger와 falsey nonnull ID를 독립 감사에서 수리했습니다. 실제 Source는 null만 dirty-ID 오류이며0/false/빈 값은 collection trailing slash PUT입니다. 공통 Profile.SourceCollectionPUT을 SourceFindPolicy와 함께 명시한 경우에만 이 fixed route를 허용하고 baseline/member DELETE는 유지합니다. 최종 strict GET200 physical 오류에서도 actual bytes/header/status만 보존하며 성공 Resource/Wire/seed를 만들지 않습니다.
+
+Router/Subnet은 기존 native CreateWithAttributes/FindRecord 동작을 바꾸지 않고 새 Source profile/helper를 제공합니다. Subnet self preflight·ordered canonical/wire response·마지막 header alias·actual response header·pool tenant_id:null을 Source 실제 실행과 대조해 수리했습니다. Accepted POST100..399이면 read/decode/cancel/source 오류 뒤에도 topology 역할 캐시를 무효화하고 reject/noHTTP는 보존합니다. Router는 이 network/subnet 캐시를 바꾸지 않습니다. 공식 Neutron27 정책 원문과 Source mock 실행을 구분했으며 실제 클라우드 권한을 검증했다고 주장하지 않습니다.
+
+Swift는 기존 stream production을 바꾸지 않고 capture/header/REST/native401/decoder를 재사용하는 raw Get opener로 file open/falsey output 이후 accepted decoder를 초기화합니다. Borrowed writer는 성공시 flush하고 닫지 않으며 owned file과 HTTP body는 실패에도 정리합니다. >5 codec chain/falsey output/open 오류 순서, explicit UTF16/32 truncation, aliases, bad header raw 보존과 typed PathError를 검증했습니다. **전체 apparent_encoding 통계 감지**(UTF8-valid NUL/invalid BOM 포함)와 **전체 CPython text-codec/alias/replace namespace**는 named remaining으로 보존합니다. 일반 mutable Proxy/Resource/session 및 SDK-R1/C1/S1와 live-cloud/release도 별도 잔여입니다.
+
+최초 실패와 수리의 근거:
+
+- Swift 최초 leaf 집중 실패3건: UTF32LE alias 누락과 typed PathError 손실은 구현 수리, bad integer header 기대는 Source가 허용하므로 fixture 수리였습니다. 같은 집중 검사 repair/stage/final PASS; 뒤 독립 감사의 codec 생성 순서·UTF16 tail 보정도 최종 검사에 포함했습니다.
+- Neutron cloud 최초 통합에서 QoS strict GET200의 physical 오류9사례가 actual partial receipt를 잃었습니다. 실제 ResponseError의 cloned metadata만 복원하고72 physical 사례의 assertion을 유지한 뒤 PASS했습니다.
+- Connection 첫 검사 전 모듈 정합성이 막혔고 기존 x/crypto v0.55.0이 요구한 x/text v0.41.0으로 고정했습니다. 이후 Root fixture2건의 catalog v2.0 중복을 수정했습니다. Go 최소1.25·다른 dependency pin을 유지하고 라이선스 원문/manifest/고지를 함께 갱신했습니다.
+
+최종 focused `-race -count=1 -json`: **8개 package·신규67그룹·249개 하위 사례 PASS**. 공개 Gophercloud testhelper를 사용하는 기존 testcloud와 기존 fault/retry/guard fixture를 재사용하고 새 테스트 프레임워크를 만들지 않았습니다. 네 서비스 가이드의 정확한 독립 Go main4개 build 및 Python AST4개 PASS; 예제 인증/live 실행과 구분합니다. Source74+90+127+65=356사례는 고정 Python 메서드를 메모리 HTTP/recording output으로 실행한 관찰이며 실클라우드·ACL·filesystem 검증은 아닙니다.
+
+전체 `make check` 첫 실행 **exit0**, 실제 test package **204개**: license/vet/race/parity/progress/gofmt PASS. 라이선스는 unchanged originals16개·pinned module6개, selected x/text v0.41.0입니다. Go1.27.2로 검증했고 module 최소1.25를 보존했습니다. 근거는 `/private/tmp/go-openstacksdk-cycle7-focused-pass.jsonl`, `...-check-first.log`, `...-exact-guides/build-receipt.json`, `...-code-receipt.json`; Go3,175파일 SHA256 `c950404bfd6324f023a11d071139b59078008e305021b090ca59ccf03d821a6c`입니다. Catalog/native/Python source metadata drift0입니다.
+
+구현은 공통/leaf/QoS cloud/Router/Subnet/Connection/Swift 수리/의존성으로 작은 의미 있는 커밋을 나눠 main에 push했습니다. 문서·판정·자동집계를 함께 마감하며 전체 SDK 목표는 미완료입니다. 시작62%→중간59/57/54%→최신53%의 계정 quota를 관측했고 다른 작업과 공유한 소비를 이 작업만의 비용으로 단정하지 않습니다. Worker8개 노력과40% 시작 경계를 유지합니다.
 
 ## 2026-10-13 추가 사이클 마감
 
