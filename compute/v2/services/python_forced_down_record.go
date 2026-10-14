@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -59,7 +60,7 @@ func (a *API) UpdateForcedDownRecord(ctx context.Context, target ForcedDownRecor
 			if !named {
 				return fail(nil, fmt.Errorf("%w: either a service id or both host and binary are required", resource.ErrInvalidOption))
 			}
-			if id, err = pythonServiceResolve(ctx, source, target.Host, target.Binary); err != nil {
+			if id, _, _, err = pythonServiceResolve(ctx, source, target.Host, target.Binary); err != nil {
 				return fail(nil, err)
 			}
 		}
@@ -82,36 +83,35 @@ func (a *API) UpdateForcedDownRecord(ctx context.Context, target ForcedDownRecor
 }
 
 // pythonServiceResolve follows _get_service from 2.53: list by host and
-// binary and require exactly one row, whose id addresses the update.
-func pythonServiceResolve(ctx context.Context, source *cloudread.Source, host, binary string) (string, error) {
+// binary and require exactly one row, whose id addresses the update. The row
+// and the list response are returned for callers that compare attributes.
+func pythonServiceResolve(ctx context.Context, source *cloudread.Source, host, binary string) (string, map[string]json.RawMessage, *rest.Response, error) {
 	query := url.Values{"binary": {binary}, "host": {host}}
 	response, err := source.Get(ctx, source.Client.ServiceURL("os-services")+"?"+query.Encode(), pythonServiceCodes()...)
 	if err != nil {
-		return "", err
+		return "", nil, nil, err
 	}
 	var page struct {
-		Services *[]struct {
-			ID json.RawMessage `json:"id"`
-		} `json:"services"`
+		Services *[]map[string]json.RawMessage `json:"services"`
 	}
 	if err := json.Unmarshal(response.Body, &page); err != nil || page.Services == nil {
-		return "", response.Fail(errors.Join(fmt.Errorf("%w: service list response lacks a services array", resource.ErrInvalidOption), err))
+		return "", nil, nil, response.Fail(errors.Join(fmt.Errorf("%w: service list response lacks a services array", resource.ErrInvalidOption), err))
 	}
 	switch rows := *page.Services; len(rows) {
 	case 0:
-		return "", response.Fail(fmt.Errorf("%w: found no matches for service host %q binary %q", resource.ErrNotFound, host, binary))
+		return "", nil, nil, response.Fail(fmt.Errorf("%w: found no matches for service host %q binary %q", resource.ErrNotFound, host, binary))
 	case 1:
-		raw := bytes.TrimSpace(rows[0].ID)
+		raw := bytes.TrimSpace(rows[0]["id"])
 		var text string
 		if err := json.Unmarshal(raw, &text); err == nil && strings.TrimSpace(text) != "" {
-			return text, nil
+			return text, rows[0], response, nil
 		}
 		var number json.Number
 		if err := json.Unmarshal(raw, &number); err == nil && number != "" {
-			return number.String(), nil
+			return number.String(), rows[0], response, nil
 		}
-		return "", response.Fail(fmt.Errorf("%w: listed service has no usable id", resource.ErrInvalidOption))
+		return "", nil, nil, response.Fail(fmt.Errorf("%w: listed service has no usable id", resource.ErrInvalidOption))
 	default:
-		return "", response.Fail(fmt.Errorf("%w: found multiple matches for service host %q binary %q", resource.ErrAmbiguous, host, binary))
+		return "", nil, nil, response.Fail(fmt.Errorf("%w: found multiple matches for service host %q binary %q", resource.ErrAmbiguous, host, binary))
 	}
 }
