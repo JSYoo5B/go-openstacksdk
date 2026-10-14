@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"reflect"
 	"strings"
 
@@ -121,7 +122,10 @@ func validateLimits(options UpdateOpts) error {
 	return nil
 }
 
-type resetOptions struct{ ignoreMissing bool }
+type resetOptions struct {
+	ignoreMissing bool
+	query         url.Values
+}
 
 // ResetOption configures the project/user reset's missing-target policy.
 type ResetOption func(*resetOptions) error
@@ -146,6 +150,9 @@ func (s *ProjectQuotaScope) Reset(ctx context.Context, options ...ResetOption) (
 		if err := apply(&config); err != nil {
 			return nil, quotaError("Reset", s.projectID, err)
 		}
+	}
+	if len(config.query) != 0 {
+		return s.api.resetWithQuery(ctx, s.projectID, "", config)
 	}
 	result := upstream.Delete(ctx, s.api.client, s.projectID)
 	if config.ignoreMissing && gophercloud.ResponseCodeIs(result.Err, http.StatusNotFound) {

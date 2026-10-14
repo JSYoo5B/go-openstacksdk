@@ -194,7 +194,7 @@ func (s *UserQuotaScope) Reset(ctx context.Context, options ...ResetOption) (*Re
 			return nil, s.wrap("Reset", err)
 		}
 	}
-	endpoint := s.api.quotaURL(s.projectID, s.userID, "")
+	endpoint := resetQueryURL(s.api.quotaURL(s.projectID, s.userID, ""), config.query)
 	client, err := guardedQuotaClient(s.api.client, http.MethodDelete, endpoint)
 	if err != nil {
 		return nil, s.wrap("Reset", err)
