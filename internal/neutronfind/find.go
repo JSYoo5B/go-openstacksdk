@@ -66,6 +66,8 @@ type Profile struct {
 	// SourceCollectionPUT permits an empty-ID PUT on this fixed collection only.
 	// It requires SourceFindPolicy and never changes ordinary member mutations.
 	SourceCollectionPUT bool
+	// SourceCollectionGET permits empty-ID fetch only on a selected Source profile.
+	SourceCollectionGET bool
 	IDKey, NameKey      string
 	// AlternateIDKey supplies a physical list marker only when IDKey is absent.
 	// An explicit primary null/false/empty value retains precedence.
@@ -861,8 +863,13 @@ func (e *Engine) getRecord(ctx context.Context, source *cloudread.Source, header
 // Get performs one literal member lookup. Query values belong to fetch, so they
 // do not seed Resource Body attributes. A leaf maps its fields to wire names.
 func (e *Engine) Get(ctx context.Context, identity string, policy Options) (*Record, error) {
-	if err := errors.Join(cloudread.Context(ctx), e.Check(ctx), findSegment(identity)); err != nil {
+	if err := errors.Join(cloudread.Context(ctx), e.Check(ctx)); err != nil {
 		return nil, err
+	}
+	if !(e.profile.SourceFindPolicy && e.profile.SourceCollectionGET && identity == "") {
+		if err := findSegment(identity); err != nil {
+			return nil, err
+		}
 	}
 	policy = CloneOptions(policy)
 	query := make(url.Values)
