@@ -3,17 +3,19 @@ package objects
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"encoding/binary"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"reflect"
 	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"golang.org/x/text/encoding"
@@ -137,27 +139,12 @@ func cloudGetLowerHeaders(header http.Header) map[string]string {
 	}
 	return result
 }
-func cloudGetValidateTranslatedHeaders(header http.Header) error {
-	// Resource._translate_response(has_body=False) still materializes all
-	// declared Object Header descriptors before the path is opened.
-	for _, decl := range objectListHeaderFields {
-		values, present := header[http.CanonicalHeaderKey(decl.wire)]
-		if !present {
-			continue
-		}
-		raw, _ := json.Marshal(strings.Join(values, ", "))
-		if _, err := objectListConvert(raw, decl.kind); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 // GetCloudObjectText owns the closed cloud get_object workflow. It reuses the
 // guarded Source stream opener/codecs while buffering only the text branch;
 // writers are borrowed, path handles and the physical HTTP body are SDK-owned.
 // Requests' statistical apparent_encoding remains explicitly unsupported for
-// unresolved unmarked non-UTF8 content, rather than silently guessing a codec.
+// unresolved unmarked content, including valid UTF8 containing NULs, rather than silently guessing a codec.
 func (a *API) GetCloudObjectText(ctx context.Context, container, object string, options ...CloudGetOption) (result *CloudGetResult, terminal error) {
 	cfg := CloudGetOpts{}
 	memory, discard := true, false
@@ -213,7 +200,7 @@ func (a *API) GetCloudObjectText(ctx context.Context, container, object string, 
 		closeErr := stream.Close()
 		terminal = request.Wrap("GetCloudObjectText", "objects", metadataContextError(ctx, errors.Join(terminal, attach(pathClose, nil), closeErr)))
 	}()
-	reader, size, err := stream.open()
+	reader, size, err := cloudGetOpenRaw(stream, configure)
 	receipt := stream.Receipt()
 	if receipt != nil {
 		result = &CloudGetResult{Receipt: receipt, Headers: cloudGetLowerHeaders(receipt.Header)}
@@ -227,11 +214,6 @@ func (a *API) GetCloudObjectText(ctx context.Context, container, object string, 
 			result.Missing = true
 		}
 		return result, nil
-	}
-	if !memory {
-		if err := cloudGetValidateTranslatedHeaders(receipt.Header); err != nil {
-			return result, err
-		}
 	}
 	if err := stream.source.check(ctx); err != nil {
 		return result, err
@@ -257,6 +239,15 @@ func (a *API) GetCloudObjectText(ctx context.Context, container, object string, 
 			destination = cfg.Writer
 		}
 	}
+	// Decoder construction belongs after outfile selection/open. In particular
+	// a falsey output never initializes a codec, and a path open error wins over
+	// a constructor error such as a six-link known Content-Encoding chain.
+	decoded, closers, decodeErr := cloudStreamDecoder(reader, receipt.Header.Get("Content-Encoding"))
+	stream.decoders = closers
+	if err := errors.Join(decodeErr, stream.source.check(ctx)); err != nil {
+		return result, err
+	}
+	reader = decoded
 	var content bytes.Buffer
 	buffer := make([]byte, size)
 	for {
@@ -307,9 +298,6 @@ func (a *API) GetCloudObjectText(ctx context.Context, container, object string, 
 	}
 	if memory {
 		proofBytes = bytes.Clone(content.Bytes())
-		if err := cloudGetValidateTranslatedHeaders(receipt.Header); err != nil {
-			return result, err
-		}
 		text, err := cloudGetResponseText(content.Bytes(), receipt.Header)
 		if err != nil {
 			return result, err
@@ -370,16 +358,16 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 	name, present := cloudGetHeaderEncoding(header)
 	if !present {
 		switch {
-		case bytes.HasPrefix(payload, []byte{0xef, 0xbb, 0xbf}):
+		case bytes.HasPrefix(payload, []byte{0xef, 0xbb, 0xbf}) && utf8.Valid(payload[3:]):
 			name = "utf-8-sig"
-		case bytes.HasPrefix(payload, []byte{0xff, 0xfe, 0, 0}), bytes.HasPrefix(payload, []byte{0, 0, 0xfe, 0xff}):
+		case cloudGetValidUTF32BOM(payload):
 			name = "utf-32"
-		case bytes.HasPrefix(payload, []byte{0xff, 0xfe}), bytes.HasPrefix(payload, []byte{0xfe, 0xff}):
+		case cloudGetValidUTF16BOM(payload):
 			name = "utf-16"
-		case utf8.Valid(payload):
+		case utf8.Valid(payload) && !bytes.Contains(payload, []byte{0}):
 			name = "utf-8"
 		default:
-			return "", fmt.Errorf("%w: Requests statistical apparent_encoding for unmarked non-UTF8 content is not implemented", resource.ErrUnsupported)
+			return "", fmt.Errorf("%w: Requests statistical apparent_encoding for this unmarked content is not implemented", resource.ErrUnsupported)
 		}
 	}
 	normalized := strings.ToLower(strings.ReplaceAll(strings.TrimSpace(name), "_", "-"))
@@ -390,9 +378,9 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 		codec = textunicode.UTF8
 	case "", "utf-8", "utf8", "u8", "utf", "cp65001":
 		codec = textunicode.UTF8
-	case "latin-1", "latin1", "l1", "iso-8859-1", "iso8859-1", "cp819", "iso-ir-100":
+	case "latin-1", "latin1", "l1", "iso-8859-1", "iso8859-1", "iso8859", "cp819", "iso-ir-100":
 		codec = charmap.ISO8859_1
-	case "ascii", "us-ascii", "us", "646", "cp367", "ansi-x3.4-1968":
+	case "ascii", "us-ascii", "us", "646", "cp367", "ansi-x3.4-1968", "ansi-x3.4-1986":
 		var out strings.Builder
 		for _, b := range payload {
 			if b > 127 {
@@ -409,11 +397,20 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 	case "utf-16-be", "utf-16be", "utf16be":
 		codec = textunicode.UTF16(textunicode.BigEndian, textunicode.IgnoreBOM)
 	case "utf-32", "utf32":
-		codec = utf32.UTF32(utf32.LittleEndian, utf32.UseBOM)
+		order := utf32.LittleEndian
+		if bytes.HasPrefix(payload, []byte{0xff, 0xfe, 0, 0}) {
+			payload = payload[4:]
+		} else if bytes.HasPrefix(payload, []byte{0, 0, 0xfe, 0xff}) {
+			order = utf32.BigEndian
+			payload = payload[4:]
+		}
+		codec = utf32.UTF32(order, utf32.IgnoreBOM)
 	case "utf-32-le", "utf-32le", "utf32le":
 		codec = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
 	case "utf-32-be", "utf-32be", "utf32be":
 		codec = utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM)
+	case "unicode-escape", "raw-unicode-escape", "punycode", "idna", "cp720", "cp1006", "cp1125", "cp949", "cp932", "mac-arabic", "mac-farsi", "mac-hebrew", "mac-greek", "mac-iceland", "mac-romanian", "mac-thai", "mac-turkish":
+		return "", fmt.Errorf("%w: Python text codec %q is outside the explicit Go charset subset", resource.ErrUnsupported, name)
 	default:
 		if strings.HasPrefix(normalized, "cp125") {
 			normalized = "windows-" + strings.TrimPrefix(normalized, "cp")
@@ -424,7 +421,10 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 		}
 		var err error
 		if codec == nil {
-			codec, err = ianaindex.IANA.Encoding(normalized)
+			codec, err = ianaindex.IANA.Encoding(name)
+			if err != nil {
+				codec, err = ianaindex.IANA.Encoding(normalized)
+			}
 		}
 		if err != nil {
 			codec = textunicode.UTF8
@@ -437,4 +437,124 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 		return "", err
 	}
 	return string(decoded), nil
+}
+
+// GET staging for get_object uses the same captured source, owned headers,
+// guarded body and native rejection/codec helpers as stream_object. Accepted
+// codec initialization is intentionally deferred until output selection/open.
+func cloudGetOpenRaw(s *cloudObjectStream, configure CloudStreamOption) (io.Reader, int, error) {
+	p, err := s.api.captureObjectList(s.ctx, s.container)
+	if err != nil {
+		return nil, 0, err
+	}
+	s.source = p
+	if err := validateMetadataObject(s.object); err != nil {
+		return nil, 0, metadataContextError(s.ctx, err)
+	}
+	cfg := CloudStreamOpts{}
+	if err := errors.Join(configure(&cfg), p.check(s.ctx)); err != nil {
+		return nil, 0, metadataContextError(s.ctx, err)
+	}
+	size := 1024
+	if cfg.ChunkSize != nil {
+		size = *cfg.ChunkSize
+	}
+	if size <= 0 || size > 16*1024*1024 {
+		return nil, 0, metadataInvalid("get_object output chunk size must be between 1 and 16777216")
+	}
+	target := p.target + "/" + url.PathEscape(s.object)
+	if _, ok := p.client.MoreHeaders["Accept"]; !ok {
+		p.client.MoreHeaders["Accept"] = "*/*"
+	}
+	if _, ok := p.client.MoreHeaders["Accept-Encoding"]; !ok {
+		p.client.MoreHeaders["Accept-Encoding"] = "gzip, deflate, zstd"
+	}
+	policy := rawObjectHeaderPolicy(p)
+	policy.Values["Accept-Encoding"] = p.client.MoreHeaders["Accept-Encoding"]
+	accepted := make([]int, 300)
+	for i := range accepted {
+		accepted[i] = 100 + i
+	}
+	rejected := make([]int, 600)
+	for i := range rejected {
+		rejected[i] = 400 + i
+	}
+	wire, err := rest.DoUnreadGuardedRejectionsHeaderPolicy(s.ctx, &p.client, p.check, http.MethodGet, target, policy, rest.RejectionPolicy{Codes: rejected, PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, accepted...)
+	if wire != nil {
+		s.receipt = &CloudStreamReceipt{StatusCode: wire.StatusCode, Header: wire.Header.Clone()}
+		s.body = wire.Body
+	} else if native, ok := rawObjectNativeReceipt(err); ok {
+		s.receipt = &CloudStreamReceipt{StatusCode: native.Actual, Header: native.ResponseHeader.Clone()}
+	}
+	if err != nil {
+		native, ok := rawObjectNativeReceipt(err)
+		if ok && rawObjectCleanStatus(err) {
+			reader, closers, decodeErr := cloudStreamDecoder(bytes.NewReader(native.Body), native.ResponseHeader.Get("Content-Encoding"))
+			if decodeErr == nil {
+				_, decodeErr = io.Copy(io.Discard, reader)
+			}
+			for i := len(closers) - 1; i >= 0; i-- {
+				decodeErr = errors.Join(decodeErr, closers[i].Close())
+			}
+			decodeErr = errors.Join(decodeErr, p.check(s.ctx))
+			if decodeErr != nil {
+				return nil, 0, &resource.ResponseError{StatusCode: native.Actual, Header: native.ResponseHeader.Clone(), Body: bytes.Clone(native.Body), Cause: errors.Join(err, decodeErr)}
+			}
+			if native.Actual == http.StatusNotFound {
+				return nil, size, nil
+			}
+		}
+		return nil, 0, err
+	}
+	return wire.Body, size, p.check(s.ctx)
+}
+
+func cloudGetValidUTF16BOM(payload []byte) bool {
+	if len(payload) < 2 || len(payload)%2 != 0 {
+		return false
+	}
+	var order binary.ByteOrder
+	if bytes.HasPrefix(payload, []byte{0xff, 0xfe}) {
+		order = binary.LittleEndian
+	} else if bytes.HasPrefix(payload, []byte{0xfe, 0xff}) {
+		order = binary.BigEndian
+	} else {
+		return false
+	}
+	for i := 2; i < len(payload); i += 2 {
+		unit := order.Uint16(payload[i:])
+		if unit >= 0xd800 && unit <= 0xdbff {
+			if i+3 >= len(payload) {
+				return false
+			}
+			low := order.Uint16(payload[i+2:])
+			if low < 0xdc00 || low > 0xdfff {
+				return false
+			}
+			i += 2
+		} else if unit >= 0xdc00 && unit <= 0xdfff {
+			return false
+		}
+	}
+	return true
+}
+func cloudGetValidUTF32BOM(payload []byte) bool {
+	if len(payload) < 4 || len(payload)%4 != 0 {
+		return false
+	}
+	var order binary.ByteOrder
+	if bytes.HasPrefix(payload, []byte{0xff, 0xfe, 0, 0}) {
+		order = binary.LittleEndian
+	} else if bytes.HasPrefix(payload, []byte{0, 0, 0xfe, 0xff}) {
+		order = binary.BigEndian
+	} else {
+		return false
+	}
+	for i := 4; i < len(payload); i += 4 {
+		value := order.Uint32(payload[i:])
+		if value > utf8.MaxRune || value >= 0xd800 && value <= 0xdfff {
+			return false
+		}
+	}
+	return true
 }

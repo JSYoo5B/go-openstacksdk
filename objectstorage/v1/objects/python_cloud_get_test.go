@@ -95,6 +95,11 @@ func TestPythonCloudObjectGetRequestsHeaderCharsetDefaultsReplacementAndAliases(
 		{"unknown charset fallback", "text/plain; charset=definitely-unknown", []byte{0xff}, "\ufffd"},
 		{"explicitutf8 keepsbom", "application/json; charset=utf-8", []byte{0xef, 0xbb, 0xbf, 'a'}, "\ufeffa"},
 		{"utf8sig stripsbom", "text/plain; charset=utf-8-sig", []byte{0xef, 0xbb, 0xbf, 'a'}, "a"},
+		{"iso8859 alias", "x; charset=iso8859", []byte{0xe9}, "é"},
+		{"ANSI1986 alias", "x; charset=ANSI_X3.4_1986", []byte{0xc3, 0xa9}, "\ufffd\ufffd"},
+		{"ShiftJIS raw IANA alias", "x; charset=shift_jis", []byte{0x93, 0xfa, 0x96, 0x7b}, "日本"},
+		{"explicit UTF32 short replacement", "x; charset=utf-32", []byte{0x41}, "\ufffd"},
+		{"explicit UTF32 shortBOM replacement", "x; charset=utf-32", []byte{0xff, 0xfe, 0}, "\ufffd"},
 		{"emptybody", "", nil, ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -453,5 +458,62 @@ func TestPythonCloudObjectGetOptionMutationGuardsSourceBeforeDestinationOrHTTP(t
 	}, func(*objects.CloudGetOpts) error { callbacks++; client.Endpoint = objectMetadataBase; return nil })
 	if result != nil || !errors.Is(e, resource.ErrInvalidOption) || callbacks != 1 || calls != 0 || writer.writes != 0 || writer.flushes != 0 || writer.closes != 0 {
 		t.Fatal(result, e, callbacks, calls, writer.writes)
+	}
+}
+
+func TestPythonCloudObjectGetDecoderConstructorsFollowPathOpenAndSkipFalseyOutfile(t *testing.T) {
+	encoding := "gzip,gzip,gzip,gzip,gzip,gzip"
+	calls, reads := 0, 0
+	makeAPI := func() (*objects.API, *objectMetadataBody) {
+		body := &objectMetadataBody{Reader: objectMetadataReader(func(dst []byte) (int, error) { reads++; return copy(dst, "unread"), io.EOF })}
+		wire := objectMetadataWire(200, body)
+		wire.Header.Set("Content-Encoding", encoding)
+		return objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return wire, nil })), body
+	}
+	api, body := makeAPI()
+	result, e := api.GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetOutfile(""))
+	if e != nil || result.Body != nil || result.Missing || reads != 0 || body.closes.Load() != 1 {
+		t.Fatal(result, e, reads, body.closes.Load())
+	}
+	api, body = makeAPI()
+	path := filepath.Join(t.TempDir(), "missingdir", "output")
+	result, e = api.GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetOutfile(path))
+	var pathError *os.PathError
+	if !errors.As(e, &pathError) || errors.Is(e, resource.ErrInvalidOption) || reads != 0 || body.closes.Load() != 1 || result.Receipt.StatusCode != 200 {
+		t.Fatal(result, e, reads, body.closes.Load())
+	}
+	api, body = makeAPI()
+	path = filepath.Join(t.TempDir(), "existing-output")
+	if e := os.WriteFile(path, []byte("old"), 0o600); e != nil {
+		t.Fatal(e)
+	}
+	result, e = api.GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetOutfile(path))
+	stored, _ := os.ReadFile(path)
+	if !errors.Is(e, resource.ErrInvalidOption) || len(stored) != 0 || reads != 0 || body.closes.Load() != 1 || result.BytesWritten != 0 || calls != 3 {
+		t.Fatal(result, e, stored, reads, body.closes.Load(), calls)
+	}
+}
+
+func TestPythonCloudObjectGetDetectorGapIncludesUTF8NULMalformedBOMAndKnownPythonCodecs(t *testing.T) {
+	for _, tc := range []struct {
+		name, contentType string
+		payload           []byte
+	}{
+		{"UTF8-valid NUL bigendian", "", []byte{0, 'A', 0, 'B'}},
+		{"UTF8-valid NUL littleendian", "", []byte{'A', 0, 'B', 0}},
+		{"malformed UTF16BOM", "", []byte{0xff, 0xfe, 'A'}},
+		{"validPython unicode_escape", "x; charset=unicode_escape", []byte(`\u0041`)},
+		{"validPython cp1006", "x; charset=cp1006", []byte{0xff}},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			body := &objectMetadataBody{Reader: bytes.NewReader(tc.payload)}
+			wire := objectMetadataWire(200, body)
+			wire.Header.Set("Content-Type", tc.contentType)
+			result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).GetCloudObjectText(context.Background(), "box", "file")
+			if !errors.Is(e, resource.ErrUnsupported) || result.Body != nil || result.Receipt.StatusCode != 200 || body.closes.Load() != 1 {
+				t.Fatal(result, e, body.closes.Load())
+			}
+			objectMetadataProof(t, e, 200, string(tc.payload))
+		})
 	}
 }
