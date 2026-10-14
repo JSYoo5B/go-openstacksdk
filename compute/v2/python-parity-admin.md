@@ -20,8 +20,8 @@
 | `delete_flavor_extra_specs_property` | `Flavors.DeleteExtraSpec(ctx, id, key)` + `resource.IgnoreMissing` | go_mapping |
 | `delete_service` | `Services.Delete(ctx, id)` + `resource.IgnoreMissing` | go_mapping |
 | `delete_share_attachment` | `ShareAttachments.DeleteRecord(ctx, server, share, options...)` | go_mapping |
-| `disable_service` | `Services.Update(ctx, id, UpdateOpts{Status, DisabledReason})` (2.53 이상만) | unresolved |
-| `enable_service` | `Services.Update(ctx, id, UpdateOpts{Status})` (2.53 이상만) | unresolved |
+| `disable_service` | `Services.DisableRecord(ctx, target, reason)` ([가이드](services/python-service-actions.md)) | go_mapping |
+| `enable_service` | `Services.EnableRecord(ctx, target)` ([가이드](services/python-service-actions.md)) | go_mapping |
 | `evacuate_server` | `Servers.Evacuate(ctx, id, opts)` (2.14 미만에서만 성공) | unresolved |
 | `extensions` | `Extensions.List(ctx)` | go_mapping |
 | `find_aggregate` | `Aggregates.Find(ctx, resource.ID(x))`와 `resource.Name(x)`를 따로 호출 | unresolved |
@@ -111,7 +111,7 @@ Python `find_*`는 ID로 GET을 먼저 보내고 404, 400, 403이면 목록에�
 
 `enable_service`, `disable_service`, `update_service_forced_down`, `update_service`는 2.53 이상에서 `PUT os-services/{id}`에 envelope 없는 본문을 보내며 Go `Update`가 같은 `status`, `disabled_reason`, `forced_down`을 만듭니다. 그러나 `UpdateOpts`의 세 필드는 모두 빈 값을 생략하고 확장 필드로도 덮을 수 없어서, `forced=False`나 `forced_down=False`로 강제 down을 푸는 요청을 만들 수 없습니다. `update_service`는 Python이 2.53 미만이면 요청 없이 거부합니다.
 
-2.53 미만에서 Python은 `PUT os-services/enable`, `disable`, `disable-log-reason`, `force-down`에 `host`와 `binary`를 담아 보냅니다. Go도 `Update(ctx, "disable", UpdateOpts{}, WithUpdateField("host", ...), WithUpdateField("binary", ...))`로 같은 요청을 만들 수 있지만, Nova가 돌려주는 service에 `id`가 없어서 Gophercloud decoder가 오류를 냅니다. 서비스 인자 없이 host와 binary만 넘긴 2.53 이상 호출은 Python이 `services(host, binary)`로 하나를 고른 뒤 수정하므로, Go에서는 `List` 결과의 ID로 `Update`를 이어 부릅니다. 이런 이유로 이 네 메서드는 unresolved입니다.
+2.53 미만에서 Python은 `PUT os-services/enable`, `disable`, `disable-log-reason`, `force-down`에 `host`와 `binary`를 담아 보냅니다. Go도 `Update(ctx, "disable", UpdateOpts{}, WithUpdateField("host", ...), WithUpdateField("binary", ...))`로 같은 요청을 만들 수 있지만, Nova가 돌려주는 service에 `id`가 없어서 Gophercloud decoder가 오류를 냅니다. 서비스 인자 없이 host와 binary만 넘긴 2.53 이상 호출은 Python이 `services(host, binary)`로 하나를 고른 뒤 수정하므로, Go에서는 `List` 결과의 ID로 `Update`를 이어 부릅니다. `enable_service`와 `disable_service`는 SDK 소유 호출 `EnableRecord`와 `DisableRecord`가 두 경로와 host, binary 조회를 함께 처리하며, 자세한 내용은 [enable/disable 가이드](services/python-service-actions.md)에 정리했습니다.
 
 `find_service`는 ID GET 없이 `os-services` 전체 목록을 query 없이 읽고, ID나 이름(없으면 binary)이 같은 항목 가운데 `host` 인자와 맞는 하나를 고릅니다. Go에는 이 helper가 없습니다. `delete_service`는 같은 DELETE를 보내지만 Go `Delete`는 404를 무시하는 옵션이 없고 204만 성공으로 봅니다.
 
@@ -149,7 +149,6 @@ flavor extra spec 삭제와 compute service 삭제는 `Remove`가 없으므로 `
 - `hypervisors`: 기본값의 요약 목록 `GET os-hypervisors`와 2.53 미만의 `os-hypervisors/{pattern}/search` 경로를 보낼 수 없습니다.
 - `update_aggregate`: `availability_zone`의 null을 보낼 수 없어 가용 영역을 지울 수 없습니다.
 - `update_flavor`: description의 null이나 빈 문자열을 보낼 수 없어 설명을 지울 수 없습니다.
-- `enable_service`, `disable_service`: 2.53 미만 action 응답을 Go `Update`가 decode하지 못합니다.
 - `update_service`, `update_service_forced_down`: `forced_down` false를 보낼 수 없고, 2.53 미만의 `force-down` action 응답도 decode하지 못합니다.
 - `evacuate_server`: `onSharedStorage`를 빼고 보낼 수 없어서 2.14 이상에서 실패합니다.
 - `migrate_server`: 2.56의 대상 `host`를 보낼 수 없습니다.
