@@ -51,12 +51,12 @@
 | `set_aggregate_metadata` | `Aggregates.SetMetadata(ctx, id, SetMetadataOpts{Metadata})` | go_mapping |
 | `share_attachments` | `ShareAttachments.ListRecords(ctx, server, options...)` | go_mapping |
 | `trigger_server_crash_dump` | 없음 | unresolved |
-| `update_aggregate` | `Aggregates.Update(ctx, id, UpdateOpts)` (`availability_zone` null 불가) | unresolved |
-| `update_flavor` | `Flavors.Update(ctx, id, UpdateOpts{Description})` (설명 지우기 불가) | unresolved |
+| `update_aggregate` | `Aggregates.UpdateRecord(ctx, id, ...)` (null `availability_zone` 포함) | go_mapping |
+| `update_flavor` | `Flavors.UpdateRecord(ctx, id, ...)` (null·빈 설명 포함) | go_mapping |
 | `update_flavor_extra_specs_property` | `Flavors.UpdateExtraSpec(ctx, id, ExtraSpecsOpts{key: value})` | go_mapping |
 | `update_quota_class_set` | 없음 | unresolved |
-| `update_service` | `Services.Update(ctx, id, UpdateOpts, WithUpdateField)` (`forced_down` false 불가) | unresolved |
-| `update_service_forced_down` | `Services.Update(ctx, id, UpdateOpts{ForcedDown: true})` (true만) | unresolved |
+| `update_service` | `Services.UpdateRecord(ctx, ...)` (`forced_down` false 포함) | go_mapping |
+| `update_service_forced_down` | `Services.UpdateForcedDownRecord(ctx, ...)` | go_mapping |
 | `usages` | `Usage.AllTenants(ctx, AllTenantsOpts{Start, End, Detailed})` | go_mapping |
 
 Share attachment 네 연산은 stock Nova project reader/member 경로입니다. [새 user API 가이드](share-attachments-python.md)에 2.97 기본 협상, 명시 버전, 고정 서버 범위와 실제 응답 보존을 설명합니다. 이 문서의 이전 관리자 묶음 분류에서 user 우선 구현으로 옮겼습니다.
@@ -147,9 +147,6 @@ flavor extra spec 삭제와 compute service 삭제는 `Remove`가 없으므로 `
 
 - `find_aggregate`, `find_hypervisor`, `find_service`: ID GET과 목록 fallback을 묶은 helper가 없습니다. aggregate는 숫자가 아닌 ID를 HTTP 전에 거부하고, hypervisor collection은 이름 조회를 지원하지 않으며 service에는 collection lookup이 없습니다.
 - `hypervisors`: 기본값의 요약 목록 `GET os-hypervisors`와 2.53 미만의 `os-hypervisors/{pattern}/search` 경로를 보낼 수 없습니다.
-- `update_aggregate`: `availability_zone`의 null을 보낼 수 없어 가용 영역을 지울 수 없습니다.
-- `update_flavor`: description의 null이나 빈 문자열을 보낼 수 없어 설명을 지울 수 없습니다.
-- `update_service`, `update_service_forced_down`: `forced_down` false를 보낼 수 없고, 2.53 미만의 `force-down` action 응답도 decode하지 못합니다.
 - `evacuate_server`: `onSharedStorage`를 빼고 보낼 수 없어서 2.14 이상에서 실패합니다.
 - `migrate_server`: 2.56의 대상 `host`를 보낼 수 없습니다.
 - `live_migrate_server`: 2.25 이상의 기본값인 `block_migration: "auto"`를 보낼 수 없습니다.
