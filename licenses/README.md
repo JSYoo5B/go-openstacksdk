@@ -24,7 +24,7 @@ third-party code and data retain their respective terms.
 | [klauspost-compress-v1.18.0-xxhash-LICENSE](klauspost-compress-v1.18.0-xxhash-LICENSE) | [klauspost/compress v1.18.0 zstd/internal/xxhash/LICENSE.txt](https://github.com/klauspost/compress/blob/v1.18.0/zstd/internal/xxhash/LICENSE.txt) | `f566a9f97bacdaf00d9f21dd991e81dc11201c4e016c86b470799429a1c9a79c` |
 | [klauspost-compress-v1.18.0-snapref-LICENSE](klauspost-compress-v1.18.0-snapref-LICENSE) | [klauspost/compress v1.18.0 internal/snapref/LICENSE](https://github.com/klauspost/compress/blob/v1.18.0/internal/snapref/LICENSE) | `f69f157b0be75da373605dbc8bbf142e8924ee82d8f44f11bcaf351335bf98cf` |
 
-| [golang-x-text-v0.37.0-LICENSE](golang-x-text-v0.37.0-LICENSE) | [golang.org/x/text v0.37.0](https://cs.opensource.google/go/x/text/+/v0.37.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
+| [golang-x-text-v0.41.0-LICENSE](golang-x-text-v0.41.0-LICENSE) | [golang.org/x/text v0.41.0](https://cs.opensource.google/go/x/text/+/v0.41.0:LICENSE) | `911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad` |
 
 Gophercloud and yaml originals were copied from the pinned module cache;
 OpenStackSDK and go-jmespath originals were copied from their pinned reference
@@ -57,6 +57,6 @@ A new module or version must be reviewed before updating this mapping. This
 checks the recorded distribution files; it does not provide trademark approval
 or independently determine legal compliance.
 
-The golang.org/x/text v0.37.0 BSD-3-Clause original is copied verbatim
+The golang.org/x/text v0.41.0 BSD-3-Clause original is copied verbatim
 from the pinned module cache. Its encoding packages supply explicit Swift text
 codecs; statistical charset detection remains an unsupported Source contract.

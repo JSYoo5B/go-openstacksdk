@@ -34,9 +34,9 @@
     ]
   },
   "golang.org/x/text": {
-    "version": "v0.37.0",
+    "version": "v0.41.0",
     "licenses": [
-      "golang-x-text-v0.37.0-LICENSE"
+      "golang-x-text-v0.41.0-LICENSE"
     ]
   }
 }

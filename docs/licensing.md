@@ -35,7 +35,7 @@
   구현을 복사하지 않고 모듈로 가져오며 complete module LICENSE·vendored xxhash MIT·
   Snappy reference BSD 원문을 별도로 보존합니다. zstd 및 같은 모듈 helper 범위와
   다른 패키지의 Apache/MIT 조건은 통합 고지에서 구분합니다.
-- **명시적 Swift 문자 인코딩:** `golang.org/x/text` v0.37.0의 encoding/transform을
+- **명시적 Swift 문자 인코딩:** `golang.org/x/text` v0.41.0의 encoding/transform을
   모듈로 사용하며 The Go Authors BSD-3-Clause 원문을 보존합니다. Python의 통계적
   charset 감지는 여전히 미구현이고, Go 1.25 최소 버전은 유지합니다.
 - **비교·추출 기준:** 고정 OpenStackSDK 소스에서 공개 선언과 리소스 metadata를

@@ -205,9 +205,9 @@ The zstd code retains Klaus Post and The Go Authors BSD-3-Clause notices and its
 
 ## Go extended text library: explicit Swift response codecs
 
-- Source: [golang.org/x/text v0.37.0](https://cs.opensource.google/go/x/text/+/v0.37.0:).
+- Source: [golang.org/x/text v0.41.0](https://cs.opensource.google/go/x/text/+/v0.41.0:).
 - License: BSD-3-Clause; copyright 2009 The Go Authors.
-- Exact original: [x/text LICENSE](licenses/golang-x-text-v0.37.0-LICENSE).
+- Exact original: [x/text LICENSE](licenses/golang-x-text-v0.41.0-LICENSE).
 - Scope: imported encoding, charmap, IANA, Unicode/UTF-32 and transform packages
   for explicit response charsets and BOMs. Source statistical charset detection
   remains unresolved; this module does not provide that contract.
