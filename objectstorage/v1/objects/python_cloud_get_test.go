@@ -126,6 +126,9 @@ func TestPythonCloudObjectGetUnmarkedBOMAndExplicitUTF16UTF32(t *testing.T) {
 		{"UTF32LEBOM", "", []byte{0xff, 0xfe, 0, 0, 'a', 0, 0, 0}, "a"},
 		{"UTF32BEBOM", "", []byte{0, 0, 0xfe, 0xff, 0, 0, 0, 'a'}, "a"},
 		{"UTF16LE noBOM", "x; charset=utf-16le", []byte{'a', 0, 0x00, 0xd8}, "a\ufffd"},
+		{"UTF16LE surrogate oddtail", "x; charset=utf-16-le", []byte{0, 0xd8, 0x41}, "\ufffd"},
+		{"UTF16BE surrogate oddtail", "x; charset=utf-16-be", []byte{0xd8, 0, 0x41}, "\ufffd"},
+		{"UTF16 BOM surrogate oddtail", "x; charset=utf-16", []byte{0xfe, 0xff, 0xd8, 0, 0x41}, "\ufffd"},
 		{"UTF16BE explicitkeepsBOM", "x; charset=utf-16-be", []byte{0xfe, 0xff, 0, 'a'}, "\ufeffa"},
 		{"UTF32 noBOM", "x; charset=utf-32le", []byte{'a', 0, 0, 0}, "a"},
 		{"validUTF8noheader", "", []byte("한글"), "한글"},
@@ -503,6 +506,7 @@ func TestPythonCloudObjectGetDetectorGapIncludesUTF8NULMalformedBOMAndKnownPytho
 		{"UTF8-valid NUL littleendian", "", []byte{'A', 0, 'B', 0}},
 		{"malformed UTF16BOM", "", []byte{0xff, 0xfe, 'A'}},
 		{"validPython unicode_escape", "x; charset=unicode_escape", []byte(`\u0041`)},
+		{"validPython palmos", "x; charset=palmos", []byte{0xff}},
 		{"validPython cp1006", "x; charset=cp1006", []byte{0xff}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

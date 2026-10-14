@@ -391,10 +391,17 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 		}
 		return out.String(), nil
 	case "utf-16", "utf16":
+		order := binary.ByteOrder(binary.LittleEndian)
+		if bytes.HasPrefix(payload, []byte{0xfe, 0xff}) {
+			order = binary.BigEndian
+		}
+		payload = cloudGetUTF16PartialSurrogateTail(payload, order)
 		codec = textunicode.UTF16(textunicode.LittleEndian, textunicode.UseBOM)
 	case "utf-16-le", "utf-16le", "utf16le":
+		payload = cloudGetUTF16PartialSurrogateTail(payload, binary.LittleEndian)
 		codec = textunicode.UTF16(textunicode.LittleEndian, textunicode.IgnoreBOM)
 	case "utf-16-be", "utf-16be", "utf16be":
+		payload = cloudGetUTF16PartialSurrogateTail(payload, binary.BigEndian)
 		codec = textunicode.UTF16(textunicode.BigEndian, textunicode.IgnoreBOM)
 	case "utf-32", "utf32":
 		order := utf32.LittleEndian
@@ -409,7 +416,7 @@ func cloudGetResponseText(payload []byte, header http.Header) (string, error) {
 		codec = utf32.UTF32(utf32.LittleEndian, utf32.IgnoreBOM)
 	case "utf-32-be", "utf-32be", "utf32be":
 		codec = utf32.UTF32(utf32.BigEndian, utf32.IgnoreBOM)
-	case "unicode-escape", "raw-unicode-escape", "punycode", "idna", "cp720", "cp1006", "cp1125", "cp949", "cp932", "mac-arabic", "mac-farsi", "mac-hebrew", "mac-greek", "mac-iceland", "mac-romanian", "mac-thai", "mac-turkish":
+	case "unicode-escape", "raw-unicode-escape", "punycode", "idna", "palmos", "cp720", "cp1006", "cp1125", "cp949", "cp932", "mac-arabic", "mac-farsi", "mac-hebrew", "mac-greek", "mac-iceland", "mac-romanian", "mac-thai", "mac-turkish":
 		return "", fmt.Errorf("%w: Python text codec %q is outside the explicit Go charset subset", resource.ErrUnsupported, name)
 	default:
 		if strings.HasPrefix(normalized, "cp125") {
@@ -557,4 +564,16 @@ func cloudGetValidUTF32BOM(payload []byte) bool {
 		}
 	}
 	return true
+}
+
+// CPython errors=replace treats a final high-surrogate plus one remaining byte
+// as a single invalid subsequence. x/text otherwise replaces both separately.
+func cloudGetUTF16PartialSurrogateTail(payload []byte, order binary.ByteOrder) []byte {
+	if len(payload)%2 == 1 && len(payload) >= 3 {
+		unit := order.Uint16(payload[len(payload)-3:])
+		if unit >= 0xd800 && unit <= 0xdbff {
+			return payload[:len(payload)-1]
+		}
+	}
+	return payload
 }
