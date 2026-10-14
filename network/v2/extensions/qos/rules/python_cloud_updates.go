@@ -130,6 +130,12 @@ func qosUpdateReceipt(value *neutronfind.Record, err error) *neutronfind.Record 
 	if errors.As(original, &native) && (native.Method == http.MethodGet || native.Method == http.MethodPut) {
 		return &neutronfind.Record{Envelope: bytes.Clone(native.Body), Header: native.ResponseHeader.Clone(), StatusCode: native.Actual}
 	}
+	// Strict GET can return no decoded Record on an accepted physical failure.
+	// Its ResponseError is actual evidence, never a successful Resource/seed.
+	var accepted *resource.ResponseError
+	if errors.As(err, &accepted) && accepted != nil {
+		return &neutronfind.Record{Envelope: bytes.Clone(accepted.Body), Header: accepted.Header.Clone(), StatusCode: accepted.StatusCode}
+	}
 	return nil
 }
 func qosUpdateRecord(value *neutronfind.Record, parent json.RawMessage) *QoSRuleUpdateRecord {
