@@ -28,6 +28,9 @@ type Profile struct {
 	LegacyVersionHeader  string
 	HeaderService        string
 	OkCodes              []int
+	// StopFaultRetryCallbacks preserves physical discovery failures before user retry hooks.
+	// Existing profiles keep their baseline unless explicitly selected.
+	StopFaultRetryCallbacks bool
 }
 
 var NovaProfile = Profile{Major: "2", HeaderService: "compute", MatchEndpointVersion: true, RequireSelfLink: true, LegacyVersionHeader: "X-OpenStack-Nova-API-Version", OkCodes: novaCodes()}
@@ -310,6 +313,13 @@ func discoveryGet(ctx context.Context, source *cloudread.Source, target string, 
 		}
 		return response, err
 	})
+	if profile.StopFaultRetryCallbacks {
+		codes := make([]int, 600)
+		for i := range codes {
+			codes[i] = 400 + i
+		}
+		return rest.DoJSONGuardedRejections(ctx, client, guard, http.MethodGet, target, nil, nil, rest.RejectionPolicy{Codes: codes, PreserveCleanRetry: true, StopFaultRetryCallbacks: true}, profile.OkCodes...)
+	}
 	return rest.DoJSONGuarded(ctx, client, guard, http.MethodGet, target, nil, nil, profile.OkCodes...)
 }
 
