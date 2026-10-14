@@ -1,6 +1,6 @@
 # 구현 순서와 단계별 현황
 
-2026-10-07에 조정한 작업 순서입니다. **핵심 서비스 user API → 핵심 서비스 admin API → 매니지드 서비스 user API → 매니지드 서비스 admin API** 순으로 진행합니다. 목표는 고정한 Gophercloud와 openstacksdk의 전체 API·리소스·복합 작업을 일관된 Go SDK로 제공하는 것입니다. 관리형 서비스의 구현도 전체 목표에 포함하며, 기존 구현과 지원 판정은 보존합니다.
+2026-10-07에 조정한 작업 순서입니다. **핵심 서비스 user API → 핵심 서비스 admin API → 매니지드 서비스 user API → 매니지드 서비스 admin API** 순으로 진행합니다. 목표는 고정한 Gophercloud와 openstacksdk의 전체 API·리소스·복합 작업을 일관된 Go SDK로 제공하는 것입니다. 관리형 서비스의 구현도 전체 목표에 포함합니다. 기존 구현은 보존하고 지원 판정은 새 검증 근거가 있을 때 갱신합니다.
 
 이 문서는 **앞으로 할 작업의 순서와 진행 단계**, [SDK 지원 판정대장](sdk-support-ledger.md)은 **검증한 계약과 실행 근거**, [판정 JSON](../api/sdk_reviews.json)은 **연산별 지원 여부**를 관리합니다. 세 자료의 상태는 서로 다른 의미를 갖습니다.
 
@@ -9,7 +9,21 @@
 ## 현재 집계와 진행 중인 작업
 
 
-**현재 구현 (2026-10-14 시작·10-15 마감, quota 반복 다섯 번째 사이클): 고정6개 후보의 구현·8worker 검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `d3998c6a`입니다. 새 Go 매핑은 **5개**, 전체 **2,028→2,033/3,228(63.0%)**, 핵심 **1,950→1,955/2,158(90.6%)**입니다. Swift get_object1행은 meaningful 부분 계약을 추가했지만 통계적 apparent_encoding과 전체 CPython codec/alias/replace registry 두 named gap이 남아 unresolved입니다. catalog3,362·unsupported134·supported0·reviews2,487을 보존하고 계약은7,352→7,406개(+54)로 갱신했습니다.
+**현재 구현 (2026-10-15, quota 반복 여섯 번째 사이클): 고정9개 후보 구현·8worker 검토·문서·집중 및 전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `5079609c`입니다. Connection7개 진입점과 library-owned 기본값·옵션·응답 증거를 구현했고 새 **78그룹·263개 하위 사례**가10개 집중 package에서 PASS했습니다. 판정은9행 모두 unresolved입니다. 기존 Network Proxy의 cap·raw limit·추가 페이지 요청·MV 순서 차이를 실제 Source 실행으로 발견하여 **go_mapping→unresolved1행**을 정정했습니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, supported0이며 계약은 **7,406→7,482개(+76)**입니다. 사용 가능한 부분 구현을 전체 named parity 완료로 집계하지 않습니다.
+
+| 소유 단위 | 고정 후보 | 최종 구현·검토 상태 |
+|---|---|---|
+| Network 목록 | Proxy networks·cloud list/search3개 | query 병합·opaque generator·Resource/location·전체 페이지, Source348·13그룹 PASS; cap/limit/추가 GET/MV 잔여·unresolved3 |
+| Subnet 목록 | Proxy subnets·cloud list/search3개 | Source descriptor·pagination·absent-service·late actual proof, Source348·19그룹 PASS; 동일 named 잔여·unresolved3 |
+| Nova ServerGroup | cloud search/get2개 | 기본 Find·명시 filters·중복/누락·finite 비교·microversion, Source147·15그룹 PASS; Resource-class JMES·전체 숫자/직렬화 잔여·unresolved2 |
+| Nova Console | cloud get_server_console1개 | bare 조회·dict/length·clean action400·raw output·discovery fault opt-in, Source68·23그룹 PASS; JSON charset/nonfinite 잔여·unresolved1 |
+| Connection·공통 | 위 후보 연결과 필요한 shared 계약 | cached service/location·list catalog 부재·cancel4그룹 및 Source collection GET/discovery/loaded filter4그룹 PASS |
+
+구현4개와 독립 Source/테스트/문서 검토4개를 병행했고 중앙 통합·Go·Git은 root가 순서대로 처리합니다. 공개 Gophercloud testhelper·기존 fixture와 Source profile/REST/converter/filter를 재사용합니다. 작은 기능 커밋9개를 main에 push했고 판정·마감 문서를 별도 커밋으로 저장합니다. 정확한 독립 Go main4개 build·Python AST4개, 고정 Source/native metadata를 사용하는204개 실제 test package 전체 `make check`가 PASS(exit0)입니다. Go source3,199개가 최종 집중·전체 gate 전후 같고 최초 집중 실패·수리·최종 통과를 [판정대장](sdk-support-ledger.md#2026-10-15-quota-반복-여섯-번째-사이클)에 구분했습니다. 새 후보를 추가하지 않았고 SDK-R1/C1/S1·실클라우드/릴리즈 잔여, 핵심 user→admin→managed user→admin 순서·Swift 핵심·후속 network/baremetal 우선순위를 보존합니다.
+
+시작 quota 잔여53%·중간45/43/41%·최종40%·ordinaryUsageAllowed=true이며 조회 가능한 reset은2026-10-20 14:03:44 KST입니다. 계정의 다른 작업과 공유한 소비를 이 작업만의 비용으로 단정하지 않습니다. Worker8개 노력과 **40% 새 사이클 시작 경계**를 유지합니다. 정확히40%이므로 이번 묶음의 마감 이후 새 사이클은 시작하지 않습니다. 반복 예약은 유지하며 이후 fresh 최소 잔여가 엄격히40%를 초과할 때만 다시 구현을 시작합니다. 전체 SDK 목표는 미완료입니다.
+
+**직전 구현 (2026-10-14 시작·10-15 마감, quota 반복 다섯 번째 사이클): 고정6개 후보의 구현·8worker 검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `d3998c6a`입니다. 새 Go 매핑은 **5개**, 전체 **2,028→2,033/3,228(63.0%)**, 핵심 **1,950→1,955/2,158(90.6%)**입니다. Swift get_object1행은 meaningful 부분 계약을 추가했지만 통계적 apparent_encoding과 전체 CPython codec/alias/replace registry 두 named gap이 남아 unresolved입니다. catalog3,362·unsupported134·supported0·reviews2,487을 보존하고 계약은7,352→7,406개(+54)로 갱신했습니다.
 
 | 소유 단위 | 고정한 이번 후보 | 최종 단계 |
 |---|---|---|
@@ -607,11 +621,11 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 2,033 (63.0%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| 검증된 Go 매핑 | 2,032 (62.9%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
-| 미해결 / 제외(미지원) | 1,195 / 134 | 미검토 선언도 미해결 집계에 포함 |
+| 미해결 / 제외(미지원) | 1,196 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,406 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,482 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
@@ -790,12 +804,12 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 <!-- sdk-service-progress:start -->
 | 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
-| 핵심 서비스 · 1·2단계 합산 | 1,955 / 2,158 | 90.6% | 202 | 1 | 134 |
+| 핵심 서비스 · 1·2단계 합산 | 1,954 / 2,158 | 90.5% | 203 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
 | 후속 베어메탈 · 3·4단계 합산 | 1 / 207 | 0.5% | 1 | 205 | 0 |
 | 후속 나머지 · 3·4단계 합산 | 68 / 580 | 11.7% | 85 | 427 | 0 |
 | 서비스 공통 기반 | 4 / 29 | 13.8% | 19 | 6 | 0 |
-| 전체 | 2,033 / 3,228 | 63.0% | 320 | 875 | 134 |
+| 전체 | 2,032 / 3,228 | 62.9% | 321 | 875 | 134 |
 
 **핵심 서비스**
 
@@ -804,7 +818,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Identity / Keystone | 354 / 379 | 24 | 1 | 10 |
 | Compute / Nova | 276 / 333 | 57 | 0 | 0 |
 | Placement | 65 / 71 | 6 | 0 | 0 |
-| Network / Neutron | 653 / 728 | 75 | 0 | 30 |
+| Network / Neutron | 652 / 728 | 76 | 0 | 30 |
 | Image / Glance | 106 / 109 | 3 | 0 | 11 |
 | Block Storage / Cinder | 379 / 398 | 19 | 0 | 82 |
 | Key Manager / Barbican | 61 / 67 | 6 | 0 | 0 |

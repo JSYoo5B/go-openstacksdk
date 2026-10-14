@@ -66,6 +66,13 @@ Quota 반복 다섯 번째 사이클의 Python/Go 사용 비교:
 
 `conn.CreateRouterRecord(ctx, options...)`와 `conn.CreateSubnetRecord(ctx, networkName, options...)`가 캐시한 Neutron 서비스와 Connection 위치 기본값을 제공합니다. QoS update는 서비스 helper가 부모·현재 규칙 조회와 변경 감지를 맡습니다. `conn.GetObjectText(ctx, container, object, options...)`는 명시 문자 인코딩·출력 소유권·깨끗한 404를 처리합니다. Swift의 통계적 charset 감지는 미구현이며 해당 연산의 전체 판정은 unresolved로 유지합니다.
 
+Quota 반복 여섯 번째 사이클의 Python/Go 사용 비교:
+
+- Neutron: [네트워크 목록·검색](network/cloud-network-lists-python.md), [서브넷 목록·검색](network/cloud-subnet-lists-python.md).
+- Nova: [서버 그룹 검색·조회](compute/cloud-server-group-reads-python.md), [콘솔 출력 조회](compute/cloud-server-console-python.md).
+
+`conn.ListNetworkRecords`, `SearchNetworkRecords`, `ListSubnetRecords`, `SearchSubnetRecords`, `SearchServerGroups`, `GetServerGroup`, `GetServerConsole`이 캐시한 서비스와 위치 기본값을 연결합니다. 목록의 깨끗한 Neutron catalog 부재는 옵션 평가 전에 빈 결과가 됩니다. 서버 그룹은 기본 Find와 명시 filters 경로를 나누고, 콘솔은 기본 bare 조회·dictionary 입력·길이 옵션·깨끗한 action400의 빈 문자열을 SDK가 처리합니다. 페이지 cap·raw limit·microversion 검사 순서, JMESPath Resource 클래스와 전체 Python 숫자 연산, 콘솔 JSON charset·비유한 숫자의 차이가 남아 이번9행 모두 unresolved입니다. 실제 차이를 발견한 기존 Network Proxy 판정도 unresolved로 바로잡았습니다. SDK-R1/C1/S1와 실클라우드·릴리즈 기준은 계속 열려 있습니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.

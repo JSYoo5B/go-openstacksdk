@@ -4,9 +4,40 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 quota 반복 다섯 번째 사이클](#2026-10-15-quota-반복-다섯-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 quota 반복 여섯 번째 사이클](#2026-10-15-quota-반복-여섯-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 quota 반복 여섯 번째 사이클
+
+출발 revision `5079609c`와 clean/main push·ordinaryUsageAllowed=true·잔여53%를 확인하고 **Network Proxy/cloud 목록·검색3 + Subnet3 + Nova ServerGroup search/get2 + Console1**, 총9개 후보를 고정했습니다. 사용자 지시대로 구현4·독립 Source/테스트/문서/라이선스 검토4, worker8개를 활용했고 중앙 공통 계약·Go·집계·Git은 root가 순서대로 처리했습니다. 새로운 후보를 추가하거나 기존 사이클에 다음 작업을 붙이지 않았습니다.
+
+이번9행은 모두 **unresolved**입니다. 실제 Source cap/limit/추가 페이지 요청/MV 순서 차이를 발견한 기존 `python:network/v2/networks`의 go_mapping1행을 unresolved로 정정했습니다. 구현된 기본 흐름·부분 계약과 전체 named parity를 구분합니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, catalog3,362·unsupported134·supported0·reviews2,487을 보존하고 계약 **7,406→7,482(+76)**을 기록했습니다. 미해결1,196개는 reviewed321+unreviewed875입니다. Source catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`과 pin은 출발 revision과 byte-identical입니다.
+
+| 소유 단위 | 실제 구현 | Source/집중 근거 | named 잔여 |
+|---|---|---|---|
+| Network3 | server query 병합·descriptor·opaque generator·location·lazy controls·actual late proof | Source348, cloud8/leaf5그룹 | cap 값 영역·raw limit·cap 경계 추가 GET·MV overflow/empty-route 검사 순서 |
+| Subnet3 | canonical/wire descriptor·ordered filter·links·query update·absence·lazy actual Resource | Source348, cloud8/leaf11그룹 | 동일 네 가지 named 차이 |
+| ServerGroup2 | 기본 Source Find/filtered get 분리·glob/dict/JMES·duplicate/missing·collection GET·microversion | Source147(core114/boundary25/arithmetic8), cloud10/leaf5그룹 | Resource-class 함수 및 plain map 동등성·전체 Python 산술/직렬화/nonfinite |
+| Console1 | bare lookup 또는 dict seed·raw length/output·clean action400·owned headers·discovery fault opt-in | Source68, cloud10/leaf13그룹 | Requests JSON charset·CPython 비유한 숫자 |
+| Connection·공통 | cached service/location·clean list-only catalog 부재·취소·opt-in Source collection GET/discovery/finite comparison/truthiness | root4/common4그룹 | 기존 SDK-R1/C1/S1는 유지 |
+
+Connection은 `ListNetworkRecords`, `SearchNetworkRecords`, `ListSubnetRecords`, `SearchSubnetRecords`, `SearchServerGroups`, `GetServerGroup`, `GetServerConsole`의7개 진입점을 제공합니다. 네트워크/서브넷 List만 깨끗한 catalog 부재를 옵션 평가 전에 []로 바꾸고 Search는 발견 오류를 유지합니다. 콘솔은 Source의 bare=True라 다른 서비스 주소/이미지 확장을 추가하지 않습니다. Console400은 lookup이 아닌 action만 처리하고 실제 dirty400/native401/read/Close/source/cancel 오류를 보존합니다.
+
+기존 Engine·REST·cloudfilter·descriptor·public Gophercloud testhelper-backed testcloud·Nova transport/body fixtures를 재사용했습니다. 새 helper의 opt-in Source collection GET은 trailing collection route를 유지하며 기존 Find 정책은 바꾸지 않습니다. Discovery physical fault는 새 opt-in profile에서만 callback을 막고 clean retry/reauth를 유지합니다. JMESPath의 finite float 데이터와 literal을 CPython binary value로 비교하며 large integer는 보존합니다. 전체 Python 산술·직렬화·비유한 숫자나 Resource 클래스의 JMESPath runtime을 닫았다고 주장하지 않습니다.
+
+List 독립 Source 감사는 두 리소스 합계696개 관찰(각348)입니다. 담당 Network의24개 재실행은 겹치는 사례이므로 더하지 않았으며 KSA-only 정규화/static edge12개는 Proxy HTTP 관찰과 구분합니다. ServerGroup147과 Console68도 고정 Source 실행/fixture 영역의 증거이며 Go·live-cloud 검증 수가 아닙니다. ServerGroup URI14개 prepared-request 관찰은 Proxy147 실행과 별도이며 Source의 literal wildcard와 Go single-segment escaping 차이를 문서/differences에 기록했습니다.
+
+최초 실패와 수리:
+
+- 공통 discovery 테스트에서 실제 RetryBackoffFunc 반환 타입과 native401 오류 구조를 잘못 가정했습니다. 수리 중 실수로 success 범위를200..799로 바꾼 점도 즉시 원래200..399로 복원했습니다. rejected fault 관찰은400..999의 opt-in입니다. 401은 Unwrap이 없는 ErrUnableToReauthenticate의 ErrOriginal/ErrReauth를 명시 검사하고 실제 body/header/status 및 read/Close 원인을 보존합니다.
+- 첫 가족 집중 gate는 Console의 *[]byte/*RawMessage 대입, ServerGroup AmbiguousError 필드명 컴파일 오류 및 Subnet native401 증거 fixture 실패를 발견했습니다. 실제 타입으로 수리하고 오류 증거를 완화하지 않았습니다.
+- 두 번째 gate는 ServerGroup unused import와 escaped URI 기대값, Console discovery 응답의 누락된 필수 CURRENT status를 발견했습니다. 고정 Python의 실제 Requests/discovery 동작과 대조해 fixture를 수리했으며 HTTP 수·정확한 결과·본문/header·불일치 검증은 유지했습니다.
+- 마지막 검토에서 Console discovery의 shared physical-fault opt-in 연결 누락을 수리했습니다. 기존 common matrix를 복제하지 않고 leaf wiring503 회귀1그룹으로 hook0/POST0/실제 native 증거를 추가했습니다.
+
+최종 집중 race는 **78그룹·263개 하위 사례·10개 package PASS**이며 로그 `/private/tmp/go-openstacksdk-cycle8-focused-final.jsonl`과 receipt에 실제 결과가 있습니다. 최초 로그 `...-focused-first.jsonl`, 수리중 `...-focused-repair.jsonl`, common `...-source-seams-*.log`/`...-discovery-repair.log`를 최종 PASS와 구분합니다. 독립 Go main4개 build·Python AST4개가 PASS이며 최종 가이드의 code fence bytes가 build receipt와 같습니다. 실제 인증/클라우드 실행은 포함하지 않습니다. 고정 Source/native metadata·Python3.14·Go1.27.2로 실행한 전체 `make check`는 **204개 실제 test package PASS(exit0)**이며 license/vet/race/parity/progress/gofmt 모두 통과했습니다. 본 사이클의 전체 gate에는 실패가 없었고 앞선 집중 gate 실패와 구분합니다. Go 최소1.25는 유지합니다. Go source3,199개 SHA256 `79a52b165907016fc51763da45de48fedba56bdae1eabe086fe46e1c313818a7`가 최종 집중·전체 gate 전후 같습니다(정렬한 rg 상대경로 NUL·bytes NUL). 실제 전체 log `...-make-check-first.log`, `...-full-check-receipt.json`, `...-guide-build.log`와 `...-exact-guides/build-receipt.json`에 근거가 있습니다. 임시 receipt의 장기 보존을 보장하지 않으므로 공개 계약 테스트·가이드·remaining·이 기록을 함께 저장합니다.
+
+네 서비스 비교 가이드와 README, 기존 network/compute 대응 표를 새 callable·named gap과 맞췄습니다. 라이선스 dependency는 새 변경 없이6 Go modules/16 retained originals를 유지합니다. SDK-R1/C1/S1, 실클라우드·외부 설치/alpha release와 전체 API 목표는 미완료입니다. 작은 기능 커밋9개를 main에 push했고 중앙 판정·마감 문서를 별도 커밋으로 저장합니다. Quota는 시작53%→중간45/43/41%→최종40%를 관측했고 계정의 다른 작업과 공유한 소비를 이 작업만의 비용으로 단정하지 않습니다. Worker8개 노력과40% 새 사이클 시작 경계를 유지합니다. 정확히40%여서 새 사이클은 실행하지 않습니다. sdk-quota 예약은 유지하고 이후 fresh ordinaryUsageAllowed=true·최소 잔여>40%일 때만 다시 구현합니다. 전체 목표를 완료 또는 임의 paused로 표시하지 않습니다.
 
 ## 2026-10-15 quota 반복 다섯 번째 사이클
 

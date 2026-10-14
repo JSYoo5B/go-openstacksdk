@@ -27,8 +27,8 @@
 | `list_hypervisors` | `Hypervisors.List(ctx, ...)`, 2.53 미만 검색 경로 없음 | unresolved |
 | `create_server_group` | `ServerGroups.Create(ctx, servergroups.CreateOpts{Name, Policy})` | go_mapping |
 | `list_server_groups` | `ServerGroups.List(ctx)` | go_mapping |
-| `search_server_groups` | `ServerGroups.List(ctx)` 뒤 cloud 필터 helper 없음 | unresolved |
-| `get_server_group` | `ServerGroups.FindRecord(ctx, nameOrID)`, filters 경로 없음 | unresolved |
+| `search_server_groups` | `Connection.SearchServerGroups(ctx, nameOrID, options...)` ([사용법](cloud-server-group-reads-python.md)) | unresolved |
+| `get_server_group` | `Connection.GetServerGroup(ctx, nameOrID, options...)` ([사용법](cloud-server-group-reads-python.md)) | unresolved |
 | `delete_server_group` | `ServerGroups.FindRecord(ctx, nameOrID)` 다음 `ServerGroups.Delete(ctx, id)` | go_mapping |
 | `get_server_id` | `Servers.FindRecord(ctx, nameOrID)`의 `id` | go_mapping |
 | `set_server_metadata` | `Servers.FindRecord` 다음 `Servers.UpdateMetadata(ctx, id, servers.MetadataOpts{...})` | go_mapping |
@@ -42,13 +42,15 @@
 | `update_server` | `Servers.FindRecord`, `Servers.Update` 뒤 주소 확장 통합 없음 | unresolved |
 | `rebuild_server` | `Servers.Rebuild` 뒤 주소 확장과 대기 helper 없음 | unresolved |
 | `delete_server` | `Servers.FindRecord`, `Servers.Remove`, 대기와 floating IP 정리 없음 | unresolved |
-| `get_server_console` | `Servers.FindRecord`, `Servers.ConsoleOutput`, 400 변환 없음 | unresolved |
+| `get_server_console` | `Connection.GetServerConsole(ctx, nameOrID, options...)` ([사용법](cloud-server-console-python.md)) | unresolved |
 | `add_server_security_groups` | cloud security group 조회 helper 없음, `SecurityGroups.AddServer` | unresolved |
 | `remove_server_security_groups` | cloud security group 조회 helper 없음, `SecurityGroups.RemoveServer` | unresolved |
 | `get_compute_limits` | `Limits.Fetch(ctx)`, project 이름 fallback 조회 없음 | unresolved |
 | `get_compute_usage` | `Usage.SingleTenant`, project 이름 fallback 조회 없음 | unresolved |
 | `get_openstack_vars` | 없음 | unresolved |
 | `get_server_meta` | 없음 | unresolved |
+
+새 Source 전용 서버 그룹·콘솔 helper의 옵션·microversion·Resource 결과는 위 가이드의 계약을 적용합니다. 아래 typed 기존 API의 공통 차이를 새 helper 전체에 확대 적용하지 않습니다.
 
 ## 공통 차이
 
@@ -82,7 +84,7 @@ Python helper가 True/False나 None을 돌려주는 자리에서 Go는 찾은 �
 
 `create_server_group(name, policies=[...])`는 Proxy를 거치며 서버가 2.64 이상이면 `policies`의 첫 값을 `policy`로 바꾸고, 그보다 낮으면 `policy`를 `policies`로 바꿉니다. Go는 이 변환을 하지 않으므로 caller가 client microversion에 맞춰 `Policy` 또는 `Policies`를 채웁니다. `list_server_groups`는 같은 `GET os-server-groups`입니다.
 
-`delete_server_group`은 `find_server_group`으로 찾은 뒤 `ignore_missing=False`로 DELETE를 보냅니다. Go도 `ServerGroups.FindRecord` 다음 `ServerGroups.Delete`를 부르며, DELETE의 404는 Python의 `NotFoundException`처럼 오류로 돌아옵니다. 찾지 못한 group은 두 쪽 모두 DELETE를 보내지 않습니다. `get_server_group`은 filters 없이 부르면 같은 `FindRecord` 조회이지만, 폐기 예정인 filters를 주면 cloud 필터 경로로 바뀌어 Go에서 재현할 수 없습니다.
+`delete_server_group`은 `find_server_group`으로 찾은 뒤 `ignore_missing=False`로 DELETE를 보냅니다. Go도 `ServerGroups.FindRecord` 다음 `ServerGroups.Delete`를 부르며, DELETE의 404는 Python의 `NotFoundException`처럼 오류로 돌아옵니다. 찾지 못한 group은 두 쪽 모두 DELETE를 보내지 않습니다. `Connection.GetServerGroup`은 filters nil/null의 기본 Source Find와 명시 filters의 cloud 검색 경로를 구분합니다. `SearchServerGroups`는 glob·dict·JMESPath와 finite 숫자 비교를 처리하지만 Resource 클래스 함수·plain dictionary와의 동등성·전체 Python 산술/직렬화/비유한 숫자가 남아 두 연산은 unresolved입니다.
 
 ## Server helper
 
@@ -101,13 +103,13 @@ Python helper가 True/False나 None을 돌려주는 자리에서 Go는 찾은 �
 ## 남은 메서드와 부족한 기능
 
 - `get_flavor_by_ram`: flavor 목록을 `ram`으로 정렬하고 `include` 부분 문자열로 고르는 helper가 없습니다.
-- `search_aggregates`, `search_server_groups`, `search_servers`: cloud `_utils._filter_list`의 name_or_id glob, dict 필터, JMESPath 필터를 적용하는 공개 helper가 없습니다. `search_servers`는 서버 주소 확장도 없습니다.
+- `search_aggregates`, `search_servers`: cloud `_utils._filter_list`의 name_or_id glob, dict 필터, JMESPath 필터를 적용하는 공개 helper가 없습니다. `search_servers`는 서버 주소 확장도 없습니다.
 - `get_aggregate`, `update_aggregate`, `delete_aggregate`, `set_aggregate_metadata`, `add_host_to_aggregate`, `remove_host_from_aggregate`: `find_aggregate`의 GET 후 목록 fallback이 없습니다. `update_aggregate`는 Proxy 수준에서도 `availability_zone=None`을 보낼 수 없고, `delete_aggregate`는 숫자 ID의 404를 False로 바꾸는 동작을 caller가 직접 처리해야 합니다.
 - `list_hypervisors`: 2.53 미만의 `os-hypervisors/{pattern}/search` 경로가 없습니다.
-- `get_server_group`: 폐기 예정 filters 인자의 cloud 필터 경로가 없습니다.
+- `search_server_groups`, `get_server_group`: [공개 helper](cloud-server-group-reads-python.md)는 구현됐지만 Resource 클래스의 JMESPath 함수/동등성 및 전체 Python 산술·직렬화·비유한 숫자 처리 차이가 남습니다.
 - `get_server`, `get_server_by_id`, `list_servers`, `update_server`, `rebuild_server`: 기본 주소 확장이 Go 조회·변경 결과에 통합되어 있지 않습니다. `get_server_by_id`는 404를 None으로 바꾸는 동작도 없고, `rebuild_server(wait=True)`는 미해결인 `wait_for_server`와 admin password 보존이 필요합니다.
 - `delete_server`: `wait=True`가 쓰는 Proxy `wait_for_delete`가 미해결이고, `delete_ips=True`의 floating IP 정리와 재시도를 서버 삭제와 묶는 helper가 없습니다.
-- `get_server_console`: console action의 400을 빈 문자열로 바꾸는 동작이 없습니다.
+- `get_server_console`: [공개 helper](cloud-server-console-python.md)가 bare 조회·supplied dictionary·길이 옵션·깨끗한 action400 변환을 처리합니다. Requests JSON charset 처리와 Python 비유한 숫자는 미구현입니다.
 - `add_server_security_groups`, `remove_server_security_groups`: `secgroup_source`에 따라 Neutron이나 Nova에서 security group을 찾는 cloud `get_security_group`과 기능 확인이 없습니다. 제거 helper는 group별 404를 False로 바꾸는 동작도 필요합니다.
 - `get_compute_limits`, `get_compute_usage`: Identity v3 `find_project`의 이름·ID fallback 조회가 없고, `get_compute_usage`는 ISO 8601 문자열 날짜를 해석하는 helper도 없습니다.
 - `get_openstack_vars`, `get_server_meta`: Ansible hostvars와 inventory group을 만드는 `meta.get_hostvars_from_server`, `meta.get_groups_from_server`에 해당하는 Go helper가 없습니다.

@@ -4,6 +4,8 @@
 
 판정 기준은 공개 Go API 자체가 Python helper의 요청 순서와 결과를 재현하는지입니다. 호출자가 행을 직접 거르거나, 페이지를 손으로 따라가거나, 404를 직접 성공으로 바꾸거나, 조건에 따라 요청을 건너뛰어야 한다면 대응으로 보지 않고 미해결로 기록합니다. 계약 테스트는 [`python_parity_cloud_b_test.go`](python_parity_cloud_b_test.go)에 있습니다.
 
+새 네트워크·서브넷 cloud 목록/검색은 SDK가 query 병합·Source Resource 투영·location·pagination을 처리합니다. 사용 가능한 기본 흐름과 모든 Python 인자에 대한 판정을 구분하며 cap/limit/microversion named gap은 각 가이드에 기록합니다.
+
 ## 판정 표
 
 | Python 메서드 | Go 호출 | 판정 |
@@ -16,10 +18,10 @@
 | [get_security_group_by_id](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1906) | `secgroups.API.GetWithFields(ctx, id)` | 대응 |
 | [list_security_groups](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L1845) | `secgroups.API.All(ctx, resource.WithFilters(filters))` | 대응 |
 | [delete_security_group_rule](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network_common.py#L2219) | `secrules.API.DeleteWithOptions(ctx, id, secrules.WithDeleteIgnoreMissing(false))` | 대응 |
-| [list_networks](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L151) | 없음 (`networks` 목록 자체가 미해결) | 미해결 |
-| [search_networks](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L53) | 없음 | 미해결 |
-| [list_subnets](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L185) | 없음 (`subnets` 목록 자체가 미해결) | 미해결 |
-| [search_subnets](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L101) | 없음 | 미해결 |
+| [list_networks](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L151) | `Connection.ListNetworkRecords` / `network.Service.ListNetworkRecords` ([사용법](cloud-network-lists-python.md)) | 미해결 · 부분 구현, cap/limit/MV 순서 잔여 |
+| [search_networks](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L53) | `Connection.SearchNetworkRecords` / `network.Service.SearchNetworkRecords` ([사용법](cloud-network-lists-python.md)) | 미해결 · 부분 구현, cap/limit/MV 순서 잔여 |
+| [list_subnets](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L185) | `Connection.ListSubnetRecords` / `network.Service.ListSubnetRecords` ([사용법](cloud-subnet-lists-python.md)) | 미해결 · 부분 구현, cap/limit/MV 순서 잔여 |
+| [search_subnets](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L101) | `Connection.SearchSubnetRecords` / `network.Service.SearchSubnetRecords` ([사용법](cloud-subnet-lists-python.md)) | 미해결 · 부분 구현, cap/limit/MV 순서 잔여 |
 | [list_ports](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L202) | `Connection.ListPortValues` / `ports.API.ListSourceValues` ([Source 목록](v2/ports/python-user-helpers.md)) | go_mapping · 기존 ledger 확정 |
 | [search_ports](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L125) | `ports.API.SearchRecords` + `WithRecordSearchFilters` ([검색 계약](v2/ports/python-list-records.md)) | go_mapping · 기존 ledger 확정 |
 | [list_router_interfaces](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2205) | `network.Service.ListRouterInterfaces` / `Connection.ListRouterInterfaces` ([사용법](cloud-router-interfaces-python.md)) | go_mapping · root network race PASS |
