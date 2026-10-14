@@ -73,7 +73,7 @@ func mutationReceipt(response *rest.Response) *Record {
 }
 
 // Mutate performs one fixed collection POST, member PUT or bodyless member
-// DELETE using shared REST ownership and rejection handling. Leaves prepare
+// DELETE (or an explicitly selected Source collection PUT) using shared REST ownership and rejection handling. Leaves prepare
 // their Source dirty fields and seed state; this engine does not send defaults,
 // allocate resources, infer parent identities or decide an update is a no-op.
 func (e *Engine) Mutate(ctx context.Context, method, identity string, body, seed map[string]json.RawMessage, policy Options) (*Record, error) {
@@ -83,13 +83,14 @@ func (e *Engine) Mutate(ctx context.Context, method, identity string, body, seed
 	if err := e.Check(ctx); err != nil {
 		return nil, err
 	}
+	collectionPUT := method == http.MethodPut && identity == "" && e.profile.SourceFindPolicy && e.profile.SourceCollectionPUT
 	switch method {
 	case http.MethodPost:
 		if identity != "" {
 			return nil, findInvalid("collection POST requires an empty identity")
 		}
 	case http.MethodPut, http.MethodDelete:
-		if err := findSegment(identity); err != nil {
+		if err := findSegment(identity); err != nil && !collectionPUT {
 			return nil, err
 		}
 	default:
@@ -114,7 +115,9 @@ func (e *Engine) Mutate(ctx context.Context, method, identity string, body, seed
 		return nil, err
 	}
 	target := source.Client.ServiceURL(e.profile.Path)
-	if method != http.MethodPost {
+	if collectionPUT {
+		target = source.Client.ServiceURL(e.profile.Path) + "/"
+	} else if method != http.MethodPost {
 		target = source.Client.ServiceURL(e.profile.Path, url.PathEscape(identity))
 	}
 	parsed, err := url.Parse(target)

@@ -63,7 +63,10 @@ type Profile struct {
 	// SourceStatusPolicy opts into valid HTTP 100..399 acceptance.
 	// Existing SourceFindPolicy bindings retain their reviewed 200..399 policy.
 	SourceStatusPolicy bool
-	IDKey, NameKey     string
+	// SourceCollectionPUT permits an empty-ID PUT on this fixed collection only.
+	// It requires SourceFindPolicy and never changes ordinary member mutations.
+	SourceCollectionPUT bool
+	IDKey, NameKey      string
 	// AlternateIDKey supplies a physical list marker only when IDKey is absent.
 	// An explicit primary null/false/empty value retains precedence.
 	AlternateIDKey      string
