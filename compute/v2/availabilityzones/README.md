@@ -15,5 +15,6 @@ describe defaults, pagination, partial results and failure suppression.
 Existing `List` returns native typed DTOs through the native `AllPages`
 single-page path. It ignores advertised continuations, retains native decode
 and status rules, and validates the whole page before publishing a row.
-`ListDetail` is the existing native privileged route; its complete SDK contract
-and the Proxy's detail branch remain queued for the core admin phase.
+`ListDetail` is the existing native privileged route. The Proxy's detail
+branch is `ListDetailRecords`, described in
+[python-detail-records.md](python-detail-records.md).

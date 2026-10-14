@@ -7,9 +7,9 @@
 | `conn.compute.availability_zones(details=False)` | `service.ListAvailabilityZones(ctx)` 또는 `service.API.AvailabilityZones.ListRecords(ctx)` | 일반 경로의 lazy owned record |
 | `conn.list_availability_zone_names(unavailable=False)` | `service.ListAvailabilityZoneNames(ctx)` | available 이름만 eager 수집 |
 | `conn.list_availability_zone_names(unavailable=True)` | 위 호출에 `compute.WithUnavailableZones(true)` | unavailable 이름도 포함 |
-| `conn.compute.availability_zones(details=True)` | 기존 `service.API.AvailabilityZones.ListDetail(ctx)` | native typed 상세 목록; 관리자 분기는 후속 검토 범위 |
+| `conn.compute.availability_zones(details=True)` | `service.API.AvailabilityZones.ListDetailRecords(ctx)` | 상세 경로의 lazy owned record ([상세 record 설명](v2/availabilityzones/python-detail-records.md)) |
 
-일반 조회는 `GET /os-availability-zone`이고 상세 조회는 `/os-availability-zone/detail`입니다. [Nova 2024.1 기본 정책](https://docs.openstack.org/nova/2024.1/configuration/policy.html)은 일반 list에 `@`, 상세 detail에 `rule:context_is_admin`을 지정합니다. 따라서 일반 목록·Cloud 이름 조회를 핵심 user 순서에 두고 상세 host/service 목록은 핵심 admin 순서로 유지합니다. 실제 접근 권한은 해당 배포의 정책이 결정합니다. 고정 Proxy의 하나인 `availability_zones` 선언은 상세 분기까지 포함하므로 일반 경로를 구현한 것만으로 전체 선언을 완료했다고 표시하지 않습니다.
+일반 조회는 `GET /os-availability-zone`이고 상세 조회는 `/os-availability-zone/detail`입니다. [Nova 2024.1 기본 정책](https://docs.openstack.org/nova/2024.1/configuration/policy.html)은 일반 list에 `@`, 상세 detail에 `rule:context_is_admin`을 지정합니다. 따라서 일반 목록·Cloud 이름 조회를 핵심 user 순서에 두고 상세 host/service 목록은 핵심 admin 순서로 유지합니다. 실제 접근 권한은 해당 배포의 정책이 결정합니다. 고정 Proxy의 하나인 `availability_zones` 선언은 상세 분기까지 포함합니다. 상세 분기는 같은 record 구현을 `/detail` 경로로 쓰는 `ListDetailRecords`가 맡습니다.
 
 ```python
 import openstack
@@ -127,6 +127,6 @@ malformed state·JSON decode·accepted body read/Close 오류·그 안의 nested
 
 기존 `AvailabilityZones.List(ctx)`는 native `AvailabilityZone` DTO와 SinglePageBase를 사용합니다. `ZoneName` string·`ZoneState.Available` bool·Hosts/service timestamp의 typed decode, native pager의 200/204/300 정책과 단일 페이지 처리는 owned raw record 목록과 구분합니다. missing/null native bool이 false가 되는 것과 Python의 untyped state descriptor가 원문을 유지하는 것은 서로 다른 반환 정책입니다. 일반 source 목록의 continuation은 SDK의 owned reader에서 처리합니다.
 
-`ListDetail`의 관리자 host/service 조회, 이를 포함하는 전체 Proxy 선언의 판정과 일반 mutable Resource/session 표면은 후속 범위입니다. 일반 사용자 두 흐름의 구현·테스트·문서는 [단계별 현황](../docs/implementation-plan.md)과 [지원 판정대장](../docs/sdk-support-ledger.md)에서 실제 검증 결과로 관리합니다. 이 가이드의 존재만으로 전체 availability zone 가족이나 SDK 전체를 완료했다고 세지 않습니다.
+상세 host/service 조회는 `ListDetailRecords`가 owned record로 제공하고, 기존 native `ListDetail`은 Gophercloud 타입으로 decode하는 별도 API로 남습니다. 일반 mutable Resource/session 표면은 후속 범위입니다. 일반 사용자 두 흐름의 구현·테스트·문서는 [단계별 현황](../docs/implementation-plan.md)과 [지원 판정대장](../docs/sdk-support-ledger.md)에서 실제 검증 결과로 관리합니다. 이 가이드의 존재만으로 전체 availability zone 가족이나 SDK 전체를 완료했다고 세지 않습니다.
 
 고정 소스는 [Proxy availability_zones](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/_proxy.py#L1854-L1874), [AvailabilityZone descriptors](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/compute/v2/availability_zone.py#L16-L36), [Cloud list_availability_zone_names](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_compute.py#L255-L276)입니다.
