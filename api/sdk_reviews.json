@@ -75126,30 +75126,42 @@
     {
       "operation": "python:compute/v2/update_aggregate",
       "source_fingerprint": "3d2bdf782fbc1aefaa9891cf9d1afbbcc5ae399f6db35f9e8e919e4f584e21b3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordName",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT os-aggregates/{id} with non-empty name and availability_zone, while an availability_zone extension field is rejected before HTTP.",
+          "behavior": "UpdateRecord sends PUT os-aggregates/{id} with only the supplied attributes in the aggregate envelope, including availability_zone null, an empty name and extension attributes, accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "compute/v2/aggregates/python_parity_test.go:TestPythonAggregateUpdateCannotSendNullAvailabilityZone"
+            "compute/v2/aggregates/python_update_record_test.go:TestPythonAggregateUpdateRecordSendsNullAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "Extension fields that collide with typed keys or the id identity and nil options fail before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "compute/v2/aggregates/python_update_record_test.go:TestPythonAggregateUpdateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "compute/v2/aggregates/python-update-record.md",
         "compute/v2/python-parity-admin.md"
       ],
       "differences": [
-        "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
-        "Python sends no request when nothing changed; Go Update always sends PUT.",
-        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python accepts an Aggregate or an ID string; Go takes the integer aggregate ID.",
+        "Python sends min(Aggregate _max_microversion 2.81, server maximum) discovered per request; Go sends the one microversion configured on the client.",
+        "Python drops undeclared keyword attributes; WithUpdateRecordField sends any extension key except the typed keys and id.",
+        "Python returns the Resource merged from request attributes and the response; Go returns AggregateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts omits an empty availability_zone and WithUpdateField cannot replace a core key, so Python's availability_zone=None, which Nova uses to remove the aggregate's zone, cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/find_aggregate",
@@ -75280,29 +75292,40 @@
     {
       "operation": "python:compute/v2/update_flavor",
       "source_fingerprint": "9f41da89d54961306be19ad227e643a470151ba07ba9dee66f86661d20ce9dd3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordDescription",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT flavors/{id} with a non-empty description, while a description extension field is rejected before HTTP.",
+          "behavior": "UpdateRecord sends PUT flavors/{id} with only the supplied attributes in the flavor envelope, including description null, an empty description and extension attributes, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "compute/v2/flavors/python_parity_test.go:TestPythonFlavorUpdateCannotClearDescription"
+            "compute/v2/flavors/python_update_record_test.go:TestPythonFlavorUpdateRecordSendsNullAndEmptyDescription"
+          ]
+        },
+        {
+          "behavior": "Extension fields that collide with description or the id identity, nil options and a blank flavor id fail before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "compute/v2/flavors/python_update_record_test.go:TestPythonFlavorUpdateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/flavors/python-update-record.md"
       ],
       "differences": [
-        "Python sends no request when nothing changed; Go Update always sends PUT.",
-        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python accepts a Flavor or an ID string; Go takes the flavor ID string and rejects a blank one before HTTP.",
+        "Python sends min(Flavor _max_microversion 2.61, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client.",
+        "Python maps attribute names such as is_public to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except description and id.",
+        "Python returns the Resource merged from request attributes and the response; Go returns FlavorUpdateRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts omits an empty description and WithUpdateField cannot replace a core key, so description=None or \"\", which Nova accepts to clear the description, cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/flavor_add_tenant_access",
@@ -75733,57 +75756,74 @@
     {
       "operation": "python:compute/v2/update_service_forced_down",
       "source_fingerprint": "1c0eb08a829a48663e10595068d485d5817bc008f3d9375b5f3efe2b79e2c7c1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.UpdateForcedDownRecord"
       ],
       "contracts": [
         {
-          "behavior": "From 2.53 Update sends {\"forced_down\": true} to PUT os-services/{id}, while forced_down false cannot be sent and a forced_down extension field is rejected before HTTP.",
+          "behavior": "From microversion 2.53 UpdateForcedDownRecord sends PUT os-services/{id} with forced_down true or false for a given id, resolves a missing id through GET os-services?binary=&host= requiring exactly one row, returns resource.ErrNotFound or resource.ErrAmbiguous for zero or several rows, and rejects a target without an id or both host and binary before HTTP.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+            "compute/v2/services/python_update_record_test.go:TestPythonComputeServiceUpdateForcedDownRecordFromMicroversion253"
+          ]
+        },
+        {
+          "behavior": "Below microversion 2.53 UpdateForcedDownRecord sends PUT os-services/force-down with host and binary, adds forced_down and pins microversion 2.11 when the client selects 2.11 or later, keeps the client microversion without forced_down below 2.11, keeps the id-less response in Fields without a typed Service, rejects a missing host or binary before HTTP and wraps a 404 in resource.OperationError.",
+          "tests": [
+            "compute/v2/services/python_update_record_test.go:TestPythonComputeServiceUpdateForcedDownRecordBelowMicroversion253"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/services/python-update-record.md"
       ],
       "differences": [
-        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python decides the 2.53 and 2.11 branches with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
+        "Python accepts a Service whose id, host and binary it reuses; Go takes ForcedDownRecordTarget values and treats empty strings as absent, so an empty host or binary that Python would send as null below 2.53 is rejected before HTTP.",
+        "Python returns None below 2.53; Go returns ServiceRecord with the raw response fields, headers and status and a nil Service.",
+        "Python's host and binary lookup would follow a next link from services_links, links, next or a Link header; Go reads only the single os-services response that Nova returns."
       ],
-      "remaining": [
-        "UpdateOpts.ForcedDown is omitted when false and WithUpdateField cannot replace it, so forced=False cannot be sent.",
-        "Below 2.53 Python sends PUT os-services/force-down at microversion 2.11; Go can build the body only with forced true and cannot decode Nova's id-less service response."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/update_service",
       "source_fingerprint": "f38dd0a417acc57f7b5a8d6532d4bf8fd8a183bc26b062fb587a72bc76f3a207",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordStatus",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordDisabledReason",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordForcedDown",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT os-services/{id} with an unwrapped status, disabled_reason and forced_down body but cannot send forced_down false.",
+          "behavior": "From microversion 2.53 UpdateRecord sends PUT os-services/{id} with only the supplied attributes in an unwrapped body, including forced_down false, empty status and disabled_reason, null disabled_reason and extension attributes, accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+            "compute/v2/services/python_update_record_test.go:TestPythonComputeServiceUpdateRecordSendsFalseAndEmptyValues"
+          ]
+        },
+        {
+          "behavior": "A client microversion below 2.53, unset or latest fails with resource.ErrUnsupported before HTTP, extension fields that collide with typed keys or id, nil options and a blank id fail with resource.ErrInvalidOption before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "compute/v2/services/python_update_record_test.go:TestPythonComputeServiceUpdateRecordRejectsInputsVersionsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/services/python-update-record.md"
       ],
       "differences": [
-        "Python raises SDKException without a request below 2.53; Go sends the PUT with any client microversion.",
-        "Python sends no request when nothing changed; Go Update always sends PUT.",
-        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request and checks 2.53 against the server range and default microversion; Go sends and checks the one microversion configured or negotiated on the Connection client.",
+        "Python accepts a Service or an ID string; Go takes the service ID string and rejects a blank one before HTTP.",
+        "Python maps attribute names such as availability_zone and is_forced_down to server keys and drops undeclared keyword attributes; WithUpdateRecordField sends any extension key verbatim as a server key except the typed keys and id.",
+        "Python returns the Resource merged from request attributes and the response; Go returns ServiceRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts omits false forced_down and empty status or disabled_reason, and WithUpdateField cannot replace these core keys, so forced_down=False cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/find_service",
@@ -85311,49 +85351,75 @@
     {
       "operation": "python:identity/v3/get_mapping",
       "source_fingerprint": "53da90f30942da7f84da861e1e70d02fe5b49c13c6bae9cb93a4837281abc19b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.GetMapping"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.GetMappingRecord",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordReadHeaders"
       ],
       "contracts": [
         {
-          "behavior": "GetMapping sends the same GET OS-FEDERATION/mappings/{id} as Python, but the decoded Mapping drops schema_version and unknown rule keys.",
+          "behavior": "GetMappingRecord sends GET OS-FEDERATION/mappings/{id} with the ID escaped as one segment, accepts every status from 200 through 399, reads the mapping envelope or root object and keeps schema_version and the raw rules JSON (including rule keys outside the native MappingRule structs) in typed fields, Body and Wire.",
           "tests": [
-            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+            "identity/v3/federation/python_mapping_records_test.go:TestPythonMappingRecordGetKeepsSchemaVersionAndRawRules"
+          ]
+        },
+        {
+          "behavior": "HTTP 400 and above return the native unexpected-status error wrapped in resource.OperationError with Resource mappings and Operation Get.",
+          "tests": [
+            "identity/v3/federation/python_mapping_records_test.go:TestPythonMappingRecordGetKeepsSchemaVersionAndRawRules"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/federation/python-mapping-records.md"
       ],
-      "differences": [],
-      "remaining": [
-        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result."
-      ]
+      "differences": [
+        "Python accepts an ID string or a Resource instance and returns a mutable Resource; Go takes an ID string, escapes it as one URL segment, rejects blank, dot and control-character IDs before HTTP and returns an owned record with typed fields plus raw Body, Wire, Envelope, Header and StatusCode.",
+        "Python converts schema_version to str and rules to list; Go keeps the JSON values as returned.",
+        "Per-request header options are a Go extension; authentication and content headers stay SDK-owned, and the Resource location attribute and deprecation warnings are not reproduced."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/mappings",
       "source_fingerprint": "9b5b37b93a9257a6fd8e160eb134a25e9cf5000a96c93c603b5ae8ce3737adb9",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.ListMappings"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.New",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.ListMappingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.AllMappingRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.WithMappingRecordListOpts"
       ],
       "contracts": [
         {
-          "behavior": "ListMappings sends GET OS-FEDERATION/mappings without a query and decodes rows without schema_version or unknown rule keys.",
+          "behavior": "ListMappingRecords sends GET OS-FEDERATION/mappings with Accept application/json and no query by default, filters id, name, rules and schema_version locally because Mapping declares no server query, ignores unknown names, and keeps schema_version and raw rules per row.",
           "tests": [
-            "identity/v3/federation/python_parity_test.go:TestPythonMappingRequestsAndDecodeGaps"
+            "identity/v3/federation/python_mapping_records_test.go:TestPythonMappingRecordListFiltersPagingFindUpdateDelete"
+          ]
+        },
+        {
+          "behavior": "limit and marker are sent like Python and, without a next link, the list repeats with marker set to the last row ID until an empty page; list failures keep the status in resource.OperationError Operation List.",
+          "tests": [
+            "identity/v3/federation/python_mapping_records_test.go:TestPythonMappingRecordListFiltersPagingFindUpdateDelete"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/federation/python-mapping-records.md"
       ],
-      "differences": [],
-      "remaining": [
-        "ListMappings takes no options, so Go cannot send Python's limit and marker query or apply Python's local Body filters such as schema_version.",
-        "Gophercloud v2.15.0 federation.Mapping has no schema_version field and decodes rules into fixed MappingRule structs, so the schema_version and any rule keys outside those structs that Python returns are dropped from the Go result."
-      ]
+      "differences": [
+        "Python returns mutable Mapping Resources; Go yields owned records with typed ID and SchemaVersion, raw Rules, Body, Wire and page evidence.",
+        "Go follows a string Keystone links.next URL as a compatibility extension; the pinned Python paginator ignores that dictionary shape and relies on limit/marker continuation.",
+        "Local Body filters compare JSON values, so Go distinguishes bool from number and does not apply Python type coercion; nested dictionary filters match subsets like Resource.list _dict_filter.",
+        "Per-request header options are a Go extension; authentication and content headers stay SDK-owned, and the Resource location attribute and deprecation warnings are not reproduced."
+      ],
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/update_mapping",
@@ -91180,31 +91246,42 @@
     {
       "operation": "python:identity/v3/project_endpoints",
       "source_fingerprint": "891c3d1068fbaa458b6a266e5d2182572c9ac78448edb51f4953ad8b27fa1acc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.New",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.List"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/projectendpoints.WithRecordListOpts"
       ],
       "contracts": [
         {
-          "behavior": "List(projectID) sends the same GET OS-EP-FILTER/projects/{project}/endpoints as Python project_endpoints(project) without query and decodes id, interface, region, service_id and url.",
+          "behavior": "ListRecords(projectID) sends GET OS-EP-FILTER/projects/{escaped project}/endpoints with Accept application/json, maps interface, region_id and service_id to Requests-encoded server query, filters id, name, is_enabled/enabled, links and url locally, ignores unknown names, and decodes enabled, region_id, links and the URI project_id on every row with raw Body and Wire.",
           "tests": [
-            "identity/v3/projectendpoints/python_parity_test.go:TestPythonProjectEndpointListDefault"
+            "identity/v3/projectendpoints/python_records_test.go:TestPythonProjectEndpointRecordListQueryFiltersAndModel"
+          ]
+        },
+        {
+          "behavior": "limit triggers Python marker continuation until an empty page, max_items alone becomes the limit hint and caps rows, a blank project ID fails before HTTP, and 400/403/404/500 keep the status in resource.OperationError Operation List.",
+          "tests": [
+            "identity/v3/projectendpoints/python_records_test.go:TestPythonProjectEndpointRecordListPagingAndStatuses"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-catalog.md"
+        "identity/v3/projectendpoints/python-records.md"
       ],
       "differences": [
-        "Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.",
-        "The Go row model has no enabled, region_id or links fields that Python ProjectEndpoint exposes."
+        "Python takes a project ID string or Project Resource and returns ProjectEndpoint Resources; Go takes the project ID string and yields owned EndpointRecord values.",
+        "Go follows a string Keystone links.next URL as a compatibility extension; the pinned Python paginator ignores that dictionary shape and relies on limit/marker continuation.",
+        "Local Body filters compare JSON values, so Go distinguishes bool from number and does not apply Python type coercion; nested dictionary filters match subsets like Resource.list _dict_filter.",
+        "Per-request header options are a Go extension; authentication and content headers stay SDK-owned, and the Resource location attribute and deprecation warnings are not reproduced."
       ],
-      "remaining": [
-        "projectendpoints.API.List takes no options, so the interface, region_id, service_id, limit and marker query parameters Python maps cannot be sent.",
-        "Python Resource.list ignores the Keystone links dict shape {\"next\": url} and, when limit is given, repeats the request with marker set to the last row ID until an empty page; Go follows links.next and never issues limit-driven marker requests.",
-        "Python filters declared Body attributes that are not query parameters locally on each row; the Go collection has no Body filter for this binding, so those keyword arguments cannot be reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/regions",
@@ -93640,33 +93717,43 @@
     {
       "operation": "python:identity/v3/role_assignments",
       "source_fingerprint": "6f50897ce881094e59c47e06f4b279fd467d62ed531f15fcfcb497c9fe68fde4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.New",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignments",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsOptions",
-        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithListAssignmentsQuery"
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.ListAssignmentRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.AllAssignmentRecords",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.WithAssignmentRecordListOpts"
       ],
       "contracts": [
         {
-          "behavior": "ListAssignments sends GET role_assignments with the dotted query keys Python maps from role_id, user_id, group_id, scope_project_id, scope_domain_id and scope_system, reproduces Python True/False and inherited_to keys through WithListAssignmentsQuery, and sends a limit without a marker follow-up.",
+          "behavior": "ListAssignmentRecords sends GET role_assignments with Accept application/json, maps role_id, user_id, group_id, scope_project_id, scope_domain_id, scope_system, inherited_to (or their dotted server names, client name winning), effective, include_names and include_subtree to Requests-encoded server query, ignores unknown names, and keeps raw role, scope (including OS-INHERIT:inherited_to), user, group and links per row.",
           "tests": [
-            "identity/v3/roles/python_parity_test.go:TestPythonRoleAssignmentsRequests"
+            "identity/v3/roles/python_assignment_records_test.go:TestPythonRoleAssignmentRecordsKeepScopeLinksAndQuery"
+          ]
+        },
+        {
+          "behavior": "role, scope, user, group, links, id and name filter rows locally with nested dictionary subset matching; with a limit the first page rows are yielded and the id-less marker continuation fails like Python's endless pagination guard; HTTP errors keep their status.",
+          "tests": [
+            "identity/v3/roles/python_assignment_records_test.go:TestPythonRoleAssignmentRecordsNestedLocalFiltersAndPaging"
           ]
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-users.md"
+        "identity/v3/roles/python-assignment-records.md"
       ],
       "differences": [
-        "Typed ListAssignmentsOpts booleans are sent as true/false while Python sends True/False; Keystone treats any value but 0 as set, so effective=False is still on in both.",
-        "Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it."
+        "Python returns RoleAssignment Resources with dict-typed role, scope, user and group; Go yields owned records with those objects as raw JSON.",
+        "With a limit, Python raises SDKException for the repeated None marker after the first page; Go stops at the same point with resource.ErrInvalidOption wrapped in resource.OperationError and sends no second request.",
+        "Go follows a string Keystone links.next URL as a compatibility extension; the pinned Python paginator ignores that dictionary shape and relies on limit/marker continuation.",
+        "Local Body filters compare JSON values, so Go distinguishes bool from number and does not apply Python type coercion; nested dictionary filters match subsets like Resource.list _dict_filter.",
+        "Per-request header options are a Go extension; authentication and content headers stay SDK-owned, and the Resource location attribute and deprecation warnings are not reproduced."
       ],
-      "remaining": [
-        "The native RoleAssignment model drops the links object and the scope OS-INHERIT:inherited_to key that Python keeps in the scope dict, so inherited and direct assignments cannot be told apart.",
-        "When limit is set and the page has no next link, Python Resource.list keeps sending GET with marker set to the last ID and the same limit until an empty page; ListAssignments sends only the first request.",
-        "Python applies the role, scope, user and group Body dicts passed through **query as local nested filters; ListAssignments has no local filter option."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:identity/v3/role_assignments_filter",
@@ -100714,29 +100801,41 @@
     {
       "operation": "python:network/v2/update_vpn_ipsec_site_connection",
       "source_fingerprint": "9aa5c15fc7c0329f310342927e73fb1613342f5016ae606f38c75abdb12778a3",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/siteconnections.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT vpn/ipsec-site-connections/{id} with pointer name and description and non-empty fields, while empty local_id and peer_cidrs are omitted and WithUpdateField rejects those core keys before HTTP.",
+          "behavior": "UpdateRecord sends PUT vpn/ipsec-site-connections/{id} with only the supplied attributes in the ipsec_site_connection envelope, including empty local_id, peer_address, peer_id, psk, initiator and names, an empty peer_cidrs list, mtu 0, an empty dpd object, admin_state_up false, a null endpoint group ID and other declared attributes through WithUpdateRecordField, accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "network/v2/extensions/vpnaas/siteconnections/python_parity_test.go:TestPythonSiteConnectionUpdateCannotSendEmptyValues"
+            "network/v2/extensions/vpnaas/siteconnections/python_update_record_test.go:TestPythonSiteConnectionUpdateRecordSendsEmptyValues"
+          ]
+        },
+        {
+          "behavior": "Extension fields that collide with typed keys or the id identity, nil options and blank or dot IDs fail before HTTP, and a 404 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "network/v2/extensions/vpnaas/siteconnections/python_update_record_test.go:TestPythonSiteConnectionUpdateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/vpnaas/siteconnections/python-update-record.md",
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
-        "Python sends no request when no attributes are given; Go Update always sends PUT with the envelope."
+        "Python accepts a VpnIPSecSiteConnection Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
+        "Python takes is_admin_state_up as the keyword name; Go uses the AdminStateUp field that serializes as admin_state_up.",
+        "Python drops undeclared keyword attributes because VpnIPSecSiteConnection does not allow unknown body attributes; WithUpdateRecordField sends any extension key except the typed keys and id.",
+        "Python converts values of typed attributes such as mtu before sending; Go serializes the Go value as given.",
+        "Python returns the Resource merged from request attributes and the response; Go returns ConnectionRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts omits empty strings, zero integers and empty lists for local_id, peer_address, peer_id, peer_cidrs, the endpoint group IDs, psk and mtu, and WithUpdateField cannot replace those core keys, so Python updates such as local_id=\"\" or peer_cidrs=[] cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/create_bgp_peer",
@@ -100819,29 +100918,41 @@
     {
       "operation": "python:network/v2/update_bgp_peer",
       "source_fingerprint": "f4786c82191d40d0ca54ae8aea373ab434aa2896f3f651183f2dfeb053acd44c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordName",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordPassword",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT bgp-peers/{id} with non-empty name and password, sends an empty envelope for an empty name and rejects a name extension field before HTTP.",
+          "behavior": "UpdateRecord sends PUT bgp-peers/{id} with only the supplied attributes in the bgp_peer envelope, including an empty name, a null name, an empty password and unknown body attributes through WithUpdateRecordField, accepts any status below 400, decodes enveloped, flat and empty responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "network/v2/extensions/bgp/peers/python_parity_test.go:TestPythonBGPPeerUpdateCannotClearName"
+            "network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordSendsEmptyName"
+          ]
+        },
+        {
+          "behavior": "Extension fields that collide with typed keys or the id identity, empty extension keys, nil options and blank or dot IDs fail before HTTP, and a 409 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "network/v2/extensions/bgp/peers/python_update_record_test.go:TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/bgp/peers/python-update-record.md",
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
-        "Python sends no request when no attributes are given; Go Update always sends PUT with the envelope."
+        "Python accepts a BgpPeer Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
+        "Python silently discards an id attribute from the commit; WithUpdateRecordField rejects the id key before HTTP.",
+        "Python returns the Resource merged from request attributes and the response; Go returns BGPPeerRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts.Name is a string with omitempty and WithUpdateField cannot replace the core name key, so update_bgp_peer(peer, name=\"\") cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/bgp_peers",
@@ -101007,29 +101118,42 @@
     {
       "operation": "python:network/v2/update_bgp_speaker",
       "source_fingerprint": "54df6e9b081c19f13446980c5f34736aa089fdb9656798db14c52b6d7e82f043",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordName",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordAdvertiseFloatingIPHostRoutes",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordAdvertiseTenantNetworks",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Update always sends advertise_floating_ip_host_routes and advertise_tenant_networks with the name, and WithUpdateField cannot replace them.",
+          "behavior": "UpdateRecord sends PUT bgp-speakers/{id} with only the supplied attributes in the bgp_speaker envelope, so a name-only update omits both advertise flags, while explicit false, null, an empty name and unknown body attributes through WithUpdateRecordField are sent; it accepts any status below 400, decodes enveloped and flat responses, and sends nothing when no attribute is supplied.",
           "tests": [
-            "network/v2/extensions/bgp/speakers/python_parity_test.go:TestPythonBGPSpeakerUpdateAlwaysSendsAdvertiseFlags"
+            "network/v2/extensions/bgp/speakers/python_update_record_test.go:TestPythonBGPSpeakerUpdateRecordSendsOnlySuppliedFlags"
+          ]
+        },
+        {
+          "behavior": "Extension fields that collide with typed keys or the id identity, nil options and a blank ID fail before HTTP, and a 400 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
+          "tests": [
+            "network/v2/extensions/bgp/speakers/python_update_record_test.go:TestPythonBGPSpeakerUpdateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/bgp/speakers/python-update-record.md",
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
-        "Python sends no request when no attributes are given; Go Update always sends PUT with the envelope."
+        "Python accepts a BgpSpeaker Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
+        "Python silently discards an id attribute from the commit; WithUpdateRecordField rejects the id key before HTTP.",
+        "Python returns the Resource merged from request attributes and the response; Go returns BGPSpeakerRecord with the native typed decode, the raw response object fields, headers and status, and Sent false when no request was needed."
       ],
-      "remaining": [
-        "UpdateOpts advertise flags are plain bools without omitempty, so update_bgp_speaker(speaker, name=...) cannot be sent without also overwriting both flags; the caller must read the speaker first and resend its values."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/bgp_speakers",
@@ -101262,35 +101386,39 @@
     {
       "operation": "python:network/v2/create_bgpvpn",
       "source_fingerprint": "45eedfaa3bb0d10aa454816a051e0ab1ddf9d0b9bb2124e087cd56a350f0cc1c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordLocalPref",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present"
       ],
       "contracts": [
         {
-          "behavior": "Create sends POST bgpvpn/bgpvpns with the non-empty attributes in {\"bgpvpn\": {...}}.",
+          "behavior": "CreateRecord sends POST bgpvpn/bgpvpns with only the supplied attributes in the bgpvpn envelope, including local_pref 0, vni 0, an empty name, an empty route_targets list, null import_targets and unknown body attributes through WithCreateRecordField, sends an empty envelope when no attribute is supplied, accepts any status below 400 and decodes enveloped, flat and empty responses.",
           "tests": [
-            "network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNProxyRequests"
+            "network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordSendsZeroLocalPref"
           ]
         },
         {
-          "behavior": "A zero LocalPref is omitted and WithCreateField(\"local_pref\", 0) is rejected before HTTP.",
+          "behavior": "Extension fields that collide with typed keys, blank extension keys and nil options fail before HTTP, and a 400 response is returned as the Gophercloud status error wrapped in resource.OperationError.",
           "tests": [
-            "network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNCreateCannotSendZeroLocalPref"
+            "network/v2/extensions/bgpvpns/python_create_record_test.go:TestPythonBGPVPNCreateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/bgpvpns/python-create-record.md",
         "network/v2/python-parity-vpn-bgp.md"
       ],
       "differences": [
-        "Python accepts any 2xx create response; the Go facade accepts only 201 or 202.",
-        "Python sends unknown keyword attributes in the body only for resources with _allow_unknown_attrs_in_body; Go sends extension keys through With*Field, which rejects keys that collide with an Opts JSON tag."
+        "Python converts values of list-typed attributes before sending; Go serializes the Go value as given.",
+        "Python returns the Resource merged from request attributes and the response; Go returns BGPVPNRecord with the native typed decode, the raw response object fields, headers and status."
       ],
-      "remaining": [
-        "CreateOpts.LocalPref is an int with omitempty and WithCreateField cannot replace the core key, so create_bgpvpn(local_pref=0), a valid networking-bgpvpn value, cannot be sent; Update with a LocalPref pointer can set it afterwards."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/delete_bgpvpn",
