@@ -48977,9 +48977,10 @@
     {
       "operation": "python:compute/v2/availability_zones",
       "source_fingerprint": "d1932218202ce62c11d084cf431916a9fcf4ada2d59e79e02ae364ab0e46f148",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.API.ListDetailRecords",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZones",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneListOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/availabilityzones.WithAvailabilityZoneMicroversion",
@@ -48990,7 +48991,8 @@
           "behavior": "The details=False branch is available through ListRecords and Service.ListAvailabilityZones at the ordinary fixed path. id/name/state/hosts are passive raw descriptors with missing or null represented by JSON null; zoneName/name and zoneState/state aliases follow original dictionary order, unknown fields remain Wire-only, and a name never fabricates inherited id.",
           "tests": [
             "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership",
-            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory"
+            "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory",
+            "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsLeaveOrdinaryRoute"
           ]
         },
         {
@@ -49001,7 +49003,7 @@
           ]
         },
         {
-          "behavior": "Owned ordinary rows accept the Source-facing200..399 success range through the shared bodyless guarded reader, preserving reverse endpoint prefixes and actual metadata. Advertised linked pages retain duplicate records, an empty raw page stops before its next link, consumer break stops continuation, and late HTTP403 is visible with its original receipt after prior rows.",
+          "behavior": "Owned ordinary rows accept the Source-facing 200..399 success range through the shared bodyless guarded reader, preserving reverse endpoint prefixes and actual metadata. Advertised linked pages retain duplicate records, an empty raw page stops before its next link, consumer break stops continuation, and late HTTP403 is visible with its original receipt after prior rows.",
           "tests": [
             "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership"
           ]
@@ -49013,23 +49015,42 @@
             "internal/rest/list_test.go:TestListFirstServerLimitIsOptInAndFixedAcrossContinuations",
             "api/compute_availability_zones_test.go:TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership"
           ]
+        },
+        {
+          "behavior": "The details=True branch is ListDetailRecords: it sends a bodyless, queryless GET os-availability-zone/detail with the client microversion in X-OpenStack-Nova-API-Version and OpenStack-API-Version, no version headers for a blank client or an explicit empty WithAvailabilityZoneMicroversion, and caller headers from WithAvailabilityZoneHeader.",
+          "tests": [
+            "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts"
+          ]
+        },
+        {
+          "behavior": "Detail rows use the same AvailabilityZoneRecord projection as ListRecords: zoneName/zoneState become name/state, hosts with per-service active/available/updated_at state stay raw JSON, id and location are null, unknown vendor fields remain only in Wire, and Envelope/Header/StatusCode keep the actual row and page receipt.",
+          "tests": [
+            "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsUseDetailRouteAndKeepHosts"
+          ]
+        },
+        {
+          "behavior": "ListDetailRecords follows availabilityZoneInfo_links continuations on the detail path and rejects a continuation that leaves os-availability-zone/detail before HTTP, accepts 200..399 including a singleton object page, and reports 403/404 rejections as resource.OperationError{ListDetailRecords, availabilityzones} wrapping the native status error and body.",
+          "tests": [
+            "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsFollowDetailLinks",
+            "compute/v2/availabilityzones/python_detail_records_test.go:TestPythonZoneDetailRecordsStatuses"
+          ]
         }
       ],
       "documentation": [
         "compute/availability-zones.md",
-        "compute/README.md"
+        "compute/README.md",
+        "compute/v2/availabilityzones/python-detail-records.md"
       ],
       "differences": [
-        "The pinned public signature is availability_zones(details=False), with no public **query. This Go lane intentionally fixes ordinary user listing and offers only concrete headers/microversion options; it does not invent reachable Source body filters, limit/marker/max-items arguments, arbitrary base_path, or supplied Resource parameters.",
-        "AvailabilityZone declares id/name/state/hosts without typed conversion, with default None and no alternate ID. Resource is the declared owned view; Wire is actual JSON including unknown/vendor fields, Envelope is the actual row, and physical Header/StatusCode are additive Go evidence. Service maps existing Connection current_location while standalone leaf location is null.",
+        "Python selects the branch with availability_zones(details=False|True); Go exposes ListRecords for details=False and ListDetailRecords for details=True.",
+        "The pinned public signature is availability_zones(details=False), with no public **query. Go offers only concrete headers/microversion options for both branches; it does not invent reachable Source body filters, limit/marker/max-items arguments, arbitrary base_path, or supplied Resource parameters.",
+        "AvailabilityZone declares id/name/state/hosts without typed conversion, with default None and no alternate ID. Resource is the declared owned view; Wire is actual JSON including unknown/vendor fields, Envelope is the actual row, and physical Header/StatusCode are additive Go evidence. Python returns hosts as a dict while Go keeps raw JSON. Service maps existing Connection current_location while standalone leaf location is null.",
         "Blank source version causes no discovery because the Source class has no _max_microversion. Explicit per-call empty is a Go versionless override; the original native client and live authentication remain unchanged under the existing guarded read policy.",
         "Go requires valid UTF8 object/page representations, supports one object in the plural envelope, and decodes an accepted204 representation rather than treating an empty204 as a successful empty list. Shared reader errors remain visible; Python JSON/shape exception class spelling is not reproduced.",
-        "Python selects body links, then top-level next, then HTTP Link according to source precedence. Go validates all advertised candidates consistently, restricts origin/prefix/route/query changes, and supports dictionary links.next as extra compatibility. An advertised first positive limit may be adopted but does not create the absent initial limit or enable marker fallback.",
-        "Ordinary owned records and Cloud names do not imply detailed host/service inventory completion or full generic mutable Resource/session/cache behavior. Those general surfaces remain the original SDK goal rather than blanket blockers added to this finite ordinary branch."
+        "Python selects body links, then top-level next, then HTTP Link according to source precedence. Go validates all advertised candidates consistently, restricts origin/prefix/route/query changes (detail continuations must stay on os-availability-zone/detail), and supports dictionary links.next as extra compatibility. An advertised first positive limit may be adopted but does not create the absent initial limit or enable marker fallback.",
+        "Owned records do not provide generic mutable Resource/session/cache behavior; the generated native ListDetail remains a separate typed Gophercloud listing."
       ],
-      "remaining": [
-        "The public details=True branch selects /os-availability-zone/detail and remains queued for the core-admin stage. Its source-shaped owned result, privileged host/service behavior and meaningful HTTP assertions are not implemented/reviewed by this ordinary user unit; native AvailabilityZones.ListDetail is not promoted."
-      ]
+      "remaining": []
     },
     {
       "operation": "gophercloud:image/v2/images.Update",
@@ -75688,70 +75709,95 @@
     {
       "operation": "python:compute/v2/enable_service",
       "source_fingerprint": "59a0547f15d82ae87397e6354853fa8f5b690fe9e4b49ac500e0cd9e527fb54f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.EnableRecord"
       ],
       "contracts": [
         {
-          "behavior": "From 2.53 Update sends PUT os-services/{id} with {\"status\": \"enabled\"}.",
+          "behavior": "From client microversion 2.53 EnableRecord sends PUT os-services/{id} with the unwrapped body {\"status\": \"enabled\"} for a given ID, ignoring Host and Binary, at the client microversion, accepts every status below 400 and decodes the typed Service and raw Fields.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsFromMicroversion253"
           ]
         },
         {
-          "behavior": "Below 2.53 Update can send the legacy PUT os-services/{action} body with host and binary extension fields but fails decoding the id-less service response.",
+          "behavior": "From 2.53 without an ID EnableRecord lists GET os-services?binary=&host=, requires exactly one row (resource.ErrNotFound for none, resource.ErrAmbiguous for several, no PUT), sends only attributes whose listed value differs, and returns the listed row with Sent false and the list header/status when nothing changed.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceLegacyActionsSendBodyButFailDecode"
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsFromMicroversion253",
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsLookupFailures"
+          ]
+        },
+        {
+          "behavior": "Below 2.53, including an unset client microversion, EnableRecord sends PUT os-services/enable with {host, binary} at the client microversion or without version headers, keeps Nova's id-less service response in Fields with a nil typed Service, and wraps a 404 in resource.OperationError{EnableRecord, services} with the Gophercloud status error.",
+          "tests": [
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsBelowMicroversion253"
+          ]
+        },
+        {
+          "behavior": "A target without an ID or both Host and Binary from 2.53, a target without both Host and Binary below 2.53 (even with an ID), an unparsable client microversion and a nil API fail with resource.ErrInvalidOption before HTTP, as Python _get_service raises ValueError.",
+          "tests": [
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsLookupFailures",
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsBelowMicroversion253"
           ]
         }
       ],
       "documentation": [
+        "compute/v2/services/python-service-actions.md",
         "compute/v2/python-parity-admin.md"
       ],
       "differences": [
-        "With service=None Python lists services(host=, binary=) and updates the single match; Go needs List followed by Update.",
-        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python decides the 2.53 branch with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
+        "Python accepts a Service or an ID whose id, host and binary it reuses; Go takes ServiceActionTarget values and treats empty strings as absent, so an empty host or binary that Python would send is rejected before HTTP.",
+        "Python returns the Resource merged from seeded attributes and the response, including the seeded id below 2.53; Go returns ServiceRecord with the response object in Fields, a typed Service from 2.53, and no typed Service for the id-less legacy response.",
+        "Python's host and binary lookup would follow a next link from services_links, links, next or a Link header; Go reads only the single os-services response that Nova returns."
       ],
-      "remaining": [
-        "Below 2.53 Python sends PUT os-services/enable with host and binary; Go Update can build that request but the Gophercloud Service decoder rejects Nova's response because it has no id."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/disable_service",
       "source_fingerprint": "cd3c30754ebdc983b88d01accd4d41816573643d0e123fa9c7a71e105e6f8ca2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.Update",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.List",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.DisableRecord"
       ],
       "contracts": [
         {
-          "behavior": "From 2.53 Update sends PUT os-services/{id} with status disabled and disabled_reason.",
+          "behavior": "From client microversion 2.53 DisableRecord sends PUT os-services/{id} with {\"status\": \"disabled\"} plus disabled_reason only when the reason is non-empty, at the client microversion, and accepts every status below 400.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceUpdateByIDCannotClearForcedDown"
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsFromMicroversion253"
           ]
         },
         {
-          "behavior": "Below 2.53 Update sends PUT os-services/disable with host and binary like Python but fails decoding the id-less service response.",
+          "behavior": "From 2.53 without an ID DisableRecord lists services by host and binary, requires exactly one row (resource.ErrAmbiguous wrapped in resource.OperationError{DisableRecord, services} for several), sends only dirty attributes ({\"disabled_reason\": ...} when only the reason changes), and sends no PUT when status and reason already match.",
           "tests": [
-            "compute/v2/services/python_parity_test.go:TestPythonComputeServiceLegacyActionsSendBodyButFailDecode"
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsFromMicroversion253",
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsLookupFailures"
+          ]
+        },
+        {
+          "behavior": "Below 2.53 DisableRecord sends PUT os-services/disable with {host, binary}, or os-services/disable-log-reason with disabled_reason added, at the client microversion or without version headers, and keeps Nova's id-less response in Fields with a nil typed Service.",
+          "tests": [
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsBelowMicroversion253"
+          ]
+        },
+        {
+          "behavior": "An unparsable client microversion and a target without the required ID or host and binary fail with resource.ErrInvalidOption before HTTP.",
+          "tests": [
+            "compute/v2/services/python_service_actions_test.go:TestPythonComputeServiceStatusRecordsLookupFailures"
           ]
         }
       ],
       "documentation": [
+        "compute/v2/services/python-service-actions.md",
         "compute/v2/python-parity-admin.md"
       ],
       "differences": [
-        "With service=None Python lists services(host=, binary=) and updates the single match; Go needs List followed by Update.",
-        "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python decides the 2.53 branch with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
+        "Python accepts a Service or an ID whose id, host and binary it reuses; Go takes ServiceActionTarget values and treats empty strings, including an empty reason, as absent; Python also treats an empty reason as no reason.",
+        "Python returns the Resource merged from seeded attributes and the response, including the seeded id below 2.53; Go returns ServiceRecord with the response object in Fields, a typed Service from 2.53, and no typed Service for the id-less legacy response.",
+        "Python's host and binary lookup would follow a next link from services_links, links, next or a Link header; Go reads only the single os-services response that Nova returns."
       ],
-      "remaining": [
-        "Below 2.53 Python sends PUT os-services/disable or disable-log-reason with host and binary; Go Update can build that request but the Gophercloud Service decoder rejects Nova's response because it has no id."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/update_service_forced_down",
