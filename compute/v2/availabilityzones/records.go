@@ -72,13 +72,17 @@ func WithAvailabilityZoneHeader(key, value string) AvailabilityZoneListOption {
 	return request.WithHeader[AvailabilityZoneListOpts](key, value)
 }
 
-// ListRecords lazily reads ordinary zones. The privileged detail branch is
-// exposed separately by the existing native ListDetail facade.
+// ListRecords lazily reads ordinary zones. ListDetailRecords owns the
+// privileged details=True branch with the same record machinery.
 func (a *API) ListRecords(ctx context.Context, options ...AvailabilityZoneListOption) iter.Seq2[*AvailabilityZoneRecord, error] {
+	return a.listZoneRecords(ctx, "ListRecords", "os-availability-zone", options)
+}
+
+func (a *API) listZoneRecords(ctx context.Context, operation, path string, options []AvailabilityZoneListOption) iter.Seq2[*AvailabilityZoneRecord, error] {
 	captured := slices.Clone(options)
 	return func(yield func(*AvailabilityZoneRecord, error) bool) {
 		fail := func(err error) {
-			yield(nil, request.Wrap("ListRecords", "availabilityzones", cloudread.ContextError(ctx, err)))
+			yield(nil, request.Wrap(operation, "availabilityzones", cloudread.ContextError(ctx, err)))
 		}
 		if err := cloudread.Context(ctx); err != nil {
 			fail(err)
@@ -128,7 +132,7 @@ func (a *API) ListRecords(ctx context.Context, options ...AvailabilityZoneListOp
 			codes[i] = i + 200
 		}
 		spec := rest.CollectionSpec[AvailabilityZoneRecord]{
-			Client: &source.Client, Path: "os-availability-zone", Kind: "availabilityzones", PluralKey: "availabilityZoneInfo",
+			Client: &source.Client, Path: path, Kind: "availabilityzones", PluralKey: "availabilityZoneInfo",
 			Validate: check, SourceGuard: check, ListCodes: codes,
 			Metadata: func(r *AvailabilityZoneRecord) *resource.Metadata {
 				if r.Wire == nil {
@@ -179,7 +183,7 @@ func (a *API) ListRecords(ctx context.Context, options ...AvailabilityZoneListOp
 		}
 		for record, err := range rest.List(opctx, spec, nil) {
 			err = errors.Join(err, check(opctx))
-			if !yield(record, request.Wrap("ListRecords", "availabilityzones", cloudread.ContextError(ctx, err))) || err != nil {
+			if !yield(record, request.Wrap(operation, "availabilityzones", cloudread.ContextError(ctx, err))) || err != nil {
 				return
 			}
 			if err := check(opctx); err != nil {
