@@ -13657,7 +13657,7 @@
     {
       "operation": "python:network/v2/networks",
       "source_fingerprint": "f17889d3f1c3c44a767012f35f62be8f2fe911f7c9271e5727f0b59c3d154ad7",
-      "status": "go_mapping",
+      "status": "unresolved",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.New",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
@@ -13690,7 +13690,9 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListPaginated",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListJMESPath",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithRecordListConflictingAttrs",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery"
       ],
       "contracts": [
         {
@@ -13888,6 +13890,45 @@
             "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsHeaderFalseyStringMapAndNullableVersionPath",
             "internal/neutronfind/proxy_list_options_test.go:TestNormalizeProxyListOptionsJMESNonstringsAreReturnedWithoutInventingQueries"
           ]
+        },
+        {
+          "behavior": "New connected Source lane uses cloned SourceStatusPolicy/SourceLinkPolicy and the complete existing Network descriptor/query profile. Original row/full page/header/status proof remains separate from projected defaults, large integers, Python-loaded local bool/number equality and owned connected location. Unknown availability_zone is read as the Source runtime attribute, while tenant_id is not inferred as Network.project_id.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawControlsLocalLoadedEqualityPagingAndReceipts",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListSourceStatusDefaultsAndConnectedLocation"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type fail during Proxy call; one-pass ordered conflicting attrs then reject restored base_path/paginated/cls/session collisions but ignore restored self/resource_type and restored JMES spelling. Raw headers/base_path/microversion are evaluated only when the Resource generator is consumed. Explicit empty base path returns empty with no HTTP but still checks iteration-start cancellation/source guard.",
+          "tests": [
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListRawFormalsRemainLazyAcrossProxyPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOriginalAndRestoredBindingHaveDifferentPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListEmptyPathSkipsHTTPAndKeepsIterationGuards",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals"
+          ]
+        },
+        {
+          "behavior": "Opaque Proxy JMES values retain Source generator identity and HTTP0 timing; @ is consumed by cloud list(), array/string/object literals become iterable values, projection null/noniterable results and type errors fail without HTTP. Nested generator values retain laziness/location/source and no fabricated JSON/HTTP receipts. Go object keys iterate lexical order rather than Source insertion order, asserted explicitly.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOpaqueProxyStaysLazyWithOwnedLocation"
+          ]
+        },
+        {
+          "behavior": "Raw JSON microversion falsey nonnull values suppress headers, null uses selected version, numeric/bool and iterable tuple values follow the separately audited Keystoneauth JSON-domain normalization. Concrete Headers/Microversion/Location options and raw filters snapshot caller inputs before guarded callback/response use; original selected source and live token are preserved.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource"
+          ]
+        },
+        {
+          "behavior": "Cloud collection discards partial public outputs on late failure while actual page rejection/physical proof is retained. Accepted200 and rejected401/404/503 read+Close/cancel/source lanes close physical bodies once, make no retry/reauth calls and preserve actual status/body/header. Native401 independent ErrOriginal value and ErrReauth causes remain available; clean retry/token renewal are guarded and bounded in fixtures.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListPhysicalFaultsKeepActualReceiptAndNoNativeHooks",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListCleanRetryTokenRenewalAndGuardedRetry"
+          ]
         }
       ],
       "documentation": [
@@ -13897,7 +13938,8 @@
         "resource/README.md",
         "network/v2/networks/listing/README.md",
         "internal/cmd/sdkgen/README.md",
-        "network/v2/networks/python-list-records.md"
+        "network/v2/networks/python-list-records.md",
+        "network/cloud-network-lists-python.md"
       ],
       "differences": [
         "Go uses concrete WithFilter/WithFilters and explicit WithBodyFilter options with frozen values instead of Python keyword arguments and mutable Resource objects. Semantic names follow Python properties; raw subnets/vlan_qinq/vlan_transparent are accepted only by explicit Body filters or raw wire query. Body bulk alias collisions reject; semantic bulk query canonical keys win by presence and sequential options are last-wins. Namespace conflicts reject deterministically.",
@@ -13912,9 +13954,24 @@
         "Go collection continuation retains fixed service origin/path/filter/cursor guards. Per-call base_path selects a service-relative collection; empty path chooses the default whereas Source empty URI yields no request. Source arbitrary adapter retargeting and informational final100..199 remain explicit differences. Original selected clients, live tokens and approved clean retries retain source ownership.",
         "Typed ListRecords/AllRecords yield resources only; truthy-string JMES calls use ProxyListRecords with arbitrary Value and optional JSON. Fully JSON null is JSON null, generator-containing values keep their opaque generator identity and no fabricated Wire/HTTP metadata. This mirrors the pinned generator behavior, which differs from cloud expression filtering over collected arrays.",
         "Source general numeric equality is opt-in through PythonLoadedEquality for this new profile: float tokens use CPython binary64 rounding/nonfinite overflow/underflow, integer tokens remain arbitrary precision, nested bool-number equality is preserved. Raw actual bytes are not rewritten. The rest of the repository is not silently migrated.",
-        "Neutron27 stock get_network allows project-reader/service/shared/external/advsvc branches with separate ADMIN provider/segments attributes. SDK does not elevate access or infer all-project scope; missing user attributes retain declared defaults. Fixture/race/source/main evidence does not prove authenticated deployment policy/extension/backend behavior."
+        "Neutron27 stock get_network allows project-reader/service/shared/external/advsvc branches with separate ADMIN provider/segments attributes. SDK does not elevate access or infer all-project scope; missing user attributes retain declared defaults. Fixture/race/source/main evidence does not prove authenticated deployment policy/extension/backend behavior.",
+        "Earlier typed/ProxyListRecords lane only: Record JSON is immutable owned view rather than lazy mutable Python Resource. Every declared field is projected before row return, so an unaccessed malformed descriptor can fail earlier. Unknown Body extensions are preserved; location is still owned null rather than Python current_location or computed constructor synthesis. Shared SDK Resource/cache/lifecycle parity remains independently tracked.",
+        "Earlier typed/ProxyListRecords lane only: The earlier typed lane has concrete header string-map and microversion/base-path string types; the new raw Source cloud lane accepts audited numeric/iterable microversion and deferred formals. None-valued headers/adapter/subclass injection, runtime non-JSON objects and arbitrary URI percent-format are not reintroduced. Default microversion has no Network class maximum, and unknown LIST skip_cache is ignored exactly rather than inventing a per-call cache override.",
+        "Earlier typed/ProxyListRecords lane only: Go collection continuation retains fixed service origin/path/filter/cursor guards. Per-call base_path selects a service-relative collection; empty path chooses the default whereas Source empty URI yields no request. Source arbitrary adapter retargeting and informational final100..199 remain explicit differences. Original selected clients, live tokens and approved clean retries retain source ownership.",
+        "SDK-R1: Go returns owned RawResource/receipt views instead of a mutable Python Resource and cache/lifecycle object. Declared descriptors are projected before row return and may fail earlier for an unaccessed malformed property. Actual Wire/Envelope/header/status are never forged from normalized values; runtime Resource.microversion attribute/object identity remain generic Resource parity scope.",
+        "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
+        "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
+        "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
+        "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity."
       ],
-      "remaining": []
+      "remaining": [
+        "SDK-owned JSON Source list still limits max_items to a nonnegative Go integer. Actual Source accepts falsey None/False, bool True, negative and fractional numeric caps and defers string comparison errors until a nonempty page. True/-1/0.5/1.5/string caps therefore differ in requests, returned raw rows or error phase; actual pinned Source Network174 limit/cap cases are recorded in the cycle8 Source receipt.",
+        "Inherited limit/marker REST preflight rejects raw limit False, negative, fractional, string and repeated values that actual Source can send. Empty/nonempty page and subsequent marker behavior differ; this is a reachable JSON named query/formal gap rather than arbitrary Python-object injection.",
+        "With ordinary integer max_items equal to exactly one whole page, Source checks the cap only before the next raw row and may perform a following marker GET. Current REST stops immediately after the capped raw row and cannot expose that next request, later HTTP/physical failure, cancellation or source guard proof. max_items=2 with two initial raw rows is an actual Source GET2 versus current Go GET1 counterexample.",
+        "Raw JSON microversion exponent overflow remains a precise named boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof. Source empty base_path=\"\" bypasses all HTTP/KSA microversion normalization, so invalid \"broken\"/[\"wrong\"] values return empty HTTP0; current Go normalizes the version before its empty-path return and errors. This reachable empty-route timing difference remains in the same named raw-microversion gap."
+      ]
     },
     {
       "operation": "python:network/v2/subnet_pools",
@@ -14138,7 +14195,23 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithBodyFilters",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.JMESPathIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.MarshalJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath"
       ],
       "contracts": [
         {
@@ -14238,6 +14311,53 @@
             "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterDescriptorSelectiveEmissionAndInventory",
             "internal/cmd/sdkgen/python_filters_test.go:TestPythonFilterPinnedCheckoutVerification"
           ]
+        },
+        {
+          "behavior": "New opt-in source profile clones pinned Subnet/NetworkResource descriptor and query declarations; missing defaults, bool/int/list casting, ordered canonical/wire response aliases, project/tenant fallback, unknown Body and large integer tokens are owned. Row if_match is a constructor Header and actual page Header remains separate. Baseline native/Find/Resources policies stay unchanged.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOwnedSparseDefaultsAndOrderedAliases",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsDescriptorsRowHeadersAndIndependentActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Canonical/wire Query mapping is pushed down without an invented name hint; non-query declared Body attributes filter loaded descriptors locally with Python loaded JSON equality. Unknown kwargs are discarded before application marshaling. Source max_items/limit raw behavior remains incomplete and is explicitly excluded below.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsPushdownLocalLoadedFiltersAndUnknownMarshalDiscard"
+          ]
+        },
+        {
+          "behavior": "Proxy._list evaluates JMESPath against the actual opaque Resource.list generator, before Resource control normalization or HTTP. Index/projection/type expressions produce null without HTTP; literals preserve arbitrary JSON; @ returns the same generator, nested to_array keeps it unconsumed, and length errors before HTTP. ListRecords/AllRecords are ordinary resource-only convenience APIs.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type/cls/session collisions and restored cls/session/base_path/paginated conflicts are eager. Truthy __conflicting_attrs restores ordered kwargs once; restored self/resource_type are discarded as unknown Resource attrs and restored JMES does not replace original expression. Resource headers/base_path/microversion are deferred until actual generator consumption, so an opaque empty literal avoids invalid controls entirely.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOneLevelRestorationBindingAndImmutableOptions",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Only explicit empty string base_path produces an empty HTTP0 generator; null selects default, false/zero/list/object fails at consumption. Context/source checks still run before an empty generator returns. Literal same-origin service-relative path policy remains narrower than arbitrary Python formatting.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsEmptyPathOnlyNullDefaultAndDelayedCancellation"
+          ]
+        },
+        {
+          "behavior": "Per-call microversion None keeps captured default and every other falsey JSON value disables it. Ordinary JSON numeric/string/list/object-key iterable normalization follows KSA conventions including true/1 -> 1.0, [2,4] -> 2.4, v2.4 -> 2.4, latest and major.latest rejection. Python overflow infinity/latest conversion remains unsupported.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMicroversionJSONDomainAndDefaultDisable"
+          ]
+        },
+        {
+          "behavior": "Source status100..399, plural singleton objects, required accepted JSON parsing, row constructor/descriptor faults, root links precedence, ignored dictionary next, HTTP/limit/raw-marker continuation use the shared guarded pager. Actual late-page body/read/Close failures preserve original native/ResponseError evidence and callbacks are suppressed only for physical faults; clean token renewal retains captured headers. Dynamic cap exact-boundary semantics remain named gaps.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsSourceLinkPrecedenceAndRawMarkerMaxItems",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMalformedAcceptedPagesKeepPhysicalProof",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsLatePhysicalFaultsNative401AndNoFaultReplay",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsCleanReauthenticationAndCapturedHeaders"
+          ]
         }
       ],
       "documentation": [
@@ -14245,7 +14365,8 @@
         "docs/listing.md",
         "resource/README.md",
         "network/README.md",
-        "network/v2/README.md"
+        "network/v2/README.md",
+        "network/cloud-subnet-lists-python.md"
       ],
       "differences": [
         "Go provides SDK-owned WithFilter/WithFilters for complete declared semantic classification, without caller builders or predicates, while WithBodyFilter/WithBodyFilters remain explicit local options and WithQuery remains independent wire data. Python canonical query names win in a bulk map; individual Go options use last-wins and nil/empty bulk replacement clears only semantic state. prefix_length is the semantic Python attribute; explicit Body options also accept raw prefixlen, which is unknown and discarded in the semantic namespace.",
@@ -14254,14 +14375,17 @@
         "Native accepted statuses, full-current-page extraction and advertised subnets_links remain intact. max_items caps consumed raw rows locally without an inferred Python limit hint. Native typed List, FindIdentity and the prior four typed Body projections retain their existing behavior.",
         "Go defines scalar/repeated query encoding explicitly: booleans are lowercase, JSON number text is preserved, null elements are omitted and empty/null query values retain option presence without URL values. Query objects and nested arrays are rejected; no Subnet CSV format or native-q-tag-derived classification is inferred. Unknown semantic attributes are discarded, while explicit unknown Body options are errors and raw wire extensions remain caller-controlled.",
         "Semantic query name is a server filter rather than a local exact-name predicate. WithName retains its query hint and local exact match; duplicate ownership of the same query or Body destination is rejected across semantic/raw/page/hint/explicit namespaces, including equal values. This is an intentional Go conflict policy rather than permissive Python kwargs merging.",
-        "An explicit semantic clear still requires an audited descriptor. Reserved session/paginated/base_path/allow_unknown_params/microversion/headers/max_items/resource_type/jmespath_filters names are not treated as field payloads. Generation additionally requires a live audited Python source checkout and its recorded AST parser minor version."
+        "An explicit semantic clear still requires an audited descriptor. Reserved session/paginated/base_path/allow_unknown_params/microversion/headers/max_items/resource_type/jmespath_filters names are not treated as field payloads. Generation additionally requires a live audited Python source checkout and its recorded AST parser minor version.",
+        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because named cap/limit and nonfinite-version gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
+        "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
+        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions."
       ],
       "remaining": [
-        "Complete Python Body/URI descriptor response defaults, project/tenant alias fallback and descriptor coercion remain beyond the covered complete query/Body classification. Local comparison keeps Go exact JSON type/array policies and returned values are still native typed Subnets rather than fully seeded Python Resources.",
-        "Subnet inherits NetworkResource with TagMixinNetwork. Original row pairing and semantic classification do not provide the complete seeded Resource, unknown-Body/cache/dirty lifecycle or Python descriptor response model. Returned native Subnets still normalize timestamps and nested modeled values.",
-        "Pinned Proxy.request optional GET response cache(cache_enabled/skip_cache) and inherited per-call header/microversion/base_path controls remain separate from configured native client retention. Direct Proxy._list fixes session to itself; adapter/session injection belongs to inherited Resource.list. Subnet inherits _max_microversion=None rather than a class-specific maximum negotiation policy.",
-        "Pinned Resource._get_next_link has RFC Link-header and limit/marker continuation paths beyond the native subnets_links pager. Deprecated Proxy._list jmespath_filters is consumed from direct query and has no ordinary Go expression-filter option. FindIdentity/native typed List do not acquire these ordinary Body options.",
-        "Pinned Proxy._list restores its special __conflicting_attrs dictionary into kwargs before Resource.list (openstack/proxy.py:896-902). The semantic declared-field API does not implement that recovery branch; its source hash is verification evidence rather than a claim that every inherited Proxy branch is mapped."
+        "Named Source max_items gap: shared list controls accept a nonnegative Go integer, while pinned Resource.list accepts falsey dynamic None/false/string/list/object and numeric true/float/negative semantics with deferred comparisons. Source negative can GET before yielding zero, numeric fraction rounds by raw-row comparison, and string may succeed on an empty page but fail at the first nonempty row. This operation remains unresolved; typed ordinary-path coverage is not full Proxy kwargs parity.",
+        "Named Source cap-boundary gap: Resource.list checks max_items before each next raw row. A page containing exactly cap raw rows can trigger another GET before the cap terminates; the shared pager stops on the first page at cap. Nonstandard dynamic limit values have Source comparison/fallback differences and are not closed here. No broader shared/legacy pager mutation was made.",
+        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain. Named empty-route timing gap: Source base_path=\"\" never reaches HTTP/KSA version validation, so invalid microversion can remain unobserved with an empty result; this leaf normalizes version before its empty-route return. Invalid headers still fail before Source while and are not part of this exception.",
+        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
       ]
     },
     {
@@ -102421,15 +102545,104 @@
       "source_fingerprint": "000e6807c23b7b0fc0959886b282fa70197d386c8144e28a1d30032a910e850e",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchServerGroups",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.GetServerGroup",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerGroups"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "Search consumes every default-project page before exact/glob name/ID and ordered local mapping/JMES filters, without name/filter/all-projects pushdown. Canonical member_ids is used for builtin dict cloud filters; wire members and unknown attrs are not rewritten to valid keys. Source untyped fields stay raw, rules alone gets dictionary getter cast.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsSearchExactGlobOrderedDictCanonicalAndNoPushdown",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCompleteSearchAndDefaultFindStopsSecondDuplicate",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsListDescriptorsAliasesUnknownStatusAndVersion"
+          ]
+        },
+        {
+          "behavior": "Absent/null filters use default find; every nonnull value including false/0/empty dict/list/string enters deprecated complete search. Filtered marker exposes the branch. Primitive JMES results are preserved in Value, not invented as a Resource; filtered get follows loaded truthiness, len, index0, retaining false/zero/empty selected elements and nil only for selected null.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsGetPresenceDefaultFindVersusDeprecatedSearch",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics"
+          ]
+        },
+        {
+          "behavior": "Default find member GET falls back only for clean400/403/404; exact ID/name equality has no fnmatch conversion. Missing defaults nil. It stops on second exact match before a later HTTP page, while filtered get fully consumes later failures before ambiguity. Observed member and consumed fallback Inventory retain separate actual proof.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsDefaultExactNoGlobMissingEmptyCollectionAndNativeErrors",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCompleteSearchAndDefaultFindStopsSecondDuplicate",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure"
+          ]
+        },
+        {
+          "behavior": "Actual Source empty string is supported as fixed trailing-slash collection GET with an empty ID seed; it is not collapsed with Source None InvalidRequest. Empty fallback never treats decoded null IDs/names as literal empty strings. Other IDs use owned literal path segments with explicit safe Go constraints.",
+          "tests": [
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsEmptyExactFallbackNeverMatchesNullAsEmptyString",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments"
+          ]
+        },
+        {
+          "behavior": "Selected Nova microversion has precedence; unspecified discovery caps against ServerGroup2.64/min/max using existing shared selection and new strict physical fault opt-in. New member/list Source100..399 leaves old native and FindRecord baselines unchanged. Actual records/default views and Wire/whole Envelope/Header/Status remain owned; CurrentLocation never enters query and foreign project names clear.",
+          "tests": [
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsListDescriptorsAliasesUnknownStatusAndVersion",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCleanRetryReauthStrictStatusAndHeaderCapture"
+          ]
+        },
+        {
+          "behavior": "Captured service/client/group binding and option/header/location snapshots precede callbacks. Nil malformed options/context/headers/location and custom cancellation fail preflight. Mutable callback snapshots cannot alter later applied filters/headers or stored response evidence.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsPreflightSelectedAPIOptionsAndCustomCancellation"
+          ]
+        },
+        {
+          "behavior": "Physical read/Close/cancel/restored source faults in search/member/discovery for200/401/404/429/503 preserve actual proof and prevent user retry/reauth/backoff, fallback or missing. Native401 value ErrOriginal/ErrReauth remain available. Clean503 retry and401 token renewal remain guarded. OkCodes expansion cannot establish success or404 absence under the original policy.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsPhysicalFaultsCannotFallbackRetryOrBecomeMissing",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCleanRetryReauthStrictStatusAndHeaderCapture",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsExpandedRejected404AndPhysicalFailureDoNotFallback"
+          ]
+        },
+        {
+          "behavior": "New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
+          ]
+        }
+      ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/python-cloud-parity.md",
+        "compute/cloud-server-group-reads-python.md",
+        "README.md"
       ],
-      "differences": [],
+      "differences": [
+        "Concrete library-owned Go options/carriers expose Value plus actual Groups/Group/Observed/Inventory instead of only mutable Python Resource/lists. JMES arbitrary output has no fabricated row association. Filtered marks deprecated get-search selection instead of Python warnings.warn side effects.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
+        "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
+        "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
+        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Basic Go15groups are root-owned validation; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
+      ],
       "remaining": [
-        "Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to server groups; the caller would have to filter the listed rows by hand."
+        "Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.",
+        "Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns\"1e+23\". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity. Supporting receipts /private/tmp/go-openstacksdk-cycle8-server-group-reads-boundaries.json and ...-arithmetic.json."
       ]
     },
     {
@@ -102437,7 +102650,17 @@
       "source_fingerprint": "24b229f9c35f3bed55243ec8f3da163b77948451ea300181e30d6cebdd2b5ad8",
       "status": "unresolved",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchServerGroups",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.GetServerGroup",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudExpression",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroupCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.ListCloudRecords",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindCloudRecord",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerGroup"
       ],
       "contracts": [
         {
@@ -102446,14 +102669,92 @@
             "compute/v2/python_parity_test.go:TestPythonCloudServerGroupHelpers",
             "compute/v2/servergroups/python_find_contracts_test.go:TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects"
           ]
+        },
+        {
+          "behavior": "Search consumes every default-project page before exact/glob name/ID and ordered local mapping/JMES filters, without name/filter/all-projects pushdown. Canonical member_ids is used for builtin dict cloud filters; wire members and unknown attrs are not rewritten to valid keys. Source untyped fields stay raw, rules alone gets dictionary getter cast.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsSearchExactGlobOrderedDictCanonicalAndNoPushdown",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCompleteSearchAndDefaultFindStopsSecondDuplicate",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsListDescriptorsAliasesUnknownStatusAndVersion"
+          ]
+        },
+        {
+          "behavior": "Absent/null filters use default find; every nonnull value including false/0/empty dict/list/string enters deprecated complete search. Filtered marker exposes the branch. Primitive JMES results are preserved in Value, not invented as a Resource; filtered get follows loaded truthiness, len, index0, retaining false/zero/empty selected elements and nil only for selected null.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsGetPresenceDefaultFindVersusDeprecatedSearch",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics"
+          ]
+        },
+        {
+          "behavior": "Default find member GET falls back only for clean400/403/404; exact ID/name equality has no fnmatch conversion. Missing defaults nil. It stops on second exact match before a later HTTP page, while filtered get fully consumes later failures before ambiguity. Observed member and consumed fallback Inventory retain separate actual proof.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsDefaultExactNoGlobMissingEmptyCollectionAndNativeErrors",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCompleteSearchAndDefaultFindStopsSecondDuplicate",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure"
+          ]
+        },
+        {
+          "behavior": "Actual Source empty string is supported as fixed trailing-slash collection GET with an empty ID seed; it is not collapsed with Source None InvalidRequest. Empty fallback never treats decoded null IDs/names as literal empty strings. Other IDs use owned literal path segments with explicit safe Go constraints.",
+          "tests": [
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsEmptyExactFallbackNeverMatchesNullAsEmptyString",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments"
+          ]
+        },
+        {
+          "behavior": "Selected Nova microversion has precedence; unspecified discovery caps against ServerGroup2.64/min/max using existing shared selection and new strict physical fault opt-in. New member/list Source100..399 leaves old native and FindRecord baselines unchanged. Actual records/default views and Wire/whole Envelope/Header/Status remain owned; CurrentLocation never enters query and foreign project names clear.",
+          "tests": [
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsListDescriptorsAliasesUnknownStatusAndVersion",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCleanRetryReauthStrictStatusAndHeaderCapture"
+          ]
+        },
+        {
+          "behavior": "Captured service/client/group binding and option/header/location snapshots precede callbacks. Nil malformed options/context/headers/location and custom cancellation fail preflight. Mutable callback snapshots cannot alter later applied filters/headers or stored response evidence.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsOwnsOptionsRecordsHeadersAndCurrentLocation",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsPreflightSelectedAPIOptionsAndCustomCancellation"
+          ]
+        },
+        {
+          "behavior": "Physical read/Close/cancel/restored source faults in search/member/discovery for200/401/404/429/503 preserve actual proof and prevent user retry/reauth/backoff, fallback or missing. Native401 value ErrOriginal/ErrReauth remain available. Clean503 retry and401 token renewal remain guarded. OkCodes expansion cannot establish success or404 absence under the original policy.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsPhysicalFaultsCannotFallbackRetryOrBecomeMissing",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsCleanRetryReauthStrictStatusAndHeaderCapture",
+            "compute/v2/servergroups/python_cloud_reads_test.go:TestSourceCloudGroupReadsExpandedRejected404AndPhysicalFailureDoNotFallback"
+          ]
+        },
+        {
+          "behavior": "New Source opt-in closes finite JSON float loading in local mapping, loaded falsey first selection and exact binary finite operands for JMES comparisons without rounding arbitrary integers. Source two-float9007199254740992.0/9007199254740993.0 comparison is supported; this does not claim full arithmetic, serialization, nonfinite or Resource class equality/function namespace.",
+          "tests": [
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsLoadedNumericMappingAndJMESPredicate",
+            "compute/cloud_server_group_reads_test.go:TestCloudServerGroupReadsJMESArbitraryJSONAndFilteredGetIndexSemantics"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover"
+          ]
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/python-cloud-parity.md",
+        "compute/cloud-server-group-reads-python.md",
+        "README.md"
       ],
-      "differences": [],
+      "differences": [
+        "Concrete library-owned Go options/carriers expose Value plus actual Groups/Group/Observed/Inventory instead of only mutable Python Resource/lists. JMES arbitrary output has no fabricated row association. Filtered marks deprecated get-search selection instead of Python warnings.warn side effects.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
+        "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
+        "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
+        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Basic Go15groups are root-owned validation; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
+      ],
       "remaining": [
-        "The deprecated filters argument switches to search_server_groups and _utils._filter_list with dictionary or JMESPath filters and a duplicate check; Go has no public SDK helper for that path."
+        "Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.",
+        "Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns\"1e+23\". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity. Supporting receipts /private/tmp/go-openstacksdk-cycle8-server-group-reads-boundaries.json and ...-arithmetic.json."
       ]
     },
     {
@@ -102774,22 +103075,111 @@
       "status": "unresolved",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput",
+        "github.com/JSYoo5B/go-openstacksdk/compute.Service.GetServerConsole",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleLength",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleLengthJSON",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithoutServerConsoleLength",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleServerJSON",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleServerRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithoutServerConsoleServer",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutputRecord",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleLength",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleLengthJSON",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithoutCloudConsoleLength",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerConsole"
       ],
       "contracts": [
         {
-          "behavior": "FindRecord and ConsoleOutput send the same lookup and os-getConsoleOutput action, but Go returns the 400 error where Python returns an empty string.",
+          "behavior": "Existing typed FindRecord and ConsoleOutput preserve their original lookup/action and 400 error contract. The separate GetServerConsole helper below owns the clean-action400 empty-string transformation.",
           "tests": [
             "compute/v2/python_parity_test.go:TestPythonCloudServerDeleteAndConsolePartialPaths"
+          ]
+        },
+        {
+          "behavior": "Source bare=True lookup uses existing FindRecord defaults(details=True/all_projects=False), member first then detailed local exact fallback, no network/image/flavor expansion; dictionary and Source record seed bypass lookup. Missing/duplicate/lookup physical errors precede the action-only400 catch.",
+          "tests": [
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleBareLookupAndSeedBypass",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleNameFallbackUsesDetailsLocalScopeAndAmbiguity",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleConnectionLocationSnapshotAndGuard"
+          ]
+        },
+        {
+          "behavior": "Nil/explicit null length omits JSON field; zero,false,negative,string,array,dictionary,large integer lengths remain raw. Factories and callback application own snapshots; resets select default lookup/length; nil/cancel/client bindings and invalidUTF8 supplied dictionaries fail before workflowHTTP. Malformed lengthJSON and effective dot/control IDs fail before leaf actionHTTP; a cloud string lookup may already have performed HTTP, preserving lookup-before-action phase order.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordLiteralLengthCaseAndRawOutput",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordOptionsAreOwnedAndReset",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordPreflightAndSourceCallback",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleLengthServerSnapshotsRecordAndReset",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleNilCancelledAndSourceBindingsPreflight"
+          ]
+        },
+        {
+          "behavior": "Raw output membership is case-sensitive and cast is not coercion: null/false/0/list/dict values preserved, missing key is Value null/HasOutput false, explicit null is true; empty root lists/quiet strings return null, output-containing nonmapping/rootnull/scalar or malformed/204 JSON retains actual response error.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordMembershipPresenceAndShape",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleCleanAction400OnlyAndRawPresence"
+          ]
+        },
+        {
+          "behavior": "Falsey dictionary id maps to Source /servers//action; a dictionary-valued id follows the selected Proxy inner-ID extraction once; absent outerID fails before action, absent innerID uses the falsey route. Arbitrary Server constructor attrs/descriptors remain SDK-R1 foundation gaps. Effective ID trims outer slashes, then bounded dot/control validation/literal escaping; Seed does not fabricate lookup response.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordFalseyAndLiteralIDRoutes",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleDictionaryFalseyIDsAndMissingKeys"
+          ]
+        },
+        {
+          "behavior": "Action onlyclean400 becomes Value JSON emptystring/Unsupported true with actual400 receipt. Dirty400 read/Close/cancel/sticky restoredsource/nativecallback/expandedOkCodes never suppressed; accepted actionread failure preserves independent lookup/action receipts.",
+          "tests": [
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleDirty400NeverBecomesUnsupported",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleCleanRetryStopsAndAcceptedReadKeepsSeparateLookup"
+          ]
+        },
+        {
+          "behavior": "NamedRequests JSON-decoding/nonfinite numeric gaps remain unsupported with actual response proof. Source68 actualCloud/Proxy/Server/Requests2.34.2/urllib32.8.0/CPython3.14.8 observations verified against ef55d7d pin; fixedfind adapter and memoryHTTP post are explicit, not live lookup/auth/retry proof.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordRequestsDecodingAndNonFiniteGapStayExplicit"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8ConsoleUsesCachedComputeAndSuppliedDictionary"
+          ]
+        },
+        {
+          "behavior": "Accepted100..399 remains original source policy; selectedversion retained, undiscoveredversion uses Server2.100 ceiling. FixedemptyAccept/version/request JSON/origin and copiedsourceheaders surviveclean retry/reauth; faults at200/400/401/403/404/429/500/777 keep physicalheaders/body/status and block new action hooks. ErrUnable original401 receipt is recovered explicitly without dropping ErrReauth. Cloud options pre-capture private readerheaders for both lookup/action while original selected bindings remain guarded. Console discovery explicitly copies NovaProfile with StopFaultRetryCallbacks=true; physicaldiscovery503 read+Close faults preserve actual native proof without a POST or hooks; global profile baseline remains unchanged.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordOriginalStatusAndInformationalPolicy",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordDiscoveryUsesServerCeilingAndSelectedShortcut",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordPhysicalFaultsRetainActualProofAndStopActionRetry",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordRetryOwnershipAndNativeReauthentication",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordOwnedSourceHeadersAndIndependentReceipt",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordFailedReauthReceiptKeepsOriginalAndCause",
+            "compute/cloud_server_console_test.go:TestCloudServerConsoleCapturesHeadersBeforeOptionsAndAcrossLookupAction",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordDiscoveryFaultOptInStopsCallbacksBeforeAction"
           ]
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/python-cloud-parity.md",
+        "compute/cloud-server-console-python.md",
+        "README.md"
       ],
-      "differences": [],
+      "differences": [
+        "Gophercloudv2.15.0 and openstacksdk ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe are pinned. Closed JSON options are SDK-owned concrete factories; callers need no interface builder. Value rawJSON plus HasOutput/Unsupported and separate lookup/seed/action evidence replaces dynamic str|None return.",
+        "SDK-R1/C1/S1 Resource class/constructor/session/cache foundations remain separate shared gaps; general Proxy.get_server_console_output and mutable Server/attrs are not newly mapped. No full cloud get_server expansion is claimed.",
+        "Nil/cancel and invalid unsafe route controls are bounded preflight; effective IDs are escaped literal segments inside the captured Nova origin. Falsey and one-level nested dictionary ID Source lanes remain supported.",
+        "Go integer/rawJSON options retain finite literal values instead of prematurely casting Source annotations. Go raw numbers preserve their original decimal spelling/large integers rather than Python float conversion; nonfinite Python values remain an explicit named gap.",
+        "Synthetic final informational199 status tests establish policy only, because actual net/http may process1xx internally. SDK action ownership guards block retry/auth hooks after physical/context/source faults; reused FindRecord existing lookup hook semantics remain unchanged.",
+        "Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds."
+      ],
       "remaining": [
-        "Python turns a 400 BadRequestException from the console action into an empty string for clouds without console logs; Go ConsoleOutput returns the 400 and only caller-side status handling could reproduce the result."
+        "Requests Response.json full encoding selection/explicitcharsets/BOM/guess/text fallback is not implemented. Actual Source application/json;charset=ISO-8859-1 nonUTF8 café succeeds, whereas current UTF8JSON record returns ErrUnsupported and the actual rawresponse. This reachable normalresponse branch prevents complete named mapping.",
+        "Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved."
       ]
     },
     {
@@ -103124,58 +103514,458 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/list_networks",
       "source_fingerprint": "8dab8ab34ae1f4522ddfe1c0d942e01b5c77224ec5360d04ecb199695c5201fa",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListNetworkRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ListNetworkRecords"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Source list service absence returns owned nonnil [] even on a nil service before filters/JMES/HTTP. Truthy list filters require a JSON mapping, falsey filters become empty mapping; configured service errors are not silently mapped to absence.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListAbsentServicePrecedesFiltersAndSearchHasNoAbsenceGate",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListFalseyFiltersAndSearchOrderedNameUpdate"
+          ]
+        },
+        {
+          "behavior": "New connected Source lane uses cloned SourceStatusPolicy/SourceLinkPolicy and the complete existing Network descriptor/query profile. Original row/full page/header/status proof remains separate from projected defaults, large integers, Python-loaded local bool/number equality and owned connected location. Unknown availability_zone is read as the Source runtime attribute, while tenant_id is not inferred as Network.project_id.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawControlsLocalLoadedEqualityPagingAndReceipts",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListSourceStatusDefaultsAndConnectedLocation"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type fail during Proxy call; one-pass ordered conflicting attrs then reject restored base_path/paginated/cls/session collisions but ignore restored self/resource_type and restored JMES spelling. Raw headers/base_path/microversion are evaluated only when the Resource generator is consumed. Explicit empty base path returns empty with no HTTP but still checks iteration-start cancellation/source guard.",
+          "tests": [
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListRawFormalsRemainLazyAcrossProxyPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOriginalAndRestoredBindingHaveDifferentPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListEmptyPathSkipsHTTPAndKeepsIterationGuards",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals"
+          ]
+        },
+        {
+          "behavior": "Opaque Proxy JMES values retain Source generator identity and HTTP0 timing; @ is consumed by cloud list(), array/string/object literals become iterable values, projection null/noniterable results and type errors fail without HTTP. Nested generator values retain laziness/location/source and no fabricated JSON/HTTP receipts. Go object keys iterate lexical order rather than Source insertion order, asserted explicitly.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOpaqueProxyStaysLazyWithOwnedLocation"
+          ]
+        },
+        {
+          "behavior": "Raw JSON microversion falsey nonnull values suppress headers, null uses selected version, numeric/bool and iterable tuple values follow the separately audited Keystoneauth JSON-domain normalization. Concrete Headers/Microversion/Location options and raw filters snapshot caller inputs before guarded callback/response use; original selected source and live token are preserved.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource"
+          ]
+        },
+        {
+          "behavior": "Cloud collection discards partial public outputs on late failure while actual page rejection/physical proof is retained. Accepted200 and rejected401/404/503 read+Close/cancel/source lanes close physical bodies once, make no retry/reauth calls and preserve actual status/body/header. Native401 independent ErrOriginal value and ErrReauth causes remain available; clean retry/token renewal are guarded and bounded in fixtures.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListPhysicalFaultsKeepActualReceiptAndNoNativeHooks",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListCleanRetryTokenRenewalAndGuardedRetry"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-network-lists-python.md",
+        "README.md"
+      ],
+      "differences": [
+        "SDK-R1: Go returns owned RawResource/receipt views instead of a mutable Python Resource and cache/lifecycle object. Declared descriptors are projected before row return and may fail earlier for an unaccessed malformed property. Actual Wire/Envelope/header/status are never forged from normalized values; runtime Resource.microversion attribute/object identity remain generic Resource parity scope.",
+        "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
+        "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
+        "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
+        "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity."
+      ],
       "remaining": [
-        "The underlying python:network/v2/networks listing is unresolved and the native Network model omits router:external, provider, MTU, DNS and port security attributes that the Python Network Resource exposes; there is no full-JSON network list record API.",
-        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+        "SDK-owned JSON Source list still limits max_items to a nonnegative Go integer. Actual Source accepts falsey None/False, bool True, negative and fractional numeric caps and defers string comparison errors until a nonempty page. True/-1/0.5/1.5/string caps therefore differ in requests, returned raw rows or error phase; actual pinned Source Network174 limit/cap cases are recorded in the cycle8 Source receipt.",
+        "Inherited limit/marker REST preflight rejects raw limit False, negative, fractional, string and repeated values that actual Source can send. Empty/nonempty page and subsequent marker behavior differ; this is a reachable JSON named query/formal gap rather than arbitrary Python-object injection.",
+        "With ordinary integer max_items equal to exactly one whole page, Source checks the cap only before the next raw row and may perform a following marker GET. Current REST stops immediately after the capped raw row and cannot expose that next request, later HTTP/physical failure, cancellation or source guard proof. max_items=2 with two initial raw rows is an actual Source GET2 versus current Go GET1 counterexample.",
+        "Raw JSON microversion exponent overflow remains a precise named boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof. Source empty base_path=\"\" bypasses all HTTP/KSA microversion normalization, so invalid \"broken\"/[\"wrong\"] values return empty HTTP0; current Go normalizes the version before its empty-path return and errors. This reachable empty-route timing difference remains in the same named raw-microversion gap."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_networks",
       "source_fingerprint": "5ceee3657246f451f4380fb2161880b84742f8cf5616c291f3ddb7563fd6393b",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchNetworkRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchNetworkRecords"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Source search has no has_service absence gate: literal nonempty identity seeds server name query, filters ordered dict.update replaces that name and JSON iterable-pairs are accepted. UUID/glob inputs remain literal name; no local ID/name/_filter_list is invented.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListAbsentServicePrecedesFiltersAndSearchHasNoAbsenceGate",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListFalseyFiltersAndSearchOrderedNameUpdate"
+          ]
+        },
+        {
+          "behavior": "New connected Source lane uses cloned SourceStatusPolicy/SourceLinkPolicy and the complete existing Network descriptor/query profile. Original row/full page/header/status proof remains separate from projected defaults, large integers, Python-loaded local bool/number equality and owned connected location. Unknown availability_zone is read as the Source runtime attribute, while tenant_id is not inferred as Network.project_id.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawControlsLocalLoadedEqualityPagingAndReceipts",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListSourceStatusDefaultsAndConnectedLocation"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type fail during Proxy call; one-pass ordered conflicting attrs then reject restored base_path/paginated/cls/session collisions but ignore restored self/resource_type and restored JMES spelling. Raw headers/base_path/microversion are evaluated only when the Resource generator is consumed. Explicit empty base path returns empty with no HTTP but still checks iteration-start cancellation/source guard.",
+          "tests": [
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListRawFormalsRemainLazyAcrossProxyPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOriginalAndRestoredBindingHaveDifferentPhases",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListEmptyPathSkipsHTTPAndKeepsIterationGuards",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals"
+          ]
+        },
+        {
+          "behavior": "Opaque Proxy JMES values retain Source generator identity and HTTP0 timing; @ is consumed by cloud list(), array/string/object literals become iterable values, projection null/noniterable results and type errors fail without HTTP. Nested generator values retain laziness/location/source and no fabricated JSON/HTTP receipts. Go object keys iterate lexical order rather than Source insertion order, asserted explicitly.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListOpaqueJMESListConversionAndDeferredFormals",
+            "network/v2/networks/python_cloud_lists_test.go:TestPythonNetworkCloudListOpaqueProxyStaysLazyWithOwnedLocation"
+          ]
+        },
+        {
+          "behavior": "Raw JSON microversion falsey nonnull values suppress headers, null uses selected version, numeric/bool and iterable tuple values follow the separately audited Keystoneauth JSON-domain normalization. Concrete Headers/Microversion/Location options and raw filters snapshot caller inputs before guarded callback/response use; original selected source and live token are preserved.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListRawMicroversionTransportAndUnknownLocationZone",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource"
+          ]
+        },
+        {
+          "behavior": "Cloud collection discards partial public outputs on late failure while actual page rejection/physical proof is retained. Accepted200 and rejected401/404/503 read+Close/cancel/source lanes close physical bodies once, make no retry/reauth calls and preserve actual status/body/header. Native401 independent ErrOriginal value and ErrReauth causes remain available; clean retry/token renewal are guarded and bounded in fixtures.",
+          "tests": [
+            "network/cloud_network_lists_test.go:TestCloudNetworkListLateFailureIsAtomicAndOptionsOwnSource",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListPhysicalFaultsKeepActualReceiptAndNoNativeHooks",
+            "network/cloud_network_lists_test.go:TestCloudNetworkListCleanRetryTokenRenewalAndGuardedRetry"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-network-lists-python.md",
+        "README.md"
+      ],
+      "differences": [
+        "SDK-R1: Go returns owned RawResource/receipt views instead of a mutable Python Resource and cache/lifecycle object. Declared descriptors are projected before row return and may fail earlier for an unaccessed malformed property. Actual Wire/Envelope/header/status are never forged from normalized values; runtime Resource.microversion attribute/object identity remain generic Resource parity scope.",
+        "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
+        "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
+        "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
+        "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity."
+      ],
       "remaining": [
-        "search_networks delegates to the unresolved python:network/v2/networks listing with name_or_id as the name query, and the native Network model omits the extension attributes Python returns."
+        "SDK-owned JSON Source list still limits max_items to a nonnegative Go integer. Actual Source accepts falsey None/False, bool True, negative and fractional numeric caps and defers string comparison errors until a nonempty page. True/-1/0.5/1.5/string caps therefore differ in requests, returned raw rows or error phase; actual pinned Source Network174 limit/cap cases are recorded in the cycle8 Source receipt.",
+        "Inherited limit/marker REST preflight rejects raw limit False, negative, fractional, string and repeated values that actual Source can send. Empty/nonempty page and subsequent marker behavior differ; this is a reachable JSON named query/formal gap rather than arbitrary Python-object injection.",
+        "With ordinary integer max_items equal to exactly one whole page, Source checks the cap only before the next raw row and may perform a following marker GET. Current REST stops immediately after the capped raw row and cannot expose that next request, later HTTP/physical failure, cancellation or source guard proof. max_items=2 with two initial raw rows is an actual Source GET2 versus current Go GET1 counterexample.",
+        "Raw JSON microversion exponent overflow remains a precise named boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof. Source empty base_path=\"\" bypasses all HTTP/KSA microversion normalization, so invalid \"broken\"/[\"wrong\"] values return empty HTTP0; current Go normalizes the version before its empty-path return and errors. This reachable empty-route timing difference remains in the same named raw-microversion gap."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_subnets",
       "source_fingerprint": "d273c50a478828129ff5aceb3d2483dc679ab7b0c1f63122c5e30a6f069e378e",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.JMESPathIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.MarshalJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ListSubnetRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.ListSubnetRecords"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "New opt-in source profile clones pinned Subnet/NetworkResource descriptor and query declarations; missing defaults, bool/int/list casting, ordered canonical/wire response aliases, project/tenant fallback, unknown Body and large integer tokens are owned. Row if_match is a constructor Header and actual page Header remains separate. Baseline native/Find/Resources policies stay unchanged.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOwnedSparseDefaultsAndOrderedAliases",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsDescriptorsRowHeadersAndIndependentActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Canonical/wire Query mapping is pushed down without an invented name hint; non-query declared Body attributes filter loaded descriptors locally with Python loaded JSON equality. Unknown kwargs are discarded before application marshaling. Source max_items/limit raw behavior remains incomplete and is explicitly excluded below.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsPushdownLocalLoadedFiltersAndUnknownMarshalDiscard"
+          ]
+        },
+        {
+          "behavior": "Proxy._list evaluates JMESPath against the actual opaque Resource.list generator, before Resource control normalization or HTTP. Index/projection/type expressions produce null without HTTP; literals preserve arbitrary JSON; @ returns the same generator, nested to_array keeps it unconsumed, and length errors before HTTP. ListRecords/AllRecords are ordinary resource-only convenience APIs.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type/cls/session collisions and restored cls/session/base_path/paginated conflicts are eager. Truthy __conflicting_attrs restores ordered kwargs once; restored self/resource_type are discarded as unknown Resource attrs and restored JMES does not replace original expression. Resource headers/base_path/microversion are deferred until actual generator consumption, so an opaque empty literal avoids invalid controls entirely.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOneLevelRestorationBindingAndImmutableOptions",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Only explicit empty string base_path produces an empty HTTP0 generator; null selects default, false/zero/list/object fails at consumption. Context/source checks still run before an empty generator returns. Literal same-origin service-relative path policy remains narrower than arbitrary Python formatting.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsEmptyPathOnlyNullDefaultAndDelayedCancellation"
+          ]
+        },
+        {
+          "behavior": "Per-call microversion None keeps captured default and every other falsey JSON value disables it. Ordinary JSON numeric/string/list/object-key iterable normalization follows KSA conventions including true/1 -> 1.0, [2,4] -> 2.4, v2.4 -> 2.4, latest and major.latest rejection. Python overflow infinity/latest conversion remains unsupported.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMicroversionJSONDomainAndDefaultDisable"
+          ]
+        },
+        {
+          "behavior": "Source status100..399, plural singleton objects, required accepted JSON parsing, row constructor/descriptor faults, root links precedence, ignored dictionary next, HTTP/limit/raw-marker continuation use the shared guarded pager. Actual late-page body/read/Close failures preserve original native/ResponseError evidence and callbacks are suppressed only for physical faults; clean token renewal retains captured headers. Dynamic cap exact-boundary semantics remain named gaps.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsSourceLinkPrecedenceAndRawMarkerMaxItems",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMalformedAcceptedPagesKeepPhysicalProof",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsLatePhysicalFaultsNative401AndNoFaultReplay",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsCleanReauthenticationAndCapturedHeaders"
+          ]
+        },
+        {
+          "behavior": "Concrete Source cloud read options snapshot raw filters, transport map/pointers, selected service/API/provider/source and current location. List alone checks network availability before filter/JMES evaluation and can return [] for an owned clean catalog absence; Search never suppresses unavailable network and directly sends a truthy name before dict.update(filters). UUID/glob strings remain literal name queries. Truthy list filters require a mapping, while search accepts JSON iterable key/value pairs and name override.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsDirectQuerySearchOverrideAndFalseyFilters",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsOnlyListMissingServiceSkipsInvalidFilters",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsSnapshotsHeaderNilResetAndSourceMutation"
+          ]
+        },
+        {
+          "behavior": "Cloud list() consumes actual Resource generators fully or converts arbitrary JSON lists/Unicode strings/map keys. It rejects scalar/null, preserves falsey literal members, and never invents Resource/Wire/header/status from a JSON literal. Nested opaque generators stay unconsumed with JSON nil and retain SDK location/source/context when subsequently consumed. Go dictionary key iteration is explicitly lexical.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsLiteralPolymorphismNoInventedResourcesOrReceipts",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Current location is SDK owned: loaded falsey/current project retains current scope and truthy foreign project clears names; unknown availability_zone keeps raw null/false/zero/list/object as zone. Response forged location remains actual Wire only. Resource, Wire, Inventory and LastResponse metadata are independently copied.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsSDKLocationRawZoneProjectsAndOwnedEvidence",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Only a complete conversion commits Subnets/Value/JSON; partial actual resources remain in Inventory on late errors. LastResponse is the last observed yielded resource/error receipt, not a guarantee of last empty/filtered page. Post-row nested location/guard failures use immutable actual ResponseError; pre-consumption cancellation has HTTP0/no receipt. Context causes and actual rejected page/descriptor status/body/header stay observable.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsAllPagesCommitOnlyCompleteRowsAndActualFailure",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsPreflightCancellationNilOptionsAndTerminalDescriptor",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-subnet-lists-python.md",
+        "README.md"
+      ],
+      "differences": [
+        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because named cap/limit and nonfinite-version gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
+        "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
+        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions."
+      ],
       "remaining": [
-        "The underlying python:network/v2/subnets listing is unresolved (descriptor coercion, Link-header continuation and returned model differences), so this cloud wrapper cannot be mapped.",
-        "Python returns an empty list when has_service('network') is false; Go has no equivalent."
+        "Named Source max_items gap: shared list controls accept a nonnegative Go integer, while pinned Resource.list accepts falsey dynamic None/false/string/list/object and numeric true/float/negative semantics with deferred comparisons. Source negative can GET before yielding zero, numeric fraction rounds by raw-row comparison, and string may succeed on an empty page but fail at the first nonempty row. This operation remains unresolved; typed ordinary-path coverage is not full Proxy kwargs parity.",
+        "Named Source cap-boundary gap: Resource.list checks max_items before each next raw row. A page containing exactly cap raw rows can trigger another GET before the cap terminates; the shared pager stops on the first page at cap. Nonstandard dynamic limit values have Source comparison/fallback differences and are not closed here. No broader shared/legacy pager mutation was made.",
+        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain. Named empty-route timing gap: Source base_path=\"\" never reaches HTTP/KSA version validation, so invalid microversion can remain unobserved with an empty result; this leaf normalizes version before its empty-route return. Invalid headers still fail before Source while and are not part of this exception.",
+        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_subnets",
       "source_fingerprint": "04dcd17f09c8cd4810000ba9c969e1208d4f56603c448e33bba3de665db9cd14",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.AllRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ProxyListRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.JMESPathIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.RecordListGenerator.MarshalJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListConflictingAttrs",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListLimit",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordListJMESPath",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadOpts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadBasePath",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadCurrentLocation",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchSubnetRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchSubnetRecords"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "New opt-in source profile clones pinned Subnet/NetworkResource descriptor and query declarations; missing defaults, bool/int/list casting, ordered canonical/wire response aliases, project/tenant fallback, unknown Body and large integer tokens are owned. Row if_match is a constructor Header and actual page Header remains separate. Baseline native/Find/Resources policies stay unchanged.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOwnedSparseDefaultsAndOrderedAliases",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsDescriptorsRowHeadersAndIndependentActualEvidence"
+          ]
+        },
+        {
+          "behavior": "Canonical/wire Query mapping is pushed down without an invented name hint; non-query declared Body attributes filter loaded descriptors locally with Python loaded JSON equality. Unknown kwargs are discarded before application marshaling. Source max_items/limit raw behavior remains incomplete and is explicitly excluded below.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsPushdownLocalLoadedFiltersAndUnknownMarshalDiscard"
+          ]
+        },
+        {
+          "behavior": "Proxy._list evaluates JMESPath against the actual opaque Resource.list generator, before Resource control normalization or HTTP. Index/projection/type expressions produce null without HTTP; literals preserve arbitrary JSON; @ returns the same generator, nested to_array keeps it unconsumed, and length errors before HTTP. ListRecords/AllRecords are ordinary resource-only convenience APIs.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Original bound self/resource_type/cls/session collisions and restored cls/session/base_path/paginated conflicts are eager. Truthy __conflicting_attrs restores ordered kwargs once; restored self/resource_type are discarded as unknown Resource attrs and restored JMES does not replace original expression. Resource headers/base_path/microversion are deferred until actual generator consumption, so an opaque empty literal avoids invalid controls entirely.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsOneLevelRestorationBindingAndImmutableOptions",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsProxyGeneratorJMESAndLazyResourceControls"
+          ]
+        },
+        {
+          "behavior": "Only explicit empty string base_path produces an empty HTTP0 generator; null selects default, false/zero/list/object fails at consumption. Context/source checks still run before an empty generator returns. Literal same-origin service-relative path policy remains narrower than arbitrary Python formatting.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsEmptyPathOnlyNullDefaultAndDelayedCancellation"
+          ]
+        },
+        {
+          "behavior": "Per-call microversion None keeps captured default and every other falsey JSON value disables it. Ordinary JSON numeric/string/list/object-key iterable normalization follows KSA conventions including true/1 -> 1.0, [2,4] -> 2.4, v2.4 -> 2.4, latest and major.latest rejection. Python overflow infinity/latest conversion remains unsupported.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMicroversionJSONDomainAndDefaultDisable"
+          ]
+        },
+        {
+          "behavior": "Source status100..399, plural singleton objects, required accepted JSON parsing, row constructor/descriptor faults, root links precedence, ignored dictionary next, HTTP/limit/raw-marker continuation use the shared guarded pager. Actual late-page body/read/Close failures preserve original native/ResponseError evidence and callbacks are suppressed only for physical faults; clean token renewal retains captured headers. Dynamic cap exact-boundary semantics remain named gaps.",
+          "tests": [
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsSourceLinkPrecedenceAndRawMarkerMaxItems",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsMalformedAcceptedPagesKeepPhysicalProof",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsLatePhysicalFaultsNative401AndNoFaultReplay",
+            "network/v2/subnets/python_cloud_lists_test.go:TestPythonSubnetListsCleanReauthenticationAndCapturedHeaders"
+          ]
+        },
+        {
+          "behavior": "Concrete Source cloud read options snapshot raw filters, transport map/pointers, selected service/API/provider/source and current location. List alone checks network availability before filter/JMES evaluation and can return [] for an owned clean catalog absence; Search never suppresses unavailable network and directly sends a truthy name before dict.update(filters). UUID/glob strings remain literal name queries. Truthy list filters require a mapping, while search accepts JSON iterable key/value pairs and name override.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsDirectQuerySearchOverrideAndFalseyFilters",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsOnlyListMissingServiceSkipsInvalidFilters",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsSnapshotsHeaderNilResetAndSourceMutation"
+          ]
+        },
+        {
+          "behavior": "Cloud list() consumes actual Resource generators fully or converts arbitrary JSON lists/Unicode strings/map keys. It rejects scalar/null, preserves falsey literal members, and never invents Resource/Wire/header/status from a JSON literal. Nested opaque generators stay unconsumed with JSON nil and retain SDK location/source/context when subsequently consumed. Go dictionary key iteration is explicitly lexical.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsLiteralPolymorphismNoInventedResourcesOrReceipts",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Current location is SDK owned: loaded falsey/current project retains current scope and truthy foreign project clears names; unknown availability_zone keeps raw null/false/zero/list/object as zone. Response forged location remains actual Wire only. Resource, Wire, Inventory and LastResponse metadata are independently copied.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsSDKLocationRawZoneProjectsAndOwnedEvidence",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Only a complete conversion commits Subnets/Value/JSON; partial actual resources remain in Inventory on late errors. LastResponse is the last observed yielded resource/error receipt, not a guarantee of last empty/filtered page. Post-row nested location/guard failures use immutable actual ResponseError; pre-consumption cancellation has HTTP0/no receipt. Context causes and actual rejected page/descriptor status/body/header stay observable.",
+          "tests": [
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsAllPagesCommitOnlyCompleteRowsAndActualFailure",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsPreflightCancellationNilOptionsAndTerminalDescriptor",
+            "network/cloud_subnet_lists_test.go:TestCloudSubnetListsNestedGeneratorCarriesLocationAndDelayedGuards"
+          ]
+        },
+        {
+          "behavior": "Connection exposes this cloud read through its cached service and SDK-owned location defaults. Cancellation is checked before catalog discovery. Only Neutron list helpers turn clean missing catalog endpoints into [] before evaluating options; searches retain catalog errors. Caller-provided options retain their explicit values.",
+          "tests": [
+            "connection_cycle8_reads_test.go:TestConnectionCycle8CancelledReadsNeverDiscover",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8MissingNeutronOnlyListsSkipOptions",
+            "connection_cycle8_reads_test.go:TestConnectionCycle8NetworkReadsCacheServiceAndForwardNameQuery"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-subnet-lists-python.md",
+        "README.md"
+      ],
+      "differences": [
+        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because named cap/limit and nonfinite-version gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
+        "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
+        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions."
+      ],
       "remaining": [
-        "search_subnets delegates to the unresolved python:network/v2/subnets listing with name_or_id as the name query."
+        "Named Source max_items gap: shared list controls accept a nonnegative Go integer, while pinned Resource.list accepts falsey dynamic None/false/string/list/object and numeric true/float/negative semantics with deferred comparisons. Source negative can GET before yielding zero, numeric fraction rounds by raw-row comparison, and string may succeed on an empty page but fail at the first nonempty row. This operation remains unresolved; typed ordinary-path coverage is not full Proxy kwargs parity.",
+        "Named Source cap-boundary gap: Resource.list checks max_items before each next raw row. A page containing exactly cap raw rows can trigger another GET before the cap terminates; the shared pager stops on the first page at cap. Nonstandard dynamic limit values have Source comparison/fallback differences and are not closed here. No broader shared/legacy pager mutation was made.",
+        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain. Named empty-route timing gap: Source base_path=\"\" never reaches HTTP/KSA version validation, so invalid microversion can remain unobserved with an empty result; this leaf normalizes version before its empty-route return. Invalid headers still fail before Source while and are not part of this exception.",
+        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
       ]
     },
     {
