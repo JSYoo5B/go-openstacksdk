@@ -34,7 +34,7 @@ func SelectLoaded(rows []json.RawMessage, nameOrID string, filters *json.RawMess
 	return selectWithPolicy(rows, nameOrID, filters, guard, selectionPolicy{loaded: true})
 }
 
-type selectionPolicy struct{ loaded bool }
+type selectionPolicy struct{ loaded, loadedExpression bool }
 
 func selectWithPolicy(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, guard func() error, policy selectionPolicy) (result Result, err error) {
 	defer func() {
@@ -91,7 +91,7 @@ func selectWithPolicy(rows []json.RawMessage, nameOrID string, filters *json.Raw
 		return selected(views, indices, guard)
 	}
 	if filter.kind == '"' {
-		return expression(views, indices, filter.text, guard)
+		return expressionPolicy(views, indices, filter.text, guard, policy.loadedExpression)
 	}
 	matched := make([]int, 0, len(indices))
 	for _, index := range indices {
@@ -183,6 +183,10 @@ func selected(views []*node, indices []int, guard func() error) (Result, error) 
 }
 
 func expression(views []*node, indices []int, source string, guard func() error) (Result, error) {
+	return expressionPolicy(views, indices, source, guard, false)
+}
+
+func expressionPolicy(views []*node, indices []int, source string, guard func() error, loaded bool) (Result, error) {
 	input, err := selected(views, indices, guard)
 	if err != nil {
 		return Result{}, err
@@ -196,7 +200,11 @@ func expression(views []*node, indices []int, source string, guard func() error)
 	if err := check(guard); err != nil {
 		return Result{}, err
 	}
-	output, err := jmespath.Search(source, data)
+	search := jmespath.Search
+	if loaded {
+		search = jmespath.SearchLoaded
+	}
+	output, err := search(source, data)
 	if err != nil {
 		return Result{}, err
 	}
@@ -211,6 +219,12 @@ func expression(views []*node, indices []int, source string, guard func() error)
 		return Result{}, err
 	}
 	return Result{Value: value, Expression: true}, nil
+}
+
+// SelectSource adds finite CPython-loaded floating expression operands to
+// SelectLoaded's mapping policy without changing previous selection callers.
+func SelectSource(rows []json.RawMessage, nameOrID string, filters *json.RawMessage, guard func() error) (Result, error) {
+	return selectWithPolicy(rows, nameOrID, filters, guard, selectionPolicy{loaded: true, loadedExpression: true})
 }
 
 func (policy selectionPolicy) truthy(value *node) (bool, error) {
