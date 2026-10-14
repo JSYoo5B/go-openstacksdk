@@ -59,6 +59,13 @@ Quota 반복 네 번째 사이클의 Python/Go 사용 비교:
 
 `conn.Network(ctx)`의 세 QoS 생성 helper가 필수 값의 0/null, 옵션 검증, 확장 광고와 부모 정책 조회를 처리합니다. `conn.StreamObjectChunks(ctx, container, object, options...)`는 첫 순회에서 Swift를 발견해 캐시하고, SDK가 기본 1024바이트·압축 해제·깨끗한 404의 빈 결과·응답 cleanup을 제공합니다. 소비자는 `stream.Chunks()`를 순회하고 조기에 멈췄을 때 `stream.Err()` 또는 `Close()`로 cleanup 오류를 확인합니다. 반환 인터페이스의 구현과 연결은 SDK가 소유하므로 애플리케이션의 builder 구현이 필요하지 않습니다.
 
+Quota 반복 다섯 번째 사이클의 Python/Go 사용 비교:
+
+- Neutron: [QoS 규칙의 변경된 필드만 수정](network/cloud-qos-rule-updates-python.md), [라우터 기본값·게이트웨이·AZ 검사](network/cloud-router-create-python.md), [서브넷 조회·기본값·확장 속성](network/cloud-subnet-create-python.md).
+- Swift: [문자열 조회와 SDK 소유 파일·빌린 writer 출력](objectstorage/cloud-object-get-python.md).
+
+`conn.CreateRouterRecord(ctx, options...)`와 `conn.CreateSubnetRecord(ctx, networkName, options...)`가 캐시한 Neutron 서비스와 Connection 위치 기본값을 제공합니다. QoS update는 서비스 helper가 부모·현재 규칙 조회와 변경 감지를 맡습니다. `conn.GetObjectText(ctx, container, object, options...)`는 명시 문자 인코딩·출력 소유권·깨끗한 404를 처리합니다. Swift의 통계적 charset 감지는 미구현이며 해당 연산의 전체 판정은 unresolved로 유지합니다.
+
 [외부 Go 프로젝트 설치 안내](docs/install.md)에서 공개 import와 검증한 커밋의 사용법을 확인합니다.
 
 [이름 변경과 이전 안내](docs/renaming.md)는 새 모듈 경로와 `openstack` 패키지 이름을 설명합니다.

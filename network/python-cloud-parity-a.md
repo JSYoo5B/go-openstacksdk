@@ -27,8 +27,8 @@
 | [`delete_firewall_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L804) | `Find` 후 `API.Delete` (404를 `False`로 바꾸는 API 없음) | unresolved |
 | [`delete_firewall_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1010) | 위와 같음 | unresolved |
 | [`delete_firewall_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1299) | 위와 같음 | unresolved |
-| [`create_router`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2250) | `routers.API.CreateWithAttributes` (기본값·AZ 확인 없음) | unresolved |
-| [`create_subnet`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2401) | `networks.API.FindRecord`, `subnets.API.CreateWithAttributes` (검증·기본값 없음) | unresolved |
+| [`create_router`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2250) | `Connection.CreateRouterRecord` / `network.Service.CreateRouterRecord` ([사용법](cloud-router-create-python.md)) | go_mapping |
+| [`create_subnet`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2401) | `Connection.CreateSubnetRecord` / `network.Service.CreateSubnetRecord` ([사용법](cloud-subnet-create-python.md)) | go_mapping |
 | [`get_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L221) | `network.Service.GetQoSPolicyRecord` ([기본 조회와 잔여](cloud-qos-policy-actions-python.md)) | unresolved · raw headers/fetch controls |
 | [`create_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1435) | `network.Service.CreateQoSPolicyRecord` ([사용법](cloud-qos-policy-mutations-python.md)) | go_mapping · 집중 검증 PASS |
 | [`delete_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1512) | `network.Service.DeleteQoSPolicyRecord` ([사용법](cloud-qos-policy-actions-python.md)) | go_mapping · root network race PASS |
@@ -77,9 +77,9 @@ Python docstring은 filters에 jmespath 문자열도 받는다고 적지만 실�
 
 ## Router·Subnet 생성
 
-`create_router`는 `admin_state_up=True`를 항상 넣고, truthy인 name과 None이 아닌 project_id를 더하며, `ext_gateway_net_id`·`enable_snat`·`ext_fixed_ips`를 `external_gateway_info`로 묶습니다. `availability_zone_hints`가 있으면 list인지 검사하고 `router_availability_zone` 확장이 없으면 예외를 냅니다. Go `routers.API.CreateWithAttributes`는 준 속성만 보내므로 인수 없이 부르면 `{"router": {}}`가 나갑니다. 호출자가 같은 본문을 직접 만들 수는 있지만 기본값, 묶음 변환, 확장 확인을 SDK가 하지 않습니다.
+`create_router`는 `admin_state_up=True`를 항상 넣고, truthy인 name과 None이 아닌 project_id를 더하며, `ext_gateway_net_id`·`enable_snat`·`ext_fixed_ips`를 `external_gateway_info`로 묶습니다. `availability_zone_hints`가 있으면 list인지 검사하고 `router_availability_zone` 확장이 없으면 예외를 냅니다. 새 `CreateRouterRecord`가 이 기본값·gateway 구성·fresh AZ gate를 소유합니다. Connection helper는 캐시한 서비스와 owned 위치 기본값을 제공합니다. 기존 native `CreateWithAttributes`는 explicit attrs 동작을 유지합니다.
 
-`create_subnet`은 `get_network`로 네트워크를 찾고(tenant_id가 있으면 filter로 사용), cidr와 subnetpool 조합을 검사하며, `ip_version=4`·`enable_dhcp=False`를 항상 넣습니다. 그 밖에도 문자열 ip_version 변환, `disable_gateway_ip`의 `gateway_ip: null` 변환, `subnetpool_name_or_id` 검색을 수행합니다. Go `subnets.API.CreateWithAttributes`는 이런 검증과 기본값 없이 준 속성만 보냅니다.
+`create_subnet`은 `get_network`로 네트워크를 찾고(tenant_id가 있으면 filter로 사용), cidr와 subnetpool 조합을 검사하며, `ip_version=4`·`enable_dhcp=False`를 항상 넣습니다. 그 밖에도 문자열 ip_version 변환, `disable_gateway_ip`의 `gateway_ip: null` 변환, `subnetpool_name_or_id` 검색을 수행합니다. 새 `CreateSubnetRecord`가 network/pool의 closed Source 조회·검증 순서·기본값·gateway·arbitrary kwargs를 소유하고 실제 lookup/POST 증거를 나눠 보존합니다. 기존 native `CreateWithAttributes`는 유지하며 일반 Proxy/Find의 raw 계약과 SDK-R1/C1/S1는 별도 잔여입니다.
 
 ## QoS
 
@@ -108,6 +108,6 @@ A의 QoS 13행 중 단일 rule get 3행과 삭제 4행, 정책 create 1행 및 �
 - `create_firewall_rule`: Gophercloud `rules.CreateOpts`가 protocol·action을 필수로 요구해 인수 없는 Python 본문을 보낼 수 없습니다.
 - `get_firewall_rule`, `get_firewall_policy`, `get_firewall_group`: FWaaS 검색이 filters query와 400·403 fallback을 지원하지 않습니다.
 - `delete_firewall_rule`, `delete_firewall_policy`, `delete_firewall_group`: 위 검색 제약에 더해, 삭제 404를 `False`로 바꾸는 SDK API가 없습니다.
-- `create_router`: `admin_state_up=True` 기본값, gateway 인수 묶음, AZ hint 검사와 `router_availability_zone` 확장 확인을 수행하는 SDK 헬퍼가 없습니다.
-- `create_subnet`: 네트워크·subnetpool 검색, cidr 조합 검증, `ip_version`·`enable_dhcp` 기본값과 gateway 변환을 수행하는 SDK 헬퍼가 없습니다.
+- `create_router`: 새 cloud/Connection helper의 기본값·gateway/AZ 계약은 집중 race·독립 main build로 검증했습니다. 일반 Proxy 전체 Resource/session 계약과 실클라우드 권한은 별도입니다.
+- `create_subnet`: 새 cloud/Connection helper의 closed lookup·검증·기본값·gateway·확장 attrs 계약은 집중 race·독립 main build로 검증했습니다. 일반 raw Find/Proxy 및 전체 Resource/session 잔여는 유지합니다.
 - QoS: 단일 rule get 3행과 정책/규칙 delete 4행을 실제 cloud helper에 연결했습니다. 정책 create는 이번 cloud helper로 대응합니다. 규칙 create 3행도 새 cloud helper에 연결했습니다. unresolved는 get_qos_policy raw headers/fetch controls와 관리자 rule-type details의 2개입니다. 규칙 create의 root 집중race·정확한main build·204개testpackage 전체gate PASS입니다. 새 delete의 root network race PASS와 독립 main build·204개 test package 전체 gate·중앙 판정 PASS을 구분합니다.
