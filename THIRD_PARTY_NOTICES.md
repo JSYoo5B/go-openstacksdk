@@ -202,3 +202,14 @@ applicable license and a summary of changes alongside the affected component.
 - Original notices: [complete module LICENSE](licenses/klauspost-compress-v1.18.0-LICENSE), [vendored xxhash MIT LICENSE](licenses/klauspost-compress-v1.18.0-xxhash-LICENSE), and [Snappy reference BSD LICENSE](licenses/klauspost-compress-v1.18.0-snapref-LICENSE).
 
 The zstd code retains Klaus Post and The Go Authors BSD-3-Clause notices and its Yann Collet source credits. The vendored cespare/xxhash code retains Caleb Spare's 2016 MIT notice. The imported package includes same-module Snappy support with the Snappy-Go Authors' 2011/2016 BSD-3-Clause notices. The complete module license also retains Apache-2.0 for gzhttp and MIT for readahead/filepathx; those package scopes are preserved in the original text and do not make the zstd implementation Apache-2.0. The Go module has no external non-stdlib runtime requirements and is pinned independently of the Gophercloud/OpenStackSDK source inventories.
+
+## Go extended text library: explicit Swift response codecs
+
+- Source: [golang.org/x/text v0.37.0](https://cs.opensource.google/go/x/text/+/v0.37.0:).
+- License: BSD-3-Clause; copyright 2009 The Go Authors.
+- Exact original: [x/text LICENSE](licenses/golang-x-text-v0.37.0-LICENSE).
+- Scope: imported encoding, charmap, IANA, Unicode/UTF-32 and transform packages
+  for explicit response charsets and BOMs. Source statistical charset detection
+  remains unresolved; this module does not provide that contract.
+
+The module is imported rather than copied and preserves the SDK Go 1.25 minimum.

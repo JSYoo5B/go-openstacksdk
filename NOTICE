@@ -58,3 +58,7 @@ and original source credits retain their respective notices. The complete
 module license, xxhash MIT license and Snappy BSD reference license are retained
 under licenses/ and described in THIRD_PARTY_NOTICES.md. No implementation
 source from this module is copied into this SDK.
+
+Swift explicit text codecs import golang.org/x/text v0.37.0, copyright 2009
+The Go Authors. Its unchanged BSD-3-Clause notice is retained under licenses/
+and described in THIRD_PARTY_NOTICES.md; implementation source is not copied.

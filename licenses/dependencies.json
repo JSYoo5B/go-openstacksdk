@@ -32,5 +32,11 @@
       "klauspost-compress-v1.18.0-xxhash-LICENSE",
       "klauspost-compress-v1.18.0-snapref-LICENSE"
     ]
+  },
+  "golang.org/x/text": {
+    "version": "v0.37.0",
+    "licenses": [
+      "golang-x-text-v0.37.0-LICENSE"
+    ]
   }
 }
