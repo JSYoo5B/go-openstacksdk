@@ -11,6 +11,8 @@
 
 **현재 구현 (2026-10-15, quota 반복 여섯 번째 사이클): 고정9개 후보 구현·8worker 검토·문서·집중 및 전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `5079609c`입니다. Connection7개 진입점과 library-owned 기본값·옵션·응답 증거를 구현했고 새 **78그룹·263개 하위 사례**가10개 집중 package에서 PASS했습니다. 판정은9행 모두 unresolved입니다. 기존 Network Proxy의 cap·raw limit·추가 페이지 요청·MV 순서 차이를 실제 Source 실행으로 발견하여 **go_mapping→unresolved1행**을 정정했습니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, supported0이며 계약은 **7,406→7,482개(+76)**입니다. 사용 가능한 부분 구현을 전체 named parity 완료로 집계하지 않습니다.
 
+**병렬 미완료 묶음 마무리 (2026-10-15): 전체2,059/3,228(63.8%)·핵심1,981/2,158(91.8%).** 앞서 중지한 입력 표현·응답 모델 단위의 남은 작업을 현재 main에 맞춰 마무리했습니다. Nova aggregate·flavor·service 수정과 migration·quota reset, Neutron VPN·BGP·BGPVPN 수정, firewall rule 생성·삽입, DHCP agent 목록, tap mirror 반복 query, Placement allocation 생성·resource class 이름 변경·allocation candidate 반복 query, Glance task null 입력, Keystone federation mapping·project endpoint·role assignment record, Nova AZ 상세와 구형 service enable·disable을 SDK 소유 record로 대응시켰습니다. 다른 세션이 먼저 구현한 cloud extension 확인, domain record, port·network 목록, Swift object 목록 초안은 버렸습니다.
+
 | 소유 단위 | 고정 후보 | 최종 구현·검토 상태 |
 |---|---|---|
 | Network 목록 | Proxy networks·cloud list/search3개 | query 병합·opaque generator·Resource/location·전체 페이지, Source348·13그룹 PASS; cap/limit/추가 GET/MV 잔여·unresolved3 |
