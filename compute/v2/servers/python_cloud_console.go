@@ -18,6 +18,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
+	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -184,7 +185,12 @@ func (a *API) ConsoleOutputRecord(ctx context.Context, serverID string, options 
 	if err := errors.Join(prior, guard(ctx)); err != nil {
 		return result, wrap(err)
 	}
-	value, present, err := consoleRecordOutput(response.Body)
+	normalized, err := responsejson.Normalize(response.Body, response.Header)
+	var value json.RawMessage
+	var present bool
+	if err == nil {
+		value, present, err = consoleRecordOutput(normalized)
+	}
 	if err = errors.Join(err, guard(ctx)); err != nil {
 		return result, wrap(response.Fail(err))
 	}
@@ -199,7 +205,7 @@ func consoleRecordInvalid(format string, args ...any) error {
 func consoleRecordOutput(raw json.RawMessage) (json.RawMessage, bool, error) {
 	raw = bytes.TrimSpace(raw)
 	if !utf8.Valid(raw) {
-		return nil, false, fmt.Errorf("%w: Requests response charset decoding is not implemented in console records", resource.ErrUnsupported)
+		return nil, false, fmt.Errorf("%w: console response needs charset decoding beyond the supported explicit set", resource.ErrUnsupported)
 	}
 	if !json.Valid(raw) {
 		return nil, false, consoleRecordInvalid("console response requires UTF-8 JSON")

@@ -1,7 +1,9 @@
 package servers_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -333,18 +335,80 @@ func TestPythonCloudConsoleRecordOwnedSourceHeadersAndIndependentReceipt(t *test
 }
 
 func TestPythonCloudConsoleRecordRequestsDecodingAndNonFiniteGapStayExplicit(t *testing.T) {
-	for _, body := range []string{string([]byte{'{', '"', 'o', 'u', 't', 'p', 'u', 't', '"', ':', '"', 'c', 'a', 'f', 0xe9, '"', '}'}), `{"output":1e400}`} {
-		var calls []nativeServerCall
-		api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response {
-			r := nativeServerWire(200, body)
-			r.Header.Set("Content-Type", "application/json; charset=ISO-8859-1")
-			return r
+	for _, tc := range []struct{ name, body, contentType string }{
+		{"unmarked nonUTF8", string([]byte{'{', '"', 'o', 'u', 't', 'p', 'u', 't', '"', ':', '"', 'c', 'a', 'f', 0xe9, '"', '}'}), "application/json"},
+		{"nonfinite", `{"output":1e400}`, "application/json; charset=UTF-8"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls []nativeServerCall
+			api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response {
+				r := nativeServerWire(200, tc.body)
+				r.Header.Set("Content-Type", tc.contentType)
+				return r
+			})
+			got, err := api.ConsoleOutputRecord(context.Background(), "vm")
+			var proof *resource.ResponseError
+			if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got == nil || string(got.Envelope) != tc.body || proof.StatusCode != 200 || string(proof.Body) != tc.body || len(calls) != 1 {
+				t.Fatal(got, err, proof, calls)
+			}
 		})
-		got, err := api.ConsoleOutputRecord(context.Background(), "vm")
-		var proof *resource.ResponseError
-		if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got == nil || string(got.Envelope) != body || proof.StatusCode != 200 || string(proof.Body) != body || len(calls) != 1 {
-			t.Fatal(got, err, proof, calls)
-		}
+	}
+}
+
+func TestPythonCloudConsoleRecordExplicitCharsetsKeepWireReceipt(t *testing.T) {
+	for _, tc := range []struct{ name, contentType, wireHex string }{
+		{"latin1", "application/json; charset=ISO-8859-1", "7b226f7574707574223a22636166e9227d"},
+		{"utf16 BOM", "application/json; charset=UTF-16", "fffe7b0022006f007500740070007500740022003a002200630061006600e90022007d00"},
+		{"utf32BE", "application/json; charset=UTF-32BE", "0000007b000000220000006f0000007500000074000000700000007500000074000000220000003a00000022000000630000006100000066000000e9000000220000007d"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			wire, decodeErr := hex.DecodeString(tc.wireHex)
+			if decodeErr != nil {
+				t.Fatal(decodeErr)
+			}
+			var calls []nativeServerCall
+			var originalHeader http.Header
+			api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response {
+				r := nativeServerWire(202, string(wire))
+				r.Header.Set("Content-Type", tc.contentType)
+				originalHeader = r.Header
+				return r
+			})
+			got, err := api.ConsoleOutputRecord(context.Background(), "vm")
+			if err != nil || got == nil || !got.HasOutput || string(got.Value) != `"café"` || got.StatusCode != 202 || !bytes.Equal(got.Envelope, wire) || got.Header.Get("Content-Type") != tc.contentType || len(calls) != 1 {
+				t.Fatal(got, err, calls)
+			}
+			got.Value[1] = 'X'
+			got.Header.Set("Content-Type", "changed")
+			if !bytes.Equal(got.Envelope, wire) || originalHeader.Get("Content-Type") != tc.contentType {
+				t.Fatal("normalized output or copied header changed wire proof", got, originalHeader)
+			}
+		})
+	}
+}
+
+func TestPythonCloudConsoleRecordCharsetFailuresPreserveActualResponse(t *testing.T) {
+	for _, tc := range []struct {
+		name, contentType, body string
+		cause                   error
+	}{
+		{"unknown codec", "application/json; charset=x-not-a-codec", `{"output":"wire"}`, resource.ErrUnsupported},
+		{"malformed charset", "application/json; charset=\"unterminated", `{"output":"wire"}`, resource.ErrUnsupported},
+		{"normalized invalid JSON", "application/json; charset=UTF-16LE", string([]byte{'{', 0, 'b', 0, 'a', 0, 'd', 0}), resource.ErrInvalidOption},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls []nativeServerCall
+			api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response {
+				r := nativeServerWire(203, tc.body)
+				r.Header.Set("Content-Type", tc.contentType)
+				return r
+			})
+			got, err := api.ConsoleOutputRecord(context.Background(), "vm")
+			var proof *resource.ResponseError
+			if !errors.Is(err, tc.cause) || !errors.As(err, &proof) || got == nil || got.HasOutput || got.Value != nil || got.StatusCode != 203 || string(got.Envelope) != tc.body || proof.StatusCode != 203 || string(proof.Body) != tc.body || proof.Header.Get("Content-Type") != tc.contentType || len(calls) != 1 {
+				t.Fatal(got, err, proof, calls)
+			}
+		})
 	}
 }
 
