@@ -26,8 +26,9 @@ func (transport pythonSecretTransport) RoundTrip(req *http.Request) (*http.Respo
 type pythonSecretCall struct{ method, path, contentType, body string }
 
 // Python update_secret commits the Secret Resource with PUT and a JSON object
-// of dirty attributes, e.g. {"id": "s1", "payload": "new", ...}, and accepts any
-// status below 400. The native Update is Barbican's payload upload: the raw
+// of dirty attributes, e.g. {"name": "renamed"}, excluding the route id.
+// An id-only seed commits nothing. Nonempty commits accept statuses below 400.
+// The native Update is Barbican's payload upload: the raw
 // payload is the body, Content-Type is a header and only 204 succeeds.
 func TestPythonSecretUpdateSendsRawPayload(t *testing.T) {
 	ctx := context.Background()
