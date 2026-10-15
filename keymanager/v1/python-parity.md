@@ -6,13 +6,13 @@
 |---|---|---|
 | [`update_container`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L142) | 없음 | unresolved |
 | [`update_order`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L243) | 없음 | unresolved |
-| [`update_secret`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L345) | `secrets.API.Update`는 payload 업로드라서 다른 요청 | unresolved |
+| [`update_secret`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L345) | `secrets.API.UpdateRecord`의 Source JSON commit ([사용법](secrets/python-update-record.md)); 기존 Update는 payload 업로드 | unresolved |
 | [`wait_for_status`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L615) | container, order, secret의 `WaitFor`만 있음 | unresolved |
 | [`wait_for_delete`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/key_manager/v1/_proxy.py#L654) | container, order, secret의 `WaitForDeletion`만 있음 | unresolved |
 
 ## 수정
 
-세 수정 메서드는 모두 `Proxy._update`를 거쳐 [Resource.commit](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1881)을 부릅니다. Container, Order, Secret은 `commit_method`를 바꾸지 않았고 resource key도 없어서, Python은 `PUT /containers/{id}`, `PUT /orders/{id}`, `PUT /secrets/{id}`에 변경된 속성을 감싸지 않은 JSON 객체로 보냅니다. ID 문자열로 새 Resource를 만들기 때문에 이 객체에는 `id`도 들어가고, 400 미만 status는 모두 성공으로 받아 응답 본문이 있으면 Resource에 합칩니다.
+세 수정 메서드는 모두 `Proxy._update`를 거쳐 [Resource.commit](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1881)을 부릅니다. Container, Order, Secret은 `commit_method`를 바꾸지 않았고 resource key도 없어서, Python은 `PUT /containers/{id}`, `PUT /orders/{id}`, `PUT /secrets/{id}`에 변경된 속성을 감싸지 않은 JSON 객체로 보냅니다. Resource.commit은 route id를 dirty body에서 제외하며 id만 있으면 요청을 생략합니다. 변경 속성이 있으면 400 미만 status를 성공으로 받아 응답 본문을 Resource에 합칩니다. 새 `secrets.API.UpdateRecord`는 이 seed/no-op/flat JSON commit과 실제 응답 record를 소유합니다.
 
 이 SDK의 `containers`와 `orders` 패키지에는 PUT을 보내는 호출이 없습니다. `secrets.API.Update`는 Barbican의 payload 추가 API를 그대로 감싸서 `UpdateOpts.Payload`를 원문 본문으로 보내고 `ContentType`, `ContentEncoding`을 header로 보냅니다. 성공 status도 204 하나뿐이고 오류만 반환합니다.
 
@@ -49,6 +49,6 @@ Python과 Go의 기본값 차이는 다음과 같습니다.
 ## 남은 부분
 
 - `update_container`, `update_order`: 변경된 속성 JSON을 `PUT /containers/{id}`, `PUT /orders/{id}`로 보내는 Go API가 없습니다.
-- `update_secret`: Go `secrets.API.Update`는 원문 payload와 Content-Type header를 보내고 204만 받습니다. Python처럼 속성 JSON 객체(`id` 포함)를 보내고 400 미만 응답을 갱신된 Secret으로 돌려주는 호출이 없습니다.
+- `update_secret`: 새 `UpdateRecord`가 id를 제외한 dirty JSON·no-op·실제 응답을 지원합니다. 동적 Resource seed/dirty lifecycle·kwargs와 Requests JSON loader의 named 차이는 [가이드](secrets/python-update-record.md)에 남깁니다. 기존 `Update`는 204만 허용하는 raw payload 업로드 API입니다.
 - `wait_for_status`: Python은 key manager의 어떤 Resource든 받지만 Go 대기는 container, order, secret에만 있고 secret store, ACL, consumer, quota용 대기가 없습니다. Python Secret은 직접 구현한 `Secret.fetch`를 쓰기 때문에 대기 중에도 payload GET을 함께 보낼 수 있는데 Go `secrets.API.WaitFor`는 metadata GET만 보냅니다. 이미 받은 Resource의 상태가 목표와 같으면 Python은 HTTP 없이 돌려주지만 Go는 항상 첫 GET을 보내고 모델 pointer를 돌려줍니다.
 - `wait_for_delete`: 같은 이유로 container, order, secret 외의 Resource를 기다릴 수 없고, Python이 돌려주는 원래 Resource 대신 Go는 오류만 돌려줍니다.

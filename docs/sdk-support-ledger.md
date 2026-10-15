@@ -4,9 +4,34 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 quota 반복 여섯 번째 사이클](#2026-10-15-quota-반복-여섯-번째-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 잔여3% 기준 첫 사이클](#2026-10-15-잔여3-기준-첫-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 잔여3% 기준 첫 사이클
+
+사용자가 개발 재개 한도를5%에서 **3%**로 조정하고 **worker8개 유지**, **리셋으로 직전보다 한도가 늘어나면 중단**하도록 지시했습니다. 출발 revision `06c6a0e3`의 clean/main 일치와 잔여11%·ordinaryUsageAllowed=true·resetsAt1792472624를 확인하고 Flavor RAM1·라우터 인터페이스 제거1·방화벽 rule/policy/group 삭제3·Barbican secret 수정1, 총6개 후보만 고정했습니다. 구현4개와 독립 Source/테스트/문서/라이선스 검토4개를 병행했고 root가 통합·검사·중앙 판정·Git을 처리했습니다.
+
+이번6행은 **unresolved**를 유지합니다. 구체적인 기본 사용 흐름과 owned 옵션·응답·검증은 추가했지만 Source 차이를 완료로 덮지 않았습니다. 검증된 매핑 **2,059/3,228(63.8%)**, 핵심 **1,981/2,158(91.8%)**, supported0·catalog3,362·unsupported134·reviews2,487을 보존하고 계약 **7,518→7,554개(+36)**를 기록했습니다. 미해결1,169개는 reviewed294+unreviewed875입니다. 생성 transport나 새 callable 개수를 named 완료 API 수로 더하지 않습니다.
+
+| 단위 | 추가한 SDK 동작 | focused 그룹 | 남은 named 차이 |
+|---|---|---:|---|
+| Flavor RAM | 기본 get_extra=true·전체 페이지와 enrichment 후 stable RAM 정렬·첫 >=·include membership·no-match | 7 | inherited flavor 목록/extra-specs가 Source100..199를 거부 |
+| Router remove | 두 참조 falsey이면 HTTP0·port 우선·literal router·JSON 해석 후 None·독립 actual proof | cloud8 + leaf2 | Requests가 허용하는 ISO8859/UTF16/32 JSON과 UTF8-only leaf 차이 |
+| Firewall delete3 | strict Find→strict DELETE·clean404 false·body descriptors/local filters·Computed summary·실제 lookup/delete proof | 6 | raw Find controls·falsey 반환ID collection DELETE·cap/limit/추가 페이지 |
+| Secret update | id 제외 dirty flat JSON·id-only no-op·Source alias/unknown attrs·response merge·독립 actual proof | 10 | 기존 Resource seed/dirty lifecycle/kwargs·Requests JSON/numeric loader |
+
+`GetFlavorByRAM`, `RemoveRouterInterface`, `DeleteFirewallRuleRecord`, `DeleteFirewallPolicyRecord`, `DeleteFirewallGroupRecord`, `secrets.API.UpdateRecord`와 closed leaf `RemoveCloudInterfaceRecord`를 제공합니다. `conn.Compute(ctx)`·`conn.Network(ctx)` 및 기존 KeyManager API에서 접근하며 새 forwarding façade는 추가하지 않았습니다. 애플리케이션에 builder interface 구현을 요구하지 않고 SDK가 입력 snapshot·기본값·페이지·검증·응답 처리를 소유합니다. 기존 typed API의 정책은 유지하고 router Source100..399/physical callback-stop만 새 closed leaf에 opt-in했습니다.
+
+Source pin은 openstacksdk ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe, Gophercloud v2.15.0입니다. 고정 Python3.14 실행 증거는 Flavor49+status199 2개, Router75, Firewall156, Secret61개입니다. 별도 Flavor14/Router13 독립 관찰은 중복 가능성이 있어 합계에 더하지 않았고 Router charset 단일 stdout probe도 분리합니다. 실제 Cloud/Proxy/Resource/Requests를 memory Adapter로 실행한 근거이며 실클라우드 인증·배포 권한 또는 Go 검증의 대체가 아닙니다. Firewall 정책 가이드는 Neutron27과 별도 FWaaS2025.2 정책의 project-member/admin 및 shared ADMIN 경계를 구분합니다.
+
+공개 Gophercloud testhelper-backed testcloud, 기존 native/physical body observers, capture/guard/REST/Source engine과 Flavor workflow를 재사용했습니다. 새 httptest 서버나 HTTP 테스트 프레임워크를 만들지 않았습니다. 총 **33그룹·247개 하위 사례·4개 focused package**가 PASS했습니다. 최초 Flavor 테스트는 선택 행의 Envelope를 전체 페이지라고 잘못 기대해 실패했습니다. 기존 FlavorRecord.UnmarshalJSON의 per-row 계약을 확인해 정확한 first행 bytes로 수리하고, 해당 실패1그룹을 재검사하여 PASS했습니다. 나머지6그룹·actual203/header/별도 enrichment201·vendor 정밀도·clone 검증은 유지했습니다. 최초 실패 `...cycle9-flavor-first.jsonl`과 수리 `...-flavor-repaired.jsonl`, secret/network 최초PASS 로그 및 `...-focused-receipt.json`에 이력을 구분합니다.
+
+독립 검토에서 발견한 computed rule.summary default/Wire 분리와 native401 ErrOriginal/ErrReauth 증거, router callback-stop, secret id-body 제외/no-op 및 응답 alias 순서를 검사 전에 수리했습니다. 기존 secret 테스트 주석과 keymanager 비교 문서의 잘못된 id 포함 설명도 교정했습니다. Native payload Update는 기존 raw body/204 정책 그대로이며 JSON commit API와 구분합니다.
+
+네 Python/Go 비교 가이드와 정확한 독립 Go main4개 build·Python AST4개가 PASS입니다. 6행의 canonical8field·fingerprint·callable30개·testgroup33개·docs 참조와 main8개 fence byte 일치를 독립 확인했습니다. 라이선스는 기존6 Go modules·retained16 originals로 변경이 없으며 고정 Source/native metadata·Python3.14·Go1.27.2의 전체 `make check`가 **204개 실제 test package PASS(exit0)**입니다. license/vet/race/parity/progress/gofmt 모두 PASS이며 이 전체 gate에는 최초 실패가 없었습니다. 앞선 집중 fixture 실패와 구분합니다. Go 최소1.25를 유지합니다. 실제 로그는 `/private/tmp/go-openstacksdk-cycle9-make-check-first.log`, `...-full-check-receipt.json`, `...-guide-build.log`, `...-exact-guides/build-receipt.json`이며 임시 근거의 장기 보존을 보장하지 않으므로 계약·테스트·가이드를 저장소에 함께 남깁니다. Go source3,257개가 전체 gate 전후 같으며 SHA256 `dbf2dbf8aa4c81953c62ed98215f0c4d7acdd2beb79f042557e7a80d6da4c8b2`가 동결돼 있습니다(정렬한 rg 상대경로 NUL·bytes NUL).
+
+계획1개와 기능4개의 작은 커밋을 main에 push했고 서비스 비교 가이드·중앙 판정·최종 진행표를 별도 커밋으로 저장합니다. Quota 관측은11→10→9→7→6→최종5%, reset시각1792472624 동일입니다. 다른 작업과 공유한 소비를 이 작업만의 비용으로 단정하지 않습니다. 새 사이클은 fresh ordinaryUsageAllowed=true·최소 잔여>3%에서만 시작합니다. 잔여 증가/reset시각 변경을 관측하면 새 할당·실행 worker를 중단하고 안전 기록 후 sdk-quota를 PAUSED로 바꾸며 reset 후 자동 재개하지 않습니다. 이후 사용자가 “이번 사이클까지만” 진행하라고 지시하여 sdk-quota를 PAUSED로 변경·확인했습니다. 이번6개 묶음만 마감하고 잔여가5%여도 새 사이클을 시작하지 않습니다. 재개에는 새 사용자 지시가 필요합니다. SDK-R1/C1/S1·실클라우드/원격 설치·릴리즈와 전체 목표는 미완료입니다.
 
 ## 2026-10-15 quota 반복 여섯 번째 사이클
 

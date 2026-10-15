@@ -25,7 +25,7 @@
 | [list_ports](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L202) | `Connection.ListPortValues` / `ports.API.ListSourceValues` ([Source 목록](v2/ports/python-user-helpers.md)) | go_mapping · 기존 ledger 확정 |
 | [search_ports](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L125) | `ports.API.SearchRecords` + `WithRecordSearchFilters` ([검색 계약](v2/ports/python-list-records.md)) | go_mapping · 기존 ledger 확정 |
 | [list_router_interfaces](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2205) | `network.Service.ListRouterInterfaces` / `Connection.ListRouterInterfaces` ([사용법](cloud-router-interfaces-python.md)) | go_mapping · root network race PASS |
-| [remove_router_interface](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2174) | `routers.API.RemoveInterfaceRecord` (일부) | 미해결 |
+| [remove_router_interface](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2174) | `service.RemoveRouterInterface(ctx, routerID, options...)` ([사용법](cloud-router-interface-remove-python.md)) | 미해결 |
 | [update_router](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2309) | 없음 | 미해결 |
 | [update_subnet](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2591) | `subnets.API.FindRecord` 후 `UpdateWithAttributes` (일부) | 미해결 |
 | [update_port](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2776) | `ports.API.FindRecord` 후 `UpdateWithAttributes` (일부) | 미해결 |
@@ -74,7 +74,7 @@ Cycle5 정책 update1행을 더해 이 B 표는 47행 중 대응 범위23행, �
 - Python 질의의 bool 값은 Requests가 `True`로 쓰지만 Go semantic filter는 `true`로 씁니다.
 - 반환값은 Python Router Resource 대신 native `routers.Router`입니다.
 
-`remove_router_interface`는 subnet_id와 port_id가 모두 비어 있으면 HTTP 전에 `ValueError`를 던집니다. 기본 인자로 부르면 바로 이 경우가 됩니다. Go `RemoveInterfaceRecord`는 이를 막지 않고 `{"subnet_id": null}`을 보내므로 미해결입니다. 하나 이상을 주었을 때의 본문(port 우선)은 테스트로 확인했습니다.
+`remove_router_interface`는 subnet_id와 port_id가 모두 비어 있으면 HTTP 전에 `ValueError`를 던집니다. 기본 인자로 부르면 바로 이 경우가 됩니다. 새 `Service.RemoveRouterInterface`는 두 인자 모두 falsey인 경우를 HTTP 전에 거부하고 port 우선·JSON 응답 해석 후 None 결과를 SDK가 처리합니다. 기존 typed leaf는 원래 동작을 유지합니다. typed router ID와 동적 Source Resource 표현 차이는 [가이드](cloud-router-interface-remove-python.md)에 구분합니다.
 
 `update_router`는 `routes`를 줄 때 `GET /v2.0/extensions`로 `extraroute`를 확인하고, 없으면 경고만 남기고 routes를 버립니다. 이 확장 검사와 바꿀 내용이 없을 때 HTTP 없이 None을 돌려주는 동작은 계속 미해결입니다.
 
@@ -135,7 +135,7 @@ get은 기본적으로 위 search를 사용해 missing None 또는 단일 결과
 - list_subnets, search_subnets: proxy `subnets` 목록이 미해결입니다.
 - list_ports, search_ports: 이미 중앙 ledger에서 Go mapping입니다. 이 문서의 API 없음/미해결 문구를 owned Source record/다형 목록·검색 helper로 정정했습니다(이번 신규 수에 포함하지 않음).
 - list_router_interfaces: Source all-page device_id 조회, 세 내부 owner·gateway 분류와 내부→gateway 순서를 SDK가 소유하는 새 helper입니다. root network race PASS, 독립 main build·204개 test package 전체 gate·중앙 판정 PASS입니다.
-- remove_router_interface: 두 인자가 모두 비었을 때 HTTP 전에 거부하지 않습니다.
+- remove_router_interface: 새 Service helper가 HTTP 전 falsey 검증·port 우선·응답 해석을 소유합니다. Source router Resource 표현 범위는 새 가이드와 중앙 판정에 따릅니다.
 - update_router: extraroute 확장 검사와 변경 없음 처리 helper가 없습니다.
 - update_port, update_subnet: 변경 내용이 없을 때 PUT을 건너뛰는 helper가 없습니다.
 - QoS: list/search 9행은 fresh 전체 extension gate·정책 lookup·Source 검색 단계를 소유하는 새 go_mapping으로 집중 race·독립 main build 검증을 통과했습니다. update_qos_policy는 새 `UpdateQoSPolicyRecord`로 대응하며 집중 검증을 통과했습니다. BW/DSCP/minimum rule update 3행도 새 `UpdateQoS...RuleRecord`가 library-owned 흐름에 대응하며 root 집중/main/전체 gate 검증 대기입니다.

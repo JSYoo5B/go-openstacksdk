@@ -14,7 +14,7 @@
 | `create_flavor` | `Flavors.Create(ctx, flavors.CreateOpts{...})` | go_mapping |
 | `delete_flavor` | `Flavors.FindIdentity(ctx, nameOrID)` 다음 `Flavors.Remove(ctx, resource.ID(id))` | go_mapping |
 | `get_flavor_name` | `Flavors.FindIdentity(ctx, flavorID)`의 `Name` | go_mapping |
-| `get_flavor_by_ram` | `conn.Compute(ctx)`의 `AllFlavors` 뒤 선택 helper 없음 | unresolved |
+| `get_flavor_by_ram` | `service.GetFlavorByRAM(ctx, ram, options...)` ([사용법](cloud-flavor-ram-python.md)) | unresolved |
 | `create_aggregate` | `Aggregates.Create(ctx, aggregates.CreateOpts{Name, AvailabilityZone})` | go_mapping |
 | `list_aggregates` | `Aggregates.All(ctx, resource.WithName(...))`, `Aggregates.List(ctx)` | go_mapping |
 | `search_aggregates` | `Aggregates.All(ctx)` 뒤 cloud 필터 helper 없음 | unresolved |
@@ -102,7 +102,7 @@ Python helper가 True/False나 None을 돌려주는 자리에서 Go는 찾은 �
 
 ## 남은 메서드와 부족한 기능
 
-- `get_flavor_by_ram`: flavor 목록을 `ram`으로 정렬하고 `include` 부분 문자열로 고르는 helper가 없습니다.
+- `get_flavor_by_ram`: 공개 helper가 전체 목록·extra specs·stable RAM 정렬·include 선택을 처리합니다. [가이드](cloud-flavor-ram-python.md)에 inherited 목록/extra-specs의 100~199 응답 차이를 named remaining으로 기록했습니다.
 - `search_aggregates`, `search_servers`: cloud `_utils._filter_list`의 name_or_id glob, dict 필터, JMESPath 필터를 적용하는 공개 helper가 없습니다. `search_servers`는 서버 주소 확장도 없습니다.
 - `get_aggregate`, `update_aggregate`, `delete_aggregate`, `set_aggregate_metadata`, `add_host_to_aggregate`, `remove_host_from_aggregate`: `find_aggregate`의 GET 후 목록 fallback이 없습니다. `update_aggregate`는 Proxy 수준에서도 `availability_zone=None`을 보낼 수 없고, `delete_aggregate`는 숫자 ID의 404를 False로 바꾸는 동작을 caller가 직접 처리해야 합니다.
 - `list_hypervisors`: 2.53 미만의 `os-hypervisors/{pattern}/search` 경로가 없습니다.

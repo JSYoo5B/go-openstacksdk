@@ -24,9 +24,9 @@
 | [`get_firewall_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L846) | `fwaas_v2/rules.API.Find` (filters 불가) | unresolved |
 | [`get_firewall_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1051) | `fwaas_v2/policies.API.Find` (filters 불가) | unresolved |
 | [`get_firewall_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1331) | `fwaas_v2/groups.API.Find` (filters 불가) | unresolved |
-| [`delete_firewall_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L804) | `Find` 후 `API.Delete` (404를 `False`로 바꾸는 API 없음) | unresolved |
-| [`delete_firewall_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1010) | 위와 같음 | unresolved |
-| [`delete_firewall_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1299) | 위와 같음 | unresolved |
+| [`delete_firewall_rule`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L804) | `service.DeleteFirewallRuleRecord(ctx, id, options...)` ([사용법](cloud-firewall-deletes-python.md)) | unresolved |
+| [`delete_firewall_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1010) | `service.DeleteFirewallPolicyRecord(ctx, id, options...)` ([사용법](cloud-firewall-deletes-python.md)) | unresolved |
+| [`delete_firewall_group`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L1299) | `service.DeleteFirewallGroupRecord(ctx, id, options...)` ([사용법](cloud-firewall-deletes-python.md)) | unresolved |
 | [`create_router`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2250) | `Connection.CreateRouterRecord` / `network.Service.CreateRouterRecord` ([사용법](cloud-router-create-python.md)) | go_mapping |
 | [`create_subnet`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L2401) | `Connection.CreateSubnetRecord` / `network.Service.CreateSubnetRecord` ([사용법](cloud-subnet-create-python.md)) | go_mapping |
 | [`get_qos_policy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_network.py#L221) | `network.Service.GetQoSPolicyRecord` ([기본 조회와 잔여](cloud-qos-policy-actions-python.md)) | unresolved · raw headers/fetch controls |
@@ -73,7 +73,7 @@ Python docstring은 filters에 jmespath 문자열도 받는다고 적지만 실�
 
 `create_firewall_rule()`은 kwargs만 넘기므로 인수가 없으면 `{"firewall_rule": {}}`가 나가고 Neutron이 action·protocol 기본값을 정합니다. Go `rules.API.Create`는 Gophercloud가 `protocol`과 `action`을 필수로 선언해 HTTP 전에 실패합니다. 핵심 필드는 `WithCreateField`로도 덮어쓸 수 없어서 이 본문을 보낼 방법이 없습니다.
 
-`get_firewall_*`와 `delete_firewall_*`는 `filters`를 `find_firewall_*`에 넘깁니다. FWaaS 패키지에는 `FindRecord`나 `FindIdentity`가 없고 일반 `Find`는 query를 받지 않아서 filters를 재현할 수 없습니다. 삭제 헬퍼는 proxy 삭제를 `ignore_missing=False`로 부르고 404를 잡아 `False`로 바꾸는데, `API.Delete`는 404를 오류로 돌려주고 `Remove`나 `resource.IgnoreMissing`은 404를 성공으로 숨기므로 Python의 `False`를 SDK API가 만들지 않습니다.
+`get_firewall_*`와 `delete_firewall_*`는 `filters`를 `find_firewall_*`에 넘깁니다. FWaaS 패키지에는 `FindRecord`나 `FindIdentity`가 없고 일반 `Find`는 query를 받지 않아서 filters를 재현할 수 없습니다. 삭제 헬퍼는 proxy 삭제를 `ignore_missing=False`로 부르고 404를 잡아 `False`로 바꾸는데, `API.Delete`는 404를 오류로 돌려주고 `Remove`나 `resource.IgnoreMissing`은 404를 성공으로 숨기므로 기존 typed API만으로는 Python의 `False`를 만들지 못합니다. 새 `Service.DeleteFirewallRuleRecord`·`DeleteFirewallPolicyRecord`·`DeleteFirewallGroupRecord`는 strict 조회·삭제와 깨끗한 404의 `Deleted=false`를 SDK가 처리합니다. [새 가이드](cloud-firewall-deletes-python.md)의 raw fetch controls·falsey ID 등 남은 계약은 별도로 추적합니다.
 
 ## Router·Subnet 생성
 
@@ -107,7 +107,7 @@ A의 QoS 13행 중 단일 rule get 3행과 삭제 4행, 정책 create 1행 및 �
 
 - `create_firewall_rule`: Gophercloud `rules.CreateOpts`가 protocol·action을 필수로 요구해 인수 없는 Python 본문을 보낼 수 없습니다.
 - `get_firewall_rule`, `get_firewall_policy`, `get_firewall_group`: FWaaS 검색이 filters query와 400·403 fallback을 지원하지 않습니다.
-- `delete_firewall_rule`, `delete_firewall_policy`, `delete_firewall_group`: 위 검색 제약에 더해, 삭제 404를 `False`로 바꾸는 SDK API가 없습니다.
+- `delete_firewall_rule`, `delete_firewall_policy`, `delete_firewall_group`: 새 공개 helper가 clean404를 false로 변환하며 raw Find controls 등 named gap을 유지합니다.
 - `create_router`: 새 cloud/Connection helper의 기본값·gateway/AZ 계약은 집중 race·독립 main build로 검증했습니다. 일반 Proxy 전체 Resource/session 계약과 실클라우드 권한은 별도입니다.
 - `create_subnet`: 새 cloud/Connection helper의 closed lookup·검증·기본값·gateway·확장 attrs 계약은 집중 race·독립 main build로 검증했습니다. 일반 raw Find/Proxy 및 전체 Resource/session 잔여는 유지합니다.
 - QoS: 단일 rule get 3행과 정책/규칙 delete 4행을 실제 cloud helper에 연결했습니다. 정책 create는 이번 cloud helper로 대응합니다. 규칙 create 3행도 새 cloud helper에 연결했습니다. unresolved는 get_qos_policy raw headers/fetch controls와 관리자 rule-type details의 2개입니다. 규칙 create의 root 집중race·정확한main build·204개testpackage 전체gate PASS입니다. 새 delete의 root network race PASS와 독립 main build·204개 test package 전체 gate·중앙 판정 PASS을 구분합니다.
