@@ -4,9 +4,17 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-15 명시 JSON 응답 charset](#2026-10-15-명시-json-응답-charset)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-15 라우터 제거 charset](#2026-10-15-라우터-제거-charset)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 라우터 제거 charset
+
+사용자 추가 지시로 출발f7cf7adf·시작 잔여3%·중간2%·ordinaryUsageAllowed=true·reset1792472624에서 root+worker2개(구현/독립 검토)로 시작했습니다. 계정 공유 사용량이며 자동화는 PAUSED입니다. 고정 범위는 cloud remove_router_interface 한 행이며 공통 Normalize를 재사용하고 legacy parser/다른 API는 변경하지 않았습니다.
+
+명시 UTF-16/32(BOM 또는 LE/BE)·Latin1을 읽어 Value/Wire만 정규화한 JSON으로 만들고 Envelope/Header/status/ResponseError.Body는 실제 wire 증거를 유지합니다. cloud 성공값은 None(null), ResponseJSON은 읽은 응답이며 디코딩 실패를 성공 None으로 숨기지 않습니다. bare UTF16/32 noBOM native-endian·unmarked guess/text fallback·나머지 codec·Python permissiveNaN/Infinity는 named 잔여입니다. SDK-R1/C1/S1·실클라우드/릴리즈와 서비스 우선순위를 보존하고 해당 행은 unresolved를 유지합니다. 매핑2,059/3,228·핵심1,981/2,158·supported0 불변이며 계약7,556→7,558개입니다.
+
+기존 공개 Gophercloud testhelper 기반 nativeRouter/testcloud fixture를 재사용했습니다. leaf 신규2그룹·서비스 신규1그룹과 기존 회귀·공통 decoder를 합쳐 집중22그룹324사례가 최초 실행 PASS입니다. 구현은87d48231로 커밋했습니다. 독립 검토는 pinned Router.remove_interface(resp.json)와 cloud None 반환, 기존 Source75 artifact pin 일치를 대조했습니다. 기존 관찰을 재사용했으며 새 Source 실행·실클라우드 증거가 아닙니다. 독립 Go main1개 빌드·Python AST1개가 PASS하고 guide fence byte 일치를 확인했습니다. 전체 make check는 최초 실행 exit0으로 실제 test package205개·license(6 modules/16 originals)·vet·race·parity·progress·gofmt PASS입니다. Go source3,260개 SHA256 3f674825c26f52927707bc350afc346493f5814d0aed9917620b182d76131f9c는 gate 전후 일치합니다. 독립 frozen-code 검토 차단 finding0이며 기존 parser 파일2개 SHA도 보존했습니다. 이번 묶음을 마감하며 새 사이클/자동화 재개는 하지 않습니다.
 
 ## 2026-10-15 명시 JSON 응답 charset
 

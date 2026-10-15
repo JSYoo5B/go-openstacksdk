@@ -76,7 +76,7 @@ Quota 반복 여섯 번째 사이클의 Python/Go 사용 비교:
 잔여3% 기준 개발 사이클의 Python/Go 사용 비교:
 
 - Nova: [RAM 기준 Flavor 선택](compute/cloud-flavor-ram-python.md). SDK가 기본 extra specs 보충·전체 페이지·stable RAM 정렬·include 조건과 첫 일치를 처리합니다.
-- Neutron: [라우터 인터페이스 제거](network/cloud-router-interface-remove-python.md), [방화벽 rule·policy·group 삭제](network/cloud-firewall-deletes-python.md). SDK가 falsey 인자 검증·port 우선·strict 조회/삭제·깨끗한 404의 false 결과를 처리합니다.
+- Neutron: [라우터 인터페이스 제거](network/cloud-router-interface-remove-python.md), [방화벽 rule·policy·group 삭제](network/cloud-firewall-deletes-python.md). SDK가 falsey 인자 검증·port 우선·strict 조회/삭제·깨끗한 404의 false 결과를 처리합니다. 라우터 제거는 명시 UTF-16/32(BOM 또는 LE/BE)·Latin1 응답을 읽고 원본 HTTP 증거를 보존하며, 전체 문자셋 추론·나머지 codec·비유한 숫자는 미지원입니다.
 - Barbican: [secret JSON commit](keymanager/v1/secrets/python-update-record.md). SDK가 id 제외·변경 없음 요청 생략·dirty 속성·실제 응답 record를 제공합니다. 기존 raw payload Update와 별도 API입니다. Secret 수정과 콘솔 출력은 명시한 UTF-16/32(BOM 또는 LE/BE)·Latin1 JSON을 공통 디코더로 읽으며 원본 응답 바이트를 보존합니다. charset 추론·나머지 codec·비유한 JSON 숫자는 미지원입니다.
 
 `conn.Compute(ctx)`·`conn.Network(ctx)`의 새 Service 메서드와 cached KeyManager API를 사용합니다. 옵션·응답 변환은 SDK가 소유하며 애플리케이션에 builder 구현을 요구하지 않습니다. 전체 named parity와 실제 남은 계약은 각 가이드·중앙 판정을 따릅니다.
