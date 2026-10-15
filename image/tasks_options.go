@@ -10,9 +10,12 @@ import (
 
 // CreateTaskOpts supplies an input object and ordinary headers. Nil Input
 // defaults to {}; raw values retain exact JSON numbers and explicit null.
+// NullInput sends the top-level "input": null that Python's
+// create_task(input=None) sends; it cannot be combined with a non-nil Input.
 type CreateTaskOpts struct {
-	Headers map[string]string
-	Input   map[string]json.RawMessage
+	Headers   map[string]string
+	Input     map[string]json.RawMessage
+	NullInput bool
 }
 type CreateTaskOption func(*CreateTaskOpts) error
 
@@ -55,6 +58,7 @@ func WithCreateTaskInput(value map[string]any) CreateTaskOption {
 			return err
 		}
 		config.Input = copyTaskRawMap(snapshot)
+		config.NullInput = false
 		return nil
 	}
 }
@@ -165,7 +169,10 @@ func parseCreateTaskOptions(options []CreateTaskOption) (CreateTaskOpts, error) 
 			return value, uploadInvalid("task input requires valid UTF-8 keys and JSON values")
 		}
 	}
-	if value.Input == nil {
+	if value.NullInput && value.Input != nil {
+		return value, uploadInvalid("task input cannot be both null and an object")
+	}
+	if value.Input == nil && !value.NullInput {
 		value.Input = make(map[string]json.RawMessage)
 	}
 	value.Headers, err = imageMutationHeaders(value.Headers, false, "")

@@ -10,7 +10,8 @@ import (
 )
 
 // CreateTask sends one asynchronous task request. Nil input becomes an owned
-// empty object; task-specific requirements and execution remain server-owned.
+// empty object unless WithCreateTaskNullInput selects JSON null;
+// task-specific requirements and execution remain server-owned.
 func (s *Service) CreateTask(ctx context.Context, taskType string, options ...CreateTaskOption) (*TaskInfo, error) {
 	p, err := s.captureTaskSource(ctx)
 	if err == nil && (taskType == "" || !utf8.ValidString(taskType)) {
@@ -23,7 +24,11 @@ func (s *Service) CreateTask(ctx context.Context, taskType string, options ...Cr
 	if err = p.finish(ctx, policy.Headers, err); err != nil {
 		return nil, wrapImageMutationError(ctx, "CreateTask", err)
 	}
-	response, err := rest.DoJSON(ctx, p.client, http.MethodPost, p.base+"tasks", map[string]any{"type": taskType, "input": policy.Input}, nil, http.StatusCreated)
+	var input any = policy.Input
+	if policy.NullInput {
+		input = nil
+	}
+	response, err := rest.DoJSON(ctx, p.client, http.MethodPost, p.base+"tasks", map[string]any{"type": taskType, "input": input}, nil, http.StatusCreated)
 	return decodeTaskInfoResponse(ctx, p, "CreateTask", response, err)
 }
 
