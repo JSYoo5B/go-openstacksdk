@@ -8,8 +8,13 @@
 
 ## 현재 집계와 진행 중인 작업
 
+**현재 구현 (2026-10-15, 잔여3% 기준 첫 사이클): 고정6개 후보를8worker로 진행 중.** 출발 revision `06c6a0e3`, 검증된 Go 매핑2,059/3,228(63.8%)·핵심1,981/2,158(91.8%)입니다. Flavor RAM 선택1·라우터 인터페이스 제거1·방화벽 rule/policy/group 삭제3·Barbican secret 수정1로 범위를 고정했습니다. 구현4개와 Source/테스트/문서/라이선스 검토4개를 병행하고 root가 공통 계약·통합·Go 검사·판정·Git을 순서대로 처리합니다. 기능·의미 있는 테스트·독립 사용 예제·remaining을 함께 검토하며 전체 parity나 supported를 선제 선언하지 않습니다.
 
-**현재 구현 (2026-10-15, quota 반복 여섯 번째 사이클): 고정9개 후보 구현·8worker 검토·문서·집중 및 전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `5079609c`입니다. Connection7개 진입점과 library-owned 기본값·옵션·응답 증거를 구현했고 새 **78그룹·263개 하위 사례**가10개 집중 package에서 PASS했습니다. 판정은9행 모두 unresolved입니다. 기존 Network Proxy의 cap·raw limit·추가 페이지 요청·MV 순서 차이를 실제 Source 실행으로 발견하여 **go_mapping→unresolved1행**을 정정했습니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, supported0이며 계약은 **7,406→7,482개(+76)**입니다. 사용 가능한 부분 구현을 전체 named parity 완료로 집계하지 않습니다.
+사용자의 최신 지시는 **새 사이클은 잔여가 엄격히3%를 초과할 때만 시작**, **8worker 노력 유지**, **리셋으로 이전 관측보다 잔여가 늘어나면 중단**입니다. 현재 관측은 **잔여11%·ordinaryUsageAllowed=true·resetsAt=1792472624(2026-10-20 14:03:44 KST)**입니다. 시작·중간·종료 관측을 비교하며 잔여 증가/reset 시각 변경이면 새 할당과 실행 중 worker를 중단하고 안전 기록 후 sdk-quota를 PAUSED로 바꿉니다. 3% 이하에서는 새 사이클을 시작하지 않으며 이미 시작한 범위만 필요한 마무리를 허용합니다. 다른 작업의 소비가 계정 한도에 포함되므로 관측 소비를 이 작업만의 비용으로 단정하지 않습니다. 기존40%/5% 시작 경계는 폐기하고 Source pin·SDK-R1/C1/S1·실클라우드/릴리즈 잔여와 서비스 우선순위를 보존합니다.
+
+
+
+**직전 구현 (2026-10-15, quota 반복 여섯 번째 사이클): 고정9개 후보 구현·8worker 검토·문서·집중 및 전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `5079609c`입니다. Connection7개 진입점과 library-owned 기본값·옵션·응답 증거를 구현했고 새 **78그룹·263개 하위 사례**가10개 집중 package에서 PASS했습니다. 판정은9행 모두 unresolved입니다. 기존 Network Proxy의 cap·raw limit·추가 페이지 요청·MV 순서 차이를 실제 Source 실행으로 발견하여 **go_mapping→unresolved1행**을 정정했습니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, supported0이며 계약은 **7,406→7,482개(+76)**입니다. 사용 가능한 부분 구현을 전체 named parity 완료로 집계하지 않습니다.
 
 **병렬 미완료 묶음 마무리 (2026-10-15): 전체2,059/3,228(63.8%)·핵심1,981/2,158(91.8%).** 앞서 중지한 입력 표현·응답 모델 단위의 남은 작업을 현재 main에 맞춰 마무리했습니다. Nova aggregate·flavor·service 수정과 migration·quota reset, Neutron VPN·BGP·BGPVPN 수정, firewall rule 생성·삽입, DHCP agent 목록, tap mirror 반복 query, Placement allocation 생성·resource class 이름 변경·allocation candidate 반복 query, Glance task null 입력, Keystone federation mapping·project endpoint·role assignment record, Nova AZ 상세와 구형 service enable·disable을 SDK 소유 record로 대응시켰습니다. 다른 세션이 먼저 구현한 cloud extension 확인, domain record, port·network 목록, Swift object 목록 초안은 버렸습니다.
 
