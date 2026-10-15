@@ -308,3 +308,49 @@ func TestCloudRouterInterfaceRemoveCleanRetryAndTokenRenewalKeepCapturedBody(t *
 		}
 	}
 }
+
+func TestCloudRouterInterfaceRemoveExplicitCharsetReceiptAndNone(t *testing.T) {
+	utf16Body := []byte{0xff, 0xfe}
+	for _, r := range `{"ack":"café"}` {
+		utf16Body = append(utf16Body, byte(r), byte(r>>8))
+	}
+	for _, tc := range []struct {
+		name, charset string
+		body          []byte
+		unsupported   bool
+	}{
+		{"latin1", "ISO-8859-1", []byte("{\"ack\":\"caf\xe9\"}"), false},
+		{"utf16", "utf-16", utf16Body, false},
+		{"unsupported", "cp1006", []byte(`{"ack":true}`), true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			contentType := "application/json;charset=" + tc.charset
+			service, count := qosCloudMutationFixture(t, func(w http.ResponseWriter, r *http.Request) {
+				if r.Method != http.MethodPut || r.URL.Path != "/neutron/v2.0/routers/r/remove_router_interface" {
+					t.Error(r.Method, r.URL)
+				}
+				w.Header().Set("Content-Type", contentType)
+				w.WriteHeader(203)
+				_, _ = w.Write(tc.body)
+			})
+			result, err := service.RemoveRouterInterface(context.Background(), "r", network.WithRouterInterfaceRemovePortID("p"))
+			if result == nil || result.StatusCode != 203 || string(result.Envelope) != string(tc.body) || result.Header.Get("Content-Type") != contentType || count.Load() != 1 {
+				t.Fatal(result, err, count.Load())
+			}
+			if tc.unsupported {
+				var proof *resource.ResponseError
+				if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || string(proof.Body) != string(tc.body) || proof.Header.Get("Content-Type") != contentType || result.Value != nil || result.ResponseJSON != nil {
+					t.Fatal(result, err, proof)
+				}
+				return
+			}
+			if err != nil || string(result.Value) != "null" || string(result.ResponseJSON) != `{"ack":"café"}` || result.Wire == nil || string(result.Wire.Body["ack"]) != `"café"` {
+				t.Fatal(result, err)
+			}
+			result.ResponseJSON[0] = '!'
+			if string(result.Envelope) != string(tc.body) {
+				t.Fatal("decoded view aliases physical receipt")
+			}
+		})
+	}
+}

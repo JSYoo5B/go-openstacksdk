@@ -1,7 +1,10 @@
 package routers_test
 
 import (
+	"bytes"
 	"context"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"testing"
@@ -78,5 +81,79 @@ func TestPythonCloudRouterInterfaceRemovePhysicalOptInNeverCallsHooks(t *testing
 				t.Fatal(result, err, native)
 			}
 		}
+	}
+}
+
+func TestPythonCloudRouterInterfaceRemoveExplicitCharsetsKeepRawProofAndLegacy(t *testing.T) {
+	for _, tc := range []struct{ name, contentType, wireHex string }{
+		{"latin1", "application/json; charset=ISO-8859-1", "7b2261636b223a22636166e9227d"},
+		{"utf16 BOM", "application/json; charset=UTF-16", "fffe7b002200610063006b0022003a002200630061006600e90022007d00"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			wire, err := hex.DecodeString(tc.wireHex)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var calls []nativeRouterCall
+			var originalHeader http.Header
+			api := pythonCoreRouterAPI(t, &calls, func(*http.Request) *http.Response {
+				reply := nativeRouterWire(203, string(wire))
+				reply.Header.Set("Content-Type", tc.contentType)
+				reply.Header.Set("X-Request-Id", "charset-wire")
+				originalHeader = reply.Header
+				return reply
+			})
+			value, err := api.RemoveCloudInterfaceRecord(context.Background(), "r", routers.WithRouterInterfacePort("p"))
+			if err != nil || value == nil || string(value.Value) != `{"ack":"café"}` || value.Wire == nil || string(value.Wire.Body["ack"]) != `"café"` || value.StatusCode != 203 || !bytes.Equal(value.Envelope, wire) || value.Header.Get("Content-Type") != tc.contentType || value.Wire.Header.Get("X-Request-Id") != "charset-wire" || value.Wire.StatusCode != 203 || len(calls) != 1 || calls[0].method != http.MethodPut || calls[0].body != `{"port_id":"p"}` {
+				t.Fatal(value, err, calls)
+			}
+			value.Value[2] = 'X'
+			value.Wire.Body["ack"][1] = 'X'
+			value.Header.Set("Content-Type", "changed")
+			if !bytes.Equal(value.Envelope, wire) || originalHeader.Get("Content-Type") != tc.contentType || value.Wire.Header.Get("Content-Type") != tc.contentType {
+				t.Fatal("normalized views changed wire proof", value, originalHeader)
+			}
+			legacy, legacyErr := api.RemoveInterfaceRecord(context.Background(), "r", routers.WithRouterInterfacePort("p"))
+			if legacyErr == nil || legacy == nil || legacy.Value != nil || !bytes.Equal(legacy.Envelope, wire) || len(calls) != 2 {
+				t.Fatal("legacy charset policy changed", legacy, legacyErr, calls)
+			}
+		})
+	}
+}
+
+func TestPythonCloudRouterInterfaceRemoveCharsetFailuresKeepOriginalResponse(t *testing.T) {
+	for _, tc := range []struct {
+		name, contentType, body string
+		unsupported             bool
+	}{
+		{"unknown codec", "application/json; charset=x-not-a-codec", `{"ack":true}`, true},
+		{"malformed charset", "application/json; charset=\"unterminated", `{"ack":true}`, true},
+		{"bare UTF16 no BOM", "application/json; charset=UTF-16", string([]byte{'{', 0, '}', 0}), true},
+		{"normalized invalid JSON", "application/json; charset=UTF-16LE", string([]byte{'{', 0, 'b', 0, 'a', 0, 'd', 0}), false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var calls []nativeRouterCall
+			api := pythonCoreRouterAPI(t, &calls, func(*http.Request) *http.Response {
+				reply := nativeRouterWire(203, tc.body)
+				reply.Header.Set("Content-Type", tc.contentType)
+				reply.Header.Set("X-Request-Id", "charset-failed")
+				return reply
+			})
+			value, err := api.RemoveCloudInterfaceRecord(context.Background(), "r", routers.WithRouterInterfaceSubnet("s"))
+			var proof *resource.ResponseError
+			if err == nil || value == nil || value.Value != nil || value.StatusCode != 203 || string(value.Envelope) != tc.body || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != tc.body || proof.Header.Get("Content-Type") != tc.contentType || proof.Header.Get("X-Request-Id") != "charset-failed" || len(calls) != 1 {
+				t.Fatal(value, err, proof, calls)
+			}
+			if tc.unsupported {
+				if !errors.Is(err, resource.ErrUnsupported) {
+					t.Fatal(err)
+				}
+			} else {
+				var syntax *json.SyntaxError
+				if !errors.As(err, &syntax) {
+					t.Fatal(err)
+				}
+			}
+		})
 	}
 }

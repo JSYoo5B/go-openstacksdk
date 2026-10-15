@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
@@ -49,7 +50,19 @@ func (a *API) RemoveCloudInterfaceRecord(ctx context.Context, id string, options
 	if err != nil {
 		return routerJSONObservation(response), wrap(err)
 	}
-	value, err := routerJSONFromResponse(response)
+	value := routerJSONObservation(response)
+	normalized, err := responsejson.Normalize(response.Body, response.Header)
+	if err == nil {
+		decodedResponse := *response
+		decodedResponse.Body = normalized
+		decoded, decodeErr := routerJSONFromResponse(&decodedResponse)
+		err = decodeErr
+		if err == nil {
+			// Only parsed views use normalized JSON. Keep the original HTTP
+			// envelope and use response.Fail below for actual wire proof.
+			value.Value, value.Wire = decoded.Value, decoded.Wire
+		}
+	}
 	if err = errors.Join(err, guard(ctx)); err != nil {
 		if value != nil {
 			value.Value = nil
