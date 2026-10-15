@@ -57,9 +57,26 @@ func flavorRecordCodes() []int {
 	return codes
 }
 
+// Source list compatibility accepts the same final adapter status domain as
+// Resource.raise_from_response. Existing native-style readers retain 200..399.
+func flavorRecordStatusCodes(sourceStatuses bool) []int {
+	if !sourceStatuses {
+		return flavorRecordCodes()
+	}
+	codes := make([]int, 300)
+	for i := range codes {
+		codes[i] = 100 + i
+	}
+	return codes
+}
+
 // Enrichment uses the same prepared extra-specs reader without recapturing a
 // source, applying options again or performing discovery for each flavor.
 func enrichFlavorRecord(ctx context.Context, source *cloudread.Source, check func(context.Context) error, version string, value *FlavorRecord) (*FlavorRecord, error) {
+	return enrichFlavorRecordSource(ctx, source, check, version, value, false)
+}
+
+func enrichFlavorRecordSource(ctx context.Context, source *cloudread.Source, check func(context.Context) error, version string, value *FlavorRecord, sourceStatuses bool) (*FlavorRecord, error) {
 	if value == nil || value.Resource == nil {
 		return value, fmt.Errorf("%w: flavor Resource is required for enrichment", resource.ErrInvalidOption)
 	}
@@ -74,7 +91,7 @@ func enrichFlavorRecord(ctx context.Context, source *cloudread.Source, check fun
 	if err != nil {
 		return value, err
 	}
-	read := &flavorExtraSpecsRead{ctx: ctx, source: source, check: check, identity: identity, seed: seed, version: version}
+	read := &flavorExtraSpecsRead{ctx: ctx, source: source, check: check, identity: identity, seed: seed, version: version, sourceStatuses: sourceStatuses}
 	wire, response, err := read.read()
 	if response == nil {
 		return value, err
@@ -134,7 +151,7 @@ func listFlavorRecordsPrepared(ctx context.Context, source *cloudread.Source, ch
 					var origin *rest.Response
 					selected := rest.CollectionSpec[flavorListRecord]{
 						Client: &source.Client, Path: path, Kind: "flavors", PluralKey: "flavors", Metadata: func(value *flavorListRecord) *resource.Metadata { return flavorRecordMetadata(&value.FlavorRecord) },
-						Validate: check, SourceGuard: check, ListCodes: flavorRecordCodes(),
+						Validate: check, SourceGuard: check, ListCodes: flavorRecordStatusCodes(parameters.sourceStatuses),
 						ValidateResponse: func(response *rest.Response) error { origin = response; return check(ctx) },
 						ValidateItem: func(value *flavorListRecord) error {
 							if err := check(ctx); err != nil {
@@ -178,7 +195,7 @@ func listFlavorRecordsPrepared(ctx context.Context, source *cloudread.Source, ch
 		}
 		for value, err := range collection.List(ctx, resource.WithBodyFilters(body)) {
 			if err == nil && parameters.getExtraSpecs {
-				value, err = enrichFlavorRecord(ctx, source, check, chosen, value)
+				value, err = enrichFlavorRecordSource(ctx, source, check, chosen, value, parameters.sourceStatuses)
 			}
 			if !yield(value, err) {
 				return
@@ -197,6 +214,18 @@ func listFlavorRecordsPrepared(ctx context.Context, source *cloudread.Source, ch
 // ListRecords is lazy and owns each logical iteration. Body filtering and the
 // raw row cap precede conditional enrichment; break stops additional work.
 func (a *API) ListRecords(ctx context.Context, options ...FlavorListOption) iter.Seq2[*FlavorRecord, error] {
+	return a.listRecords(ctx, false, options...)
+}
+
+// ListSourceRecords uses the pinned Source 100..399 policy for both collection
+// and conditional extra-specs reads. Normal ListRecords/Find/Fetch keep their
+// existing 200..399 policy. Informational final statuses are tested through a
+// synthetic transport; a normal HTTP transport consumes interim responses.
+func (a *API) ListSourceRecords(ctx context.Context, options ...FlavorListOption) iter.Seq2[*FlavorRecord, error] {
+	return a.listRecords(ctx, true, options...)
+}
+
+func (a *API) listRecords(ctx context.Context, sourceStatuses bool, options ...FlavorListOption) iter.Seq2[*FlavorRecord, error] {
 	owned := slices.Clone(options)
 	return func(yield func(*FlavorRecord, error) bool) {
 		wrap := func(err error) error { return request.Wrap("ListRecords", "flavors", cloudread.ContextError(ctx, err)) }
@@ -207,6 +236,7 @@ func (a *API) ListRecords(ctx context.Context, options ...FlavorListOption) iter
 		}
 		operationCtx := rest.WithOperationGuard(ctx, check)
 		parameters, err := prepareFlavorList(operationCtx, check, owned)
+		parameters.sourceStatuses = sourceStatuses
 		if err != nil {
 			yield(nil, wrap(err))
 			return

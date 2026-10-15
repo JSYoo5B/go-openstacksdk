@@ -179,13 +179,14 @@ func baseFlavorQuery(value FlavorListOpts, rawQuery url.Values) (url.Values, err
 }
 
 type flavorListParameters struct {
-	query         url.Values
-	control       rest.ListControl
-	selection     *resource.FilterSelection
-	headers       map[string]string
-	microversion  *string
-	details       bool
-	getExtraSpecs bool
+	sourceStatuses bool
+	query          url.Values
+	control        rest.ListControl
+	selection      *resource.FilterSelection
+	headers        map[string]string
+	microversion   *string
+	details        bool
+	getExtraSpecs  bool
 }
 
 func flavorReadParameters(value FlavorListOpts, rawQuery url.Values, headers map[string]string, selection *resource.FilterSelection) (flavorListParameters, error) {

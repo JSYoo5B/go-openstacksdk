@@ -267,7 +267,7 @@ func (s *Service) GetFlavorByRAM(ctx context.Context, ram any, options ...Flavor
 	if err != nil {
 		return nil, flavorCloudFailure(op, err)
 	}
-	listed, err := p.queryInventory(prepared, true)
+	listed, err := p.queryInventorySource(prepared, true, true)
 	result := &FlavorRAMResult{}
 	if listed != nil {
 		for _, row := range listed.Inventory {

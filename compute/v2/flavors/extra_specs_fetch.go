@@ -120,12 +120,13 @@ func snapshotFlavorExtraSpecsInput(input FlavorExtraSpecsRequest) (string, *reso
 }
 
 type flavorExtraSpecsRead struct {
-	ctx      context.Context
-	source   *cloudread.Source
-	check    func(context.Context) error
-	identity string
-	seed     *resource.RawResource
-	version  string
+	sourceStatuses bool
+	ctx            context.Context
+	source         *cloudread.Source
+	check          func(context.Context) error
+	identity       string
+	seed           *resource.RawResource
+	version        string
 }
 
 // prepareFlavorExtraSpecsRead snapshots the same input and read policy for the
@@ -199,10 +200,7 @@ func (read *flavorExtraSpecsRead) read(property ...string) (*resource.RawResourc
 		parts = append(parts, url.PathEscape(value))
 	}
 	target := read.source.Client.ServiceURL(parts...)
-	codes := make([]int, 200)
-	for index := range codes {
-		codes[index] = index + 200
-	}
+	codes := flavorRecordStatusCodes(read.sourceStatuses)
 	response, prior := microversions.MemberGet(read.ctx, read.source, target, read.version, microversions.NovaProfile, codes...)
 	if response == nil {
 		return nil, nil, errors.Join(prior, read.check(read.ctx))

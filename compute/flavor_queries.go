@@ -132,6 +132,10 @@ func flavorQueryValues(rows []*flavors.FlavorRecord) ([]json.RawMessage, json.Ra
 	return views, value, err
 }
 func (p *flavorRecordWorkflow) queryInventory(config request.Config[FlavorQueryOpts], defaultExtra bool) (*FlavorQueryResult, error) {
+	return p.queryInventorySource(config, defaultExtra, false)
+}
+
+func (p *flavorRecordWorkflow) queryInventorySource(config request.Config[FlavorQueryOpts], defaultExtra, sourceStatuses bool) (*FlavorQueryResult, error) {
 	result := &FlavorQueryResult{Inventory: []*flavors.FlavorRecord{}}
 	options := []flavors.FlavorListOption{flavors.WithFlavorListDetails(true), flavors.WithFlavorListExtraSpecs(flavorQueryExtra(config.Options, defaultExtra))}
 	if config.Options.Microversion != nil {
@@ -140,7 +144,11 @@ func (p *flavorRecordWorkflow) queryInventory(config request.Config[FlavorQueryO
 	for key, value := range config.Headers {
 		options = append(options, flavors.WithFlavorListHeader(key, value))
 	}
-	for record, readErr := range p.api.ListRecords(p.ctx, options...) {
+	list := p.api.ListRecords
+	if sourceStatuses {
+		list = p.api.ListSourceRecords
+	}
+	for record, readErr := range list(p.ctx, options...) {
 		if record != nil {
 			result.Inventory = append(result.Inventory, p.locate(record))
 		}
