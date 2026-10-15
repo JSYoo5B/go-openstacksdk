@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/responsejson"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -256,19 +257,25 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...UpdateReco
 	result.Committed = true
 	// Resource._translate_response tolerates ValueError from response.json(),
 	// keeping the request seed; valid nonobject JSON still raises a shape error.
-	if !utf8.Valid(response.Body) {
+	// Normalize only the parse input. The HTTP envelope and every response
+	// error keep the physical response bytes and original Content-Type.
+	normalized, normalizeErr := responsejson.Normalize(response.Body, response.Header)
+	if err := errors.Join(normalizeErr, guard(ctx)); err != nil {
+		return result, wrap(response.Fail(err))
+	}
+	if !utf8.Valid(normalized) {
 		return result, wrap(response.Fail(fmt.Errorf("%w: Requests response JSON charset decoding remains unsupported", resource.ErrUnsupported)))
 	}
-	if len(bytes.TrimSpace(response.Body)) > 0 && json.Valid(response.Body) {
+	if len(bytes.TrimSpace(normalized)) > 0 && json.Valid(normalized) {
 		fields := map[string]json.RawMessage{}
-		if raw := bytes.TrimSpace(response.Body); raw[0] != '{' {
+		if raw := bytes.TrimSpace(normalized); raw[0] != '{' {
 			return result, wrap(response.Fail(updateRecordInvalid("commit response must support object pop/attribute merge")))
 		}
-		if err := json.Unmarshal(response.Body, &fields); err != nil {
+		if err := json.Unmarshal(normalized, &fields); err != nil {
 			return result, wrap(response.Fail(err))
 		}
 		result.Wire = &resource.RawResource{Metadata: resource.Metadata{Body: updateRecordFieldsCopy(fields), Header: response.Header.Clone(), StatusCode: response.StatusCode}}
-		members, parseErr := cloudfilter.ObjectMembers(response.Body)
+		members, parseErr := cloudfilter.ObjectMembers(normalized)
 		if parseErr != nil {
 			return result, wrap(response.Fail(parseErr))
 		}

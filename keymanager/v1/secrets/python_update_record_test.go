@@ -2,6 +2,7 @@ package secrets_test
 
 import (
 	"context"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"unicode/utf16"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
@@ -284,12 +286,84 @@ func TestPythonSecretUpdateRecordRequestsCharsetGapIsExplicit(t *testing.T) {
 	body := string([]byte{'{', '"', 'n', 'a', 'm', 'e', '"', ':', '"', 'c', 'a', 'f', 0xe9, '"', '}'})
 	api, _, calls := secretUpdateFixture(t, func(*http.Request) *http.Response {
 		r := nativeSecretWire(200, body)
-		r.Header.Set("Content-Type", "application/json; charset=ISO-8859-1")
+		r.Header.Set("Content-Type", "application/json; charset=cp1006")
 		return r
 	})
 	got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
 	var proof *resource.ResponseError
 	if !errors.Is(err, resource.ErrUnsupported) || !errors.As(err, &proof) || got.StatusCode != 200 || string(got.Envelope) != body || !got.Committed || len(*calls) != 1 {
 		t.Fatal(got, err, proof, *calls)
+	}
+}
+
+func secretUpdateCharsetJSON(text string, width int, order binary.ByteOrder, bom []byte) []byte {
+	data := append([]byte(nil), bom...)
+	if width == 2 {
+		for _, v := range utf16.Encode([]rune(text)) {
+			var b [2]byte
+			order.PutUint16(b[:], v)
+			data = append(data, b[:]...)
+		}
+	} else {
+		for _, v := range text {
+			var b [4]byte
+			order.PutUint32(b[:], uint32(v))
+			data = append(data, b[:]...)
+		}
+	}
+	return data
+}
+func TestPythonSecretUpdateRecordExplicitCharsetsDecodeViewsKeepPhysicalEnvelope(t *testing.T) {
+	cases := []struct {
+		name, charset string
+		body          []byte
+	}{
+		{"latin1", "ISO-8859-1", []byte{'{', '"', 'n', 'a', 'm', 'e', '"', ':', '"', 'c', 'a', 'f', 0xe9, '"', '}'}},
+		{"utf16-bom", "utf-16", secretUpdateCharsetJSON(`{"name":"café"}`, 2, binary.LittleEndian, []byte{0xff, 0xfe})},
+		{"utf32be", "utf-32-be", secretUpdateCharsetJSON(`{"name":"café"}`, 4, binary.BigEndian, nil)},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			contentType := "application/json; charset=" + tc.charset
+			api, _, calls := secretUpdateFixture(t, func(*http.Request) *http.Response {
+				r := nativeSecretWire(200, string(tc.body))
+				r.Header.Set("Content-Type", contentType)
+				return r
+			})
+			got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
+			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(tc.body) || got.Header.Get("Content-Type") != contentType || len(*calls) != 1 {
+				t.Fatal(got, err, *calls)
+			}
+			for _, view := range []*resource.RawResource{got.Resource, got.Wire} {
+				var name string
+				if json.Unmarshal(view.Body["name"], &name) != nil || name != "café" || view.Header.Get("Content-Type") != contentType || view.StatusCode != 200 {
+					t.Fatal(view)
+				}
+			}
+			got.Wire.Body["name"][1] = 'X'
+			var name string
+			if json.Unmarshal(got.Resource.Body["name"], &name) != nil || name != "café" || string(got.Envelope) != string(tc.body) {
+				t.Fatal("normalized views/raw envelope alias", got)
+			}
+		})
+	}
+}
+func TestPythonSecretUpdateRecordDecodedShapeFailureKeepsOriginalEncodedProof(t *testing.T) {
+	body := secretUpdateCharsetJSON(`[]`, 2, binary.LittleEndian, []byte{0xff, 0xfe})
+	contentType := "application/json; charset=utf-16"
+	api, _, calls := secretUpdateFixture(t, func(*http.Request) *http.Response {
+		r := nativeSecretWire(200, string(body))
+		r.Header.Set("Content-Type", contentType)
+		return r
+	})
+	got, err := api.UpdateRecord(context.Background(), "s1", secrets.WithUpdateRecordAttribute("name", "seed"))
+	var proof *resource.ResponseError
+	if err == nil || !errors.As(err, &proof) || got == nil || !got.Committed || got.StatusCode != 200 || string(got.Envelope) != string(body) || proof.StatusCode != 200 || string(proof.Body) != string(body) || proof.Header.Get("Content-Type") != contentType || got.Wire != nil || len(*calls) != 1 {
+		t.Fatal(got, err, proof, *calls)
+	}
+	proof.Body[0] = 0
+	proof.Header.Set("Content-Type", "changed")
+	if string(got.Envelope) != string(body) || got.Header.Get("Content-Type") != contentType {
+		t.Fatal("error proof/raw receipt alias", got)
 	}
 }
