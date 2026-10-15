@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 잔여3% 기준 첫 사이클](#2026-10-15-잔여3-기준-첫-사이클)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 축소 단발 Flavor 상태 정책](#2026-10-15-축소-단발-flavor-상태-정책)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 축소 단발 Flavor 상태 정책
+
+사용자는 에이전트를 줄여 사용량 약3% 범위로 한 번만 진행하라고 정정했습니다. 출발52a32099·시작 잔여4%/ordinaryUsageAllowed=true/resetsAt1792472624를 확인하고 root+읽기 전용 worker1개로 cloud get_flavor_by_ram의 상태 정책만 고정했습니다. 반복 sdk-quota는 PAUSED이며 재개하지 않았습니다.
+
+API.ListSourceRecords→private policy→collection ListCodes와 conditional extra-specs read에100~399를 연결했습니다. RAM helper만 이 경로를 자동 선택하고 기존 AllFlavors/Search/Get/ListRecords/standalone FetchExtraSpecs와 기존 Find enrichment wrapper는 false 기본값/200~399를 유지합니다. 정책은 caller 옵션 적용 후 고정해 callback으로 선택 범위를 바꾸지 못합니다. 최초 집중 검사와 추가 UTF16 증거 검사 모두 실패 없이 PASS이며 새3그룹14사례와 기존10그룹75사례를 재사용해 총13그룹89사례를 검증했습니다. 공개 Gophercloud testhelper-backed 기존 Nova fixture를 재사용했고 서버 프레임워크를 추가하지 않았습니다.
+
+Source199 두 기존 실제 Python 관찰을 재사용했습니다. 독립 검토에서는 Resource.list(resource.py:2284)와 Flavor.fetch_extra_specs(flavor.py:199)의 Requests Response.json 경로가 UTF16/32 detection 및 legacy charset을 처리하지만 Go는 raw encoding/json을 쓴다는 다른 named gap을 확인했습니다. Go에서 명시 UTF16 응답의 실제199·header·raw body를 보존하는 오류를 두 단계별로 검증했습니다. 이는 새 Flavor Python 실행을 주장하는 증거가 아니며 Source loader 코드·이전 Router/Secret 실행 근거와 Go wire 재현을 구분합니다. 기존 상태 gap은 해결했지만 decoder gap을 숨기지 않아 named 행은 unresolved/매핑2,059개를 유지하고 계약7,554→7,555(+1)를 기록합니다. SDK-R1/C1/S1·live-cloud/release도 미완료입니다.
+
+생산 수정948ac426을 main에 push했고 동결 Go source3,258개 SHA256 2c485bfc116c556af0defe4545ffa6a3a51a96b750721f56b5a1f5e3564c1bc5가 전체 gate 전후 같고 전체 **204개 실제 test package make check PASS(exit0)**입니다. license/vet/race/parity/progress/gofmt 모두 통과했으며 최초 실패나 생산 수리 반복은 없었습니다. 집중 로그는 /private/tmp/go-openstacksdk-cycle10-focused-first.jsonl 및 ...-charset-test.jsonl입니다. 기존 main의 fence를 유지하고 현재 소스에서 독립 Go main1개 build·Python AST1개 PASS를 확인했습니다. 전체 log는 /private/tmp/go-openstacksdk-cycle10-make-check.log 및 ...-full-receipt.json, main 빌드 log는 ...-main-build.log입니다. Go최소1.25·실행1.27.2와 고정 Source/native metadata를 유지하고 의존성/라이선스6modules·원문16개 변경은 없습니다. 현재 관측 잔여4%/동일reset시각이며 사용량은 정수·공유계정 관측으로 이번 작업만의 소비를 단정하지 않습니다. 문서/판정을 마감 커밋으로 저장하고 automationPAUSED 상태에서 종료합니다. 별도 반복이나 추가 후보는 시작하지 않습니다.
 
 ## 2026-10-15 잔여3% 기준 첫 사이클
 

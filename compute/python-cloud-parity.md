@@ -102,7 +102,7 @@ Python helper가 True/False나 None을 돌려주는 자리에서 Go는 찾은 �
 
 ## 남은 메서드와 부족한 기능
 
-- `get_flavor_by_ram`: 공개 helper가 전체 목록·extra specs·stable RAM 정렬·include 선택을 처리합니다. [가이드](cloud-flavor-ram-python.md)에 inherited 목록/extra-specs의 100~199 응답 차이를 named remaining으로 기록했습니다.
+- `get_flavor_by_ram`: 공개 helper가 전체 목록·extra specs·stable RAM 정렬·include 선택을 처리합니다. [가이드](cloud-flavor-ram-python.md)에 목록/extra-specs100~399 정책을 RAM helper에 연결했으며 Requests 응답 charset 차이는 named remaining으로 유지합니다.
 - `search_aggregates`, `search_servers`: cloud `_utils._filter_list`의 name_or_id glob, dict 필터, JMESPath 필터를 적용하는 공개 helper가 없습니다. `search_servers`는 서버 주소 확장도 없습니다.
 - `get_aggregate`, `update_aggregate`, `delete_aggregate`, `set_aggregate_metadata`, `add_host_to_aggregate`, `remove_host_from_aggregate`: `find_aggregate`의 GET 후 목록 fallback이 없습니다. `update_aggregate`는 Proxy 수준에서도 `availability_zone=None`을 보낼 수 없고, `delete_aggregate`는 숫자 ID의 404를 False로 바꾸는 동작을 caller가 직접 처리해야 합니다.
 - `list_hypervisors`: 2.53 미만의 `os-hypervisors/{pattern}/search` 경로가 없습니다.

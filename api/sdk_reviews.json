@@ -102533,7 +102533,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMQueryOptions",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryHeader",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListSourceRecords"
       ],
       "contracts": [
         {
@@ -102577,9 +102578,17 @@
           ]
         },
         {
-          "behavior": "Existing guarded reader preserves native401 actual failed body, physical Read/Close error chain, custom cancel cause and transient/restored client-source invalidation without returning completed selection. Clean503 retry is exercised with original list route. New helper keeps existing flavor list/extra status policy unchanged; no 1xx parity claim.",
+          "behavior": "Existing guarded reader preserves native401 actual failed body, physical Read/Close error chain, custom cancel cause and transient/restored client-source invalidation without returning completed selection. Clean503 retry is exercised with original list route. Existing guard/retry invariants remain; the RAM-only Source status policy is covered by the dedicated contract below.",
           "tests": [
             "compute/cloud_flavor_ram_test.go:TestCloudFlavorByRAMPhysicalFaultsNative401AndCleanRetry"
+          ]
+        },
+        {
+          "behavior": "RAM-only Source collection and conditional enrichment accept100..399 through ListSourceRecords. Existing AllFlavors/Search/Get/ListRecords/standalone FetchExtraSpecs keep200..399. Actual status/header/body are retained; Requests charset decoding is not implied by this policy.",
+          "tests": [
+            "compute/cloud_flavor_ram_source_status_test.go:TestCloudFlavorRAMSourceStatusListAndEnrichment",
+            "compute/cloud_flavor_ram_source_status_test.go:TestCloudFlavorRAMSourceStatusPreservesExistingReaders",
+            "compute/cloud_flavor_ram_source_status_test.go:TestCloudFlavorRAMSourceStatusDoesNotClaimUTF16Decoding"
           ]
         }
       ],
@@ -102591,10 +102600,10 @@
         "Go returns owned FlavorRAMResult with selected Flavor and actual consumed Inventory, instead of only mutable Python Flavor. Resource/default/location, Wire, per-row list Envelope and separate extra-specs whole response evidence remain distinct; local no-match uses errors.Is(ErrNoFlavorByRAM), comparison/membership errors use ErrInvalidOption.",
         "Public any inputs are SDK-owned JSON-domain primitive/container snapshots, not required application builder interfaces. RawMessage preserves numeric spelling. Python arbitrary classes/operators, NaN/Infinity runtime float values, configurable huge-integer string conversion limits and custom runtime callback timing are not reproduced. Safe Go IDs/UTF8/JSON/header/selected-source policy and existing foundation SDK-R1/SDK-C1/SDK-S1 remain explicit; supported increment0.",
         "Actual imported pinned Source under Python3.14.8 ran49 cloud→NovaProxy→Flavor/Resource cases, plus2 status199 list/extra cases. Only Adapter Response/connection were substituted. Source SHA4 recorded at /private/tmp/go-openstacksdk-cycle9-flavor-ram-source.json; status proof at /private/tmp/go-openstacksdk-cycle9-flavor-ram-status-source.json; independent14-case flavor comparison at /private/tmp/go-openstacksdk-cycle9-flavor-router-audit.json. Mock/Go/race/main proof is not actual authenticated backend/role/deployment acceptance.",
-        "Existing AllFlavors default false remains unchanged while this helper owns default true. Root Connection forwarding is not added; conn.Compute(ctx) returns the service. Existing native and generic flavor reader policies are preserved. Go7groups/root validation are distinct from actual Python Source execution."
+        "Existing AllFlavors default false remains unchanged while this helper owns default true. Root Connection forwarding is not added; conn.Compute(ctx) returns the service. Existing native and generic flavor reader policies are preserved. Existing Go7groups plus3 new status/decoder groups/root validation are distinct from actual Python Source execution."
       ],
       "remaining": [
-        "Named get_flavor_by_ram transport status parity remains unresolved: actual pinned Source accepts a status199 list response and a separate status199 required extra-specs response, both returning the selected Flavor; reused Go flavorRecordCodes and extra-specs read policy accept200..399 and reject100..199. This precise reachable remaining is not replaced by generic SDK-R1 and prevents completed go_mapping/full-supported promotion. Basic helper selection is now implemented; the previous missing-local-RAM-selector remaining is obsolete."
+        "Named response-decoder gap: Source Resource.list and Flavor.fetch_extra_specs call Requests Response.json, which handles UTF-16/32 detection and explicit legacy response charsets. The Go list and extra-specs readers pass raw bytes to encoding/json instead; a UTF-16 JSON response can succeed in Source but fail after accepted199 in Go, with actual response evidence retained. SDK-R1/C1/S1 foundations remain separate."
       ]
     },
     {

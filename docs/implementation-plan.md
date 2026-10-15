@@ -8,7 +8,10 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**최신 중단 지시 (2026-10-15): 이번 사이클까지만 마무리합니다.** sdk-quota는 PAUSED로 변경·확인했으며 현재 고정6개 후보의 전체 검사·문서·커밋/push만 마감하고 새 사이클은 시작하지 않습니다. 재개에는 새 사용자 지시가 필요합니다.
+**추가 단발 작업 (2026-10-15): 약3% 사용량 범위·worker1개로 Flavor RAM 상태 정책 보강 마감.** 사용자는 잔여3%가 아니라 사용량 약3% 정도의 한 번 작업으로 정정했습니다. 시작 잔여4%·ordinaryUsageAllowed=true·resetsAt1792472624이며 반복 자동화는 PAUSED 그대로입니다. Root가 구현·Go·Git, worker1개가 읽기 전용 Source/코드/문서 검토를 맡습니다. RAM 전용 ListSourceRecords가 목록과 extra-specs100~399를 연결하고 기존6개 reader200~399는 보존합니다. 새3그룹과 기존10그룹을 재사용한 집중13그룹89사례가 PASS했습니다. 코드 수정948ac426을 push했고 전체204개 test package·license/vet/race/parity/progress/gofmt PASS(exit0), 독립 Flavor main1개 빌드·Python AST1개 PASS로 마감했습니다. Go source3,258개 SHA256 2c485bfc116c556af0defe4545ffa6a3a51a96b750721f56b5a1f5e3564c1bc5는 gate 전후 같습니다. Requests UTF16/32·legacy charset 차이는 새 증거와 함께 unresolved로 남겨 매핑2,059개/계약7,555개이며 supported0입니다. 한도 증가/reset이면 중단하고 별도 다음 사이클은 실행하지 않습니다.
+
+
+**직전 중단 지시 (2026-10-15): 이번 사이클까지만 마무리합니다.** sdk-quota는 PAUSED로 변경·확인했으며 현재 고정6개 후보의 전체 검사·문서·커밋/push만 마감하고 새 사이클은 시작하지 않습니다. 재개에는 새 사용자 지시가 필요합니다.
 
 **현재 구현 (2026-10-15, 잔여3% 기준 첫 사이클): 고정6개 후보 구현·8worker 검토·집중33그룹247사례·독립 main4개·전체204개 test package gate PASS, 이번 묶음 마감.** 출발 revision `06c6a0e3`, 검증된 Go 매핑2,059/3,228(63.8%)·핵심1,981/2,158(91.8%)입니다. Flavor RAM 선택1·라우터 인터페이스 제거1·방화벽 rule/policy/group 삭제3·Barbican secret 수정1로 범위를 고정했습니다. 구현4개와 Source/테스트/문서/라이선스 검토4개를 병행하고 root가 공통 계약·통합·Go 검사·판정·Git을 순서대로 처리합니다. 기능 커밋4개를 main에 push했습니다. 계약은7,518→7,554개(+36)로 증가했지만 이번6행은 named 차이를 남겨 모두 unresolved이며 매핑 완료 수는 늘리지 않습니다. 실제 최초 Flavor Envelope fixture 실패와 수리 후 PASS를 [판정대장](sdk-support-ledger.md#2026-10-15-잔여3-기준-첫-사이클)에 구분했습니다. 전체 license/vet/race/parity/progress/gofmt PASS(exit0)이며 Go source3,257개 SHA256 dbf2dbf8aa4c81953c62ed98215f0c4d7acdd2beb79f042557e7a80d6da4c8b2가 최종 gate 전후 같습니다. 전체 Source parity·SDK-R1/C1/S1·실클라우드/릴리즈는 미완료입니다.
 
@@ -634,7 +637,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 제외(미지원) | 1,169 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,554 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,555 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.

@@ -2,7 +2,7 @@
 
 기준은 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`, Gophercloud `v2.15.0`입니다. `conn.Compute(ctx)`에서 얻은 service의 `GetFlavorByRAM`이 상세 목록, 조건부 extra specs 보충, RAM 정렬과 이름 부분 문자열 선택을 제공합니다. 애플리케이션은 builder/interface를 구현하지 않아도 됩니다.
 
-**기능 구현을 제공하지만 완료 집계는 unresolved입니다.** 기존 Flavor reader가 200~399만 수락하여 Source의 100~199 응답과 차이가 남습니다. Source의 실제 list와 extra-specs 응답 status199가 모두 성공하는 것을 별도 실행해 확인했습니다. 이 도달 가능한 차이를 일반 SDK 차이로 치환하거나 전체 호환으로 집계하지 않습니다.
+**기능 구현을 제공하지만 완료 집계는 unresolved입니다.** RAM helper는 목록과 조건부 extra-specs 양쪽에 Source100~399 정책을 사용합니다. 기존 `ListRecords`·All/Search/Find·독립 extra-specs 조회는 200~399 정책을 유지합니다. Source와 같은 199 응답은 합성 Adapter transport로 검증했으며 일반 HTTP의 interim 응답을 최종 응답이라고 주장하지 않습니다. Requests가 처리하는 UTF-16/32·명시 legacy charset JSON을 raw Go JSON decoder가 재현하지 못하는 차이는 남아 있습니다.
 
 | Python | Go | 의미 |
 | --- | --- | --- |
@@ -30,11 +30,11 @@ JSON null RAM의 sort/compare는 오류입니다. 정렬은 include보다 먼저
 
 선택 Flavor와 Inventory는 독립적으로 복제됩니다. Resource는 Source descriptor/default와 기존 Connection location view, Wire는 실제 JSON 행입니다. **FlavorRecord.Envelope는 기존 reader 계약대로 해당 flat 행의 원본 bytes**이며 전체 list page를 발명하지 않습니다. Header/StatusCode는 그 행을 얻은 실제 페이지의 값입니다. Enrichment는 별도의 extra-specs 전체 응답과 실제 status/header를 보존합니다. 로컬 선택 오류의 ResponseError가 포함하는 증거도 소비한 마지막 행에서 온 것이며 추가 HTTP 관측을 주장하지 않습니다.
 
-기존 목록/보충 reader의 microversion·safe path·retry/reauth·cancellation/source guard·오류 chain을 재사용합니다. 새 Source status opt-in을 기존 reader에 추가하지 않았으므로 **100~199 성공 상태가 남은 구체적 차이**입니다. 이 변경은 기존 native API와 공통 reader 정책을 바꾸지 않습니다. 일반 clean retry, native401, Read/Close 실패, 사용자 취소 원인과 잠시 변경되었다 복원된 client source를 기존 testhelper 기반 fixture로 검증합니다. Live backend 권한과 배포 정책 검증은 별도입니다.
+기존 목록/보충 reader의 microversion·safe path·retry/reauth·cancellation/source guard·오류 chain을 재사용합니다. 새 `flavors.API.ListSourceRecords`만 Source100~399를 선택하며 RAM helper가 이를 자동 사용합니다. 기존 API 기본값과 Find/독립 FetchExtraSpecs 정책은 유지합니다. 응답의 Requests charset 해석은 별도 named gap입니다. 일반 clean retry, native401, Read/Close 실패, 사용자 취소 원인과 잠시 변경되었다 복원된 client source를 기존 testhelper 기반 fixture로 검증합니다. Live backend 권한과 배포 정책 검증은 별도입니다.
 
 공개 `any` 인수는 임의 Python 런타임 객체 모델이 아니라 SDK가 소유하는 JSON-domain 값 입력입니다. `json.RawMessage`로 integer/float token을 보존할 수 있습니다. NaN/Infinity float 값, 사용자 Python class/연산자, adapter/session subclass, full Resource MRO·동적 attribute·cache/session foundation은 Go 입력/기존 SDK-R1·SDK-C1·SDK-S1 범위 차이입니다. 매우 큰 JSON integer는 CPython의 설정 가능한 문자열 변환 길이 제한을 재현하지 않습니다. 임의 사용자 callback 실행 시점과 예외 문구를 Python과 같다고 주장하지 않습니다. 이 행의 supported 증가량은 0입니다.
 
-Actual pinned Python3.14.8의 cloud 함수→Nova Proxy→Flavor/Resource list·descriptor·fetch_extra_specs를 49개 사례로 실행했고, 별도 list/extra status199 2개를 확인했습니다. Adapter HTTP 응답과 connection만 fixture로 대체했으며 실서비스 인증 검증이 아닙니다. 독립 Source 검토의 14개 사례도 정렬·extra 보충·동적 값 순서를 대조했습니다. Go에는 7개 테스트 그룹을 추가했으며 최종 통과 여부는 별도의 Go gate 결과로 판정합니다.
+Actual pinned Python3.14.8의 cloud 함수→Nova Proxy→Flavor/Resource list·descriptor·fetch_extra_specs를 49개 사례로 실행했고, 별도 list/extra status199 2개를 확인했습니다. Adapter HTTP 응답과 connection만 fixture로 대체했으며 실서비스 인증 검증이 아닙니다. 독립 Source 검토의 14개 사례도 정렬·extra 보충·동적 값 순서를 대조했습니다. 기존7개 RAM 그룹을 재사용하고 Source status/기존6개 reader 보존/남은 UTF-16 응답 증거3개 그룹을 추가했습니다. 최종 통과 여부는 별도의 Go gate 결과로 판정합니다.
 
 ## 독립 Python main
 
