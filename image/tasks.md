@@ -6,7 +6,7 @@
 
 | 호출 | 요청과 기본값 |
 |---|---|
-| `CreateTask(ctx, taskType, ...)` | type/input을 담은 collection POST. type은 비어 있지 않은 UTF8 literal이고 local enum 검사를 하지 않습니다. nil Input은 `{}`입니다. |
+| `CreateTask(ctx, taskType, ...)` | type/input을 담은 collection POST. type은 비어 있지 않은 UTF8 literal이고 local enum 검사를 하지 않습니다. nil Input은 `{}`이고, `WithCreateTaskNullInput`을 주면 `"input": null`을 보냅니다. |
 | `GetTask(ctx, taskID, ...)` | 지정한 literal task ID의 GET. 404는 오류입니다. Ref·Name·Find·missing suppression을 제공하지 않습니다. |
 | `Tasks(ctx, ...)` | 실행 시 요청하는 lazy iterator. 기본은 서버 limit·sort 설정을 사용하고 광고된 canonical body next만 따라갑니다. |
 | `AllTasks(ctx, ...)` | 같은 iterator를 모아 nonnil 빈 slice 또는 전체 결과를 반환합니다. 오류 시 부분 slice 대신 nil/error입니다. |
@@ -79,7 +79,7 @@ func allTasks(ctx context.Context, svc *image.Service) ([]*image.TaskInfo, error
 
 `With...Opts`는 해당 설정 전체를 교체하고 마지막 helper가 우선합니다. Headers·Input map/raw buffer·Limit pointer·callback config는 실행 전후에 복사합니다. `Tasks`는 생성 시 option slice를 복사하고 iteration마다 준비합니다. 재사용과 병렬 iteration은 caller가 공유 입력을 동시에 변경하지 않는 범위에서 지원합니다.
 
-[고정 task Schema](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/tasks.py#L354-L430)는 input에 null/object를 허용하지만 controller는 `task['input'].get('image_id')`를 사용합니다. Go는 이 차이를 고려하여 항상 object를 보냅니다. type은 server의 `import`, `api_image_import`, `location_import` 검증을 그대로 둡니다. 생성 Schema가 허용하는 일부 다른 root 속성도 controller는 type/input 이외에는 전달하지 않습니다. SDK의 concrete CreateOpts는 input과 headers만 받습니다.
+[고정 task Schema](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/tasks.py#L354-L430)는 input에 null/object를 허용하지만 controller는 `task['input'].get('image_id')`를 사용합니다. Go는 이 차이를 고려하여 기본으로 object를 보냅니다. Python의 `create_task(input=None)`과 같은 null 요청이 필요하면 [`WithCreateTaskNullInput`](python-create-task.md)을 씁니다. type은 server의 `import`, `api_image_import`, `location_import` 검증을 그대로 둡니다. 생성 Schema가 허용하는 일부 다른 root 속성도 controller는 type/input 이외에는 전달하지 않습니다. SDK의 concrete CreateOpts는 input, NullInput, headers만 받습니다.
 
 Python의 실제 세 proxy 호출은 다음과 같습니다. [Task Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/task.py#L16-L53)는 create/fetch/list를 제공하며 update/delete는 제공하지 않습니다.
 
