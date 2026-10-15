@@ -2159,14 +2159,28 @@
     {
       "operation": "python:compute/v2/revert_quota_set",
       "source_fingerprint": "1e631ccd77071b505259799d7b2a0904da3e7bd867e42215522d735f372b1f4e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.InUser",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Reset"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.UserQuotaScope.Reset",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetQuery",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithResetIgnoreMissing"
       ],
       "contracts": [
+        {
+          "behavior": "WithResetQuery adds revert_quota_set(**query) parameters as literal values to the project DELETE os-quota-sets/{project} and next to the fixed user_id on the user scope, a later value for a key wins, a 404 stays an error that is also resource.ErrNotFound unless WithResetIgnoreMissing(true) is given, and a 500 stays a Gophercloud status error inside resource.OperationError.",
+          "tests": [
+            "compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetForwardsQueryAndMissingPolicy"
+          ]
+        },
+        {
+          "behavior": "WithResetQuery rejects user_id, a blank or control-character key, an invalid UTF-8 value and a nil option on both scopes before HTTP.",
+          "tests": [
+            "compute/v2/quotasets/python_reset_query_test.go:TestPythonQuotaResetQueryRejectsScopeOwnedAndInvalidKeys"
+          ]
+        },
         {
           "behavior": "The no-query project reset uses bodyless DELETE and strict missing handling without an additional GET.",
           "tests": [
@@ -2207,17 +2221,19 @@
           ]
         }
       ],
+      "documentation": [
+        "compute/v2/quotasets/python-reset-query.md",
+        "compute/v2/quotasets/README.md"
+      ],
       "differences": [
+        "Python urlencodes str(value) for each query value; WithResetQuery takes the literal text, so the caller passes \"True\" or a Python list spelling to reproduce those values.",
+        "Python accepts every status below 400; Go accepts Nova's 202 and 204.",
+        "Python sends min(QuotaSet _max_microversion 2.56, server maximum); Go sends the client microversion.",
+        "Python passes user_id as a query keyword; Go maps it to UserQuotaScope and rejects user_id in WithResetQuery. Go encodes query keys in sorted order.",
         "Python returns None; Go returns ResetResponse with the fixed project/user identities and copied headers and can explicitly ignore a 404.",
         "UserQuotaScope is separate from ProjectQuotaScope, so a user Reset cannot promote a project-wide operation; guarded redirects reject changes to the exact request target rather than forwarding arbitrary query mutations."
       ],
-      "documentation": [
-        "compute/v2/quotasets/README.md"
-      ],
-      "remaining": [
-        "The Python proxy forwards arbitrary reset query parameters through Resource.delete; Go maps explicit user_id through UserQuotaScope but does not expose additional arbitrary reset query parameters.",
-        "Audit inherited Proxy._delete/QuotaSet/Resource missing, response, adapter and microversion behavior beyond the tested project and fixed-user HTTP contracts."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/update_quota_set",
@@ -28847,15 +28863,28 @@
     {
       "operation": "python:image/v2/create_task",
       "source_fingerprint": "0b80538e18d6bc91e0695d7397e6c83a363a51c619518e0d12832034f6b21174",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.CreateTask",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskOpts",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskInput",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskNullInput",
         "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeader",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskInput"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithCreateTaskHeaders"
       ],
       "contracts": [
+        {
+          "behavior": "WithCreateTaskNullInput makes CreateTask send POST tasks with {\"type\": ..., \"input\": null}, clears an earlier input object, is overridden by a later WithCreateTaskInput, is also selected by CreateTaskOpts.NullInput, and a null input in the 201 response leaves TaskInfo.Input nil with the raw null kept in Metadata.Body.",
+          "tests": [
+            "image/python_create_task_test.go:TestPythonCreateTaskSendsNullInput"
+          ]
+        },
+        {
+          "behavior": "CreateTaskOpts with both NullInput and a non-nil Input fails before HTTP as resource.ErrInvalidOption wrapped in a CreateTask resource.OperationError, and a 400 response to a null input is returned as the Gophercloud status error with operation context.",
+          "tests": [
+            "image/python_create_task_test.go:TestPythonCreateTaskNullInputRejections"
+          ]
+        },
         {
           "behavior": "One fixed captured image-service collection POST201 with explicit type/input only. Type nonemptyUTF8 literal without local enum/control gate; nilInput defaults{} rather than top-levelnull. Pinned nullable Schema/controller.get discrepancy is explicit deliberateGo policy; no extra GET/child/wait/cleanup.",
           "tests": [
@@ -28907,20 +28936,17 @@
         }
       ],
       "documentation": [
+        "image/python-create-task.md",
         "image/tasks.md"
       ],
       "differences": [
-        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
-        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
-        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Go nilInput{} wholeobject policy deliberately differs from pinned nullable input Schema; controller.get does not prove null succeeds. Go forwards nonempty Type without enum gate and server validates supportedtypes.201 schedules async pendingtask, not success, no compensation/URIreachability/executor parity."
+        "Python sends every declared Task attribute it receives, such as status, owner or message, and may omit type or input; Go always sends exactly the type and input keys, which are the only values Glance's controller passes to task creation.",
+        "Python sends any input value, including a list or a string; Go sends a JSON object, {} by default, or null with WithCreateTaskNullInput.",
+        "Python sends an empty type string to the server; Go rejects an empty or invalid UTF-8 type before HTTP.",
+        "Python accepts every status below 400 and ignores a non-JSON body; Go accepts only 201 and returns a non-object body as a resource.ResponseError.",
+        "Python returns a Task Resource merged from the request attributes and the response with the self key dropped; Go returns TaskInfo with only response fields, typed as optional strings and raw JSON maps, plus headers, status and the raw body."
       ],
-      "remaining": [
-        "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
-        "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
-        "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Go nilInput{} wholeobject policy deliberately differs from pinned nullable input Schema; controller.get does not prove null succeeds. Go forwards nonempty Type without enum gate and server validates supportedtypes.201 schedules async pendingtask, not success, no compensation/URIreachability/executor parity."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:image/v2/get_task",
@@ -68382,11 +68408,13 @@
     {
       "operation": "python:placement/v1/allocation_candidates",
       "source_fingerprint": "d0bd4fdde3e02e658d9ae462689638d52dad8f173fd02206dce9dc871710a731",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.API.List",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListOptions",
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocationcandidates.WithListQueryValues",
+        "github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues"
       ],
       "contracts": [
         {
@@ -68396,23 +68424,29 @@
           ]
         },
         {
-          "behavior": "A suffixed member_of group holds one value and WithListQuery replaces it, so a repeated member_of1 key cannot be sent.",
+          "behavior": "WithListQueryValues sends a key once per value in order, such as member_of1=agg-4&member_of1=agg-5 and same_subtree, replacing the ListOpts serialization of that key, while a later WithListQuery for the same key wins.",
           "tests": [
-            "placement/v1/allocationcandidates/python_parity_test.go:TestPythonAllocationCandidatesSuffixedMemberOfIsSingle"
+            "placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryValues"
+          ]
+        },
+        {
+          "behavior": "WithListQueryValues with a blank key fails before HTTP as resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 response to a repeated query is returned as the Gophercloud status error.",
+          "tests": [
+            "placement/v1/allocationcandidates/python_list_query_test.go:TestPythonAllocationCandidatesRepeatedQueryRejections"
           ]
         }
       ],
       "documentation": [
+        "placement/v1/allocationcandidates/python-list-query.md",
         "placement/v1/python-parity.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.34.",
         "Python yields one AllocationCandidate per allocation request with provider_summaries reduced to that candidate's providers; Go yields the whole response once and the caller selects ProviderSummaries by the AllocationRequests[i].Allocations keys.",
-        "Go decodes only the 1.12+ response shape; Python also accepts the 1.10-1.11 list shape."
+        "Python accepts every status below 400 and also decodes the 1.10-1.11 list response shape; Go accepts 200, 204 and 300 through Gophercloud paging and decodes only the 1.12+ shape.",
+        "Python consumes paginated, base_path, jmespath_filters, allow_unknown_params and microversion as call controls rather than query keys; Go has no equivalents and takes the microversion from the client."
       ],
-      "remaining": [
-        "Python forwards **query to requests, so a list value such as member_of1=['agg-4', 'agg-5'] becomes a repeated suffixed member_of key (valid from 1.24, below Python's 1.34); Go ResourceGroup.MemberOf is one string and WithListQuery replaces a key with one value, so no public Go option sends a repeated suffixed member_of or any other repeated key outside ListOpts."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:placement/v1/get_allocation",
@@ -68469,35 +68503,41 @@
     {
       "operation": "python:placement/v1/create_allocations",
       "source_fingerprint": "2058131d183e7a98ef01b5d0f50f7007b454e3e6e1de1c2cb17f4b2ad0c5dae7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Manage",
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithManageField"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.WithCreateRecordHeader"
       ],
       "contracts": [
+        {
+          "behavior": "At placement 1.38 CreateRecord posts the caller's per-consumer objects unchanged to POST allocations, so mappings, null consumer_generation and an empty allocations map stay inside each consumer, sends {} for a nil or empty map and null for a nil consumer, and accepts 200 and 204.",
+          "tests": [
+            "placement/v1/allocations/python_create_record_test.go:TestPythonAllocationCreateRecordSendsPerConsumerKeys"
+          ]
+        },
+        {
+          "behavior": "A 409 response is returned as the Gophercloud status error wrapped in resource.OperationError, and values encoding/json cannot encode, a nil option or a nil API fail before HTTP.",
+          "tests": [
+            "placement/v1/allocations/python_create_record_test.go:TestPythonAllocationCreateRecordRejections"
+          ]
+        },
         {
           "behavior": "At placement 1.38 Manage sends POST allocations with each consumer's allocations, project_id, user_id, consumer_generation and consumer_type, and an empty non-nil allocations map clears a consumer.",
           "tests": [
             "placement/v1/allocations/python_parity_test.go:TestPythonAllocationProxyCalls"
           ]
-        },
-        {
-          "behavior": "With two consumers WithManageField places an extension such as mappings at the top level of the POST body instead of inside each consumer.",
-          "tests": [
-            "placement/v1/allocations/python_parity_test.go:TestPythonAllocationManageExtensionPlacement"
-          ]
         }
       ],
       "documentation": [
+        "placement/v1/allocations/python-create-record.md",
         "placement/v1/python-parity.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
-        "A nil Go Allocations map is sent as null and rejected by placement, whereas Python sends the dict as given."
+        "Python returns None; Go returns CreateRecordResult with the response headers and status code.",
+        "Python sends no body when allocations is None; Go sends {} for a nil consumer map."
       ],
-      "remaining": [
-        "Python posts the caller's dict unchanged, so per-consumer keys outside UpdateOpts (for example the 1.34 mappings field) reach every consumer; Go UpdateOpts has no such field and WithManageField puts an extension at the top level when there are zero or several consumers."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:placement/v1/delete_allocation",
@@ -68594,27 +68634,39 @@
     {
       "operation": "python:placement/v1/update_resource_class",
       "source_fingerprint": "ad7b621ed52e38b0ec1e68ee74177ef669ccf9d81cb5f197b49dc5029270f592",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.Update"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.UpdateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordName",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.WithUpdateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null"
       ],
       "contracts": [
         {
-          "behavior": "Update sends PUT resource_classes/{name} without a body and treats the 200 response that placement 1.2 returns for a rename as an unexpected status.",
+          "behavior": "UpdateRecord sends PUT resource_classes/{name} at placement 1.2 even when the client selects 1.39, with {\"name\": new}, {} without a new name or {\"name\": null}, accepts 200, 201 and 204, decodes the 200 body into the typed ResourceClass and raw fields while an empty body leaves both nil, and leaves the client microversion unchanged.",
           "tests": [
-            "placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassUpdateIsNotTheRenameCall"
+            "placement/v1/resourceclasses/python_update_record_test.go:TestPythonResourceClassUpdateRecordRenames"
+          ]
+        },
+        {
+          "behavior": "A 409 response is returned as the Gophercloud status error wrapped in resource.OperationError, a non-object JSON body is returned with resource.ResponseError, and invalid names, a conflicting version header, nil options and a nil API fail before HTTP.",
+          "tests": [
+            "placement/v1/resourceclasses/python_update_record_test.go:TestPythonResourceClassUpdateRecordRejections"
           ]
         }
       ],
       "documentation": [
+        "placement/v1/resourceclasses/python-update-record.md",
         "placement/v1/python-parity.md"
       ],
       "differences": [
-        "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2."
+        "Python sends min(1.2, server maximum) or the session default microversion; Go always sends 1.2 for this call because 1.7 and later turn the PUT into a bodyless ensure-exists call.",
+        "Python accepts a ResourceClass or a name string; Go takes the current name string.",
+        "Python returns the Resource merged from request attributes and the response, so its id keeps the old name; Go returns ResourceClassRecord with the native typed decode, the raw response object fields, headers and status."
       ],
-      "remaining": [
-        "Python commits PUT resource_classes/{name} at 1.2 with a JSON body ({} or {\"name\": new}) and decodes the 200 response, which renames the class; Go Update implements only the 1.7+ bodyless ensure-exists PUT accepting 201/204, so there is no Go call that sends the rename body."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:placement/v1/get_resource_class",
@@ -76038,78 +76090,120 @@
     {
       "operation": "python:compute/v2/evacuate_server",
       "source_fingerprint": "17fca98e38f319e84336d4b4699f9d96c866225138b81d3661c42ea2edab4ca1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Evacuate"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.EvacuateWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerHost",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerAdminPass",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerForce",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerOnSharedStorage",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerHeader",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerField"
       ],
       "contracts": [
         {
-          "behavior": "Evacuate with empty options posts {\"evacuate\": {\"onSharedStorage\": false}} where Python posts {\"evacuate\": {}}.",
+          "behavior": "EvacuateWithOptions posts {\"evacuate\": {}} to servers/{id}/action by default and only the supplied host, adminPass, force and onSharedStorage keys otherwise, keeping empty strings and false, with the client microversion and a single empty Accept header.",
           "tests": [
-            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys"
+          ]
+        },
+        {
+          "behavior": "Each migration action accepts every status below 400, returns 400 and above as the Gophercloud status error inside resource.OperationError named after the method for servers, and rejects a blank server ID, a nil option, a core-key extension and a nil API before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationActionsStatusesAndPreflight"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/servers/python-migration-actions.md"
       ],
       "differences": [
-        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the client.",
+        "Python accepts a Server or an ID; Go takes the server ID string.",
+        "Like Python, Go does not gate onSharedStorage or force by microversion, so Nova validates them.",
+        "WithEvacuateServerField can send extension keys inside the evacuate object, which Python cannot."
       ],
-      "remaining": [
-        "EvacuateOpts.OnSharedStorage has no omitempty, so Go always sends onSharedStorage, which Nova rejects from 2.14; Python's default and host/admin_pass/force calls on 2.14+ cannot be reproduced."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/migrate_server",
       "source_fingerprint": "525f4f82a4bd1d757715781ef2bc7f4841a5684490caf8c85659a44d1508cd39",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Migrate"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.MigrateWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerHost",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerHeader",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerField"
       ],
       "contracts": [
         {
-          "behavior": "Migrate posts {\"migrate\": null} like Python without a host and accepts no options.",
+          "behavior": "MigrateWithOptions posts {\"migrate\": null} without a host or with an empty host and {\"migrate\": {\"host\": h}} with one, and a host below selected microversion 2.56 fails with resource.ErrUnsupported before HTTP.",
           "tests": [
-            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys"
+          ]
+        },
+        {
+          "behavior": "Each migration action accepts every status below 400, returns 400 and above as the Gophercloud status error inside resource.OperationError named after the method for servers, and rejects a blank server ID, a nil option, a core-key extension and a nil API before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationActionsStatusesAndPreflight"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/servers/python-migration-actions.md"
       ],
       "differences": [
-        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the Connection client."
+        "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the client.",
+        "Python checks the host against the supported server microversion (or the session default) and raises ValueError; Go checks it against the selected client microversion and returns resource.ErrUnsupported.",
+        "Python accepts a Server or an ID; Go takes the server ID string."
       ],
-      "remaining": [
-        "Migrate takes no options, so Python's host argument ({\"migrate\": {\"host\": h}} from 2.56) cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/live_migrate_server",
       "source_fingerprint": "931fd0837cea5bb0ae0eea9e9eea01bb74b974ce3bf93385218c844ded6ebd57",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.LiveMigrate",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateField"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.LiveMigrateWithOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerOptions",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerHost",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerForce",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerBlockMigration",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerAutoBlockMigration",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerDiskOverCommit",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerHeader",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerField"
       ],
       "contracts": [
         {
-          "behavior": "LiveMigrate sends host, a boolean block_migration and force through WithLiveMigrateField, while block_migration \"auto\" is rejected before HTTP.",
+          "behavior": "LiveMigrateWithOptions derives Python's body from the selected microversion: from 2.30 (and latest) it sends the 2.30 body with microversion 2.30 (host null unless given, block_migration defaulting to \"auto\", force only with a host), from 2.25 the 2.25 body with 2.25 and no force key, and below 2.25 or unversioned the legacy body with block_migration and disk_over_commit defaulting to false under the client microversion.",
           "tests": [
-            "compute/v2/servers/python_parity_admin_test.go:TestPythonAdminServerMigrationActionArgumentGaps"
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape"
+          ]
+        },
+        {
+          "behavior": "Python's ValueError cases (a host without force below 2.30, \"auto\" below 2.25) plus auto combined with a boolean, a caller version header that conflicts with the fixed body version and a core-key extension fail with resource.ErrInvalidOption inside resource.OperationError before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape"
+          ]
+        },
+        {
+          "behavior": "Each migration action accepts every status below 400, returns 400 and above as the Gophercloud status error inside resource.OperationError named after the method for servers, and rejects a blank server ID, a nil option, a core-key extension and a nil API before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_migration_actions_test.go:TestPythonMigrationActionsStatusesAndPreflight"
           ]
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/servers/python-migration-actions.md"
       ],
       "differences": [
-        "Python picks the 2.30, 2.25 or legacy body and microversion from server discovery; Go sends the body the caller builds with the client microversion."
+        "Python chooses the 2.30, 2.25 or legacy body from the supported server microversion (or the session default); Go chooses it from the selected client microversion, treating latest as 2.30 or later, and like Python sends 2.30 or 2.25 as the request microversion for those bodies.",
+        "Python accepts a Server or an ID; Go takes the server ID string, and block_migration is expressed by WithLiveMigrateServerBlockMigration(bool) or WithLiveMigrateServerAutoBlockMigration().",
+        "WithLiveMigrateServerField can send extension keys inside os-migrateLive, which Python cannot."
       ],
-      "remaining": [
-        "LiveMigrateOpts.BlockMigration is *bool and block_migration is a core key, so Python's default block_migration \"auto\" from 2.25 cannot be sent."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:compute/v2/trigger_server_crash_dump",
@@ -87512,45 +87606,57 @@
     {
       "operation": "python:network/v2/tap_mirrors",
       "source_fingerprint": "ca2bd3320221ca69fc8d2b877cf11fe4a40869d39c10cc93ffbe0e512f69a0ca",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.All",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.List",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.API.All",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListOptions",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/resource.Collection.All",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapmirrors.WithListQueryValues",
+        "github.com/JSYoo5B/go-openstacksdk/request.WithQueryValues",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithQuery",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithName",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize"
       ],
       "contracts": [
         {
-          "behavior": "All sends GET taas/tap_mirrors with name, project_id and limit query values, follows the tap_mirrors_links next href with marker and decodes each mirror; a full page without links ends the listing after one request.",
+          "behavior": "List with WithListQueryValues sends GET taas/tap_mirrors with fields, sort_key and sort_dir repeated once per value in order alongside name and limit, keeps the repeated keys when following the tap_mirrors_links next href with marker, lets a later option replace earlier values of the key and drops a key given no values.",
           "tests": [
-            "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorListQueryAndPaging"
+            "network/v2/extensions/taas/tapmirrors/python_list_query_test.go:TestPythonTapMirrorListRepeatedQueryValues"
           ]
         },
         {
-          "behavior": "resource.WithQuery and tapmirrors.WithListQuery keep one value per key, so repeated fields or sort_key values collapse to the last value.",
+          "behavior": "WithListQueryValues with a blank key fails before HTTP with resource.ErrInvalidOption wrapped in a List resource.OperationError, and a 400 list response is returned as the Gophercloud status error after sending the repeated sort_key values.",
+          "tests": [
+            "network/v2/extensions/taas/tapmirrors/python_list_query_test.go:TestPythonTapMirrorListRepeatedQueryRejectsInputAndStatus"
+          ]
+        },
+        {
+          "behavior": "request.WithQueryValues snapshots the values, replaces an earlier single value, removes the key when given no values, and replaces the typed serialization of that key through ExtendQuery.",
+          "tests": [
+            "request/query_values_test.go:TestQueryValuesRepeatKeysAndExtendTypedQuery"
+          ]
+        },
+        {
+          "behavior": "All sends GET taas/tap_mirrors with name, project_id and limit query values, follows the tap_mirrors_links next href with marker and decodes each mirror; a full page without links ends the listing after one request.",
           "tests": [
             "network/v2/extensions/taas/tapmirrors/python_parity_test.go:TestPythonTapMirrorListQueryAndPaging"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/taas/tapmirrors/python-list-query.md",
         "network/v2/python-parity-sfc-tap.md"
       ],
       "differences": [
-        "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
-        "Python returns a TapMirror Resource whose project_id falls back to tenant_id; Go returns *tapmirrors.TapMirror with separate ProjectID and TenantID fields, and HTTP errors are gophercloud errors wrapped in resource.OperationError instead of openstack.exceptions.",
-        "Neutron has no microversion, so neither SDK sends a version header.",
-        "Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every WithQuery or WithListQuery key to the server and leaves Body filtering to the caller except exact name through resource.WithName.",
-        "Python continues with marker=<last id> after a full limit page without links; Go follows only tap_mirrors_links.",
-        "Python passes the directions dict through unchanged; Go Directions sends IN/OUT tunnel IDs as JSON strings of integers, omits a zero ID and fails to decode a response whose tunnel IDs are unquoted numbers."
+        "Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every WithListQuery, WithListQueryValues or resource.WithQuery key to the server.",
+        "Repeated query keys are available only through API.List; API.All and resource.WithQuery still send one value per key, so combining repeated fields with max_items means stopping the List iterator after that many rows.",
+        "Python continues with marker=<last id> after a limit page without links; Go follows only tap_mirrors_links.",
+        "Python returns TapMirror Resources whose project_id falls back to tenant_id; Go yields *tapmirrors.TapMirror with separate ProjectID and TenantID, and List HTTP errors are Gophercloud errors.",
+        "Python passes the directions dict through unchanged; Go Directions decodes IN/OUT tunnel IDs from JSON strings of integers and fails on unquoted numbers.",
+        "Neutron has no microversion, so neither SDK sends a version header."
       ],
-      "remaining": [
-        "Python encodes list values for fields, sort_key and sort_dir as repeated query keys; ListOpts has none of these keys and both WithListQuery and resource.WithQuery replace a key with one value, so no public Go option sends repeated fields or sort keys."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/update_tap_mirror",
@@ -95136,29 +95242,38 @@
     {
       "operation": "python:network/v2/insert_rule_into_policy",
       "source_fingerprint": "e288ffc9a14ae3687a76257a8264a397d1ee84d2f7a2b6882c7a52d2f1f2582f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.InsertRule",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleOptions"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.InsertRuleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordAfter",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordBefore",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.WithInsertRuleRecordHeader"
       ],
       "contracts": [
         {
-          "behavior": "InsertRule with exactly one of InsertAfter or InsertBefore sends PUT /fwaas/firewall_policies/{id}/insert_rule with an unwrapped firewall_rule_id body and decodes the unwrapped policy; no position, both positions, or a null insert_before extension fail before HTTP.",
+          "behavior": "InsertRuleRecord sends PUT fwaas/firewall_policies/{id}/insert_rule with an unwrapped body that always carries firewall_rule_id, insert_after and insert_before, sending null for an omitted position and an empty string when given, snapshots InsertRuleRecordOpts when the option is built, accepts 200 and 202, and decodes the unwrapped policy into the typed Policy and raw Fields.",
           "tests": [
-            "network/v2/extensions/fwaas_v2/policies/python_parity_test.go:TestPythonFirewallPolicyRuleActions"
+            "network/v2/extensions/fwaas_v2/policies/python_insert_rule_test.go:TestPythonFirewallPolicyInsertRuleRecordSendsNullPositions"
+          ]
+        },
+        {
+          "behavior": "A blank policy ID, a nil option or a nil API fail before HTTP with resource.ErrInvalidOption in an InsertRuleRecord resource.OperationError, a 404 is returned as the Gophercloud status error wrapped for policies, and a non-JSON 200 body fails with resource.ResponseError like Python resp.json().",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/policies/python_insert_rule_test.go:TestPythonFirewallPolicyInsertRuleRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/fwaas_v2/policies/python-insert-rule.md",
         "network/v2/python-parity-l3-qos-fw.md"
       ],
       "differences": [
-        "Python always sends insert_after and insert_before, as JSON null when not given; Go omits the unused position key.",
-        "Python accepts an ID or a Resource and returns a mutable Resource; Go takes an ID string and returns the Gophercloud v2.15.0 typed model, so response fields outside that model are dropped."
+        "Python accepts the policy and the rule as an ID or a Resource; Go takes ID strings and rejects a blank policy ID before HTTP.",
+        "Python updates and returns the FirewallPolicy Resource; Go returns PolicyRecord with the typed Policy, the raw response object fields, headers and status.",
+        "Python raises HttpException with the NeutronError message for statuses of 400 and above; Go returns the Gophercloud status error wrapped in resource.OperationError."
       ],
-      "remaining": [
-        "Python's default call insert_rule_into_policy(policy, rule) sends both positions as null; Gophercloud v2.15.0 InsertRuleOpts requires exactly one of InsertBefore and InsertAfter and the core keys cannot be added as null extensions, so an SDK-owned insert call would be needed."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/remove_rule_from_policy",
@@ -96616,11 +96731,34 @@
     {
       "operation": "python:network/v2/dhcp_agent_hosting_networks",
       "source_fingerprint": "ef644f5fb33143eef77b010605655140a75ccae0f24b165237c13e70f4284eab",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPNetworks"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.API.ListDHCPNetworkRecords",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsQuery",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents.WithDHCPNetworkRecordsHeader"
       ],
       "contracts": [
+        {
+          "behavior": "ListDHCPNetworkRecords sends GET agents/{id}/dhcp-networks with Network query keys translated to wire names (is_shared as shared=True) and list values repeated, drops unknown keys, follows a /v2.0 relative networks_links next href, then continues with marker=<last id> after a page without links while a limit is present until an empty page, and yields the typed Network, raw Fields without self, AgentID and status.",
+          "tests": [
+            "network/v2/extensions/agents/python_dhcp_networks_test.go:TestPythonDHCPNetworkRecordsQueryAndPaging"
+          ]
+        },
+        {
+          "behavior": "Network Body attributes outside the query mapping such as mtu, subnet_ids and dns_domain=None filter rows locally with Python equality, max_items is sent as limit when no limit is given and counts filtered rows before stopping, and paginated=False reads only the first page.",
+          "tests": [
+            "network/v2/extensions/agents/python_dhcp_networks_test.go:TestPythonDHCPNetworkRecordsClientFiltersAndControls"
+          ]
+        },
+        {
+          "behavior": "A blank agent ID, a nil option, a call-control query key such as max_items, a blank query key, a negative max_items, an unencodable value and a nil API fail before HTTP with resource.ErrInvalidOption in a ListDHCPNetworkRecords resource.OperationError, and a 404 is returned as the Gophercloud status error wrapped for agents.",
+          "tests": [
+            "network/v2/extensions/agents/python_dhcp_networks_test.go:TestPythonDHCPNetworkRecordsRejectsInputsAndErrorStatuses"
+          ]
+        },
         {
           "behavior": "ListDHCPNetworks sends a bare GET agents/{id}/dhcp-networks and decodes the networks array, matching the Python call without query arguments.",
           "tests": [
@@ -96629,14 +96767,15 @@
         }
       ],
       "documentation": [
+        "network/v2/extensions/agents/python-dhcp-networks.md",
         "network/v2/python-parity-core.md"
       ],
       "differences": [
-        "Go returns a slice of native networks.Network values instead of a generator of DHCPAgentHostingNetwork Resources."
+        "Python accepts the agent as an ID or an Agent Resource; Go takes an ID string, and Python base_path and jmespath_filters are not supported.",
+        "Python compares client filters against typed Resource attributes (for example int mtu); Go compares the raw response JSON with Python equality.",
+        "Python yields DHCPAgentHostingNetwork Resources; Go yields DHCPNetworkRecord values with the Gophercloud networks.Network decode and the raw row. Go encodes query keys in sorted order."
       ],
-      "remaining": [
-        "agents.API.ListDHCPNetworks accepts no query, so Python's Network QueryParameters keys cannot be sent, and it reads one response without following networks_links."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:network/v2/network_hosting_dhcp_agents",
@@ -106640,28 +106779,39 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_firewall_rule",
       "source_fingerprint": "231e4cb366d2df08899018314eed907b7dbdd83f6ea0ea688b86a764cf071207",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateField"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.CreateRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordOptions",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordField",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.WithCreateRecordHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Present",
+        "github.com/JSYoo5B/go-openstacksdk/request.Null"
       ],
       "contracts": [
         {
-          "behavior": "rules.API.Create fails before HTTP when protocol and action are not set, and with them sends POST /fwaas/firewall_rules including extension fields such as source_firewall_group_id.",
+          "behavior": "CreateRecord sends POST fwaas/firewall_rules with an empty firewall_rule object for no arguments and otherwise only the supplied attributes, including protocol null, enabled false, an empty description, extension keys and a declared key with another JSON type through WithCreateRecordField when the typed field is omitted, accepts 200, 201 and 202, and decodes enveloped, flat and empty responses.",
           "tests": [
-            "network/python_cloud_parity_a_test.go:TestPythonCloudFirewallGapsCreateRuleAndFindFallback"
+            "network/v2/extensions/fwaas_v2/rules/python_create_record_test.go:TestPythonFirewallRuleCreateRecordSendsOnlyGivenAttributes"
+          ]
+        },
+        {
+          "behavior": "A blank extension key, a nil option, an extension that repeats a supplied typed key and a nil API fail before HTTP with resource.ErrInvalidOption, and a 400 response is returned as the Gophercloud status error wrapped in a rules resource.OperationError.",
+          "tests": [
+            "network/v2/extensions/fwaas_v2/rules/python_create_record_test.go:TestPythonFirewallRuleCreateRecordRejectsInputsAndErrorStatuses"
           ]
         }
       ],
       "documentation": [
+        "network/v2/extensions/fwaas_v2/rules/python-create-record.md",
         "network/python-cloud-parity-a.md"
       ],
       "differences": [
-        "Python forwards only the given kwargs, so create_firewall_rule() sends an empty firewall_rule object and Neutron applies defaults."
+        "Python returns the FirewallRule Resource merged from request attributes and the response; Go returns RuleRecord with the typed Rule, the raw response object fields, headers and status.",
+        "Go rejects the same key supplied both in CreateRecordOpts and WithCreateRecordField, which Python keyword arguments cannot express.",
+        "A response field that does not fit the Gophercloud Rule model, such as a string firewall_policy_id, fails the Go typed decode while Python keeps it."
       ],
-      "remaining": [
-        "Gophercloud v2.15.0 rules.CreateOpts declares protocol and action as required and WithCreateField cannot set core fields, so Go cannot send the Python body that omits them (including the default no-argument call)."
-      ]
+      "remaining": []
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/get_firewall_rule",
