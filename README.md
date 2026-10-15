@@ -71,13 +71,13 @@ Quota 반복 여섯 번째 사이클의 Python/Go 사용 비교:
 - Neutron: [네트워크 목록·검색](network/cloud-network-lists-python.md), [서브넷 목록·검색](network/cloud-subnet-lists-python.md).
 - Nova: [서버 그룹 검색·조회](compute/cloud-server-group-reads-python.md), [콘솔 출력 조회](compute/cloud-server-console-python.md).
 
-`conn.ListNetworkRecords`, `SearchNetworkRecords`, `ListSubnetRecords`, `SearchSubnetRecords`, `SearchServerGroups`, `GetServerGroup`, `GetServerConsole`이 캐시한 서비스와 위치 기본값을 연결합니다. 목록의 깨끗한 Neutron catalog 부재는 옵션 평가 전에 빈 결과가 됩니다. 서버 그룹은 기본 Find와 명시 filters 경로를 나누고, 콘솔은 기본 bare 조회·dictionary 입력·길이 옵션·깨끗한 action400의 빈 문자열을 SDK가 처리합니다. 페이지 cap·raw limit·microversion 검사 순서, JMESPath Resource 클래스와 전체 Python 숫자 연산, 콘솔 JSON charset·비유한 숫자의 차이가 남아 이번9행 모두 unresolved입니다. 실제 차이를 발견한 기존 Network Proxy 판정도 unresolved로 바로잡았습니다. SDK-R1/C1/S1와 실클라우드·릴리즈 기준은 계속 열려 있습니다.
+`conn.ListNetworkRecords`, `SearchNetworkRecords`, `ListSubnetRecords`, `SearchSubnetRecords`, `SearchServerGroups`, `GetServerGroup`, `GetServerConsole`이 캐시한 서비스와 위치 기본값을 연결합니다. 목록의 깨끗한 Neutron catalog 부재는 옵션 평가 전에 빈 결과가 됩니다. 서버 그룹은 기본 Find와 명시 filters 경로를 나누고, 콘솔은 기본 bare 조회·dictionary 입력·길이 옵션·깨끗한 action400의 빈 문자열을 SDK가 처리합니다. 페이지 cap·raw limit·microversion 검사 순서, JMESPath Resource 클래스와 전체 Python 숫자 연산, 콘솔의 미지원 charset·비유한 숫자의 차이가 남아 이번9행 모두 unresolved입니다. 실제 차이를 발견한 기존 Network Proxy 판정도 unresolved로 바로잡았습니다. SDK-R1/C1/S1와 실클라우드·릴리즈 기준은 계속 열려 있습니다.
 
 잔여3% 기준 개발 사이클의 Python/Go 사용 비교:
 
 - Nova: [RAM 기준 Flavor 선택](compute/cloud-flavor-ram-python.md). SDK가 기본 extra specs 보충·전체 페이지·stable RAM 정렬·include 조건과 첫 일치를 처리합니다.
 - Neutron: [라우터 인터페이스 제거](network/cloud-router-interface-remove-python.md), [방화벽 rule·policy·group 삭제](network/cloud-firewall-deletes-python.md). SDK가 falsey 인자 검증·port 우선·strict 조회/삭제·깨끗한 404의 false 결과를 처리합니다.
-- Barbican: [secret JSON commit](keymanager/v1/secrets/python-update-record.md). SDK가 id 제외·변경 없음 요청 생략·dirty 속성·실제 응답 record를 제공합니다. 기존 raw payload Update와 별도 API입니다.
+- Barbican: [secret JSON commit](keymanager/v1/secrets/python-update-record.md). SDK가 id 제외·변경 없음 요청 생략·dirty 속성·실제 응답 record를 제공합니다. 기존 raw payload Update와 별도 API입니다. Secret 수정과 콘솔 출력은 명시한 UTF-16/32(BOM 또는 LE/BE)·Latin1 JSON을 공통 디코더로 읽으며 원본 응답 바이트를 보존합니다. charset 추론·나머지 codec·비유한 JSON 숫자는 미지원입니다.
 
 `conn.Compute(ctx)`·`conn.Network(ctx)`의 새 Service 메서드와 cached KeyManager API를 사용합니다. 옵션·응답 변환은 SDK가 소유하며 애플리케이션에 builder 구현을 요구하지 않습니다. 전체 named parity와 실제 남은 계약은 각 가이드·중앙 판정을 따릅니다.
 

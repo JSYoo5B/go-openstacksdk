@@ -70294,8 +70294,10 @@
           ]
         },
         {
-          "behavior": "Named Requests charset gap returns ErrUnsupported plus actual accepted body/status/header and remains unresolved instead of full transport parity.",
+          "behavior": "UTF16/UTF32 with a BOM or explicit LE/BE and ISO8859-1/Latin1 decode through shared responsejson.Normalize only for JSON Resource/Wire projection. Actual Envelope/Header/Status and ResponseError.Body retain original physical bytes, including normalized-shape errors. Unsupported cp1006/remaining namespace keeps ErrUnsupported+actual proof; no-op/dirty PUT semantics remain unchanged.",
           "tests": [
+            "keymanager/v1/secrets/python_update_record_test.go:TestPythonSecretUpdateRecordExplicitCharsetsDecodeViewsKeepPhysicalEnvelope",
+            "keymanager/v1/secrets/python_update_record_test.go:TestPythonSecretUpdateRecordDecodedShapeFailureKeepsOriginalEncodedProof",
             "keymanager/v1/secrets/python_update_record_test.go:TestPythonSecretUpdateRecordRequestsCharsetGapIsExplicit"
           ]
         }
@@ -70311,11 +70313,12 @@
         "Concrete option factories own attrs/rawbytes/header maps/basepath/version pointers. Sequential attribute factories and response JSON preserve alias order; unordered Go input maps use sorted key order. Explicit Headers/Microversion are Go transport controls; Python attrs microversion does not override commit sessionversion.",
         "SDK-owned Seed/Request/Resource/Wire/Envelope/Header/StatusCode distinguish input from actual response. Committed means accepted body/Close observed; false never proves no remote execution, and a nonnil Resource on error can be a request seed.",
         "Literal service-relative BasePath and bounded nonblank escaped commit IDs replace arbitrary URI templates/falsey Source ID routes. Captured source/headers/body stay guarded through native hooks; returned HREFs never trigger metadata/payload reads.",
-        "SDK-R1/C1/S1 Resource/class/session/cache foundations remain separate gaps. Actual Source61 observations use Proxy/Secret/Resource/Requests2.34.2/urllib32.8.0/CPython3.14.8 with adapterput returning memoryHTTPResponse. No liveBarbican/auth/retry/ACL proof. Worker no Go execution; root owns final checks."
+        "SDK-R1/C1/S1 Resource/class/session/cache foundations remain separate gaps. Actual Source61 observations use Proxy/Secret/Resource/Requests2.34.2/urllib32.8.0/CPython3.14.8 with adapterput returning memoryHTTPResponse. No liveBarbican/auth/retry/ACL proof. Worker no Go execution; root owns final checks.",
+        "Cycle11 closes the declared BOM-or-explicit-LE/BE UTF16/UTF32 plus Latin1 response charset subset through the shared responsejson normalizer; actual wire byte receipts remain separate from normalized views. This does not complete the two named remaining areas or the full Requests loader/codec namespace. Existing standalone mains and Source61 oracle are unchanged; root owns Go validation."
       ],
       "remaining": [
         "Full existing Python Secret/Resource/dictionary synchronized and dirty-state equality, pending changes, same-instance mutation/recommit, complete MRO/constructor/kwargs binding and URI formatting remain unsupported. Raw self/secret/resource_type/value attrs are ignored but Source duplicate binding raises TypeError beforeHTTP; id/connection/_synchronized/cls are separately rejected. Empty/falsey commit ID routes, arbitrary printf base_path/URI attrs and deferred formal-validation order also remain outside this closed string-ID API.",
-        "Full Requests Response.json encoding/charsets/BOM/guess/text fallback and permissive Python float/NaN/Infinity loading are unmatched. NonUTF8 responses return ErrUnsupported+actualrawproof, including some Source-tolerated malformed cases; valid legacy-charset JSON may succeed in Source. Finite Go rawJSON retains number spelling/large integers rather than all Python loaded-value semantics."
+        "Full Requests Response.json guess_json_utf/unmarked encoding inference, codec namespace beyond UTF16/UTF32 with BOM or explicit LE/BE plus ISO8859-1/Latin1, text fallback and permissive Python float/NaN/Infinity loading remain unmatched. Supported explicit charsets now decode Resource/Wire while raw physical Envelope/Header/Status/Error.Body remain unchanged. Unsupported cp1006 or malformed charset declarations return ErrUnsupported+actualproof; nocharset/UTF8 bytes are cloned without unmarked nonUTF8 inference. Finite Go rawJSON retains number spelling/large integers rather than all Python loaded-value semantics. BOM-less bare utf-16/utf-32 native-endian selection remains unsupported."
       ]
     },
     {
@@ -103573,7 +103576,7 @@
           ]
         },
         {
-          "behavior": "NamedRequests JSON-decoding/nonfinite numeric gaps remain unsupported with actual response proof. Source68 actualCloud/Proxy/Server/Requests2.34.2/urllib32.8.0/CPython3.14.8 observations verified against ef55d7d pin; fixedfind adapter and memoryHTTP post are explicit, not live lookup/auth/retry proof.",
+          "behavior": "The remaining unmarked/unknown-codec Requests JSON-decoding and nonfinite numeric branches stay unsupported with actual response proof. Explicit supported charset normalization is covered by the added contract below. Existing Source68 actualCloud/Proxy/Server/Requests2.34.2/urllib32.8.0/CPython3.14.8 observations are reused, not extended; fixedfind adapter and memoryHTTP post remain distinct from live lookup/auth/retry proof.",
           "tests": [
             "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordRequestsDecodingAndNonFiniteGapStayExplicit"
           ]
@@ -103597,6 +103600,13 @@
             "compute/cloud_server_console_test.go:TestCloudServerConsoleCapturesHeadersBeforeOptionsAndAcrossLookupAction",
             "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordDiscoveryFaultOptInStopsCallbacksBeforeAction"
           ]
+        },
+        {
+          "behavior": "Shared responsejson.Normalize decodes explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 before output parsing. Representative Latin1/UTF16-BOM/UTF32BE accepted202 output values are UTF8 JSON while Envelope/Header remain independent actual wire proof. Unknown/malformed charset and supported-charset malformed JSON preserve original203 ResponseError.Body/Header with distinct Unsupported/InvalidOption causes; shared decoder matrix is root owned.",
+          "tests": [
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordExplicitCharsetsKeepWireReceipt",
+            "compute/v2/servers/python_cloud_console_test.go:TestPythonCloudConsoleRecordCharsetFailuresPreserveActualResponse"
+          ]
         }
       ],
       "documentation": [
@@ -103610,10 +103620,11 @@
         "Nil/cancel and invalid unsafe route controls are bounded preflight; effective IDs are escaped literal segments inside the captured Nova origin. Falsey and one-level nested dictionary ID Source lanes remain supported.",
         "Go integer/rawJSON options retain finite literal values instead of prematurely casting Source annotations. Go raw numbers preserve their original decimal spelling/large integers rather than Python float conversion; nonfinite Python values remain an explicit named gap.",
         "Synthetic final informational199 status tests establish policy only, because actual net/http may process1xx internally. SDK action ownership guards block retry/auth hooks after physical/context/source faults; reused FindRecord existing lookup hook semantics remain unchanged.",
-        "Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds."
+        "Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds.",
+        "Cycle11 adds only bounded explicit response charset normalization in the console leaf, reused by existing Service/Connection GetServerConsole. Actual Envelope/Header/ResponseError.Body keep wirebytes while Value comes from normalized JSON. Existing Source68 receipts are unchanged; no new Source matrix, codec registry, guess_json_utf or nonfinite support is claimed. Worker ran gofmt only; root owns Go/race and standalone main validation."
       ],
       "remaining": [
-        "Requests Response.json full encoding selection/explicitcharsets/BOM/guess/text fallback is not implemented. Actual Source application/json;charset=ISO-8859-1 nonUTF8 café succeeds, whereas current UTF8JSON record returns ErrUnsupported and the actual rawresponse. This reachable normalresponse branch prevents complete named mapping.",
+        "Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 café observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.",
         "Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved."
       ]
     },

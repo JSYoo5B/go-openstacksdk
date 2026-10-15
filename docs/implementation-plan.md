@@ -8,6 +8,8 @@
 
 ## 현재 집계와 진행 중인 작업
 
+**추가 한 사이클 (2026-10-15): worker2개와 root로 명시 JSON 응답 charset 공통 모듈·Secret 수정·콘솔 출력을 보강합니다.** 출발90b7c0f0, 시작 잔여4%·최근3%·ordinaryUsageAllowed=true·reset1792472624입니다. 자동화는 PAUSED이며 이번 고정 묶음 뒤 새 사이클은 없습니다. 명시 UTF-16/32(BOM 또는 LE/BE)·Latin1만 두 연산에 연결하고 원본 응답 증거를 보존합니다. 집중39그룹275사례와 독립 Go main2개 빌드·Python AST2개가 PASS했습니다. 구현을 881185c1·73adca01·e40547bf로 나눠 커밋했습니다. 계약7,555→7,556개이며 두 행은 unresolved로 유지합니다. 전체205개 test package·license/vet/race/parity/progress/gofmt가 최초 실행 PASS(exit0)했습니다. Go source3,260개 SHA256 549eea5b8cabf6c49fda12fd231585236bb1dda5ffe75f5ec58d21113f34109e는 gate 전후 일치합니다. 이번 한 사이클을 마감하고 자동화는 PAUSED를 유지합니다.
+
 **추가 단발 작업 (2026-10-15): 약3% 사용량 범위·worker1개로 Flavor RAM 상태 정책 보강 마감.** 사용자는 잔여3%가 아니라 사용량 약3% 정도의 한 번 작업으로 정정했습니다. 시작 잔여4%·ordinaryUsageAllowed=true·resetsAt1792472624이며 반복 자동화는 PAUSED 그대로입니다. Root가 구현·Go·Git, worker1개가 읽기 전용 Source/코드/문서 검토를 맡습니다. RAM 전용 ListSourceRecords가 목록과 extra-specs100~399를 연결하고 기존6개 reader200~399는 보존합니다. 새3그룹과 기존10그룹을 재사용한 집중13그룹89사례가 PASS했습니다. 코드 수정948ac426을 push했고 전체204개 test package·license/vet/race/parity/progress/gofmt PASS(exit0), 독립 Flavor main1개 빌드·Python AST1개 PASS로 마감했습니다. Go source3,258개 SHA256 2c485bfc116c556af0defe4545ffa6a3a51a96b750721f56b5a1f5e3564c1bc5는 gate 전후 같습니다. Requests UTF16/32·legacy charset 차이는 새 증거와 함께 unresolved로 남겨 매핑2,059개/계약7,555개이며 supported0입니다. 한도 증가/reset이면 중단하고 별도 다음 사이클은 실행하지 않습니다.
 
 
@@ -637,7 +639,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 제외(미지원) | 1,169 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,555 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,556 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.

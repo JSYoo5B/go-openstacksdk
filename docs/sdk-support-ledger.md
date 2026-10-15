@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 마감 단위는 [2026-10-15 축소 단발 Flavor 상태 정책](#2026-10-15-축소-단발-flavor-상태-정책)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-15 명시 JSON 응답 charset](#2026-10-15-명시-json-응답-charset)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-15 명시 JSON 응답 charset
+
+출발90b7c0f0에서 사용자가 추가 한 사이클과 소폭 worker 증가를 승인했습니다. root+worker2개로 공통 Normalize·Barbican update_secret·Nova get_server_console만 고정했습니다. 시작 잔여4%·중간3%·ordinaryUsageAllowed=true·reset1792472624이며 계정 공유 사용량입니다. sdk-quota는 PAUSED를 유지하고 다음 사이클은 시작하지 않습니다.
+
+명시 UTF-16/32(BOM 또는 LE/BE)·Latin1을 정규화해 JSON view를 읽고 원본 Envelope/Header/status/ResponseError.Body는 보존합니다. Gophercloud 공개 testhelper와 기존 fixture를 재사용했습니다. 전체 Requests 감지·임의 codec·BOM 없는 bare UTF16/32 native-endian·비유한 JSON 숫자·SDK-R1/C1/S1·실클라우드/릴리즈는 남습니다. 두 기존 행은 unresolved이며 매핑2,059/3,228·핵심1,981/2,158·supported0을 유지하고 계약만7,555→7,556으로 증가합니다. 다른 서비스에는 이 디코더를 연결하지 않았습니다.
+
+공통 첫 Go 검사는 PASS했지만 Python 기본 codec 경계값3개를 별도 대조하면서 high surrogate+불완전 trailing unit의 대체문자 수 기대를 수정했습니다. Go 실패를 수리한 것으로 기록하지 않습니다. 최종 공통+Secret 집중14그룹91사례, 콘솔 leaf/cloud25그룹184사례는 모두 PASS(총39그룹275사례)입니다. Source61/68 기존 관찰을 재사용했고 새 Source 실행은 없습니다. 독립 Go main2개 빌드·Python AST2개 PASS이며 실제 인증/클라우드 실행은 하지 않았습니다. 중앙 판정 갱신 스크립트는 contracts 없는 기존 행의 KeyError로 쓰기 전에 중단됐고 선택적 필드 처리로 수리했습니다.
+
+구현은 881185c1(공통)·73adca01(Secret)·e40547bf(콘솔)로 나눴습니다. 전체 make check는 최초 실행 exit0, test package205개와 license(6 modules/16 originals)·vet·race·parity·progress·gofmt가 PASS했습니다. Go source3,260개 SHA256 549eea5b8cabf6c49fda12fd231585236bb1dda5ffe75f5ec58d21113f34109e를 gate 전후 대조해 동일함을 확인했습니다. 이번 한 사이클을 마감하고 자동화는 PAUSED를 유지합니다.
 
 ## 2026-10-15 축소 단발 Flavor 상태 정책
 
