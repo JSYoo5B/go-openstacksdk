@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 두 사이클: 포트 수정](#2026-10-18-두-사이클-포트-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 두 사이클: 서브넷 수정](#2026-10-18-두-사이클-서브넷-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-18 두 사이클: 서브넷 수정
+
+두 번째이자 마지막 사이클은 첫 사이클 main push5a9ce66e 뒤 시작했으며 잔여16%·ordinaryUsageAllowed=true·reset1792649594를 재확인했습니다. root+worker2개로 cloud update_subnet 한 행만 고정하고 기존 포트/공통 코드와 자동화 PAUSED를 보존했습니다.
+
+SDK 소유7개 옵션은 enable_dhcp만 null 여부로, 나머지는 Source truthiness로 판단합니다. effective attrs가 없으면 service/ID 검증이나 HTTP 없이 NoOp를 반환하고, gateway 비활성화와 truthy gateway 주소의 충돌은 조회 전에 오류입니다. gateway 비활성화는 null로 보내고 빈 목록은 clear가 아닌 무시입니다. 유효 인자가 있으면 이름/ID 조회와 raw dirty 비교 후 변경 필드만 native PUT에 전달합니다. native 오류의 성공 모델은 nil이며 Lookup은 따로 보존합니다. 옵션 전 포인터 snapshot/유효 인자일 때 변경 검증, effective 판정 뒤 full source capture/guard 순서를 문서에 명시합니다.
+
+독립 검토는 옵션 callback의 context 취소가 무변경 성공으로 빠지는 경로를 찾아 option 전후/NoOp 직전 검증과 회귀 테스트로 수리했습니다. 최초 Go focused는 port 전용 오류 helper에 SubnetRecord를 넘긴 타입 불일치로 컴파일 실패했고 root가 원본 Envelope/Header/status의 rest.Response.Fail로 수리했습니다. 최종 집중은 서브넷6그룹15사례+포트4그룹13사례=10그룹28사례 PASS입니다. 실제 Source cloud 메서드+stublookup/proxy12사례는 noattrs/conflict/truthiness/missing 순서만 입증하며 Resource/HTTP/live 실행은 아닙니다. 공개 Gophercloud testhelper 기반 기존 scripted Neutron fixture를 재사용했습니다.
+
+구현ebd2dc60 커밋 뒤 독립 Go main 빌드가 포트 옵션 함수를 잘못 사용해 실패했습니다. 가이드와 추출 main을 WithSubnetUpdateJSON로 수리했으며 Python AST는 PASS입니다. 이 실패는 전체 gate가 시작되기 전의 예제 실패입니다. native 응답 병합/unknown fields/raw receipt·GET/LIST canonical alias·전체 Python 타입/Requests decoder·재시도 hooks·SDK-R1/C1/S1·실클라우드/릴리즈 차이는 유지합니다. 계약7,560→7,562개이며 해당 행 unresolved·완료 매핑2,059/3,228·supported0 불변입니다. 수리 후 독립 Go main1개 빌드·Python AST1개·guide fence byte 대조 PASS, 전체 make check는 첫 실행 exit0으로 실제 test package205개·license(6 modules/16 originals)·vet·race·parity·progress·gofmt가 PASS했습니다. Go source3264개 SHA256 4934417f5a684fc2d56d2b34e1393d514be3ff100e4f2f8a87cdfbc8f17c89c5는 gate 전후 동일합니다. 종료 잔여15%·reset동일이며 계정 공유 사용량입니다. 두 번째 사이클을 마감하고 자동화는 PAUSED로 유지합니다.
 
 ## 2026-10-18 두 사이클: 포트 수정
 

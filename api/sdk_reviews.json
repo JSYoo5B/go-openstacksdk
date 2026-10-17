@@ -105070,7 +105070,11 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.UpdateWithAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateSubnetRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithSubnetUpdateOpts"
       ],
       "contracts": [
         {
@@ -105078,16 +105082,35 @@
           "tests": [
             "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBUpdatePortAndSubnetChains"
           ]
+        },
+        {
+          "behavior": "SDK-owned seven formal kwargs use Source nonnull enable_dhcp versus truthiness for the remaining inputs, rename subnet_name to name, turn a truthy disable_gateway_ip into gateway_ip null, reject truthy gateway conflict before lookup, and skip service/identity validation and all HTTP when the effective body is empty. Go cancellation cannot be hidden by that no-op.",
+          "tests": [
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateEffectiveValuesAndDirtySelection",
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateIneffectiveAndConflictBeforeServiceLookup",
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOptionCancellationCannotBecomeNoOp"
+          ]
+        },
+        {
+          "behavior": "Effective attrs resolve member/name lookup and compare ordinary raw wire values with Python equality, skip equal-value PUT and commit only changed fields to the resolved ID. Options snapshot JSON, reject unsupported kwargs before HTTP, retain lookup on native conflict without fabricated success and preserve configured provider hooks.",
+          "tests": [
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateNameFallbackAndMissing",
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOwnedOptionsAndPreflight",
+            "network/cloud_subnet_update_test.go:TestCloudSubnetUpdateConflictKeepsLookupAndSingleAttempt"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/python-cloud-parity-b.md",
+        "network/cloud-subnet-update-python.md"
       ],
       "differences": [
-        "Go returns the native Subnet model instead of a Subnet Resource."
+        "Go returns the native Subnet model instead of a Subnet Resource.",
+        "UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract."
       ],
       "remaining": [
-        "With default arguments Python returns None without any HTTP request, and it rejects disable_gateway_ip with gateway_ip before the lookup; no Go helper performs this, so the caller must decide to skip the lookup and PUT."
+        "Native mutation decoder omits unknown fields and does not merge partial/empty/malformed successful bodies into an existing Python Resource; this bridge exposes no raw mutation receipt.",
+        "Member GET/LIST canonical-only or canonical/wire collision mapping, arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate."
       ]
     },
     {
