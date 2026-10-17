@@ -627,3 +627,5 @@ namespace association의 [owned 생성·삭제와 독립 main](image/metadef-res
 [방화벽 rule 수정 Python/Go 비교](network/cloud-firewall-rule-update-python.md): 선택한 Network 서비스의 `UpdateFirewallRuleRecord`가 필터를 포함한 엄격한 이름/ID 조회, 무변경 PUT 생략, 변경 필드 전송을 처리합니다. SDK가 builder를 소유하며 null·false·빈 값을 유지합니다. HTTP 200 이외의 수정 응답 처리와 전체 Resource 응답 계약은 미해결입니다.
 
 [방화벽 policy 수정 Python/Go 비교](network/cloud-firewall-policy-update-python.md): `UpdateFirewallPolicyRecord`가 대상 policy를 먼저 조회하고 rule 이름을 입력 순서대로 ID로 해석합니다. 빈 목록 clear, 중복 참조, 무변경 PUT 생략과 조회 증거를 처리하며 native 응답·전체 Resource 차이는 미해결로 남습니다.
+
+[방화벽 group 수정 Python/Go 비교](network/cloud-firewall-group-update-python.md): `UpdateFirewallGroupRecord`가 대상 group 뒤 egress·ingress policy와 port 이름을 ID로 해석합니다. Policy null 해제·빈 port 목록 비우기·변경 없는 PUT 생략을 구분하고 단계별 조회 증거를 제공합니다. 전체 Resource 동등성은 미완료입니다.

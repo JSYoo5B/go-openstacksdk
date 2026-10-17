@@ -106351,15 +106351,45 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_group",
       "source_fingerprint": "915cc75336b53eb98ca8ebba1c60cecd3ab09b021b0102e3d36582233d90416b",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallGroupRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdateFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdatePorts",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdateOpts"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "SDK-owned exact eight cloud kwargs validate before strict target group Find, rejecting direct egress/ingress_firewall_policy_id despite the Source docstring claim. Empty attrs still look up; raw equal values skip PUT and dirty attrs preserve null/false/empty via a private SDK builder with separate lookup/native mutation output.",
+          "tests": [
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateLookupOnlyAndDirtySelection",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateNameFallbackAndMissing",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateOwnedOptionsAndPreflight",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateConflictKeepsLookupAndSingleAttempt",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateFiltersStrictBindingAndFalseyDefaults"
+          ]
+        },
+        {
+          "behavior": "After target Find, nonnull policy aliases resolve strict egress then ingress regardless input key order, null aliases set wire ID null without policy lookup, then ports resolve in input order with duplicates and without target-filter propagation. [] clears with no port lookup; equal resolved references still resolve before no-PUT. Midphase failures and null ports retain prior target/policy/port evidence and prevent further lookup/PUT.",
+          "tests": [
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateTargetPolicyPortsOrderAndEmptyClear",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateNullPoliciesAndEmptyPorts",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateReferenceFailuresPreservePhaseOrder",
+            "network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateResolvedEqualReferencesStillLookUp"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-firewall-group-update-python.md"
+      ],
+      "differences": [
+        "UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence and Group is native mutation output. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection."
+      ],
       "remaining": [
-        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
-        "No Go helper maps ingress/egress_firewall_policy names to *_firewall_policy_id (None clears them) or translates port names to IDs before the PUT."
+        "Policy references are nonempty JSON strings or null; ports are JSON arrays of nonempty strings. Arbitrary Python iterable/object/nonstring/empty response-ID/runtime-exception behavior and full same-instance Resource lifecycle remain outside this bounded profile.",
+        "Native HTTP200-only mutation acceptance and typed/unknown/partial/empty/malformed response handling expose no original PUT receipt. Raw Find header/microversion/fetch constructor controls, full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps."
       ]
     },
     {
