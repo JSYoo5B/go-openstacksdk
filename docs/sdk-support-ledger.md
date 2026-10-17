@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 추가 두 사이클: 방화벽 rule 수정](#2026-10-18-추가-두-사이클-방화벽-rule-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 방화벽 후속 두 사이클: policy 수정](#2026-10-18-방화벽-후속-두-사이클-policy-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-18 방화벽 후속 두 사이클: policy 수정
+
+첫 사이클은 출발390b69c2·시작 잔여14%·중간13%·ordinaryUsageAllowed=true·reset1792649594에서 root+구현/독립검토 worker2개로 진행했습니다. 범위는 cloud update_firewall_policy 한 행이며 서비스 우선순위·기존 API/공통 코드·자동화 PAUSED를 보존했습니다.
+
+UpdateFirewallPolicyRecord는6개 kwargs와 Filters를 소유합니다. strict target policy Find 뒤 firewall_rules가 있으면 rule을 순서대로 strict Find해 ID로 바꿉니다. 대상 필터를 rule lookup에 전파하지 않고 중복도 다시 조회합니다. []는 rule 조회 없이 clear, ID 해석 후 같은 값은 PUT 생략, 중간 실패는 이전 RuleLookups 증거를 보존하고 PUT0입니다. null/잘못된 참조 형태는 대상 조회 뒤 오류이며 JSON 배열의 nonempty string 참조/응답 ID라는 Go 범위를 명시했습니다. private SDK builder와 고정 native Update, 기존 profile/Find/projection/공개 Gophercloud testhelper fixture를 재사용했습니다.
+
+첫 집중은 policy8그룹31사례+rule5그룹21사례=13그룹52사례 PASS로 실패/수리 없이 통과했습니다. 실제 Source method/helper AST에서 decorator를 제거하고 stub Find/update7사례를 실행해 target-first·filter분리·orderedduplicate·[]/null 순서를 확인했습니다. 이 실행은 decorator/Resource commit/HTTP/live 검증이 아닙니다. 독립 frozen code/docs/review 차단 finding0입니다. 구현b8da817e 커밋.
+
+Native HTTP200-only/typed model·unknown/부분/빈 응답 Resource 병합·원본 mutation receipt·raw Find controls·임의 Python iterable/ID·숫자/encoding/SDK-R1/C1/S1·실클라우드/릴리즈는 남겨 unresolved를 유지합니다. 계약7,566→7,568개, 완료 매핑2,059/3,228·supported0은 불변입니다. 독립 Go main/Python AST 각1개와 전체205개 test package·license(6 modules/16 originals)·vet·race·parity·progress·gofmt 모두 최초 실행 PASS(exit0)했습니다. Go source3270개 SHA256 85ea57775cf2c717699c6852b4db682f5911931e7ffb660dae28ad4497f6a7f3는 gate 전후 동일합니다.
 
 ## 2026-10-18 추가 두 사이클: 방화벽 rule 수정
 

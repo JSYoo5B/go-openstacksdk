@@ -106366,15 +106366,44 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_policy",
       "source_fingerprint": "6c2f6ded7e2794c459d1cd0d0a9c81852cd04b80382ede7476048c26f7df730f",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallPolicyRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateRules",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateOpts"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "SDK-owned six cloud kwargs validate before strict target policy Find, including empty attrs; raw equal attrs skip PUT and dirty attrs use a private upstream builder preserving explicit null/false/empty JSON. Lookup evidence and native Policy mutation result are distinct, with nil mutation result on failure.",
+          "tests": [
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateLookupOnlyAndDirtySelection",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateNameFallbackAndMissing",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOwnedOptionsAndPreflight",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateConflictKeepsLookupAndSingleAttempt"
+          ]
+        },
+        {
+          "behavior": "A present firewall_rules key is translated only after target lookup: ordered strict rule lookup repeats duplicate references without forwarding policy filters, [] clears with zero rule lookup, and equal resolved IDs skip PUT only after lookups. A later missing reference retains target/prior rule evidence and stops further work; unsupported JSON reference shapes fail after target lookup. Falsey filters/defaults and bound argument collisions preserve the bounded strict Find contract.",
+          "tests": [
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOrderedRulesTargetFirstAndEmptyClear",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateRuleFailureKeepsPriorEvidence",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateUnsupportedRuleShapesAfterTargetLookup",
+            "network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateFiltersStrictBindingAndFalseyDefaults"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-firewall-policy-update-python.md"
+      ],
+      "differences": [
+        "UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Policy uses native mutation extraction. Empty and equal-update branches return a carrier rather than the same Python mutable Resource."
+      ],
       "remaining": [
-        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
-        "No Go helper translates firewall_rules names or IDs to rule IDs before the PUT."
+        "Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.",
+        "Native HTTP200-only mutation acceptance, typed/unknown/partial/empty/malformed response handling, raw mutation receipt, full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate."
       ]
     },
     {
