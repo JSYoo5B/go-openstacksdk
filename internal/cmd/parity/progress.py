@@ -88,11 +88,11 @@ def render(total, counts, reviewed, contracts):
         "|---|---:|---|",
         f"| 고정 소스 전체 선언 | {total:,} | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |",
         f"| 구현 대상 선언 | {target:,} | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |",
-        f"| 검증된 Go 매핑 | {mapped:,} ({percent:.1f}%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |",
+        f"| API 매핑 | {mapped:,} ({percent:.1f}%) | 구현 대상 대비 `go_mapping` 판정. 부분 검증 기록을 추가해도 이 수는 늘지 않음 |",
         f"| source 그대로 지원 | {counts['supported']:,} | `supported` 판정 |",
         f"| 미해결 / 제외(미지원) | {counts['unresolved']:,} / {counts['unsupported']:,} | 미검토 선언도 미해결 집계에 포함 |",
         f"| 연산별 검토 기록 | {reviewed:,} | 아직 개별 기록 없는 선언 {total - reviewed:,} |",
-        f"| 기록한 부분·전체 계약 | {contracts:,} | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |",
+        f"| 검증 동작 기록 | {contracts:,} | [판정 JSON](../api/sdk_reviews.json)의 `contracts` 항목 수; 기록 분할 크기가 달라 API 완료 수·구현률로 사용하지 않음 |",
         END,
     ])
 
@@ -133,7 +133,7 @@ def completed(count):
 
 
 def render_services(counts):
-    lines = [SERVICE_START, "| 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |",
+    lines = [SERVICE_START, "| 우선순위 묶음 | API 대응 / 대상 | API 대응률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |",
              "|---|---:|---:|---:|---:|---:|"]
     groups = [
         ("핵심 서비스 · 1·2단계 합산", CORE),
@@ -150,7 +150,7 @@ def render_services(counts):
         lines.append(f"| {label} | {done:,} / {total:,} | {percent:.1f}% | "
                      f"{count['unresolved']:,} | {count['unreviewed']:,} | {count['unsupported']:,} |")
     for label, owners in [("핵심 서비스", CORE), ("후속 서비스 · 네트워크 → 베어메탈 → 나머지", LATER)]:
-        lines.extend(["", f"**{label}**", "", "| 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |",
+        lines.extend(["", f"**{label}**", "", "| 서비스 | API 대응 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |",
                       "|---|---:|---:|---:|---:|"])
         for key, name in owners:
             count = counts[key]

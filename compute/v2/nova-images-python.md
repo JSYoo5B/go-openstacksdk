@@ -132,4 +132,4 @@ Source pin: `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`; `openstack/compute/v2/_p
 
 Member GET의 400/403/404와 DeleteRecord의 404는 공통 `DoJSONGuardedRejections`로 관찰합니다. 정상 404만 기본 삭제에서 무시하며, Read·Close·취소 cause·Source 변경·retry callback 오류가 섞인 거부 응답은 native 상태/본문/헤더와 원인을 함께 반환하고 find의 목록 fallback을 차단합니다. Read에서 변한 Source가 Close에서 원복되어도 이미 관측한 실패는 유지됩니다. native retry hook이 같은 원래 HTTP 거부 오류를 그대로 반환한 경우에는 정상 거부 상태를 유지해 기본 ignore_missing과 find fallback이 계속 동작합니다. accepted 응답 증거와 native ABI는 유지합니다.
 
-회귀는 `TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind`와 `TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook`이며 기존 package fault body/transport 및 testcloud를 재사용합니다. 집중 race 실행을 통과했으며 전체 검사·판정 근거는 [지원 판정대장](../../docs/sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 기록합니다.
+회귀는 `TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind`와 `TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook`이며 기존 package fault body/transport 및 testcloud를 재사용합니다. 집중 race 실행을 통과했으며 전체 검사·판정 근거는 [지원 판정대장](../../docs/history/sdk-support-ledger-2026-10-18.md#핵심-credentialneutronswiftnova34개-마감)에 기록합니다.

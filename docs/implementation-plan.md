@@ -1,830 +1,52 @@
 # 구현 순서와 단계별 현황
 
-2026-10-07에 조정한 작업 순서입니다. **핵심 서비스 user API → 핵심 서비스 admin API → 매니지드 서비스 user API → 매니지드 서비스 admin API** 순으로 진행합니다. 목표는 고정한 Gophercloud와 openstacksdk의 전체 API·리소스·복합 작업을 일관된 Go SDK로 제공하는 것입니다. 관리형 서비스의 구현도 전체 목표에 포함합니다. 기존 구현은 보존하고 지원 판정은 새 검증 근거가 있을 때 갱신합니다.
+목표는 고정한 Gophercloud와 openstacksdk의 API·리소스·복합 작업을 일관된 Go SDK로 제공하는 것입니다.
+SDK가 기본값·구체적인 옵션·확장 처리와 공통 리소스 동작을 소유하며, 애플리케이션에 builder 구현 책임을 넘기지 않습니다.
 
-이 문서는 **앞으로 할 작업의 순서와 진행 단계**, [SDK 지원 판정대장](sdk-support-ledger.md)은 **검증한 계약과 실행 근거**, [판정 JSON](../api/sdk_reviews.json)은 **연산별 지원 여부**를 관리합니다. 세 자료의 상태는 서로 다른 의미를 갖습니다.
+구현 순서는 **핵심 서비스 user API → 핵심 서비스 admin API → 매니지드·후속 서비스 user API → 매니지드·후속 서비스 admin API**입니다.
+기존 구현은 유지하고 실제 근거가 있는 연산의 판정만 갱신합니다.
 
-[단계별 사용·릴리즈 기준](release-milestones.md)은 `make smoke`로 확인하는 핵심 user 개발 preview와 외부 설치용 alpha의 완료 조건을 관리합니다. 현재 5개 흐름·9개 기존 테스트 그룹이 로컬 HTTP race 검증을 통과했고, 공개 모듈 경로와 외부 소비자의 local-replace 빌드를 확인했고, push한 정확한 커밋의 replace 없는 원격 설치·빌드도 확인했습니다. [설치 안내](install.md)에 실제 결과를 기록합니다.
+고정 기준은 Gophercloud `v2.15.0`과 openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe`입니다.
+정확한 source pin과 선언 fingerprint는 [catalog](../api/sdk_support_catalog.json)와 [판정 JSON](../api/sdk_reviews.json)에서 관리합니다.
 
 ## 현재 집계와 진행 중인 작업
 
-**방화벽 후속 두 사이클 (2026-10-18): policy 수정 → group 수정.** 사용자 추가 지시로 출발390b69c2·잔여14%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. root와 구현/독립검토 worker2개로 첫 사이클 update_firewall_policy의 strict target Find→순서대로 rule 이름/ID 해석→dirty PUT을 고정합니다. 첫 policy 사이클은 구현b8da817e·첫 집중13그룹52사례(policy8/31+기존rule5/21)·독립 Go main/Python AST 각1개·전체205개 test package와 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3270개 SHA256 85ea57775cf2c717699c6852b4db682f5911931e7ffb660dae28ad4497f6a7f3는 gate 전후 동일하며 계약7,566→7,568개입니다. 두 번째 update_firewall_group은 이 사이클 main push 뒤 시작합니다. 서비스 우선순위·named gaps·자동화 PAUSED를 유지하고 이 두 사이클 뒤 마감합니다.
+숫자는 다음 세 의미로 구분합니다.
 
-**추가 두 사이클 마감 (2026-10-18): 라우터·방화벽 rule 수정, 구현/문서4개 커밋.** 사용자 추가 지시로 출발3fabfd84·잔여15%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. 구현/독립 검토 worker2개와 root로 첫 사이클 cloud update_router의 noattrs HTTP0·extraroute에 따른 routes 포함/생략·gateway 옵션·dirty PUT만 고정합니다. 첫 라우터 사이클은 구현df998fee·집중18그룹51사례(router신규8/23+기존10/28)·독립 Go main/Python AST 각1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3266개 SHA256 7eb3eaa30907b4ea2cb09298be23821b25aab89341993b456e912a6c9574efea는 gate 전후 동일하며 계약7,562→7,564개입니다. 두 번째 방화벽 rule은 구현efe38035·첫 집중13그룹44사례(FW신규5/21+router8/23), 독립 Go main/Python AST 각1개, 전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3268개 SHA256 7658abab5643accb7d63d5746eff8184590593970dbc5ee04cc4bdc51c02f0e7는 gate 전후 동일합니다. 이번 두 사이클 신규13그룹44사례·독립 main/AST 각2개·계약7,562→7,566개(+4)이며 두 행은 named 차이로 unresolved를 유지합니다. 종료 잔여14%·reset동일로 계정 공유 사용량입니다. 기존 핵심 user→admin→관리형 순서와 Swift 핵심·후속 네트워크/베어메탈 우선순위를 보존합니다. 자동화는 PAUSED이며 이 두 사이클 뒤 종료합니다.
+- **API 매핑:** 고정 선언에 대응하는 공개 Go API가 정해진 profile로 연결되고 검토된 연산 수입니다. 전체 openstacksdk 동등성이나 전체 SDK 완료 수가 아닙니다.
+- **미해결 항목:** 연산별 필수 동작에 실제 누락이 있거나 아직 검토하지 않은 선언입니다. 부분 구현·테스트·문서가 있어도 남은 차이가 있으면 유지합니다.
+- **검증 동작 기록:** 판정 JSON의 `contracts` 항목입니다. 한 연산에 여러 기록이 있을 수 있으므로 API 완료 수·테스트 함수 수·전체 구현률로 사용하지 않습니다.
 
-**두 사이클 마감 (2026-10-18): 포트·서브넷 수정 helper 추가, 구현/문서 4개 커밋.** 사용자 추가 지시로 출발c20407db·잔여17%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. root와 worker2개(구현/독립 검토)로 핵심 user cloud helper를 순서대로 진행하고 사이클마다 집중·전체 검사·판정·문서·작은 커밋/main push를 마감합니다. 자동화는 PAUSED이며 두 사이클 뒤 종료합니다. 첫 사이클 포트 수정은 집중4그룹13사례·독립 Go main1개·Python AST1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. 구현e77ff22f, 계약7,558→7,560개이며 named 행은 unresolved·매핑2,059/3,228을 유지합니다. Go source3262개 SHA256 b1890aa886a51add602c351402a75fedc701f474529ee9c287fca2b9bf8a4504는 gate 전후 동일합니다. 두 번째 서브넷 수정은 구현ebd2dc60, 수리 후 포트 회귀 포함 집중10그룹28사례(서브넷6/15+포트4/13)·독립 Go main1개/Python AST1개·전체205개 test package gate PASS로 마감했습니다. Go source3264개 SHA256 4934417f5a684fc2d56d2b34e1393d514be3ff100e4f2f8a87cdfbc8f17c89c5는 gate 전후 동일합니다. 두 사이클 합계 신규 테스트10그룹28사례, 독립 main/AST 각2개, 계약7,558→7,562개(+4)이며 대상2행은 남은 차이로 unresolved를 유지합니다. 종료 잔여15%·reset동일이며 계정 공유 사용량입니다. 자동화는 PAUSED, 추가 사이클은 시작하지 않습니다.
-
-**추가 한 묶음 (2026-10-15): cloud 라우터 인터페이스 제거의 명시 응답 charset 연결.** 사용자 추가 지시에 따라 출발f7cf7adf·잔여3%·ordinaryUsageAllowed=true·reset1792472624에서 worker2개(구현/독립 검토)+root로 시작했습니다. 공통 Normalize를 해당 cloud leaf에만 재사용하고 normalized Value/Wire와 원본 Envelope/Header/status/오류 body를 분리합니다. legacy 공통 라우터 parser·다른 연산은 보존합니다. 핵심 user 우선순위와 SDK-R1/C1/S1·실클라우드/릴리즈 잔여는 그대로이며 자동화는 PAUSED입니다. 집중22그룹324사례 PASS, 구현87d48231 커밋 완료입니다. 계약7,556→7,558개이며 대상은 unresolved를 유지합니다. 독립 Go main1개 빌드·Python AST1개와 전체205개 test package·license/vet/race/parity/progress/gofmt가 최초 실행 PASS(exit0)했습니다. Go source3,260개 SHA256 3f674825c26f52927707bc350afc346493f5814d0aed9917620b182d76131f9c는 gate 전후 동일합니다. 이번 묶음을 마감하고 자동화는 PAUSED를 유지합니다.
-
-**추가 한 사이클 (2026-10-15): worker2개와 root로 명시 JSON 응답 charset 공통 모듈·Secret 수정·콘솔 출력을 보강합니다.** 출발90b7c0f0, 시작 잔여4%·최근3%·ordinaryUsageAllowed=true·reset1792472624입니다. 자동화는 PAUSED이며 이번 고정 묶음 뒤 새 사이클은 없습니다. 명시 UTF-16/32(BOM 또는 LE/BE)·Latin1만 두 연산에 연결하고 원본 응답 증거를 보존합니다. 집중39그룹275사례와 독립 Go main2개 빌드·Python AST2개가 PASS했습니다. 구현을 881185c1·73adca01·e40547bf로 나눠 커밋했습니다. 계약7,555→7,556개이며 두 행은 unresolved로 유지합니다. 전체205개 test package·license/vet/race/parity/progress/gofmt가 최초 실행 PASS(exit0)했습니다. Go source3,260개 SHA256 549eea5b8cabf6c49fda12fd231585236bb1dda5ffe75f5ec58d21113f34109e는 gate 전후 일치합니다. 이번 한 사이클을 마감하고 자동화는 PAUSED를 유지합니다.
-
-**추가 단발 작업 (2026-10-15): 약3% 사용량 범위·worker1개로 Flavor RAM 상태 정책 보강 마감.** 사용자는 잔여3%가 아니라 사용량 약3% 정도의 한 번 작업으로 정정했습니다. 시작 잔여4%·ordinaryUsageAllowed=true·resetsAt1792472624이며 반복 자동화는 PAUSED 그대로입니다. Root가 구현·Go·Git, worker1개가 읽기 전용 Source/코드/문서 검토를 맡습니다. RAM 전용 ListSourceRecords가 목록과 extra-specs100~399를 연결하고 기존6개 reader200~399는 보존합니다. 새3그룹과 기존10그룹을 재사용한 집중13그룹89사례가 PASS했습니다. 코드 수정948ac426을 push했고 전체204개 test package·license/vet/race/parity/progress/gofmt PASS(exit0), 독립 Flavor main1개 빌드·Python AST1개 PASS로 마감했습니다. Go source3,258개 SHA256 2c485bfc116c556af0defe4545ffa6a3a51a96b750721f56b5a1f5e3564c1bc5는 gate 전후 같습니다. Requests UTF16/32·legacy charset 차이는 새 증거와 함께 unresolved로 남겨 매핑2,059개/계약7,555개이며 supported0입니다. 한도 증가/reset이면 중단하고 별도 다음 사이클은 실행하지 않습니다.
-
-
-**직전 중단 지시 (2026-10-15): 이번 사이클까지만 마무리합니다.** sdk-quota는 PAUSED로 변경·확인했으며 현재 고정6개 후보의 전체 검사·문서·커밋/push만 마감하고 새 사이클은 시작하지 않습니다. 재개에는 새 사용자 지시가 필요합니다.
-
-**현재 구현 (2026-10-15, 잔여3% 기준 첫 사이클): 고정6개 후보 구현·8worker 검토·집중33그룹247사례·독립 main4개·전체204개 test package gate PASS, 이번 묶음 마감.** 출발 revision `06c6a0e3`, 검증된 Go 매핑2,059/3,228(63.8%)·핵심1,981/2,158(91.8%)입니다. Flavor RAM 선택1·라우터 인터페이스 제거1·방화벽 rule/policy/group 삭제3·Barbican secret 수정1로 범위를 고정했습니다. 구현4개와 Source/테스트/문서/라이선스 검토4개를 병행하고 root가 공통 계약·통합·Go 검사·판정·Git을 순서대로 처리합니다. 기능 커밋4개를 main에 push했습니다. 계약은7,518→7,554개(+36)로 증가했지만 이번6행은 named 차이를 남겨 모두 unresolved이며 매핑 완료 수는 늘리지 않습니다. 실제 최초 Flavor Envelope fixture 실패와 수리 후 PASS를 [판정대장](sdk-support-ledger.md#2026-10-15-잔여3-기준-첫-사이클)에 구분했습니다. 전체 license/vet/race/parity/progress/gofmt PASS(exit0)이며 Go source3,257개 SHA256 dbf2dbf8aa4c81953c62ed98215f0c4d7acdd2beb79f042557e7a80d6da4c8b2가 최종 gate 전후 같습니다. 전체 Source parity·SDK-R1/C1/S1·실클라우드/릴리즈는 미완료입니다.
-
-이번 사이클 시작 시 적용한 지시는 **새 사이클은 잔여가 엄격히3%를 초과할 때만 시작**, **8worker 노력 유지**, **리셋으로 이전 관측보다 잔여가 늘어나면 중단**입니다. 시작 잔여11%, 직전 관측은 **잔여5%·ordinaryUsageAllowed=true·resetsAt=1792472624(2026-10-20 14:03:44 KST)**입니다. 시작·중간·종료 관측을 비교하며 잔여 증가/reset 시각 변경이면 새 할당과 실행 중 worker를 중단하고 안전 기록 후 sdk-quota를 PAUSED로 바꿉니다. 3% 이하에서는 새 사이클을 시작하지 않으며 이미 시작한 범위만 필요한 마무리를 허용합니다. 다른 작업의 소비가 계정 한도에 포함되므로 관측 소비를 이 작업만의 비용으로 단정하지 않습니다. 기존40%/5% 시작 경계는 폐기했고 관측은11→10→9→7→6→5%, reset시각은 같았습니다. 이후 사용자의 “이번 사이클까지만” 지시가 우선하므로 sdk-quota는 PAUSED이며 잔여가 남아도 자동 재개하지 않습니다. Source pin·SDK-R1/C1/S1·실클라우드/릴리즈 잔여와 서비스 우선순위를 보존합니다.
-
-
-
-**직전 구현 (2026-10-15, quota 반복 여섯 번째 사이클): 고정9개 후보 구현·8worker 검토·문서·집중 및 전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `5079609c`입니다. Connection7개 진입점과 library-owned 기본값·옵션·응답 증거를 구현했고 새 **78그룹·263개 하위 사례**가10개 집중 package에서 PASS했습니다. 판정은9행 모두 unresolved입니다. 기존 Network Proxy의 cap·raw limit·추가 페이지 요청·MV 순서 차이를 실제 Source 실행으로 발견하여 **go_mapping→unresolved1행**을 정정했습니다. 전체 **2,033→2,032/3,228(62.9%)**, 핵심 **1,955→1,954/2,158(90.5%)**, supported0이며 계약은 **7,406→7,482개(+76)**입니다. 사용 가능한 부분 구현을 전체 named parity 완료로 집계하지 않습니다.
-
-**병렬 미완료 묶음 마무리 (2026-10-15): 전체2,059/3,228(63.8%)·핵심1,981/2,158(91.8%).** 앞서 중지한 입력 표현·응답 모델 단위의 남은 작업을 현재 main에 맞춰 마무리했습니다. Nova aggregate·flavor·service 수정과 migration·quota reset, Neutron VPN·BGP·BGPVPN 수정, firewall rule 생성·삽입, DHCP agent 목록, tap mirror 반복 query, Placement allocation 생성·resource class 이름 변경·allocation candidate 반복 query, Glance task null 입력, Keystone federation mapping·project endpoint·role assignment record, Nova AZ 상세와 구형 service enable·disable을 SDK 소유 record로 대응시켰습니다. 다른 세션이 먼저 구현한 cloud extension 확인, domain record, port·network 목록, Swift object 목록 초안은 버렸습니다.
-
-| 소유 단위 | 고정 후보 | 최종 구현·검토 상태 |
-|---|---|---|
-| Network 목록 | Proxy networks·cloud list/search3개 | query 병합·opaque generator·Resource/location·전체 페이지, Source348·13그룹 PASS; cap/limit/추가 GET/MV 잔여·unresolved3 |
-| Subnet 목록 | Proxy subnets·cloud list/search3개 | Source descriptor·pagination·absent-service·late actual proof, Source348·19그룹 PASS; 동일 named 잔여·unresolved3 |
-| Nova ServerGroup | cloud search/get2개 | 기본 Find·명시 filters·중복/누락·finite 비교·microversion, Source147·15그룹 PASS; Resource-class JMES·전체 숫자/직렬화 잔여·unresolved2 |
-| Nova Console | cloud get_server_console1개 | bare 조회·dict/length·clean action400·raw output·discovery fault opt-in, Source68·23그룹 PASS; JSON charset/nonfinite 잔여·unresolved1 |
-| Connection·공통 | 위 후보 연결과 필요한 shared 계약 | cached service/location·list catalog 부재·cancel4그룹 및 Source collection GET/discovery/loaded filter4그룹 PASS |
-
-구현4개와 독립 Source/테스트/문서 검토4개를 병행했고 중앙 통합·Go·Git은 root가 순서대로 처리합니다. 공개 Gophercloud testhelper·기존 fixture와 Source profile/REST/converter/filter를 재사용합니다. 작은 기능 커밋9개를 main에 push했고 판정·마감 문서를 별도 커밋으로 저장합니다. 정확한 독립 Go main4개 build·Python AST4개, 고정 Source/native metadata를 사용하는204개 실제 test package 전체 `make check`가 PASS(exit0)입니다. Go source3,199개가 최종 집중·전체 gate 전후 같고 최초 집중 실패·수리·최종 통과를 [판정대장](sdk-support-ledger.md#2026-10-15-quota-반복-여섯-번째-사이클)에 구분했습니다. 새 후보를 추가하지 않았고 SDK-R1/C1/S1·실클라우드/릴리즈 잔여, 핵심 user→admin→managed user→admin 순서·Swift 핵심·후속 network/baremetal 우선순위를 보존합니다.
-
-시작 quota 잔여53%·중간45/43/41%·최종40%·ordinaryUsageAllowed=true이며 조회 가능한 reset은2026-10-20 14:03:44 KST입니다. 계정의 다른 작업과 공유한 소비를 이 작업만의 비용으로 단정하지 않습니다. Worker8개 노력과 **40% 새 사이클 시작 경계**를 유지합니다. 정확히40%이므로 이번 묶음의 마감 이후 새 사이클은 시작하지 않습니다. 반복 예약은 유지하며 이후 fresh 최소 잔여가 엄격히40%를 초과할 때만 다시 구현을 시작합니다. 전체 SDK 목표는 미완료입니다.
-
-**직전 구현 (2026-10-14 시작·10-15 마감, quota 반복 다섯 번째 사이클): 고정6개 후보의 구현·8worker 검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `d3998c6a`입니다. 새 Go 매핑은 **5개**, 전체 **2,028→2,033/3,228(63.0%)**, 핵심 **1,950→1,955/2,158(90.6%)**입니다. Swift get_object1행은 meaningful 부분 계약을 추가했지만 통계적 apparent_encoding과 전체 CPython codec/alias/replace registry 두 named gap이 남아 unresolved입니다. catalog3,362·unsupported134·supported0·reviews2,487을 보존하고 계약은7,352→7,406개(+54)로 갱신했습니다.
-
-| 소유 단위 | 고정한 이번 후보 | 최종 단계 |
-|---|---|---|
-| QoS 규칙 수정 | cloud BW·DSCP·minimum bandwidth update3개 | 구현·Source74·cloud/leaf race PASS·실제 GET200 증거와 falsey collection PUT 수리·go_mapping3 |
-| Router 생성 | cloud create_router1개 | 기본값·gateway·fresh AZ gate·Source90·cloud/leaf/Connection race PASS·go_mapping1 |
-| Subnet 생성 | cloud create_subnet1개 | closed network/pool 조회·기본값/검증·arbitrary attrs·Source127·18그룹/Connection race PASS·go_mapping1 |
-| Swift 객체 조회 | cloud get_object1개 | eager text/output·소유권·clean404·Source65·21그룹/Connection race PASS·부분 구현·unresolved1 |
-
-새 집중 race **67그룹·249개 하위 사례**, 독립 Go main **4개** build·Python AST **4개**, 고정 Source/native metadata를 사용한 전체 **204개 실제 test package**의 `make check`가 PASS했습니다. 공개 Gophercloud testhelper·기존 fixture·Source profile·REST guard/converter/filter를 재사용했습니다. Go 최소1.25를 유지하며 기존 crypto 의존성 그래프에 맞춰 text codec을 v0.41.0으로 고정했고 원문16개/module6개 license gate도 PASS입니다. 발견한 최초 실패와 수리·최종 통과는 [마감 검증 근거](sdk-support-ledger.md#2026-10-15-quota-반복-다섯-번째-사이클)에 구분했습니다. 작은 기능 커밋을 main에 push하고 문서·중앙 판정·집계도 함께 마감합니다.
-
-반복 작업 sdk-quota는 사용자의 재개 지시로 ACTIVE이며 새 사이클은 ordinaryUsageAllowed=true이고 조회 가능한 최소 잔여가 **엄격히40% 초과**일 때만 시작합니다. 시작62%·중간59/57/54%·최신53%; 계정의 다른 작업과 공유한 관측이므로 이 작업만의 소비로 단정하지 않습니다. 정확히40% 또는 그 아래에서는 새 사이클을 시작하지 않고 이미 시작한 범위는 필요한 마무리까지 완료합니다. **worker8개 최대 노력**을 유지하고 고정한6개 범위를 확장하지 않았습니다. 핵심 user→핵심 admin→managed user→managed admin·Swift 핵심·후속 네트워크/베어메탈 우선순위와 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존하며 전체 목표를 완료로 표시하지 않습니다.
-
-**직전 구현 (2026-10-13, quota 반복 네 번째 사이클): 구현·8worker 독립 검토·문서·전체 gate PASS, 고정4개 묶음 마감.** 출발 revision은 `1c34b74e`이며 Go 매핑은 전체 **2,024→2,028개(+4), 2,028/3,228(62.8%)**, 핵심 **1,946→1,950/2,158(90.4%)**입니다. 새38그룹·독립 Go main2개 build·Python AST2개와 고정 Source/native metadata를 사용한204개 실제 test package 전체 `make check`가 PASS입니다. Source catalog3,362·unsupported134·supported0, SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. zstd 응답 지원에 필요한 고정 Go dependency와 원문3개를 추가해 module5개/원문15개 라이선스 gate도 PASS입니다. 시작 quota 잔여83%, 최신78%입니다. 이후 worker8개 유지 지시를 반복 프롬프트에 반영했습니다. 이번4개 범위만 마감하고 잔여80% 이하에서는 새 사이클을 시작하지 않습니다.
-
-| 소유 단위 | 고정한 이번 범위 | 단계 |
-|---|---|---|
-| Neutron QoS Rule | cloud bandwidth limit·DSCP·minimum bandwidth create3개 | 구현·최종focused race PASS·Source62+독립45·작은커밋/main push 완료 |
-| Swift Object | cloud stream_object1개·닫힌 chunk iterator·Connection 통합 | 구현·독립lifecycle/codec 수리 후최종race/Connection PASS·커밋 완료 |
-
-공통 요청·REST guard·Source profile·converter·공개 Gophercloud testhelper와 기존 fixture를 재사용하고 새 파일 소유를 분리합니다. 사용자의 추가 지시에 따라 quota가80% 근처여도8개 worker의 구현·Source/테스트/문서/라이선스 독립 검토를 유지합니다. root가 모든 Go 검사·공통 코드·중앙 판정·집계·작은 커밋과 승인된 main push를 순서대로 처리합니다. 이4개 후보만 마무리하며 QoS update·admin details, 일반 Swift Proxy mutable Object/attrs와 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. 한도는 다른 계정 작업과 공유하며 시작한 범위는80% 아래로 내려가도 필요한 수리·검증·문서·commit/push까지 마무리합니다. 새 사이클은 조회 가능한 최소 잔여가 엄격히80%를 초과할 때만 시작합니다. [마감 검증 근거](sdk-support-ledger.md#2026-10-13-quota-반복-네-번째-사이클)에 최초 실패·수리·최종 PASS를 구분했습니다.
-
-**직전 구현 (2026-10-13, quota 반복 세 번째 사이클): 구현·검토·문서·전체 gate PASS, 고정8개 묶음 마감.** 출발 revision은 `3caf3aeb`이며 Go 매핑은 전체 **2,016→2,024개(+8), 2,024/3,228(62.7%)**, 핵심 **1,938→1,946/2,158(90.2%)**입니다. 새 테스트78그룹·독립 Go main4개 build·Python AST4개와 고정 Source/native metadata를 사용한204개 실제 test package 전체 `make check`가 PASS입니다. catalog3,362·unsupported134·supported0과 SDK-R1/C1/S1·실클라우드/릴리즈 잔여를 보존합니다. 시작 quota 잔여86%, 최신83%이며 계정의 다른 작업과 공유하는 사용량입니다. 작은 기능 커밋을 main에 push했고 마감 문서·판정도 함께 반영합니다.
-
-| 소유 단위 | 고정한 이번 범위 | 단계 |
-|---|---|---|
-| Keystone User·Role | cloud get_user/get_role2개·필요한 closed resolver | 구현·Source 검토·최종 leaf/cloud race PASS·커밋 완료 |
-| Keystone Domain | Proxy get_domain·cloud get_domain2개 | 구현·leaf/cloud race PASS·비교 가이드·커밋 완료 |
-| Keystone Project·Group | cloud get_project/get_group2개·closed resolver | 구현·raw query 수리 후 cloud race PASS·커밋 완료 |
-| Neutron QoS Policy | cloud create/update2개·Source leaf mutation | 구현·Source microversion 수리·최종 focused race PASS·커밋 완료 |
-
-공통 계약은 기존 Source profile·descriptor·guard·REST·filter를 재사용하며, 새로운 closed helper의 호출 가능 인자만 이번 판정 대상으로 봅니다. [마감 검증 기록](sdk-support-ledger.md#2026-10-13-quota-반복-세-번째-사이클)에 최초 실패·수리·최종 PASS를 구분했습니다. 범용 Find의 raw query/cache/Resource 잔여는 별도 유지합니다. QoS create/update의 고정 stock policy는 project manager를 허용하고 deprecated admin-only 정책과 구분하며 실제 배포 권한을 주장하지 않습니다. root가 Go 검증·중앙 판정·문서 집계·작은 커밋과 승인된 main push를 맡습니다. 이8개 후보 범위를 마무리한 뒤 종료하며 새 후보를 추가하지 않습니다. 최소 잔여가 엄격히80%를 초과할 때만 새 사이클을 시작하는 규칙과 핵심 user→핵심 admin→매니지드 user→매니지드 admin 순서를 보존합니다.
-
-**직전 구현 (2026-10-13, quota 반복 두 번째 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `01c92efc`입니다. Go 매핑은 전체 **2,002→2,016개(+14), 2,016/3,228(62.5%)**, 핵심 **1,924→1,938/2,158(89.8%)**입니다. 후보15개 중14개를 매핑했으며 QoS policy getter의 raw headers/fetch controls는 unresolved로 유지했습니다. 고정 catalog3,362·unsupported134·supported0과 원래 판정 근거를 보존했습니다.
-
-| 병렬 소유 단위 | 구현·검증·문서 | 신규 Go 매핑 |
-|---|---|---:|
-| Keystone Service | Proxy 목록·closed lookup·cloud 검색/조회, leaf/cloud race PASS·Source AST41·가이드 | 3 |
-| Keystone Endpoint | None/falsey 필터·cloud 검색/조회·실제 응답/위치, identity race PASS·가이드 | 2 |
-| Keystone Region·GroupUsers | profile·group scope·paging·정책, 이름 충돌 수리 후 leaf race PASS·가이드2개 | 2 |
-| Neutron QoS Policy | fresh gate·Source lookup/삭제, network/leaf race PASS·Source15·가이드; getter raw 옵션 잔여 | 1 |
-| Neutron QoS Rule | BW·DSCP·minimum 삭제·minimum strict policy·actual receipt, cloud/leaf race PASS·Source51·가이드 | 3 |
-| Neutron Security Group·Router | Neutron/Nova·dict pushdown/local 선택·기존값 bypass·owner 분류, network/leaf/Connection race PASS·Source65·가이드2개 | 3 |
-| 합계 | 새 계약 테스트119그룹·독립 Go main9개 build·Python AST9개·중앙 판정/자동 집계·204 test package 전체 gate PASS | 14 |
-
-Root가 Go 검사·공통 엔진·중앙 판정·진행표·커밋/push를 맡고 worker6개는 파일 소유를 나누어 구현했습니다. SDK가 Service/Endpoint Connection 캐시·location 기본값과 Security Group backend 선택, 기존 값의 발견 없는 반환, Router 전체 inventory 분류를 제공합니다. Source 상태코드 옵션을 mutation에도 연결하면서 기존 API의200..399 정책을 보존했습니다. 공개 Gophercloud testhelper·기존 fixture·공통 engine/guard/descriptor/filter를 재사용했습니다. 최초 GroupUsers 메서드 충돌·Service 인자 누락·root Neutron catalog fixture와 공통 status 회귀 fixture를 수리한 후 집중 race를 통과했으며 [검증 기록](sdk-support-ledger.md#2026-10-13-quota-반복-두-번째-사이클)에 실패·수리·최종 검증을 구분합니다.
-
-시작 quota 잔여91%, 최종87%입니다. 계정 사용량은 다른 작업과 공유하며 이 작업만의 비용으로 단정하지 않습니다. 이번 실행은 고정한15개 후보만 마무리하며 전체 SDK 목표를 완료로 표시하지 않습니다. 다음 사이클은 ordinaryUsageAllowed=true이고 조회 가능한 창의 최소 잔여가 엄격히80%를 초과할 때만 시작합니다. SDK-R1/C1/S1·실클라우드·릴리즈 잔여를 보존합니다.
-
-**직전 구현 (2026-10-13, quota 반복 첫 사이클): 구현·검토·문서·전체 gate PASS, 이번 묶음 마감.** 출발 revision은 `8b9eeed1`입니다. 검증한 Go 매핑은 전체 **1,981→2,002개(+21), 2,002/3,228(62.0%)**, 핵심 **1,903→1,924/2,158(89.2%)**입니다. 기존 `list_users` 매핑을 보강한 1행은 신규 수에 포함하지 않았으며, 관리자 rule-type details 1행은 unresolved로 유지합니다. 고정 catalog3,362개·unsupported134개·supported0을 보존하고 판정23행을 갱신했습니다.
-
-| 병렬 소유 단위 | 최종 구현·집중 검증·문서 | 신규 Go 매핑 |
-|---|---|---:|
-| Keystone User | proxy users·cloud 목록/검색·UUID query·location, race PASS·비교 문서·커밋/push | 2 |
-| Keystone Role | proxy roles·cloud 목록/검색·실제 권한 정책, race PASS·비교 문서·커밋/push | 3 |
-| Keystone Domain | proxy domains·presence-aware cloud 목록/검색, race PASS·비교 문서·커밋/push | 3 |
-| Keystone Endpoint | Source descriptor·페이지 링크·system reader 조회, race PASS·비교 문서·커밋/push | 1 |
-| Neutron QoS Policy | fresh 전체 extension gate·cloud 목록/검색·Source Proxy 결과, race PASS·문서·커밋/push | 2 |
-| Neutron QoS RuleType | cloud 목록·opaque 결과·Source Proxy, race PASS·문서·커밋/push; details는 admin 단계 | 1 |
-| Neutron QoS Bandwidth | 부모 policy 조회 후 목록·검색·단일 조회·opaque generator, race PASS·문서·커밋/push | 3 |
-| Neutron QoS DSCP·Minimum | 각각 목록·검색·단일 조회·strict parent getter·location, race PASS·문서·커밋/push | 6 |
-| 합계 | 새 계약 테스트156그룹·독립 Go main9개 build·Python 예제 AST 통과, 전체 gate PASS | 21 |
-
-Connection의 User·Role·Domain 조회는 캐시된 Keystone API와 기본 location을 전달하고 명시 옵션을 보존합니다. 공통 QoS extension 확인은 매 호출 전체 alias 목록을 다시 읽으며 후반 오류를 보존합니다. 기존 공개 Gophercloud testhelper·fixture·공통 guard/descriptor/filter를 재사용했습니다. 최초 User raw-query 변환 오류, Endpoint 권한 오류 assertion, QoS native 오류 carrier·페이지 링크·다형 검색 경계를 수리한 후 집중 검사를 통과했습니다. 전체 검사에서는 Role 결과 DTO2개를 API 호출 근거로 쓰던 판정 JSON 오류를 수리했으며 최종 `make check`의 실제 test package204개와 race/vet/parity/progress/license/gofmt가 모두 PASS입니다. [실행 근거](sdk-support-ledger.md#2026-10-13-quota-반복-첫-사이클)에 최초 실패와 최종 검증을 구분합니다.
-
-시작 quota 잔여97%, 최종 조회91%입니다. 한도는 계정의 다른 작업과 공유합니다. 새 사이클은 조회 가능한 창의 최소 잔여가 **엄격히80%를 초과**하고 ordinaryUsageAllowed=true일 때만 시작하며, 이미 시작한 범위는 경계를 내려가도 검증·문서·판정·커밋/push까지 마무리합니다. 모델 capacity 오류는 같은 모델에서 재개했으며 이번 범위 밖 API·새 목표·관리자 mutation은 추가하지 않았습니다. SDK-R1/C1/S1·실클라우드·외부 릴리즈의 남은 계약을 보존합니다.
-
-**직전 사이클 (2026-10-13, 추가 한 사이클): 구현·검토·문서·전체 gate PASS, 이번 사이클 마감.** Go 매핑은 전체 **1,963→1,981개(+18), 1,981/3,228개(61.4%)**, 핵심 **1,885→1,903/2,158개(88.2%)**입니다. 후보21행을 검토하여18행을 매핑하고 Find3행은 미해결로 유지했습니다. 새 계약 테스트174개와 독립 Go main11개/Python AST11개, 생성기·서비스 등록을 검증했습니다. 고정 catalog3,362개와 unsupported134개, 기존 판정 근거를 보존하고 자동 집계를 갱신했습니다. 최종 `make check`는204개 실제 test package와 race/vet/parity/progress/license/gofmt 모두 PASS입니다. 최초 vet 실패와 status 회귀, 해당 수리 후 최종 전체 통과를 [검증 기록](sdk-support-ledger.md#2026-10-13-추가-사이클-마감)에 구분했습니다.
-
-| 병렬 소유 단위 | 최종 단계 | 신규 Go 매핑 |
-|---|---|---:|
-| Neutron Extension | 목록·GET-first Find 구현·race PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 1 |
-| Neutron AvailabilityZone·AutoAllocatedTopology | user 정책·무시되는 kwargs·strict 삭제·race PASS·커밋/push 완료 | 4 |
-| Port cloud 목록·subnet 선택·bulk 생성 | 다형 결과·loaded 비교·flat plural body·lazy row 변환·Connection race PASS·커밋/push 완료 | 3 |
-| Swift object 검색 | 전체 목록·metadata 비교·Connection location 구현, 서비스/Connection race PASS·커밋/push 완료 | 1 |
-| Keystone limit·registered limit | Source의 untyped 필드·descriptor·목록 구현, race PASS·커밋/push 완료 | 2 |
-| Keystone Project | 목록·cloud helper 구현, leaf/Cloud 회귀 PASS·커밋/push 완료; Find는 raw fetch controls 미해결 유지 | 3 |
-| Keystone Group | 목록·cloud 검색·Source oracle·최종 race PASS·커밋/push 완료; Find는 미해결 유지 | 2 |
-| Nova Extension·ServerAction | Compute descriptor·event Resource·지연 버전 발견·최종 race PASS·커밋/push 완료 | 2 |
-| 합계 | 개별·전체 검증, 문서 예제, 생성기, 판정·자동 집계 완료 | 18 |
-
-공통 paging의 Source link precedence, 서비스별 version header, SDK 소유 descriptor projection과 bulk 응답 변환을 재사용했습니다. `supported`와 전체 Resource/session 동등성은 별도로 추적하고, Project·Group·Neutron Extension Find의 raw controls·lifecycle은 이번 사이클의 완료 수에서 제외합니다. 개별 gate에서 native401 오류의 원인 보존, HTTP NoBody, Source의 null link/scalar 필터 오류, bulk scalar list cast, native503 retry hook의 fixture를 수정했습니다. 전체 gate의 vet cleanup 누락과 Neutron199 status 회귀도 발견했으며, SourceStatusPolicy opt-in과 기존 테스트를 보존하는 회귀 검사로 수리했습니다. 실패와 최종 통과를 구분해 저장하고 서비스별 작은 커밋과 최종 문서 커밋을 main에 push합니다. 이 사이클의 추가 구현은 종료하며 전체 목표의 남은 계약은 유지합니다.
-
-**직전 사이클 (2026-10-13): 사용자 요청에 따라 현재 병렬 작업 묶음을 마무리, 전체 gate PASS.** 전체 Go 매핑은 **1,944→1,963개(+19), 1,963/3,228개(60.8%)**, 핵심은 **1,866→1,885/2,158개(87.3%)**입니다. 고정 선언3,362개와 `unsupported`134개를 보존했습니다. 새 계약 테스트260개와 독립 Go main13개를 추가·검증했고, 고정 Python Source와 compiled native metadata를 활성화한 전체 `make check`(201개 실제 test package, race/vet/parity/progress/license/gofmt)가 통과했습니다. 로컬 TCP 주소 할당 실패가 난 병렬 실행 기록을 보존하고 `GOFLAGS=-p=1 GOMAXPROCS=2`로 통과한 최종 결과를 기록합니다.
-
-| 병렬 소유 단위 | 최종 구현·검토 | 신규 Go 매핑 |
-|---|---|---:|
-| Network record 목록·ServiceProviders | Source kwargs·descriptor·opaque generator·paging 및 서비스 등록 완료 | 2 |
-| Port record 목록·검색 | Source 목록·loaded 검색·Connection location/서비스 부재 처리 완료; cloud `list_ports`의 임의 iterable 변환은 unresolved 유지 | 2 |
-| Swift object record 목록·raw 응답 | full lazy 목록과 buffered/stream raw 조회·실제 오류 증거 완료 | 3 |
-| Swift container cloud workflow·검색 | get-or-create·ACL 변환·전체 페이지 검색·Connection 기본 location 완료 | 4 |
-| Nova share attachment | user 정책·기본/명시 버전·생성/조회/목록/삭제4개 완료 | 4 |
-| Cinder summary/resource filters | Source summary2GET·일반 query·opaque/eager 목록·서비스 등록 완료 | 2 |
-| Nova/Cinder quota query | owned fetch 옵션·descriptor·location 입력·stock reader 정책 완료 | 2 |
-| Barbican ACL/Quota wait | concrete target2개와 상태 없는 삭제 관찰 완료; admin/임의 Resource 범용 wait2행은 unresolved 유지 | 0 |
-| 합계 | 판정 JSON의 실제 상태 변화 | 19 |
-
-공통 loaded JSON equality/cloud filter, lazy generator identity, Neutron list controls, native backoff guard와 unread Reader 계약을 함께 정리했습니다. 기존 fault fixture·Gophercloud testhelper·공통 policy를 재사용했습니다. source/catalog fingerprint와 기존 계약 근거는 보존했고, 미완결 Extension 파일은 제거했으며 AvailabilityZones 등 새 서비스는 시작하지 않았습니다. 서비스별 변경을 작은 commit으로 저장하고 push합니다. 핵심 user→핵심 admin→managed user→managed admin 순서와 Swift 핵심/후속 네트워크·베어메탈 우선순위는 유지합니다. 전체 inventory·SDK-R1/C1/S1·실클라우드 acceptance·alpha 릴리즈는 미완료입니다.
-
-집계는 [판정 JSON](../api/sdk_reviews.json)과 고정 catalog에서 `make progress`로 생성합니다. `make check`는 집계가 판정 JSON과 다르면 실패합니다. **API 완료 수**와 **진행 중인 구현 단계**를 함께 확인할 수 있도록 아래에 현재 작업을 기록합니다.
-
-**이전 구현 (2026-10-12): 미해결 해소 두 번째 단계, 사용량 한도로 작업 중지. 전체1,944/3,228(60.2%)·핵심1,866/2,158(86.5%), 전체 gate PASS.** 서버 API가 폐기된 133개를 구현 대상에서 제외했고, SDK 소유 API(networking-sfc, Neutron flavor·service profile·metering, TaaS tap flow·tap service, local IP, segment range, NDP proxy, conntrack helper, 기본 보안 그룹 rule·statefulness, QoS packet rate rule 변경, Cinder group type·default type·cluster·service action·group reset)와 공통 helper(`fields` 조회, FindIdentity fallback 확장)를 추가했습니다. 입력 표현·응답 모델·cloud extension 확인 단위는 중간에 중지해 머지하지 않았고, 일부 결과는 해당 worktree에 commit되지 않은 상태로 남아 있습니다. 변경 없는 수정 요청의 판정 기준은 아직 결정 전입니다.
-
-**이전 구현 (2026-10-12): 핵심 서비스 Python proxy·cloud helper 판정 마감. 전체1,665/3,362(49.5%)·핵심1,587/2,292(69.2%), 전체 gate PASS.** 서비스별 worktree 에이전트 16개가 Keystone v3·Cinder v2/v3·Neutron proxy와 cloud identity·compute·network·object store helper 904개를 판정해 255개를 `go_mapping`으로 기록했고, 핵심 서비스의 미검토 선언은1개 남았습니다. 남은 핵심 작업은 unresolved 703개의 해소이며, Gophercloud 바인딩이 없는 경로의 SDK 소유 호출 작성과 find fallback·로컬 Body 필터·`fields` 조회 같은 공통 helper 보강이 중심입니다. 근거는 [판정대장의 마감 기록](sdk-support-ledger.md#핵심-python-proxycloud-판정-병렬-묶음-마감)에 정리했습니다. 미해결 722개(native 선언 포함)를 다시 읽어 [구현 가능성](core-unresolved-feasibility.md)을 나눈 결과, 566개는 구현 가능하고 130개는 서버 API가 폐기된 경로이며 26개는 구현하지 않는 항목입니다. 호스트 기본 `python3`가 3.15라 전체 gate와 `make generate`는 `python3.14`를 PATH 앞에 둔 상태로 실행합니다.
-
-**이전 묶음 마감 (2026-10-11): 추가34개 named API 구현·서비스 race·검토·문서·판정 완료. 전체1,410/3,362(41.9%)·핵심1,336/2,292(58.3%).** Neutron QoS 조회12·SecurityGroup/Rule 목록2·Router 검색/목록2·RBAC 변경3과 Cinder replication3·legacy consistency group7·snapshot5를 추가했습니다. SecretStore 대기9개 회귀도 PASS이나 ACL·Quota·ProjectQuota가 남아 named wait2개는 unresolved이며 완료 API 수를 늘리지 않습니다. 공통 JSON float truthiness·Source Header 별칭/복수값·owned mutation/projection을 재사용했고, 401 실제 응답 보존·LIST 제어 옵션과 페이지 경계를 보완했습니다. 기능별 작은 커밋으로 저장했습니다. 최종 `f129e687`의 전체 `make check`가 exit0이며 license·vet·race164개 test package·parity·집계·gofmt와 정확한 비교 main12개 외부 빌드/Python AST가 PASS입니다. 같은 Go소스의 앞선 불변 snapshot에서164개 uncached PASS도 확인했습니다. 첫 전체 검사의 판정 metadata 오류(exit2)와 수리 후 최종 PASS를 구분해 보존합니다. [마감 검증 기록](sdk-support-ledger.md#핵심-user-추가34개-마감)에 최종 근거를 갱신합니다. 사용자의 여기까지 마무리 지시에 따라 새 구현 할당을 끝내고 현재 묶음만 마감합니다. 전체 목표·우선순위·남은 SDK-R1/C1/S1·실제 클라우드 acceptance·alpha 범위는 유지합니다.
-
-**이전 묶음 마감 완료 (2026-10-11): 독립 서비스 병렬 묶음42개·전체 검사·문서 예제 빌드 PASS. 전체1,292/3,362(38.4%)·핵심1,218/2,292(53.1%).** Keystone6·Nova12·Cinder11·Swift1·Neutron12개를 추가했습니다. 최종 `1544c0d3` 불변 snapshot의 `GOFLAGS=-p=4 make check`가 exit0이며 race156개 test package, license·vet·parity·progress·gofmt를 통과했습니다. 정확한 문서 main11개도 별도 외부 local-replace module에서 빌드했습니다. 당시 재시작 요청으로 마감했으며, 최신 계속 진행 지시에 따라 현재는8개 worker로 다음 핵심 user 묶음을 진행합니다. 전체 범위와 우선순위는 유지합니다. SDK-R1/C1/S1·stock Backup metadata4개·실제 클라우드 acceptance·alpha release는 미완료입니다.
-
-| 이번 단위 | 신규 API | 구현·서비스 검증 | Python/Go 문서·판정 |
-|---|---:|---|---|
-| Credential update | 1 | 완료·race7그룹 PASS | 완료·main 빌드 PASS |
-| Keystone Trust | 5 | 완료·패키지12그룹 PASS | 완료·main 빌드 PASS |
-| Nova user action | 8 | 완료·서버 패키지44그룹 PASS | 완료·main 빌드 PASS |
-| Nova attachment/group | 3 | 완료·패키지25그룹 PASS | 완료·main 빌드 PASS |
-| Nova server backup | 1 | 완료·leaf/service/Connection17그룹 포함 PASS | 완료·main 빌드 PASS |
-| Cinder attachment | 2 | 완료·패키지24그룹 PASS | 완료·main 빌드 PASS |
-| Cinder Transfer | 3 | 완료·패키지13그룹 PASS·기존3개 계약 보강 | 완료·main 빌드 PASS |
-| Cinder type/encryption/QoS | 4 | 완료·집중20그룹 PASS | 완료·main 빌드 PASS |
-| Cinder connector | 2 | 완료·Volume 패키지22그룹 PASS | 완료·main 빌드 PASS |
-| Swift native Create | 1 | 완료·집중8그룹 PASS·생성기 회귀 PASS | 완료·main 빌드 PASS |
-| Neutron port forwarding | 12 | 완료·패키지12그룹 PASS·6동작/2명칭 | 완료·main 빌드 PASS |
-
-표의 검증 수는 기존 회귀를 포함하며 서로 겹치는 패키지를 합산하지 않습니다. 전체 revision·소스 SHA·첫 실패와 최종 통과 구분·재개 위치는 [마감 검증 기록](sdk-support-ledger.md#핵심-독립-서비스42개-마감)에 있습니다.
-
-[권한 분기 정리](core-policy-branches.md)에 user/admin/service 조건을 기록했습니다. API 수는 합산이며 Cinder encryption/QoS3개는 admin, attachment2개는 Source 내부용입니다. Nova volume swap·unshelve host·all-projects 검색의 추가 권한은 각 분기에서 따로 설명합니다.
-
-**재개 후 추가 API 완료 (2026-10-11): Cinder attachment2·transfer3·type/encryption/QoS4·Neutron port forwarding12·Keystone trust5, +26개. 누적1,250→1,278/3,362·핵심1,176→1,204/2,292.** 서비스별 race 검증을 통과한 named API를 반영했습니다. Cinder type 조회는 user이지만 encryption 생성/수정과 QoS 조회3개는 stock 기본 정책상 admin이므로 user 완료량에 합산하지 않습니다. Swift·Credential2개를 포함한 재개 누적은28개이며 Nova action·attachment·connector·backup은 최종 검증 중입니다.
-
-**재개 후 API 완료 (2026-10-11): Swift native object Create와 Keystone generic Credential update2개. 전체1,250→1,252·핵심1,176→1,178/2,292.** 빈 reader 기본값·typed nil preflight·재사용 bytes 옵션과 PATCH의 생략/null/응답 병합/no-op을 구현했습니다. 집중 race에서 Swift8개·생성기1개·Credential7개 그룹을 검증했고, 나머지 worker는 병렬 구현 중입니다. 이 숫자는 실제 OpenStack 인증 검증이나 전체 Resource/session 동등성의 완료 수를 뜻하지 않습니다.
-
-**최신 API 완료 (2026-10-11): Keystone5·Neutron14·Swift7·Nova8, 전체1,216→1,250(+34)·핵심1,142→1,176/2,292.** Identity178→183/389·Network268→282/758·Object Storage20→27/74·Compute220→228/333입니다. 새13개 review를 추가하고 기존 unresolved21행을 완료했으며 기존 ApplicationCredential/AccessRule5행의 오류 계약도 보강했습니다. [현재 묶음의 사용법·검증 기록](sdk-support-ledger.md#핵심-credentialneutronswiftnova-34개-마감)에 구현·검증·문서·재개 위치를 기록합니다.
-
-서비스 사이 의존성이 없는 구현은 서비스별 에이전트가 동시에 진행합니다. 공통 기능은 먼저 확정해 재사용하고, 담당 파일을 나눠 구현·서비스별 테스트·Python 비교 문서를 준비합니다. 생성기 통합·판정 JSON·자동 집계·전체 검사·commit/push는 한곳에서 순서대로 처리합니다.
-
-**앞선 API 완료 (2026-10-11): Neutron 선택 조회·조건부 삭제18개와 Keystone 토큰3개, 전체1,174→1,195(+21)·핵심1,100→1,121/2,292·Network238→256/758·Identity167→170/389.** [Neutron 가이드](../network/v2/python-read-delete.md)·[Keystone 가이드](../identity/v3/python-token-actions.md)와 [검증 기록](sdk-support-ledger.md#neutron-선택-조회조건부-삭제와-keystone-토큰-완료)에 사용법과 근거를 남겼습니다. 기존1,532개 판정·catalog·source pins는 보존했고, 새21행61계약을 추가했습니다. 전체 Resource/session 동등성의 supported 판정은0개이며 named Go API 완료 수와 구분합니다.
-
-**앞선 API 완료 (2026-10-11): Nova Python proxy 114개 판정과 직접 삭제 `ignore_missing` 공통 기능, 전체1,103→1,174(+71)·핵심1,029→1,100/2,292.** Nova 서버 user 62개와 관리자 52개를 판정해 65개를 `go_mapping`으로 기록하고, `resource.IgnoreMissing`으로 직접 삭제 9개의 Python 기본값을 재현했습니다. [검증 기록](sdk-support-ledger.md#nova-python-proxy와-직접-삭제-ignore_missing-완료)에 근거를 정리했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 Python proxy 첫 병렬 묶음 142개 판정과 noauth·swauth native 4개, 전체1,011→1,103(+92)·핵심937→1,029/2,292.** Placement·Keystone v2·Glance v1·Barbican 잔여·Cinder v3 핵심 resource의 Python proxy 메서드를 판정해 88개를 `go_mapping`으로 기록하고, Go가 같은 요청을 만들 수 없는 54개는 사유와 함께 unresolved로 남겼습니다. [검증 기록](sdk-support-ledger.md#핵심-python-proxy-첫-병렬-묶음-완료)에 근거를 정리했습니다.
-
-**앞선 API 완료 (2026-10-11): Keystone v2·OAuth1·EC2 token native 37개와 sdkgen 결함 수정 3건, 전체972→1,011(+39)·핵심898→937/2,292.** Keystone v2.0 21개와 OAuth1·EC2 token 16개의 계약을 고정하고, endpoint 목록 필터 누락·Placement 1.12 이상 decode 오류·token header 확장 누락을 sdkgen에서 고쳐 unresolved 3행을 해소했습니다. [검증 기록](sdk-support-ledger.md#keystone-잔여-native와-sdkgen-결함-3건-완료)에 근거를 남겼습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 admin 병렬 8묶음 235개, 전체737→972(+235)·핵심663→898/2,292.** Nova flavor·서버 관리자 16개, Neutron agent·segment 22개, Neutron BGP·BGP VPN 34개, Placement 33개(unresolved 1), Nova 인프라 20개, Cinder 관리자·Glance task 28개, Keystone catalog·policy·limit·mapping 39개(unresolved 1), Keystone domain·group·project·user·role 45개의 계약을 고정했습니다. 묶음별 가이드와 [검증 기록](sdk-support-ledger.md#핵심-admin-병렬-8묶음-완료)에 남긴 제약을 정리했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 admin Cinder native QoS spec 10개, 전체727→737(+10)·핵심653→663/2,292·Block Storage168→178/480.** QoS spec 생성·조회·목록·수정·삭제·key 삭제와 volume type association 호출의 계약을 고정했습니다. [Cinder v3 native QoS spec 호출](../blockstorage/v3/native-qos.md)과 [검증 기록](sdk-support-ledger.md#cinder-native-qos-specs-완료)에 설명합니다. 새2그룹과 하위 사례32, 전체 `make check`(race 109개 실제 test package)가 통과했고 `97ac8acc`·`f0ccc0c7`·`03d074c6`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 admin Cinder native backup 관리자 호출 8개, 전체719→727(+8)·핵심645→653/2,292·Block Storage160→168/480.** v3·v2 backup의 export record·import record·reset status·force delete 계약을 고정했습니다. [Cinder v3 native backup 호출](../blockstorage/v3/native-backups.md#관리자-호출)과 [검증 기록](sdk-support-ledger.md#cinder-native-backup-admin-calls-완료)에 설명합니다. 새4그룹과 하위 사례36, 전체 `make check`(race 108개 실제 test package)가 통과했고 `ec6b5663`·`43465118`·`d463bdd9`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 admin Cinder native volume·snapshot 관리자 action 8개, 전체711→719(+8)·핵심637→645/2,292·Block Storage152→160/480.** v3·v2 volume의 force delete·reset status, v3 volume unmanage, v3 snapshot의 force delete·reset status·update status 계약을 고정했습니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md#관리자-action)과 [검증 기록](sdk-support-ledger.md#cinder-native-volume-snapshot-admin-actions-완료)에 설명합니다. 새3그룹과 하위 사례46, 전체 `make check`(race 108개 실제 test package)가 통과했고 `86811078`·`ac117b34`·`d67be278`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Nova native 보안 그룹 proxy 10개, 전체701→711(+10)·핵심627→637/2,292·Compute107→117/333.** 2.36에서 제거된 `os-security-groups` proxy의 CRUD·rule·서버 action 계약을 고정했습니다. [Nova 보안 그룹 proxy native 호출](../compute/v2/secgroups/README.md)과 [검증 기록](sdk-support-ledger.md#nova-native-security-group-proxy-완료)에 설명합니다. 새2그룹과 하위 사례30, 전체 `make check`(race 108개 실제 test package)가 통과했고 `ef71d203`·`12d07bed`·`bc4d1410`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Keystone v3 native trust·사용자 본인 호출 9개, 전체692→701(+9)·핵심618→627/2,292·Identity25→34/389.** trust 생성·조회·목록·삭제와 role 목록·조회·확인, 접근 가능 project 목록, 암호 변경의 계약을 고정했습니다. [Keystone v3 native trust·사용자 본인 호출](../identity/v3/native-trusts.md)과 [검증 기록](sdk-support-ledger.md#keystone-v3-native-trusts-user-self-calls-완료)에 설명합니다. 새4그룹과 하위 사례20, 전체 `make check`(race 107개 실제 test package)가 통과했고 `e97ab5c2`·`91598b0b`·`8a13c9b0`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Keystone v3 native application credential·credential·EC2 credential 16개, 전체676→692(+16)·핵심602→618/2,292·Identity9→25/389.** 사용자가 소유하는 세 credential 종류와 access rule의 CRUD·목록 계약을 고정했습니다. [Keystone v3 native credential 호출](../identity/v3/native-credentials.md)과 [검증 기록](sdk-support-ledger.md#keystone-v3-native-credentials-완료)에 설명합니다. 새6그룹과 하위 사례50, 전체 `make check`(race 105개 실제 test package)가 통과했고 `e2c16439`·`afb290da`·`f73f368f`·`220e3998`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Keystone v3 native token·catalog 5개, 전체671→676(+5)·핵심597→602/2,292·Identity4→9/389.** token 생성·조회·검증·폐기와 catalog 목록의 계약을 고정하고, token 계열 생성 builder가 확장 필드를 scope에도 넣던 생성 결함을 sdkgen에서 고쳤습니다. [Keystone v3 native token·catalog 호출](../identity/v3/native-tokens.md)과 [검증 기록](sdk-support-ledger.md#keystone-v3-native-tokens-catalog-완료)에 설명합니다. 새4그룹과 생성기 3사례, 전체 `make check`(race 102개 실제 test package)가 통과했고 `9be824ab`·`54c82805`·`be42d62f`·`ba47812f`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Swift native object 8개, 전체663→671(+8)·핵심589→597/2,292·Object Storage10→18/74.** object 조회·다운로드·수정·삭제·복사·목록·bulk delete·temp URL 서명의 계약을 고정했습니다. native `Create`는 nil content에서 panic하므로 unresolved로 기록했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md#object)과 [검증 기록](sdk-support-ledger.md#swift-native-objects-완료)에 설명합니다. 새6그룹, 전체 `make check`(race 101개 실제 test package)가 통과했고 `d6db09fd`·`cedebdf7`·`4d4678f2`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Swift native 계정·container 8개, 전체655→663(+8)·핵심581→589/2,292·Object Storage2→10/74.** 계정 HEAD/POST와 container 생성·조회·수정·삭제·목록·bulk delete의 계약을 고정했습니다. [Swift native 호출](../objectstorage/v1/native-calls.md)과 [검증 기록](sdk-support-ledger.md#swift-native-accounts-containers-완료)에 설명합니다. 새6그룹, 전체 `make check`(race 101개 실제 test package)가 통과했고 `8235ad2e`·`639de41e`·`18435016`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native snapshots·backups·transfers·AZ 16개, 전체639→655(+16)·핵심565→581/2,292·Block Storage136→152/480.** v3 계약을 v2 경로로 옮겨 검증하고 v2 snapshot의 단일 페이지 목록을 고정했습니다. snapshot `WaitForStatus`(native panic)와 backup `Update`(v2 경로 없음·SDK 보정 없음)는 unresolved로 기록했습니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)과 [검증 기록](sdk-support-ledger.md#cinder-v2-native-snapshots-backups-transfers-zones-완료)에 설명합니다. 9그룹과 하위 사례54, 전체 `make check`(race 101개 실제 test package)가 통과했고 `02f29e82`·`a5f6a9ea`·`70a79fdc`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v2 legacy native volume 사용자 호출 19개, 전체620→639(+19)·핵심546→565/2,292·Block Storage117→136/480.** v3 계약 테스트를 v2 경로로 옮겨 생성·조회·목록·수정·삭제·대기와 사용자 action 13개를 고정했습니다. [Cinder v2 native 호출](../blockstorage/v2/native-calls.md)과 [검증 기록](sdk-support-ledger.md#cinder-v2-native-volume-user-calls-완료)에 설명합니다. 6그룹과 하위 사례84, 전체 `make check`(race 97개 실제 test package)가 통과했고 `9b322c9f`·`9f69b50c`·`e36f2692`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native volume type 조회 4개, 전체616→620(+4)·핵심542→546/2,292·Block Storage113→117/480.** volume type 조회·목록과 extra spec 목록·단일 조회의 계약을 고정했습니다. [Cinder v3 native volume type 조회](../blockstorage/v3/native-volume-types.md)와 [검증 기록](sdk-support-ledger.md#cinder-v3-native-volume-type-reads-완료)에 설명합니다. 새2그룹과 하위 사례15, 전체 `make check`(race 96개 실제 test package)가 통과했고 `b1387189`·`1f4d9da6`·`b6134317`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native transfers·availability zone·API 버전 7개, 전체609→616(+7)·핵심535→542/2,292·Block Storage106→113/480.** volume transfer 다섯 호출, availability zone 목록, endpoint root 기반 버전 목록의 계약을 고정했습니다. 검증 중 찾은 Cinder v2/v3·Manila availability zone 목록의 생성 결함을 sdkgen에서 고쳤습니다. [Cinder v3 native transfer·availability zone·버전 호출](../blockstorage/v3/native-transfers.md)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-transfers-availability-zones-versions-완료)에 설명합니다. 새6그룹과 하위 사례18, 생성기 3사례, 전체 `make check`(race 95개 실제 test package)가 통과했고 `b1cf94ad`·`d1bd9856`·`64523f5b`·`8e8f39d2`·`9ed94827`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native backups 사용자 호출 7개, 전체602→609(+7)·핵심528→535/2,292·Block Storage99→106/480.** backup 생성·조회·요약/상세 목록·수정·restore·삭제의 계약을 고정했습니다. [Cinder v3 native backup 호출](../blockstorage/v3/native-backups.md)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-backups-user-calls-완료)에 설명합니다. 새2그룹과 하위 사례22, 기존 Update 3그룹, 전체 `make check`(race 92개 실제 test package)가 통과했고 `392dd692`·`9c4e689a`·`a26a31c9`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native attachments 7개, 전체595→602(+7)·핵심521→528/2,292·Block Storage92→99/480.** attachment 생성·조회·목록·수정·완료·삭제와 상태 대기의 계약을 고정했습니다. [Cinder v3 native attachment 호출](../blockstorage/v3/native-attachments.md)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-attachments-완료)에 설명합니다. 새3그룹과 하위 사례25, 전체 `make check`(race 92개 실제 test package)가 통과했고 `fc493906`·`7f514dc6`·`8a4048a5`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native snapshots 6개, 전체589→595(+6)·핵심515→521/2,292·Block Storage86→92/480.** snapshot 생성·조회·요약/상세 목록·수정·삭제의 계약을 고정했습니다. 같은 package의 `WaitForStatus`는 envelope 없는 응답에서 native panic이 SDK 오류로 바뀌지 않아 unresolved로 기록했습니다. [Cinder v3 native snapshot 호출](../blockstorage/v3/native-snapshots.md)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-snapshots-완료)에 설명합니다. 새3그룹과 하위 사례22, 전체 `make check`(race 91개 실제 test package)가 통과했고 `6f416936`·`c43433b3`·`b67fbc9e`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native volume 사용자 action 13개, 전체576→589(+13)·핵심502→515/2,292·Block Storage73→86/480.** attach·detach·reserve·connection·extend·upload image·image metadata·bootable·retype·reimage action의 본문과 고정 status를 고정했습니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md#사용자-action)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-volume-user-actions-완료)에 설명합니다. 새3그룹과 하위 사례63, 전체 `make check`(race 90개 실제 test package)가 통과했고 `eaab9696`·`d864b0dd`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Cinder v3 native volumes CRUD·목록·대기 6개, 전체570→576(+6)·핵심496→502/2,292·Block Storage67→73/480.** generated volume 생성·조회·목록·수정·삭제와 `WaitForStatus`의 계약을 고정했습니다. [Cinder v3 native 볼륨 호출](../blockstorage/v3/native-volumes.md)과 [검증 기록](sdk-support-ledger.md#cinder-v3-native-volumes-crud-list-wait-완료)에 설명합니다. 새3그룹과 하위 사례21, 전체 `make check`(race 90개 실제 test package)가 통과했고 `5c2ebe50`·`a07e78cb`·`d5ee2a45`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native tap mirrors 5개, 전체565→570(+5)·핵심491→496/2,292·Network177→182/758.** tap mirror CRUD와 문자열 tunnel ID 방향 값의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#tap-mirror)와 [검증 기록](sdk-support-ledger.md#neutron-native-tap-mirrors-완료)에 설명합니다. 새2그룹과 하위 사례16, 전체 `make check`(race 89개 실제 test package)가 통과했고 `8270f33e`·`2923f276`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native VPNaaS 25개, 전체540→565(+25)·핵심466→491/2,292·Network152→177/758.** endpoint group·IKE policy·IPsec policy·VPN service·IPsec site connection의 CRUD 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#vpnaas)와 [검증 기록](sdk-support-ledger.md#neutron-native-vpnaas-완료)에 설명합니다. 새10그룹과 하위 사례75, 전체 `make check`(race 88개 실제 test package)가 통과했고 `a0acba52`·`d8bf1110`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native FWaaS v2 groups·policies·rules 19개, 전체521→540(+19)·핵심447→466/2,292·Network133→152/758.** firewall group·policy·rule CRUD와 group 정책 제거, policy 규칙 삽입·제거의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#firewall-grouppolicyrule)와 [검증 기록](sdk-support-ledger.md#neutron-native-fwaas-v2-groups-policies-rules-완료)에 설명합니다. 새7그룹과 하위 사례62, 전체 `make check`(race 83개 실제 test package)가 통과했고 `ddaa5995`·`1b79e5be`를 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native attribute tags·API 버전·extension 조회 10개, 전체511→521(+10)·핵심437→447/2,292·Network123→133/758.** resource 태그 여섯 호출, endpoint root 기반 버전 조회 두 호출, extension 목록·조회의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#attribute-tagapi-버전extension-조회)와 [검증 기록](sdk-support-ledger.md#neutron-native-attribute-tags-api-versions-extensions-완료)에 설명합니다. 새6그룹과 전체 `make check`(race 80개 실제 test package)가 통과했고 `f19a18d9`·`9db4cc68`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native address groups·RBAC policies 12개, 전체499→511(+12)·핵심425→437/2,292·Network111→123/758.** address group CRUD와 주소 추가·제거, RBAC policy CRUD의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#address-grouprbac-policy)와 [검증 기록](sdk-support-ledger.md#neutron-native-address-groups-rbac-policies-완료)에 설명합니다. 새5그룹과 하위 사례40, 전체 `make check`(race 77개 실제 test package)가 통과했고 `bd07075c`·`18cb9c37`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native QoS policies·rules·rule types 21개, 전체478→499(+21)·핵심404→425/2,292·Network90→111/758.** QoS policy 생성·조회·목록·삭제, 세 종류 rule의 생성·조회·수정·삭제·목록, rule type 조회·목록의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#qos-policyrulerule-type)와 [검증 기록](sdk-support-ledger.md#neutron-native-qos-policies-rules-rule-types-완료)에 설명합니다. 새6그룹과 하위 사례69, 전체 `make check`(race 75개 실제 test package)가 통과했고 `a1765737`·`d1c4fbc7`을 push했습니다.
-
-**앞선 API 완료 (2026-10-11): 핵심 user Neutron native subnetpools·address scopes 11개와 trunks·port forwarding 12개, 전체455→478(+23)·핵심381→404/2,292·Network67→90/758.** subnet pool·address scope·trunk·port forwarding의 generated 호출 스물세 개의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#subnet-pooladdress-scope)와 [검증 기록](sdk-support-ledger.md#neutron-native-subnet-pools-address-scopes-trunks-port-forwarding-완료)에 설명합니다. 새11그룹과 하위 사례85, 전체 `make check`(race 72개 실제 test package)가 통과했고 `d9cc33af`·`3e2053b1`·`cac35164`·`245b5b26`을 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Neutron native routers·extraroutes 11개, 전체444→455(+11)·핵심370→381/2,292·Network56→67/758.** generated router·extra route 열한 호출의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#routerextra-route)와 [검증 기록](sdk-support-ledger.md#neutron-native-routers-extra-routes-완료)에 설명합니다. 새4그룹16사례와 전체 `make check`(race 68개 실제 test package)가 통과했고 `6db675ce`·`ef10a720`을 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Neutron native security groups·rules·floating IP 13개, 전체431→444(+13)·핵심357→370/2,292·Network43→56/758.** generated security group·rule·floating IP 열세 호출의 계약을 고정하고 floating IP Create를 닫았습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md#security-grouprulefloating-ip)와 [검증 기록](sdk-support-ledger.md#neutron-native-security-groups-rules-floating-ips-완료)에 설명합니다. 새8그룹42사례와 전체 `make check`(race 66개 실제 test package)가 통과했고 `62d7da9f`·`0c6bda05`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Neutron native networks·subnets·ports 12개, 전체419→431(+12)·핵심345→357/2,292·Network31→43/758.** generated network·subnet·port 열두 호출의 계약을 고정했습니다. [native 생성·조회·목록·삭제](../network/v2/native-crud.md)와 [검증 기록](sdk-support-ledger.md#neutron-native-networks-subnets-ports-완료)에 설명합니다. 새6그룹39사례와 전체 `make check`(race 63개 실제 test package)가 통과했고 `240509e9`·`0186aa45`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native instanceactions·extensions·apiversions·usage 단일 tenant 8개, 전체411→419(+8)·핵심337→345/2,292·Compute99→107/333.** generated Compute 조회 여덟 호출의 계약을 고정해 Compute의 사용자 native 호출을 마쳤습니다. 각 package README와 [검증 기록](sdk-support-ledger.md#nova-native-compute-read-apis-완료)에 설명합니다. 새8그룹30사례와 전체 `make check`(race 60개 실제 test package)가 통과했고 `21e37c94`·`6e2121d7`을 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native servergroups·volumeattach·attachinterfaces 12개, 전체399→411(+12)·핵심325→337/2,292·Compute87→99/333.** generated 서버 그룹·볼륨 연결·인터페이스 연결 열두 호출의 계약을 고정했습니다. 세 package README와 [검증 기록](sdk-support-ledger.md#nova-native-server-groups-and-attachments-완료)에 설명합니다. 새6그룹42사례와 전체 `make check`(race 56개 실제 test package)가 통과했고 `9d68e275`·`25cd3f8f`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native `tags` 6개, 전체393→399(+6)·핵심319→325/2,292·Compute81→87/333.** generated tag 여섯 호출의 계약을 고정했습니다. [tags README](../compute/v2/tags/README.md#native-서버-id-호출)와 [검증 기록](sdk-support-ledger.md#nova-native-tags-완료)에 설명합니다. 새2그룹26사례와 전체 `make check`(race 53개 실제 test package)가 통과했고 `741fb2dc`·`c2d19dfd`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native server 주소·console output·상태 대기 4개, 전체389→393(+4)·핵심315→319/2,292·Compute77→81/333.** generated server 주소·console·대기 네 호출의 계약을 고정해 servers native 묶음의 사용자 호출을 마쳤습니다. [native 서버 호출](../compute/v2/servers/native.md#주소console-output상태-대기)과 [검증 기록](sdk-support-ledger.md#nova-native-servers-addresses-console-wait-완료)에 설명합니다. 새3그룹14사례와 전체 `make check`(race 52개 실제 test package)가 통과했고 `17bc0b3b`·`a4fbadb8`을 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native server action 20개, 전체369→389(+20)·핵심295→315/2,292·Compute57→77/333.** generated server 사용자 action 스무 호출의 계약을 고정했습니다. [native 서버 호출](../compute/v2/servers/native.md#사용자-action)과 [검증 기록](sdk-support-ledger.md#nova-native-servers-user-actions-완료)에 설명합니다. 새4그룹111사례와 전체 `make check`(race 52개 실제 test package)가 통과했고 `dd12abe8`·`c15ee53a`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native server metadata 6개, 전체363→369(+6)·핵심289→295/2,292·Compute51→57/333.** generated server metadata 여섯 호출의 계약을 고정했습니다. [native 서버 호출](../compute/v2/servers/native.md#metadata)과 [검증 기록](sdk-support-ledger.md#nova-native-servers-metadata-완료)에 설명합니다. 새2그룹25사례와 전체 `make check`(race 52개 실제 test package)가 통과했고 `41f464e9`·`51242330`을 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Nova native `servers` CRUD 6개, 전체357→363(+6)·핵심283→289/2,292·Compute45→51/333.** generated server CRUD 여섯 호출의 계약을 고정하고 `servers.Create`를 닫았습니다. [native 서버 호출](../compute/v2/servers/native.md)과 [검증 기록](sdk-support-ledger.md#nova-native-servers-crud-완료)에 설명합니다. 새4그룹29사례와 전체 `make check`(race 52개 실제 test package)가 통과했고 `9168bc58`·`4cadc4ff`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican Python `find_container`·`find_order` 2개, 전체355→357(+2)·핵심281→283/2,292·Key Manager50→52/67.** 공통 `keymanagerread.FindIdentity`로 Python `Resource.find`의 직접 GET·fallback 목록·id/name 일치를 제공합니다. [검증 기록](sdk-support-ledger.md#barbican-python-find_containerfind_order-완료)에 설명합니다. 새2그룹8사례와 전체 `make check`(race 51개 실제 test package)가 통과했고 `0f187761`·`bceed143`·`582c7662`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican Python secret ACL 4개, 전체351→355(+4)·핵심277→281/2,292·Key Manager46→50/67.** 새 `secretacls` package가 Python `SecretACL`의 fetch·PUT commit·ignore-missing delete를 제공하고 sdkgen으로 서비스에 연결했습니다. [secretacls README](../keymanager/v1/secretacls/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-python-secret-acl-완료)에 설명합니다. 새3그룹15사례와 전체 `make check`(race 51개 실제 test package, 재생성 drift0)가 통과했고 `d1e5b2b6`·`8374c556`·`dc7c9ade`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `acls` 8개, 전체343→351(+8)·핵심269→277/2,292·Key Manager38→46/67.** generated ACL 여덟 호출의 경로·본문·status·확장 위치를 고정해 Barbican native 32개를 모두 닫았습니다. [acls README](../keymanager/v1/acls/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-acls-완료)에 설명합니다. 새2그룹35사례와 전체 `make check`(race 50개 실제 test package)가 통과했고 `646e7a9b`·`519fa5d9`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `orders` 4개, 전체339→343(+4)·핵심265→269/2,292·Key Manager34→38/67.** generated order 네 호출의 경로·본문·status·페이지 계약을 고정했습니다. [orders README](../keymanager/v1/orders/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-orders-완료)에 설명합니다. 새2그룹18사례와 전체 `make check`(race 49개 실제 test package)가 통과했고 `21c4e5e7`·`72b6414f`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `containers` 9개, 전체330→339(+9)·핵심256→265/2,292·Key Manager25→34/67.** generated container·consumer·secret ref 호출의 경로·본문·status·페이지 계약을 고정했습니다. [containers README](../keymanager/v1/containers/README.md)와 [검증 기록](sdk-support-ledger.md#barbican-native-containers-완료)에 설명합니다. 새3그룹39사례와 전체 `make check`(race 48개 실제 test package)가 통과했고 `6a22fbcb`·`aaf53acc`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican native secret metadata 6개, 전체324→330(+6)·핵심250→256/2,292·Key Manager19→25/67.** generated metadata 여섯 호출의 경로·본문·status·확장 위치를 고정했습니다. [secrets README](../keymanager/v1/secrets/README.md#native-secret-metadata-calls)와 [검증 기록](sdk-support-ledger.md#barbican-native-secret-metadata-완료)에 설명합니다. 새2그룹32사례와 전체 `make check`(race 47개 실제 test package)가 통과했고 `9a6b9910`·`17c5092a`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Barbican native `secrets` 5개, 전체319→324(+5)·핵심245→250/2,292·Key Manager14→19/67.** generated secret 다섯 호출의 경로·본문·시각·고정 status·페이지 계약을 고정했습니다. [secrets README](../keymanager/v1/secrets/README.md#native-get-list-create-update-and-delete)와 [검증 기록](sdk-support-ledger.md#barbican-native-secrets-완료)에 설명합니다. 새3그룹24사례와 전체 `make check`(race 47개 실제 test package)가 통과했고 `d1ac3545`·`8e82d028`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance `add_image_location`1개, 전체318→319(+1)·핵심244→245/2,292·Glance81→82/120.** Python `Resource.create`와 같은 200..399 acceptance와 ImageLocation view를 보완해 unresolved 판정을 닫았습니다. [location 가이드](../image/locations.md#add-결과의-imagelocation-view)와 [검증 기록](sdk-support-ledger.md#glance-add_image_location-완료)에 설명합니다. 새2그룹34사례·기존 테스트 수정과 전체 `make check`(race 46개 실제 test package)가 통과했고 `a382f17c`·`177f9f60`·`89b461a0`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `imagedata` 3개, 전체315→318(+3)·핵심241→244/2,292·Glance78→81/120.** generated `Upload/Stage/Download`의 경로·status·stream 소유권 계약을 고정했습니다. [imagedata 가이드](../image/v2/imagedata/README.md#native-uploadstagedownload)와 [검증 기록](sdk-support-ledger.md#glance-native-imagedata-완료)에 설명합니다. 새2그룹7사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `2d318e7d`·`b7927fdb`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `imageimport` 2개, 전체313→315(+2)·핵심239→241/2,292·Glance76→78/120.** generated `Get/Create`의 경로·본문·확장 병합·고정 status 계약을 고정했습니다. [imageimport 가이드](../image/v2/imageimport/README.md#native-getcreate)와 [검증 기록](sdk-support-ledger.md#glance-native-imageimport-완료)에 설명합니다. 새2그룹11사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `e4b7b212`·`108b07f7`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `members` 5개, 전체308→313(+5)·핵심234→239/2,292·Glance71→76/120.** generated members 다섯 호출의 경로·본문·고정 status 계약을 고정했습니다. [native 멤버 가이드](../image/v2/members/README.md)와 [검증 기록](sdk-support-ledger.md#glance-native-members-완료)에 설명합니다. 새2그룹24사례와 전체 `make check`(race 46개 실제 test package)가 통과했고 `8d60976b`·`5cdbd56e`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.Create`1개, 전체307→308(+1)·핵심233→234/2,292·Glance70→71/120.** generated `API.Create`의 본문·확장·기본201 계약을 고정했습니다. [native 생성 가이드](../image/v2/images/create.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imagescreate-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4c96f116`·`0b04de99`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.List`1개, 전체306→307(+1)·핵심232→233/2,292·Glance69→70/120.** generated `API.List`의 query·페이지·중단 계약을 고정하고 int64 size 필터가 빠지는 native 동작과 대체 방법을 문서화했습니다. [native 목록 가이드](../image/v2/images/list.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imageslist-완료)에 설명합니다. 새2그룹8사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `139ecc29`·`3778942c`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance native `images.Get`1개, 전체305→306(+1)·핵심231→232/2,292·Glance68→69/120.** generated `API.Get`의 native 경로·기본200·header merge·projection을 계약 테스트로 고정했습니다. [native 조회 가이드](../image/v2/images/get.md)와 [검증 기록](sdk-support-ledger.md#glance-native-imagesget-완료)에 설명합니다. 새2그룹16사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `f3c653e6`·`f83ab0b9`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `create_image`1개, 전체304→305(+1)·핵심230→231/2,292·Glance67→68/120.** `Connection.CreateCloudImageRecord`가 Glance·Cinder 분기, 생성 후 Cloud 대기, timeout 정리를 연결해 ImageCloudMixin 12개를 모두 닫았습니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-생성)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-생성-완료)에 설명합니다. 새2그룹10사례(10회 반복)와 전체 `make check`(race 45개 실제 test package)가 통과했고 `d35410d8`·`9d8d50c8`·`09f5987e`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Cinder v3 Proxy `create_image`1개, 전체303→304(+1)·핵심229→230/2,292.** Cloud `create_image` volume 분기의 선행 의존으로 `Connection.CreateVolumeImageRecord`와 `image.Service.ExistingImageRecord`를 추가했습니다. [사용법](../blockstorage/volume-upload-image.md#proxy-create_image-기본-형식과-image-반환)과 [검증 기록](sdk-support-ledger.md#cinder-v3-proxy-create_image-완료)에 설명합니다. 새2그룹13사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `6e224837`·`249537cf`·`b1cfeca0`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `delete_image`1개, 전체302→303(+1)·핵심228→229/2,292·Glance66→67/120.** `Service.DeleteCloudImageRecord`가 Find·owned 삭제·Task 업로드 Swift 객체 정리·선택적 부재 대기를 연결합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-삭제)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-삭제-완료)에 설명합니다. 새3그룹23사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `4348b877`·`55a9171d`·`abfcdb7e`·`2381134a`·`61f79f2e`·`78b0c67c`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `update_image_properties`1개, 전체301→302(+1)·핵심227→228/2,292·Glance65→66/120.** `Service.UpdateCloudImageProperties`가 `image or name_or_id` 선택 뒤 owned 속성 helper에 위임합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-속성-갱신)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-속성-갱신-완료)에 설명합니다. 새1그룹4사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `a46250e8`·`3d109207`·`b0aeb599`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `download_image`1개, 전체300→301(+1)·핵심226→227/2,292·Glance64→65/120.** `Service.DownloadCloudImageRecord`가 필수 출력 검사·strict Find·owned 다운로드를 연결하고 Found와 하위 다운로드 증거를 분리해 반환합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-다운로드)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-다운로드-완료)에 설명합니다. 새2그룹12사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `e746f5f9`·`53f5ac00`·`5f4d7de8`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud `wait_for_image`1개, 전체299→300(+1)·핵심225→226/2,292·Glance63→64/120.** `Service.WaitForCloudImageRecord`가 Proxy find 반복·정확한 active/error 비교·`iterate_timeout`의3600초/2초 정책을 제공하고 실패 때 마지막 record와 실제 응답 증거를 보존합니다. [Python/Go 비교](../image/image-record-cloud.md#이미지-대기)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-대기-완료)에 설명합니다. 새3그룹14사례(20회 반복)와 전체 `make check`(race 45개 실제 test package)가 통과했고 `eb3a1c38`·`2771798b`·`78d2a6e3`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 exclude helper3개, 전체296→299(+3)·핵심222→225/2,292·Glance60→63/120.** `Service.GetImageRecordExclude`·`GetImageRecordName`·`GetImageRecordID`가 같은 `search_images` inventory에서 Python `exclude not in image.name` 멤버십으로 첫 행을 고르고 각각 declared view, raw name, raw id를 반환합니다. [Python/Go 비교](../image/image-record-cloud.md#exclude-선택과-이름id-반환)와 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-exclude이름id-조회-완료)에 멤버십·순서·TypeError 경계를 설명합니다. 새2그룹15사례와 전체 `make check`(race 45개 실제 test package)가 통과했고 `0a4df3f5`·`6f4d80ed`·`e38bedc2`를 push했습니다.
-
-**앞선 API 완료 (2026-10-10): 핵심 user Glance Cloud 이미지 조회 helper4개, 전체292→296(+4)·핵심218→222/2,292·Glance56→60/120.** `Service.AllCloudImageRecords`·`SearchImageRecords`·`GetCloudImageRecord`·`GetImageRecordByID`가 Cloud의 `list_images`·`search_images`·`get_image`·`get_image_by_id`를 기존 owned 목록·Find·literal Get 엔진과 공통 Cloud 필터로 제공합니다. deleted status 제외·`show_all`의 member query, `get_image`의 `filters is not None` 분기와 truthiness·`len`·index0 선택, strict by-ID GET을 검증했습니다. property helper의 이름 검색도 같은 inventory 함수를 공유합니다. [Python/Go 비교·독립 main](../image/image-record-cloud.md)과 [검증 기록](sdk-support-ledger.md#glance-cloud-이미지-목록검색조회-완료)에 옵션과 부분 결과를 설명합니다.
-
-새 집중 테스트9그룹50사례와 기존 image record 테스트가 race로 통과했고 전체 `make check`(race 45개 실제 test package·parity·progress·gofmt)와 가이드 main의 외부 local-replace build를 확인했습니다. 판정 JSON은 reviews556·contracts3,754·go_mapping296입니다. 공통 inventory `0b0b69c4`·공개 API `3d2dc80f`·테스트 `2d4c0a2f`/`77474a48`·가이드 `73e2e078`를 작은 commit으로 main에 push했습니다. 실제 OpenStack/Python 호출은 실행하지 않았습니다.
-
-이 앞선 source 감사 당시 현대 `create_image`의 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup은 후속 구현 범위였습니다. 이후 `CreateImageRecord`와 `CreateCloudImageRecord`의 현대 생성 graph 및 Swift Task 연계를 완료했으며 현재 두 선언은 go_mapping입니다. [현대 생성 가이드](../image/image-record-create.md)와 [Cloud 가이드](../image/image-record-cloud.md)의 최신 구현·검증 기록을 따릅니다. 감사 근거 `/private/tmp/go-openstacksdk-image-record-create-source-audit.json`은 당시 기록으로 보존합니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance 현대 CreateImageRecord 전체1개, 전체291→292(+1)·핵심217→218/2,292·Glance55→56/120.** Service/Connection의 같은 facade가 cloud 기본값·tagged 입력·파일명 추론·hash 계산/중복 재사용·vendor/property/Meta 우선순위와 metadata-only/direct/import/Swift Task의 전체 선택을 처리합니다. raw store·size·creation capability·checksum과 현재 ID 삭제, lazy Swift container/object·SLO·Task396 공유 예산·original 진단·속성 후처리와 entered-wait finally 정리도 검증했습니다. ordinary user와 같은 함수의 foreign owner/public/community/copy-image/Task 정책 분기는 server native 오류를 보존하며 별도 API로 중복 집계하지 않습니다. [Python/Go 비교·scenario별 독립 main](../image/image-record-create.md)에 22개 concrete 옵션과 응답·데이터 소유권을 설명합니다.
-
-새87그룹361사례 + 기존2,445그룹19,800사례 = **집중 race11개 package·2,532그룹20,161사례**가 PASS했습니다. 전체 `make check`의 license 원문12개·pinned Go 의존성4개·vet·race **45개 실제 test package**·pinned parity·progress·gofmt가 통과했고 실제 재생성1회 Go drift0입니다. Go source2,184개 SHA256 `d8e5d6529981f7e9874087b56fc60c400bce477c3e617fcb2cdb3bcf1def044a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection/Swift fixtures, find/property/metadata/size/REST/native response와 Swift 파일/SLO 엔진을 재사용했습니다.
-
-실제 red→green 회귀로 Task 시간 예산·HTTP 요청 타이머가 부모 guard를 오염시키는 문제, 정상 Swift 응답 Close의 자동 타이머 취소를 실패로 처리하던 문제와 configured store header 충돌을 수정했습니다. 타이머 만료 뒤 살아 있는 caller context로 정리하며, 사용자 취소·실제 source/binding drift·혼합 오류는 후속 HTTP를 계속 막습니다. native rejection은 원래 body/header를 보존하고 accepted 응답 증거로 합성하지 않습니다.
-
-Pinned Source20파일·103 AST spans를 독립 재확인하고 새30계약을 기존 legacy CreateAndImport12계약·32개 ordered refs 뒤에 추가했습니다. 다른551 reviews·catalog·source pins/fingerprint는 그대로입니다. reviews552·contracts3,742·go_mapping292·review unresolved259·catalog unresolved3,069·미검토2,810·unsupported1·supported0입니다. 공통 SDK-R1/C1/S1과 standalone Swift/Task 행은 미해결이며 전체 목표는 active입니다. 유한 JSON/source-fixed 전체 생성 graph의 Go mapping을 완료했고, 임의 Python Resource/Adapter/session 동등성이나 실제 OpenStack/Python 인증·호출을 판정하지 않았습니다.
-
-생성·설치 문서의 독립 main2개를 외부 local-replace consumer로 빌드하고, push한 최종 문서·판정 revision `890454fbf6269f0e3c67219a8a616fcbe8d5b4cc`을 새 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009045950-890454fbf626`·get/build exit0이며 원격 Go2,184개·API 판정/catalog·라이선스·고지·대응표17개 파일이 로컬 최종 검증 bytes와 같습니다. 배포 판정에도 whole create42계약이 포함됩니다. 근거는 `/private/tmp/go-openstacksdk-image-record-create-{focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer,remote-consumer}.json`과 source audit/independent source revalidation입니다.
-
-타이머 수정 `5669f1af`·전체 연결 `99e1331c`·공통 guard `d8c67e13`·preface/connection 테스트 `a51ceb80`·direct/admin 테스트 `261ca8fa`·Swift/deadline 테스트 `e58aea99`·비교 문서 `dbbac08b`·최종 판정 `890454fb`를 작은 의미 단위로 main에 push했습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord download1개, 전체290→291(+1)·핵심216→217/2,292·Glance54→55/120.** `Service.DownloadImageRecord`와 `Connection`의 같은 facade가 literal ID·owned Record·full raw Resource의 private state를 준비하고 필수 metadata fetch 뒤 fetched private ID로 binary GET을 수행합니다. file/writer/buffer/stream 네 분기와 binary 응답 뒤 Python raw truthiness·primary algorithm factory·MD5 fallback·checksum verification을 처리하며, stream-only는 caller가 소비하고 닫습니다. initial-ID equality·implicit status gate·206/Content-Range 거부·최종 GET·binary response Record translation·stream 자동 checksum proof를 추가하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-download.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-download-완료)에 concrete8옵션·Record/Metadata/Downloaded·raw expected·부분 bytes와 owned/caller Close를 설명했습니다.
-
-새28그룹197사례 + 기존385그룹2736 = **집중 race413그룹2933사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 download/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/native Download/Record/Connection fixture, private capture·descriptor projection·prepared fetch·fixed request/native retry·borrowed writer chunk-copy·response body guard 엔진을 재사용했습니다. 별도 HTTP fixture 서버나 builder/interface 확장 책임을 추가하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
-
-Download 전용 감사의 pinned Source16Python+10Glance파일·86 AST spans·26개 새 계약을 검토했습니다. 다른551 reviews와 legacy `DownloadTo`10계약·18개 test refs·기존 API profile·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,712·go_mapping291·review unresolved260·unsupported1이며 catalog unresolved3,070에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 뜻하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-download-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 Source audit SHA256 `4a9a0de7f6dc62d094191acbb93dbcff7c2cc6e4dbf123a66f8ec4afeecc5102`입니다.
-
-중간 계획 `ad82f1ee`·defaults/hash/license `76fcb99a`·workflow 공개 API `01423c67`를 의미 있는 작은 commit으로 main에 push했습니다. 테스트·사용 문서·최종 판정은 각각 별도 작은 commit으로 관리합니다. 이 download 단위의 정확한 revision 원격 설치·main2·라이선스16개 일치 결과도 검증했습니다.
-
-정확한 문서·판정 revision `a4688f1b4cf4ae8aa26896629a0321965054840d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009033426-a4688f1b4cf4`·get/build exit0이며 download/설치 main **2개**를 빌드했습니다. 원격 Go source2,157개 SHA256 `cdc70487ebaa12a8b466146917ddfae15da7c64abbff133f8f882cbcf89ce83f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **16개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-download-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-Resource raw map/JSON과 owned private Record는 option callback 전에 snapshot하고 declared65필드·properties/current location을 project합니다. valid metadata object는 sparse overlay/clean하며 fetched id가 바뀌면 후속 binary target에도 적용합니다. invalid JSON syntax는 pending state와 실제 metadata receipt/header를 보존하고 valid nonobject·descriptor·fetched identity 오류는 binary 전에 멈춥니다. public view/Wire/self/file 수정은 target을 바꾸지 않으며 이전 private borrowed data도 새 binary payload로 대체하지 않습니다.
-
-hash fields는 type=None raw JSON이므로 algorithm과 expected의 Python truthiness를 유지합니다. truthy primary pair에서만 PythonString algorithm으로 factory를 한 번 호출하고 unsupported sentinel은 SDK MD5로 metadata checksum/actual Content-MD5 fallback을 선택합니다. 그 밖의 factory 오류나 nil hash는 binary 접수 뒤 소비 전에 visible합니다. 기본16 algorithm의 MD5/SHA1/SHA2/truncation/SHA3/BLAKE2/SHAKE·대소문자/명시 alias를 지원하고 임의 OpenSSL registry를 완료로 주장하지 않습니다. BLAKE2 x/crypto v0.55.0·indirect x/sys v0.47.0의 BSD-3-Clause 원문2개를 추가해 배포 라이선스/고지는16개 파일이며, 기존14개 원격 기록은 당시 증거로 유지합니다.
-
-소비 후 exact lowercase hex와 raw expected를 비교하며 nonstring truthy expected는 full transfer 뒤 mismatch입니다. SHAKE는 stream-only 선택에 성공하지만 consumed mode는 전체 copy 후 length-required 오류를 반환합니다. EOF+successful write일 때만 Complete/Actual을 기록하고 Close-only 오류는 완료 proof를 보존합니다. stream-only의 BytesWritten/Complete/Verified는 caller 소비 뒤에도 자동 갱신하지 않습니다. exact Algorithm md5의 raw ContentMD5/CompatibilityHeader만 Source header 교체를 project하며 실제 binary Header는 독립 보존합니다.
-
-Output/path는 Stream보다 우선하고 borrowed writer는 Seek/Truncate/Flush/Close하지 않습니다. SDK Filename은 fetch→binary GET→hash 선택 뒤 os.Create/close하며 partial 파일을 지우지 않습니다. buffer는 전체 owned bytes와 실패시 partial bytes를 반환하고 기본 memory cap을 추가하지 않습니다. chunk는1byte..64MiB로 제한하며 ordered preference의 empty/comma/control/repeats는 valid UTF8이면 한 query 값으로 encode합니다. actual200..399/206/204를 받아들이고 Go native400..599 오류는 Source binary의 quiet raw HTTP 응답과 명시적으로 구분합니다. safe prebody native retry/reauth·live auth를 유지하고 accepted body 소비를 재시작하지 않습니다.
-
-Stage/Import/Upload/Download4개 public 데이터 workflow의 finite owned graph를 완료했습니다. 기존 public Stage28/Import28/Upload30 계약과 현대 public `create_image`20파일 전체 graph·12계약은 보존합니다. 다음은 현대 whole create의 file/name inference·duplicate/hash·config/vendor·metadata conversion·upload/import·Swift/SLO/task·wait/cleanup 전체 분기입니다. 별도 cloud download wrapper와 SDK-R1/C1/S1을 lower Download 완료에 포함하지 않습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord upload1개, 전체289→290(+1)·핵심215→216/2,292·Glance53→54/120.** `Service.UploadImageRecord`와 `Connection`의 같은 facade가 전체 raw constructor·65필드 descriptor view·metadata 생성/응답 변환·borrowed data·기본 total-size 추론·signed size·한 번의 binary PUT를 처리합니다. 명시 formal formats는 Python truthiness로 precheck하고 이후 hook/properties의 raw overrides에 재검사를 넣지 않습니다. name·형식·visibility 기본값·필수 Reader·strict enum을 추가하지 않으며 nil Data는 빈 PUT입니다. 초기/최종 GET·PUT 응답 translation·status gate·checksum·Task/Swift/import·wait·rollback·자동 삭제는 없습니다. [Python/Go 비교·독립 main](../image/image-record-upload.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-upload-완료)에 concrete10옵션·Record/Metadata/Uploaded와 후행 실패를 설명했습니다.
-
-새23그룹151사례 + 기존344그룹2480 = **집중 race367그룹2631사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 upload/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,148개 SHA256 `c36b09fce4c592dbc54b9ef68d2c62bb1182a9790e2236611816e5617c3c84f2`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 taskCore/Record/Connection/HTTP fault/native upload/guard fixture, JSON snapshot·descriptor projection·raw property flattening·response transport·Stage size inference·shared binary 엔진을 재사용했습니다. metadata 생성은 공통 private 기반으로 구성하며 별도 HTTP 서버/전송 엔진이나 builder를 요구하지 않습니다. 최종 focused/full/generation/local consumer/review는 동일 Go 소스와 문서 main bytes를 확인합니다.
-
-Upload 전용 감사의 pinned Source26파일·67 AST spans·20개 새 계약을 검토했습니다. 다른551 reviews와 legacy `UploadImage`10계약·17개 test refs·기존 API profile·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,686·go_mapping290·review unresolved261·unsupported1이며 catalog unresolved3,071에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 뜻하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 근거는 `/private/tmp/go-openstacksdk-image-record-upload-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 `/private/tmp/go-openstacksdk-image-record-upload-source-audit.json`입니다.
-
-현재 구현 단계 `0066f089`·공통/옵션 `ce36dcff`·공개 API `53cb43b0`를 작은 commit으로 main에 push했습니다. 테스트 `dd014ac1`·가이드 `42ead228`·검증 판정 `a20f06ca`도 별도 작은 commit으로 main에 push했습니다. 이 upload 단위의 정확한 revision 원격 설치·main2·라이선스14개 일치 결과도 검증했습니다.
-
-정확한 문서·판정 revision `a20f06ca2f5b6572de79e9c251f643fc1e1a980d`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009024601-a20f06ca2f5b`·get/build exit0이며 upload/설치 main **2개**를 빌드했습니다. 원격 Go source2,148개 SHA256 `c36b09fce4c592dbc54b9ef68d2c62bb1182a9790e2236611816e5617c3c84f2`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-upload-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-형식 formal 입력은 raw JSON의 falsey 값을 생성 전에 거부하며 truthy 비문자열도 서버 입력으로 보존합니다. formal 바인딩 뒤 `__conflicting_attrs.items()`와 properties overlay가 형식을 null 등으로 바꿔도 최종 wire 검사를 반복하지 않습니다. raw constructor Body의 supplied id도 POST에 포함하고, getter 기본값/변환을 생성 Body로 역주입하지 않습니다. valid object metadata 응답은 sparse overlay/clean을 수행하며 invalid syntax는 pending baseline을 보존하고 actual header/receipt를 유지합니다. 유효한 non-object·descriptor 오류는 visible이며 metadata 후 private raw id를 단일 고정 file route로 선택합니다.
-
-성공한 metadata 뒤 plain Data를 nil까지 새로 할당하며 size는 signed int64·0·음수를 보존합니다. 기본 추론은 전체 seekable 길이를 얻고 원래 cursor를 복원하며 실제 전송은 남은 bytes입니다. WithoutSize는 Size만 해제하고 명시 inference optout을 유지합니다. borrowed Reader는 caller가 열고 닫으며 Record의 plain data에도 공유 참조로 남습니다. metadata JSON은 native retry/auth를 유지하고 소비되는 binary는 SDK reauth/retry/backoff/redirect/GetBody 재생을 끕니다.
-
-PUT는 opaque 접수여서 생성 Record의 current/original/dirty·ImportMethods·status·location·Metadata/Wire/Envelope를 바꾸지 않습니다. ID/seek/read/transport/HTTP 실패도 생성 Record/Metadata를 보존하고 Uploaded는 실제 accepted PUT 증거만 유지합니다. 고정 Source metadata는 HTTP 오류를 raise하지만 Image.upload PUT는 별도 translate/raise 없이 raw 응답을 반환합니다. Go native400..599 오류와 accepted200..399·physical Read/Close/context/source 부분 receipt 정책은 명시적 차이입니다. 같은 공개 metadata 입력의 public visibility/foreign owner admin 분기와 ordinary member/user·community 분기는 서버가 판단합니다.
-
-앞선 upload 단위 당시 Stage/Import/Upload3개 public graph를 완료하고 whole Download1행·기존10계약을 unresolved로 유지했습니다. 후속 Download는 위의 owned 완료 단위에서 닫았으며 현재 Stage/Import/Upload/Download4개 finite public graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 당시 unresolved였으며 이후 현대 생성 단위에서 go_mapping으로 완료했습니다. 당시에는 공통 metadata 생성·deprecated upload만으로 file/name inference·duplicate/hash·config/vendor·Swift/SLO/task·wait/cleanup 분기를 완료하지 않습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord import1개, 전체288→289(+1)·핵심214→215/2,292·Glance52→53/120.** `Service.ImportImageRecord`와 `Connection`의 같은 facade가 supplied private Image의65 descriptor·cached format truthiness·Method/URI/remote/root flag JSON presence·SDK-owned literal/raw/Attributes/Record Store 선택을 처리하고 한 번의 logical import POST를 제출합니다. ordinary user의 glance-direct/web-download/glance-download3분기와 같은 함수의 exact copy-image admin 분기를 함께 구현했습니다. literal ID는 cached format이 없어 HTTP 전에 실패하며 초기 GET·name lookup·method/store discovery·stage·task·완료 wait·cleanup을 넣지 않습니다. [Python/Go 비교·독립 main](../image/image-record-import.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-import-완료)에 concrete16옵션·Store2변환 함수·원시 JSON·pending Body·opaque 부분 ACK를 기록했습니다.
-
-새24그룹199사례 + 기존300그룹2229 = **집중 race324그룹2428사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 import/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,141개 SHA256 `4c9a95cd0621ed629ff6e4daacc0f82189594d8fbaaf391edd3b1ee4ec099e0f`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper·기존 taskCore/Record/Connection/HTTP fault/native import/store/generator fixture와 JSON snapshot·truthiness·guard·response 엔진을 재사용했습니다. selected store header 값 또는 부재를 검증하는 shared REST RequestHeaderPolicy를 추가했으며 별도 private HTTP 엔진은 만들지 않았습니다. 최종 focused/full/generation은 동일한 Go 소스를 확인합니다.
-
-Import 전용 감사의 pinned Source14Python+10Glance파일,24개 SHA/AST parse·74 AST spans를 확인하고16개 새 계약을 추가했습니다. 다른551 reviews와 native/ref legacy12계약의 API/test refs·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,666·go_mapping289·review unresolved262·unsupported1이며 catalog unresolved3,072에는 미검토2,810개가 포함됩니다. Source runtime 전체 동등성을 주장하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-import-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 `/private/tmp/go-openstacksdk-image-record-import-source-audit.json`입니다.
-
-Store private identity/constructor와 초기 검증 `8b25d127`, JSON/With 옵션 `ac7690f0`, shared selected-value/absent-header policy `d9cc8d3a`, 테스트 `f7e66197`로 변경을 작은 commit에 나누었습니다. 공개 API `713b8aa2`·가이드 `95c8cb5b`·판정 `8c616a27`도 별도 작은 commit으로 main에 push했습니다. 이 import 단위의 정확한 revision 원격 설치·main2·라이선스14개 일치 결과도 검증했습니다.
-
-정확한 문서·판정 revision `8c616a274fb357161d717193902018194886e367`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009021503-8c616a274fb3`·get/build exit0이며 import/설치 main **2개**를 빌드했습니다. 원격 Go source2,141개 SHA256 `4c9a95cd0621ed629ff6e4daacc0f82189594d8fbaaf391edd3b1ee4ec099e0f`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-import-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-Method nil은 기본 glance-direct이고 explicit null/empty/비문자열/unknown 값은 JSON에 보존합니다. URI는 Python truthy일 때 exact web-download에만, remote region/image/interface는 세 값이 모두 truthy일 때 method와 무관하게 함께 포함합니다. flag는 non-None 값의 false·비bool JSON까지 보존하여 서버가 검증합니다. Store Attributes는 canonical id만 소비하며 missing/null에는 name fallback을 넣지 않습니다. plural은 모든 JSON ID의 순서·중복을 보존하고 singular empty string은 stores:[""]와 빈 compatibility header를 함께 보냅니다. singular 비문자열/null의 Go header 경계와 Source arbitrary session의 동작을 같은 오류로 주장하지 않습니다.
-
-Source Import는 `_translate_response`나 `raise_from_response`를 호출하지 않고 `Proxy.request` 기본 raise_exc=False이므로 raw400..599 응답도 반환할 수 있습니다. Go는 명시한 native400..599 오류와 actual200..399 accepted policy를 적용합니다. ACK의 invalid JSON/UTF-8·ImportMethods·Location은 수신 증거이며 Record의 current/original/dirty·이전 Envelope/Wire/Header·borrowed data를 overlay/clean하지 않습니다. accepted Read/Close/source/context 실패는 실제 partial ACK와 원인만 남기고 prepared Record를 완료 결과로 합성하지 않습니다. native 거부는 accepted ACK를 만들지 않으며 안전한 native JSON retry/reauth는 고정 body/route·live token·selected/absent store-header guard를 유지합니다.
-
-첫 집중 검사의3개 실패는 retry fixture가 MoreHeaders map을 통째로 바꾸며 보호된 selected store header까지 삭제하여 guard가 올바르게 거부한 결과였습니다. X-Retry를 기존 map에 추가하도록 fixture를 수정하고 store header 제거가 두 번째 dispatch 전에 503 원인과 ErrInvalidOption을 보존하는 회귀 사례를 추가했습니다. 구현은 바꾸지 않았으며 실패한 initial JSON/source를 남겨두고 위 PASS 수치는 final run만 집계합니다.
-
-앞선 import 단위 당시 Stage/Import2행을 완료했고 upload/download2행·기존20계약을 unresolved로 유지했습니다. 후속 Upload/Download는 위의 owned 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. deprecated upload에는 final fetch/PUT response translation/public filename 인자가 없어 이 분기를 추가하지 않았습니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 당시 unresolved였으며 이후 현대 생성 단위에서 go_mapping으로 완료했습니다. 당시에는 미완료였습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord staging1개, 전체287→288(+1)·핵심213→214/2,292·Glance51→52/120.** `Service.StageImageRecord`와 `Connection`의 같은 facade가 cached private queued seed·filename/borrowed data·기본 전체 길이 추론·signed Size·한 번의 binary PUT·header-only translation·필수 seeded metadata GET을 처리합니다. literal ID는 cached queued 상태가 없어 IO·HTTP 전에 실패하며 자동 초기 GET·이름 lookup을 넣지 않습니다. [Python/Go 비교·독립 main](../image/image-record-stage.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-staging-완료)에 concrete6옵션·상태 순서·size optout·pending Body·부분 receipt와 데이터 수명을 기록했습니다.
-
-새20그룹104사례 + 기존224그룹1713 = **집중 race244그룹1817사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 staging/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,132개 SHA256 `845e89a3170ae14989cb3279403749d618be928802179d7ccc2429c491bc1bdb`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper·기존 HTTP/fault/Record/Connection·native stage fixture와 shared binary/seeded fetch/guard/response 엔진을 재사용했습니다. 새 HTTP 서버 엔진이나 resolver builder는 추가하지 않았으며, 최종 focused/full/generation은 동일한 Go 소스를 확인합니다.
-
-Stage 전용 감사의 pinned Source14Python+10Glance파일(기존23 provenance+current-location1파일),24개 SHA/AST parse·72 AST spans를 확인하고16개 새 계약을 추가했습니다. 다른551 reviews와 선택한 native/ref legacy12계약의 API/test refs·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,650·go_mapping288·review unresolved263·unsupported1이며 catalog unresolved3,073에는 미검토2,810개가 포함됩니다. Source runtime 전체 동등성을 주장하는 supported는0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-stage-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`과 `/private/tmp/go-openstacksdk-image-record-stage-source-audit.json`입니다.
-
-공통 binary/seeded fetch/borrowed data 보존 `6b0e05ea`·공개 Stage API `39d3779c`·계약/Connection 검증과 현재 진행 `03d2de3e`를 각각 작은 commit으로 main에 push했습니다. 판정·사용 문서는 별도 작은 commit으로 관리합니다.
-
-정확한 문서·판정 revision `046b489d4cf328e8be77e67b36dbe501b6727c61`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009013644-046b489d4cf3`·get/build exit0이며 staging/설치 main **2개**를 빌드했습니다. 원격 Go source2,132개 SHA256 `845e89a3170ae14989cb3279403749d618be928802179d7ccc2429c491bc1bdb`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-stage-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-Source `Image.stage`는 `_translate_response(has_body=False)`를 호출하므로 HTTP400..599가 오류이며 후속 fetch를 실행하지 않습니다. Go도 native 거부 원인을 보존하고 actual200..399 ACK만 accepted로 다룹니다. opaque ACK는 독립 Staged와 Record Envelope/Header/StatusCode에 보존되고 Wire=nil이며 private current/original/dirty Body를 clean하지 않습니다. 정상 final GET object는 seed overlay 후 clean, malformed syntax는 pending 상태 유지, 물리 처리·projection·후속 fetch 오류는 실제 단계 receipt와 원인만 보존합니다.
-
-borrowed data는 SDK가 닫거나 복제하지 않고 같은 참조를 반환 Record·owned Update·property helper·Wait를 거쳐 보존합니다. nil data는 retained private data 또는 empty PUT을 사용합니다. SDK-owned Filename은 queued 이후 열어 필수 final GET까지 유지하고 모든 return 경로에서 닫으며 closed-file fallback 참조를 제거합니다. 기본 io.Seeker total-size 추론·current cursor 복구, end seek 실패 뒤 best-effort 추가 restore, signed int64(0/negative 포함)·explicit size/optout의 noSeek는 명시한 Go lifecycle/representation 경계입니다. Python bool/arbitrary integer/data truthiness·임의 mutable Resource/Adapter/session과 blocking Read/custom transport 내부 replay는 broader runtime 범위로 남깁니다.
-
-앞선 staging 단위 당시4개 public 데이터 workflow의13Python+10Glance파일/66 AST 감사에서 Stage1행을 닫고 complete Import를 다음 단위로 선정했습니다. 후속 Import/Upload/Download도 위 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 당시 unresolved였으며 이후 현대 생성 단위에서 go_mapping으로 완료했습니다. 당시에는 미완료였습니다. 이 staging 단위의 exact revision 원격 설치·main2·라이선스14개 일치 결과는 검증했습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 속성 helper1개, 전체286→287(+1)·핵심212→213/2,292·Glance50→51/120.** `Service.UpdateImagePropertiesRecord`와 `Connection`의 같은 facade가 cached properties copy·ordered kwargs·kernel/ramdisk 전체 목록 검색·int/raw/string 변환·raw meta overlay·canonical backing 비교·공통 owned Update commit을 처리합니다. Source의 bool을 `Updated`로 보존하므로 True가 PATCH 전송을 뜻하지 않고 False는 Update를 생략합니다. literal ID에는 자동 GET을 넣지 않으며 truthy 참조 검색 뒤 missing properties copy가 실패하는 Source 순서도 유지합니다. [Python/Go 비교·독립 main](../image/image-record-properties.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-속성-helper-완료)에 concrete 옵션·no-op/pending·부분 오류와 JSON/Unicode/control 경계를 기록했습니다.
-
-새20그룹128사례 + 기존156그룹1211 = **집중 race176그룹1339사례**, 전체 vet·race **45개 실제 test package**, 실제 재생성1회 Go drift0와 속성/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,123개 SHA256 `dc7351eaadb7b5a1402fabf4dc3bf15636747813a20cc716bbf7514344f91d50`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper·기존 HTTP/fault/Record/Connection fixture, pager·cloudfilter·integer/string 변환·RFC6902·prepared update/response 엔진을 재사용했습니다. 새 HTTP 서버·독립 resolver builder를 요구하지 않습니다. 최종 focused/full/generation은 동일한 Go 소스를 확인합니다.
-
-고정 Source11파일/40 AST의18개 새 계약을 추가하고 기존 typed add-per-key10계약의 API/test refs와 다른551 reviews·catalog bytes·source pins/fingerprints를 보존했습니다. reviews552·contracts3,634·go_mapping287·review unresolved264·unsupported1이며 catalog unresolved3,074에는 미검토2,810개가 포함됩니다. 전체 Source runtime 동등성을 주장하는 supported 판정은0개입니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. 실행 근거는 `/private/tmp/go-openstacksdk-image-record-properties-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`입니다.
-
-공통 Update preparation `74ea3ede`·공개 helper `9db5159c`·계약/Connection 테스트 `3295bda9`·Python 비교 문서 `542c27cb`를 각각 작은 commit으로 main에 push했습니다.
-
-정확한 문서·판정 revision `48d6ef15374db885ca1d02bf2e4bb7b052e8135e`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009010239-48d6ef15374d`·get/build exit0이며 속성 helper/설치 main **2개**를 빌드했습니다. 원격 Go source2,123개 SHA256 `dc7351eaadb7b5a1402fabf4dc3bf15636747813a20cc716bbf7514344f91d50`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-properties-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-데이터 workflow Source 감사 `/private/tmp/go-openstacksdk-image-data-workflows-source-audit.json`의 SHA256은 `2af47c35353e44463f2d33125fafb5ed8a49714769b993fdbc3039817de107c0`입니다. 당시13개 pinned Python 파일과10개 pinned Glance 파일의66 AST로4개 선언·기존44계약을 unresolved로 추적했습니다. 이후 Stage/Import/Upload/Download를 위 owned 완료 단위에서 닫아 현재4개 finite public 데이터 graph가 완료입니다. 현대 public `create_image`20파일 전체 graph·기존12계약은 당시 unresolved였으며 이후 현대 생성 단위에서 go_mapping으로 완료했습니다. 당시에는이며 metadata POST나 deprecated upload만으로 닫지 않습니다. 이 앞선 속성 helper 단위의 exact revision 원격 설치·라이선스14개 일치 결과는 검증했습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned ImageRecord 비활성화·재활성화2개, 전체284→286(+2)·핵심210→212/2,292·Glance48→50/120.** `Connection`과 `Service`가 private current ID·concrete header 옵션·현재 location의65필드 preparation과 독립 local Record/actual ACK를 제공합니다. 추가 GET·discovery·wait 없이 고정 POST를 보내며 pending raw Body·이전 fetch receipt를 보존하고 local status를 합성하지 않습니다. [Python/Go 비교·독립 main](../image/image-record-actions.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-비활성화재활성화-완료)에 사용법과 명시적인 HTTP 오류 정책 차이를 기록했습니다.
-
-새12그룹81사례 + 기존144그룹1130 = **집중 race156그룹1211사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 액션/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection fixture를 재사용했고 새 HTTP 서버 engine은 없습니다. 첫 집중 run의 잘못된 wire/canonical fixture는 수정했으며 최종 소스의 근거는 재실행한 receipt입니다.
-
-Source의 기본 `raise_exc=False`는 정상 transport의 HTTP400..599에도 공개 action에서 None으로 끝날 수 있지만 Go는 native 오류를 반환하고 actual200..399의 opaque ACK를 보존합니다. 따라서 이2행은 `go_mapping`이며 Source status 동등성을 주장하지 않습니다. 기존550 reviews·두 legacy8계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 새16계약으로 reviews552·contracts3,616·go_mapping286·review unresolved265·unsupported1입니다. catalog unresolved3,075에는 미검토2,810개가 포함됩니다. SDK-R1/C1/S1과 전체 목표는 active이며 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-공통 preparation `7850ddfb`·공개 API `9e718050`·계약/Connection 테스트 `8d4e89f3`를 각각 작은 commit으로 main에 push했습니다. `/private/tmp/go-openstacksdk-image-record-actions-{source,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 실행 근거를 기록합니다. full public `create_image`의20파일 전체 graph·12계약은 당시 unresolved였고 이후 현대 생성 단위에서 완료했습니다. 당시에는 metadata POST만으로 이 선언을 완료 처리하지 않습니다.
-
-정확한 문서·판정 revision `f65e5be7321b6c98cbefc79d3c10fcb012ebbc76`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009002558-f65e5be7321b`·get/build exit0이며 액션/설치 main **2개**를 빌드했습니다. 원격 Go source2,115개 SHA256 `bcab98e51c94a859e54930a7a6be302bd01fad2b1d03a1970f5c61ec2c3f5d1a`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-actions-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): Glance owned ImageRecord 전체·store 삭제와 별도 native Delete, 전체282→284(+2)·핵심208→210/2,292·Glance46→48/120.** 전체 삭제는 고정 Glance 정책의 user 경로이고 store location 삭제는 admin 경로이며 단일 Python proxy 선언을 한 번만 집계합니다. `DeleteImageRecord`는 private current ID·concrete 옵션·whole Record+actual ACK 또는 store ACK를 제공하고 pending Body를 clean하지 않습니다. native `API.Images.Delete`는 error-only·기본202/204·raw ID 전달 정책을 별도 검증했습니다. [Python/Go 비교·독립 main](../image/image-record-delete.md), [native 가이드](../image/v2/images/delete.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-삭제와-native-delete-완료)에 사용법과 범위를 설명합니다.
-
-새28그룹195사례 + 기존116그룹935 = **집중 race144그룹1130사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0와 삭제/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다.
-
-공통 ID decoder를 기존 Unicode 검사와 결합해 Image/Member Get·Update·Tag·Wait·Find·marker가 raw lone surrogate를 다른 U+FFFD ID로 바꾸지 않게 했습니다. 실제 U+FFFD·valid pair·literal backslash-u는 유지합니다. serviceinfo의 별도 store marker는 후속 추적하며 전체 JSON equality 엔진을 변경한 것으로 판정하지 않습니다. public Gophercloud testhelper와 기존 HTTP/fault/Record/Connection fixture를 재사용했습니다. native 테스트의 작은 transport/body adapter는 leaf 패키지에서 작성했으며 새 HTTP 서버 엔진은 없습니다. 다른550 reviews·선택한 legacy10계약의 API/test refs·catalog bytes·pins/fingerprints를 보존하고 새12계약으로 reviews552·contracts3,600입니다. 실제 cloud/Python 호출은 실행하지 않았으며 SDK-R1/C1/S1과 전체 목표는 active입니다.
-
-정확한 문서·판정 revision `cdddf468c1df9375684acf21575b23a45deb3efa`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261009000252-cdddf468c1df`·get/build exit0이며 삭제/설치 main **2개**를 빌드했습니다. 원격 Go source2,109개 SHA256 `26712dbb6f9aca5a28fc41c870421b05aa9dfbf596030dceae3a9e170d793983`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-delete-remote-consumer.json`에 근거가 있습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다. native tests·shared fix·owned API·tests·guide·판정을 각각 작은 commit으로 main에 push했습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance MemberRecord 조회·추가·수정·삭제, 전체279→282(+3)·핵심205→208/2,292·Glance43→46/120.** 기존 조회의 go_mapping은 그대로 보존하고 Add/Update/Remove3개만 새로 닫았습니다. `Connection`과 `Service`의 네 메서드가 raw declared 속성·fresh Member 요청·200..399 응답 overlay·부분 결과·삭제404 기본값을 처리합니다. 같은 status·attrs 생략에도 Update는 bound `member`를 포함한 PUT을 보냅니다. [Python 비교·owner/recipient·독립 main](../image/member-record-mutations.md)과 [검증 기록](sdk-support-ledger.md#glance-owned-memberrecord-조회추가수정삭제-완료)에 기존 typed API·Source 제어 인자·immutable JSON-domain 경계를 설명합니다.
-
-새22그룹196사례 + 기존38그룹651 = **집중 race60그룹847사례**, 전체 vet·race **45개 실제 test package**, 재생성1회 Go drift0, 멤버/설치 main2개의 외부 local-replace build가 PASS했습니다. Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 기존 public Gophercloud testhelper·HTTP/fault/Connection fixture를 재사용했고 새 HTTP 서버/fault engine은0개입니다. 다른547 reviews·선택한 기존28계약의 테스트/API·source pins/fingerprints·catalog bytes를 보존하고 기존 설명은 legacy typed 범위로 한정했습니다. 새26계약으로 reviews551·contracts3,588·go_mapping282입니다. 같은 Go의 전체 gate를 최종 JSON/prose에 재사용하며 최종282 parity/progress/gofmt도 PASS했습니다.
-
-공통 guarded 옵션 `a993b5cf`·공개 API `48086df6`·계약/Connection 테스트 `abf27b47`·사용 가이드/중간 진행 `36cea3b1`을 각각 commit/push했습니다. Source/policy 검토와 실행 근거는 `/private/tmp/go-openstacksdk-member-record-{source-audit,policy-audit,focused-receipt,check-receipt,generation-receipt,review-receipt,local-consumer}.json`에 기록합니다. 실제 Python/cloud 호출은 실행하지 않았으며 SDK-R1/C1/S1과 전체 목표는 active입니다. 다음 핵심 user 후보는 `delete_image`의 owned 입력·응답 처리이며 store overload도 함께 검토합니다. Cloud mixin의 Swift cleanup은 별도 선언으로 추적합니다.
-
-정확한 문서·판정 revision `4aa85ff43194756fcbe31c6beffe5d1c6707cc2a`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008232408-4aa85ff43194`·get/build exit0이며 멤버 CRUD/설치 main **2개**를 빌드했습니다. 원격 Go source2,101개 SHA256 `0f37f5bd403d6f253c7088d9b339d239d9962045303a06acafff41be973c55d3`가 최종 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-record-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user owned ImageRecord 수정1개, 전체278→279(+1)·핵심204→205/2,292·Glance42→43/120.** `Service.UpdateImageRecord`·`Connection.UpdateImageRecord`가 ID/SDK Record와 concrete 속성 옵션을 받아 sparse raw baseline·same-value/no-op·sticky dirty·properties 교체·wire alias·공통 자동 JSON Patch·응답 overlay/clean을 처리합니다. invalid JSON은 pending 상태를 유지하고 accepted 처리 실패는 actual receipt와 제출 Record를 보존합니다. [Python/Go 비교·독립 main](../image/image-record-update.md), [검증 기록](sdk-support-ledger.md#glance-owned-imagerecord-수정-완료)에 immutable JSON-domain profile과 Source 전체 path 정렬·수치·control 입력 차이를 기록했습니다. 공통 SDK-R1/C1/S1 목표는 계속 추적합니다.
-
-새 **25그룹165사례** + 기존48그룹375 = **집중 race73그룹540사례**, 전체 vet·race **45개 실제 test package**, 문서 main2개의 외부 local-replace build·재생성 Go drift0가 PASS했습니다. Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`입니다. 다른550 reviews·기존7계약/API·pins/catalog/fingerprint를 보존하고6계약을 추가해 reviews551·contracts3,562입니다. 최종279 parity/progress/gofmt와 정확한 원격 설치·main2개·Go SHA/라이선스14개 일치도 PASS했습니다.
-
-공통 엔진 `dc837814`·공개 API `c7a79ea0`·계약 테스트 `8178fb38`·사용 가이드 `f768f498`·완료 판정 `c068cace`를 각각 commit/push했습니다. 전체 SDK 목표는 active이며 다음 핵심 user 단위의 Source를 검토합니다.
-
-정확한 문서·판정 revision `c068cacecf76dc4ab40254b4324233aa4cfcc86e`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008225520-c068cacecf76`·get/build exit0이며 owned 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,095개 SHA256 `2cfee5fda3252931e10f6c93da3cbe7a7dbe1e4493879b9f3b6c863dbdfaa346`가 집중/전체 gate·재생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-owned-update-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): Glance native `images.Update`1개와 owned 수정용 raw Body 기반, 전체277→278(+1)·핵심203→204/2,292·Glance41→42/120.** native9종 concrete Patch·property3op·nil/empty·option 교체·기본200·native context/retry/partial Extract를 검증했습니다. GET/Find/List·literal tag constructor는 descriptor/default 전 sparse raw current/original을 독립 보존하며, local tags는 current만 바꾸고 원본 fetch baseline은 유지합니다. 이 snapshot은 mutable dirty/header state machine이 아니며 owned `update_image` 완료 수를 올리지 않습니다. [Python/Go 비교·독립 main](../image/v2/images/update.md), [검증 기록](sdk-support-ledger.md#glance-native-update와-owned-수정용-raw-body-기반)에 입력·API·서버 권한·현재 pending 경계를 설명합니다.
-
-새 **8그룹51사례(native6그룹47 + raw snapshot2그룹4)** + 기존67그룹575 = **집중 race75그룹626사례**, 전체 vet·race **44개 실제 test package**가 PASS했습니다. 최종278 parity/progress/gofmt·반복 생성 Go drift0와 native/설치 main **2개**의 외부 local-replace build도 PASS했습니다. Go source2,089개 SHA256 `0bbe5d809249c129a9b4355dcdcbb92e7519bd3c2b8f3a77655b0f67df0bbfa3`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 기존550 reviews/contracts3,550과 pins/fingerprints를 보존하고 native1행6계약만 추가해 reviews551·contracts3,556입니다. configured client/decoder의 native 정책을 owned ACK/source guard로 확대하지 않습니다.
-
-raw Body 기반/회귀 `2f5b87a2`·native 계약 테스트 `b55ed8aa`·Python 비교 가이드 `3d901393`를 각각 commit/push했습니다. 판정 `862eef0b`도 commit/push하고 정확한 revision의 replace 없는 원격 설치·main2개·Go SHA·라이선스14개 일치를 확인했습니다. 전체 SDK 목표는 active입니다.
-
-정확한 문서·판정 revision `862eef0b0d0b0ec08a072ac8937aae5b8916b776`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008220600-862eef0b0d0b`·get/build exit0이며 native 수정/설치 main **2개**를 빌드했습니다. 원격 Go source2,089개 SHA256 `0bbe5d809249c129a9b4355dcdcbb92e7519bd3c2b8f3a77655b0f67df0bbfa3`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-update-raw-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python/jsonpatch 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance ImageRecord 태그 추가·삭제2개, 전체275→277(+2)·핵심201→203/2,292·Glance39→41/120.** `AddImageRecordTag/RemoveImageRecordTag`가 literal ID의 GET 없는65필드 기본 Resource 또는 supplied record의 독립 snapshot을 받고, 성공200..399 뒤 duplicate append/first exact remove를 처리합니다. local view·기존 fetch receipt·새 opaque mutation ACK를 분리하고, null/raw 처리 오류와 accepted physical 실패에 ACK+nil Record+error를 보존합니다. 기존 strict204·native 전체 tags PATCH를 유지합니다. [Python/Go 비교·독립 main](../image/image-record-tags.md), [검증 기록](sdk-support-ledger.md#glance-imagerecord-태그-추가삭제-완료)에 입력·옵션·권한·Source 준비 lifecycle의 Go 경계를 설명합니다.
-
-새 **10그룹98사례** + 기존41그룹326사례 = **집중 race51그룹424사례**, 전체 vet·race **43개 실제 test package**가 PASS했습니다. 명령에 지정한6개 package 중 집중 테스트가 실제 매치된 것은4개 package입니다. 최종277 parity/progress/gofmt·반복 생성 Go drift0, 태그/설치 main **2개**의 외부 local-replace build도 PASS했습니다. Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews·선택한 두 선언의 기존18계약/API·pins/fingerprints를 보존하고12계약을 추가해 reviews550·contracts3,550입니다. Python supplied Resource의 `_update`·microversion/location/to_dict·dirty/default alias, Adapter/cache/session 동등성은 공통 SDK-R1/C1/S1에 남으며 실제 cloud 검증을 실행하지 않았습니다.
-
-공통 snapshot/타입 `17946082`·실행 코드 `0edc5b7c`·leaf 테스트 `85091653`·Connection `64e9840b`·가이드 `0f8997f4`를 각각 commit/push했습니다. Gophercloud의 generator-test 발췌 fixture와 Unicode full lowercase 데이터 고지 누락도 `fea9a547`로 보완했습니다. 판정 `72cf240b`도 commit/push하고 정확한 revision의 원격 설치·main2개 build·Go SHA·라이선스14개 일치를 확인했습니다. 전체 SDK 목표는 active입니다.
-
-정확한 문서·판정 revision `72cf240b6a9508cbbbf4404ae882ef9576a306ce`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008214624-72cf240b6a95`·get/build exit0이며 태그/설치 main **2개**를 빌드했습니다. 원격 Go source2,087개 SHA256 `b449631fcefd58d9a3f240ddce214040a3a60bf190d5d20c9a8c497c1166eba4`가 최종 집중/전체 gate·반복 생성의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-tags-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance ImageRecord 상태·삭제 대기2개, 전체273→275(+2)·핵심199→201/2,292·Glance37→39/120.** `WaitForImageRecordStatus/WaitForImageRecordDelete`가 초기 목표 snapshot, fresh GET·Body overlay, nullable 상태·목표/실패 우선순위, zero interval/timeout·한 budget·callback0와 삭제404의 seed/마지막 record 반환을 제공합니다. 공통 Collection/WaitPolicy·Image projector·공개 Gophercloud helper와 기존 HTTP/fault fixture를 재사용했습니다. [Python/Go 비교·독립 main](../image/image-record-waits.md), [검증 기록](sdk-support-ledger.md#glance-imagerecord-상태삭제-대기-완료)에 입력·기본값·반환·오류·Go 경계를 기록했습니다.
-
-새 **17그룹132사례**와 기존32그룹240사례를 합친 **집중 race49그룹372사례**, 전체 vet·race **43개 실제 test package**가 PASS했습니다. 최종275 parity·progress·gofmt, 반복 생성 Go drift0와 대기/설치 main **2개**의 외부 local-replace build도 PASS했습니다. Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews·선택한 두 선언의 기존18계약·API·source pins/fingerprints를 보존하고 새12계약을 추가해 reviews550·contracts3,538입니다. mutable Resource/cache/session·arbitrary parser/runtime 동등성은 공통 목표에 남습니다.
-
-공통 삭제 guard `ab694cae`·Unicode16 비교와 출처/라이선스 `40cf0780`·대기 API/leaf 테스트 `6ffc3931`·Connection 테스트 `0786265b`·가이드 `85e9020e`를 의미 있는 단위로 commit/push했습니다. Unicode 자료에는 기존 `licenses/unicode-LICENSE`를 적용하고 source URL/hash·고지를 보완했습니다. 판정 `180b672b`도 commit/push하고 정확한 revision의 원격 설치·main2개·Go source/라이선스14개 파일 일치를 확인했습니다. 전체 목표는 active입니다.
-
-정확한 문서·판정 revision `180b672ba90518981c21913086af9bb060b7d544`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008210659-180b672ba905`·get/build exit0이며 대기/설치 main **2개**를 빌드했습니다. 원격 Go source2,082개 SHA256 `377666ca351152533e11139af3b2dce6e24c3e46ff728b1b49967cf091746085`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-record-waits-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance Image 조회·목록·검색3개, 전체270→273(+3)·핵심196→199/2,292·Glance34→37/120.** `GetImageRecord/ListImageRecords/AllImageRecords/FindImageRecord`가 Body64개와 computed location, unknown properties packing·별칭·descriptor 변환·실제 Wire/receipt, 공통 페이지 순회·로컬 필터·GET→일반→숨김 검색을 제공합니다. 기존 typed/native 프로필은 유지합니다. [Python/Go 비교·독립 main](../image/image-records.md), [검증 기록](sdk-support-ledger.md#glance-image-owned-조회목록검색-완료)을 추가했습니다.
-
-새 **23그룹182사례**와 기존100그룹692사례를 합친 **집중 race123그룹874사례**, 전체 vet·race **43개 실제 test package**가 PASS했습니다. 최종273 parity·progress·gofmt와 반복 생성 Go drift0도 확인했습니다. Go source2,074개 SHA256 `3cc9702bc1924492bbb534fb6d94640aa739e90543a5268c488b0249fd4c9b91`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른547 reviews·기존23계약·API를 보존하고 새18계약을 추가해 reviews550·contracts3,526입니다. 공통 Python string helper `7a3da054`·조회 `03c9d8e1`·목록 `497defd5`·검색/Connection `24e3b273`·가이드 `5545c5e6`을 작은 단위로 commit/push했습니다.
-
-정확한 문서·판정 revision `16b2873a9ef203b5f07162bba277df84b5a26a16`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008202819-16b2873a9ef2`·get/build exit0이며 Image/설치 main **2개**를 빌드했습니다. 원격 Go source2,074개 SHA256 `3cc9702bc1924492bbb534fb6d94640aa739e90543a5268c488b0249fd4c9b91`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-image-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance import 정보1개, 전체269→270(+1)·핵심195→196/2,292·Glance33→34/120.** `GetImportInfoRecord`가 id/name/import_methods/location의 4필드 declared Resource·임의 dictionary 변환·actual200..399 fetch를 제공합니다. 기본 `ListStoreRecords/AllStoreRecords`도 6필드 view·로컬 필터·공통 페이지 순회·부분 결과까지 구현했습니다. 상세 `stores(details=True)`가 admin 단계에 남아 있으므로 stores 전체 선언은 unresolved로 유지하고 다시 세지 않습니다. [Python/Go 비교·독립 main](../image/v2/serviceinfo/records.md), [검증 기록](sdk-support-ledger.md#glance-import-정보기본-store-owned-records)을 추가했습니다.
-
-새 **15그룹146사례**와 기존78그룹410사례를 합친 **집중 race93그룹556사례**, 전체 vet·race **43개 실제 test package**, 최종270 parity·progress·gofmt와 반복 생성 Go drift0가 PASS했습니다. discovery/설치 main **2개**도 별도 외부 module local-replace build가 통과했습니다. 기존 serviceinfo·Connection fixture와 공개 Gophercloud helper를 재사용했으며 새 서버/fault engine은0개입니다. Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews와 선택한 두 선언의 기존17계약·API를 보존하고12계약을 추가했습니다.
-
-모델/getter `99cd9850`·기본 목록 `2545b808`·Connection `a00b5144`를 별도 commit/push했습니다. 실제 Glance는 paging query를 무시할 수 있어 무옵션 목록은 보통 한 번 읽으며, 명시한 positive limit의 Source marker fallback이 같은 목록을 반복하면 Go는 cycle 오류와 partial 결과로 종료합니다. legacy typed strict200 getter/list/detail은 유지합니다. `/private/tmp/go-openstacksdk-serviceinfo-records-check-receipt.json`에 최종 근거를 기록했으며 정확한 문서·판정 revision의 원격 설치와 main2개·Go SHA·라이선스14개 일치도 확인했습니다.
-
-정확한 문서·판정 revision `95a7c6de03b24b76ffbe49fa6f17efdad553abc6`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008193028-95a7c6de03b2`·get/build exit0이며 discovery/설치 main **2개**를 빌드했습니다. 원격 Go source2,062개 SHA256 `5edf83e69d402ecd8b22677afb70d3d7ca5f8af692534fdd8b6273ea46fb022c`가 최종 집중/전체 gate의 소스와 같고 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-serviceinfo-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**당시 후속으로 계획한 owned Image 태그 add/remove2개도 최신 단위에서 완료했습니다.** Store 상세·task Get/List·metadata 쓰기는 핵심 admin에 유지하고 완료 API를 다시 세지 않습니다.
-
-**직전 API 완료 (2026-10-09): 핵심 user Glance member owned 목록·검색2개, 전체267→269(+2)·핵심193→195/2,292·Glance31→33/120.** `ListImageMemberRecords/AllImageMemberRecords`가 9필드 declared Resource·실제 Wire·현재 location·공통 페이지 순회와 부분 수집을 제공합니다. `FindImageMemberRecord`는 seeded GET 후 clean native400/403/404에서 같은 목록을 사용해 정확한 ID/name과 중복을 검사합니다. 기존 finite typed 목록·literal Find·native scope는 유지합니다. [Python/Go 비교·독립 main](../image/member-records.md), [검증 기록](sdk-support-ledger.md#glance-member-owned-목록검색-완료)을 추가했습니다.
-
-새 **16그룹180사례**와 기존190그룹713사례(Cinder 공통 수정 회귀2사례 추가)를 검증한 **집중 race206그룹893사례**가 PASS했습니다. 전체 vet·race **43개 실제 test package**, 최종269 parity·progress·gofmt, 반복 생성 Go drift0와 정확한 member/설치 main **2개**의 외부 local-replace build가 통과했습니다. Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`입니다. 다른548 reviews와 두 선언의 기존14계약을 보존하고12계약을 추가했습니다. 실제 인증·OpenStack/Python runtime 및 전체 mutable Resource/session 완료는 주장하지 않습니다.
-
-공통 paging `8bfe2ddd`·body fault 재사용 `c520fa86`·목록 `455bb7bc`·검색 `ab6a92b3`·기존 retry 정책 보존 `e06f5f62`를 작은 단위로 commit/push했습니다. 전체 검사에서 확인한 Compute 키페어 회귀는 `PreserveCleanRetry`를 Glance 검색의 선택400/403/404에만 적용해 해결하고 기존 Compute·Cinder 계약을 재검증했습니다. `/private/tmp/go-openstacksdk-member-records-check-receipt.json`에 최종 실행 근거가 있으며 새 문서·판정의 정확한 원격 설치와 main2개·라이선스14개 byte equality도 확인했습니다.
-
-정확한 문서·판정 revision `0647ce86adc0e5f0cdbfbe8f3dc7c100c7655433`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008190535-0647ce86adc0`·get/build exit0이며 member/설치 main **2개**를 빌드했습니다. 원격 Go source2,054개 SHA256 `aaf23a88846b8ed282cd9097a9e384df83beca6fa6150fad2c6877fa5f964aad`가 최종 집중/전체 gate의 소스와 같고, 라이선스·고지 **14개 파일**도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-member-records-remote-consumer.json`에 기록했습니다. 실제 인증·OpenStack/Python 호출은 실행하지 않았습니다.
-
-**당시 진행 단위:** Glance `get_import_info`·기본 `stores`의 owned view·Source 기본값·페이지 순회 구현이었으며 위 최신 단위에서 getter와 기본 목록을 완료했습니다. 고정 server controller의 두 기본 경로는 별도 admin policy를 호출하지 않지만 `stores(details=True)`는 admin 또는 service role·project scope를 요구하므로 핵심 admin에 둡니다. 단일 stores 선언은 상세 분기까지 닫기 전 unresolved를 유지하며 기존 getter/schema를 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)를 기록했고 전체 API 목표는 active입니다.
-
-**직전 API 완료 (2026-10-09): 핵심 user Glance object·namespace owned 목록2개, 전체265→267(+2)·핵심191→193/2,292·Glance29→31/120.** `ListRecords/AllRecords`가 object9필드·namespace13필드의 declared Resource, 실제 Wire/page receipt, 기본값·descriptor 변환·현재 location·공통 페이지 순회와 부분 결과를 제공합니다. namespace의 nil/0 limit 구분과 정확한 `/v2/` collection alias를 추가했고, 공통 응답 읽기 직후 guard를 검사하여 Close 복원 전에 실패를 보존합니다. 기존 typed List/All의 strict200 계약은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-object-namespace-record-lists.md), [검증 기록](sdk-support-ledger.md#glance-objectnamespace-owned-목록-완료)을 추가했습니다.
-
-새 **34그룹272사례**(object20/138·namespace9/122·Connection1/2·공통4/10)와 기존142그룹1,922사례를 재사용한 **집중 race176그룹2,194사례**가 PASS했습니다. 전체 vet·race **43개 실제 test package**, 최종267 parity·progress·gofmt, 반복 생성 Go drift0, 정확한 목록/설치 main **2개**의 외부 local-replace build exit0입니다. Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d40386936934d29`, catalog SHA256 `231ec992770396ff8a2f16a43942fba7a8f52694b19f001cf69e99c53ffe5cd6`이고 `/private/tmp/go-openstacksdk-metadata-lists-check-receipt.json`에 근거를 기록합니다. 다른548 reviews와 기존 두 선언의13계약을 보존하고13계약을 추가했습니다. 전체 mutable Resource/session의 동일성 또는 실제 인증 cloud 실행을 주장하지 않습니다.
-
-응답 guard `49869890`·paging `252f9c2e`·object 구현 `11b57da4`/테스트 `f45866f4`·namespace 구현 `0b2ad4a6`/테스트 `3c0b7591`·Connection `760f546a`를 작은 단위로 commit/push했습니다. 문서·최종 판정 `73f54853`도 commit/push하고 원격 설치의 정확한 main2개 build를 확인했습니다.
-
-정확한 문서·판정 revision `73f54853810614b582e2e5513a4812e6cd8a97e2`을 별도 외부 module에서 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008181840-73f548538106`·get/build exit0이며 목록/설치 main **2개**를 빌드했습니다. 원격 Go source2,044개 SHA256 `c0ea7d4a6716e99c59fd707e53c15bd770409bb0cc3c7cca1d40386936934d29`가 집중 race·전체43 package gate·반복 생성 drift0의 source와 같고 라이선스/고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadata-lists-remote-consumer.json`에 기록했습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 admin Glance resource type association owned 생성·삭제2개, 전체263→265(+2)·핵심189→191/2,292·Glance27→29/120.** `CreateRecord`는 명시한6개 raw Body 값만 flat POST하고 빈 입력도 `{}`를 보냅니다. 같은8필드 Resource projector에 고정 namespace·현재 location·응답 overlay를 연결했습니다. `DeleteRecord`는 옵션 전 identity를 복사하고 실제 opaque ACK와 기본 physical404 receipt를 반환합니다. 기존 typed strict201/204 API는 유지합니다. [Python/Go 비교·독립 main](../image/metadef-resource-type-association-mutations.md), [검증 기록](sdk-support-ledger.md#glance-resource-type-association-owned-생성삭제-완료)을 추가했습니다.
-
-집중 race **45그룹·753개 최종 사례**가 PASS했습니다. 기존34그룹620사례를 재사용하고 새 leaf10그룹131사례·Connection1그룹2사례를 추가했습니다. public Gophercloud helper·기존 ResourceType/Connection HTTP/fault fixture·association 목록 projector·semantic capture·REST guard를 재사용하며 새 서버/fault engine은0개입니다. 전체 vet·race **43개 실제 test package**, 최종265개 parity·progress·gofmt·반복 생성 Go drift0·정확한 생성삭제/목록/설치 main3개의 외부 local-replace build가 PASS했습니다. Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`이며 근거는 `/private/tmp/go-openstacksdk-association-check-receipt.json`입니다.
-
-진행 단계 `01d5df58`·API `2467fdce`·leaf 테스트 `ee2514c5`·Connection `fbc88b37`를 각각 commit/push했습니다. catalog/source pins·다른548 reviews·기존11계약을 보존하고11계약을 추가해 reviews550·계약3,471입니다. Glance 기본 정책의 add/remove association은 metadef_admin이므로 이 완료 단위는 핵심 admin으로 교정합니다. [권한 근거와 순서 교정](glance-policy-priorities.md)을 기록하며 기존 구현·완료 수는 유지합니다. 실제 cloud/서버 정책과 전체 mutable Resource/session 목표는 계속 추적합니다.
-
-정확한 구현·문서 revision `1f9c1d7a5ede8f0b2c12142e033ce0af5d75e435`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008173702-1f9c1d7a5ede`·get/build exit0이며 생성삭제/목록/설치 main3개가 빌드됐습니다. 원격 Go source2,033개 SHA256 `0907dfca1b916d7803d4098933f38753ee9f2a83804db323e20baa1e7bb6a452`가 최종 전체/집중/반복 생성의 소스와 같고 라이선스·고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-association-remote-consumer.json`과 [설치 안내](install.md)에 기록합니다.
-
-**당시 다음 구현:** 핵심 user Glance object·namespace의 owned 목록2개입니다. 기본 정책의 project reader 경로를 근거로 먼저 진행하고, object 생성·수정·개별/전체 삭제4개는 핵심 admin으로 옮깁니다. 이미 완료한 object/namespace getter와 schema는 다시 세지 않습니다. [권한 근거](glance-policy-priorities.md)에 따라 전체 API 목표와 서비스 우선순위는 유지합니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 admin Glance property owned 생성·수정2개, 전체261→263(+2)·핵심187→189/2,292·Glance25→27/120.** `CreateRecord`는 명시한19개 Body 속성의 raw 값만 POST하고 `UpdateRecord`는 선택한 ID와 fresh18개 non-id 속성만 PUT합니다. 반환 view에는 같은 descriptor 기본값·변환을 적용하며 요청 기본값을 합성하지 않습니다. 빈 생성은 POST `{}`, 빈 수정은 property HTTP 없이 receipt가 없는 local snapshot을 반환합니다. [Python/Go 비교·독립 main](../image/metadef-property-record-write.md), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-생성수정-완료)을 추가했습니다.
-
-집중 race **42그룹·477개 최종 사례**가 PASS했습니다. 기존 조회·목록·삭제33그룹274사례를 재사용하고 새 leaf8그룹201사례·Connection1그룹2사례만 추가했습니다. public Gophercloud helper·기존 Property/Connection HTTP/fault fixture·descriptor projector·semantic capture·REST guard를 재사용하며 새 서버/fault engine은0개입니다. Get/Create/Update의 응답 overlay와 Get/List/Create/Update의 location capture를 공통화했습니다. 전체 vet·race **43개 실제 test package**,263개 parity·progress·gofmt·반복 생성 Go drift0·정확한 생성수정/조회/목록/설치 main4개의 외부 local-replace build가 PASS했습니다. Go source2,029개 SHA256 `71d742e983a57a99a6fdba10b86318c7b7ac87bb1e3e29e298fd0eed07ef03e0`이며 실제 근거는 `/private/tmp/go-openstacksdk-property-write-check-receipt.json`입니다.
-
-진행 단계 `a4614dc0`·공통 처리 `0093f8fc`·API `d0177a45`·leaf 테스트 `7502bd37`·Connection `6ab931b3`를 각각 commit/push했습니다. catalog/source pins·다른548 reviews·기존12계약을 보존하고12계약을 추가해 reviews550·계약3,460입니다. SDK 설명만으로 user 범위를 판단했던 분류는 [서버 기본 정책](glance-policy-priorities.md)에 따라 핵심 admin으로 교정했습니다. 완료한 구현과 수치는 유지합니다. 실제 cloud/서버 정책 검증과 전체 Python Resource/session 목표는 계속 추적합니다.
-
-정확한 구현·문서 revision `7b07fe93e433b3694852c685d979d4fbffa4cb35`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008171128-7b07fe93e433`·get/build exit0이며 생성수정/조회/목록/설치 main4개를 빌드했습니다. 원격 Go source2,029개 SHA가 최종 gate와 같고 라이선스·고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-property-write-remote-receipt.json`과 [설치 안내](install.md)에 기록합니다. 같은 Go의 최종 prose/JSON 검토에서는 전체 Go gate를 재사용합니다.
-
-**당시 다음 구현 (현재 권한 분류: 핵심 admin):** Glance resource type association의 owned 생성·삭제2개입니다. 완료한 owned 목록 옆에 raw dirty Body·기본값/location·Resource identity와 opaque ACK를 연결합니다. 전체 API 목표와 서비스 우선순위는 active입니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 Glance property owned 목록·삭제3개(user 목록1·admin 삭제2), 전체258→261(+3)·핵심184→187/2,292·Glance22→25/120.** `ListRecords/AllRecords`가 key→name seed·공통21필드 Resource·canonical19 Body 로컬 필터·partial 결과를 제공하고, `DeleteRecord/DeleteAllRecords`는 immutable identity와 실제 opaque ACK를 제공합니다. 목록은 Source의 명시적 JSON Accept를 상속 헤더와 native retry에서도 유지합니다. [Python/Go 비교·독립 main](../image/metadef-property-record-list.md), [삭제 예제](../image/v2/metadefproperties/README.md#owned-목록과-삭제), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료)을 갱신했습니다.
-
-집중 race **33그룹·274개 최종 사례**가 PASS했습니다. 기존 조회13그룹92사례를 재사용하고 목록·Connection12그룹116사례와 삭제8그룹66사례를 추가했습니다. public Gophercloud helper·기존 Property/Connection HTTP/fault fixture·JSON projector/filter·REST guard를 재사용하며 새 서버/fault engine은0개입니다. 전체 vet·race **43개 실제 test package**, 최종261개 parity·progress·gofmt와 반복 생성 drift0를 확인했습니다. Go source2,024개 SHA256 `76ad963e062c1d685aba025872b49ec057391d3748931458ee27080cfc93d21a`의 전체 Go 검증을 JSON/prose 최종 검사에도 재사용했습니다. 근거는 `/private/tmp/go-openstacksdk-property-list-check-receipt.json`입니다.
-
-공통 guard `c834f9ef`·목록 `ebd363d6`·Connection `404000d7`·Accept 수정 `0f35bef3`·삭제 `4e1388ba`·삭제 테스트 `cf0652dc`·비교 문서 `50b43025`를 각각 commit/push했습니다. catalog/source pins·다른547 reviews·기존16계약을 보존하고13계약을 추가해 reviews550·계약3,448입니다. 정확한 구현·문서 revision `50b4302520ee2d05a1ced1119e40f919e857bc01`을 별도 외부 module에 GOWORK=off·replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008163807-50b4302520ee`·get/build exit0이며 목록/조회/설치 main3개와 삭제 package example1개가 빌드됐습니다. 원격 Go SHA와 라이선스·고지13개 파일도 로컬과 같습니다. [설치 안내](install.md)와 `/private/tmp/go-openstacksdk-property-list-remote-receipt.json`에 기록합니다.
-
-**당시 다음 구현 (현재 권한 분류: 핵심 admin):** property의 owned 생성·수정2개입니다. 고정 Source의 dirty 필드 전송·ID 선택·변경이 없을 때 PUT 생략·응답 overlay를 공통 projector와 연결합니다. 기존 required Type/Title·strict status raw CRUD를 완료로 다시 세지 않습니다. 전체 API 목표와 서비스 우선순위는 active입니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance owned property 조회, 전체257→258(+1)·핵심183→184/2,292·Glance21→22/120.** `NamespaceScope.GetRecord`가 concrete ID/Resource 입력과 초기 속성, 응답 overlay·nullable descriptor 기본값/변환, 양쪽 Connection current location을 제공합니다. Resource·실제 Wire·Envelope·receipt를 분리하고 actual200..399의 빈/비JSON 성공을 처리합니다. 기존 strict200 raw Get은 유지합니다. [Python/Go 비교·독립 main](../image/metadef-property-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-조회-완료)을 갱신했습니다.
-
-새 집중 race **13그룹·92개 최종 사례**(leaf12그룹91·Connection1그룹1), 전체 race **43개 실제 test package**·vet, 최종 고정 parity·progress·gofmt가 PASS했습니다. 기존 public Gophercloud helper·Property/Connection fixture·REST guard·공통 JSON descriptor를 재사용하며 새 서버/fault engine0개·Close callback adapter1개입니다. 지원 JSON의 타입 참조를 함수·메서드로 교정했고 Go 변경 없이 최종 metadata gate를 확인했습니다. 반복 생성 drift0·정확한 새/기존 조회/설치 main3개의 외부 local-replace 빌드가 PASS했습니다. Go source2,018개·SHA256 `bb6e1a27ce2cb84e913fdc425eb7c3d34bc143447c4ff7fa144ef013da581894`이며 `/private/tmp/go-openstacksdk-property-record-check-receipt.json`에 실제 근거를 기록했습니다.
-
-모델 `e480edcc`·조회 `ea80c826`·Connection `86d9781f`를 각각 commit/push했습니다. catalog3,362개 fingerprint/source pins·다른549 reviews·기존6개 raw 계약과7번째 audit 테스트를 보존했습니다. 예전 audit의 미해결 문구를 additive getter 구현에 맞게 교정하고6계약을 추가해 reviews550·계약3,435입니다. 이번 증가는 named getter1개이며 전체 Python Resource/session이나 실제 cloud 검증을 뜻하지 않습니다. 정확한 구현·문서 revision `1662a6743e2543bbb76ba3f15ed30511d1a4632a`을 별도 외부 module에 replace 없이 설치했습니다. 실제 버전 `v0.0.0-20261008160331-1662a6743e25`·get/build exit0이며 새 owned 조회 main·기존 raw 조회 main·설치 main3개를 빌드했습니다. 원격 Go source2,018개 SHA가 최종 gate와 같고 라이선스/고지13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-property-record-remote-receipt.json`과 [설치 안내](install.md)에 기록합니다.
-
-**당시 다음 구현:** 같은 핵심 user `metadef_properties` owned 유한 dictionary 목록입니다. key→name seed·같은 Resource projector·descriptor 이후 canonical Body 로컬 필터·mandatory properties JSON·partial collection을 처리합니다. 이 Source의 `max_items`는 property descriptor 조건이고 pagination cap이 아닙니다. 완료한 getter나 schema를 다시 세지 않습니다.
-
-**앞선 API 완료 (2026-10-09): 핵심 user Glance resource type·association owned 목록, 전체255→257(+2)·핵심181→183/2,292·Glance19→21/120.** `ListRecords/AllRecords`가 declared Resource·실제 Wire/page/receipt, semantic query와 local Body 필터·raw row cap·공통 paging을 제공합니다. 두 Connection 진입점이 current location을 전달하며 고정 Source collector의 Body/URI별 location 규칙을 반영했습니다. [Python/Go 비교·독립 main](../image/metadef-resource-types-records.md), [검증 기록](sdk-support-ledger.md#glance-metadef-resource-typeassociation-owned-목록-완료)을 함께 갱신했습니다.
-
-새 집중 race **20그룹·228개 최종 사례**(목록17그룹224·property2그룹3·Connection1그룹1)가 PASS했습니다. 기존 public testhelper·rtCore/Property/Connection fixture·REST paging·JSON filter를 재사용했고 새 HTTP 서버/fault engine은0개, Close callback용 작은 adapter만1개입니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt, 반복 생성 Go drift0와 정확한 독립 main3개의 외부 local-replace 빌드가 PASS했습니다. Go source **2,013개**, SHA256 `19e37601b49bd38dc5a4a60a24c3a1d43e85747c9e7b96c576f1f3922bd9401a`이며 실제 근거는 `/private/tmp/go-openstacksdk-metadef-records-check-receipt.json`에 기록했습니다.
-
-구현 `9aba6303`·두 Connection 경로 `08517200`·property 경계 `454d9756`를 작은 단위로 commit/push했습니다. catalog3,362개 fingerprint·source pins와 다른547 reviews·기존 계약을 그대로 보존했습니다. 새 선언을 추가하지 않고 기존 두 list의 미해결을 닫았으며 reviews550·계약3,429입니다. 서비스별 핵심183개는 user/admin 합산이고 새 HTTP endpoint2개를 뜻하지 않습니다. Python 전체 Resource/session lifecycle·실제 cloud·alpha tag 배포는 별도이며 전체 목표와 서비스 우선순위는 active입니다.
-
-정확한 revision `b4a0f6ab71ec34b698cf12ab670f0516112411dd`을 별도 외부 module에서 replace 없이 설치하여 동일한 main3개를 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008153156-b4a0f6ab71ec`이며 원격 Go source2,013개 SHA가 위 최종 gate와 같습니다. LICENSE·NOTICE·통합 고지·제3자 라이선스/고지 13개 파일도 로컬과 byte-identical입니다. `/private/tmp/go-openstacksdk-metadef-records-remote-receipt.json`과 [설치 안내](install.md)에 결과를 기록합니다. 이후 JSON/prose 갱신에는 같은 Go의 전체 검사를 반복하지 않습니다.
-
-**당시 다음 구현:** `get_metadef_property`는 초기 Resource 속성·descriptor default/coercion·fetch translation의 실제 구현 공백을 확인해 **미해결 유지**입니다. 기존 strict200 getter와 additive resource_type query를 완료로 재집계하지 않았습니다. [조회 비교·실행 main](../image/metadef-property.md)에 seed/default·200..399/invalid-JSON·mutable cache 차이를 기록했고 owned getter부터 이어갑니다.
-
-**앞선 완료 (2026-10-08): `go-openstacksdk` 이름 변경과 라이선스 정리.** 모듈·루트 `openstack` 패키지·생성기·문서·manifest/review 참조·GitHub 저장소·로컬 checkout·GoLand 설정을 동기화했습니다. 프로젝트 원본 코드는 Apache-2.0이며 제3자 원문·저작권·CPython 포팅과 Unicode 데이터 조건을 따로 보존합니다. [변경 안내](renaming.md), [라이선스](licensing.md), [통합 고지](../THIRD_PARTY_NOTICES.md)에 범위를 설명합니다.
-
-2026-10-08 이름 변경 후 revision `7cec3a4df3a46838d23f6a4c381034eb6e27b947`을 별도 외부 module에 `GOWORK=off`·replace 없이 설치했습니다. 실제 버전은 `v0.0.0-20261008061758-7cec3a4df3a4`이며 설치 안내 main·Glance schema main·별칭 없는 `openstack` import main **3개**의 get/build exit0입니다. 원격 module cache에 루트 LICENSE·NOTICE·통합 고지와 제3자 원문이 포함되어 있습니다. Go source **2,005개**, SHA256 `7c4805edb03341a4f8aa06b16c49ce0eab5479e916f865feb74ee59e7fede33a`가 로컬 전체 검사와 원격 cache에서 같습니다. 전체 `make check` **43개 실제 test package**, vet·고정 parity·progress·gofmt와 반복 생성 drift0가 PASS했습니다. 이동한 디렉토리의 `make smoke`도 **5개 흐름·9개 기존 그룹**이 PASS했습니다. 실제 인증/OpenStack 호출과 alpha tag 배포는 포함하지 않습니다.
-
-이름 변경 `17499af7`·라이선스 `7cec3a4d`를 별도 commit/push했습니다. catalog3,362개 fingerprint·source pins·550개 reviews의 판정/계약을 보존했고 API 완료는 **255/3,362**, 계약은 **3,418**로 유지합니다. 실제 실행 근거는 `/private/tmp/go-openstacksdk-rename-check-receipt.json`, `/private/tmp/go-openstacksdk-rename-remote-receipt.json`, `.reports/core-smoke.json`입니다. 서비스 우선순위와 전체 구현 범위는 유지합니다.
-
-**앞선 API 완료 (2026-10-08): 핵심 user Glance schema12개, 전체243→255(+12)·핵심169→181/2,292·Glance7→19/120.** `GetSchemaRecord`는 같은16고정 경로를 ordinary Schema·MetadefSchema class로 투영하고 nullable raw·dict·bool·list, ordered aliases와 Connection location을 처리합니다. 실제 Wire·Envelope·receipt는 분리하며 빈/비JSON 성공과 parsed nonobject 오류를 구분합니다. 기존16 strict getter의 API·200 정책은 유지합니다. [Python/Go 비교·독립 main](../image/schema-records.md), [검증 기록](sdk-support-ledger.md#glance-schema-class-records-완료)에 사용법과 숫자/encoding·명시 zone의 Go 차이를 설명합니다.
-
-집중 race35그룹 중31개를 재사용했고 새4그룹65사례가 PASS했습니다. 공개 Gophercloud helper·기존 SDK transport/body fault fixture를 사용하며 새 서버·fault engine은0개입니다. 실제 고정 Python checkout을 지정한 전체 `make check`43개 test package·반복 생성 drift0·정확한 독립/설치 main의 local-consumer 빌드가 PASS했습니다. 기본 임시 checkout의 일부 Source 파일 누락으로 실패한 첫 전체 검사는 환경 경로를 교정해 해결했고 Go 코드는 바꾸지 않았습니다. Go source2,005개 SHA256 `e4e94fb52a3729a7da9003665b580fb934a6d5d6b7bc583fb5ee018908e4cb0c`가 집중·전체·원격 module cache에서 같습니다.
-
-기반 `c119403a`·구현 `9e84d06e`·테스트 `b4f0f482`·문서 `3729f70c`를 작게 commit/push했습니다. 정확한 revision `3729f70c2b150d19a719d6c8abf2a1eae8a4f666`을 새 외부 module에서 replace 없이 설치해 같은 main2개를 빌드했고, get/build exit0·버전 `v0.0.0-20261008051710-3729f70c2b15`입니다. 기존12행의60계약과 나머지538행의 원문·catalog/pins를 보존하고36계약을 추가했습니다. Task schema2개·Metadef schema10개를 go_mapping으로 갱신하며 이미 완료한 ordinary schema4개는 다시 세지 않습니다. 핵심181개는 user/admin 합산이고, 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다.
-
-**앞선 완료 (2026-10-08): 핵심 user Availability Zone 일반 목록·Cloud 이름 조회, 전체241→243(+2)·핵심167→169/2,292·Nova43→45/333.** owned `ListRecords`/`Service.ListAvailabilityZones`는 raw5필드·alias 순서·모든 advertised 페이지·location을 처리합니다. `ListAvailabilityZoneNames`는 unavailable 기본 false·state 선평가·순서/중복·SDK HTTP/loop 실패의 빈 배열을 조합하고 partial Inventory·SuppressedError를 보존합니다. native `List`의 정상 객체 envelope를 읽지 못하던 문제는 native AllPages 단일 페이지 경로로 수정했습니다. [Python/Go 비교·독립 main](../compute/availability-zones.md), [검증 기록](sdk-support-ledger.md#availability-zone-일반-목록cloud-이름-조회-완료)에 차이와 예외 범위를 설명합니다.
-
-집중 race41그룹 중38그룹을 재사용하고 고유 API3그룹48사례만 추가했습니다. 기존 생성기 검증 그룹에도 native AZ 사례를 연결했습니다. 공개 Gophercloud helper·기존 SDK 서버/오류 fixture를 사용하며 새 HTTP harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·의도한 generated List1개 교정 이후 반복 생성 drift0·정확한 독립 main build가 PASS했습니다. 최종 Go source2,001개 SHA256 `915a3a9d4f67131b4aaba489232d613643347134ff634b51fc43d670bb9d294d`는 집중·전체 gate 및 원격 module cache에서 같습니다. 수정 `46225a97`·owned reader `bdb4acb4`·Cloud/테스트 `60ffec77`·문서 `2488a769`를 작게 commit/push했습니다.
-
-정확한 revision `2488a769b27401fab85115e989cf511c01a86cfa`을 별도 module에서 replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008045149-2488a769b274`입니다. catalog/source pins와 기존547 reviews를 보존하고 새3행12계약만 추가했습니다. **완료 증가는 Cloud names·native ordinary List2개입니다.** Proxy `availability_zones`는 ordinary 계약을 기록했지만 `details=True` 관리자 분기가 남아 unresolved이며 native ListDetail도 승격하지 않습니다. 핵심169개는 user/admin 합산입니다. 전체 API·Resource/session 목표와 서비스 우선순위는 active이고 동일 Go의 JSON/prose에는 전체 gate를 재사용합니다.
-
-**앞선 완료 (2026-10-08): 핵심 user Cloud Flavor 목록·검색·단건 조회, 전체238→241(+3)·핵심164→167/2,292·Nova40→43/333.** `AllFlavors`는 extra-specs 기본 false인 eager 상세 목록, `SearchFlavors`는 기본 true인 전체 inventory 보충 후 Cloud 필터, `GetFlavor`는 기본 true인 Find 직접 위임을 제공합니다. 기존 owned List/Find·extra-specs reader·CloudFilter·location/guard를 조합하고 옵션 callback의 소유권 경계를 공통화했습니다. [Python/Go 비교·독립 main](../compute/flavor-cloud.md), [검증 기록](sdk-support-ledger.md#cloud-flavor-목록검색단건-조회-완료)에 서로 다른 기본값·필터·partial Inventory와 Go 차이를 기록합니다.
-
-집중 race60그룹 중56그룹을 재사용하고 새4그룹(고유 API51사례·공통 옵션 순수 검증1그룹)을 추가했습니다. 공개 Gophercloud helper·기존 SDK 서버/오류 fixture를 사용해 새 HTTP harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·재생성 Go drift0·정확한 독립 main build가 PASS했습니다. 최종 Go source1,998개 SHA256 `c6b80797734918b28faaca111130f30d9dd2a154a8f16f91d0c4ca3eede1dc08`가 집중·전체 gate 및 원격 module cache에서 같습니다. 공통화 `d4fe3202`·구현 `5c400b22`·테스트 `60ab3f30`·문서 `f22a803d`를 작은 단위로 commit/push했습니다.
-
-정확한 revision `f22a803d095233c151a4d47206b49e8a74d8b92d`을 외부 module에서 replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008042836-f22a803d0952`입니다. catalog/source pins와 기존544 reviews를 보존하고 새3행9계약만 추가했습니다. 완료241개는 고정 source 선언의 Go 매핑이며 핵심167개는 user/admin 합산입니다. 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다. 동일 Go의 JSON/prose에는 전체 gate를 재사용하고 parity/progress/gofmt를 확인합니다.
-
-**앞선 완료 (2026-10-08): 핵심 user Flavor owned 목록·검색, 전체236→238(+2)·핵심162→164/2,292·Nova38→40/333.** `Service.ListFlavors`/`FindFlavor`와 leaf `ListRecords`/`FindFlavor`가 Source의 detail·is_public=None·query 별칭·Body 필터·descriptor 기본값·조건부 specs·페이지·현재 location을 처리합니다. 실제 Wire/Envelope와 독립 view를 구분하고 Find의 seed·실제400/403/404 fallback·중복·늦은 오류를 연결했습니다. [Python/Go 비교·독립 main](../compute/flavor-records.md), [검증 기록](sdk-support-ledger.md#flavor-owned-목록검색-완료)에 API와 명시한 Go 차이를 기록합니다.
-
-집중 race53그룹 중41그룹을 재사용하고 새12그룹에 서비스 고유 API84사례와 공통 순수 검증을 추가했습니다. 공개 Gophercloud helper·기존 SDK fixture/오류 wrapper를 쓰며 새 서버 harness·fault helper는0개입니다. 전체 `make check`43개 실제 test package·재생성 Go drift0·정확한 외부 main build가 PASS했습니다. 최종 Go source1,996개 SHA256 `cc3404ffe583ef697d0eb7040d71e3d7bf177b738f150ae529bbbce1493d2350`가 집중·전체 gate 및 원격 module cache에서 같습니다. 구현6커밋과 문서 `037bd153`를 작은 단위로 commit/push했습니다.
-
-정확한 revision `037bd1535f699c20d09aedef6dea11e963f022a4`을 별도 module에서 replace 없이 설치해 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008035547-037bd1535f69`입니다. catalog/source pins와 다른542 reviews를 보존하고 기존 Find8계약에5개를 추가·신규 List5계약을 기록했습니다. 두 Source 선언이 Go 매핑238개에 반영됐으며 새 endpoint2개를 뜻하지 않습니다. 핵심164개는 user/admin 합산이고 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다. 동일 Go의 JSON/prose에는 전체 gate를 재사용하고 parity/progress/gofmt를 확인합니다.
-
-**앞선 완료 (2026-10-08): 핵심 user flavor 단일 property·Cloud ID 조회와 native3개, 전체231→236(+5)·핵심157→162/2,292·Nova33→38/333.** 새 `GetExtraSpecsProperty`는 raw 값·missing/null·실제 응답을 보존하며 기존 Fetch reader를 공유합니다. `Service.GetFlavorByID`는 기존 strict GET/enrichment를 연결해 기본 false를 SDK가 소유합니다. 기존 native Get/GetExtraSpec/ListDetail3개도 DTO·string-map·linked page의 별도 계약을 검토했습니다. [Python/Go 비교·독립 main](../compute/flavor-property-and-native.md), [검증 기록](sdk-support-ledger.md#flavor-property와-cloud-id-조회-및-native3개-완료)에 반환·버전·입력·오류와 Go 차이를 기록합니다.
-
-기존 public testhelper/testcloud·fault fixture·Fetch/nativefind/guard/version28개 그룹을 재사용하고 새7그룹74사례만 추가했습니다. 집중 race35그룹·전체42 test package `make check`·재생성 Go drift0·정확한 독립 main의 외부 빌드가 PASS했습니다. 최종 Go source1,983개 SHA256 `bccbeed5b2b97484735d5d6f5d90532313c2f6d1379c3f4c6d844ed1f7f9ce9d`는 집중·전체 gate와 원격 module cache에서 같습니다. 공통 reader `b3e55994`·property/native검증 `74c97ec4`·ID기본값 `88f008e5`·문서 `3d446f60`를 작게 commit/push했습니다.
-
-정확한 revision `3d446f604fb57fefe5be31595679c24ff9ffd796`을 새 외부 module에서 replace 없이 설치하여 같은 main과 설치 main을 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008031535-3d446f604fb5`이며 catalog/source pins·기존538 reviews를 보존하고5행15계약만 추가했습니다. 이후 JSON/prose에는 동일 Go의 전체 gate를 재사용하고 parity/progress/gofmt를 확인합니다.
-
-완료236개는 고정 source 선언의 Go 매핑이며 핵심162개는 user/admin 합산입니다. 이번5개는 새 Go 메서드2개와 native binding3개의 판정으로, 새 HTTP endpoint5개를 뜻하지 않습니다. 실제 OpenStack/Python 실행·alpha tag 배포는 포함하지 않으며 전체 API·Resource/session 목표와 서비스 우선순위는 active입니다.
-
-**앞선 완료 (2026-10-08): 핵심 user flavor 명시 extra-specs 조회·Cloud keypair5개와 native1개, 전체224→231(+7)·핵심150→157/2,292·Nova26→33/333.** 항상 직접 GET하는 FetchExtraSpecs와 Cloud List/Search/Get/Create/Delete6개 Go 메서드를 구현하고 기존 native ListExtraSpecs1개를 별도로 검토했습니다. 원문 specs/source dict 변환·filters presence·두 단계 필터·current Connection location·strict bool 삭제를 기존 reader/projector/CloudFilter/First/guard와 연결했습니다. [Flavor 비교·main](../compute/flavor-extra-specs.md), [Cloud keypair 비교·main](../compute/keypairs-cloud.md), [검증 기록](sdk-support-ledger.md#flavor-extra-specs와-cloud-keypair-완료)에 API별 계약과 Go 차이를 설명합니다.
-
-공개 testhelper.SetupHTTP·TestMethod/TestHeader와 기존 testcloud/physical fault wrapper를 재사용했습니다. 새6그룹85사례와 기존40개 공통 그룹의 집중 race46그룹, 전체42 test package make check·재생성 Go drift0·정확한 독립 main2개 빌드가 PASS했습니다. Go source1,979개 SHA256 `47121553d380a5b4b7ed6e34b1dcbfc1fa5a7144a92910e43773c034959d1774`는 최종 집중·전체 gate와 원격 module cache에서 같습니다. 구현 `58662346`·Cloud 연결 `cb3f7866`·문서 `df3afaea`를 작게 commit/push했고 정확한 revision `df3afaea603f3eb627f9948be30948a87ec29991`의 replace 없는 원격 get/build와 설치 main도 PASS했습니다. 실제 버전은 `v0.0.0-20261008024734-df3afaea603f`입니다. catalog/source pins·기존531 reviews를 그대로 보존하고 새7행24계약만 추가했습니다.
-
-이 구간의 완료231개는 고정 source 선언의 Go 매핑이며 핵심157개는 user/admin 합산입니다. 새 endpoint7개나 전체 Resource/session 완성을 뜻하지 않습니다. 실제 OpenStack/Python 실행·alpha tag 배포는 포함하지 않으며 전체 목표와 우선순위는 active로 유지합니다.
-
-**앞선 완료 (2026-10-08): 핵심 user keypair 목록·검색과 native List, 전체221→224(+3)·핵심147→150/2,292·Nova23→26/333.** `KeyPairs.ListRecords`는9필드 Resource와 실제 행·semantic 필터·전체 페이지를 제공하고 `FindKeypair`는 직접 GET 이후 clean400/403/404에서 owner를 유지해 전체 목록을 검색합니다. native List의6string·SinglePageBase·200/204/300 계약은 별도로 검토했습니다. 새 HTTP 동작2개와 native 선언1개의 완료이며 기존 Create/Get/Delete를 재집계하지 않습니다. [Python 비교·전체 main](../compute/keypairs-list-find.md), [검증 기록](sdk-support-ledger.md#compute-keypair-목록검색과-native-list-완료)을 함께 갱신했습니다.
-
-공통 reader `c50e9ce8`·member binding `a28c3e92`·목록 `48355084`·검색 `e78609f7`·문서 `2490e481`을 작은 단위로 push했습니다. 기존 public testhelper·서버/오류 fixture·projector·필터/페이징/find를 재사용하고 집중 race98그룹 중91그룹은 기존 검증입니다. 새6 API 그룹97사례와 공통 표10사례, 전체42 test package gate·재생성 Go drift0·정확한 독립 main build가 PASS했습니다. Go source1,973개 SHA256 `bbb1c68d0a0a67e5a50a531247d85c0f13b71ca2b8ebf3d530ffbb3ffb3ef9b3`는 집중·전체 gate와 원격 module cache에서 같습니다. 정확한 revision `2490e4813a564b5d8163f15091eff5448817398f`의 replace 없는 원격 설치·같은 main/설치 main 빌드도 PASS이고 버전은 `v0.0.0-20261008020804-2490e4813a56`입니다. catalog/source pins·기존528 reviews를 보존하고 새3행12계약을 추가했습니다. 같은 Go source의 문서·판정 갱신에는 전체 검사를 반복하지 않습니다.
-
-own-user는 핵심 user 단계로 분류하며 다른 owner의 권한은 [Nova 기본 index/show 정책](https://docs.openstack.org/nova/latest/configuration/policy.html)과 배포별 설정이 판단합니다. 핵심150개는 user/admin 서비스 합산이며1단계 완료 수로 표시하지 않습니다. 실제 OpenStack/Python 호출·alpha tag 배포는 포함하지 않으며 전체 Resource/session 목표는 active입니다.
-
-**앞선 완료 (2026-10-08): Compute console auth-token 조회, 전체220→221(+1)·핵심146→147/2,292·Nova22→23/333.** `Service.ValidateConsoleAuthToken`은 token을 고정 member로 조회하며 nullable7필드·location과 실제 Wire·receipt를 분리합니다. Cinder `MemberGet`을 공통화하고 공개 testhelper·기존 fault wrapper를 사용했습니다. [Python 비교·전체 main](../compute/console-auth-token.md), [검증 기록](sdk-support-ledger.md#compute-console-auth-token-조회-완료)에 유한 discovery·seed·nonJSON·Go 차이를 기록합니다.
-
-공통 `e742005c`·구현/테스트 `8e9a7827`·비교 문서 `40dbb0ea`를 작은 단위로 push했습니다. 새3그룹42사례와 기존9개 회귀 그룹을 합친 집중 race12그룹·전체42 test package `make check`·정확한 main 빌드·원격 replace 없는 설치/빌드가 PASS입니다. Go source1,968개 SHA256 `1b22fdecda0348eb93f1fc99c17b4a6caf4e79b1808eff1406d66dbadc901e31`는 집중·전체 gate와 원격 module cache에서 같습니다. 재생성의 기존 Go drift0이며 catalog·source pins·기존527 reviews를 보존하고1행5계약만 추가했습니다.
-
-**권한 분류 교정:** 앞서 user 후보로 표시했던 이 GET은 [Nova 기본 정책](https://docs.openstack.org/nova/latest/configuration/policy.html)의 `os_compute_api:os-console-auth-tokens`가 `rule:context_is_admin`을 요구하므로 **2단계 핵심 admin**으로 기록합니다. 배포별 정책은 서버가 판단합니다. 준비한 공통화·조회 단위를 닫았으며 다음 구현은 핵심 user입니다. 서비스 합산147개를 user 단계의 완료 수로 표시하지 않습니다. [설치 안내](install.md)에 정확한 원격 revision `40dbb0eaa8f97a19eb0c7aca417bc4251db955e9`의 결과를 갱신했습니다.
-
-**앞선 완료 (2026-10-08): Compute console 자동 선택, 전체219→220(+1)·핵심145→146/2,292·Nova21→22/333.** `conn.Compute(ctx)`의 `CreateConsole`은 광고 min/max와 선택 버전으로 기존 modern·legacy executor를 합성합니다. 기본 protocol null·branch별2.99/2.100 private ceiling·modern6필드 dictionary와 computed location을 처리하며 console POST 실패 시 다른 API로 전환하지 않습니다. [Python 비교·전체 main](../compute/console-selection.md), [검증 기록](sdk-support-ledger.md#compute-console-자동-선택-완료)에 Go의 유한 discovery·auth/cache/오류 차이를 명시합니다.
-
-공통 모듈 `537b6531`·console 구현 `963fb1bc`·Nova eligibility `2ff3f866`·문서 `a884b81c`·alternate API test `466f28d7`을 작은 단위로 push했습니다. 새 composition3그룹49사례·pure1그룹과 기존 direct/Cinder/Connection12그룹을 합친 집중 race16그룹·전체42 test package `make check`가 PASS했습니다. Go source1,965개 SHA256 `7543a1f9eaea5ab349f95f4bc6a9d3027137111e26ffc70acadc00d78f2bbc99`는 gate 전후 같습니다. 재생성의 기존 Go drift0이며, catalog/524개 기존 review를 보존하고 기존 direct 설명2행을 교정·새1행6계약을 추가했습니다. 정확한 source revision `466f28d7f3f4a6f7f44d75cf9a4e4c1a96bea2f2`의 replace 없는 원격 get/build도 PASS이며 remote Go SHA가 같습니다. [설치 안내](install.md)에 결과를 기록합니다.
-
-**앞선 완료 (2026-10-08): Keypair 생성·legacy console 조회 및 native Create, 전체216→219(+3)·핵심142→145/2,292·Nova18→21/333.** `KeyPairs.CreateKeypair`는 nullable 전체 속성·ID/name 별칭·입력/응답 병합과 view-only ssh를 처리하고, `Servers.ConsoleURL`은6개 legacy action과 원래 console JSON 값을 제공합니다. 별도 native Create의 실제 Name/UserID/Type/PublicKey·extension·200/201·partial/null 계약도 검토했습니다. 완료3개는 두 user HTTP 작업과 native 선언1개입니다. [Python 비교·전체 main](../compute/keypairs-console.md), [검증 근거](sdk-support-ledger.md#keypair-생성과-legacy-console-url-완료)를 함께 갱신합니다.
-
-keypair 구현/테스트 `df34b6f6`·console 구현/테스트 `23df3da5`·문서 `0851b89c`를 작게 커밋하고 push했습니다. 기존 public fixture의6그룹과 shared bool/clone2그룹을 재사용해 집중 race8그룹·전체41 test package `make check`가 PASS했습니다. Go source1,960개 SHA256 `65af6c636b84bb427a832758738be65d823a78ac0e00dc4efaa31632b470d1b2`는 gate 전후 같습니다. 재생성의 기존 Go drift0·독립 main 빌드 PASS이며, 기존523 reviews·catalog를 보존하고3행12계약을 추가했습니다.
-
-정확한 revision `0851b89cb637dd1ece091dad78f38b41b59fe7a4`을 새 외부 module에서 replace 없이 설치하고 같은 main과 설치 main을 빌드했습니다. get/build exit0·버전 `v0.0.0-20261008003103-0851b89cb637`이며 원격 Go SHA가 위 로컬 gate와 같습니다. 실제 OpenStack/Python 호출·alpha tag 배포는 포함하지 않으며 전체 목표는 active입니다.
-
-**앞선 완료 (2026-10-08): Compute user 작업2개·native3개 판정, 전체211→216(+5)·핵심137→142/2,292·Nova13→18/333.** SDK 소유 `RemoteConsoles.CreateConsole`과 `KeyPairs.DeleteKeypair`로 protocol 추론·type별 선택 버전 검사·입력/응답 분리·owner와 미존재 기본값을 구현했습니다. 같은 fixture의 native Create/Delete와 기존 Get13사례도 직접 선언별 계약을 검토해3개 판정을 추가했습니다. 완료5개는 두 소스의 선언 수이며 새 HTTP 작업은2개입니다. [Python 비교·독립 main](../compute/user-actions.md), [검증 근거](sdk-support-ledger.md#compute-console-생성과-keypair-삭제-및-native-3개-완료)를 함께 갱신합니다.
-
-구현/테스트는 keypair `bdab3a84`, remote console `a6f44ea2`, 문서는 `1d159655`로 나누어 push했습니다. 집중 race8그룹·전체41 test package `make check`·정확한 외부 main build가 PASS했고, 재생성의 기존 Go drift는0입니다. 최종 Go source1,956개 SHA256 `d9bcc2db5bc20cecaeb9c11610ed0835d876bb36aab017f0499a83f1205660ed`가 gate 전후 같습니다. 기존518 reviews·catalog를 보존하고5행17계약을 추가했습니다. public testhelper·기존 fixture/fault wrapper·공통 삭제 classifier를 재사용하며 공통 오류 표를 복제하지 않았습니다.
-
-코드/문서 exact revision `1d159655cb11`을 새 외부 module에서 replace 없이 원격 설치하여 action main과 설치 main을 빌드했습니다. get/build exit0·실제 버전 `v0.0.0-20261008001048-1d159655cb11`이고 원격 Go SHA도 위 로컬 gate와 같습니다. 실제 OpenStack/Python 실행은 포함하지 않으며 전체 API·Resource/session 목표는 active입니다.
-
-**앞선 완료 (2026-10-08): Compute user 조회5개 판정, 전체206→211(+5)·핵심132→137/2,292·Nova8→13/333.** `get_flavor`·metadata 두 이름·`get_keypair`·console output의 고정 source 계약을 검토했습니다. ConsoleOutput은 SDK 소유 concrete 옵션으로 생략과 명시 length=0을 구분하고 기존 native API를 유지합니다. metadata·keypair는 기존 fixture/public helper의2테이블24사례, flavor는 기존 테스트를 재사용했습니다. 집중 race15그룹·전체41 test package `make check`·정확한 독립 main 빌드가 PASS했고 재생성의 기존 Go drift는0입니다. 기존513개 판정·catalog를 보존하고5행17계약을 추가했습니다. [비교·전체 main](../compute/user-read-apis.md), [검증 근거](sdk-support-ledger.md#compute-user-조회5개-완료)를 함께 갱신합니다.
-
-구현/콘솔 테스트 `e53d34fe`·조회 테스트 `bfac16ad`·비교 문서 `f32680a5`를 작게 커밋하고 push했습니다. 최종 Go source1,952개 SHA256 `3c99df8dd9159ce9411c3ecca9ad4c6337bddb9a264085b8ede453d1c4a1b6aa`는 전체 gate 전후 같습니다. metadata의 두 source 이름이 하나의 Go 구현을 공유한다는 사실도 판정에 명시합니다. 전체 API·Resource/session 목표와 서비스 순서는 유지합니다.
-
-같은 코드/문서 revision `f32680a5cb51`을 새 외부 module에서 replace 없이 원격 설치해 Compute 조회 main과 설치 main을 빌드했습니다. get/build exit0, 실제 버전 `v0.0.0-20261007234227-f32680a5cb51`이며 원격 module-cache의 Go SHA도 최종 로컬 gate와 같습니다. 실제 OpenStack/Python 실행은 포함하지 않습니다.
-
-**앞선 완료 (2026-10-08): 기존 Network user 조회·삭제8개 판정, 전체198→206(+8)·핵심124→132/2,292.** 역할 목록 getter7개와 cloud `delete_network`의 실제 입력·기본값·분류·반환·오류·cache를 pinned source와 대조했습니다. 기존102계약·33개 고유 test anchor·공개 API를 보존했고, Go의 DTO·typed 설정·success-only cache·명시 Ref·DELETE202/204 차이를 문서화했습니다. 새 코드나 HTTP harness 없이 방금 통과한 동일 Go source의 전체41 package gate를 재사용합니다. 다른505개 review·catalog bytes는 그대로이며 전체 Resource/session·has_service·loader 목표는 계속 추적합니다.
-
-**앞선 완료 (2026-10-08): Keystone user_groups, 전체197→198(+1)·핵심123→124/2,292.** SDK 소유 `ListGroupRecords(ctx,userID)`를 추가하고 Project와 같은 membership 읽기·raw 모델·source guard·페이징을 재사용합니다. Group 고유 검증은 기존 public testhelper·fault wrapper를 쓰는 HTTP3그룹에 담았고, 첫 server limit 처리는 공통 표10사례와 두 서비스의 기존 continuation 표를 확장했습니다. 집중 race52그룹·최종 전체41 test package `make check`·문서의 두 독립 main build가 PASS했습니다. Go source1,949개 SHA256 `1e706afb6b7b1b7baa524ba48a36a752303905baf73b593b01504a946fc331f5`가 gate 전후 같습니다. 기존4계약과 다른512개 판정을 유지하고3계약을 추가했습니다.
-
-공유 페이징 `e45094f6`·membership 공통화 `aefd9d60`·Group 구현/테스트 `3fd07d91`·비교/사용 문서 `36e16d08`을 나누어 push했습니다. 재생성은 기존 Go drift0/Identity README 동기화1이며, 문서의 두 main과 기존 설치 main을 정확한 원격 revision `36e16d08dc5f`에서 replace 없이 빌드했습니다. 실제 버전은 `v0.0.0-20261007231141-36e16d08dc5f`이고 remote Go SHA가 최종 로컬 gate와 같습니다. 전체 API·Resource/session 목표는 계속 진행합니다.
-
-**앞선 완료 (2026-10-08): Keystone user_projects, 전체196→197(+1)·핵심122→123/2,292.** SDK 소유 `ListProjectRecords`에11개 canonical query·15개 입력 이름,4개 로컬 Body 필터, 원문 행 기준 cap·페이지 순회와 고정 사용자 Resource/Wire를 연결했습니다. 공개 Gophercloud testhelper·기존 fault wrapper·공통 classifier/matcher/REST iterator를 재사용합니다. 초기 집중48그룹과 최종 전체41 test package `make check`가 PASS했고, 최종 Go source1,946개 SHA256 `fbdfa62d28b4474c0ba083c253c883952b3e75201422c6896454beaaa762967e`가 gate 전후 같습니다. 기존4계약과 다른512개 판정을 보존하고4계약을 추가했습니다. 새 named 목록의 Go 매핑 완료이며 전체 mutable Resource/session 구현 완료를 뜻하지 않습니다.
-
-공통 페이지·fixture `29a0dfe4`, 고정 descriptor `eb95f1a0`, leaf 구현 `ad29902e`, HTTP 테스트 `c27b5706`, Python 비교·두 독립 Go 예제 `74545abc`를 작은 단위로 커밋·push했습니다. 재생성은 기존 Go를 보존하고 Identity README만 동기화했습니다. 문서의 두 main은 외부 consumer-only replace 빌드를 통과했고, `74545abc`를 새 module에서 replace 없이 원격 설치해 같은 두 main과 설치 안내 main도 빌드했습니다. 원격 module-cache 소스의 Go SHA도 최종 로컬 gate와 같습니다.
-
-**직전 완료 (2026-10-08): 핵심 user 조회8개 판정, 전체188→196(+8).** Nova Password/limits2개, Cinder limits1개, Swift account/container metadata2개, Glance member/namespace/object getter3개의 실제 source·입력·기본 경로·응답·오류와 Go 차이를 대조했습니다. 기존43계약·API/test/doc anchors를 보존했고, 핵심 서비스 완료는114→122/2,292입니다. 직전 Barbican 생성3개를 포함한 최근 구간은179→196(+17)입니다.
-
-Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected value를 추가해 보완했습니다. 공개 Gophercloud `TestMethod`·`TestHeader`로 선택된 microversion/token을 확인하고 같은 표에서 HTTP203 거부를 검증합니다. 테스트는 `6597eac6`, Python 비교·alias 설명 교정은 `0c7edac7`로 작게 커밋·push했습니다. 집중 race와 최종40 test package `make check`가 PASS했고, Go source1,939개 SHA256 `c62109d1a35f53bbd5aa143f321ef5016e2e774651eee0c5fb1d1b7a38dc671c`이 gate 전후 같습니다. 최종 판정 parity와196개 집계도 PASS했습니다. 문서·JSON만 바뀐 뒤 같은 전체 Go 검사를 반복하지 않습니다. 전체 Resource/session·공통 context cause 및 남은 API/workflow 목표는 계속 추적합니다.
-
-**외부 설치 기반도 완료했습니다.** namespace·generator·문서·판정 참조는 `github.com/JSYoo5B/gophercloudsdk`로 맞춰 `3f02405`로 커밋·push했습니다. 고정 fingerprint3,362개와 기존 판정을 보존했으며, 생성기 집중 race·재생성 drift0·당시 전체40 package check·기존 smoke5흐름/9그룹이 PASS했습니다. 별도 consumer의 local-replace 빌드와 같은 main의 정확한 커밋 원격 설치·replace 없는 빌드가 각각 PASS했습니다. 당시 원격 버전은 `v0.0.0-20261007215549-3f0240534253`이며 [설치 안내](install.md)는 후속 Keystone 구현까지 포함한 검증 revision으로 갱신했습니다. 예정 alpha tag는 아직 배포하지 않았습니다.
-
-**다음 핵심 user 단위:** Glance member owned 목록·검색2개를 구현합니다. [고정 Glance 정책](glance-policy-priorities.md)에 따라 metadata 쓰기는 핵심 admin에 배치하고 완료한 구현은 보존합니다. 이미 완료한 getter·schema를 다시 세지 않으며 task Get/List와 Availability Zone 상세 host/service 조회도 핵심 admin에 유지합니다.
+`go_mapping`과 `supported`는 서로 다른 판정입니다. `supported`는 고정 Source 동작 그대로의 지원이며, `go_mapping`에는 명시한 Go profile과 차이가 있습니다.
+서비스 표의 **API 대응**은 `go_mapping`과 `supported`를 합한 수이며, 서비스 전체나 user/admin 단계 완료를 뜻하지 않습니다.
 
 <!-- sdk-progress:start -->
 | 지표 | 현재 값 | 해석 |
 |---|---:|---|
 | 고정 소스 전체 선언 | 3,362 | Gophercloud·openstacksdk 선언; inherited/descriptor/Resource 표면은 별도 추적 |
 | 구현 대상 선언 | 3,228 | 전체 선언에서 폐기된 서버 API 등 `unsupported`로 제외한 선언을 뺀 수 |
-| 검증된 Go 매핑 | 2,059 (63.8%) | 구현 대상 대비 `go_mapping` 판정. 부분 계약 추가만으로 이 수를 늘리지 않음 |
+| API 매핑 | 2,059 (63.8%) | 구현 대상 대비 `go_mapping` 판정. 부분 검증 기록을 추가해도 이 수는 늘지 않음 |
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 제외(미지원) | 1,169 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,568 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 검증 동작 기록 | 7,570 | [판정 JSON](../api/sdk_reviews.json)의 `contracts` 항목 수; 기록 분할 크기가 달라 API 완료 수·구현률로 사용하지 않음 |
 <!-- sdk-progress:end -->
 
-최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.
-
-| 완료 단위 | 완료 수 변화 | 구현·검증 근거 | 원격 반영 |
-|---|---:|---|---|
-| Floating IP 조회 6개·삭제 1개·생성 1개 최종 판정 | 161 → 169 (+8) | 신규 생성 24그룹·조회 회귀 3그룹, 전체 40 package check, 실행 예제 컴파일 | `73bcfba` |
-| 미연결 Floating IP 일괄 정리 | 169 → 170 (+1) | 신규 HTTP 12그룹, 집중 race 169그룹·전체 40 package check, 실행 예제 컴파일 | `9f1cb3d` |
-| Secret getter·Glance schema getter 4개 | 170 → 175 (+5) | 기존 25개 계약·실제 HTTP/raw/옵션 테스트 재검토, 관련 4 package 집중 race·전체 40 package check PASS | `4d89708` push 완료 |
-| AvailableFloatingIP named getter | 175 → 176 (+1) | Query/Create/Allocate 재사용·Neutron 내부/Nova fallback, 집중 race·전체40 package check·smoke5흐름 PASS | `c61acae` push 완료 |
-| Barbican effective quota getter | 176 → 177 (+1) | 기존 strict/error fixture·context guard 재사용, 집중3 package race·전체40 package check·조회 main build PASS | `1546e7d` push 완료 |
-| Barbican Container/Order metadata getter | 177 → 179 (+2) | 공유 Fetch·기존 fixture6그룹, 집중3 package race·전체40 package check·main build·smoke5흐름 PASS | `156b907` push 완료 |
-| Barbican Container/Order/Secret 삭제 | 179 → 182 (+3) | 공유 Delete·기존 fixture6그룹, 집중4 package race·전체40 package vet/race·나머지 gate·main build·smoke5흐름 PASS | `97e205e` push 완료 |
-| Barbican SecretStore 목록 semantic 필터 | 182 → 183 (+1) | 공통 classifier/matcher/pagination·기존 fixture의4 HTTP그룹·cached Connection, 집중4 package race·전체40 package check·main build·smoke5흐름 PASS | `a1218bb` push 완료 |
-| Barbican SecretStore fixed getter2개 | 183 → 185 (+2) | 기존3계약씩·HTTP/Connection·shared decoder 재사용, 같은 최종40 package gate·보존2 Go 함수 build·ID mapping 비교 | `c3cf874` push 완료 |
-| Barbican Container/Order/Secret 생성 | 185 → 188 (+3) | 공통 raw/seed projection·기존 leaf/cached/body fixture6그룹, 집중3 package race·최종40 package check·문서 main build PASS | `1eae268`·`9c14ed4`·`8b8c67f` push 완료 |
-| 핵심 user 고정 조회8개 | 188 → 196 (+8) | 기존43계약·112개 test anchor 재검토, Password 표/assertion 보강·집중 race·최종40 package check·196개 parity PASS | 테스트 `6597eac6`·비교 문서 `0c7edac7` push 완료; 판정·집계는 이 완료 단위에 포함 |
-| Keystone user_projects SDK 소유 목록 | 196 → 197 (+1) | 공통 필터·REST·public testhelper/fault fixture 재사용, HTTP4그룹·descriptor/proof3그룹·초기 집중48그룹·최종41 package check·두 main build PASS | 구현 `ad29902e`·테스트 `c27b5706`·문서 `74545abc` push 완료 |
-| Keystone user_groups SDK 소유 목록 | 197 → 198 (+1) | Project membership reader·기존 public fixture 재사용, HTTP3그룹·공통 server limit 표10사례·집중52그룹·전체41 package check·원격 main3개 build PASS | 공유 `e45094f6`·공통화 `aefd9d60`·구현/테스트 `3fd07d91`·문서 `36e16d08` push 완료 |
-| Network 역할 목록7·cloud 삭제1 판정 | 198 → 206 (+8) | 기존102계약·33 test anchor·source/Go 차이 대조, 새 Go/HTTP harness0·동일 Go SHA의 전체41 package gate 재사용·최종 parity/progress PASS | 비교 문서와 판정·집계를 작은 커밋으로 push |
-| Compute user 조회5개 | 206 → 211 (+5) | 콘솔 옵션 생략/0 보완·기존 fixture2표24사례·flavor 증거 재사용, 집중15그룹·전체41 package check·독립 main build·생성 Go drift0 | 구현 `e53d34fe`·테스트 `bfac16ad`·문서 `f32680a5` push 완료 |
-| Compute user 작업2개·native3개 | 211 → 216 (+5) | owned remote console·keypair 삭제, native Get/Delete/Create 개별 검토·기존 fixture 확장, 집중8그룹·전체41 package check·독립/원격 main build·생성 Go drift0 | keypair `bdab3a84`·console `a6f44ea2`·문서 `1d159655` push 완료 |
-| Keypair 생성·legacy console 및 native Create | 216 → 219 (+3) | existing public fixture 확장·집중8그룹·전체41 package check·독립/원격 main build·생성 Go drift0 | 구현 `df34b6f6`·`23df3da5`·문서 `0851b89c` push 완료 |
-| Compute console 자동 선택 | 219 → 220 (+1) | 공통 Cinder discovery 추출·기존12그룹 재사용, composition49사례·집중16그룹·전체42 package check·생성 Go drift0 | 공통 `537b6531`·구현 `963fb1bc`·eligibility `2ff3f866` push 완료 |
-| Compute console auth-token 조회 | 220 → 221 (+1) | 공통 member GET·public fixture·기존9그룹 재사용, 집중12그룹·전체42 package gate·독립/원격 main build·생성 Go drift0 | `e742005c`·`8e9a7827`·`40dbb0ea` push 완료; 기본 정책상 핵심 admin 분류 |
-| Compute keypair 목록·검색 및 native List | 221 → 224 (+3) | 공통 reader/projector·public fixture·기존91그룹 재사용, 집중98그룹·전체42 package gate·독립/원격 main build·Go drift0 | `c50e9ce8`·`a28c3e92`·`48355084`·`e78609f7`·`2490e481` push 완료 |
-| Flavor always-fetch·Cloud keypair5·native1 | 224 → 231 (+7) | 공통40그룹 재사용·새6그룹85사례·집중46그룹·전체42 package gate·main2개/원격 main3개 build PASS | `58662346`·`cb3f7866`·`df3afaea` push 완료 |
-| Flavor property·Cloud ID 조회·native3 | 231 → 236 (+5) | 기존28그룹 재사용·새7그룹74사례·집중35그룹·전체42 package gate·독립/원격 main build PASS | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료 |
-| Flavor owned 목록·검색 | 236 → 238 (+2) | 기존41그룹 재사용·새 API84사례·집중53그룹·전체43 package gate·독립/원격 main build PASS | 구현6커밋·문서 `037bd153` push 완료 |
-| Cloud Flavor 목록·검색·단건 조회 | 238 → 241 (+3) | 기존56그룹 재사용·새 API51사례·집중60그룹·전체43 package gate·독립/원격 main build PASS | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료 |
-| Availability Zone ordinary·Cloud names | 241 → 243 (+2) | 기존38그룹 재사용·API48사례·집중41그룹·전체43 package gate·독립/원격 main build PASS | `46225a97`·`bdb4acb4`·`60ffec77`·`2488a769` push 완료; Proxy details 미완료 |
-| Glance class별 schema12개 | 243 → 255 (+12) | 기존31그룹 재사용·새4그룹65사례·집중35그룹·전체43 package gate·반복 생성 drift0·독립/원격 main2개 build PASS | `c119403a`·`9e84d06e`·`b4f0f482`·`3729f70c` push 완료 |
-| Glance resource type·association owned 목록 | 255 → 257 (+2) | 새20그룹228사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `9aba6303`·`08517200`·`454d9756`·`b4a0f6ab` push 완료 |
-| Glance property owned 조회 | 257 → 258 (+1) | 새13그룹92사례·전체43 package gate·반복 생성 drift0·독립/원격 main3개 build PASS | `e480edcc`·`ea80c826`·`86d9781f`·`1662a674` push 완료 |
-| Glance property owned 목록·삭제 | 258 → 261 (+3) | 기존13그룹 재사용·새20그룹182사례·집중33그룹·전체43 package gate·main3/example1 build PASS | 공통/목록/Connection/Accept/삭제/테스트/문서7개 commit push 완료 |
-| Glance property owned 생성·수정 | 261 → 263 (+2) | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate·반복 생성 drift0·외부 main4개 build PASS | `0093f8fc`·`d0177a45`·`7502bd37`·`6ab931b3` push 완료 |
-| Glance association owned 생성·삭제 | 263 → 265 (+2) | 기존34그룹 재사용·새11그룹133사례·집중45그룹753·전체43 package gate·반복 생성 drift0·local/remote main3개 build PASS | `2467fdce`·`ee2514c5`·`fbc88b37` push 완료 |
-| Glance object·namespace owned 목록 | 265 → 267 (+2) | 기존142그룹 재사용·새34그룹272사례·집중176그룹2,194·전체43 package gate·반복 생성 drift0·local/remote main2개 build PASS | `49869890`~`760f546a` 코드/테스트 push 완료 |
-| Glance ImageRecord 상태·삭제 대기 | 273 → 275 (+2) | 새17그룹132·집중49그룹372·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `ab694cae`·`40cf0780`·`6ffc3931`·`0786265b`·`85e9020e` push 완료 |
-| Glance ImageRecord 태그 추가·삭제 | 275 → 277 (+2) | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0·외부 main2개 build PASS | `17946082`·`0edc5b7c`·`85091653`·`64e9840b`·`0f8997f4` push 완료 |
-| Glance native Update·raw Body 기반 | 277 → 278 (+1) | 새8그룹51·집중75그룹626·전체44 package gate·생성 drift0·외부 main2개 build PASS | `2f5b87a2`·`b55ed8aa`·`3d901393` push 완료; owned update pending |
-| Glance owned ImageRecord 수정 | 278 → 279 (+1) | 새25그룹165·집중73그룹540·전체45 package gate·생성 drift0·외부 main2개 build PASS | `dc837814`·`c7a79ea0`·`8178fb38`·`f768f498`·`c068cace` push 완료 |
-| Cinder native QoS spec 10개 | pinned Gophercloud v2.15.0 qos requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례32·전체 `make check` PASS | blockstorage/v3/native-qos.md·생성 README 링크 | **10행 go_mapping·737/3,362** | 작은 commit3개 push 완료 |
-| Nova Python proxy 114개·직접 삭제 ignore_missing | 고정 openstacksdk compute proxy·Resource와 Collection.Delete 규칙 검토 완료 | `resource.IgnoreMissing` 추가 | 새 Python 47그룹·전체 gate(155 package) PASS | Nova python-parity 두 문서·resource README·기존 Python 문서 갱신 | **신규 go_mapping65행·삭제9행 해소·Cinder3행 기준 정렬·1,174/3,362** | test·docs·feat·판정 commit push 완료 |
-| 핵심 Python proxy 첫 병렬 묶음 142개·noauth·swauth 4개 | 고정 openstacksdk proxy·Resource·proxy.py와 pinned noauth·swauth 소스 검토 완료 | 기존 generated facade·collection 유지 | 새 Python 61그룹·native 4그룹·전체 gate(155 package) PASS | 서비스별 python-parity.md 5개·noauth·swauth 가이드 | **신규 go_mapping92행·unresolved54행·1,103/3,362** | 묶음별 test·docs·link·판정 commit push 완료 |
-| Keystone 잔여 native 37개·sdkgen 결함 3건 | Keystone v2·OAuth1·EC2 token pinned 소스와 endpoints·allocationcandidates·tokens 생성 경로 검토 완료 | sdkgen 수정 3건(query reflection, extractor 선택, 미사용 builder 메서드) | 새19그룹·sdkgen 회귀 테스트3·전체 gate(153 package) PASS | identity/v2/native-calls.md·native-oauth1-ec2.md·기존 가이드 갱신 | **신규37행·unresolved3행 해소·1,011/3,362** | 묶음별 test·docs·fix·판정 commit push 완료 |
-| 핵심 admin 병렬 8묶음 235개 | Nova·Neutron·Keystone·Placement·Cinder/Glance 묶음별 pinned Gophercloud v2.15.0 검토 완료 | 기존 generated facade 유지 | 새94그룹·마지막 전체 gate(146 package) PASS | 묶음별 native 가이드 9개·생성 README 링크 | **235행 go_mapping·unresolved2·972/3,362** | 묶음별 test·docs·link·판정 commit push 완료 |
-| Cinder native backup 관리자 호출 8개(v3·v2) | pinned Gophercloud v2.15.0 backups export/import/reset/force delete 검토 완료 | 기존 generated facade 유지 | 새4그룹·하위 사례36·전체 `make check` PASS | native-backups.md 관리자 절·v2 native-calls.md | **8행 go_mapping·727/3,362** | 작은 commit3개 push 완료; 다음 Cinder QoS·volume type 관리 |
-| Cinder native volume·snapshot 관리자 action 8개 | pinned Gophercloud v2.15.0 v2/v3 volumes·v3 snapshots admin action 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례46·전체 `make check` PASS | native-volumes.md·native-snapshots.md·v2 native-calls.md 관리자 절 | **8행 go_mapping·719/3,362** | 작은 commit3개 push 완료; 다음 backup 관리자 호출 |
-| Nova native 보안 그룹 proxy 10개 | pinned Gophercloud v2.15.0 secgroups requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례30·전체 `make check` PASS | compute/v2/secgroups/README.md·생성 README 링크 | **10행 go_mapping·711/3,362** | 작은 commit3개 push 완료; 다음 핵심 admin 단계 |
-| Keystone v3 native trusts·ListAvailable·ChangePassword 9개 | pinned Gophercloud v2.15.0 trusts·projects·users 해당 요청 검토 완료 | 기존 generated facade 유지 | 새4그룹·하위 사례20·전체 `make check` PASS | identity/v3/native-trusts.md·생성 README 절 | **9행 go_mapping·701/3,362** | 작은 commit3개 push 완료; 다음 핵심 user 잔여 점검 |
-| Keystone v3 native application credentials·credentials·EC2 credentials 16개 | pinned Gophercloud v2.15.0 세 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례50·전체 `make check` PASS | identity/v3/native-credentials.md·생성 README 절 | **16행 go_mapping·692/3,362** | 작은 commit4개 push 완료; 다음 trust·사용자 본인 조회 |
-| Keystone v3 native tokens·catalog 5개 | pinned Gophercloud v2.15.0 tokens·catalog와 OmitHeaders 처리 순서 검토 완료 | **sdkgen token scope 확장 필드 중복 수정**(tokens·ec2tokens·oauth1) | 새4그룹·생성기 3사례·전체 `make check` PASS | identity/v3/native-tokens.md·생성 README 절 | **5행 go_mapping·676/3,362** | 작은 commit4개 push 완료; 다음 Keystone 사용자 소유 자원 |
-| Swift native objects 9개 | pinned Gophercloud v2.15.0 objects requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례2·전체 `make check` PASS | objectstorage/v1/native-calls.md object 절 | **8행 go_mapping·671/3,362**, `Create` unresolved | 작은 commit3개 push 완료; panic guard는 별도 작업; 다음 Keystone |
-| Swift native accounts·containers 8개 | pinned Gophercloud v2.15.0 accounts·containers와 objectstorage/v1 이름 검사 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례3·전체 `make check` PASS | objectstorage/v1/native-calls.md·생성 README 링크 | **8행 go_mapping·663/3,362** | 작은 commit3개 push 완료; 다음 Swift objects |
-| Cinder v2 native snapshots·backups·transfers·AZ 18개 | pinned Gophercloud v2.15.0 v2/v3 차이와 backup Update 보정 범위 검토 완료 | 기존 generated facade 유지 | 새·이식 9그룹·하위 사례54·전체 `make check` PASS | blockstorage/v2/native-calls.md 절 추가 | **16행 go_mapping·655/3,362**, 2행 unresolved | 작은 commit3개 push 완료; snapshot 대기 guard는 별도 작업 |
-| Cinder v2 native volumes 사용자 호출 19개 | pinned Gophercloud v2.15.0 v2 volumes와 v3 차이 검토 완료 | 기존 generated facade 유지 | v3 테스트 이식 6그룹·하위 사례84·전체 `make check` PASS | blockstorage/v2/native-calls.md·생성 README 링크 | **19행 go_mapping·639/3,362** | 작은 commit3개 push 완료; 다음 v2 snapshots·backups 등 |
-| Cinder v3 native volume type 조회 4개 | pinned Gophercloud v2.15.0 volumetypes read requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례15·전체 `make check` PASS | blockstorage/v3/native-volume-types.md·생성 README 링크 | **4행 go_mapping·620/3,362** | 작은 commit3개 push 완료; 다음 Cinder v2 legacy |
-| Cinder v3 native transfers·AZ·API versions 7개 | pinned Gophercloud v2.15.0 transfers·availabilityzones·apiversions와 SinglePageBase.IsEmpty 검토 완료 | **sdkgen AZ 단일 페이지 추출 수정**(Cinder v2/v3·Manila) | 새6그룹·하위 사례18·생성기 3사례·전체 `make check` PASS | blockstorage/v3/native-transfers.md·생성 README 링크 | **7행 go_mapping·616/3,362** | 작은 commit5개 push 완료; 다음 Cinder v2·volume type 조회 |
-| Cinder v3 native backups 사용자 호출 7개 | pinned Gophercloud v2.15.0 backups requests/results/urls 검토 완료 | 기존 generated facade·Update envelope adapter 유지 | 새2그룹·하위 사례22와 기존 Update 3그룹·전체 `make check` PASS | blockstorage/v3/native-backups.md·생성 README 링크 | **7행 go_mapping·609/3,362** | 작은 commit3개 push 완료; 다음 transfers 등 |
-| Cinder v3 native attachments 7개 | pinned Gophercloud v2.15.0 attachments requests/results/util/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례25·전체 `make check` PASS | blockstorage/v3/native-attachments.md·생성 README 링크 | **7행 go_mapping·602/3,362** | 작은 commit3개 push 완료; 다음 v3 backups |
-| Cinder v3 native snapshots 7개 | pinned Gophercloud v2.15.0 snapshots requests/results/util/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례22·전체 `make check` PASS | blockstorage/v3/native-snapshots.md·생성 README 링크 | **6행 go_mapping·595/3,362**, `WaitForStatus` unresolved | 작은 commit3개 push 완료; panic guard는 별도 작업; 다음 attachments·backups |
-| Cinder v3 native volume 사용자 action 13개 | pinned Gophercloud v2.15.0 volumes action requests/results 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례63·전체 `make check` PASS | native-volumes.md 사용자 action 절 | **13행 go_mapping·589/3,362** | 작은 commit2개 push 완료; 다음 v3 snapshots |
-| Cinder v3 native volumes CRUD·List·WaitForStatus 6개 | pinned Gophercloud v2.15.0 volumes requests/results/util/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹·하위 사례21·전체 `make check` PASS | blockstorage/v3/native-volumes.md·생성 README 링크 | **6행 go_mapping·576/3,362** | 작은 commit3개 push 완료; 다음 v3 volume 사용자 action |
-| Neutron native tap mirrors 5개 | pinned Gophercloud v2.15.0 tapmirrors requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹·하위 사례16·전체 `make check` PASS | native-crud.md tap mirror 절 | **5행 go_mapping·570/3,362** | 작은 commit2개 push 완료; 다음 Cinder native |
-| Neutron native VPNaaS 25개 | pinned Gophercloud v2.15.0 다섯 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새10그룹·하위 사례75·전체 `make check` PASS | native-crud.md VPNaaS 절 | **25행 go_mapping·565/3,362** | 작은 commit2개 push 완료; 다음 tap mirror |
-| Neutron native FWaaS v2 groups·policies·rules 19개 | pinned Gophercloud v2.15.0 세 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새7그룹·하위 사례62·전체 `make check` PASS | native-crud.md firewall 절 | **19행 go_mapping·540/3,362** | 작은 commit2개 push 완료; 다음 VPNaaS |
-| Neutron native attributestags·apiversions·extensions 10개 | pinned Gophercloud v2.15.0 세 package와 common extensions·BaseEndpoint 검토 완료 | 기존 generated facade 유지 | 새6그룹·전체 `make check` PASS | native-crud.md attribute tag·API 버전 절 | **10행 go_mapping·521/3,362** | 작은 commit2개 push 완료; 다음 firewall |
-| Neutron native addressgroups·rbacpolicies 12개 | pinned Gophercloud v2.15.0 두 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새5그룹·하위 사례40·전체 `make check` PASS | native-crud.md address group·RBAC 절 | **12행 go_mapping·511/3,362** | 작은 commit2개 push 완료; 다음 attribute tags·API 버전 |
-| Neutron native QoS policies·rules·ruletypes 21개 | pinned Gophercloud v2.15.0 세 package requests/results/urls와 Neutron 기본 QoS 정책 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례69·전체 `make check` PASS | native-crud.md QoS 절·trunk 목록 문구 정정 | **21행 go_mapping·499/3,362** | 작은 commit2개 push 완료; 다음 address group·RBAC |
-| Neutron native trunks·portforwarding 12개 | pinned Gophercloud v2.15.0 두 package requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새5그룹·하위 사례42·전체 `make check` PASS | native-crud.md trunk·port forwarding 절 | **12행 go_mapping·478/3,362** | 작은 commit2개 push 완료; 다음 QoS |
-| Neutron native subnetpools·addressscopes 11개 | pinned Gophercloud v2.15.0 두 package requests/results 검토 완료 | 기존 generated facade 유지 | 새6그룹·하위 사례43·전체 `make check` PASS | native-crud.md subnet pool·address scope 절 | **11행 go_mapping·466/3,362** | 작은 commit2개 push 완료; 다음 trunk·port forwarding |
-| Neutron native routers·extraroutes 11개 | pinned Gophercloud v2.15.0 두 package requests/results 검토 완료 | 기존 generated facade 유지 | 새4그룹16·전체 `make check` PASS | native-crud.md router 절 | **11행 go_mapping·455/3,362** | 작은 commit2개 push 완료; 다음 Neutron 사용자 extension |
-| Neutron native security groups·rules·floating IP 13개 | pinned Gophercloud v2.15.0 세 package requests/results 검토 완료 | 기존 generated facade 유지 | 새8그룹42·전체 `make check` PASS | native-crud.md 절 추가 | **floating IP Create 포함 13행 go_mapping·444/3,362** | 작은 commit2개 push 완료; 다음 router |
-| Neutron native networks·subnets·ports 12개 | pinned Gophercloud v2.15.0 세 package requests/results 검토 완료 | 기존 generated facade 유지 | 새6그룹39·전체 `make check` PASS | native-crud.md·Network 목차 | **12행 go_mapping·431/3,362** | 작은 commit2개 push 완료; 다음 security·floating IP |
-| Nova native instanceactions·extensions·apiversions·usage 단일 tenant 8개 | pinned Gophercloud v2.15.0 네 package requests/results 검토 완료 | 기존 generated facade 유지 | 새8그룹30·전체 `make check` PASS | README 3개 추가·instanceactions native 절 | **8행 go_mapping·419/3,362** | 작은 commit2개 push 완료; 다음 Neutron 핵심 리소스 |
-| Nova native servergroups·volumeattach·attachinterfaces 12개 | pinned Gophercloud v2.15.0 세 package requests/results 검토 완료 | 기존 generated facade 유지 | 새6그룹42·전체 `make check` PASS | package README 3개·Compute 목차 | **12행 go_mapping·411/3,362** | 작은 commit2개 push 완료; 다음 조회 API 8개 |
-| Nova native tags 6개 | pinned Gophercloud v2.15.0 tags requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹26·전체 `make check` PASS | README native 절 | **6행 go_mapping·399/3,362** | 작은 commit2개 push 완료; 다음 servergroups·volumeattach·attachinterfaces |
-| Nova native servers 주소·console·대기 4개 | pinned Gophercloud v2.15.0 addresses·console output·WaitForStatus 검토 완료 | 기존 generated facade 유지 | 새3그룹14·전체 `make check` PASS | native.md 주소·console·대기 절 | **4행 go_mapping·393/3,362** | 작은 commit2개 push 완료; 다음 tags |
-| Nova native servers user action 20개 | pinned Gophercloud v2.15.0 server action requests/results 검토 완료 | 기존 generated facade 유지 | 새4그룹111·전체 `make check` PASS | native.md 사용자 action 절 | **20행 go_mapping·389/3,362** | 작은 commit2개 push 완료; 다음 servers 주소·console·대기 |
-| Nova native servers metadata 6개 | pinned Gophercloud v2.15.0 server metadata requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹25·전체 `make check` PASS | native.md metadata 절 | **6행 go_mapping·369/3,362** | 작은 commit2개 push 완료; 다음 servers user action |
-| Nova native servers CRUD 6개 | pinned Gophercloud v2.15.0 servers requests/results 검토 완료 | 기존 generated facade 유지 | 새4그룹29·전체 `make check` PASS | native.md 추가 | **Create 포함 6행 go_mapping·363/3,362** | 작은 commit2개 push 완료; 다음 servers metadata |
-| Barbican Python find_container·find_order | pinned Python find/_get_one_match·Container/Order alternate id 검토 완료 | 공통 `keymanagerread.FindIdentity`·두 package FindIdentity 완료 | 새2그룹8·전체 `make check` PASS | README find 절 추가 | **신규2행 go_mapping·357/3,362** | 작은 commit3개 push 완료 |
-| Barbican Python secret ACL 4개 | pinned Python proxy·SecretACL Resource·commit/delete 검토 완료 | owned `secretacls` package·서비스 연결 완료 | 새3그룹15·전체 `make check` PASS | secretacls README 추가 | **신규4행 go_mapping·355/3,362** | 작은 commit3개 push 완료 |
-| Barbican native acls 8개 | pinned Gophercloud v2.15.0 acls requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹35·전체 `make check` PASS | acls README 추가 | **신규8행 go_mapping·351/3,362** | 작은 commit2개 push 완료; 다음 Python secret ACL |
-| Barbican native orders 4개 | pinned Gophercloud v2.15.0 orders requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹18·전체 `make check` PASS | orders README 추가 | **신규4행 go_mapping·343/3,362** | 작은 commit2개 push 완료; 다음 native acls |
-| Barbican native containers 9개 | pinned Gophercloud v2.15.0 containers requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹39·전체 `make check` PASS | containers README 추가 | **신규9행 go_mapping·339/3,362** | 작은 commit2개 push 완료; 다음 native orders |
-| Barbican native secret metadata 6개 | pinned Gophercloud v2.15.0 secret metadata requests/results 검토 완료 | 기존 generated facade 유지 | 새2그룹32·전체 `make check` PASS | native 절 추가 | **신규6행 go_mapping·330/3,362** | 작은 commit2개 push 완료; 다음 native containers |
-| Barbican native secrets 5개 | pinned Gophercloud v2.15.0 secrets requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새3그룹24·전체 `make check` PASS | native 절 추가 | **신규5행 go_mapping·324/3,362** | 작은 commit2개 push 완료; 다음 secret metadata |
-| Glance add_image_location 재검토 | 고정 Glance 정책으로 핵심 user 확인, Python `Resource.create` 대조 완료 | 200..399 accepted·ImageLocation view 추가 | 기존 테스트 수정·새2그룹34·전체 `make check` PASS | location 가이드 갱신 | **unresolved→go_mapping·319/3,362** | 작은 commit3개 push 완료 |
-| Glance native imagedata 3개 | pinned Gophercloud v2.15.0 imagedata requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹7·전체 `make check` PASS | native 절 추가 | **신규3행 go_mapping·318/3,362** | 작은 commit2개 push 완료; 다음 add_image_location 재검토 |
-| Glance native imageimport 2개 | pinned Gophercloud v2.15.0 imageimport requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹11·전체 `make check` PASS | native 절 추가 | **신규2행 go_mapping·315/3,362** | 작은 commit2개 push 완료; 다음 native imagedata |
-| Glance native members 5개 | pinned Gophercloud v2.15.0 members requests/results/urls 검토 완료 | 기존 generated facade 유지 | 새2그룹24·전체 `make check` PASS | native 멤버 가이드 추가 | **신규5행 go_mapping·313/3,362** | 작은 commit2개 push 완료; 다음 native imageimport |
-| Glance native images.Create | pinned Gophercloud v2.15.0 Create·CreateOpts·ToImageCreateMap 검토 완료 | 기존 generated facade 유지 | 새2그룹13·전체 `make check` PASS | native 생성 가이드 추가 | **신규1행 go_mapping·308/3,362** | 작은 commit2개 push 완료; 다음 native members |
-| Glance native images.List | pinned Gophercloud v2.15.0 List·ToImageListQuery·ImagePage·BuildQueryString 검토 완료 | 기존 generated facade 유지 | 새2그룹8·전체 `make check` PASS | native 목록 가이드 추가 | **신규1행 go_mapping·307/3,362** | 작은 commit2개 push 완료; 다음 native images.Create |
-| Glance native images.Get | pinned Gophercloud v2.15.0 Get·Extract·UnmarshalJSON 검토 완료 | 기존 generated facade 유지 | 새2그룹16·전체 `make check` PASS | native 조회 가이드 추가 | **신규1행 go_mapping·306/3,362** | 작은 commit2개 push 완료; 다음 native images.List |
-| Nova Python proxy·직접 삭제 ignore_missing | 1,103 → 1,174 (+71) | 새 47그룹·전체 gate(155 package) PASS | `19a7ade0`·`58f54d42`·`dd2db375` push 완료 |
-| 핵심 Python proxy 첫 병렬 묶음·noauth·swauth | 1,011 → 1,103 (+92) | 새 65그룹·전체 gate(155 package) PASS | `bb87cb7c`·`1287fd61`·`297994a7`·`307f0467` push 완료 |
-| Keystone 잔여 native·sdkgen 결함 3건 | 972 → 1,011 (+39) | 새19그룹·sdkgen 회귀3·전체 gate(153 package) PASS | `55e1d001`·`c16e49de`·`8c5b9287`·`11261eaf` push 완료 |
-| 핵심 admin 병렬 8묶음 | 737 → 972 (+235) | 새94그룹·전체 gate(146 package) PASS | `c3ce712d`·`80d5f3e0`·`8d04f4eb`·`01e28db7`·`46048d30` push 완료 |
-| Cinder native QoS specs | 727 → 737 (+10) | 새2그룹32·전체 `make check`(109 package) PASS | `97ac8acc`·`f0ccc0c7`·`03d074c6` push 완료 |
-| Cinder native backup admin calls | 719 → 727 (+8) | 새4그룹36·전체 `make check`(108 package) PASS | `ec6b5663`·`43465118`·`d463bdd9` push 완료 |
-| Cinder native volume snapshot admin actions | 711 → 719 (+8) | 새3그룹46·전체 `make check`(108 package) PASS | `86811078`·`ac117b34`·`d67be278` push 완료 |
-| Nova native security group proxy | 701 → 711 (+10) | 새2그룹30·전체 `make check`(108 package) PASS | `ef71d203`·`12d07bed`·`bc4d1410` push 완료 |
-| Keystone v3 native trusts user-self calls | 692 → 701 (+9) | 새4그룹20·전체 `make check`(107 package) PASS | `e97ab5c2`·`91598b0b`·`8a13c9b0` push 완료 |
-| Keystone v3 native credentials | 676 → 692 (+16) | 새6그룹50·전체 `make check`(105 package) PASS | `e2c16439`·`afb290da`·`f73f368f`·`220e3998` push 완료 |
-| Keystone v3 native tokens catalog | 671 → 676 (+5) | 새4그룹·생성기 3사례·전체 `make check`(102 package) PASS | `9be824ab`·`54c82805`·`be42d62f`·`ba47812f` push 완료 |
-| Swift native objects | 663 → 671 (+8) | 새6그룹·전체 `make check`(101 package) PASS, `Create` unresolved | `d6db09fd`·`cedebdf7`·`4d4678f2` push 완료 |
-| Swift native accounts containers | 655 → 663 (+8) | 새6그룹·전체 `make check`(101 package) PASS | `8235ad2e`·`639de41e`·`18435016` push 완료 |
-| Cinder v2 native snapshots backups transfers zones | 639 → 655 (+16) | 9그룹54·전체 `make check`(101 package) PASS, 2행 unresolved | `02f29e82`·`a5f6a9ea`·`70a79fdc` push 완료 |
-| Cinder v2 native volume user calls | 620 → 639 (+19) | v3 이식 6그룹84·전체 `make check`(97 package) PASS | `9b322c9f`·`9f69b50c`·`e36f2692` push 완료 |
-| Cinder v3 native volume type reads | 616 → 620 (+4) | 새2그룹15·전체 `make check`(96 package) PASS | `b1387189`·`1f4d9da6`·`b6134317` push 완료 |
-| Cinder v3 native transfers availability zones versions | 609 → 616 (+7) | 새6그룹18·생성기 3사례·전체 `make check`(95 package) PASS | `b1cf94ad`·`d1bd9856`·`64523f5b`·`8e8f39d2`·`9ed94827` push 완료 |
-| Cinder v3 native backups user calls | 602 → 609 (+7) | 새2그룹22·기존 Update 3그룹·전체 `make check`(92 package) PASS | `392dd692`·`9c4e689a`·`a26a31c9` push 완료 |
-| Cinder v3 native attachments | 595 → 602 (+7) | 새3그룹25·전체 `make check`(92 package) PASS | `fc493906`·`7f514dc6`·`8a4048a5` push 완료 |
-| Cinder v3 native snapshots | 589 → 595 (+6) | 새3그룹22·전체 `make check`(91 package) PASS, `WaitForStatus` unresolved | `6f416936`·`c43433b3`·`b67fbc9e` push 완료 |
-| Cinder v3 native volume user actions | 576 → 589 (+13) | 새3그룹63·전체 `make check`(90 package) PASS | `eaab9696`·`d864b0dd` push 완료 |
-| Cinder v3 native volumes CRUD list wait | 570 → 576 (+6) | 새3그룹21·전체 `make check`(90 package) PASS | `5c2ebe50`·`a07e78cb`·`d5ee2a45` push 완료 |
-| Neutron native tap mirrors | 565 → 570 (+5) | 새2그룹16·전체 `make check`(89 package) PASS | `8270f33e`·`2923f276` push 완료 |
-| Neutron native VPNaaS | 540 → 565 (+25) | 새10그룹75·전체 `make check`(88 package) PASS | `a0acba52`·`d8bf1110` push 완료 |
-| Neutron native FWaaS v2 groups policies rules | 521 → 540 (+19) | 새7그룹62·전체 `make check`(83 package) PASS | `ddaa5995`·`1b79e5be` push 완료 |
-| Neutron native attribute tags API versions extensions | 511 → 521 (+10) | 새6그룹·전체 `make check`(80 package) PASS | `f19a18d9`·`9db4cc68` push 완료 |
-| Neutron native address groups RBAC policies | 499 → 511 (+12) | 새5그룹40·전체 `make check`(77 package) PASS | `bd07075c`·`18cb9c37` push 완료 |
-| Neutron native QoS policies rules rule types | 478 → 499 (+21) | 새6그룹69·전체 `make check`(75 package) PASS | `a1765737`·`d1c4fbc7` push 완료 |
-| Neutron native trunks port forwarding | 466 → 478 (+12) | 새5그룹42·전체 `make check`(72 package) PASS | `cac35164`·`245b5b26` push 완료 |
-| Neutron native subnet pools address scopes | 455 → 466 (+11) | 새6그룹43·전체 `make check`(72 package) PASS | `d9cc33af`·`3e2053b1` push 완료 |
-| Neutron native routers extra routes | 444 → 455 (+11) | 새4그룹16·전체 `make check`(68 package) PASS | `6db675ce`·`ef10a720` push 완료 |
-| Neutron native security groups rules floating IPs | 431 → 444 (+13) | 새8그룹42·전체 `make check`(66 package) PASS | `62d7da9f`·`0c6bda05` push 완료 |
-| Neutron native networks subnets ports | 419 → 431 (+12) | 새6그룹39·전체 `make check`(63 package) PASS | `240509e9`·`0186aa45` push 완료 |
-| Nova native compute read APIs | 411 → 419 (+8) | 새8그룹30·전체 `make check`(60 package) PASS | `21e37c94`·`6e2121d7` push 완료 |
-| Nova native server groups and attachments | 399 → 411 (+12) | 새6그룹42·전체 `make check`(56 package) PASS | `9d68e275`·`25cd3f8f` push 완료 |
-| Nova native tags | 393 → 399 (+6) | 새2그룹26·전체 `make check`(53 package) PASS | `741fb2dc`·`c2d19dfd` push 완료 |
-| Nova native servers addresses console wait | 389 → 393 (+4) | 새3그룹14·전체 `make check`(52 package) PASS | `17bc0b3b`·`a4fbadb8` push 완료 |
-| Nova native servers user actions | 369 → 389 (+20) | 새4그룹111·전체 `make check`(52 package) PASS | `dd12abe8`·`c15ee53a` push 완료 |
-| Nova native servers metadata | 363 → 369 (+6) | 새2그룹25·전체 `make check`(52 package) PASS | `41f464e9`·`51242330` push 완료 |
-| Nova native servers CRUD | 357 → 363 (+6) | 새4그룹29·전체 `make check`(52 package) PASS | `9168bc58`·`4cadc4ff` push 완료 |
-| Barbican Python find_container·find_order | 355 → 357 (+2) | 새2그룹8·전체 `make check` PASS | `0f187761`·`bceed143`·`582c7662` push 완료 |
-| Barbican Python secret ACL 4개 | 351 → 355 (+4) | 새3그룹15·전체 `make check`(51 package) PASS | `d1e5b2b6`·`8374c556`·`dc7c9ade` push 완료 |
-| Barbican native acls 8개 | 343 → 351 (+8) | 새2그룹35·전체 `make check`(50 package) PASS | `646e7a9b`·`519fa5d9` push 완료 |
-| Barbican native orders 4개 | 339 → 343 (+4) | 새2그룹18·전체 `make check`(49 package) PASS | `21c4e5e7`·`72b6414f` push 완료 |
-| Barbican native containers 9개 | 330 → 339 (+9) | 새3그룹39·전체 `make check`(48 package) PASS | `6a22fbcb`·`aaf53acc` push 완료 |
-| Barbican native secret metadata 6개 | 324 → 330 (+6) | 새2그룹32·전체 `make check` PASS | `9a6b9910`·`17c5092a` push 완료 |
-| Barbican native secrets 5개 | 319 → 324 (+5) | 새3그룹24·전체 `make check`(47 package) PASS | `d1ac3545`·`8e82d028` push 완료 |
-| Glance add_image_location | 318 → 319 (+1) | 새2그룹34·기존 3그룹 수정·전체 `make check` PASS | `a382f17c`·`177f9f60`·`89b461a0` push 완료 |
-| Glance native imagedata 3개 | 315 → 318 (+3) | 새2그룹7·전체 `make check` PASS | `2d318e7d`·`b7927fdb` push 완료 |
-| Glance native imageimport 2개 | 313 → 315 (+2) | 새2그룹11·전체 `make check` PASS | `e4b7b212`·`108b07f7` push 완료 |
-| Glance native members 5개 | 308 → 313 (+5) | 새2그룹24·전체 `make check`(46 package) PASS | `8d60976b`·`5cdbd56e` push 완료 |
-| Glance native images.Create | 307 → 308 (+1) | 새2그룹13·전체 `make check` PASS | `4c96f116`·`0b04de99` push 완료 |
-| Glance native images.List | 306 → 307 (+1) | 새2그룹8·전체 `make check` PASS | `139ecc29`·`3778942c` push 완료 |
-| Glance native images.Get | 305 → 306 (+1) | 새2그룹16·전체 `make check` PASS | `f3c653e6`·`f83ab0b9` push 완료 |
-| Glance Cloud create_image | 304 → 305 (+1) | 새2그룹10·10회 반복·전체 `make check` PASS | `d35410d8`·`9d8d50c8`·`09f5987e` push 완료 |
-| Cinder v3 Proxy create_image | 303 → 304 (+1) | 새2그룹13·전체 `make check` PASS | `6e224837`·`249537cf`·`b1cfeca0` push 완료 |
-| Glance Cloud delete_image | 302 → 303 (+1) | 새3그룹23·전체 `make check` PASS | `abfcdb7e`·`2381134a`·`61f79f2e`·`78b0c67c` push 완료 |
-| Glance Cloud update_image_properties | 301 → 302 (+1) | 새1그룹4·전체 `make check` PASS | `a46250e8`·`3d109207`·`b0aeb599` push 완료 |
-| Glance Cloud download_image | 300 → 301 (+1) | 새2그룹12·전체 `make check` PASS | `e746f5f9`·`53f5ac00`·`5f4d7de8` push 완료 |
-| Glance Cloud wait_for_image | 299 → 300 (+1) | 새3그룹14·20회 반복·전체 `make check` PASS | `eb3a1c38`·`2771798b`·`78d2a6e3` push 완료 |
-| Glance Cloud 이미지 exclude·이름·ID | 296 → 299 (+3) | 새2그룹15·전체 `make check` PASS | `0a4df3f5`·`6f4d80ed`·`e38bedc2` push 완료 |
-| Glance Cloud 이미지 목록·검색·조회 | 292 → 296 (+4) | 새9그룹50·image 전체 race·전체 `make check`·외부 main1개 build PASS | `0b0b69c4`·`3d2dc80f`·`2d4c0a2f`·`77474a48`·`73e2e078` push 완료 |
-| Glance owned ImageRecord download | 290 → 291 (+1) | 새28그룹197·집중413그룹2933·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; `a4688f1b` exact revision 원격 get/build·main2·라이선스16 PASS; 작은 commit/push 완료 |
-| Glance owned ImageRecord upload | 289 → 290 (+1) | 새23그룹151·집중367그룹2631·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
-| Glance owned ImageRecord import | 288 → 289 (+1) | 새24그룹199·집중324그룹2428·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `8c616a27` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
-| Glance owned ImageRecord staging | 287 → 288 (+1) | 새20그룹104·집중244그룹1817·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `046b489d` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
-| Glance owned ImageRecord 속성 helper | 286 → 287 (+1) | 새20그룹128·집중176그룹1339·전체45 package gate·실제 생성1회 drift0·외부 main2개 build PASS | `48d6ef15` exact revision 원격 get/build·main2·라이선스14 PASS; 작은 commit/push 완료 |
-| Glance owned ImageRecord Deactivate/Reactivate | 284 → 286 (+2) | 새12그룹81·집중156그룹1211·전체45 package gate·생성 drift0·외부 main2개 build PASS | `7850ddfb`·`9e718050`·`8d4e89f3` push 완료; Source HTTP 오류 정책 차이 명시 |
-| Glance owned ImageRecord whole/store + native Delete | 282 → 284 (+2) | 새28그룹195·집중144그룹1130·전체45 package gate·생성 drift0·외부 main2개 build PASS | `a011b3aa`·`233167a1`·`b04fa490`·`198c0443` push 완료 |
-| Glance owned MemberRecord Get/Add/Update/Remove | 279 → 282 (+3) | 조회 중복 집계 없음·새22그룹196·집중60그룹847·전체45 package gate·생성 drift0·외부 main2개 build PASS | `a993b5cf`·`48086df6`·`abf27b47`·`36cea3b1`·`4aa85ff4` push 완료 |
-
-완료 수가 그대로인 동안에도 구현·테스트·문서 단계는 갱신합니다. 부분 계약·테스트 수를 API 완료 수에 더하지 않습니다.
+최근 두 작업은 핵심 Neutron cloud의 firewall policy/group 수정 helper입니다.
+정확한 검증 범위는 아래 [현재 작업 현황](#현재-작업-현황)과 판정 JSON을 봅니다.
+과거 사이클별 quota·commit·소스 hash와 반복 보고는 이 계획에서 제거했습니다. 필요한 이력은 Git과 [지원 판정대장](sdk-support-ledger.md)의 검증 근거에서 확인합니다.
 
 ## 서비스 우선순위별 API 집계
 
-`make progress`가 아래 표도 함께 생성합니다. 완료는 `supported`와 `go_mapping`, 부분·미해결 검토는 개별 review가 있지만 `unresolved`인 선언입니다. 미검토는 개별 review가 없는 선언입니다. **서비스별 수는 user/admin 합산이며 1단계 완료율로 해석하지 않습니다.**
+`make progress`가 생성하는 아래 표는 **서비스별 누적 API 매핑**을 비교하기 위한 자료입니다.
+서비스별 수는 user/admin 합산이며 각 구현 단계의 완료율이 아닙니다.
+판정 JSON에 권한별 분류가 완성되지 않아 user/admin 단계별 API 수는 아직 분리 집계하지 않습니다.
 
-고정 Gophercloud/Python 직접 선언과 Cloud 복합 작업을 소스의 주관 서비스에 한 번씩 포함합니다. `_network_common`의 Nova·Neutron 공통 IP 작업은 Network 그룹에서 한 번만 세며, `_coe`는 Container Infra입니다. 실행 시 다른 서비스도 호출하는 작업을 중복 집계하지 않습니다. 고정 소스의 `FileSegment` 4개(`cloud/_utils`)는 Swift, server inventory 3개는 Nova, Identity 버전을 고르는 native `utils.ChooseVersion`은 Keystone에 배정합니다. Python `connection`·`openstackcloud`와 나머지 native common/version utilities는 서비스 공통 기반으로 분리합니다. 상속·descriptor·Resource 전체 표면은 이 분모에 포함되지 않습니다.
+고정 소스의 직접 선언을 주관 서비스에 한 번씩 배정합니다.
+복합 작업이 다른 서비스를 호출하더라도 중복으로 세지 않으며, 상속·descriptor·Resource 전체 표면은 이 분모와 별도로 추적합니다.
 
 <!-- sdk-service-progress:start -->
-| 우선순위 묶음 | 완료 / 대상 | 완료 판정률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
+| 우선순위 묶음 | API 대응 / 대상 | API 대응률 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|---:|
 | 핵심 서비스 · 1·2단계 합산 | 1,981 / 2,158 | 91.8% | 176 | 1 | 134 |
 | 후속 네트워크 · 3·4단계 합산 | 5 / 254 | 2.0% | 13 | 236 | 0 |
@@ -835,7 +57,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **핵심 서비스**
 
-| 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
+| 서비스 | API 대응 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 358 / 379 | 20 | 1 | 10 |
 | Compute / Nova | 287 / 333 | 46 | 0 | 0 |
@@ -848,7 +70,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 
 **후속 서비스 · 네트워크 → 베어메탈 → 나머지**
 
-| 서비스 | 완료 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
+| 서비스 | API 대응 / 대상 | 부분·미해결 검토 | 미검토 | 제외(미지원) |
 |---|---:|---:|---:|---:|
 | Load Balancer / Octavia | 3 / 144 | 7 | 134 | 0 |
 | DNS / Designate | 2 / 110 | 6 | 102 | 0 |
@@ -868,196 +90,133 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | Accelerator / Cyborg | 0 / 35 | 24 | 11 | 0 |
 <!-- sdk-service-progress:end -->
 
-단계별 진행은 현재 다음과 같습니다. 판정 JSON에 권한·user/admin 분류가 없어 각 단계의 완료/전체 수는 **아직 미분류**입니다. 같은 서비스 함수를 user/admin 양쪽에 중복 집계하거나 대기 중인 단계의 기존 완료 기능을 0으로 표시하지 않습니다.
-
-| 구현 순서 | 현재 상태 | 단계별 API 개수 |
-|---|---|---|
-| 1. 핵심 서비스 user API | 진행 중 · Keystone membership·Compute 조회/keypair/console 합성 완료, 남은 user 계약 선별 | user/admin 분리 집계 대기 |
-| 2. 핵심 서비스 admin API | 다음 작업 대기 · 기존 판정 유지, console token 조회의 기본 권한 분류 교정·완료 | user/admin 분리 집계 대기 |
-| 3. 매니지드·후속 서비스 user API | 추가 작업 대기 · 네트워크 → 베어메탈 → 나머지 | user/admin 분리 집계 대기 |
-| 4. 매니지드·후속 서비스 admin API | 추가 작업 대기 · 같은 내부 순서 | user/admin 분리 집계 대기 |
-
-후속 서비스의 기존 완료 수에는 우선순위 조정 전에 구현한 Senlin·Masakari 등의 기능이 포함됩니다. 앞으로의 작업 순서를 뜻하는 단계와 누적 완료 판정을 구분합니다. 0개 완료인 서비스에도 API 파사드나 부분 구현이 있을 수 있으며, 전체 연산의 필수 계약을 닫기 전에는 완료로 세지 않습니다.
+현재 1단계 핵심 user 동작을 보완 중입니다. 2단계 이후에도 기존에 매핑한 기능은 보존합니다.
+후속 서비스의 누적 값에는 우선순위 조정 전에 구현한 기능이 포함되므로 작업 순서와 누적 매핑을 구분합니다.
 
 ## 서비스 우선순위
 
-공통 기반은 해당 작업에 필요한 범위부터 보완합니다. 앞 단계의 미해결 계약을 우선 닫고 다음 단계로 이동합니다. 단계 안에서는 기본 사용 흐름과 그 흐름을 막는 계약을 먼저 처리합니다.
-
-| 순서 | API 범위 | 먼저 완성할 동작 |
+| 순서 | API 범위 | 우선 작업 |
 |---|---|---|
-| 1 | **핵심 서비스 user API** | 인증·프로젝트 선택, 이름/ID 조회, 사용자가 소유하거나 사용할 수 있는 리소스의 기본 CRUD·목록·페이지네이션·대기, 서버 부팅·네트워크·볼륨·이미지·키 관리·객체 저장 흐름 |
-| 2 | **핵심 서비스 admin API** | 운영자 권한을 요구하는 전역 조회·관리, quota·서비스/host·Placement 관리, Cinder `ManageVolume` 등 관리자 action과 관련 기본값·확장·오류 계약 |
-| 3 | **매니지드 서비스 user API** | LBaaS·DBaaS·컨테이너·클러스터 등에서 사용자가 요청·조회·수정·삭제하는 리소스와 상위 작업, 부모 범위·비동기 완료·부분 실패 |
-| 4 | **매니지드 서비스 admin API** | 해당 서비스의 운영자용 전역 관리·quota·서비스/host·관리자 action과 관련 계약 |
+| 1 | 핵심 서비스 user API | 인증·프로젝트 선택, 이름/ID 조회, 기본 CRUD·목록·페이지네이션·대기, 서버·네트워크·볼륨·이미지·키·객체 저장 흐름 |
+| 2 | 핵심 서비스 admin API | 전역 관리·quota·서비스/host·Placement, Cinder ManageVolume 등 관리자 action과 관련 기본값·오류 처리 |
+| 3 | 매니지드·후속 서비스 user API | 네트워크 → 베어메탈 → 나머지의 사용자 리소스·복합 작업, 부모 범위·비동기 완료·부분 실패 |
+| 4 | 매니지드·후속 서비스 admin API | 같은 내부 서비스 순서의 전역 관리·quota·운영자 action |
 
-핵심 서비스 묶음은 **Identity(Keystone), Compute(Nova), Placement, Network(Neutron), Image(Glance), Block Storage(Cinder), Key Manager(Barbican), Object Storage(Swift)**입니다.
+핵심 서비스는 Identity(Keystone), Compute(Nova), Placement, Network(Neutron), Image(Glance), Block Storage(Cinder), Key Manager(Barbican), Object Storage(Swift)입니다.
 
-후속 서비스 묶음은 **Load Balancer(Octavia), DNS(Designate), Bare Metal(Ironic), Bare Metal Introspection, Database(Trove), Container Infra(Magnum), Container(Zun), Clustering(Senlin), Orchestration(Heat), Messaging(Zaqar), Workflow(Mistral), Shared File System(Manila), Instance HA(Masakari), Metric, Reservation(Blazar), Accelerator(Cyborg)** 순서입니다. 이 중 인프라 확장·특화 서비스도 핵심 서비스 뒤에서 같은 user → admin 순서로 진행합니다. 모든 후속 서비스를 배포 형태까지 관리형이라고 분류하는 것은 아닙니다.
+후속 단계 안의 서비스 순서는 다음과 같습니다.
 
-**후속 user API 단계와 후속 admin API 단계 각각에서 네트워크 관련 서비스(Octavia·Designate) → 베어메탈(Ironic·Introspection) → 나머지 후속 서비스 순으로 진행합니다.** 따라서 후속 서비스의 user API를 처리한 뒤 같은 내부 순서로 admin API를 처리합니다. Neutron은 핵심 서비스 묶음에서 먼저 진행합니다. Barbican을 핵심으로 올리고 Swift도 핵심에 유지합니다.
+1. 네트워크: Load Balancer(Octavia), DNS(Designate).
+2. 베어메탈: Bare Metal(Ironic), Bare Metal Introspection.
+3. 나머지: Database(Trove), Container Infra(Magnum), Container(Zun), Clustering(Senlin), Orchestration(Heat), Messaging(Zaqar), Workflow(Mistral), Shared File System(Manila), Instance HA(Masakari), Metric, Reservation(Blazar), Accelerator(Cyborg).
 
-Swift는 일반 Glance 업로드/import의 필수 의존은 아니지만, 고정 openstacksdk의 [Swift 경유 이미지 Task 업로드](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L835-L913)에 필요합니다. `image_api_use_tasks` 분기는 Swift container/object 생성 → Glance import Task → 선택적 대기·이미지 갱신·객체 정리를 연결하며, 이 흐름은 [남은 구현 범위](../image/README.md#전체-api와-남은-작업)에 포함됩니다. 해당 Task 경로의 권한 분류는 고정 소스의 admin-only 설명과 서버 정책을 검토해 핵심 admin 단계에 배치합니다.
+후속 user API를 처리한 뒤 같은 서비스 순서로 후속 admin API를 처리합니다.
+Neutron은 핵심에, Barbican과 Swift도 핵심에 유지합니다. 모든 후속 서비스를 배포 형태까지 관리형으로 분류하는 것은 아닙니다.
 
-현재 Connection의 24개 서비스를 모두 배치했으며, 고정 소스에만 있는 추가 버전·상속·descriptor·Resource 표면도 각 서비스와 권한 범위에 따라 조사합니다.
+Swift는 일반 Glance 업로드의 필수 의존은 아니지만 고정 Source의 Swift 경유 이미지 Task 업로드에 필요합니다.
+이 경로는 container/object 생성 → Glance import Task → 선택적 대기·이미지 갱신·객체 정리를 연결합니다.
+관련 남은 범위는 [Image 안내](../image/README.md#전체-api와-남은-작업)에서 관리하며, Source의 admin-only 설명과 서버 정책을 검토해 핵심 admin 단계에 배치합니다.
 
-user/admin은 SDK 함수 이름이나 CRUD 여부만으로 판단하지 않습니다. 연산의 사용 목적과 확인한 API 권한 정책을 근거로 구분하고, 정책·배포에 따라 달라지는 권한은 차이를 기록합니다. 하나의 함수가 일반 호출과 `all_projects`·force 등 관리자 옵션을 함께 제공하면 **계약 단위로 두 단계에 나눕니다.** 공통 구현을 먼저 완료해도 관리자 분기의 검증이 남으면 해당 전체 연산의 지원 판정은 미완료로 유지합니다. 권한이 미확정인 계약은 분류 근거를 조사하고 미해결로 남깁니다.
+user/admin은 함수 이름이나 CRUD만으로 판단하지 않습니다.
+정책·사용 목적을 근거로 분류하고 `all_projects`·force처럼 한 함수에 관리자 분기가 있으면 검증 동작을 나누어 추적합니다.
+배포별 권한이 미확정이면 근거와 차이를 남깁니다.
 
-핵심 user API는 다음 사용 흐름을 기준으로 진행합니다. 이미 검증한 부분은 재구현하지 않고 연결된 판정의 `remaining`을 확인합니다.
+핵심 user 단계는 다음 흐름의 남은 항목을 우선합니다.
 
-1. **인증과 기본 조회:** Identity의 인증·접근 가능한 프로젝트 선택, 공유 토큰과 endpoint 선택, Nova·Neutron·Glance의 이름/ID·목록·기본값 계약을 확인합니다.
-2. **이미지 기반 서버와 네트워크:** 이미지·flavor·network·port 해석, 서버 생성·대기·삭제, floating IP 선택·재사용·자동 연결과 각 단계의 부분 실패를 닫습니다.
-3. **볼륨과 부팅:** Cinder의 기본 생명주기, 서버 연결·분리, 볼륨·snapshot 기반 부팅과 이미지 연계에서 남은 계약을 닫습니다.
-4. **키 관리:** Barbican의 secret/container 생성·조회·목록·수정·삭제, payload와 접근 권한·옵션의 계약을 닫습니다. 각 리소스가 실제로 제공하는 연산을 소스와 권한 정책으로 확인합니다.
-5. **객체 저장:** Swift의 container/object 생성·목록·업로드·다운로드·삭제, metadata·스트림 소유권·무결성 계약을 닫고 Glance 연계의 공통 기반을 준비합니다. Glance Task 연계는 권한 범위에 맞춰 핵심 admin 단계에서 처리합니다.
-6. **핵심 user API의 나머지 범위:** 사용자가 조회 가능한 quota·limits, 확장 API·이전 버전과 공통 Resource 동작을 끝까지 추적합니다. 프로젝트/사용자/role의 관리자 작업, quota 변경·Placement 관리·관리자 action은 2단계에서 처리합니다.
+- 인증·접근 가능한 프로젝트·공유 토큰·endpoint 선택과 기본 조회.
+- 이미지·flavor·network·port 해석, 서버 생성·대기·삭제, floating IP와 부분 실패.
+- Cinder 생명주기·서버 연결/분리·볼륨/snapshot 부팅·이미지 연계.
+- Barbican secret/container·payload·권한·옵션.
+- Swift container/object·metadata·스트림 소유권·무결성.
+- 사용자 quota/limits·확장·이전 버전과 공통 Resource 동작.
 
-각 흐름은 작은 API/계약 단위로 구현·검증·커밋하고 다음 핵심 흐름으로 이어갑니다. 앞선 작업을 막는 의존 기능이나 기존 공개 API의 회귀가 있으면 필요한 부분을 먼저 처리하고 그 이유와 범위를 이 문서에 기록합니다. 의존 기능 처리는 후속 단계 전체를 앞당기는 것으로 해석하지 않습니다.
-
-다음 후보였던 Cinder `ManageVolume`은 **2단계인 핵심 서비스 admin API의 후보**로 이동하고 착수 시 권한 정책 근거를 확인합니다. 이미 끝낸 순수 Volume 모델 변환 공통화는 유지합니다. Senlin·Masakari 등에서 이미 검증한 기능도 유지하며 후속 미해결 계약의 순서만 뒤로 이동합니다.
+이미 검증한 기능은 재구현하지 않고 연결된 `remaining`을 확인합니다.
+앞선 흐름을 막는 의존 기능이나 회귀는 필요한 범위만 먼저 처리합니다. 이는 후속 단계 전체를 앞당기는 지시가 아닙니다.
 
 ## 구현 단위와 검증 반복의 조정
 
-완료 API를 닫는 속도를 높이기 위해 다음 원칙을 적용합니다. 검증 수준은 유지하고, 같은 기반의 비교·검증·기록을 반복하는 작업을 줄입니다.
+작업을 시작할 때 연산과 필요한 동작 목록을 고정합니다.
+동일한 공통 엔진·profile·descriptor·converter·fixture를 재사용하고, 새 요청·입력·결과·실패 분기에 필요한 검증을 추가합니다.
+공개 Gophercloud testhelper를 재사용할 수 있으면 새 HTTP 테스트 프레임워크를 만들지 않습니다.
 
-- 착수 시 해당 선언의 입력·기본값·확장·반환·오류·페이지·대기 등 실제 필수 계약을 유한 목록으로 고정합니다. 다른 선언의 mutable Resource/session 전체를 해당 API의 포괄적인 미완료 사유로 추가하지 않습니다. Go의 명시적 타입·옵션과 Python의 동적 입력 차이는 문서화하고, 실제 필요한 동작 누락은 구현합니다.
-- 이미 검증한 공통 엔진을 재사용합니다. 선언별 근거는 공통 계약과 실제 binding 검증을 연결하고, 새로운 입력·요청 경로·결과·실패 분기에 필요한 집중 테스트를 추가합니다.
-- 변경에 맞는 집중 검증이 통과하면 구현을 작은 의미 있는 커밋으로 저장합니다. 전체 검증은 변경 범위와 공통 기반의 영향에 맞춰 묶어서 수행하고, 같은 소스의 전체 검증을 판정·문구 갱신마다 반복하지 않습니다. 새 실패나 미해결 위험이 있으면 추가 검증합니다.
-- 기존 부분 판정도 실제 named 계약을 다시 확인합니다. 구현·테스트·문서가 갖춰졌고 필수 누락이 없으면 최종 판정까지 닫고, 실제 누락이 있으면 그 항목만 보완합니다. 함수 생성이나 숫자 증가만으로 완료 처리하지 않습니다.
-- 진행 숫자는 자동 집계하고, 계획과 대장은 현재 단계·검증 근거를 단위 종료 시 함께 갱신합니다. 소스 검토·구현·검증 등의 단계 변화는 대화에도 알리며, 문서/집계 작업 때문에 다음 구현을 오래 지연하지 않습니다.
+의존성 없는 서비스나 검토 작업은 파일 소유를 나누어 병렬 처리할 수 있습니다.
+공통 계약과 통합 범위는 먼저 정하고 root가 공통 수정·Go 검사·중앙 판정·Git 작업을 순서대로 처리합니다.
+승인된 사이클의 범위를 늘려 여러 사이클을 하나로 합치지 않습니다.
+
+집중 검증이 통과한 구현은 작은 의미 있는 커밋으로 보존하고 main에 push합니다.
+전체 검사는 공통 기반과 변경 영향에 맞춰 묶어서 수행합니다.
+같은 Go 소스의 문구·판정 갱신만으로 전체 검사를 반복하지 않으며, 새 코드·실패·미해결 위험이 있으면 필요한 검증을 다시 합니다.
+
+생성 transport나 검증 동작 기록 증가만으로 API 매핑을 올리지 않습니다.
+기존 미해결 연산도 실제 필수 누락을 다시 확인하고, 구현·테스트·문서가 모두 갖춰졌을 때 판정을 바꿉니다.
+범용 Resource/session 목표를 모든 선언의 포괄적인 blocker로 중복해서 붙이지 않습니다.
 
 ## 공통 SDK의 남은 계약
 
-연산의 named Go 기본 profile 판정과 별도로 아래 공통 계약을 추적합니다. 이 항목이 완료되기 전 전체 openstacksdk 동등성이나 전체 목표 완료를 주장하지 않습니다. 선택 기능을 API별 포괄적인 미완료 사유로 반복 추가하지 않되, 실제 누락과 public 선택 경계는 서비스 가이드·판정 JSON에도 명시합니다.
+아래 공통 범위는 연산별 API 매핑과 별도로 추적합니다.
+미완료인 동안 전체 openstacksdk 동등성이나 전체 SDK 목표 완료를 주장하지 않습니다.
 
-| 추적 ID | 남은 구현·검증 | 현재 상태·순서 |
-|---|---|---|
-| SDK-R1 | mutable Resource의 같은 객체 fetch/update, Body/Header/URI component·dirty state·변경 추적과 저장·기본값의 공통 lifecycle | owned immutable view·descriptor·snapshot와 Image 수정의 original/current·sticky dirty·no-op·자동 patch·응답 후 baseline 갱신 구현. Body/Header/URI 전체와 서비스 공통 mutable lifecycle은 미완료; 필수 동작부터 유한 단위로 구현하고 쓰기 권한은 핵심 admin 순서에 연결 |
-| SDK-C1 | 선택적 Adapter cache, conditional GET·ETag/Last-Modified·304 reuse와 invalidation·개별/동시 호출 소유권 | 구현 대기. 현재 GET은 fresh HTTP이며 캐시 동등성 없음. 핵심 user 공통 조회 단계 |
-| SDK-J1 | pinned Proxy._list의 deprecated JMESPath 필터·임의 결과 shape·오류·paging/소유권 계약을 명시적 Go 선택으로 제공 | 공통 JMESPath 기반은 있으나 ImageRecord 목록 binding 미구현; `jmespath_filters`는 ErrUnsupported. 핵심 user 목록 공통 단계 |
-| SDK-S1 | 동적 per-call session·base_path·microversion, adapter와 Resource override의 일관된 우선순위·지원 범위 | 고정 source capture/guard와 concrete 옵션만 구현. 공통 사용자 설정 계약부터 구현; 외부 Python 객체 재현과 Go 타입의 차이를 문서화 |
+| 추적 ID | 남은 구현·검증 |
+|---|---|
+| SDK-R1 | 같은 mutable Resource 객체의 fetch/update, Body/Header/URI component와 dirty state·baseline·기본값의 서비스 공통 lifecycle. Owned view·snapshot와 일부 Image 수정 동작은 있으나 전체 공통화는 미완료 |
+| SDK-C1 | 선택적 Adapter cache, conditional GET·ETag/Last-Modified·304 재사용·invalidation과 호출 간 소유권. 현재 fresh HTTP이며 캐시 동등성 없음 |
+| SDK-J1 | 고정 Proxy 목록의 deprecated JMESPath·임의 결과 shape·오류·paging binding. 공통 기반은 있으나 ImageRecord 목록의 jmespath_filters는 미지원 |
+| SDK-S1 | 동적 per-call session·base_path·microversion, adapter/Resource override 우선순위. 현재 source capture/guard와 구체적인 옵션 범위만 구현 |
+
+연산별로 실제 누락인 status·encoding·raw control·부분 응답·참조 타입 차이는 해당 서비스 가이드와 `remaining`에 명시합니다.
+실클라우드 acceptance와 릴리즈 기준도 로컬 모의 HTTP 검증과 분리해 남깁니다.
 
 ## 작업 단위의 진행 단계
 
-지원 판정과 별도로 각 작업의 소스 검토·구현·테스트·문서·최종 검토를 구분합니다. 부분 구현은 테스트와 문서가 있어도 전체 연산의 `remaining`이 남으면 `unresolved`입니다.
-
-| 단계 | 완료 기준과 남길 근거 |
+| 단계 | 완료 기준 |
 |---|---|
-| 소스 검토 | 핵심/후속 서비스와 user/admin 단계 및 권한 분류 근거를 기록; 고정 source pin의 입력·생략/null/false/zero·기본값·결과·오류·버전·상속 동작을 비교하고 대상 연산 ID와 남은 계약을 기록 |
-| 구현 | 공개 Go API와 SDK 소유 concrete 옵션·기본값·모델·공통 정책을 구현하고 의미 있는 작은 커밋으로 보존 |
-| 테스트 | 실제 요청 경로·body/query/header·응답·실패·취소·부분 성공을 확인하는 계약 테스트와 변경에 맞는 집중/회귀 검증을 실행하고 명령·결과·검증한 revision을 기록 |
-| 문서 | 서비스 사용법과 Python/Go 비교, 기본값·차이·부분 결과를 설명하고 변경한 실행 예제의 빌드 및 링크를 확인 |
-| 최종 검토·지원 판정 | 고정 소스·실제 assertion·문서·실행 결과를 함께 검토하고 `sdk_reviews.json`의 API·계약별 테스트·문서·차이·남은 기능을 갱신; `paritycheck`로 정합성 확인 |
-| 공유 | 구현·테스트·문서·판정을 각각 작은 의미 있는 커밋으로 저장하고 직접 push; 단위 종료 시 이 표와 지원대장의 검증 근거 갱신 |
+| 소스 검토 | 연산 ID·source pin·권한/서비스 단계와 입력·기본값·반환·오류·버전·상속의 필수 동작을 확인 |
+| 구현 | SDK 소유 공개 옵션·기본값·모델·공통 정책을 구현하고 작은 커밋으로 보존 |
+| 테스트 | 요청 path/body/query/header, 응답·실패·취소·부분 성공의 의미 있는 집중/회귀 검증 |
+| 문서 | 서비스 사용법과 Python/Go 비교·기본값·차이·부분 결과, 변경한 실행 예제의 빌드 확인 |
+| 최종 검토·판정 | Source·실제 assertion·문서·실행 결과를 대조해 API/검증 동작/차이/remaining 갱신, 정합성 검사 |
+| 공유 | 승인된 push, 자동 진행 집계와 현재 단계 갱신 |
 
-작업 착수, 구현·집중 검증 완료, 커밋·push, 문서·최종 검토 완료처럼 단계가 바뀔 때 대화에도 진행 상황을 알립니다. 업데이트에는 완료한 기능, 실제 검증 결과, 커밋·push 상태와 다음 작업을 포함합니다. 실행 중인 작업은 60초 이상 안내 없이 두지 않으며, 전체 연산의 남은 계약을 부분 완료와 구분합니다.
+단계는 겹칠 수 있습니다. 구현과 테스트·문서를 함께 작성하고 전체 단위 종료까지 커밋을 미루지 않습니다.
+소스가 바뀌면 영향받는 검증을 갱신하며 이전 revision의 성공을 변경 후 성공으로 옮겨 적지 않습니다.
 
-중간 업데이트는 다음 네 항목을 기준으로 짧게 작성합니다. 단계 전환이 없는 동안에도 새로 확인한 계약이나 실패 원인, 다음 검증에서 확인할 내용을 알립니다.
+대화의 중간 보고에는 다음만 짧게 알립니다.
 
-- **현재 작업·단계:** 서비스와 대상 기능, 소스 검토/구현/테스트/문서/최종 검토 중 현재 단계.
-- **완료·검증 결과:** 실제로 구현한 범위와 실행한 검증 결과. 실행 중인 테스트와 아직 실행하지 않은 검증은 구분.
-- **커밋·push 상태:** 새 커밋과 원격 반영 여부. 의미 있는 변경이 쌓이면 작업 단위 전체가 끝나기 전에도 커밋·push.
-- **남은 작업·다음 행동:** 현재 단위의 미완료 계약과 다음 검증 또는 구현. API 개수를 보고할 때는 전체 연산 판정과 부분 계약 완료를 구분하고, 변화가 있으면 판정 JSON에서 다시 집계.
-
-
-단계는 일부 겹칠 수 있습니다. 예를 들어 계약 테스트와 문서는 구현과 함께 작성하고, 커밋·push도 단위가 완전히 끝날 때까지 미루지 않습니다. 코드가 바뀌면 영향받는 단계의 검증을 다시 확인하며, 이전 revision의 성공을 변경 후 성공으로 옮겨 적지 않습니다.
+- 현재 기능과 진행 단계.
+- 실제로 통과·실패한 검증과 아직 실행 중인 검사.
+- 커밋·push 상태와 현재 묶음의 남은 작업.
+- 숫자를 보고할 때 API 매핑 변화와 검증 동작 기록 변화를 별도로 표시.
 
 ## 현재 작업 현황
 
-아래는 2026-10-10까지의 완료 단위와 다음 작업입니다. 각 행의 판정은 해당 선언의 구현·테스트·문서 근거이며, 전체 Resource/session 등 다른 선언의 목표는 계속 추적합니다. 착수와 단계 전환 때 이 표·집계·검증 기록을 함께 갱신합니다.
+| 대상 | 구현·검증 상태 | 연산 판정 |
+|---|---|---|
+| Cloud firewall policy 수정 | target-first strict 조회·순서 있는 rule 해석·raw 변경 감지 구현. 집중 8그룹·31사례와 전체 205 test package·예제 검사 통과 | 응답·Resource·Find 차이가 남아 unresolved |
+| Cloud firewall group 수정 | target→egress→ingress→ports, null/빈 목록·부분 실패 구현. 집중 9그룹·29사례 통과; 전체 205 test package·예제 검사 통과 | 응답·Resource·port/Find 차이가 남아 unresolved |
 
-| 작업 단위 | 소스 검토 | 구현 | 테스트 | 문서 | 최종 검토·판정 | 커밋·push / 다음 행동 |
-|---|---|---|---|---|---|---|
-| Neutron 선택 조회·조건부 삭제 / Keystone 토큰 병렬 | Source17개·유효 Body 매핑208개 및 token3개 검토 완료 | **Neutron18·Keystone3개 구현 완료** | 새22그룹·집중 race51그룹838 test event·전체155 package gate PASS | 서비스별 Python 비교·정확한 main2개 외부 빌드 PASS | **21개 go_mapping·전체1,195/3,362** | 공통·생성 API·서비스별 테스트·문서를 작은 커밋으로 분리. 독립 서비스 병렬 구현 유지 |
-| Glance Cloud create_image | pinned Cloud `create_image`·wait/timeout cleanup 검토 완료 | image/volume 분기·Cloud 대기·timeout 삭제 완료 | 새2그룹10·10회 반복·전체 `make check` PASS | Cloud 가이드 절 추가 | **신규1행 go_mapping·305/3,362** | 작은 commit4개 push 완료; 다음 native images.Get |
-| Cinder v3 Proxy create_image (Cloud create_image 의존) | pinned `block_storage/v3/_proxy.py` create_image·`Volume.upload_to_image` 검토 완료 | 형식 기본값·upload 액션·`ExistingImageRecord` 완료 | 새2그룹13·전체 `make check` PASS | upload 가이드 절 추가 | **신규1행 go_mapping·304/3,362** | 작은 commit3개 push 완료; 다음 Cloud create_image |
-| Glance Cloud delete_image | pinned Cloud `delete_image`·Proxy `delete_object`/Object.delete SLO 분기 검토 완료 | Find·owned delete·Task 객체 정리·부재 대기 Service API 완료 | 새3그룹23·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·303/3,362** | 작은 commit6개 push 완료; 다음 Cinder v3 Proxy create_image |
-| Glance Cloud update_image_properties | pinned Cloud wrapper의 `image or name_or_id` 검토 완료 | 선택 wrapper·owned helper 위임 Service API 완료 | 새1그룹4·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·302/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image |
-| Glance Cloud download_image | pinned Cloud `download_image`·`_download.py` 출력 분기 검토 완료 | 출력 검사·strict Find·owned 다운로드 연결 Service API 완료 | 새2그룹12·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·301/3,362** | 작은 commit3개 push 완료; 다음 Cloud update_image_properties/delete_image |
-| Glance Cloud wait_for_image | pinned Cloud `wait_for_image`·`utils.iterate_timeout` 검토 완료 | 반복 find·정확한 상태 비교·timeout/간격 옵션 Service API 완료 | 새3그룹14·20회 반복·전체 `make check` PASS | Python 비교 절 추가 | **신규1행 go_mapping·300/3,362** | 작은 commit3개 push 완료; 다음 Cloud delete_image/download_image |
-| Glance Cloud 이미지 exclude·이름·ID | pinned Cloud `_image.py` 3함수·Python `in` 의미 검토 완료 | 공통 search 재사용·exclude 멤버십·Service API3개 완료 | 새2그룹15·전체 `make check` PASS | Python 비교 절 추가 | **신규3행 go_mapping·299/3,362** | 작은 commit3개 push 완료; 다음 wait_for_image |
-| Glance Cloud 이미지 목록·검색·조회 | pinned Cloud `_image.py` 4함수·`_utils._filter_list`·Glance get/list 기본 정책 검토 완료 | 공통 list_images inventory·Cloud 옵션·All/Search/Get/ByID Service API 완료 | 새9그룹50·image 전체 race·전체 `make check` PASS | Python 비교·독립 main 외부 local build PASS | **신규4행 go_mapping·296/3,362** | 작은 commit5개 push 완료; 다음 get_image_exclude/name/id·wait_for_image |
-| Glance owned ImageRecord download | pinned Source16Python+10Glance파일/86 AST·26필수 계약·ordinary user/deactivated admin 전체 검토 완료 | full raw/owned constructor·mandatory fetch/private ID·file/writer/buffer/stream·afterGET checksum/factory·Service/Connection 완료 | 새28그룹197·집중413그룹2933·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·download/설치 main2개 외부 local build PASS | **신규1행 go_mapping·291/3,362**; noFinalGET·raw expected/opaque binary/partial bytes 보존 | 계획ad82f1ee·hash/license76fcb99a·API01423c67 작은 commit; `a4688f1b` 원격 main2·라이선스16 PASS·다음 현대 whole create_image |
-| Glance owned ImageRecord upload | pinned Source26파일/67 AST·20필수 계약·ordinary user/admin metadata 전체 검토 완료 | raw private constructor·metadata POST/translation·borrowed data·signed/inferred size·one PUT·Service/Connection 완료 | 새23그룹151·집중367그룹2631·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·upload/설치 main2개 외부 local build PASS | **신규1행 go_mapping·290/3,362**; noGET·noPUTtranslate·Record/Metadata/Uploaded 보존 | 단계0066f089·공통ce36dcff·API53cb43b0 작은 commit; `a20f06ca` 원격 main2·라이선스14 PASS·다음 whole Download |
-| Glance owned ImageRecord import | pinned Source14Python+10Glance파일/74 AST·16필수 계약·ordinary3/copy-image admin 전체 검토 완료 | private format·raw Method/URI/remote/flags·literal/raw/Attributes/Record store·guarded POST·Service/Connection 완료 | 새24그룹199·집중324그룹2428·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·import/설치 main2개 외부 local build PASS | **신규1행 go_mapping·289/3,362**; noGET·pending/opaque ACK·모든 store JSON 보존 | 공통/API/검증/문서/판정 작은 commit push 완료; `8c616a27` 원격 main2·라이선스14 PASS·다음 whole Upload |
-| Glance owned ImageRecord staging | pinned Source14Python+10Glance파일/72 AST·16필수 계약·modify_image user 정책 검토 완료 | private queued·filename/data·default signed-size inference·shared PUT/header/fetch·Service/Connection 완료 | 새20그룹104·집중244그룹1817·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·staging/설치 main2개 외부 local build PASS | **신규1행 go_mapping·288/3,362**; literal ID noGET·pending Body/actual receipt 보존 | shared/API/검증/문서/판정 작은 commit push 완료; `046b489d` 원격 main2·라이선스14 PASS·다음 complete owned Import |
-| Glance owned ImageRecord 속성 helper | pinned Source11파일/40 AST·18필수 계약·ordinary user/admin 필드 확인 완료 | ordered kwargs/meta·full-list resolver·shared prepared Update·Service/Connection 완료 | 새20그룹128·집중176그룹1339·전체45 package PASS; 실제 생성1회 drift0 | Python 비교·속성/설치 main2개 외부 local build PASS | **신규1행 go_mapping·287/3,362**; bool/noHTTP·literal copy failure 보존 | finite public helper 완료; exact revision 원격 설치·main2·라이선스14 PASS·R1/C1/S1 추적 |
-| Glance owned stage/import/upload/download 전체 Source 감사 | pinned Python13+Glance10파일/66 AST·SHA 2af47c35 유지; Stage72/Import74/Upload67/Download86 AST 추가 검토 완료 | Stage/Import/Upload/Download4개 finite owned public graph 완료 | 4행 실제 gate 완료; 기존 fixture/transfer/private Record/response 엔진 재사용 | 네 owned guide·독립 main 완료 | **4행 go_mapping·legacy44계약과 original refs 보존**; Source 감사만으로 수 증가 없음 | 현대 public create20파일12계약 unresolved; metadata·deprecated upload/leaf import만으로 완료하지 않음 |
-| Glance owned ImageRecord Deactivate/Reactivate | pinned Source8파일/22 AST·project member 정책·Source silentHTTP 오류 확인 완료 | 공통 preparation 재사용·Service/Connection2메서드 완료 | 새12그룹81·집중156그룹1211·전체45 package PASS; 생성 drift0 | Python/Go 비교·main2개 외부 build PASS | **신규2행 go_mapping·286/3,362**; Source 오류 정책 차이 명시 | 7850ddfb·9e718050·8d4e89f3 push 완료; 전체 R1/C1/S1 계속 추적 |
-| Glance owned ImageRecord Delete whole/store + native Delete | pinned Proxy/Store/Resource·native·whole user/store admin 검토 완료 | owned API·공통 strict identity·native ABI 보존/작은 commit push | 집중144그룹1130·전체45 package PASS; 생성 drift0 | Python/Go·native 가이드·main2개 외부 build PASS | **신규2행 go_mapping·284/3,362** | finite owned/native profile 완료; R1/C1/S1 계속 추적 |
-| Glance owned MemberRecord Get/Add/Update/Remove | pinned proxy·Member7 Body/URI·policy 검토 완료 | guarded 옵션·fresh 요청·4개 Connection binding 완료/commit push | 집중60그룹847·전체45 package gate PASS; 생성 drift0 | Python 비교·owner/recipient·main2개 외부 build PASS | **신규3행 go_mapping·조회 중복 없음·282/3,362** | named immutable profile 완료; R1/C1/S1 계속 추적 |
-| Glance owned ImageRecord update | pinned Proxy·raw component·commit·response 8개 Source 검토 완료 | **ID/Record·sticky dirty·no-op·wire/properties·공통 diff·baseline 갱신 완료** | 새25그룹165·집중73그룹540·전체45 package·재생성 drift0 PASS | Python 비교·독립 main2개 외부 local build PASS | **go_mapping1행·전체279/3,362**; R1/C1/S1 별도 추적 | 엔진 dc837814·API c7a79ea0·테스트8178fb38·가이드f768f498 push 완료; 판정 c068cace push 완료; 최종 metadata·원격 main2개·Go SHA/라이선스14개 일치 PASS |
-| Glance raw Body snapshot / native Update | pinned Source raw/dirty/alias/response·9종 patch·server 정책 검토 완료 | **raw current/original 기반 완료**; owned commit/diff는 위 최신 단위에서 완료 | native6그룹47+raw2그룹4·집중75그룹626·전체44 package·생성 drift0 PASS | Python 비교·native/설치 main2개 외부 local build PASS | **native go_mapping1행·당시 전체278/3,362**; 당시 Python update unresolved | 기반2f5b87a2·native b55ed8aa·문서3d901393·판정862eef0b push 완료; 원격 main2개·Go SHA/라이선스14개 일치; owned dirty/commit는 위 최신 단위에서 완료 |
-| Glance ImageRecord 태그 add/remove | pinned Proxy·TagMixin·Resource 준비·default alias·project-member 정책 검토 완료 | **owned Add/Remove·private local tags와 별도 ACK 완료** | 새10그룹98·집중51그룹424·전체43 package gate·반복 생성 drift0 PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체277/3,362**; 공통 Resource/cache/session은 별도 추적 | snapshot/API/leaf/Connection/가이드5개·판정72cf240b push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |
-| Glance ImageRecord status/delete 대기 | pinned defaults·initial shortcut·fresh GET/overlay·404·Unicode16 비교 검토 완료 | **owned 상태/삭제 대기·공통 guard 완료** | 새17그룹132·집중49그룹372·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체275/3,362** | 공통/API/Connection/문서5개·판정180b672b push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 확인 |
-| Glance Image owned 조회·목록·검색 | pinned Body62+inherited2·generic pager·hidden lookup·reader 기본 정책 검토 완료 | **Get/List/All/Find·64 Body+location·Connection 완료** | 새23그룹182·집중123그룹874·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping3행·전체273/3,362** | 구현4커밋·가이드5545c5e6·판정16b2873a push 완료; 원격 main2개 build·Go SHA·라이선스14개 일치 |
-| Glance import 정보·기본 store owned records | pinned Source·server 기본/detail 정책 검토 완료 | **Import4·Store6 owned view·기본 목록·필터·Connection 완료**; 상세는 admin 후순위 | 새15그룹146·집중93그룹556·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **import go_mapping1행·전체270/3,362**; stores는 상세 미완료 unresolved | 구현3개·문서9832ed03·판정95a7c6de push 완료; 원격 main2개 build·Go SHA·라이선스14개 일치 |
-| Glance member owned 목록·검색 | 고정 Source·reader 기본 정책·alias/seed/GET fallback 검토 완료 | **owned 9필드 List/All·GET-first Find 완료** | 새16그룹180·집중206그룹893·Cinder 회귀2사례·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체269/3,362** | 구현5커밋·문서de9f98fa·판정0647ce86 push 완료; 원격 main2개 build·Go SHA/라이선스14개 일치 |
-| Glance object·namespace owned 목록 | pinned descriptor·public kwargs·generic pagination 검토 완료 | **두 leaf의 owned Record/ListRecords 완료** | 새34그룹272사례·집중176그룹2,194·전체43 package gate PASS | Python 비교·정확한 main2개 외부 local build PASS | **go_mapping2행·전체267/3,362** | 코드/테스트7개 commit 49869890~760f546a·문서/판정73f54853 push 완료; 원격 main2개 build·Go SHA/라이선스13개 일치 |
-| Glance object owned 생성·수정·개별/전체 삭제 | 고정 Source7 Body·fresh update·Resource reuse·bulk delete 초기 검토; 기본 정책 admin | 핵심 admin 순서 대기 | 기존 property/association fixture 재사용 예정 | Python 비교·예제 추가 예정 | 네 선언 unresolved 유지 | 핵심 user 완료 뒤 구현 |
-| Glance resource type association owned 생성·삭제 | pinned6 Body·constructor·public Resource reuse·delete/404 검토 완료 | **CreateRecord/DeleteRecord 완료** | 기존34그룹 재사용·새11그룹133사례·집중45그룹753·전체43 package gate PASS | Python 비교·정확한 main3개 외부 build PASS | **go_mapping2행·전체265/3,362** | API2467fdce·leafee2514c5·Connectionfbc88b37 push 완료; 문서1f9c1d7a 원격 main3개 build·Go SHA/라이선스13개 일치 확인 |
-| Glance property owned 목록·삭제 | pinned finite list·두 deletion·identity·has_body=False 검토 완료 | **ListRecords/AllRecords·DeleteRecord/DeleteAllRecords·공통 guard 완료** | 기존13그룹 재사용·새20그룹182사례·집중33그룹274·전체43 package race/vet·최종261 metadata PASS | Python 비교·정확한 main3개/example1개 local/remote build PASS | **go_mapping3행·전체261/3,362** | 구현·검증·문서7개 commit push 완료. [검증 기록](sdk-support-ledger.md#glance-metadef-property-owned-목록삭제-완료) |
-| Glance property owned 생성·수정 | pinned constructor·raw dirty body·POST/PUT·no-op·공개 identity 선택 검토 완료 | **공통 response/location·CreateRecord/UpdateRecord 완료** | 기존33그룹 재사용·새9그룹203사례·집중42그룹477·전체43 package gate PASS | Python 비교·정확한 main4개 local/remote build PASS | **go_mapping2행·전체263/3,362** | 공통/API/leaf/Connection을 별도 commit push. `7b07fe93` 원격 설치·main4개 build·Go SHA/라이선스13개 일치 확인 |
-| Glance property owned 조회 | pinned getter·descriptor·fetch 검토 완료 | **seed/overlay·21필드 view·GetRecord·Connection 완료** | 집중13그룹92·전체43 package race/vet·metadata gate PASS | Python 비교·정확한 독립 main3개 build PASS | **go_mapping1행·전체258/3,362** | `e480edcc`·`ea80c826`·`86d9781f` push 완료. 당시 다음 owned 목록은 위 단위에서 완료 |
-| Cinder `UploadVolumeToImage` | 완료 | 완료 | 집중 14그룹·전체 race·vet 완료 | Python 비교·3개 호출 경로·예제 컴파일 완료 | 해당 Python Proxy 1개 연산 `go_mapping`; native/v2/Resource 등은 별도 | `f9892f5`까지 push 완료. [검증 기록](sdk-support-ledger.md#cinder-v3-volume-image-export), [사용법](../blockstorage/volume-upload-image.md) |
-| Volume 순수 모델 변환 공통화 | 기존 변환 계약 비교 완료 | 완료 | 기존 계약 회귀·전체 race·vet 완료 | 내부 변경을 지원대장에 기록 | 의미 보존 검토 완료, API 지원 승격 없음 | `a35f92f` push 완료. [검증 기록](sdk-support-ledger.md#volume-모델-변환의-공통-내부-계층) |
-| Identity 사용자별 프로젝트·그룹 목록 | native page와 Python 모델·상속 비교 완료 | 반환 모델·추출기 교정 완료 | 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | native 2개 `go_mapping`, Python 2개 부분 판정·정합성 검증 완료 | 코드·테스트 `ff685e9` push 완료. 문서·판정 `4ba94ab` push 완료. [검증 기록](sdk-support-ledger.md#identity-v3-사용자별-프로젝트그룹-목록), [사용법](../identity/v3/users/memberships.md). NIC 선택으로 연결 완료 |
-| Nova 서버 NIC 선택 | cloud·Proxy·native와 capability 정책 비교 완료 | concrete NIC·mode·port 이름 해석·default auto 완료 | 11개 신규 HTTP 그룹·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 관련 3개 부분 판정, 전체 연산 unresolved | 코드·테스트 `55927d3` push 완료. [사용법](../compute/server-network-interfaces.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-nic-선택). 문서·판정 `16d51cc` push 완료 |
-| Nova 서버 생성의 기본 네트워크 | config/cloud/native의 선택·상속·오류·cache 비교 완료 | Connection concrete 옵션·파일 snapshot·YAML 전체 페이지 name/ID 선택 완료 | 신규 12그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | create 3개 부분 판정 갱신·default getter 1개 부분 판정, 전체 연산 unresolved | 코드·테스트 `0355600`·`afb3023` push 완료. [사용법](../compute/server-default-network.md), [검증 기록](sdk-support-ledger.md#nova-서버-생성의-기본-네트워크). 문서·판정 `a61135f` push 완료 |
-| Neutron floating IP 재사용·서버 연결 | 고정 available/create/attach·NAT·cache·cleanup 비교 완료 | Ensure·recorded owner·revision·자동 external/router·빈 페이지 선택 완료 | 신규 9그룹 집중 race·전체 check 완료 | Python 비교·독립 Go 예제 컴파일 완료 | 부분 계약 검토 완료, 전체 cloud 연산 unresolved | 코드·테스트 `51223e7`·문서·판정 `15bb5cc` push 완료. [사용법](../network/floating-ip-ensure.md), [검증 기록](sdk-support-ledger.md#neutron-floating-ip-재사용과-서버-연결) |
-| 서버 생성과 floating IPv4 연결 | 고정 create/wait/available·remaining timeout·주소 수렴 차이 비교 완료 | CreateWithFloatingIP·생성 전 서비스/owner 준비·필수 서버/IP ACTIVE·단일 deadline·부분 결과 완료 | 신규 8그룹 집중 race·전체 check 완료 | Python 비교·정확한 독립 Go 예제 컴파일 완료 | cloud create/available 갱신·cloud wait 부분 판정 추가, 전체 연산 unresolved | 준비 공통화 `bc36b0a`·구현 `14e6d88`·경계 테스트 `50b155d`·문서/판정 `8af4c7b` push 완료. [사용법](../compute/create-with-floating-ip.md), [검증 기록](sdk-support-ledger.md#서버-생성과-floating-ip-연결) |
-| 공유 네트워크 역할 getter·설정·cache | 고정 family·NAT/default·use flags·loader·cache 차이 비교 완료 | 10 getter·2 flag·owned snapshot·성공 cache·Reset·설정 상속/교체 완료 | 신규 9그룹·기존 설정 snapshot assertion·집중 race·전체 check 완료 | Python 비교·정확한 독립 Go 예제 컴파일 완료 | 12개 공개 선언의 부분 계약·정합성 검증 완료, 전체 연산 unresolved | Network `0fc1be8`·Connection `39e376c`·경계 `4551ea7`·문서/판정 `833d1f1` push 완료. [사용법](../network/network-roles.md), [검증 기록](sdk-support-ledger.md#공유-네트워크-역할-조회와-설정) |
-| 공유 역할의 기본 NIC·floating source/NAT 소비 | 고정 default·floating 후보·다중 port NAT·캐시/오류 순서 비교 완료 | configured default·zero external·조건부 NAT가 공유 snapshot 소비 완료 | 신규 10그룹·집중 race·전체 check 완료 | Python 비교·새 독립 workflow 예제 컴파일·기존 4개 main 보존 확인 완료 | 기존 17개 부분 판정 갱신·정합성 검증 완료, 지원 승격 없음 | 기본 NIC `09ddb13`·source/NAT `db79187`·경계 테스트 `9b3bb54` push 완료. [검증 기록](sdk-support-ledger.md#공유-역할의-기본-nicfloating-sourcenat-소비), [사용법](../network/network-roles.md#서버-생성에-같은-설정-사용하기). 문서·판정은 이번 갱신에 포함 |
-| 상위 Network CRUD와 공유 cache hook | 고정 cloud·Proxy·Resource의 생성/수정/삭제·AZ·기본값·cache 차이 비교 완료 | concrete 옵션·owned lookup/응답·접수 후 원래 cache Reset 완료 | 기본 7그룹·경계 12그룹·Connection 1그룹 집중 race 완료; 공통 삭제/조회·HTTP guard·204 7그룹 추가, 전체 40 package check 완료 | Python/Go 독립 예제·기본값/오류·native 모델 한계 작성, 독립 main 컴파일 완료 | cloud 3행 부분 판정 추가·기존 12행 갱신, 전체 gate·예제 컴파일·정합성 검증 완료, 지원 승격 없음 | 공통 오류 `fd863f3`·guard `2d95f3e`·CRUD `69aa03d`·조회 `8d0477d`·경계 `f71e838`·204 `5bfea18` 커밋·push 완료. [사용법](../network/network-mutations.md). 문서 `a1dc85c` push 완료. 판정·단계 기록은 이번 분리 커밋에 포함 |
-| 서버 주소 선택·기존 IP 보충 | 고정 raw/cloud/meta·역할/MAC·IPv6·probe·source/설정 차이 검토 완료 | owned view·public/private/default·Neutron/Nova 보충·Connection lazy/cache·concrete policy 완료 | 신규 23그룹 집중 race·전체 40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크 확인 완료 | cloud getter 2행 부분 판정 추가; 전체 Get/Create/Wait unresolved 유지 | `0cc3815`·`864b0e6`·`bbd39c6`·`5e889a6`·`8e982e4` 커밋·push 완료. [사용법](../compute/server-addresses.md), [검증 기록](sdk-support-ledger.md#서버-주소-선택과-기존-floating-ip-보충). 문서 `726ea3b` push 완료; 판정·단계 기록은 분리 커밋으로 보존 |
-| Floating IP 선택 계획과 실행 | 고정 needs/available/NAT·owner/응답·재선택 차이 검토 완료 | owner-free PrepareEnsure·owned plan·동일 tuple 실행·port 재GET·guarded REST·부분 201/202 결과 완료 | 신규 plan 13그룹·공유 헤더 1그룹·집중 4 package race·전체 40 package check 완료 | Python/Go 비교·정확한 main 최종 코드 컴파일·상대 링크 확인 완료 | 기존 available/native Create 2행 부분 근거 갱신·상태/핀 유지, 자동 cloud 연산 unresolved | 공통 헤더 `0258a1a`·계획 `c2cf46b`·경계 `37692fc`·헤더 범위/PUT `9ea3e22` push 완료. [사용법](../network/floating-ip-plan.md)·문서 `f77250d` push 완료. [검증 기록](sdk-support-ledger.md#floating-ip-선택-계획과-실행)과 판정은 분리 커밋으로 보존 |
-| 자동 IP 필요성·조건부 연결·Nova 수렴 | 고정 needs/skip/source·available/attach·raw Nova wait와 부분 실패 검토 완료 | guarded planner·lazy decision·조건부 Neutron assignment·raw Nova target 관측·부분 결과 완료 | 신규19그룹 집중3 package race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크245개 확인 완료 | add_ips 부분 판정1행·기존 available/getter3행 갱신; 전체 연산 unresolved·지원 승격 없음 | planner `532a1be`·context `744092f`·구현 `64cb181`·경계 `a048624`·BUILD `ba78cd4`·문서 `488a84a` push 완료. [사용법](../compute/server-automatic-ip.md), [검증 기록](sdk-support-ledger.md#기존-서버의-자동-floating-ip-판단연결nova-관측). 당시 미완료한 상위 소비자 통합은 아래 후속 단위에 기록; Nova/full source 계약은 계속 추적 |
-| 자동 IP와 서버 생성·ACTIVE 대기의 통합 | 고정 create/get_active/wait·metadata·fault/삭제·budget 비교 완료 | owned 생성·raw ACTIVE/주소 준비·조건부 IP·known Creation/Server/Assignment·전체 deadline 완료 | 신규16그룹·집중13그룹4 package race·전체40 package check 완료 | Python/Go 비교·정확한 main 컴파일·상대 파일 링크 확인 완료 | create/wait2행 갱신·get_active 부분1행 추가, 전체 연산 unresolved·지원 승격 없음 | 대기 정책 `745f50d`·의존 조회 `3249f71`·통합 `f3ed74a`·경계 `afee318` push 완료. [사용법](../compute/create-with-automatic-floating-ip.md), [검증 기록](sdk-support-ledger.md#서버-생성과-자동-floating-ip-통합). 문서·판정·진행표는 별도 커밋으로 보존 |
-| 기존 서버의 `GetActiveServer`·`WaitForServer` | 고정 status/fault/주소·180초/5초·async/sync·삭제 차이 검토 완료 | 공개 API·비동기 IP·필수 관측·lazy Compute binding 완료 | 새17그룹·관련3 package race·전체40 package check 완료 | Python/Go 비교·정확한 main 컴파일·상대 파일 링크 확인 완료 | get_active/wait2행 근거 갱신·정합성 통과, unresolved 유지·지원 승격 없음 | 공유 `b60264d`·Compute `4a305e6`·Connection `85a3063`·경계 `61982b2` push 완료. [사용법](../compute/server-ready.md), [검증 기록](sdk-support-ledger.md#기존-서버의-active-판정과-상위-대기). 문서 `05a2e60` 보존. 판정·단계는 별도 작은 커밋 |
-| Neutron 접수 후 IP 모델 보존 | owned POST201/202·PUT200·부분 모델·오류 결합 검토 완료 | accepted decode·검증한 PUT 후보 대체 완료 | 새4그룹·기존 plan 회귀2 package race·전체40 package check 완료 | 기존 plan/readiness의 부분 모델·오류 설명·상대 링크798개 확인 완료 | 기존6행 근거 갱신·정합성 통과, unresolved 유지·지원 승격 없음 | 구현 `6ffc6a3`·서버 흐름 `5c6941d`·오류 assertion `b3a7d56`·문서 `96536db`·판정/진행표 `dfa622f` push 완료. 명시 순차 연결의 부분 결과 기반; 아래 Attach 단계에 연결 |
-| 기존 Floating IP의 고정 연결 | Python 주소 선택·Neutron 연결·owner/재연결·revision 차이 검토 완료 | owner-free Attach·정확 주소/ID·고정 tuple·조건부 PUT·부분 결과 완료 | 새10그룹·기존 plan/서버 흐름2 package race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·최종 상대 링크990개 확인 완료 | HTTP 증거·Tags 소유권·오류 원인 보완, 신규 add_ip_list 부분1행 unresolved·최종 parity 통과·지원 승격 없음 | 구현 `413e83b`·기본6그룹 `2e59e28`·경계 `e68f037`·문서 `41d17ae`·판정/진행표 `d3c9ef4` push 완료. [사용법](../network/floating-ip-attach.md), [검증 기록](sdk-support-ledger.md#기존-floating-ip의-고정-연결). 후속 순차 IP·pool 소비자와 standalone source registry는 아래 별도 단위에 기록 |
-| standalone IP 흐름의 lazy Compute source registry | cached API/Servers/Flavors 변경 재현 완료 | 공통 준비 단계에서 operation source registry 유지 완료 | 신규 Connection1그룹·집중3 package race 완료 | IP dispatch 문서에 검증 범위·source 실패 보존 기록 완료 | 기존 계약 근거·최종 parity 완료, 지원 승격 없음 | 수정 `71e8962` push 완료. 접수 IP·마지막 raw Server를 보존하고 source 변경 직후 후속 요청 중단 |
-| 명시 IP 목록·pool의 선택·연결 흐름 | 고정 pool > ips > auto·backend·주소 순서·부분 실패 검토 완료 | concrete selector·ordered Attempts·Plan/Ensure/Get/Wait/Create 소비 완료 | 신규 Compute13·Connection2그룹·집중3 package race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·상대 파일 링크 검증 완료 | 기존6행 근거 갱신·최종 parity 완료, unresolved 유지·지원 승격 없음 | 구현 `b2ee2af`·Compute 검증 `7028370`·Connection 검증 `bc8d096`·사용 문서 `e8dff01` push 완료. [사용법](../compute/server-ip-dispatch.md), [검증 기록](sdk-support-ledger.md#명시-ip-목록과-pool의-상위-연결-흐름). 독립60초/async entry는 아래 후속 단위에 기록; Nova/full source 계약은 계속 추적. 기존 서비스 우선순위·전체 목표 유지 |
-| 독립 AddIPsToServer·AddIPList | 고정60초/async·상태 gate 부재·필수 empty 목록·raw wait·pool 차이 검토 완료 | 공개 Service/Connection·concrete options·동기 raw-only profile·강한 기존 readiness 유지 완료 | 신규 Compute11·Connection3그룹·집중 race·전체40 package check 완료 | Python/Go 비교·독립 main 컴파일·상대 파일 링크 검증 완료 | 기존3행 근거 갱신·최종 parity 완료, unresolved 유지·지원 승격 없음 | 구현 `b5b4174`·기본 검증 `4d2ae19`·강화 `f4fa8a9`·사용 문서 `c3feb51` push 완료. 진행·판정 기록은 별도 커밋으로 공유. [사용법](../compute/server-ip-helpers.md), [검증 기록](sdk-support-ledger.md#독립-서버-ip-helper). 후속 Nova 실행은 다음 행에서 검증했습니다. 남은 named cloud 계약을 계속 처리합니다 |
-| Legacy Nova floating IP backend | 고정 Nova available/create/attach·pool·normalization·버전/오류 차이 검토 완료 | 실제 list/선택/할당·compat GET·add action·별도 NovaAssignment·기존 소비자 통합 완료 | 신규 Compute21·Connection4의25그룹 집중 race·전체40 package check 완료 | Python/Go 사용법·기존 설명 교정·독립 main 컴파일·상대 파일 링크 검증 완료 | 기존6행 갱신·최종 parity·정적 검토 완료; 전체 연산 unresolved 유지·지원 승격 없음 | 구현 `d8b4d10`·검증 `03b994c`/`fc0d79b`/`1d96736`/`5b13e09`·오류 경계 `611f0fe`·주석 `4f8a1bf` push 완료. 문서 `30a06ae`·`2a2ed9d` 분리 커밋. [사용법](../compute/server-nova-floating-ip.md), [검증 기록](sdk-support-ledger.md#legacy-nova-floating-ip-backend). 독립 조회·생성·삭제는 아래 완료 행에서 검증했습니다. Available 반환 view·선택 순서는 후속 완료 기록으로 연결했습니다 |
-| 독립 Floating IP availability | 고정 free-first·optional Server·NotFound·normalization 비교 완료 | Network·Compute·Connection API와 actual backend·접수 부분 결과 완료 | 신규 Network7·Connection/Service8의15그룹·Nova 회귀 집중 race·전체40 package check 완료 | Python 비교·정확한 독립 main2개 컴파일·상대 파일 링크 검증 완료 | availability1행 부분 계약11개 추가·최종 parity·정적 검토 완료; unresolved 유지·지원 승격 없음 | 구현 `6de0c4d`·검증 `695ccb4`·경계 `78bd573`·상위 `3cb2689`·검증 `d4c23f7`·terminal `3949ec4` push 완료. 문서 `f7b2e8b`·`60f292a`·`c92120d` push 완료; 판정 `2274394` 분리 커밋. [상위 사용법](../compute/floating-ip-available.md)·[Neutron 사용법](../network/floating-ip-available.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-availability). 독립 pool/IP 조회·생성·삭제는 아래 완료 행으로 연결했습니다. Available 보완 결과는 후속 완료 행에서 추적합니다 |
-| 독립 Floating IP 목록·검색·단건·pool 조회 | 고정 cloud6연산·dict/JMES·404·Resource/Nova 정규화 비교 완료 | Service·Connection API6개·owned view/Wire·공통 concrete 옵션 완료 | 기존25+신규 회귀3그룹·관련 집중 race·최종40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·기존 Go fence/상대 파일 링크 확인 완료 | Cloud6개 go_mapping; Neutron eager descriptor/local filter·빈 nested dict 오류 수정·판정 정합성 완료 | 기존 코드 push 완료; 수정 `e4dfabe`·회귀 `f839131`·최종 문서/판정 `73bcfba`까지 push 완료. [사용법](../compute/floating-ip-queries.md)·[검증 기록](sdk-support-ledger.md#floating-ip-named-계약-재검토와-현재-집계)
-| 독립 Floating IP 삭제·공개 조회 재검증 | 고정 cloud retry·DELETE helper·일반 Get·passive 응답·버전 차이 검토 완료 | Service/Connection·SDK 소유 옵션·논리 Attempts·접수/조회 proof 완료 | 신규 HTTP20·pure3의23그룹·관련88그룹 집중 race·전체40 package check 완료 | Python/Go 비교·정확한 독립 main 컴파일·기존 Go 예제/상대 파일 링크 확인 완료 | 기존23그룹·22계약 재감사 완료; named Cloud 삭제1개 go_mapping, 다른 Proxy/Resource 선언은 별도 | 공유 조회 `8d08c61`·구현 `98b5c7e`·옵션 `5a9a5ff`·기본 `eb14968`·경계 `bb52340`·success guard `0880f87`·문서 `edeabe2`/`86c79bd` push 완료. 판정 `afb6063`·진행 기록은 별도 작은 커밋. [사용법](../compute/floating-ip-delete.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-삭제와-공개-조회-재검증). 후속 Create·wait/timeout 정리와 미연결 IP 삭제는 아래 두 완료 행에서 검증했습니다 |
-| 독립 Floating IP Create·선택적 wait/timeout 정리 | fresh·port 우선·Network/pool presence·Resource seed·wait-only60초·cleanup 비교 완료 | Neutron·Nova·Service/Connection·wait/cleanup 구현 완료 | 신규24그룹·조회 회귀3그룹·集中157그룹 race·최종40 package check 완료 | Python 비교·정확한 독립 main 컴파일·상대 링크 검증 완료 | Cloud Create1개 go_mapping; 실제19계약·24신규그룹 연결 | 코드·테스트 `bf3024a`, 가이드 `6af6a88`, 판정 `e1a580a`, 집계 `73bcfba`까지 push 완료. [사용법](../compute/floating-ip-create.md)·[검증 기록](sdk-support-ledger.md#독립-floating-ip-생성과-조회-완료). 후속 미연결 IP 삭제는 다음 완료 행에서 검증했습니다 |
-| 미연결 Floating IP 일괄 정리 | Neutron gate·eager inventory·port truthiness·false/error·retry·fallback backend 비교 완료 | Service/Connection·기존 concrete Delete 옵션·owned partial Count/Items 완료 | 신규 HTTP12그룹·집중 race169그룹·`b75fc9c` 전체40 package check 통과 | Python 비교·정확한 독립 main 컴파일·문서 링크 확인 완료 | Cloud named1개 go_mapping·실제14계약·12신규그룹 연결 | 공통 `b0bcc4c`·구현 `14ed0f6`·검증 `27da548`/`b75fc9c` push 완료. 문서 `158c2fd`/`9d066b4`·판정 `0136cfa`·집계 `e56409b` push 완료. [사용법](../compute/floating-ip-unattached-delete.md)·[검증 기록](sdk-support-ledger.md#미연결-floating-ip-일괄-정리). 다음: 남은 핵심 user 계약 |
-| `AvailableFloatingIP` 반환 view와 남은 선택 순서 | 고정 소스 비교 완료 | **Resource/Wire·location·strict·옵션 snapshot/guard 구현 완료** | 신규 HTTP 7그룹·`239eb9e` 전체 40 package check PASS | Python 비교 갱신·정확한 독립 main 컴파일 PASS | unresolved 유지; 필수 3개 중 view 연결 1개 구현·집중 검증 완료 | 구현 `4897448`·검증 `cf2c5e1`/`239eb9e` push 완료. 문서·전체 검증 완료; Neutron 내부 fallback → Nova raw 필터·list404 생성 순서의 2항목을 이어서 보완 |
-| `AvailableFloatingIP` 직접·외부 Nova 선택 | 고정 raw 필터·전체 정규화·list404/fresh 순서 검토 완료 | **Query/Create 재사용·Inventory/Creation·optional typed projection 완료** | 기존 fixture 재사용 HTTP4그룹·관련3 package 집중 race·전체40 package check PASS | Python 비교·오류/부분 결과 사용법 갱신 | unresolved 유지, 필수 remaining **2→1** | 구현 `3b00178`·검증 `b9ef579`·사용법/판정 `099caaa` push 완료. Neutron 내부 목록 fallback·로컬 필터·선택 network allocation은 다음 단위 |
-| `AvailableFloatingIP` Neutron 내부 선택·named 완료 | 고정 public list·filter·fresh 소스 검토 완료 | **Query/Create/Allocate·concrete plan 재사용 완료** | 기존 fixture 재사용 HTTP9그룹·typed NAT3사례·집중 race·전체40 package check·smoke5흐름 PASS | 전체·Compute·Network 사용법 갱신; 기존 독립 main fence 보존 | **go_mapping, remaining1→0; 전체176/3,362** | 공통 준비 `d190fd6`·NAT `2c5e2c8`·구현 `c434d93`·검증 `6bf368b`·사용법 `b1cb273`. 내부 inventory와 외부 availability를 구분, accepted 오류의 재할당0 |
-| Compute flavor·metadata 두 이름·keypair·console 조회5개 | pinned source 입력·기본값·응답 비교 완료 | ConsoleOutput 생략/0 owned 옵션 완료; 기존 조회 API 재사용 | public helper/fault fixture·집중15그룹·전체41 package gate PASS | Python 비교·독립 main·원격 설치 build PASS | **go_mapping5행·전체211/3,362** | `e53d34fe`·`bfac16ad`·`f32680a5` push 완료. 기존513 reviews/catalog 보존,17계약 추가; [가이드](../compute/user-read-apis.md) |
-| Compute remote console·keypair 삭제 및 native3개 | pinned source 기본값·seed/응답·직접 native 계약 검토 완료 | SDK 소유 CreateConsole·DeleteKeypair 완료, native ABI 유지 | public helper·기존 fixture6그룹·shared classifier2그룹·전체41 package gate PASS | Python 비교·독립/원격 main build PASS | **5개 go_mapping·전체216/3,362** | `bdab3a84`·`a6f44ea2`·`1d159655` push 완료. 기존518 reviews/catalog 보존·17계약 추가; [가이드](../compute/user-actions.md) |
-| Compute keypair 생성·legacy console URL 및 native Create | nullable 속성·ID/name 별칭·view 기본값·6개 legacy action·native ABI 검토 완료 | **CreateKeypair·ConsoleURL 완료** | public fixture6그룹·shared bool/clone2그룹·전체41 package gate PASS | Python 비교·독립/원격 main build PASS | **3개 go_mapping·전체219/3,362** | `df34b6f6`·`23df3da5`·`0851b89c` push 완료. 기존523 reviews/catalog 보존·12계약 추가 |
-| Compute create_console의 modern/legacy 자동 선택 | endpoint 범위·selected tuple·기본 null·dict·status/self-link 조사·감사 완료 | **Service.CreateConsole·공통 discovery 완료** | public fixture 재사용·기존12그룹·집중16그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체220/3,362** | `537b6531`·`963fb1bc`·`2ff3f866` push 완료. catalog/기존524행 보존·direct 설명2행 교정·새6계약 |
-| Compute console auth-token 조회 | 고정 Resource.fetch·selected/max·location 순서·Nova 기본 권한 확인 완료 | **SDK 소유 조회·Cinder MemberGet 공통화 완료** | 기존9그룹·새3그룹42사례·집중12그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping1행·전체221/3,362** | **2단계핵심 admin으로 user 분류 교정.** 공통 `e742005c`·구현/테스트 `8e9a7827`·문서 `40dbb0ea` push 완료; 다음은 핵심 user |
-| Compute keypair 목록·찾기 및 native List | 고정 source·own-user/foreign-owner·native 계약 검토 완료 | **SDK 소유 ListRecords·FindKeypair·공통 reader/GET binding 완료** | 기존91그룹 재사용·집중98그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping3행·전체224/3,362** | 공통 `c50e9ce8`·`a28c3e92`·목록 `48355084`·검색 `e78609f7`·문서 `2490e481` push 완료. 기존528 reviews/catalog 보존·새12계약; [가이드](../compute/keypairs-list-find.md) |
-| Flavor extra-specs 명시 조회·Cloud keypair5개·native1 | 고정 source·dict view·필터 presence·location·삭제 기본값 검토 완료 | **FetchExtraSpecs·Cloud keypair5개 완료** | 공통40그룹·집중46그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping7행·전체231/3,362** | `58662346`·`cb3f7866`·`df3afaea` push 완료. 기존531 reviews/catalog 보존·새24계약 |
-| Flavor property·Cloud ID 조회 및 native3개 | 고정 source와 native DTO/string-map/linked-page 차이 검토 완료 | **공통 reader·GetExtraSpecsProperty·GetFlavorByID 완료** | 기존28그룹·집중35그룹·전체42 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping5행·전체236/3,362** | `b3e55994`·`74c97ec4`·`88f008e5`·`3d446f60` push 완료. 기존538 reviews/catalog 보존·새15계약 |
-| Flavor owned 목록·검색 | source2개·descriptor/default/query/continuation·location 대조 완료 | **ListRecords/FindFlavor·Service 연결 완료** | 기존41그룹·집중53그룹·새 API84사례·전체43 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping2개·전체238/3,362** | 구현6커밋·문서 `037bd153` push 완료. 다른542 reviews/catalog 보존·Find8계약 유지·새10계약 |
-| Cloud Flavor 목록·검색·단건 조회 | 고정 defaults/eager-order/직접 Find 분기 대조 완료 | **공통 옵션 경계·Cloud3개 연결 완료** | 기존56그룹·집중60그룹·새 API51사례·전체43 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping3개·전체241/3,362** | `d4fe3202`·`5c400b22`·`60ab3f30`·`f22a803d` push 완료. 기존544 reviews/catalog 보존·새9계약 |
-| Availability Zone 일반 목록·Cloud 이름 조회 | raw5필드·alias·state 순서·실패 범위·nativeSinglePage 대조 완료 | **owned 일반 목록·Cloud 이름 조회·native stream 교정 완료** | 기존38그룹·집중41그룹·고유 API48사례·전체43 package gate PASS | Python 비교·정확한 독립/원격 main build PASS | **go_mapping2개·Proxy ordinary부분 unresolved1개·전체243/3,362** | 구현3커밋·문서 `2488a769` push 완료. 기존547 reviews/catalog 보존·새12계약; 상세 host admin은 2단계 |
-| 핵심 user API의 나머지 미해결 계약 선별 | 진행 | 대기 | 대기 | 대기 | 대기 | 1단계. 기존 인증·조회와 새 Identity 수정 이후 Nova·Neutron·Glance·Cinder·Barbican·Swift 및 cloud/Resource 계약을 계속 추적 |
-| Cinder `ManageVolume` | 예비 소스 조사 | 공통 모델 준비만 완료, 공개 API 미구현 | API 계약 검증 대기 | 사용 문서 대기 | 미완료, 지원 승격 없음 | 2단계 후보로 이동. 재개 시 조사 결과와 admin 분류를 고정 소스·권한 정책과 비교하고 저장소에 근거 기록 |
-| Glance·Swift Task 업로드 연계 | 현대 생성 전체 graph·Swift/SLO/task 분기 검토 완료 | **CreateImageRecord·CreateCloudImageRecord 연계 완료** | 고정 소스·Task 대기·정리·부분 실패 계약 및 전체 gate PASS | [현대 생성 가이드](../image/image-record-create.md)·[Cloud 가이드](../image/image-record-cloud.md) | **두 named 선언 go_mapping, 중복 집계 없음** | Swift는 핵심 서비스로 유지. 추가 backend 구현은 남은 개별 선언 기준으로 선별 |
-| 매니지드·확장 서비스의 user 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 3단계. 네트워크 → 베어메탈 → 나머지. 기존 완료 기능을 그대로 유지 |
-| 매니지드·확장 서비스의 admin 계약 | 기존 판정별 근거 유지, 권한 분류 예정 | 추가 구현 대기 | 추가 검증 대기 | 추가 문서 대기 | 남은 계약별 미완료 | 4단계. 네트워크 → 베어메탈 → 나머지. 기존 완료 기능을 그대로 유지 |
+이번 두 연산은 API 매핑을 늘린 것으로 보고하지 않습니다. 실제 추가한 동작은 연산별 검증 동작 기록과 테스트로 연결합니다.
+전체 목표는 미완료이며 다음 범위는 핵심 user 단계의 남은 필수 동작에서 별도로 고정합니다.
+반복 자동화는 PAUSED입니다. 이번 승인 범위가 끝나면 새 사이클을 임의로 시작하지 않습니다.
 
 ## 지원 여부와 검증 근거의 관리
 
-| 자료 | 현재 맡는 역할 |
+| 자료 | 역할 |
 |---|---|
-| [전체 catalog](../api/sdk_support_catalog.json) | 두 고정 소스의 직접 선언 ID와 fingerprint. 판정이 없는 선언도 `unresolved`로 추적 |
-| [연산별 판정](../api/sdk_reviews.json) | `supported`·`go_mapping`·`unsupported`·`unresolved`, 공개 API, 계약별 테스트, 문서, Go 차이와 `remaining` |
-| [지원 판정대장](sdk-support-ledger.md) | 단위별 구현 범위, 수동 소스/계약 검토, 실제 QA·예제 검증 결과와 커밋 근거 |
-| 이 문서 | 서비스·사용 흐름의 우선순위와 작업 단위별 진행 단계 |
-| [테스트 안내](testing.md), [검증기 안내](../internal/cmd/paritycheck/README.md) | 실행 명령과 자동 검증 범위 |
+| [전체 catalog](../api/sdk_support_catalog.json) | 고정 소스의 직접 선언 ID·fingerprint와 전체 대상 |
+| [연산별 판정](../api/sdk_reviews.json) | supported/go_mapping/unsupported/unresolved, 공개 API, 검증 동작별 테스트·문서·차이·remaining |
+| [지원 판정대장](sdk-support-ledger.md) | 검증 요약과 이력 근거. 상세 과거 기록은 여기와 Git 이력을 참조 |
+| 이 문서 | 서비스 우선순위·현재 작업·단계별 관리와 자동 집계 |
+| [테스트 안내](testing.md), [검증기 안내](../internal/cmd/paritycheck/README.md) | 실행 방법·자동 검증의 범위 |
+| [릴리즈 기준](release-milestones.md), [설치 안내](install.md) | 로컬 preview와 외부 alpha의 별도 완료 조건·설치 검증 |
 
-현재 실행 로그·세부 소스 대조·검증 receipt 일부는 `/private/tmp`에 보관하고, 검증 요약과 계약별 테스트·문서·커밋 연결을 저장소에 기록합니다. 임시 파일은 장기 보존을 보장하지 않으므로 후속 작업자가 필요한 결론·남은 범위·실행 결과를 저장소 기록만으로 확인할 수 있게 갱신합니다.
+`make check`는 license·vet·race test·판정 정합성·진행 집계·gofmt 등을 확인합니다.
+정합성 검사는 API/테스트 함수/문서 존재와 pin·fingerprint·판정 관계를 검사합니다.
+테스트가 동작을 충분히 증명하는지는 별도 검토가 필요하며, 실제 실행 성공도 실행 결과로 확인합니다.
 
-`make check`는 vet·race test·지원 판정 정합성·gofmt를 실행합니다. `paritycheck`는 API와 테스트 함수 및 문서의 존재, source pin/fingerprint, 판정과 남은 기능의 정합성을 확인합니다. **테스트가 계약을 충분히 증명하는지, 실제 실행이 통과했는지는 수동 검토와 실행 결과로 확인합니다.** 현재 HTTP 테스트는 로컬 모의 서버 검증이며 실클라우드 acceptance나 Python 예제 실행은 별도 미검증 범위입니다.
+Source AST+stub 관찰은 실제 Source의 해당 본문·순서만 증명하며 전체 Python SDK 실행이나 HTTP 검증으로 보고하지 않습니다.
+로컬 모의 HTTP, 예제 Go 빌드·Python AST, 실클라우드 acceptance와 릴리즈 검증을 구분합니다.
+최초 실패와 수리 후 성공도 구분해 필요한 검증 기록에 보존합니다.
 
-최신 지원 판정 개수는 위의 [현재 집계](#현재-집계와-진행-중인-작업)에만 기록하고 판정 JSON에서 다시 계산합니다. 이 집계는 두 소스의 직접 선언 수이며 중복을 제거한 HTTP endpoint 수나 상속 표면을 포함한 전체 SDK 완료율과 다릅니다. 구현·테스트가 있는 연산도 해당 선언의 필수 계약 검토가 남으면 미해결로 유지합니다. 완료된 named 선언에 별도 Resource/session 목표의 남은 작업을 중복 blocker로 붙이지 않습니다.
-
-전체 완료는 [기존 완료 기준](sdk-support-ledger.md#완료-판정)을 따릅니다. 우선순위 조정으로 `unsupported`·`unresolved`를 제외하거나 생성 transport 수를 SDK 완료 수로 바꾸지 않습니다.
+최신 누적 숫자는 자동 집계 두 표에서만 관리합니다.
+이 분모는 중복 제거한 HTTP endpoint 수나 상속 표면 전체가 아니며 검증 동작 기록 수에도 전체 구현률을 붙이지 않습니다.
+전체 완료는 [완료 판정](sdk-support-ledger.md#완료-판정)을 따릅니다. 우선순위 조정으로 미해결·미지원을 지우거나 생성 코드 수를 SDK 완료 수로 바꾸지 않습니다.

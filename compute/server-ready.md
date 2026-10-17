@@ -165,7 +165,7 @@ GetActive의 known non-ACTIVE·ERROR·주소 오류·automatic skip에는 Comput
 
 Go는 상태를 대소문자 구분 없이 비교하며, pinned Python helper는 ERROR/ACTIVE literal을 비교합니다. ERROR는 user failure states를 비워도 반드시 실패입니다. Native Fault 모델은 source의 key 미제공/null/빈 message 구분과 mutable Resource/extra_data taxonomy 전부를 보존하지 않습니다. malformed addresses를 clean absence로 바꾸지 않습니다. 접수된 GET200/203 body에서 동일 ID의 유효한 Server를 확인한 뒤 Close/source/취소 오류가 나면 마지막 모델과 응답 증거를 함께 반환합니다. wrong-ID·malformed envelope는 대상 모델로 채택하지 않습니다.
 
-Neutron allocation의 accepted201/202 응답에서 read/Close/source 오류가 나도 디코드 가능한 body의 IP 모델과 Allocated=true를 보존합니다. malformed·truncated body로 모델을 확인하지 못한 경우 FloatingIP가 nil일 수 있습니다. 실제 ResponseError의 status/header/body·처리 오류·decode/검증 원인을 함께 확인합니다. Get/Wait/Create/Ensure의 [후속 IP 부분 모델 검증](../docs/sdk-support-ledger.md#neutron-접수-응답의-ip-모델-보존)은 matching Nova GET의 모델 보존 검증과 구분합니다.
+Neutron allocation의 accepted201/202 응답에서 read/Close/source 오류가 나도 디코드 가능한 body의 IP 모델과 Allocated=true를 보존합니다. malformed·truncated body로 모델을 확인하지 못한 경우 FloatingIP가 nil일 수 있습니다. 실제 ResponseError의 status/header/body·처리 오류·decode/검증 원인을 함께 확인합니다. Get/Wait/Create/Ensure의 [후속 IP 부분 모델 검증](../docs/history/sdk-support-ledger-2026-10-18.md#neutron-접수-응답의-ip-모델-보존)은 matching Nova GET의 모델 보존 검증과 구분합니다.
 
 raw 조회가 성공하기 전 반환 Server는 supplied 모델의 복사본일 수 있으며, 현재 Nova 상태를 확인한 증거가 아닙니다. 오류 여부·응답 증거·Observed를 함께 확인합니다. GetActive의 async 성공은 요청 접수/모델을 얻었다는 의미입니다. IP ACTIVE 또는 Nova가 목표 floating IPv4를 보았다는 뜻은 `Observed=true`의 sync 완료와 구분합니다. GetActive 기본 async에서 이미 할당한 자원을 자동 삭제하지 않고, association 실패를 새 allocation fallback으로 덮지 않습니다.
 
@@ -181,6 +181,6 @@ supplied Server의 top-level field와 ID는 옵션 callback 전에 캡처합니�
 
 공개 get_active_server/wait_for_server의 typed supplied entry와 Neutron pool → 순차 명시 IPv4 → automatic 소비자를 제공해도 전체 source operation은 unresolved로 추적합니다. Nova의 별도 공개 CRUD·detach/cleanup·함수별 fallback, standalone cloud IP helper의 전체 Resource 반환·정규화, full has_service/config/network/session/Resource model, public/private/interface 필드 expansion, cloud get_server의 lookup/defaultquery/broad Exception·missing retry, fault/extra_data/cleanup 정책과 integer remaining-time budget은 남습니다. Go의 noDELETE와 owned partial-response 정책은 명시한 차이이며 Python의 cleanup 결과와 같다고 주장하지 않습니다.
 
-readiness 기반의 17개 테스트 그룹으로 확인한 입력 상태·비동기 접수·강제 관측·raw metadata·부분 실패·취소·동일 deadline·180초 기본값·옵션 1회 적용·lazy Compute 수명 검증은 [지원대장](../docs/sdk-support-ledger.md#기존-서버의-active-판정과-상위-대기)에 기록합니다. 집중 검증과 전체 gate, 정확한 독립 main의 컴파일·SHA는 실제 결과를 기준으로 구분합니다. Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다.
+readiness 기반의 17개 테스트 그룹으로 확인한 입력 상태·비동기 접수·강제 관측·raw metadata·부분 실패·취소·동일 deadline·180초 기본값·옵션 1회 적용·lazy Compute 수명 검증은 [지원대장](../docs/history/sdk-support-ledger-2026-10-18.md#기존-서버의-active-판정과-상위-대기)에 기록합니다. 집중 검증과 전체 gate, 정확한 독립 main의 컴파일·SHA는 실제 결과를 기준으로 구분합니다. Python runtime·인증된 OpenStack 실행은 검증하지 않았습니다.
 
 Nova assignment가 필요한 GetActive async는 Compute endpoint를 발견해 list/재GET/action을 수행하고 raw 주소 수렴을 기다리지 않습니다. 동기 Get/Wait는 같은 ID의 실제 raw 서버 ACTIVE와 목표 floating IPv4를 확인합니다. 목표 주소가 보이는 BUILD·ERROR도 완료로 처리하지 않습니다. `NovaAssignment`에 actual action202와 pre-action IP를 남기며 Neutron IP ACTIVE 상태를 합성하지 않습니다.

@@ -308,4 +308,4 @@ Connection getter는 두 discovery flag가 false이거나 clean catalog endpoint
 
 [서버 주소 view](../compute/server-addresses.md), [자동 IP 필요성·조건부 연결](../compute/server-automatic-ip.md), [명시 IP·pool 순서](../compute/server-ip-dispatch.md), [Nova backend](../compute/server-nova-floating-ip.md), [생성](../compute/create-with-automatic-floating-ip.md)과 [ready/wait](../compute/server-ready.md)는 각 가이드의 실제 API와 Go 차이를 기준으로 비교합니다. 역할 목록의 대응만으로 그 선언들이나 cloud `create_server` 전체를 완료로 판정하지 않습니다. 위 비교는 고정 소스와 로컬 HTTP 계약의 범위이며 실제 클라우드의 통신 가능성이나 전체 Python parity를 검증한 결과는 아닙니다.
 
-[Network 계약 테스트](roles_test.go)와 [Connection 통합 테스트](../connection_network_roles_test.go)는 분류·페이지·오류·동시 탐색·cache/Reset·설정과 반환값 소유권을 로컬 HTTP fixture로 검증합니다. 전체 검사와 위 독립 Go 예제의 컴파일 결과는 [지원 판정대장](../docs/sdk-support-ledger.md#공유-네트워크-역할-조회와-설정)에 기록했습니다. 인증된 OpenStack 또는 Python 예제 실행 결과는 포함하지 않습니다.
+[Network 계약 테스트](roles_test.go)와 [Connection 통합 테스트](../connection_network_roles_test.go)는 분류·페이지·오류·동시 탐색·cache/Reset·설정과 반환값 소유권을 로컬 HTTP fixture로 검증합니다. 전체 검사와 위 독립 Go 예제의 컴파일 결과는 [지원 판정대장](../docs/history/sdk-support-ledger-2026-10-18.md#공유-네트워크-역할-조회와-설정)에 기록했습니다. 인증된 OpenStack 또는 Python 예제 실행 결과는 포함하지 않습니다.

@@ -238,6 +238,6 @@ Server·AutomaticIP 옵션과 concrete body 입력을 준비해 재사용하며 
 Python 예제와 비교는 고정 source 정적 검토 기준이며 인증된 cloud/Python 실행을 뜻하지 않습니다. 새 HTTP fixture의 이미지/볼륨/NIC·shared cache·known skip·later owner·실제 ACTIVE/metadata·부분 결과·whole deadline 근거와 정확한 main의 최종code 컴파일을 [지원 판정대장](../docs/sdk-support-ledger.md)에 실제 결과만 기록합니다. 해당 source 공개 연산의 remaining이 남으면 unresolved입니다.
 
 
-새 생성 HTTP 테스트, Connection 이름 조회·기본 NIC, resolver 페이지·source 유지 및 공통 대기 정책의 검증 근거는 [지원대장](../docs/sdk-support-ledger.md#서버-생성과-자동-floating-ip-통합)에 기록합니다.
+새 생성 HTTP 테스트, Connection 이름 조회·기본 NIC, resolver 페이지·source 유지 및 공통 대기 정책의 검증 근거는 [지원대장](../docs/history/sdk-support-ledger-2026-10-18.md#서버-생성과-자동-floating-ip-통합)에 기록합니다.
 
 생성 전에 알려진 legacy 버전·selector 미지원은 서버 POST 전에 거부합니다. 생성 이후 Nova API 실패에서는 알려진 Creation·Server·NovaAssignment와 원래 HTTP 오류를 유지합니다. 동기 관측은 실제 서버 ACTIVE를 요구하며 BUILD·ERROR에 목표 주소가 있어도 완료되지 않습니다. Nova assignment는 pre-action raw 모델을 보존하고 합성 IP ACTIVE를 제공하지 않습니다.

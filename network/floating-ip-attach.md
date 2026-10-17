@@ -121,4 +121,4 @@ func run(ctx context.Context, cloud, server, ipID, address, fixed string, execut
 
 계획과 결과는 별도 소유이며 Selection이나 반환 모델의 Tags를 바꿔도 계획을 수정하지 않습니다. zero/실패/다른 service의 계획은 실행할 수 없습니다. source 변경은 sticky 오류이고 복원해도 같은 계획으로 이어가지 않습니다. 412·retry header 변경·그 밖의 실패에 재선택·새 IP allocation·Nova fallback·자동 DELETE가 없습니다.
 
-검증 근거와 전체 남은 범위는 [지원 대장](../docs/sdk-support-ledger.md#기존-floating-ip의-고정-연결)과 [진행표](../docs/implementation-plan.md)를 참고하세요.
+검증 근거와 전체 남은 범위는 [지원 대장](../docs/history/sdk-support-ledger-2026-10-18.md#기존-floating-ip의-고정-연결)과 [진행표](../docs/implementation-plan.md)를 참고하세요.
