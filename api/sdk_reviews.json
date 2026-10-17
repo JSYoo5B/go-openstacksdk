@@ -105051,15 +105051,42 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/update_router",
       "source_fingerprint": "aa06a50620e1989fe510303f2567aad1fca9d7310de39b5a785db8985ac41d0f",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateRouterRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithRouterUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithRouterUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithRouterUpdateOpts"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "SDK-owned six cloud formals distinguish truthy name/gateway network/fixed IPs from nonnull admin state/SNAT/routes, reuse library gateway assembly without creation admin defaults or merging existing gateway state, skip all HTTP when no effective args exist, and commit only raw dirty fields after member/name lookup. No-op and native mutation result remain distinct from lookup evidence.",
+          "tests": [
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateEffectiveValuesAndDirtySelection",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateIneffectiveBeforeServiceLookup",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateNameFallbackAndMissing"
+          ]
+        },
+        {
+          "behavior": "Nonnull routes including [] and false perform fresh complete extraroute discovery before lookup; missing extension drops routes only and can return lookup-free no-op, while other attrs continue. HTTP/late malformed alias/continuation failures never become unsupported-route fallback. Owned options/preflight and canceled-context guards prevent unwanted HTTP; native conflict preserves lookup and no success model.",
+          "tests": [
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateRoutesGateAndDrop",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateExtensionFailureCannotBecomeDroppedRoutes",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateOwnedOptionsAndPreflight",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateOptionCancellationCannotBecomeNoOp",
+            "network/cloud_router_update_test.go:TestCloudRouterUpdateConflictKeepsLookupAndSingleAttempt"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-router-update-python.md"
+      ],
+      "differences": [
+        "UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record while Router is native mutation output; neither is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks."
+      ],
       "remaining": [
-        "No Go helper sends GET /v2.0/extensions to check extraroute before including routes and drops routes with a warning when it is absent.",
-        "No Go helper returns without HTTP when no router fields are given and otherwise resolves name_or_id with find_router before the PUT; the caller would have to sequence these steps and the external_gateway_info construction."
+        "Native PUT result projection omits unknown response fields and does not merge partial/empty/malformed success bodies into the existing Python Resource; no original mutation receipt is exposed.",
+        "Member GET/LIST canonical-only/canonical-wire collision mapping, arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate."
       ]
     },
     {

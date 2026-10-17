@@ -621,3 +621,5 @@ namespace association의 [owned 생성·삭제와 독립 main](image/metadef-res
 [포트 수정 Python/Go 비교](network/cloud-port-update-python.md): `conn.Network(ctx)`로 선택한 서비스의 `UpdatePortRecord`가 이름/ID 조회와 변경 필드 선별을 처리합니다. 옵션이 없거나 값이 같으면 PUT을 생략하며, null·false·빈 목록은 명시한 값으로 전달합니다. 전체 mutable Resource/응답 병합 계약은 미완료입니다.
 
 [서브넷 수정 Python/Go 비교](network/cloud-subnet-update-python.md): 선택한 Network 서비스의 `UpdateSubnetRecord`는 변경 인자가 없으면 HTTP 없이 반환하고, gateway 옵션 충돌을 조회 전에 검사합니다. `WithSubnetUpdateEnableDHCP(false)`와 gateway 비활성화(null)를 구분하며 변경 필드만 PUT에 보냅니다.
+
+[라우터 수정 Python/Go 비교](network/cloud-router-update-python.md): 선택한 Network 서비스의 `UpdateRouterRecord`가 무변경 HTTP 생략, 명시 false와 gateway 정보, `extraroute` 확인을 처리합니다. 확장이 없으면 routes만 제외하고 `RoutesDropped`로 알리며 다른 수정은 계속합니다.

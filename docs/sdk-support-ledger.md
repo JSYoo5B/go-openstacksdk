@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 두 사이클: 서브넷 수정](#2026-10-18-두-사이클-서브넷-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 추가 두 사이클: 라우터 수정](#2026-10-18-추가-두-사이클-라우터-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-18 추가 두 사이클: 라우터 수정
+
+추가 요청의 첫 사이클로 출발3fabfd84·잔여15%·ordinaryUsageAllowed=true·reset1792649594에서 root+구현/독립검토 worker2개로 시작했습니다. 범위는 cloud update_router 한 행이며 기존 API/공통 코드·서비스 우선순위·자동화 PAUSED를 보존했습니다.
+
+UpdateRouterRecord는6개 Source 옵션을 소유합니다. noattrs는 HTTP0 NoOp, admin/SNAT false는 유효하며 기존 routerCreateBody의 gateway 조립을 재사용하되 create의 admin=true 기본값은 제거합니다. routes가 null이 아니면 빈 목록/false도 fresh extraroute 전체목록 확인 대상입니다. 확장 부재만 routes를 제외해 RoutesDropped로 알리고 나머지 변경을 계속하며 route-only면 router 조회 없이 종료합니다. 다른 HTTP·후속 페이지·unhashable alias 오류는 숨기지 않습니다. 조회 raw Wire와 비교해 dirty-only native PUT으로 전달하고 실패한 native Router는 nil입니다.
+
+집중 첫 실행은 router8그룹23사례+기존 port/subnet10그룹28사례=18그룹51사례 PASS이며 실패/수리 없이 통과했습니다. 기존 public Gophercloud testhelper 기반 scripted Neutron fixture와 qosReadStart extension full-list를 재사용했습니다. 실제 Source update_router+gateway helper AST 본문과 stub extension/lookup/proxy10사례는 orchestration만 입증하며 Resource/cache/HTTP/full SDK 실행 증거가 아닙니다. 독립 최종 code/docs/review 검토 차단 finding0입니다.
+
+구현df998fee로 커밋했습니다. Source warning logger 대신 RoutesDropped를 제공하며 native unknown/부분/빈 응답의 Resource 병합·원본 mutation receipt·canonical GET/LIST alias·Python 숫자/객체·Requests encoding·hook 전체 no-replay·SDK-R1/C1/S1·실클라우드/릴리즈는 unresolved로 유지합니다. 계약7,562→7,564개이며 완료 매핑2,059/3,228·supported0은 불변입니다. 독립 Go main/Python AST 각1개와 전체205개 test package·license(6 modules/16 originals)·vet·race·parity·progress·gofmt 모두 최초 실행 PASS(exit0)했습니다. Go source3266개 SHA256 7eb3eaa30907b4ea2cb09298be23821b25aab89341993b456e912a6c9574efea는 gate 전후 동일합니다.
 
 ## 2026-10-18 두 사이클: 서브넷 수정
 
