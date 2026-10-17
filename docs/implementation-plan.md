@@ -8,7 +8,7 @@
 
 ## 현재 집계와 진행 중인 작업
 
-**추가 두 사이클 (2026-10-18): 라우터 수정 → 방화벽 rule 수정.** 사용자 추가 지시로 출발3fabfd84·잔여15%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. 구현/독립 검토 worker2개와 root로 첫 사이클 cloud update_router의 noattrs HTTP0·extraroute에 따른 routes 포함/생략·gateway 옵션·dirty PUT만 고정합니다. 첫 라우터 사이클은 구현df998fee·집중18그룹51사례(router신규8/23+기존10/28)·독립 Go main/Python AST 각1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3266개 SHA256 7eb3eaa30907b4ea2cb09298be23821b25aab89341993b456e912a6c9574efea는 gate 전후 동일하며 계약7,562→7,564개입니다. 두 번째 cloud update_firewall_rule은 이 사이클 main push 뒤 시작합니다. 기존 핵심 user→admin→관리형 순서와 Swift 핵심·후속 네트워크/베어메탈 우선순위를 보존합니다. 자동화는 PAUSED이며 이 두 사이클 뒤 종료합니다.
+**추가 두 사이클 마감 (2026-10-18): 라우터·방화벽 rule 수정, 구현/문서4개 커밋.** 사용자 추가 지시로 출발3fabfd84·잔여15%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. 구현/독립 검토 worker2개와 root로 첫 사이클 cloud update_router의 noattrs HTTP0·extraroute에 따른 routes 포함/생략·gateway 옵션·dirty PUT만 고정합니다. 첫 라우터 사이클은 구현df998fee·집중18그룹51사례(router신규8/23+기존10/28)·독립 Go main/Python AST 각1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3266개 SHA256 7eb3eaa30907b4ea2cb09298be23821b25aab89341993b456e912a6c9574efea는 gate 전후 동일하며 계약7,562→7,564개입니다. 두 번째 방화벽 rule은 구현efe38035·첫 집중13그룹44사례(FW신규5/21+router8/23), 독립 Go main/Python AST 각1개, 전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. Go source3268개 SHA256 7658abab5643accb7d63d5746eff8184590593970dbc5ee04cc4bdc51c02f0e7는 gate 전후 동일합니다. 이번 두 사이클 신규13그룹44사례·독립 main/AST 각2개·계약7,562→7,566개(+4)이며 두 행은 named 차이로 unresolved를 유지합니다. 종료 잔여14%·reset동일로 계정 공유 사용량입니다. 기존 핵심 user→admin→관리형 순서와 Swift 핵심·후속 네트워크/베어메탈 우선순위를 보존합니다. 자동화는 PAUSED이며 이 두 사이클 뒤 종료합니다.
 
 **두 사이클 마감 (2026-10-18): 포트·서브넷 수정 helper 추가, 구현/문서 4개 커밋.** 사용자 추가 지시로 출발c20407db·잔여17%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. root와 worker2개(구현/독립 검토)로 핵심 user cloud helper를 순서대로 진행하고 사이클마다 집중·전체 검사·판정·문서·작은 커밋/main push를 마감합니다. 자동화는 PAUSED이며 두 사이클 뒤 종료합니다. 첫 사이클 포트 수정은 집중4그룹13사례·독립 Go main1개·Python AST1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. 구현e77ff22f, 계약7,558→7,560개이며 named 행은 unresolved·매핑2,059/3,228을 유지합니다. Go source3262개 SHA256 b1890aa886a51add602c351402a75fedc701f474529ee9c287fca2b9bf8a4504는 gate 전후 동일합니다. 두 번째 서브넷 수정은 구현ebd2dc60, 수리 후 포트 회귀 포함 집중10그룹28사례(서브넷6/15+포트4/13)·독립 Go main1개/Python AST1개·전체205개 test package gate PASS로 마감했습니다. Go source3264개 SHA256 4934417f5a684fc2d56d2b34e1393d514be3ff100e4f2f8a87cdfbc8f17c89c5는 gate 전후 동일합니다. 두 사이클 합계 신규 테스트10그룹28사례, 독립 main/AST 각2개, 계약7,558→7,562개(+4)이며 대상2행은 남은 차이로 unresolved를 유지합니다. 종료 잔여15%·reset동일이며 계정 공유 사용량입니다. 자동화는 PAUSED, 추가 사이클은 시작하지 않습니다.
 
@@ -645,7 +645,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 제외(미지원) | 1,169 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,564 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,566 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.

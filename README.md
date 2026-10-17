@@ -623,3 +623,5 @@ namespace association의 [owned 생성·삭제와 독립 main](image/metadef-res
 [서브넷 수정 Python/Go 비교](network/cloud-subnet-update-python.md): 선택한 Network 서비스의 `UpdateSubnetRecord`는 변경 인자가 없으면 HTTP 없이 반환하고, gateway 옵션 충돌을 조회 전에 검사합니다. `WithSubnetUpdateEnableDHCP(false)`와 gateway 비활성화(null)를 구분하며 변경 필드만 PUT에 보냅니다.
 
 [라우터 수정 Python/Go 비교](network/cloud-router-update-python.md): 선택한 Network 서비스의 `UpdateRouterRecord`가 무변경 HTTP 생략, 명시 false와 gateway 정보, `extraroute` 확인을 처리합니다. 확장이 없으면 routes만 제외하고 `RoutesDropped`로 알리며 다른 수정은 계속합니다.
+
+[방화벽 rule 수정 Python/Go 비교](network/cloud-firewall-rule-update-python.md): 선택한 Network 서비스의 `UpdateFirewallRuleRecord`가 필터를 포함한 엄격한 이름/ID 조회, 무변경 PUT 생략, 변경 필드 전송을 처리합니다. SDK가 builder를 소유하며 null·false·빈 값을 유지합니다. HTTP 200 이외의 수정 응답 처리와 전체 Resource 응답 계약은 미해결입니다.

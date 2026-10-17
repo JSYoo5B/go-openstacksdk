@@ -106381,15 +106381,40 @@
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_rule",
       "source_fingerprint": "7df318963a8453d06b1362a93966603c343d4d9c170199a92457e5ac3aa75a9e",
       "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "documentation": [
-        "network/python-cloud-parity-b.md"
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallRuleRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallRuleUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallRuleUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallRuleUpdateFilters",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallRuleUpdateOpts"
       ],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "SDK-owned fourteen-key cloud attrs are validated before strict member/name Find; empty attrs still look up, equal raw kwargs skip PUT, and only dirty fields reach an SDK-private upstream builder. Explicit null/false/empty and raw ANY protocol are preserved without requiring application builders; native mutation output remains separate from lookup receipt and is nil on failure.",
+          "tests": [
+            "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateLookupOnlyAndDirtySelection",
+            "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateNameFallbackAndMissing",
+            "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateConflictKeepsLookupAndSingleAttempt"
+          ]
+        },
+        {
+          "behavior": "Owned JSON filters normalize falsey JSON to default strict Find kwargs and push ordinary filter fields through member/fallback lookup. Truthy nonobjects and bound name_or_id/ignore_missing collisions fail without HTTP; currently unsupported raw headers/microversion namespaces are rejected. Option snapshots, unsupported cloud keys, cancellation and selected-source mutation are checked before lookup.",
+          "tests": [
+            "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateFiltersStrictBindingAndFalseyDefaults",
+            "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateOwnedOptionsAndPreflight"
+          ]
+        }
+      ],
+      "documentation": [
+        "network/python-cloud-parity-b.md",
+        "network/cloud-firewall-rule-update-python.md"
+      ],
+      "differences": [
+        "UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. A private SDK builder preserves fourteen cloud kwargs without exposing builder-interface responsibility to callers. Lookup is a separate record; Rule uses upstream typed result extraction and provider hooks."
+      ],
       "remaining": [
-        "No Go helper reproduces find_firewall_* name-or-ID resolution with the extra filters together with the policy, port and rule name-to-ID translation used by this helper.",
-        "Python sends no PUT when no attributes are given because nothing is dirty; Go has no helper that skips it."
+        "Native mutation retains upstream HTTP200-only acceptance, strict typed projection, no unknown/partial/empty/malformed response merge or same mutable Resource identity, and no original mutation receipt.",
+        "Raw Find headers/microversion member-query versus fallback-formal behavior and base_path/skip_cache/resource_response_key/fetch constructor controls are not fully implemented; currently unsupported reserved filters fail before HTTP. Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate."
       ]
     },
     {

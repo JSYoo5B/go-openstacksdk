@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 추가 두 사이클: 라우터 수정](#2026-10-18-추가-두-사이클-라우터-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 추가 두 사이클: 방화벽 rule 수정](#2026-10-18-추가-두-사이클-방화벽-rule-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-18 추가 두 사이클: 방화벽 rule 수정
+
+두 번째/마지막 사이클은36c05b12 main push 뒤 잔여15%·ordinaryUsageAllowed=true·reset1792649594를 재확인하고 시작했습니다. root+구현/독립 검토 worker2개로 cloud update_firewall_rule 한 행만 고정했습니다. 기존 profile/Find/fixture를 재사용하고 공통·생성 코드와 다른 서비스 API를 수정하지 않았습니다.
+
+UpdateFirewallRuleRecord는 Source14키의 소유 옵션과 Filters를 제공합니다. kwargs는 조회 전에 검사하고 falsey filters는 기본값, ignore_missing=False인 strict Find를 수행합니다. raw Wire와 Python JSON 비교로 무변경 PUT을 생략하고 변경 필드만 보냅니다. 성공 모델과 Lookup HTTP 증거를 분리하고 native 오류일 때 Rule은 nil입니다. 응답 ID는 nonempty string 확인 뒤 literal segment로 escape합니다. firewallDeleteLocation의 summary/location projection을 재사용했습니다.
+
+정적 검토에서 generated WithUpdateField가 core JSON 키를 예약해 거부하는 설계 오류를 발견했습니다. 첫 Go 실행 전에 소유 파일의 private ToRuleUpdateMap builder+고정 native Update로 수리했습니다. 앱 사용자는 interface/builder를 구현하지 않습니다. 14키 raw JSON/null/false/빈 값/대문자 protocol을 그대로 보존합니다. 이 수정은 Go gate 실패를 수리한 것으로 기록하지 않습니다. 첫 집중은 FW5그룹21사례+router8그룹23사례=13그룹44사례 PASS입니다. 공개 Gophercloud testhelper 기반 기존 scripted fixture를 재사용했습니다.
+
+Source AST에서 decorator를 제거한 실제 메서드+stub Find/update9사례는 falsey filters와 strict lookup/kwargs 전달/중복 ignore_missing binding 오류만 입증합니다. decorator/Resource commit/HTTP/live 실행 증거는 아닙니다. 독립 code/guide/review 최종 차단 finding0입니다. 구현efe38035 커밋. native v2.15.0 Update OkCodes{200}를 고정 module source에서 확인했으며 Source100..399 차이, native typed Rule의 unknown/부분/빈 응답 병합·raw mutation receipt·raw Find headers/microversion/base_path/fetch namespace·Python 타입/Requests decoder·native hooks·SDK-R1/C1/S1·실클라우드/릴리즈를 남겨 unresolved를 유지합니다. 계약7,564→7,566개, 완료 매핑2,059/3,228·supported0 불변입니다. 독립 Go main/Python AST 각1개, guide fence 대조, 전체205개 test package·license(6 modules/16 originals)·vet·race·parity·progress·gofmt 모두 최초 실행 PASS(exit0)했습니다. Go source3268개 SHA256 7658abab5643accb7d63d5746eff8184590593970dbc5ee04cc4bdc51c02f0e7는 gate 전후 동일합니다. 종료 잔여14%·reset동일(계정 공유 사용량)이며 두 사이클을 마감하고 자동화는 PAUSED를 유지합니다.
 
 ## 2026-10-18 추가 두 사이클: 라우터 수정
 
