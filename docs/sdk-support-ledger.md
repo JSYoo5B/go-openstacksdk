@@ -4,9 +4,19 @@
 
 [Gophercloud 연산 목록](../api/gophercloud_inventory.json), [공통 리소스 목록](../api/resource_inventory.json), [Python 연산 목록](../api/openstacksdk/manifest.json)은 조사 대상을 찾는 자료입니다. 함수가 생성되거나 모델 이름이 일치하는 것만으로 SDK 동등성이 증명되지는 않습니다.
 
-현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-15 라우터 제거 charset](#2026-10-15-라우터-제거-charset)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
+현재 숫자는 [구현 계획의 자동 집계](implementation-plan.md#현재-집계와-진행-중인-작업)에서 확인합니다. `make progress`는 판정 JSON으로 숫자를 갱신하고 `make check`는 불일치를 거부합니다. 최신 작업 단위는 [2026-10-18 두 사이클: 포트 수정](#2026-10-18-두-사이클-포트-수정)입니다. 아래 단위별 과거 집계는 당시 revision의 이력입니다.
 
 [Glance 기본 정책에 따른 user/admin 순서 교정](glance-policy-priorities.md)은 metadata 쓰기를 핵심 admin으로 분류하고, user 목록2개는 아래 단위에서 완료했습니다. 현재 서비스 수는 user/admin 합산이며 최신 named Go 매핑 수는 [자동 진행표](implementation-plan.md#현재-집계와-진행-중인-작업)를 따릅니다.
+
+## 2026-10-18 두 사이클: 포트 수정
+
+사용자 요청의 첫 사이클이며 출발c20407db, 시작 잔여17%·중간16%·ordinaryUsageAllowed=true·reset1792649594입니다. 구현/독립 검토 worker2개와 root로 core user update_port만 고정했습니다. Source pin을 변경하지 않고 삭제된 임시 Source/native metadata를 복원했습니다. 자동화는 PAUSED입니다.
+
+UpdatePortRecord의 소유 옵션은 Source cloud의 13개 kwargs를 조회 전에 검사합니다. FindRecord 이름/ID 조회 뒤 raw Wire와 Python JSON 비교로 변경 필드만 native UpdateWithAttributes에 전달하며, 옵션 없음·같은 값은 PUT0입니다. 누락과 null을 구분하고 false/빈 목록을 보내며 조회 결과와 수정 결과를 분리합니다. 원본 mutable Resource 반환·부분/빈 응답 병합·unknown extension·raw mutation receipt·canonical GET/LIST alias 충돌·arbitrary Python 타입·native hooks 전체 no-replay 보장은 미완료로 유지합니다. SDK-R1/C1/S1·실클라우드/릴리즈도 남습니다.
+
+최초 focused는 fixture 경로가 /ports여서 실제 /v2.0/ports 요청이500이 되는 실패였습니다. 경로 수리 뒤409에서 native extractor가 빈 Port 포인터도 반환하는 차이를 발견해 오류일 때 Port를 비우도록 구현 수리했습니다. 최종 집중4그룹13사례 PASS입니다. Test 이름도 모든 retry를 막는다고 오해하지 않도록 ConflictKeepsLookupAndSingleAttempt로 좁혔습니다. 공개 Gophercloud testhelper 기반 기존 pythonCloudBClient/testcloud를 재사용했습니다.
+
+Source AST에서 decorator를 제거한 실제 cloud 메서드 본문+stub lookup/proxy7사례는 forwarding/missing 흐름만 검증합니다. 정본 method의 description kwarg는 허용되지 않아 관찰값을 허용된 name 빈 문자열로 교체했습니다. decorator·Resource commit·HTTP/full SDK 실행 증거로 쓰지 않습니다. 독립 static검토는 decorator13키·raw dirty 비교·response merge 차이·native hook 경계를 대조했고 차단 문제는 없었습니다. 구현e77ff22f·독립 main1개 빌드·Python AST1개 PASS, 전체205개 test package·license(6 modules/16 originals)·vet·race·parity·progress·gofmt PASS(exit0)입니다. Go source3262개 SHA256 b1890aa886a51add602c351402a75fedc701f474529ee9c287fca2b9bf8a4504는 gate 전후 동일합니다. 계약7,558→7,560개이며 대상은 unresolved, go_mapping2,059/3,228·supported0을 유지합니다.
 
 ## 2026-10-15 라우터 제거 charset
 

@@ -105098,7 +105098,11 @@
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes",
-        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute"
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdatePortRecord",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateJSON",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateOpts"
       ],
       "contracts": [
         {
@@ -105106,17 +105110,34 @@
           "tests": [
             "network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBUpdatePortAndSubnetChains"
           ]
+        },
+        {
+          "behavior": "SDK-owned cloud helper snapshots strict thirteen-key kwargs, validates before lookup, always resolves even empty kwargs, skips PUT for no attributes or Python-equal raw wire values, and PUTs only changed fields to the resolved response ID. Explicit null/false/empty collections remain distinct from omission; raw string boolean values are not replaced by descriptor getter views.",
+          "tests": [
+            "network/cloud_port_update_test.go:TestCloudPortUpdateLookupOnlyAndDirtySelection",
+            "network/cloud_port_update_test.go:TestCloudPortUpdateNameFallbackAndMissing"
+          ]
+        },
+        {
+          "behavior": "Options own caller JSON, unsupported canonical aliases/revision/extensions and malformed inputs fail before HTTP; canceled context or selected-service mutation cannot send lookup/PUT. A default-client conflict retains a separate lookup record and makes one PUT attempt without fabricated native success. No new mutation retry policy is added; configured provider retry/reauthentication hooks remain in force.",
+          "tests": [
+            "network/cloud_port_update_test.go:TestCloudPortUpdateOwnedOptionsAndPreflight",
+            "network/cloud_port_update_test.go:TestCloudPortUpdateConflictKeepsLookupAndSingleAttempt"
+          ]
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/python-cloud-parity-b.md",
+        "network/cloud-port-update-python.md"
       ],
       "differences": [
         "Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.",
-        "Go returns the native Port model, which omits extension attributes."
+        "Go returns the native Port model, which omits extension attributes.",
+        "Cloud UpdatePortRecord returns a separate Lookup PortRecord and native PUT Port; NoOp has Lookup and no fabricated Port. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance."
       ],
       "remaining": [
-        "With default arguments (no attributes) Python only looks the port up and commits nothing, so no PUT is sent; Go UpdateWithAttributes always sends a PUT, and no Go helper skips it."
+        "Native PUT decoder omits unknown extension fields and does not preserve/merge the Python Resource on partial, empty or malformed success JSON; no raw mutation receipt is exposed by this bridge.",
+        "Ordinary wire-key lookup response dirty comparison is covered; GET/LIST canonical-only attributes and canonical/wire key collision precedence and original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees."
       ]
     },
     {

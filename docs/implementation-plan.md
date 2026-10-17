@@ -8,6 +8,8 @@
 
 ## 현재 집계와 진행 중인 작업
 
+**두 사이클 개발 (2026-10-18): 1차 포트 수정 → 2차 서브넷 수정.** 사용자 추가 지시로 출발c20407db·잔여17%·ordinaryUsageAllowed=true·reset1792649594에서 시작했습니다. root와 worker2개(구현/독립 검토)로 핵심 user cloud helper를 순서대로 진행하고 사이클마다 집중·전체 검사·판정·문서·작은 커밋/main push를 마감합니다. 자동화는 PAUSED이며 두 사이클 뒤 종료합니다. 첫 사이클 포트 수정은 집중4그룹13사례·독립 Go main1개·Python AST1개·전체205개 test package의 license/vet/race/parity/progress/gofmt PASS로 마감했습니다. 구현e77ff22f, 계약7,558→7,560개이며 named 행은 unresolved·매핑2,059/3,228을 유지합니다. Go source3262개 SHA256 b1890aa886a51add602c351402a75fedc701f474529ee9c287fca2b9bf8a4504는 gate 전후 동일합니다. 다음은 서브넷 수정 한 묶음입니다.
+
 **추가 한 묶음 (2026-10-15): cloud 라우터 인터페이스 제거의 명시 응답 charset 연결.** 사용자 추가 지시에 따라 출발f7cf7adf·잔여3%·ordinaryUsageAllowed=true·reset1792472624에서 worker2개(구현/독립 검토)+root로 시작했습니다. 공통 Normalize를 해당 cloud leaf에만 재사용하고 normalized Value/Wire와 원본 Envelope/Header/status/오류 body를 분리합니다. legacy 공통 라우터 parser·다른 연산은 보존합니다. 핵심 user 우선순위와 SDK-R1/C1/S1·실클라우드/릴리즈 잔여는 그대로이며 자동화는 PAUSED입니다. 집중22그룹324사례 PASS, 구현87d48231 커밋 완료입니다. 계약7,556→7,558개이며 대상은 unresolved를 유지합니다. 독립 Go main1개 빌드·Python AST1개와 전체205개 test package·license/vet/race/parity/progress/gofmt가 최초 실행 PASS(exit0)했습니다. Go source3,260개 SHA256 3f674825c26f52927707bc350afc346493f5814d0aed9917620b182d76131f9c는 gate 전후 동일합니다. 이번 묶음을 마감하고 자동화는 PAUSED를 유지합니다.
 
 **추가 한 사이클 (2026-10-15): worker2개와 root로 명시 JSON 응답 charset 공통 모듈·Secret 수정·콘솔 출력을 보강합니다.** 출발90b7c0f0, 시작 잔여4%·최근3%·ordinaryUsageAllowed=true·reset1792472624입니다. 자동화는 PAUSED이며 이번 고정 묶음 뒤 새 사이클은 없습니다. 명시 UTF-16/32(BOM 또는 LE/BE)·Latin1만 두 연산에 연결하고 원본 응답 증거를 보존합니다. 집중39그룹275사례와 독립 Go main2개 빌드·Python AST2개가 PASS했습니다. 구현을 881185c1·73adca01·e40547bf로 나눠 커밋했습니다. 계약7,555→7,556개이며 두 행은 unresolved로 유지합니다. 전체205개 test package·license/vet/race/parity/progress/gofmt가 최초 실행 PASS(exit0)했습니다. Go source3,260개 SHA256 549eea5b8cabf6c49fda12fd231585236bb1dda5ffe75f5ec58d21113f34109e는 gate 전후 일치합니다. 이번 한 사이클을 마감하고 자동화는 PAUSED를 유지합니다.
@@ -641,7 +643,7 @@ Password의 성공 값 assertion 공백은 기존 표 기반 fixture에 expected
 | source 그대로 지원 | 0 | `supported` 판정 |
 | 미해결 / 제외(미지원) | 1,169 / 134 | 미검토 선언도 미해결 집계에 포함 |
 | 연산별 검토 기록 | 2,487 | 아직 개별 기록 없는 선언 875 |
-| 기록한 부분·전체 계약 | 7,558 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
+| 기록한 부분·전체 계약 | 7,560 | [판정 JSON](../api/sdk_reviews.json)의 계약 항목 수; 테스트 함수 수나 전체 API 완료 수와 다름 |
 <!-- sdk-progress:end -->
 
 최근 완료 수 변화는 다음과 같습니다. 아래 수치는 해당 커밋 시점의 이력입니다.

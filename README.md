@@ -617,3 +617,5 @@ namespace association의 [owned 생성·삭제와 독립 main](image/metadef-res
 ## License
 
 프로젝트 코드는 [Apache-2.0](LICENSE)을 적용합니다. 제3자 코드와 데이터에는 원래 라이선스가 함께 적용되며, [NOTICE](NOTICE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), [라이선스·출처 안내](docs/licensing.md)에 범위와 고지를 기록합니다.
+
+[포트 수정 Python/Go 비교](network/cloud-port-update-python.md): `conn.Network(ctx)`로 선택한 서비스의 `UpdatePortRecord`가 이름/ID 조회와 변경 필드 선별을 처리합니다. 옵션이 없거나 값이 같으면 PUT을 생략하며, null·false·빈 목록은 명시한 값으로 전달합니다. 전체 mutable Resource/응답 병합 계약은 미완료입니다.
