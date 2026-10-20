@@ -39,6 +39,12 @@ Unresolved boundaries:
 - Map inherited per-call base_path/microversion/header controls and deprecated proxy JMESPath behavior beyond the tested local cap/one-response policy.
 - Compare arbitrary Resource/cache input ownership, URI overlay and full lifecycle semantics. Strict modern2.45+ scope behavior does not implement the earlier legacy access_list action contract.
 
+## Generated `API.Get` and `API.List`
+
+`API.Get` (`GET /share-access-rules/{id}`) and `API.List` (`GET /share-access-rules?share_id={id}`) are thin wrappers over the native calls. Only HTTP 200 succeeds; other statuses stay native errors and nothing is retried. `Get` does not check the rule's `share_id` against a parent, and `List` has no paging, caps or extra query options. `List` reads one response, never follows links, and returns an empty slice for an empty, null or missing `access_list`. Neither call validates the microversion locally; the client's selected microversion is sent as the header when set. Use `InShare` and `AccessRuleScope` for parent-checked, 2.45-validated, capped access.
+
+The pinned native `List` appends the raw share ID after `?share_id=`, so an ID such as `x&injected=yes` would add a query parameter. The generator therefore replaces that call with an audited helper that sends the ID through `url.QueryEscape` as a single `share_id` value; the URL, 200-only handling and result type are otherwise native. The override is pinned to the inspected native declaration and generation fails if it drifts. `Get` places the ID in the URL path unchanged.
+
 ## Usage examples
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.

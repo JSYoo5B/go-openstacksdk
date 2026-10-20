@@ -8471,7 +8471,8 @@
       "name": "List",
       "sdk_package": "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "request_policy": "sdk_escaped_query_list"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/sharedfilesystems/v2/sharenetworks",

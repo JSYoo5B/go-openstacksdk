@@ -13,7 +13,7 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 | Source-equivalent support | 0 | supported decisions |
 | Unresolved / excluded (unsupported) | 730 / 134 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 2,851 | Declarations without individual reviews 511 |
-| Behavior contracts | 8,709 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
+| Behavior contracts | 8,710 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
 
 Behavior-contract counts reflect review granularity and must not be used as completed API counts. Unreviewed operations remain unresolved.

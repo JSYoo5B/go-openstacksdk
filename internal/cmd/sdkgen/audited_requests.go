@@ -43,6 +43,14 @@ var auditedRequestCalls = []auditedRequestCall{
 		declarationSHA256: "9e1844f9565bc6f5166cb8a8edb697ded38eb0392edd490ba806f9f6f7a75c79",
 		signature:         matchesQueueUpdateSignature,
 	},
+	// Native shareaccessrules List concatenates the raw share ID into the
+	// share_id query value, so reserved characters inject query parameters.
+	{
+		path: "sharedfilesystems/v2/shareaccessrules", operation: "List",
+		helper: "listAccessRules", policy: "sdk_escaped_query_list",
+		declarationSHA256: "ea934b66db7f3a0727f84ec86054bb4ff88f6fbbde7decf31f62c986fcaa4c5a",
+		signature:         matchesAccessRuleListSignature,
+	},
 	// Native snapshot WaitForStatus dereferences the result of Get without a
 	// nil check, so a response without the snapshot envelope panics.
 	{
@@ -213,6 +221,29 @@ func matchesQueueUpdateSignature(pkg *types.Package, fn *types.Func) bool {
 	}
 	extractor, _, _ := types.LookupFieldOrMethod(sig.Results().At(0).Type(), true, pkg, "Extract")
 	return extractor != nil && result.NumFields() > 0
+}
+
+// matchesAccessRuleListSignature accepts List(ctx, client, shareID) ListResult
+// where ListResult is a local struct with an Extract method.
+func matchesAccessRuleListSignature(pkg *types.Package, fn *types.Func) bool {
+	sig := fn.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 3 || sig.Results().Len() != 1 || !isContext(sig.Params().At(0).Type()) || !isString(sig.Params().At(2).Type()) {
+		return false
+	}
+	client := types.TypeString(sig.Params().At(1).Type(), func(p *types.Package) string { return p.Path() })
+	if client != "*"+upstreamModule+".ServiceClient" {
+		return false
+	}
+	named, ok := sig.Results().At(0).Type().(*types.Named)
+	if !ok || named.Obj().Pkg() != pkg || named.Obj().Name() != "ListResult" {
+		return false
+	}
+	result, ok := named.Underlying().(*types.Struct)
+	if !ok || result.NumFields() == 0 {
+		return false
+	}
+	extractor, _, _ := types.LookupFieldOrMethod(named, true, pkg, "Extract")
+	return extractor != nil
 }
 
 // The override is deliberately specific to v2.15.0's StartIntrospection rather

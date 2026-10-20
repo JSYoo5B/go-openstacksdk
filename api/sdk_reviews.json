@@ -120535,10 +120535,19 @@
           "tests": [
             "api/manila_shareaccessrules_test.go:TestManilaAccessRuleCancellationPreservesCauseAndSkipsHTTP"
           ]
+        },
+        {
+          "behavior": "The share ID is sent through url.QueryEscape as one share_id value, so reserved characters such as & and # cannot inject or truncate query parameters; the same GET, 200-only handling and result type are kept.",
+          "tests": [
+            "api/share_access_rule_escape_test.go:TestShareAccessRuleEscapeListKeepsReservedShareIDInOneQueryValue",
+            "api/share_access_rule_escape_test.go:TestShareAccessRuleEscapeListKeepsOnly200AndNoRetry",
+            "internal/cmd/sdkgen/audited_access_rule_list_test.go:TestAuditedAccessRuleListUsesEscapingHelper",
+            "internal/cmd/sdkgen/audited_access_rule_list_test.go:TestAuditedAccessRuleListRejectsDrift"
+          ]
         }
       ],
       "differences": [
-        "The generated API.List has no paging, caps or extra query options and does not escape the share ID; use AccessRuleScope.List for validated, capped listing. Wrapped errors keep the native error as the cause; the SDK adds operation/resource context and context cancellation/deadline causes remain observable."
+        "The generated API.List has no paging, caps or extra query options; the pinned native List concatenates the raw share ID into the query, so the SDK replaces that call with an audited helper that escapes it while keeping the native URL, 200-only handling and result type. Use AccessRuleScope.List for validated, capped listing. Wrapped errors keep the native error as the cause; the SDK adds operation/resource context and context cancellation/deadline causes remain observable."
       ],
       "documentation": [
         "sharedfilesystems/v2/shareaccessrules/README.md"

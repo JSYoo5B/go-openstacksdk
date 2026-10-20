@@ -28,7 +28,7 @@ func (a *API) Get(ctx context.Context, accessID string) (*ShareAccess, error) {
 
 // List invokes the upstream API with library-owned builders and result handling.
 func (a *API) List(ctx context.Context, shareID string) ([]ShareAccess, error) {
-	result := upstream.List(ctx, a.client, shareID)
+	result := listAccessRules(ctx, a.client, shareID)
 	value0, err := result.Extract()
 	err = request.Wrap("List", "shareaccessrules", err)
 	return value0, err
