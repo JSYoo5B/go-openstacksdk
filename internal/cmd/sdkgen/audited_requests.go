@@ -26,6 +26,23 @@ var auditedRequestCalls = []auditedRequestCall{
 		declarationSHA256: "cf3afa01f5c61e99f1713b6f22bbdf6818982efa44fc7791cf30f4610e71f1dd",
 		signature:         matchesIntrospectionStartSignature,
 	},
+	// Native dns zones Share reflects over its ShareOptsBuilder argument instead
+	// of calling ToShareMap, so any wrapper builder serializes as an empty body.
+	{
+		path: "dns/v2/zones", operation: "Share",
+		helper: "shareZone", policy: "sdk_builder_body_share",
+		declarationSHA256: "8a61e0064fe7922e1e70f20cdb6f7079023b64f6c03983e564ba21e85e3cce13",
+		signature:         matchesZoneShareSignature,
+	},
+	// Native messaging queues Update passes its UpdateOptsBuilder argument
+	// directly to the request body, which reflects over the value, so any
+	// wrapper builder serializes as an empty object instead of the patch list.
+	{
+		path: "messaging/v2/queues", operation: "Update",
+		helper: "updateQueue", policy: "sdk_builder_body_update",
+		declarationSHA256: "9e1844f9565bc6f5166cb8a8edb697ded38eb0392edd490ba806f9f6f7a75c79",
+		signature:         matchesQueueUpdateSignature,
+	},
 	// Native snapshot WaitForStatus dereferences the result of Get without a
 	// nil check, so a response without the snapshot envelope panics.
 	{
@@ -89,6 +106,113 @@ func matchesStatusWaitSignature(pkg *types.Package, fn *types.Func) bool {
 	}
 	client := types.TypeString(sig.Params().At(1).Type(), func(p *types.Package) string { return p.Path() })
 	return client == "*"+upstreamModule+".ServiceClient"
+}
+
+// matchesZoneShareSignature accepts Share(ctx, client, zoneID, opts) ZoneShareResult
+// where opts is a single-method ToShareMap builder implemented by ShareZoneOpts.
+func matchesZoneShareSignature(pkg *types.Package, fn *types.Func) bool {
+	sig := fn.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 4 || sig.Results().Len() != 1 || !isContext(sig.Params().At(0).Type()) || !isString(sig.Params().At(2).Type()) {
+		return false
+	}
+	client := types.TypeString(sig.Params().At(1).Type(), func(p *types.Package) string { return p.Path() })
+	if client != "*"+upstreamModule+".ServiceClient" {
+		return false
+	}
+	localNamed := func(t types.Type, name string) bool {
+		named, ok := t.(*types.Named)
+		return ok && named.Obj().Pkg() == pkg && named.Obj().Name() == name
+	}
+	if !localNamed(sig.Params().At(3).Type(), "ShareOptsBuilder") || !localNamed(sig.Results().At(0).Type(), "ZoneShareResult") {
+		return false
+	}
+	builder, ok := sig.Params().At(3).Type().Underlying().(*types.Interface)
+	if !ok || builder.NumMethods() != 1 || builder.Method(0).Name() != "ToShareMap" {
+		return false
+	}
+	body := builder.Method(0).Type().(*types.Signature)
+	if body.Params().Len() != 0 || body.Results().Len() != 2 || !isError(body.Results().At(1).Type()) {
+		return false
+	}
+	if m, ok := body.Results().At(0).Type().(*types.Map); !ok || !isString(m.Key()) {
+		return false
+	}
+	options := pkg.Scope().Lookup("ShareZoneOpts")
+	if options == nil || !types.Implements(options.Type(), builder) {
+		return false
+	}
+	fields, ok := options.Type().Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 1 || fields.Field(0).Name() != "TargetProjectID" || !isString(fields.Field(0).Type()) || reflect.StructTag(fields.Tag(0)).Get("json") != "target_project_id" {
+		return false
+	}
+	result, ok := sig.Results().At(0).Type().Underlying().(*types.Struct)
+	if !ok {
+		return false
+	}
+	extractor, _, _ := types.LookupFieldOrMethod(sig.Results().At(0).Type(), true, pkg, "Extract")
+	return extractor != nil && result.NumFields() > 0
+}
+
+// matchesQueueUpdateSignature accepts Update(ctx, client, queueName, opts) UpdateResult
+// where opts is a single-method ToQueueUpdateMap builder implemented by
+// BatchUpdateOpts, a slice of UpdateOpts{Op, Path, Value}.
+func matchesQueueUpdateSignature(pkg *types.Package, fn *types.Func) bool {
+	sig := fn.Type().(*types.Signature)
+	if sig.Variadic() || sig.Params().Len() != 4 || sig.Results().Len() != 1 || !isContext(sig.Params().At(0).Type()) || !isString(sig.Params().At(2).Type()) {
+		return false
+	}
+	client := types.TypeString(sig.Params().At(1).Type(), func(p *types.Package) string { return p.Path() })
+	if client != "*"+upstreamModule+".ServiceClient" {
+		return false
+	}
+	localNamed := func(t types.Type, name string) bool {
+		named, ok := t.(*types.Named)
+		return ok && named.Obj().Pkg() == pkg && named.Obj().Name() == name
+	}
+	if !localNamed(sig.Params().At(3).Type(), "UpdateOptsBuilder") || !localNamed(sig.Results().At(0).Type(), "UpdateResult") {
+		return false
+	}
+	builder, ok := sig.Params().At(3).Type().Underlying().(*types.Interface)
+	if !ok || builder.NumMethods() != 1 || builder.Method(0).Name() != "ToQueueUpdateMap" {
+		return false
+	}
+	body := builder.Method(0).Type().(*types.Signature)
+	if body.Params().Len() != 0 || body.Results().Len() != 2 || !isError(body.Results().At(1).Type()) {
+		return false
+	}
+	list, ok := body.Results().At(0).Type().(*types.Slice)
+	if !ok {
+		return false
+	}
+	if m, ok := list.Elem().(*types.Map); !ok || !isString(m.Key()) {
+		return false
+	}
+	batch := pkg.Scope().Lookup("BatchUpdateOpts")
+	if batch == nil || !types.Implements(batch.Type(), builder) {
+		return false
+	}
+	batchSlice, ok := batch.Type().Underlying().(*types.Slice)
+	if !ok || !localNamed(batchSlice.Elem(), "UpdateOpts") {
+		return false
+	}
+	fields, ok := batchSlice.Elem().Underlying().(*types.Struct)
+	if !ok || fields.NumFields() != 3 {
+		return false
+	}
+	for i, want := range []struct{ name, tag string }{{"Op", "op"}, {"Path", "path"}, {"Value", "value"}} {
+		if fields.Field(i).Name() != want.name || reflect.StructTag(fields.Tag(i)).Get("json") != want.tag {
+			return false
+		}
+	}
+	if !localNamed(fields.Field(0).Type(), "UpdateOp") || !isString(fields.Field(0).Type().Underlying()) || !isString(fields.Field(1).Type()) {
+		return false
+	}
+	result, ok := sig.Results().At(0).Type().Underlying().(*types.Struct)
+	if !ok {
+		return false
+	}
+	extractor, _, _ := types.LookupFieldOrMethod(sig.Results().At(0).Type(), true, pkg, "Extract")
+	return extractor != nil && result.NumFields() > 0
 }
 
 // The override is deliberately specific to v2.15.0's StartIntrospection rather

@@ -255,7 +255,7 @@ func (a *API) Share(ctx context.Context, zoneID string, opts ShareZoneOpts, opti
 		return zero0, err
 	}
 	_opts := shareOptsBuilder{base: cfg.Options, config: cfg}
-	result := upstream.Share(ctx, a.client, zoneID, _opts)
+	result := shareZone(ctx, a.client, zoneID, _opts)
 	value0, err := result.Extract()
 	err = request.Wrap("Share", "zones", err)
 	return value0, err

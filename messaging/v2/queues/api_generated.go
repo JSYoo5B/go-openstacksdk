@@ -275,7 +275,7 @@ func (a *API) Update(ctx context.Context, queueName string, opts BatchUpdateOpts
 		return zero0, err
 	}
 	_opts := updateOptsBuilder{base: cfg.Options, config: cfg}
-	result := upstream.Update(ctx, a.client, queueName, _opts)
+	result := updateQueue(ctx, a.client, queueName, _opts)
 	value0, err := result.Extract()
 	err = request.Wrap("Update", "queues", err)
 	return value0, err

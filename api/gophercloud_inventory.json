@@ -3437,7 +3437,8 @@
       "name": "Share",
       "sdk_package": "github.com/JSYoo5B/go-openstacksdk/dns/v2/zones",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "request_policy": "sdk_builder_body_share"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/dns/v2/zones",
@@ -5725,7 +5726,8 @@
       "name": "Update",
       "sdk_package": "github.com/JSYoo5B/go-openstacksdk/messaging/v2/queues",
       "builder_free": true,
-      "return_policy": "extract"
+      "return_policy": "extract",
+      "request_policy": "sdk_builder_body_update"
     },
     {
       "source": "github.com/gophercloud/gophercloud/v2/openstack/metric/v1/metrics",
