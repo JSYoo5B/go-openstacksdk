@@ -1,0 +1,469 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "create_queue",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 36,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.queue.Queue"
+      ],
+      "id": "message/v2/create_queue",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_queue",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 47,
+      "parameters": [
+        {
+          "name": "queue",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.queue.Queue"
+      ],
+      "id": "message/v2/get_queue",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "queues",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 59,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.queue.Queue"
+      ],
+      "id": "message/v2/queues",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_queue",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 77,
+      "parameters": [
+        {
+          "name": "value",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.queue.Queue"
+      ],
+      "id": "message/v2/delete_queue",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "post_message",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 96,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "messages",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.message.Message"
+      ],
+      "id": "message/v2/post_message",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "messages",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 114,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.message.Message"
+      ],
+      "id": "message/v2/messages",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_message",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 141,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "message",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.message.Message"
+      ],
+      "id": "message/v2/get_message",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_message",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 159,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "value",
+          "required": true
+        },
+        {
+          "name": "claim",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.message.Message",
+        "openstack.resource.Resource"
+      ],
+      "id": "message/v2/delete_message",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_subscription",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 191,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.subscription.Subscription"
+      ],
+      "id": "message/v2/create_subscription",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "subscriptions",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 207,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.subscription.Subscription"
+      ],
+      "id": "message/v2/subscriptions",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_subscription",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 231,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "subscription",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.subscription.Subscription"
+      ],
+      "id": "message/v2/get_subscription",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_subscription",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 250,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "value",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.subscription.Subscription"
+      ],
+      "id": "message/v2/delete_subscription",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_claim",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 282,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.claim.Claim"
+      ],
+      "id": "message/v2/create_claim",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_claim",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 294,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "claim",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.claim.Claim"
+      ],
+      "id": "message/v2/get_claim",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_claim",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 309,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "claim",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.claim.Claim"
+      ],
+      "id": "message/v2/update_claim",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_claim",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 331,
+      "parameters": [
+        {
+          "name": "queue_name",
+          "required": true
+        },
+        {
+          "name": "claim",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.message.v2.claim.Claim"
+      ],
+      "id": "message/v2/delete_claim",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 359,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "message/v2/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/message/v2/_proxy.py",
+      "line": 398,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "message/v2/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}

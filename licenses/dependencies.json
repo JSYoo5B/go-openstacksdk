@@ -1,0 +1,42 @@
+{
+  "github.com/gophercloud/gophercloud/v2": {
+    "version": "v2.15.0",
+    "licenses": [
+      "gophercloud-v2.15.0-LICENSE"
+    ]
+  },
+  "golang.org/x/crypto": {
+    "version": "v0.55.0",
+    "licenses": [
+      "golang-x-crypto-v0.55.0-LICENSE"
+    ]
+  },
+  "golang.org/x/sys": {
+    "version": "v0.47.0",
+    "licenses": [
+      "golang-x-sys-v0.47.0-LICENSE"
+    ]
+  },
+  "gopkg.in/yaml.v2": {
+    "version": "v2.4.0",
+    "licenses": [
+      "yaml-v2.4.0-LICENSE",
+      "yaml-v2.4.0-LICENSE.libyaml",
+      "yaml-v2.4.0-NOTICE"
+    ]
+  },
+  "github.com/klauspost/compress": {
+    "version": "v1.18.0",
+    "licenses": [
+      "klauspost-compress-v1.18.0-LICENSE",
+      "klauspost-compress-v1.18.0-xxhash-LICENSE",
+      "klauspost-compress-v1.18.0-snapref-LICENSE"
+    ]
+  },
+  "golang.org/x/text": {
+    "version": "v0.41.0",
+    "licenses": [
+      "golang-x-text-v0.41.0-LICENSE"
+    ]
+  }
+}

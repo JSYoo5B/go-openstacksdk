@@ -1,0 +1,332 @@
+package resource
+
+import (
+	"context"
+	"errors"
+	"iter"
+	"net/http"
+	"net/url"
+	"strings"
+	"unicode"
+	"unicode/utf8"
+
+	"github.com/gophercloud/gophercloud/v2"
+)
+
+// FindIdentity automatically resolves one controller identity or exact name.
+// Safe unescaped segments use GET first. Names that cannot safely use an ID
+// route are searched only through the list query; FindFallbackNever rejects
+// those names before HTTP. Identity strings are never trimmed or URL-decoded.
+// Audited SDK bindings opt in explicitly; existing ID/Name lookup is unchanged.
+func (c *Collection[T]) FindIdentity(ctx context.Context, identity string, options ...IdentityFindOption) (*T, error) {
+	kind := ""
+	if c != nil {
+		kind = c.binding.Kind
+	}
+	fail := func(err error) (*T, error) {
+		if ctx != nil && ctx.Err() != nil {
+			err = errors.Join(err, ctx.Err(), context.Cause(ctx))
+		}
+		return nil, &OperationError{Operation: "find_identity", Resource: kind, Cause: err}
+	}
+	config, err := PrepareIdentityFindOptions(options...)
+	if err == nil {
+		err = validateIdentityFindInput(identity)
+	}
+	if err != nil {
+		return fail(err)
+	}
+	if c == nil || !c.binding.IdentityFind || c.binding.Get == nil || c.binding.ID == nil && c.binding.IdentityResponseID == nil || c.binding.Name == nil && c.binding.IdentityName == nil || c.binding.IdentityLiteralGet && c.binding.GetIdentityQuery == nil {
+		return fail(ErrUnsupported)
+	}
+	if ctx == nil {
+		return fail(invalid("identity find context is required"))
+	}
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	// Snapshot SDK-owned list and enrichment policies before any callback can run.
+	missingListQuery := cloneIdentityFindOptions(IdentityFindOpts{Query: c.binding.IdentityMissingListQuery}).Query
+	listDefaults := cloneIdentityFindOptions(IdentityFindOpts{Query: c.binding.IdentityListQueryDefaults}).Query
+	extraSpecs := c.binding.IdentityExtraSpecs
+	for _, query := range []url.Values{missingListQuery, listDefaults} {
+		for key := range query {
+			if err := validateIdentityFindQueryKey(key); err != nil {
+				return fail(err)
+			}
+		}
+	}
+	if config.GetExtraSpecs != nil && extraSpecs == nil {
+		return fail(ErrUnsupported)
+	}
+	getExtraSpecs := config.GetExtraSpecs != nil && *config.GetExtraSpecs
+	finish := func(value *T) (*T, error) {
+		if err := ctx.Err(); err != nil {
+			return fail(err)
+		}
+		if getExtraSpecs {
+			var err error
+			value, err = extraSpecs(ctx, value)
+			if canceled := ctx.Err(); canceled != nil {
+				return fail(errors.Join(err, canceled))
+			}
+			if err != nil {
+				return fail(err)
+			}
+			if _, err := c.identityFindID(value); err != nil {
+				return fail(err)
+			}
+			if err := ctx.Err(); err != nil {
+				return fail(err)
+			}
+		}
+		return value, nil
+	}
+	originalQuery := cloneIdentityFindOptions(config).Query
+	if config.AllProjects != nil {
+		for key := range config.Query {
+			if strings.EqualFold(key, "all_tenants") || c.binding.IdentityAllProjectsQuery != "" && strings.EqualFold(key, c.binding.IdentityAllProjectsQuery) {
+				return fail(invalid("typed all-projects conflicts with raw query %q", key))
+			}
+		}
+		if c.binding.IdentityAllProjectsQuery == "" {
+			return fail(ErrUnsupported)
+		}
+		if err := validateIdentityFindQueryKey(c.binding.IdentityAllProjectsQuery); err != nil {
+			return fail(err)
+		}
+	}
+	if config.Details != nil && c.binding.IterateIdentity == nil {
+		return fail(ErrUnsupported)
+	}
+	details := config.Details == nil || *config.Details
+	ignoreMissing := config.IgnoreMissing == nil || *config.IgnoreMissing
+	safeRoute := safeIdentityFindRoute(identity) && c.validateID(identity) == nil
+	if c.binding.IdentityDirectGet != nil {
+		if err := c.binding.IdentityDirectGet(identity); err != nil {
+			return fail(err)
+		}
+		safeRoute = true
+	}
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if safeRoute {
+		if len(config.Query) != 0 && c.binding.GetIdentityQuery == nil {
+			return fail(ErrUnsupported)
+		}
+		value, err := c.getIdentity(ctx, identity, config.Query)
+		if canceled := ctx.Err(); canceled != nil {
+			return fail(errors.Join(err, canceled))
+		}
+		if err == nil {
+			if _, err := c.identityFindID(value); err != nil {
+				return fail(err)
+			}
+			if err := ctx.Err(); err != nil {
+				return fail(err)
+			}
+			return finish(value)
+		}
+		if !identityFindCanFallback(err, config.Fallback) {
+			if !identityFindTerminalError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) && ignoreMissing {
+				return nil, nil
+			}
+			return fail(err)
+		}
+	} else if config.Fallback == FindFallbackNever {
+		return fail(invalid("identity cannot safely use a direct ID route"))
+	}
+	// A successful list observation is required before treating absence as
+	// ignorable. List HTTP failures are never suppressed by IgnoreMissing.
+	if c.binding.IterateIdentity == nil && c.binding.IterateControlled == nil && c.binding.Iterate == nil && (c.binding.List == nil || c.binding.Extract == nil) {
+		return fail(ErrUnsupported)
+	}
+	for key, values := range listDefaults {
+		if !config.Query.Has(key) {
+			config.Query[key] = append([]string(nil), values...)
+		}
+		if !originalQuery.Has(key) {
+			originalQuery[key] = append([]string(nil), values...)
+		}
+	}
+	if config.AllProjects != nil && *config.AllProjects {
+		config.Query.Set(c.binding.IdentityAllProjectsQuery, "true")
+	}
+	if c.binding.NameQuery != nil {
+		key := c.binding.NameQueryKey
+		if key == "" {
+			key = "name"
+		}
+		if err := validateIdentityFindQueryKey(key); err != nil {
+			return fail(err)
+		}
+		if !config.Query.Has(key) {
+			config.Query.Set(key, c.binding.NameQuery(identity))
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	found, err := c.findIdentityList(ctx, identity, config.Query, details)
+	if err != nil {
+		return fail(err)
+	}
+	if found == nil && len(missingListQuery) != 0 {
+		// Start from the caller's query, not the first search's automatic name
+		// or all-projects hint. The fixed SDK overlay is mandatory.
+		for key, values := range missingListQuery {
+			originalQuery[key] = append([]string(nil), values...)
+		}
+		found, err = c.findIdentityList(ctx, identity, originalQuery, details)
+		if err != nil {
+			return fail(err)
+		}
+	}
+	if err := ctx.Err(); err != nil {
+		return fail(err)
+	}
+	if found == nil && !ignoreMissing {
+		// Do not attach a suppressed direct 400/403 to logical list absence.
+		return fail(&NotFoundError{Resource: kind, Reference: identity})
+	}
+	if found != nil {
+		return finish(found)
+	}
+	return found, nil
+}
+
+// findIdentityList observes the entire native search before reporting logical
+// absence. Both phases retain exact ID-or-name matching and late error checks.
+func (c *Collection[T]) findIdentityList(ctx context.Context, identity string, query url.Values, details bool) (*T, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	// WithName would filter out rows matching only their ID. Copy the validated
+	// wire query directly to retain repeated and explicitly empty values.
+	query = cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query
+	listQuery := func(options *listOptions) error {
+		options.query = cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query
+		return nil
+	}
+	var found *T
+	var foundID string
+	listCollection := c
+	if modeIterator := c.binding.IterateIdentity; modeIterator != nil {
+		binding := c.binding
+		binding.IterateControlled = nil
+		binding.Iterate = func(ctx context.Context, query url.Values) iter.Seq2[*T, error] {
+			return modeIterator(ctx, query, details)
+		}
+		listCollection = NewCollection(binding)
+	}
+	for value, err := range listCollection.List(ctx, listQuery) {
+		if err != nil {
+			return nil, err
+		}
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		id, err := c.identityFindID(value)
+		if err != nil {
+			return nil, err
+		}
+		name := c.identityFindName(value)
+		if err := ctx.Err(); err != nil {
+			return nil, err
+		}
+		if id != identity && name != identity {
+			continue
+		}
+		if found != nil {
+			return nil, &AmbiguousError{Resource: c.binding.Kind, Name: identity, IDs: []string{foundID, id}}
+		}
+		found, foundID = value, id
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	return found, nil
+}
+
+// getIdentity retains Get's native error and missing-resource policy. The query
+// hook receives its own copy so callback mutations cannot change list fallback.
+func (c *Collection[T]) getIdentity(ctx context.Context, identity string, query url.Values) (*T, error) {
+	if len(query) == 0 && !c.binding.IdentityLiteralGet {
+		return c.Get(ctx, identity)
+	}
+	if err := c.validateID(identity); err != nil {
+		return nil, err
+	}
+	value, err := c.binding.GetIdentityQuery(ctx, identity, cloneIdentityFindOptions(IdentityFindOpts{Query: query}).Query)
+	if !terminalReadError(err) && gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+		err = &NotFoundError{Resource: c.binding.Kind, Reference: identity, Cause: err}
+	}
+	if err != nil {
+		return nil, c.wrap("get", err)
+	}
+	return value, nil
+}
+
+// identityFindName reads the comparable Python Resource.name of one row.
+func (c *Collection[T]) identityFindName(value *T) string {
+	if c.binding.IdentityName != nil {
+		return c.binding.IdentityName(value)
+	}
+	return c.binding.Name(value)
+}
+
+func validateIdentityFindInput(identity string) error {
+	if strings.TrimSpace(identity) == "" || !utf8.ValidString(identity) {
+		return invalid("identity must be nonempty UTF-8")
+	}
+	for _, char := range identity {
+		if unicode.IsControl(char) {
+			return invalid("identity must not contain control characters")
+		}
+	}
+	return nil
+}
+
+func safeIdentityFindRoute(identity string) bool {
+	if ID(identity).Validate() != nil {
+		return false
+	}
+	for _, char := range identity {
+		if unicode.IsSpace(char) {
+			return false
+		}
+	}
+	return true
+}
+
+func (c *Collection[T]) identityFindID(value *T) (string, error) {
+	if value == nil {
+		return "", invalid("identity response must contain a resource")
+	}
+	if c.binding.IdentityResponseID != nil {
+		return c.binding.IdentityResponseID(value)
+	}
+	id := c.binding.ID(value)
+	if err := validateIdentityFindInput(id); err != nil {
+		return "", err
+	}
+	if err := c.validateID(id); err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
+func identityFindTerminalError(err error) bool {
+	return terminalReadError(err)
+}
+
+func identityFindCanFallback(err error, policy FindFallbackPolicy) bool {
+	if policy == FindFallbackNever || identityFindTerminalError(err) {
+		return false
+	}
+	if gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+		return true
+	}
+	return policy == FindFallbackCompatible && (gophercloud.ResponseCodeIs(err, http.StatusBadRequest) || gophercloud.ResponseCodeIs(err, http.StatusForbidden))
+}

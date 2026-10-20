@@ -1,0 +1,140 @@
+package resource
+
+import (
+	"context"
+	"iter"
+
+	"github.com/gophercloud/gophercloud/v2/pagination"
+)
+
+// Stream extracts resources from each page while preserving cancellation and
+// stopping pagination when the consumer breaks out of the iterator.
+func Stream[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) ([]T, error)) iter.Seq2[*T, error] {
+	return StreamWithControl(ctx, pager, extract, ListControl{})
+}
+
+// SinglePageStream preserves native AllPages handling of a SinglePageBase.
+// Some object-envelope pages inherit its array-only IsEmpty; AllPages bypasses
+// that check for a single page. Extraction still validates the whole response
+// before publishing a row, and consumer cancellation/break stops publication.
+func SinglePageStream[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) ([]T, error)) iter.Seq2[*T, error] {
+	return func(yield func(*T, error) bool) {
+		if ctx == nil {
+			yield(nil, invalid("context is required"))
+			return
+		}
+		if err := ctx.Err(); err != nil {
+			yield(nil, err)
+			return
+		}
+		page, err := pager.AllPages(ctx)
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		values, err := extract(page)
+		if err != nil {
+			yield(nil, err)
+			return
+		}
+		for i := range values {
+			if err := ctx.Err(); err != nil {
+				yield(nil, err)
+				return
+			}
+			if !yield(&values[i], nil) {
+				return
+			}
+		}
+		if err := ctx.Err(); err != nil {
+			yield(nil, err)
+		}
+	}
+}
+
+// StreamWithControl applies a local row cap and first-page policy before any
+// outer filters. It leaves the pager's wire query unchanged. Native page
+// emptiness checks and extractors may decode the entire page, including rows
+// beyond the cap; their errors remain observable.
+func StreamWithControl[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) ([]T, error), control ListControl) iter.Seq2[*T, error] {
+	return func(yield func(*T, error) bool) {
+		if control.MaxItems < 0 {
+			yield(nil, invalid("maximum items must be non-negative"))
+			return
+		}
+		stopped := false
+		count := 0
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
+			values, err := extract(page)
+			if err != nil {
+				return false, err
+			}
+			for i := range values {
+				if err := ctx.Err(); err != nil {
+					return false, err
+				}
+				count++
+				if !yield(&values[i], nil) {
+					stopped = true
+					return false, nil
+				}
+				if err := ctx.Err(); err != nil {
+					return false, err
+				}
+				if control.MaxItems > 0 && count >= control.MaxItems {
+					return false, nil
+				}
+			}
+			if err := ctx.Err(); err != nil {
+				return false, err
+			}
+			return !control.SinglePage, nil
+		})
+		if err == nil && !stopped {
+			err = ctx.Err()
+		}
+		if err != nil && !stopped {
+			yield(nil, err)
+		}
+	}
+}
+
+// StreamValues handles typed page responses such as address maps or allocation
+// candidates, which are not naturally represented as slices of resource objects.
+func StreamValues[T any](ctx context.Context, pager pagination.Pager, extract func(pagination.Page) (T, error)) iter.Seq2[T, error] {
+	return func(yield func(T, error) bool) {
+		stopped := false
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
+			value, err := extract(page)
+			if err != nil {
+				return false, err
+			}
+			if !yield(value, nil) {
+				stopped = true
+				return false, nil
+			}
+			return true, nil
+		})
+		if err != nil && !stopped {
+			var zero T
+			yield(zero, err)
+		}
+	}
+}
+
+// Pages is reserved for APIs whose upstream page has no typed extractor.
+func Pages(ctx context.Context, pager pagination.Pager) iter.Seq2[pagination.Page, error] {
+	return func(yield func(pagination.Page, error) bool) {
+		stopped := false
+		err := eachPage(ctx, pager, func(_ context.Context, page pagination.Page) (bool, error) {
+			if !yield(page, nil) {
+				stopped = true
+				return false, nil
+			}
+			return true, nil
+		})
+		if err != nil && !stopped {
+			yield(nil, err)
+		}
+	}
+}

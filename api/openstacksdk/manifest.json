@@ -1,0 +1,153 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "source_url": "https://github.com/openstack/openstacksdk/tree/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "proxy_methods": 1834,
+  "cloud_workflows": 397,
+  "connection_methods": 5,
+  "proxies": [
+    {
+      "service": "accelerator",
+      "version": "v2",
+      "file": "accelerator/v2.json",
+      "methods": 24
+    },
+    {
+      "service": "baremetal",
+      "version": "v1",
+      "file": "baremetal/v1.json",
+      "methods": 108
+    },
+    {
+      "service": "baremetal_introspection",
+      "version": "v1",
+      "file": "baremetal_introspection/v1.json",
+      "methods": 12
+    },
+    {
+      "service": "block_storage",
+      "version": "v2",
+      "file": "block_storage/v2.json",
+      "methods": 112
+    },
+    {
+      "service": "block_storage",
+      "version": "v3",
+      "file": "block_storage/v3.json",
+      "methods": 183
+    },
+    {
+      "service": "clustering",
+      "version": "v1",
+      "file": "clustering/v1.json",
+      "methods": 69
+    },
+    {
+      "service": "compute",
+      "version": "v2",
+      "file": "compute/v2.json",
+      "methods": 145
+    },
+    {
+      "service": "container_infrastructure_management",
+      "version": "v1",
+      "file": "container_infrastructure_management/v1.json",
+      "methods": 17
+    },
+    {
+      "service": "database",
+      "version": "v1",
+      "file": "database/v1.json",
+      "methods": 21
+    },
+    {
+      "service": "dns",
+      "version": "v2",
+      "file": "dns/v2.json",
+      "methods": 66
+    },
+    {
+      "service": "identity",
+      "version": "v2",
+      "file": "identity/v2.json",
+      "methods": 22
+    },
+    {
+      "service": "identity",
+      "version": "v3",
+      "file": "identity/v3.json",
+      "methods": 158
+    },
+    {
+      "service": "image",
+      "version": "v1",
+      "file": "image/v1.json",
+      "methods": 11
+    },
+    {
+      "service": "image",
+      "version": "v2",
+      "file": "image/v2.json",
+      "methods": 79
+    },
+    {
+      "service": "instance_ha",
+      "version": "v1",
+      "file": "instance_ha/v1.json",
+      "methods": 17
+    },
+    {
+      "service": "key_manager",
+      "version": "v1",
+      "file": "key_manager/v1.json",
+      "methods": 34
+    },
+    {
+      "service": "load_balancer",
+      "version": "v2",
+      "file": "load_balancer/v2.json",
+      "methods": 84
+    },
+    {
+      "service": "message",
+      "version": "v2",
+      "file": "message/v2.json",
+      "methods": 18
+    },
+    {
+      "service": "network",
+      "version": "v2",
+      "file": "network/v2.json",
+      "methods": 425
+    },
+    {
+      "service": "object_store",
+      "version": "v1",
+      "file": "object_store/v1.json",
+      "methods": 29
+    },
+    {
+      "service": "orchestration",
+      "version": "v1",
+      "file": "orchestration/v1.json",
+      "methods": 30
+    },
+    {
+      "service": "placement",
+      "version": "v1",
+      "file": "placement/v1.json",
+      "methods": 38
+    },
+    {
+      "service": "shared_file_system",
+      "version": "v2",
+      "file": "shared_file_system/v2.json",
+      "methods": 114
+    },
+    {
+      "service": "workflow",
+      "version": "v2",
+      "file": "workflow/v2.json",
+      "methods": 18
+    }
+  ]
+}

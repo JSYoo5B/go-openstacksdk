@@ -1,0 +1,736 @@
+{
+  "revision": "ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe",
+  "operations": [
+    {
+      "name": "read_env_and_templates",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 73,
+      "parameters": [
+        {
+          "name": "template_file",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "template_url",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "template_object",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "files",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "environment_files",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [],
+      "id": "orchestration/v1/read_env_and_templates",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 118,
+      "parameters": [
+        {
+          "name": "preview",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/create_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "find_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 152,
+      "parameters": [
+        {
+          "name": "name_or_id",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        },
+        {
+          "name": "resolve_outputs",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/find_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "stacks",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 175,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/stacks",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 185,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "resolve_outputs",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/get_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 202,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "preview",
+          "required": false,
+          "default": "False"
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/update_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 219,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/delete_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "check_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 237,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/check_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "abandon_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 254,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/abandon_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "export_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 264,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/export_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "suspend_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 279,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/suspend_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "resume_stack",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 289,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/resume_stack",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_stack_template",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 299,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack",
+        "openstack.orchestration.v1.stack_template.StackTemplate"
+      ],
+      "id": "orchestration/v1/get_stack_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_stack_environment",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 324,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack",
+        "openstack.orchestration.v1.stack_environment.StackEnvironment"
+      ],
+      "id": "orchestration/v1/get_stack_environment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_stack_files",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 349,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack",
+        "openstack.orchestration.v1.stack_files.StackFiles"
+      ],
+      "id": "orchestration/v1/get_stack_files",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "resources",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 370,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.resource.Resource",
+        "openstack.orchestration.v1.stack.Stack"
+      ],
+      "id": "orchestration/v1/resources",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_software_config",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 401,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_config.SoftwareConfig"
+      ],
+      "id": "orchestration/v1/create_software_config",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "software_configs",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 413,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_config.SoftwareConfig"
+      ],
+      "id": "orchestration/v1/software_configs",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_software_config",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 426,
+      "parameters": [
+        {
+          "name": "software_config",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_config.SoftwareConfig"
+      ],
+      "id": "orchestration/v1/get_software_config",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_software_config",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 440,
+      "parameters": [
+        {
+          "name": "software_config",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_config.SoftwareConfig"
+      ],
+      "id": "orchestration/v1/delete_software_config",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "create_software_deployment",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 463,
+      "parameters": [
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_deployment.SoftwareDeployment"
+      ],
+      "id": "orchestration/v1/create_software_deployment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "software_deployments",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 476,
+      "parameters": [
+        {
+          "name": "query",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_deployment.SoftwareDeployment"
+      ],
+      "id": "orchestration/v1/software_deployments",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_software_deployment",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 489,
+      "parameters": [
+        {
+          "name": "software_deployment",
+          "required": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_deployment.SoftwareDeployment"
+      ],
+      "id": "orchestration/v1/get_software_deployment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "delete_software_deployment",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 503,
+      "parameters": [
+        {
+          "name": "software_deployment",
+          "required": true
+        },
+        {
+          "name": "ignore_missing",
+          "required": false,
+          "default": "True"
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_deployment.SoftwareDeployment"
+      ],
+      "id": "orchestration/v1/delete_software_deployment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "update_software_deployment",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 526,
+      "parameters": [
+        {
+          "name": "software_deployment",
+          "required": true
+        },
+        {
+          "name": "attrs",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.software_deployment.SoftwareDeployment"
+      ],
+      "id": "orchestration/v1/update_software_deployment",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "validate_template",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 544,
+      "parameters": [
+        {
+          "name": "template",
+          "required": true
+        },
+        {
+          "name": "environment",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "template_url",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "ignore_errors",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.InvalidRequest",
+        "openstack.orchestration.v1.template.Template"
+      ],
+      "id": "orchestration/v1/validate_template",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "get_template_contents",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 584,
+      "parameters": [
+        {
+          "name": "template_file",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "template_url",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "template_object",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "files",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.exceptions.SDKException"
+      ],
+      "id": "orchestration/v1/get_template_contents",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "stack_events",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 605,
+      "parameters": [
+        {
+          "name": "stack",
+          "required": true
+        },
+        {
+          "name": "resource_name",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attr",
+          "keyword_attributes": true
+        }
+      ],
+      "resources": [
+        "openstack.orchestration.v1.stack.Stack",
+        "openstack.orchestration.v1.stack_event.StackEvent"
+      ],
+      "id": "orchestration/v1/stack_events",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_status",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 648,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "status",
+          "required": true
+        },
+        {
+          "name": "failures",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "None"
+        },
+        {
+          "name": "attribute",
+          "required": false,
+          "default": "'status'"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "orchestration/v1/wait_for_status",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    },
+    {
+      "name": "wait_for_delete",
+      "class": "Proxy",
+      "source": "openstack/orchestration/v1/_proxy.py",
+      "line": 687,
+      "parameters": [
+        {
+          "name": "res",
+          "required": true
+        },
+        {
+          "name": "interval",
+          "required": false,
+          "default": "2"
+        },
+        {
+          "name": "wait",
+          "required": false,
+          "default": "120"
+        },
+        {
+          "name": "callback",
+          "required": false,
+          "default": "None"
+        }
+      ],
+      "resources": [
+        "openstack.resource.ResourceT"
+      ],
+      "id": "orchestration/v1/wait_for_delete",
+      "kind": "proxy",
+      "candidates": [],
+      "review": "pending"
+    }
+  ]
+}

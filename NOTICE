@@ -1,0 +1,64 @@
+go-openstacksdk
+Copyright 2026 JaeSang Yoo and the go-openstacksdk contributors
+
+Original project contributions are licensed under the Apache License,
+Version 2.0. Third-party code and data retain their respective licenses
+and copyright notices; see THIRD_PARTY_NOTICES.md and licenses/.
+
+This distribution includes an adapted go-jmespath v0.4.0 source fork:
+Copyright 2015 James Saryerwinnie
+Licensed under the Apache License, Version 2.0.
+
+Generated API declarations/wrappers and pinned generator-test source excerpts
+use Gophercloud v2.15.0. Test fixtures may combine or alter source excerpts:
+Copyright 2012-2013 Rackspace, Inc.
+Copyright Gophercloud authors
+Licensed under the Apache License, Version 2.0.
+
+OpenStackSDK source is the reference for extracted API/resource metadata
+and Python-compatible behavior. The pinned Cloud filter source includes:
+Copyright (c) 2015 Hewlett-Packard Development Company, L.P.
+Licensed under the Apache License, Version 2.0.
+
+The project depends on yaml.v2 v2.4.0. Its original NOTICE is retained in
+licenses/yaml-v2.4.0-NOTICE:
+Copyright 2011-2016 Canonical Ltd.
+Licensed under the Apache License, Version 2.0.
+The dependency also includes a Go port of libyaml under the MIT license:
+Copyright (c) 2006 Kirill Simonov
+The original port scope and permission notice are retained in
+licenses/yaml-v2.4.0-LICENSE.libyaml.
+
+Glob bracket parsing is adapted from CPython 3.14.8 Lib/fnmatch.py:
+Copyright (c) 2001 Python Software Foundation; All Rights Reserved
+The Python license agreements and change summary are retained separately.
+
+Unicode 16.0.0 digit-property, full lowercase and context-property data
+are used in compact generated tables:
+Copyright 2024 Unicode, Inc.
+The Unicode License V3 is retained in licenses/unicode-LICENSE.
+
+JMESPath.py 1.0.1 is a test reference, not a bundled Python runtime:
+Copyright (c) 2013 Amazon.com, Inc. or its affiliates. All Rights Reserved
+Its MIT license is retained in licenses/jmespath-py-v1.0.1-LICENSE.
+
+go-openstacksdk is an independent project. It is not affiliated with or
+endorsed by the OpenInfra Foundation, OpenStackSDK, or Gophercloud projects.
+This notice does not grant rights to upstream trademarks or imply approval
+of the project name by an upstream rights holder.
+
+Owned image download imports BLAKE2 from golang.org/x/crypto v0.55.0 and
+CPU capability support from golang.org/x/sys v0.47.0. Copyright 2009 The Go
+Authors; their BSD-3-Clause terms are preserved in licenses/ and
+THIRD_PARTY_NOTICES.md. No implementation source is copied into this SDK.
+
+Swift zstd stream decoding imports github.com/klauspost/compress v1.18.0.
+Klaus Post, The Go Authors, the Snappy-Go Authors, Caleb Spare (cespare/xxhash),
+and original source credits retain their respective notices. The complete
+module license, xxhash MIT license and Snappy BSD reference license are retained
+under licenses/ and described in THIRD_PARTY_NOTICES.md. No implementation
+source from this module is copied into this SDK.
+
+Swift explicit text codecs import golang.org/x/text v0.41.0, copyright 2009
+The Go Authors. Its unchanged BSD-3-Clause notice is retained under licenses/
+and described in THIRD_PARTY_NOTICES.md; implementation source is not copied.
