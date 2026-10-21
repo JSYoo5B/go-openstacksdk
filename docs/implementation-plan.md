@@ -9,11 +9,11 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 |---|---:|---|
 | Pinned source declarations | 3,362 | Gophercloud/openstacksdk declarations; inherited, descriptor and Resource surfaces tracked separately |
 | Implementation target | 3,216 | All declarations excluding unsupported routes, such as retired server APIs |
-| API mappings | 2,893 (90.0%) | go_mapping decisions against the target; partial verification does not increase this count |
+| API mappings | 3,134 (97.5%) | go_mapping decisions against the target; partial verification does not increase this count |
 | Source-equivalent support | 0 | supported decisions |
-| Unresolved / excluded (unsupported) | 323 / 146 | Unreviewed declarations are included in unresolved totals |
+| Unresolved / excluded (unsupported) | 82 / 146 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 3,362 | Declarations without individual reviews 0 |
-| Behavior contracts | 9,434 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
+| Behavior contracts | 9,762 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
 
 Behavior-contract counts reflect review granularity and must not be used as completed API counts. Unreviewed operations remain unresolved.
@@ -23,12 +23,12 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 <!-- sdk-service-progress:start -->
 | Priority group | API mappings / target | Mapping rate | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|---:|
-| Core services: stages 1 and 2 | 2,076 / 2,154 | 96.4% | 78 | 0 | 138 |
-| Following network: stages 3 and 4 | 193 / 254 | 76.0% | 61 | 0 | 0 |
-| Following bare metal: stages 3 and 4 | 115 / 207 | 55.6% | 92 | 0 | 0 |
-| Other following services: stages 3 and 4 | 495 / 578 | 85.6% | 83 | 0 | 2 |
-| Shared foundation | 14 / 23 | 60.9% | 9 | 0 | 6 |
-| Total | 2,893 / 3,216 | 90.0% | 323 | 0 | 146 |
+| Core services: stages 1 and 2 | 2,085 / 2,154 | 96.8% | 69 | 0 | 138 |
+| Following network: stages 3 and 4 | 253 / 254 | 99.6% | 1 | 0 | 0 |
+| Following bare metal: stages 3 and 4 | 205 / 207 | 99.0% | 2 | 0 | 0 |
+| Other following services: stages 3 and 4 | 571 / 578 | 98.8% | 7 | 0 | 2 |
+| Shared foundation | 20 / 23 | 87.0% | 3 | 0 | 6 |
+| Total | 3,134 / 3,216 | 97.5% | 82 | 0 | 146 |
 
 **Core services**
 
@@ -36,10 +36,10 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 |---|---:|---:|---:|---:|
 | Identity / Keystone | 377 / 379 | 2 | 0 | 10 |
 | Compute / Nova | 308 / 333 | 25 | 0 | 0 |
-| Placement | 68 / 71 | 3 | 0 | 0 |
-| Network / Neutron | 695 / 728 | 33 | 0 | 30 |
+| Placement | 69 / 71 | 2 | 0 | 0 |
+| Network / Neutron | 699 / 728 | 29 | 0 | 30 |
 | Image / Glance | 108 / 109 | 1 | 0 | 11 |
-| Block Storage / Cinder | 392 / 398 | 6 | 0 | 82 |
+| Block Storage / Cinder | 396 / 398 | 2 | 0 | 82 |
 | Key Manager / Barbican | 66 / 67 | 1 | 0 | 0 |
 | Object Storage / Swift | 62 / 69 | 7 | 0 | 5 |
 
@@ -47,19 +47,19 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 
 | Service | API mappings / target | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|
-| Load Balancer / Octavia | 131 / 144 | 13 | 0 | 0 |
-| DNS / Designate | 62 / 110 | 48 | 0 | 0 |
-| Bare Metal / Ironic | 103 / 189 | 86 | 0 | 0 |
-| Bare Metal Introspection | 12 / 18 | 6 | 0 | 0 |
-| Database / Trove | 50 / 55 | 5 | 0 | 0 |
-| Container Infra / Magnum | 50 / 56 | 6 | 0 | 0 |
+| Load Balancer / Octavia | 143 / 144 | 1 | 0 | 0 |
+| DNS / Designate | 110 / 110 | 0 | 0 | 0 |
+| Bare Metal / Ironic | 189 / 189 | 0 | 0 | 0 |
+| Bare Metal Introspection | 16 / 18 | 2 | 0 | 0 |
+| Database / Trove | 55 / 55 | 0 | 0 | 0 |
+| Container Infra / Magnum | 56 / 56 | 0 | 0 | 0 |
 | Container / Zun | 4 / 4 | 0 | 0 | 0 |
-| Clustering / Senlin | 67 / 69 | 2 | 0 | 0 |
-| Orchestration / Heat | 50 / 66 | 16 | 0 | 0 |
+| Clustering / Senlin | 69 / 69 | 0 | 0 | 0 |
+| Orchestration / Heat | 62 / 66 | 4 | 0 | 0 |
 | Messaging / Zaqar | 37 / 37 | 0 | 0 | 1 |
 | Workflow / Mistral | 30 / 30 | 0 | 0 | 0 |
-| Shared File System / Manila | 149 / 196 | 47 | 0 | 0 |
-| Instance HA / Masakari | 10 / 17 | 7 | 0 | 0 |
+| Shared File System / Manila | 193 / 196 | 3 | 0 | 0 |
+| Instance HA / Masakari | 17 / 17 | 0 | 0 | 0 |
 | Metric | 9 / 9 | 0 | 0 | 0 |
 | Reservation / Blazar | 5 / 5 | 0 | 0 | 0 |
 | Accelerator / Cyborg | 34 / 34 | 0 | 0 | 1 |

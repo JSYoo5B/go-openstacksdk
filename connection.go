@@ -34,6 +34,7 @@ type Connection struct {
 	blockStorage    *blockstorage.Service
 	services        map[string]any
 	clients         map[string]*gophercloud.ServiceClient
+	misc            connectionMisc
 }
 
 // Connect authenticates once. It uses OS_CLOUD/clouds.yaml when OS_CLOUD is set,
@@ -100,6 +101,7 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 	// Preserve configured facts before native authentication derives/mutates
 	// its internal scope. Token response names are not configuration names.
 	o.locationFacts = configuredLocation(cloudName, auth)
+	recordedAuth := cloneAuthOptions(auth)
 	provider, err := config.NewProviderClient(ctx, auth, config.WithHTTPClient(client))
 	if err != nil {
 		return nil, fmt.Errorf("authenticate: %w", err)
@@ -107,7 +109,11 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 	if _, present := os.LookupEnv("OS_REGION_NAME"); present || cloudName != "" || eo.Region != "" {
 		o.locationFacts.RegionName = locationString(eo.Region)
 	}
-	return newConnection(provider, o, eo)
+	connection, err := newConnection(provider, o, eo)
+	if err == nil {
+		connection.misc.auth = &recordedAuth
+	}
+	return connection, err
 }
 
 // FromProvider adopts an already authenticated provider without changing it.

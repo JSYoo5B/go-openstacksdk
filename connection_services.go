@@ -156,6 +156,7 @@ func (c *Connection) serviceClientVersion(ctx context.Context, service Service, 
 		return nil, fmt.Errorf("connect %s %s: %w", service, version, err)
 	}
 	client.ProviderClient = c.provider
+	c.misc.decorate(client)
 	selection, err := c.selectMicroversion(ctx, service, client)
 	if err != nil {
 		return nil, err
