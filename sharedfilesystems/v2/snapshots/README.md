@@ -19,3 +19,11 @@ Extension inputs use `WithCreateField`, `WithUpdateField`, `WithResetStatusField
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup through `/snapshots/detail?name=...` with local exact matching, duplicate-name errors, `WithStatus` sent as the `status` query and also matched locally, and ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Get` and `API.Delete` themselves do not map a missing snapshot to `resource.ErrNotFound`.
 
 Acknowledgement of Create, Update, Delete, ForceDelete or ResetStatus does not imply completion; wait on `status` explicitly. Cancelling a context stops the local call and does not roll back remote work; mutations are never replayed automatically.
+
+## Python-parity helpers
+
+`ForceRemove` posts `{"force_delete":null}` for one ID (404 ignored by default). `GetMetadata`, `GetMetadatum` and `DeleteMetadata` use `/snapshots/{id}/metadata[/{key}]`; only HTTP 200 succeeds, keys are path-escaped and `DeleteMetadata` stops at the first failing key, including a 404. See `../python-parity-a.md`.
+
+## Summary list and manage
+
+`List` streams `GET /snapshots` (the summary view) with the same filters and offset paging as `ListDetail` (`WithListOptions`, `WithListQuery`); fields the summary omits are zero values. `Manage(ctx, ManageOpts{ShareID, ProviderLocation, ...})` posts to `/snapshots/manage` and returns the snapshot echoed by the service (200 or 202); `Name` and `Description` are pointers and `DriverOptions` a map, omitted only when nil, and `WithManageField` rejects core names. `Unmanage` posts `{"unmanage":null}` to `/snapshots/{id}/action` (202 only). Acknowledgement does not prove the state change; wait on `status`. Nothing is replayed. See `../python-share-operations.md`.

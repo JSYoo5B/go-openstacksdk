@@ -21,3 +21,7 @@ Extension inputs use `WithCreateField`, `WithUpdateField`, `WithSetExtraSpecsFie
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, and ignore-missing deletion by default (`Remove` returns nil for a 404). `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing share type.
 
 Share types are administrator-controlled; policy failures surface as HTTP response errors. An acknowledged mutation is not rolled back by cancelling the context, and uncertain mutations are never replayed automatically.
+
+## Python-parity helpers
+
+`UnsetExtraSpecProperty` deletes one extra spec and reports a 404 as `ErrNotFound` unless `resource.WithIgnoreMissing` is given. `CreateWithExtraSpecs` sends the extra specs verbatim, so `driver_handles_share_servers=false`, null and empty values are preserved; the typed `Create` cannot send `false` for that required field. See `../python-parity-a.md`.

@@ -22,3 +22,7 @@ Extension inputs use `WithCreateField`, `WithPromoteField`, `WithResetStatusFiel
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`. Replicas have no name, so lookups are by ID. `All` reads `/share-replicas/detail`; a `WithStatus` filter is applied locally and is not sent as a `status` query parameter. `Remove` ignores a 404 by default; `API.Delete`, `API.Get` and the other native calls keep a 404 as `gophercloud.ErrUnexpectedResponseCode`.
 
 Acknowledgement of Create, Delete, ForceDelete, Resync, Promote, ResetStatus or ResetState does not imply completion; wait on `status` or `replica_state` explicitly. Cancelling a context stops the local call and does not roll back remote work; mutations are never replayed automatically.
+
+## Python-parity helpers
+
+`ForceRemove` posts `{"force_delete":null}` for one replica ID. A 404 is ignored by default and reported as `ErrNotFound` with `resource.WithMissingError`. See `../python-parity-a.md`.

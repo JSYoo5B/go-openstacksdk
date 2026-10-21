@@ -18,3 +18,7 @@ Extension inputs use `WithCreateField`, `WithUpdateField`, `WithAddSecurityServi
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup, duplicate-name errors, and ignore-missing deletion by default. `API.Get` and `API.Delete` do not add `resource.ErrNotFound` or ignore a missing share network.
 
 Deleting or updating a share network that is in use is rejected by the server and surfaces as an HTTP response error. Cancelling a context stops the local call and does not roll back remote work; mutations are never replayed automatically.
+
+## Summary list
+
+`List` streams `GET /share-networks` (the summary view) with the same filters and offset paging as `ListDetail` (`WithListOptions`, `WithListQuery`). Without a limit the native pager asks once more at the maximum offset, as for `ListDetail`. Fields the summary omits are zero values. See `../python-share-operations.md` for the Python comparison.

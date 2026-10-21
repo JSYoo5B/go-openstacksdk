@@ -34,3 +34,15 @@ Known limitations:
 `Find`, `All`, `Remove`, `WaitFor` and `WaitForDeletion` use the common `resource.Collection`: exact name lookup after an ID miss, duplicate-name errors, `status` passed as a query filter, `WithMaxItems` as a local cap, and ignore-missing deletion by default (`Remove` returns nil for a 404; `WithMissingError` reports it). `API.Delete` itself does not ignore a missing share.
 
 Acknowledgement of Create, Extend, Shrink, Revert, ResetStatus, ForceDelete, Unmanage, Delete or access changes does not imply completion; wait on `status` (or the access rule `state`) explicitly. Cancelling a context stops the local call and does not roll back remote work; mutations are never replayed automatically, including after a 5xx response or a deadline.
+
+## Python-parity helpers
+
+`ForceRemove(ctx, id, ...resource.LookupOption)` posts `{"force_delete":null}` for one ID and ignores a 404 by default (`resource.WithMissingError` reports `ErrNotFound`). `ReplaceMetadata` replaces all metadata with `PUT /shares/{id}/metadata` (200 only; a nil map sends `{}`). `DeleteMetadata(ctx, id, keys, ...resource.LookupOption)` deletes keys one request each, ignores missing keys by default, continues after other failures and returns `*MetadataDeleteError` with the failed keys, native causes and, after context cancellation, the unattempted keys. See `../python-parity-a.md` for the Python comparison.
+
+## Summary list, manage, soft delete and resize
+
+`List` streams `GET /shares` (the summary view) with the same filters and offset paging as `ListDetail`; options are `WithListOptions` and `WithListQuery`. Summary rows carry only the fields the service returns, so other model fields are zero values.
+
+`Manage(ctx, ManageOpts{Protocol, ExportPath, ServiceHost, ...})` posts to `/shares/manage` and returns the share echoed by the service (HTTP 200 or 202). `Name`, `Description`, `ShareType`, `ShareServerID` and `IsPublic` are pointers and `DriverOptions` is a map; they are omitted only when nil. `WithManageField` adds extension members and rejects core names. Required inputs fail before HTTP. The share is normally still managing, so wait on `status`.
+
+`SoftDelete` and `Restore` post `{"soft_delete":null}` and `{"restore":null}` (Manila 2.69 and later; only 202 succeeds). `Resize(ctx, id, newSize, ...ResizeOption)` reads the share, then sends at most one extend (`WithResizeForce` adds `"force":true`) or shrink action and returns `ResizeExtend`, `ResizeShrink` or `ResizeNone`; `WithResizeNoExtend` and `WithResizeNoShrink` disable a direction. The size read is not locked and acknowledgement does not mean the resize finished. None of these calls is replayed. See `../python-share-operations.md` for the Python comparison.

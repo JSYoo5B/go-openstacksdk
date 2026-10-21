@@ -71,3 +71,7 @@ fmt.Println(media.Image, media.Inserted, media.MediaTypes)
 ## References
 
 - [Source-shaped Node reads](python-record-reads.md)
+
+## Console and trait helpers
+
+`API.GetConsole`, `API.SetConsoleMode` and `API.AddTrait` call the console and trait endpoints that the pinned Gophercloud release does not expose. They send only the configured client microversion, escape path segments, never replay a failed call and keep context cancellation observable. `GetConsole` accepts only 200 and retains the raw `console_info` and response body. `SetConsoleMode` always sends the explicit `enabled` boolean and accepts 200, 202 and 204; an acknowledgement does not prove the console changed state. `AddTrait` sends a bodyless PUT and accepts only 204. The comparison with the Python operations is in [python-operations-a.md](../python-operations-a.md).
