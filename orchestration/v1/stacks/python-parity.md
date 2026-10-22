@@ -93,3 +93,12 @@ list. Only HTTP 200 succeeds and a validation failure keeps its native error.
   `update_stack(preview=True)` is wired incorrectly: the value reaches
   `Stack.commit` as the positional `prepend_key`, which that method ignores, so
   it performs an ordinary PUT.
+
+## Cloud-layer stack workflows
+
+The Python cloud methods `search_stacks`, `create_stack`, `update_stack` and
+`delete_stack` (with the event polling of `event_utils.poll_for_events`) are
+ported by the `orchestration/v1/stackcloud` package and the matching
+`Connection` methods; see [stackcloud/README.md](../stackcloud/README.md).
+`StackResources.AllRows` is the list form those workflows use: it pages like
+`All` and keeps each row's original JSON object.

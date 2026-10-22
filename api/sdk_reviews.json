@@ -139674,81 +139674,129 @@
     {
       "operation": "python:cloud/_orchestration/OrchestrationCloudMixin/search_stacks",
       "source_fingerprint": "ba1d162c021d7d9786225efeab091fbf9f599596e68f9d8eb52c04eed3233ea6",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.All"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchStacks",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.SearchStacks",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.StackView",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.AllRows"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "One complete GET /stacks list, then _filter_list over the Python Stack.to_dict view: exact or fnmatch glob on id/name, dictionary filters with nested subsets on attribute names (tags [] when absent, bool/list/dict conversions, unknown keys dropped), JMESPath strings as arbitrary output; invalid filter keys and list HTTP errors fail.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudSearchStacksFiltersPythonViewByGlobDictAndJMESPath",
+            "connection_orchestration_stacks_test.go:TestConnectionStackWorkflowsUseCachedOrchestrationEndpoint"
+          ]
+        }
+      ],
       "differences": [
-        "Python lists all stacks and applies _utils._filter_list, which matches name_or_id against id and name by equality or fnmatch glob and accepts a filter dictionary (nested subsets) or a JMESPath string."
+        "Python returns a list of Stack Resources; Go returns SearchResult with matching StackRow values (typed summary plus exact JSON), the full inventory and the filtered JSON view, or the arbitrary JMESPath output with Expression set.",
+        "The view's computed location is null because Python derives it from the session (shared SDK-R1/S1 boundary in docs/sdk-support-ledger.md); Python's deprecation warning and fnmatch debug logging are not reproduced."
       ],
       "documentation": [
+        "orchestration/v1/stackcloud/README.md",
         "orchestration/v1/stacks/python-parity.md"
-      ],
-      "remaining": [
-        "The Go list returns all stacks but no helper reproduces the glob and filter semantics of _filter_list for stacks; add a search workflow with fixtures or map it with explicit local filtering semantics."
       ]
     },
     {
       "operation": "python:cloud/_orchestration/OrchestrationCloudMixin/delete_stack",
       "source_fingerprint": "c11705b1838aa4a12362dbc85fe251ce356afff0b2d711b106206b485395829f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.WaitDeleted",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.DeleteStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.DeleteStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "get_stack(resolve_outputs=False) absence (404, DELETE_COMPLETE, name/ID mismatch) returns Deleted=false without a mutation; otherwise one DELETE /stacks/{id} is sent, a 404 is ignored and other HTTP errors fail.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudDeleteStackLookupResultAndSingleDelete",
+            "connection_orchestration_stacks_test.go:TestConnectionStackWorkflowsUseCachedOrchestrationEndpoint"
+          ]
+        },
+        {
+          "behavior": "Wait captures the latest event marker (limit=1, sort_dir=desc), polls DELETE events from it with is_stack_event matching and the two-empty-poll stack GET fallback, ignores HTTP errors while polling but not malformed events, and fails with Python's message when the final lookup shows DELETE_FAILED.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudDeleteStackWaitPollsEventsFromMarkerAndReportsDeleteFailed",
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudPollFallsBackToStackGetAfterTwoEmptyPolls"
+          ]
+        }
+      ],
       "differences": [
-        "Python looks up the stack with get_stack(resolve_outputs=False), returns False when it is missing, deletes the Stack and optionally polls events; Go has separate lookup, delete and deletion-wait operations."
+        "Python returns True/False and raises SDKException for DELETE_FAILED; Go returns DeleteResult.Deleted and wraps ErrDeleteFailed, keeping the lookup, marker, acknowledgement, swallowed polling HTTP error and final lookup.",
+        "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier."
       ],
       "documentation": [
+        "orchestration/v1/stackcloud/README.md",
         "orchestration/v1/stacks/python-parity.md"
-      ],
-      "remaining": [
-        "No Go workflow combines the lookup, the True/False result and the optional wait=True path, which uses the event-polling helper (event_utils.poll_for_events) and raises SDKException when the stack ends in DELETE_FAILED; the status-based WaitDeleted differs from event polling."
       ]
     },
     {
       "operation": "python:cloud/_orchestration/OrchestrationCloudMixin/create_stack",
       "source_fingerprint": "903db378eee3f4dbfd808e9e8236f4facb3daf332384b0099500f2d674c0b16a",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Create",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Wait",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.CreateStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.CreateStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithTemplateLoader",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/templateloader.Loader.ReadEnvAndTemplates"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "The POST /stacks body carries stack_name, tags (null when unset), disable_rollback=!rollback, timeout_mins as floor(seconds/60), parameters ({} when unset) and only the loaded template/files/environment; Wait polls CREATE events without a marker, a CREATE_FAILED status is returned rather than raised, and get_stack(name) supplies the detailed stack.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudCreateStackPostsPythonAttributesWaitsAndReturnsDetail"
+          ]
+        },
+        {
+          "behavior": "Loader errors and cancellation stop before HTTP; a rejected POST has no acknowledgement; after an accepted POST a wait, deadline or response-shape failure returns the acknowledgement with the error and the POST is sent once.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudCreateStackKeepsAcceptedEvidenceAndNeverReplays",
+            "connection_orchestration_stacks_test.go:TestConnectionStackWorkflowsUseCachedOrchestrationEndpoint"
+          ]
+        }
+      ],
       "differences": [
-        "Python builds stack attributes from template/environment files (read_env_and_templates), creates the stack, optionally polls events and then returns get_stack(name)."
+        "TimeoutSeconds is an integer; Python also accepts float seconds and then sends a float timeout_mins. Parameters are a map instead of **kwargs.",
+        "Results are typed records that keep every phase's evidence (attributes, marker, acknowledgement, wait status, final lookup) instead of a Stack Resource; an error after an accepted mutation is returned together with that evidence, the mutation is never replayed and cancellation does not roll back remote work.",
+        "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier."
       ],
       "documentation": [
-        "orchestration/v1/stacks/python-parity.md",
-        "orchestration/v1/templateloader/README.md"
-      ],
-      "remaining": [
-        "The template/environment loading half is now covered by templateloader (see read_env_and_templates). Still missing: a workflow that converts timeout seconds to minutes and rollback to disable_rollback, posts the loaded template/files/environment, polls events with event_utils.poll_for_events semantics when wait=True and returns the detailed stack."
+        "orchestration/v1/stackcloud/README.md",
+        "orchestration/v1/stacks/python-parity.md"
       ]
     },
     {
       "operation": "python:cloud/_orchestration/OrchestrationCloudMixin/update_stack",
       "source_fingerprint": "dcaa8f7c76680192fcf4fead6e74602897974af9d13e60d418e1c14e35c29d63",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Update",
-        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Wait",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.UpdateStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.UpdateStack",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithTemplateLoader",
+        "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackcloud.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/orchestration/v1/templateloader.Loader.ReadEnvAndTemplates"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "PUT /stacks/{name_or_id} carries the create attributes without stack_name; Wait captures the latest event marker before the PUT (a marker failure sends no PUT), polls UPDATE events from it, and get_stack(name_or_id) returns the refreshed stack or nil when missing.",
+          "tests": [
+            "api/heat_cloud_stack_workflows_test.go:TestHeatCloudUpdateStackCapturesMarkerPutsAndPollsUpdateEvents",
+            "connection_orchestration_stacks_test.go:TestConnectionStackWorkflowsUseCachedOrchestrationEndpoint"
+          ]
+        }
+      ],
       "differences": [
-        "Python builds attributes like create_stack, captures the latest event as a marker when waiting, updates and polls events from that marker, then returns get_stack."
+        "TimeoutSeconds is an integer; Python also accepts float seconds. Parameters are a map instead of **kwargs.",
+        "Results are typed records that keep every phase's evidence (attributes, marker, acknowledgement, wait status, final lookup) instead of a Stack Resource; an error after an accepted mutation is returned together with that evidence, the mutation is never replayed and cancellation does not roll back remote work.",
+        "poll_for_events has no overall timeout in Python; in Go the context bounds the wait and WithPollInterval replaces the fixed five-second period. The stack reference is path-escaped as one segment and must be a valid identifier."
       ],
       "documentation": [
-        "orchestration/v1/stacks/python-parity.md",
-        "orchestration/v1/templateloader/README.md"
-      ],
-      "remaining": [
-        "The loader half is covered by templateloader. Still missing: the workflow that captures the last event marker, updates, polls update events and returns the refreshed stack."
+        "orchestration/v1/stackcloud/README.md",
+        "orchestration/v1/stacks/python-parity.md"
       ]
     },
     {
