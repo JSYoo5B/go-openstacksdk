@@ -105719,7 +105719,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/delete_server",
       "source_fingerprint": "2a85cffe36f5d36eb882369b9ae4831e53027b2744bd677a97715ceffbb76d3f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Remove",
@@ -105732,7 +105732,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPs",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPRetry",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerFloatingIPOptions",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForDelete"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy"
       ],
       "contracts": [
         {
@@ -105759,18 +105760,24 @@
             "connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete",
             "connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone"
           ]
+        },
+        {
+          "behavior": "The _has_floating_ips gate skips floating-IP cleanup without any request when floating_ip_source is none; a lookup raising NotFound continues with the next address; the find_server defaults look up by identity and then name=<name> on the detail list; the Nova floating source lists and deletes through os-floating-ips without Neutron.",
+          "tests": [
+            "connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingSourceNoneSkipsFloatingCleanup",
+            "connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingLookupNotFoundContinues",
+            "connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFindServerDefaults",
+            "connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerNovaFloatingSourceDeletesThroughNova"
+          ]
         }
       ],
       "differences": [
-        "Wait/delete errors are returned as Go errors; a wait failure after an accepted DELETE returns (true, err)."
+        "Wait/delete errors are returned as Go errors; a wait failure after an accepted DELETE returns (true, err).",
+        "The floating-IP gate uses the Connection's floating_ip_source (ServerAddressPolicy or clouds.yaml); per-call floating-IP query options do not change it. Floating lookup and delete semantics are those of GetFloatingIP and DeleteFloatingIP."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Python's _has_floating_ips gate (floating-IP source none) and the per-address NotFound-continue branch have no dedicated fixture; floating lookup and delete semantics are delegated to the separately reviewed GetFloatingIP/DeleteFloatingIP.",
-        "Python's find_server default and the non-Neutron (Nova floating source) delete_ips branch are untested here."
       ]
     },
     {
@@ -105897,12 +105904,14 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/add_server_security_groups",
       "source_fingerprint": "bc91d089c75c95f21e169d988dbc903cff7c927cda49f335af64b668fc8788c8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.AddServer",
         "github.com/JSYoo5B/go-openstacksdk.Connection.AddServerSecurityGroups",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord",
+        "github.com/JSYoo5B/go-openstacksdk.WithSecurityGroupSource",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SecurityGroupCloud"
       ],
       "contracts": [
         {
@@ -105919,29 +105928,36 @@
             "connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP",
             "connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
           ]
+        },
+        {
+          "behavior": "The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.",
+          "tests": [
+            "connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP",
+            "connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection",
+            "connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource"
+          ]
         }
       ],
       "differences": [
-        "Group inputs are identity strings; pre-resolved dict/Resource groups and a single non-list argument are not accepted."
+        "Group inputs are identity strings; pre-resolved dict/Resource groups and a single non-list argument are not accepted.",
+        "The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Python's _has_secgroups gate (secgroup_source none raises OpenStackCloudUnavailableFeature) is not modelled; Go selects Neutron or Nova from the catalog only.",
-        "get_server(bare=True)/get_security_group lookups reuse the mapped Go finders; their own Resource/Munch normalization differences remain."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/remove_server_security_groups",
       "source_fingerprint": "dae9d43669f798624a9fb8d2fcc68b16b6637fef789cea245183f9fcce46db17",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.RemoveServer",
         "github.com/JSYoo5B/go-openstacksdk.Connection.RemoveServerSecurityGroups",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord",
+        "github.com/JSYoo5B/go-openstacksdk.WithSecurityGroupSource",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SecurityGroupCloud"
       ],
       "contracts": [
         {
@@ -105957,17 +105973,23 @@
             "connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction",
             "connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay"
           ]
+        },
+        {
+          "behavior": "The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.",
+          "tests": [
+            "connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP",
+            "connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection",
+            "connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource"
+          ]
         }
       ],
       "differences": [
-        "Group inputs are identity strings; pre-resolved dict/Resource groups are not accepted."
+        "Group inputs are identity strings; pre-resolved dict/Resource groups are not accepted.",
+        "The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Python's _has_secgroups gate (secgroup_source none) is not modelled; Go selects Neutron or Nova from the catalog only."
       ]
     },
     {
@@ -112972,10 +112994,14 @@
     {
       "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/has_service",
       "source_fingerprint": "5dea5582ca614fcceefc8532dd8fa087c42285b440c49b11c47ee2901b6ee33c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.HasService",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpoint"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.HasServiceVersion",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ServiceEnabled",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpoint",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpointContext",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceEnabled"
       ],
       "contracts": [
         {
@@ -112984,26 +113010,44 @@
             "connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride",
             "connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
           ]
+        },
+        {
+          "behavior": "HasServiceVersion asks SessionEndpointContext for min_version=version and max_version='<major>.latest', so a catalog URL of that major needs no request, other majors consult the version document, and an absent version is false.",
+          "tests": [
+            "connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags",
+            "connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject"
+          ]
+        },
+        {
+          "behavior": "has_<service> flags from clouds.yaml or WithServiceEnabled (explicit options win) disable a service before any lookup; unset flags default to official os-service-types types, so aliases such as volumev3 are false unless enabled; non-boolean flags are rejected.",
+          "tests": [
+            "connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags",
+            "connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource",
+            "connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog"
+          ]
         }
       ],
       "differences": [
-        "Go returns lookup failures as errors where Python returns False."
+        "Go returns lookup failures and invalid versions as errors where Python returns False.",
+        "HasService performs no version discovery; HasServiceVersion with an empty version is has_service without a version (including the implied version of volumev2/volumev3/sharev2/workflowv2).",
+        "Catalog types match exactly; os-service-types aliases are not resolved during catalog lookup, as for EndpointFor.",
+        "has_<service> values must be booleans and are validated when the Connection is created instead of asserting at call time; region-specific clouds.yaml values are not read.",
+        "Version discovery is not cached between calls and the debug log of disabled services is not emitted."
       ],
       "documentation": [
         "docs/connection-r2-misc.md"
-      ],
-      "remaining": [
-        "The version argument (min_version and max_version discovery) is not implemented.",
-        "The has_<service> configuration flags of clouds.yaml are not read."
       ]
     },
     {
       "operation": "python:cloud/openstackcloud/_OpenStackCloudMixin/get_session_endpoint",
       "source_fingerprint": "daadc1c339a2e942ae5dedd39e8bb9fc8e984d67dfb88f46321be920a652a654",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpoint",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.EndpointFor"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpointContext",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.EndpointFor",
+        "github.com/JSYoo5B/go-openstacksdk.WithEndpointMinVersion",
+        "github.com/JSYoo5B/go-openstacksdk.WithEndpointMaxVersion"
       ],
       "contracts": [
         {
@@ -113011,16 +113055,29 @@
           "tests": [
             "connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride"
           ]
+        },
+        {
+          "behavior": "SessionEndpointContext follows keystoneauth discovery: an override or a catalog URL already within the bounds and major is returned without a request; otherwise unauthenticated GETs (a 401 retried with the token) of the unversioned URL, matched versioned URL, identity hack and catalog URL select the newest CURRENT/SUPPORTED/STABLE/DEPRECATED version in range by its self link (relative and foreign-host links repaired, project suffix restored); no match is not found and no document falls back to the catalog URL.",
+          "tests": [
+            "connection_endpoint_discovery_test.go:TestSessionEndpointContextVersionDiscovery",
+            "connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject"
+          ]
+        },
+        {
+          "behavior": "Invalid, contradictory or alias-mismatched versions are errors before HTTP, overrides skip discovery, version bounds are rejected by the context-free SessionEndpoint, and cancellation stops discovery.",
+          "tests": [
+            "connection_endpoint_discovery_test.go:TestSessionEndpointContextOverrideInvalidAndCanceled"
+          ]
         }
       ],
       "differences": [
-        "Go returns (url, found, error)."
+        "Go returns (url, found, error); invalid versions, malformed version documents and cancellation are errors where Python raises SDKException.",
+        "Version discovery runs only in SessionEndpointContext; SessionEndpoint never makes a request.",
+        "Catalog types match exactly; os-service-types aliases are not resolved during catalog lookup, as for EndpointFor.",
+        "Discovery documents are not cached between calls; the discovery GET uses the provider HTTP client and the current token without reauthentication."
       ],
       "documentation": [
         "docs/connection-r2-misc.md"
-      ],
-      "remaining": [
-        "min_version and max_version version discovery against the service is not implemented."
       ]
     },
     {

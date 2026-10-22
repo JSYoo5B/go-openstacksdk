@@ -594,21 +594,37 @@ Unresolved boundaries:
 
 ### `python:cloud/_compute/ComputeCloudMixin/delete_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Remove`
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteServer`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetFloatingIP`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteFloatingIP`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWait`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerTimeout`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPs`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPRetry`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFloatingIPOptions`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForDelete`
+- `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 
 - With wait=False and delete_ips=False, FindRecord and Remove reproduce the find_server lookup and the DELETE that ignores 404.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudServerDeleteAndConsolePartialPaths`.
+- DeleteServer returns false without DELETE for a missing server, maps a DELETE 404 to false, never replays a failed DELETE, observes absence with wait, keeps (true, err) after an accepted DELETE whose wait times out and rejects a non-positive timeout before HTTP.
+  Tests: `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerMissingServerSendsNoDelete`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerFoundSendsOneDeleteAndMaps404ToFalse`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteErrorIsNotReplayed`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitObservesAbsence`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWaitTimeoutKeepsAcceptedDelete`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerRejectsNonPositiveTimeoutBeforeHTTP`.
+- With delete_ips the floating addresses found in the server addresses are looked up and deleted before the server DELETE, a floating IP that is not deleted aborts the server DELETE, and without the option no Neutron call is made.
+  Tests: `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeDeleteServerWithoutDeleteIPsLeavesFloatingAlone`.
+- The _has_floating_ips gate skips floating-IP cleanup without any request when floating_ip_source is none; a lookup raising NotFound continues with the next address; the find_server defaults look up by identity and then name=<name> on the detail list; the Nova floating source lists and deletes through os-floating-ips without Neutron.
+  Tests: `connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingSourceNoneSkipsFloatingCleanup`, `connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFloatingLookupNotFoundContinues`, `connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerFindServerDefaults`, `connection_cloud_server_delete_gates_test.go:TestCloudDeleteServerNovaFloatingSourceDeletesThroughNova`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- With wait=True Python calls compute.wait_for_delete with the given timeout; python:compute/v2/wait_for_delete is unresolved.
-- With delete_ips=True Python first finds floating addresses in the server addresses, resolves each with get_floating_ip and deletes it with delete_floating_ip(retry=delete_ip_retry), aborting the server delete on failure; Go has no helper that composes this cleanup with server deletion.
+- Wait/delete errors are returned as Go errors; a wait failure after an accepted DELETE returns (true, err).
+- The floating-IP gate uses the Connection's floating_ip_source (ServerAddressPolicy or clouds.yaml); per-call floating-IP query options do not change it. Floating lookup and delete semantics are those of GetFloatingIP and DeleteFloatingIP.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_console`
 
@@ -671,36 +687,53 @@ Unresolved boundaries:
 
 ### `python:cloud/_compute/ComputeCloudMixin/add_server_security_groups`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.AddServer`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.AddServerSecurityGroups`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord`
+- `github.com/JSYoo5B/go-openstacksdk.WithSecurityGroupSource`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SecurityGroupCloud`
 
 - The addSecurityGroup action matches the proxy request once the group name is known.
   Tests: `compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests`.
+- AddServerSecurityGroups finds the server, resolves every group before any action, sends one addSecurityGroup per group in order using name else ID, and returns false without actions for a missing server/group or empty list.
+  Tests: `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeAddServerSecurityGroupsResolvesAllThenSendsInOrder`, `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsRejectEmptyIdentitiesBeforeHTTP`, `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
+- The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.
+  Tests: `connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP`, `connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection`, `connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- Python resolves every group with the cloud get_security_group (search over Neutron or Nova security groups selected by secgroup_source) and raises OpenStackCloudUnavailableFeature when security groups are disabled; Go has no SDK helper for that lookup or gate.
+- Group inputs are identity strings; pre-resolved dict/Resource groups and a single non-list argument are not accepted.
+- The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations.
 
 ### `python:cloud/_compute/ComputeCloudMixin/remove_server_security_groups`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.RemoveServer`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.RemoveServerSecurityGroups`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetSecurityGroupRecord`
+- `github.com/JSYoo5B/go-openstacksdk.WithSecurityGroupSource`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SecurityGroupCloud`
 
 - The removeSecurityGroup action matches the proxy request once the group name is known.
   Tests: `compute/v2/secgroups/python_parity_test.go:TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests`.
+- RemoveServerSecurityGroups shares the lookup phase, continues after a 404 removeSecurityGroup and returns false, stops on other errors and never replays an action.
+  Tests: `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeRemoveServerSecurityGroupsContinuesPast404AndReportsFalse`, `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupsMissingServerOrGroupSendsNoAction`, `connection_r2_cloud_compute_secgroups_test.go:TestR2CloudComputeSecurityGroupActionFailureStopsSequenceWithoutReplay`.
+- The _has_secgroups gate: a secgroup_source other than neutron or nova in any casing (including null or empty) returns network.ErrUnavailableSecurityGroups before any request; only the exact source 'neutron' with the network service enabled uses Neutron, so 'nova', 'Neutron' or has_network false resolve groups through Nova; clouds.yaml secgroup_source is read and WithSecurityGroupSource overrides it.
+  Tests: `connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsUnavailableSourceFailsBeforeHTTP`, `connection_cloud_secgroup_source_test.go:TestCloudServerSecurityGroupsNovaSelection`, `connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- Python resolves every group with the cloud get_security_group (search over Neutron or Nova security groups selected by secgroup_source) and raises OpenStackCloudUnavailableFeature when security groups are disabled; Go has no SDK helper for that lookup or gate.
-- Python catches a 404 per group, continues and returns False; Go RemoveServer returns the 404 and only caller-side status handling could reproduce it.
+- Group inputs are identity strings; pre-resolved dict/Resource groups are not accepted.
+- The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_compute_limits`
 

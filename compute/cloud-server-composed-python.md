@@ -52,20 +52,33 @@ returned admin password, else the supplied one, is restored on the waited
 server. The rebuild is never replayed; a failed wait returns the action result
 beside the error.
 
-`DeleteServer` returns `(false, nil)` for a missing server or a 404 DELETE
-and sends a single DELETE otherwise. `WithCloudServerDeleteIPs` looks up and
-deletes each floating address (rows tagged `OS-EXT-IPS:type == floating`, in
-order) through `GetFloatingIP` and `DeleteFloatingIP` with the configured retry
-(default 1) before the server DELETE; a floating IP that is not deleted aborts
-before the server DELETE. With wait, absence is observed for the timeout; once
-the DELETE was accepted, a wait failure returns `(true, err)`.
+`DeleteServer` finds the server like `find_server` with its defaults (GET by
+identity, then the detail list filtered by `name` only). It returns
+`(false, nil)` for a missing server or a 404 DELETE and sends a single DELETE
+otherwise. `WithCloudServerDeleteIPs` looks up and deletes each floating address
+(rows tagged `OS-EXT-IPS:type == floating`, in order) through `GetFloatingIP`
+and `DeleteFloatingIP` with the configured retry (default 1) before the server
+DELETE, using the Neutron or Nova (`os-floating-ips`) backend the Connection
+selects. An address whose lookup reports not found or finds nothing is skipped;
+a floating IP that is not deleted aborts before the server DELETE. When the
+Connection's `floating_ip_source` is `none` (`WithServerAddressPolicy` or
+clouds.yaml), the cleanup is skipped without any request, as Python's
+`_has_floating_ips` gate does; per-call floating-IP options do not change the
+gate. With wait, absence is observed for the timeout; once the DELETE was
+accepted, a wait failure returns `(true, err)`.
 
 ## Security groups
 
-Both helpers take identities (names or IDs). The server is found first with
-`FindRecord`, then every group is resolved in order with
-`GetSecurityGroupRecord` (Neutron, or Nova when the catalog cleanly lacks
-Neutron). A missing server or group returns `(false, nil)` before any action.
+Both helpers take identities (names or IDs). The `secgroup_source`
+configuration (`WithSecurityGroupSource` or clouds.yaml, default `neutron`) is
+checked first, like `_has_secgroups`: any value other than `neutron` or `nova`
+in any casing, including null, returns `network.ErrUnavailableSecurityGroups`
+before any request. The server is then found with `FindRecord` (as
+`get_server(bare=True)` uses `find_server`), and every group is resolved in
+order with `GetSecurityGroupRecord`. Neutron is used only for the exact source
+`neutron` while the network service is enabled (`has_network`) and present in
+the catalog; otherwise Nova `os-security-groups` is used. A missing server or
+group returns `(false, nil)` before any action.
 Add sends one `addSecurityGroup` action per group using the group name, else its
 ID. Remove tolerates a 404 on one action, continues, and returns false at the end;
 any other error stops the sequence. No action is replayed.
@@ -78,7 +91,7 @@ re-rendered and `location` and unknown wire fields are absent.
 
 ## Limits
 
-- Python's `secgroup_source` gate and pre-resolved group objects are not modelled.
+- Pre-resolved group objects are not accepted; groups are identity strings.
 - `detailed=True` hostvars (`get_openstack_vars`, `get_server_meta`) have no Go
   equivalent; `get_server_public_ip` style expansion remains the separate,
   independently reviewed `ExpandServerInterfaces`.
