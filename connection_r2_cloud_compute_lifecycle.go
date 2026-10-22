@@ -42,6 +42,8 @@ type CloudServerActionOpts struct {
 	Rebuild       []servers.RebuildOption
 	Bare          bool
 	Address       []compute.ServerAddressOption
+	// Detailed expands the rebuild result into GetOpenStackVars hostvars.
+	Detailed bool
 }
 
 // CloudServerActionOption mutates CloudServerActionOpts.
@@ -313,7 +315,7 @@ func (c *Connection) RebuildServer(ctx context.Context, serverID, imageID string
 		return nil, wrap(err)
 	}
 	result := &CloudServerResult{Server: rebuilt, Sent: true, AdminPassword: rebuilt.AdminPass}
-	read := CloudServerReadOpts{Bare: cfg.Bare, Address: cfg.Address}
+	read := CloudServerReadOpts{Bare: cfg.Bare, Address: cfg.Address, Detailed: cfg.Detailed}
 	if cfg.Wait {
 		password := rebuilt.AdminPass
 		if password == "" {

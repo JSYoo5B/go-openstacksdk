@@ -10,6 +10,7 @@ import (
 	"slices"
 	"sync"
 
+	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -127,10 +128,28 @@ func (e *inventoryEntry) connection(ctx context.Context) (*Connection, error) {
 }
 
 // InventoryHost is one server and the inventory cloud that returned it.
+// Hostvars is set by the default expansion (Python expand=True); Interfaces
+// is set by both expansions and is nil with WithInventoryBare.
 type InventoryHost struct {
-	Cloud  string
-	Server *servers.Server
+	Cloud      string
+	Server     *servers.Server
+	Interfaces *compute.ServerAddressView
+	Hostvars   *CloudServerHostvars
 }
+
+// InventoryExpansion selects how each listed server is expanded.
+type InventoryExpansion int
+
+const (
+	// InventoryExpandHostvars is Python's default expand=True:
+	// list_servers(detailed=True), the GetOpenStackVars hostvars.
+	InventoryExpandHostvars InventoryExpansion = iota
+	// InventoryExpandInterfaces is expand=False: list_servers(detailed=False)
+	// still adds the interface expansion.
+	InventoryExpandInterfaces
+	// InventoryExpandNone is a Go extension that skips every expansion.
+	InventoryExpandNone
+)
 
 // InventoryFailure records a cloud that could not be listed.
 type InventoryFailure struct {
@@ -151,6 +170,10 @@ type InventoryOpts struct {
 	AllProjects      bool
 	ContinueOnFailed bool
 	Filters          *json.RawMessage
+	Expansion        InventoryExpansion
+	// Private maps OpenStackInventory(private=True): every cloud computes
+	// interface addresses with compute.WithPrivateCloud(true).
+	Private bool
 }
 
 // InventoryOption configures an inventory operation.
@@ -159,6 +182,28 @@ type InventoryOption func(*InventoryOpts) error
 // WithInventoryAllProjects lists servers of all projects (all_tenants=true).
 func WithInventoryAllProjects() InventoryOption {
 	return func(o *InventoryOpts) error { o.AllProjects = true; return nil }
+}
+
+// WithInventoryExpand maps the expand argument: true (the default) builds
+// hostvars, false builds only the interface expansion.
+func WithInventoryExpand(expand bool) InventoryOption {
+	return func(o *InventoryOpts) error {
+		o.Expansion = InventoryExpandInterfaces
+		if expand {
+			o.Expansion = InventoryExpandHostvars
+		}
+		return nil
+	}
+}
+
+// WithInventoryBare skips every per-server expansion (a Go extension).
+func WithInventoryBare() InventoryOption {
+	return func(o *InventoryOpts) error { o.Expansion = InventoryExpandNone; return nil }
+}
+
+// WithInventoryPrivate maps the private constructor flag for this call.
+func WithInventoryPrivate(private bool) InventoryOption {
+	return func(o *InventoryOpts) error { o.Private = private; return nil }
 }
 
 // WithInventoryContinueOnCloudError keeps going when one cloud cannot be
@@ -216,14 +261,36 @@ func (i *Inventory) listCloud(ctx context.Context, e *inventoryEntry, opts Inven
 		}
 		hosts = append(hosts, InventoryHost{Cloud: e.name, Server: server})
 	}
+	if opts.Expansion == InventoryExpandNone {
+		return hosts, nil
+	}
+	var address []compute.ServerAddressOption
+	if opts.Private {
+		address = append(address, compute.WithPrivateCloud(true))
+	}
+	for index := range hosts {
+		host := &hosts[index]
+		if opts.Expansion == InventoryExpandHostvars {
+			hostvars, err := conn.cloudServerHostvars(ctx, host.Server, nil, address)
+			if err != nil {
+				return nil, err
+			}
+			host.Hostvars, host.Interfaces = hostvars, hostvars.Interfaces
+			continue
+		}
+		if host.Interfaces, err = conn.ExpandServerInterfaces(ctx, host.Server, address...); err != nil {
+			return nil, err
+		}
+	}
 	return hosts, nil
 }
 
 // ListHosts lists the detailed servers of every cloud in order. Each server
 // list is requested once and failures are never replayed. On a failure without
 // WithInventoryContinueOnCloudError the hosts of earlier clouds are returned
-// together with the error. The servers are the compute detail records; the
-// Python interface and floating IP expansion is not applied.
+// together with the error. Each server is then expanded as selected by
+// WithInventoryExpand (hostvars by default) unless WithInventoryBare is set;
+// an expansion failure fails that cloud like a listing failure.
 func (i *Inventory) ListHosts(ctx context.Context, options ...InventoryOption) (*InventoryHosts, error) {
 	opts, err := applyInventoryOptions(options)
 	if err != nil {
@@ -264,8 +331,9 @@ type InventorySearch struct {
 
 // SearchHosts lists all hosts (with the failure policy of ListHosts) and
 // applies the cloud identifier selection: exact or fnmatch-style glob on the
-// server ID or name, then the optional filters. Filter keys are the JSON field
-// names of the compute server record.
+// server ID or name, then the optional filters over InventoryHostView. Filter
+// keys are the JSON field names of the compute server record plus the
+// expansion keys.
 func (i *Inventory) SearchHosts(ctx context.Context, nameOrID string, options ...InventoryOption) (*InventorySearch, error) {
 	opts, err := applyInventoryOptions(options)
 	if err != nil {
@@ -277,7 +345,7 @@ func (i *Inventory) SearchHosts(ctx context.Context, nameOrID string, options ..
 	}
 	rows := make([]json.RawMessage, len(listed.Hosts))
 	for index, host := range listed.Hosts {
-		if rows[index], err = json.Marshal(host.Server); err != nil {
+		if rows[index], err = InventoryHostView(host); err != nil {
 			return nil, fmt.Errorf("project server row: %w", err)
 		}
 	}
@@ -292,6 +360,19 @@ func (i *Inventory) SearchHosts(ctx context.Context, nameOrID string, options ..
 		}
 	}
 	return result, nil
+}
+
+// InventoryHostView is the JSON row SearchHosts filters: the hostvars
+// mapping when expanded with hostvars, else the server JSON with the
+// interface fields set over it, else the bare server JSON.
+func InventoryHostView(host InventoryHost) (json.RawMessage, error) {
+	if host.Hostvars != nil {
+		return json.Marshal(host.Hostvars)
+	}
+	if host.Interfaces == nil {
+		return json.Marshal(host.Server)
+	}
+	return CloudServerResultView(&CloudServerResult{Server: host.Server, Interfaces: host.Interfaces})
 }
 
 // GetHost returns the single host selected by SearchHosts, nil when nothing

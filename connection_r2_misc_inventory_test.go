@@ -32,7 +32,28 @@ func r2MiscInventoryCloud(t *testing.T, body string, status int) (*sdk.Connectio
 		state.mu.Unlock()
 		testcloud.JSON(w, status, body)
 	})
+	r2MiscInventoryExpansionEndpoints(cloud)
 	return connection(t, cloud), state
+}
+
+// r2MiscInventoryExpansionEndpoints answers the reads of the default hostvars
+// expansion with empty Neutron, security group and Cinder collections.
+func r2MiscInventoryExpansionEndpoints(cloud *testcloud.Cloud) {
+	cloud.Mux.HandleFunc("GET /network/v2.0/networks", func(w http.ResponseWriter, _ *http.Request) {
+		testcloud.JSON(w, 200, `{"networks":[]}`)
+	})
+	cloud.Mux.HandleFunc("GET /network/v2.0/ports", func(w http.ResponseWriter, _ *http.Request) {
+		testcloud.JSON(w, 200, `{"ports":[]}`)
+	})
+	cloud.Mux.HandleFunc("GET /compute/v2.1/project/servers/{id}", func(w http.ResponseWriter, r *http.Request) {
+		testcloud.JSON(w, 200, `{"server":{"id":"`+r.PathValue("id")+`"}}`)
+	})
+	cloud.Mux.HandleFunc("GET /compute/v2.1/project/servers/{id}/os-security-groups", func(w http.ResponseWriter, _ *http.Request) {
+		testcloud.JSON(w, 200, `{"security_groups":[]}`)
+	})
+	cloud.Mux.HandleFunc("GET /volume/v3/project/volumes/detail", func(w http.ResponseWriter, _ *http.Request) {
+		testcloud.JSON(w, 200, `{"volumes":[]}`)
+	})
 }
 
 const r2MiscServersA = `{"servers":[{"id":"a-1","name":"web-1","status":"ACTIVE"},{"id":"a-2","name":"db-1","status":"SHUTOFF"}]}`

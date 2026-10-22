@@ -28,6 +28,9 @@ type CloudServerReadOpts struct {
 	// expands unless bare is set; the record readers never expand.
 	Bare    bool
 	Address []compute.ServerAddressOption
+	// Detailed replaces the interface expansion with GetOpenStackVars
+	// hostvars (Python detailed=True). Bare still skips every expansion.
+	Detailed bool
 }
 
 // CloudServerReadOption mutates CloudServerReadOpts.
@@ -186,11 +189,27 @@ type CloudServerResult struct {
 	Record *servers.ServerFindRecord
 	// Sent reports whether a mutating request was sent.
 	Sent bool
+	// Hostvars is the detailed expansion; nil unless Detailed was requested.
+	Hostvars *CloudServerHostvars
 }
 
 func (c *Connection) cloudServerExpand(ctx context.Context, result *CloudServerResult, cfg CloudServerReadOpts) error {
+	return c.cloudServerExpandFrom(ctx, result, cfg, nil)
+}
+
+// cloudServerExpandFrom expands result.Server; base is the record whose
+// Resource view describes that same server snapshot, or nil.
+func (c *Connection) cloudServerExpandFrom(ctx context.Context, result *CloudServerResult, cfg CloudServerReadOpts, base *servers.ServerFindRecord) error {
 	if cfg.Bare || result == nil || result.Server == nil {
 		return nil
+	}
+	if cfg.Detailed {
+		hostvars, err := c.cloudServerHostvars(ctx, result.Server, base, cfg.Address)
+		result.Hostvars = hostvars
+		if hostvars != nil {
+			result.Interfaces = hostvars.Interfaces
+		}
+		return err
 	}
 	view, err := c.ExpandServerInterfaces(ctx, result.Server, cfg.Address...)
 	result.Interfaces = view
@@ -208,6 +227,9 @@ func (c *Connection) GetServerByID(ctx context.Context, id string, options ...Cl
 	cfg, err := applyCloudServerReadOptions(options)
 	if err != nil {
 		return nil, wrap(err)
+	}
+	if cfg.Detailed {
+		return nil, wrap(fmt.Errorf("%w: get_server_by_id has no detailed expansion", resource.ErrInvalidOption))
 	}
 	if err := c.recordListContext(ctx); err != nil {
 		return nil, wrap(err)
