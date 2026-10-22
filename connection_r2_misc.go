@@ -397,6 +397,9 @@ type endpointQuery struct {
 	availability gophercloud.Availability
 	region       *string
 	serviceName  string
+	// minVersion and maxVersion request version discovery; they are only
+	// accepted by SessionEndpointContext and HasServiceVersion.
+	minVersion, maxVersion string
 }
 
 // WithEndpointInterface selects the catalog interface instead of the
@@ -500,6 +503,9 @@ func (c *Connection) EndpointFor(serviceType string, options ...EndpointOption) 
 	if err != nil {
 		return "", false, err
 	}
+	if q.minVersion != "" || q.maxVersion != "" {
+		return "", false, invalid("endpoint version bounds require SessionEndpointContext")
+	}
 	c.mu.Lock()
 	override := c.options.endpoints[Service(serviceType)]
 	c.mu.Unlock()
@@ -518,10 +524,16 @@ func (c *Connection) SessionEndpoint(serviceType string, options ...EndpointOpti
 	return c.EndpointFor(serviceType, options...)
 }
 
-// HasService reports whether SessionEndpoint finds an endpoint. A missing
-// endpoint is (false, nil); unlike Python, lookup failures such as a missing
-// recorded catalog are returned as errors instead of false.
+// HasService reports whether the service is enabled by configuration
+// (ServiceEnabled: the has_<service> flag, else an official service type) and
+// SessionEndpoint finds an endpoint. A disabled service is (false, nil) without
+// a lookup and a missing endpoint is (false, nil); unlike Python, lookup
+// failures such as a missing recorded catalog are returned as errors instead of
+// false. It performs no version discovery; HasServiceVersion does.
 func (c *Connection) HasService(serviceType string, options ...EndpointOption) (bool, error) {
+	if c != nil && serviceType != "" && !c.ServiceEnabled(serviceType) {
+		return false, nil
+	}
 	_, ok, err := c.SessionEndpoint(serviceType, options...)
 	return ok, err
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -79,6 +80,10 @@ func (c *Connection) cloudSecurityGroupPrepare(ctx context.Context, op, server s
 			return fail(fmt.Errorf("%w: security group name or ID must be nonempty", resource.ErrInvalidOption))
 		}
 	}
+	// _has_secgroups runs before the server lookup.
+	if !c.hasSecurityGroups() {
+		return fail(network.ErrUnavailableSecurityGroups)
+	}
 	id, names, found, err = c.cloudServerSecurityGroupNames(ctx, server, groups)
 	if err != nil {
 		return fail(err)
@@ -93,8 +98,10 @@ func (c *Connection) cloudSecurityGroupPrepare(ctx context.Context, op, server s
 // or group returns (false, nil) before any action. An empty group list sends
 // nothing and returns false, as Python's empty-list guard does. A failing action stops the
 // sequence (earlier groups stay added) and no action is replayed.
-// Passing already-resolved group objects and the configured secgroup_source
-// gate are not modelled.
+// When secgroup_source (WithSecurityGroupSource or clouds.yaml) is neither
+// neutron nor nova, network.ErrUnavailableSecurityGroups is returned before any
+// request, as Python raises OpenStackCloudUnavailableFeature. Passing
+// already-resolved group objects is not modelled.
 func (c *Connection) AddServerSecurityGroups(ctx context.Context, server string, groups ...string) (bool, error) {
 	id, names, found, err := c.cloudSecurityGroupPrepare(ctx, "AddServerSecurityGroups", server, groups)
 	if err != nil || !found || len(names) == 0 {

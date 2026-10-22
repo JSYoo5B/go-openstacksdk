@@ -25,6 +25,8 @@ type cloudConfiguration struct {
 	networkRoles      network.NetworkRolePolicy
 	serverAddresses   compute.ServerAddressPolicy
 	imageCreatePolicy image.ImageCreatePolicy
+	serviceFlags      map[string]bool
+	secgroupSource    *string
 }
 
 type cloudNetworkDocument struct {
@@ -157,6 +159,10 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		return result, err
 	}
 	result.imageCreatePolicy, err = configuredImageCreatePolicy(name, settings)
+	if err != nil {
+		return result, err
+	}
+	result.serviceFlags, result.secgroupSource, err = configuredServiceSettings(settings)
 	return result, err
 }
 

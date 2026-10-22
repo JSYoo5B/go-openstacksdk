@@ -49,6 +49,14 @@ type connectionOptions struct {
 	serverAddressesSet       bool
 	imageCreatePolicy        image.ImageCreatePolicy
 	imageCreatePolicySet     bool
+	// serviceFlags holds has_<service> configuration keyed by the normalized
+	// service type (lower case, '-' replaced by '_'). It is never mutated
+	// after Connect/FromProvider, so derived connections may share it.
+	serviceFlags map[string]bool
+	// secgroupSource is the secgroup_source configuration; nil means the
+	// Python default "neutron".
+	secgroupSource    *string
+	secgroupSourceSet bool
 }
 
 type ConnectionOption func(*connectionOptions) error

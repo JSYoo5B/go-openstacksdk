@@ -220,10 +220,16 @@ func (c *Connection) cloudServerDeleteFloatingIPs(ctx context.Context, record *s
 	return nil
 }
 
-// DeleteServer maps delete_server. A missing server is (false, nil) with no
-// DELETE. With WithCloudServerDeleteIPs each floating address found in the
-// server's addresses is looked up and deleted first; a floating IP that is not
-// deleted aborts before the server DELETE. A 404 on the DELETE is (false, nil).
+// DeleteServer maps delete_server. The server is found like find_server with
+// its defaults (details, current project). A missing server is (false, nil)
+// with no DELETE. With WithCloudServerDeleteIPs each floating address found in
+// the server's addresses is looked up and deleted first, through the Neutron or
+// Nova floating-IP backend the Connection selects; an address whose lookup
+// reports not found or finds nothing is skipped, and a floating IP that is not
+// deleted aborts before the server DELETE. When the Connection's
+// floating_ip_source is none (ServerAddressPolicy or clouds.yaml), the
+// floating-IP cleanup is skipped without any request, as Python's
+// _has_floating_ips gate does. A 404 on the DELETE is (false, nil).
 // With WithCloudServerWait the call then observes absence for the timeout
 // (default 180 seconds). The DELETE is never replayed; once it was accepted a
 // wait failure returns (true, err) because the remote delete was requested.
@@ -257,7 +263,8 @@ func (c *Connection) DeleteServer(ctx context.Context, nameOrID string, options 
 	if id == "" {
 		return false, wrap(fmt.Errorf("%w: found server has no string ID", resource.ErrInvalidOption))
 	}
-	if cfg.DeleteIPs {
+	// _has_floating_ips: floating_ip_source none skips the floating cleanup.
+	if cfg.DeleteIPs && c.options.serverAddresses.FloatingIPSource() != compute.FloatingIPNone {
 		if err := c.cloudServerDeleteFloatingIPs(ctx, record, cfg); err != nil {
 			return false, wrap(err)
 		}

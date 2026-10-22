@@ -106,7 +106,11 @@ func TestR2MiscEndpointForInvalidAndUnrecordedCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if ok, err := bare.HasService("thing"); err == nil || ok || !errors.Is(err, sdk.ErrNoAuthResult) {
+	// "thing" is not an official service type, so it is disabled before lookup.
+	if ok, err := bare.HasService("thing"); err != nil || ok {
+		t.Fatalf("unofficial type: %v %v", ok, err)
+	}
+	if ok, err := bare.HasService("network"); err == nil || ok || !errors.Is(err, sdk.ErrNoAuthResult) {
 		t.Fatalf("no catalog: %v %v", ok, err)
 	}
 }

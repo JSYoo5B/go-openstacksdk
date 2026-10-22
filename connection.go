@@ -72,6 +72,7 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 		if !o.serverAddressesSet {
 			o.serverAddresses = configuration.serverAddresses
 		}
+		o.applyConfiguredServiceSettings(configuration)
 	} else {
 		auth, err = openstack.AuthOptionsFromEnv()
 		if err != nil {
