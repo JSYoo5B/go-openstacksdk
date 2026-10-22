@@ -215,7 +215,12 @@ func TestR2MiscConnectAsOverridesAuthAndSharesNothing(t *testing.T) {
 
 	// The derived Connection authenticated separately, kept the endpoint
 	// override and region, and sends its own token without request IDs.
-	for name, c := range map[string]*sdk.Connection{"parent": parent, "child": child} {
+	// Iterate in a fixed order so the recorded token order is deterministic.
+	for _, entry := range []struct {
+		name string
+		c    *sdk.Connection
+	}{{"parent", parent}, {"child", child}} {
+		name, c := entry.name, entry.c
 		compute, err := c.Compute(ctx)
 		if err != nil {
 			t.Fatal(err)
