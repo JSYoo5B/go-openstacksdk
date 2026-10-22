@@ -82,7 +82,7 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, options UpdateOpts, with
 	}
 	config, err := request.Apply(options, with...)
 	if err == nil {
-		err = request.ValidateCapabilities(config, true, false, false, defaultLimitsArgument)
+		err = request.ValidateCapabilities(config, true, false, false, defaultLimitsArgument, legacyKeysArgument)
 	}
 	if err != nil {
 		return nil, quotaError("Update", s.projectID, err)
@@ -120,6 +120,9 @@ func (s *ProjectQuotaScope) Update(ctx context.Context, options UpdateOpts, with
 			return nil, quotaError("Update", s.projectID, fmt.Errorf("%w: quota %s has both a value and default inheritance", resource.ErrInvalidOption, key))
 		}
 		core[key] = json.RawMessage("null")
+	}
+	if err := applyLegacyQuotaKeys(config, core); err != nil {
+		return nil, quotaError("Update", s.projectID, err)
 	}
 	fields := make(map[string]any, len(core))
 	for key, value := range core {

@@ -26,12 +26,20 @@ type GetTaskOption func(*GetTaskOpts) error
 // ListTasksOpts supplies six server query fields and local iteration controls.
 // Empty strings omit queries; nil Limit omits, while an explicit zero is sent.
 // MaxItems is local only and never changes the server's requested limit.
+//
+// BodyFilters, MarkerFallback and LinkHeader are explicit opt-ins for pinned
+// Python Resource.list behaviors; see WithListTasksBodyFilter,
+// WithListTasksMarkerFallback and WithListTasksLinkHeader. BodyFilters is keyed
+// by Python Task attribute name and holds complete JSON values.
 type ListTasksOpts struct {
 	Headers                                map[string]string
 	Limit                                  *int
 	Marker, Type, Status, SortKey, SortDir string
 	MaxItems                               int
 	SinglePage                             bool
+	BodyFilters                            map[string]json.RawMessage
+	MarkerFallback                         bool
+	LinkHeader                             bool
 }
 type ListTasksOption func(*ListTasksOpts) error
 
@@ -139,6 +147,7 @@ func copyGetTaskOpts(value GetTaskOpts) GetTaskOpts {
 }
 func copyListTasksOpts(value ListTasksOpts) ListTasksOpts {
 	value.Headers = taskHeadersCopy(value.Headers)
+	value.BodyFilters = copyTaskRawMap(value.BodyFilters)
 	if value.Limit != nil {
 		snapshot := *value.Limit
 		value.Limit = &snapshot
@@ -207,6 +216,9 @@ func parseListTasksOptions(options []ListTasksOption) (ListTasksOpts, url.Values
 	}
 	if value.Limit != nil {
 		query.Set("limit", strconv.Itoa(*value.Limit))
+	}
+	if err := validateTaskBodyFilters(value.BodyFilters); err != nil {
+		return value, query, err
 	}
 	value.Headers, err = imageMutationHeaders(value.Headers, false, "")
 	return value, query, err

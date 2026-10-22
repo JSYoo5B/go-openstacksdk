@@ -188,7 +188,11 @@ func (s *AccessRuleScope) listWithControl(ctx context.Context, control resource.
 		configured := append([]ListOption{request.WithArgument[ListOpts](listControlArgument, control)}, options...)
 		cfg, err := request.Apply(ListOpts{}, configured...)
 		if err == nil {
-			err = request.ValidateCapabilities(cfg, false, true, true, listControlArgument)
+			err = request.ValidateCapabilities(cfg, false, true, true, listControlArgument, listBodyFiltersArgument)
+		}
+		var filters map[string]json.RawMessage
+		if err == nil {
+			filters, err = accessRuleBodyFilters(cfg)
 		}
 		if err != nil {
 			yield(nil, err)
@@ -258,7 +262,12 @@ func (s *AccessRuleScope) listWithControl(ctx context.Context, control resource.
 				fail(err)
 				return
 			}
-			if !yield(value, nil) {
+			matched, err := matchAccessRule(value, filters)
+			if err != nil {
+				fail(err)
+				return
+			}
+			if matched && !yield(value, nil) {
 				return
 			}
 			if err := ctx.Err(); err != nil {

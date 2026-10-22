@@ -44,6 +44,7 @@ func (s *Service) Tasks(ctx context.Context, options ...ListTasksOption) iter.Se
 			markers[marker] = true
 		}
 		consumed := 0
+		filters := taskWireFilters(policy.BodyFilters)
 		for {
 			if err = p.check(ctx); err != nil {
 				fail(err)
@@ -69,6 +70,7 @@ func (s *Service) Tasks(ctx context.Context, options ...ListTasksOption) iter.Se
 				fail(response.Fail(err))
 				return
 			}
+			var lastID *string
 			for _, row := range rows {
 				if policy.MaxItems > 0 && consumed >= policy.MaxItems {
 					return
@@ -84,7 +86,17 @@ func (s *Service) Tasks(ctx context.Context, options ...ListTasksOption) iter.Se
 				}
 				value.Header, value.StatusCode = response.Header.Clone(), response.StatusCode
 				consumed++
-				if !yield(&value, nil) {
+				lastID = nil
+				if value.ID != nil {
+					id := *value.ID
+					lastID = &id
+				}
+				matched, err := matchTaskBodyFilters(&value, filters)
+				if err != nil {
+					fail(response.Fail(err))
+					return
+				}
+				if matched && !yield(&value, nil) {
 					return
 				}
 				if err = p.check(ctx); err != nil {
@@ -103,6 +115,12 @@ func (s *Service) Tasks(ctx context.Context, options ...ListTasksOption) iter.Se
 				return
 			}
 			next, err := taskNextPage(fields, base, current, initial)
+			if err == nil && next == nil && policy.LinkHeader {
+				next, err = taskLinkHeaderPage(response.Header, base, current, initial)
+			}
+			if err == nil && next == nil && policy.MarkerFallback && taskPositiveLimit(initial) {
+				next, err = taskFallbackPage(base, initial, lastID)
+			}
 			if err != nil {
 				fail(response.Fail(err))
 				return
@@ -156,6 +174,18 @@ func taskNextPage(fields map[string]json.RawMessage, base, current *url.URL, ini
 	if link == "" {
 		return nil, nil
 	}
+	return taskContinuation(link, base, current, initial)
+}
+
+func taskLinkHeaderPage(header http.Header, base, current *url.URL, initial url.Values) (*url.URL, error) {
+	link, err := taskLinkHeaderNext(header)
+	if err != nil || link == "" {
+		return nil, err
+	}
+	return taskContinuation(link, base, current, initial)
+}
+
+func taskContinuation(link string, base, current *url.URL, initial url.Values) (*url.URL, error) {
 	if err := taskQueryText(link); err != nil {
 		return nil, err
 	}
