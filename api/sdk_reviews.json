@@ -20252,7 +20252,17 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.WaitForState",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.WaitForAvailable",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForState",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForAvailable"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForAvailable",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/capabilities.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.QuotaClassResources"
       ],
       "contracts": [
         {
@@ -20325,6 +20335,13 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "Group, group snapshot, consistency group and consistency group snapshot records and clusters expose their status to blockstorage.WaitForState (case-insensitive target, error failure, deleted completion); status-less models fail before HTTP without a selected attribute.",
+          "tests": [
+            "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsRecordAndClusterStatus",
+            "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsDeleteEveryFetchableResource"
+          ]
         }
       ],
       "differences": [
@@ -20333,26 +20350,39 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Python nullable descriptor/status/progress coercion and Resource-return behavior are outside the explicit Ref/native-model API (see the differences above); native name-resolution paging limits and model decoders remain unchanged.",
+        "Image-v1, Glance wait_for_task and Cloud wait_for_server/wait_for_image workflows are separate declarations and are not promoted by this operation.",
+        "Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go."
       ],
       "documentation": [
         "docs/service-waits.md",
         "blockstorage/v3/volumes/README.md",
-        "blockstorage/v3/snapshots/README.md"
+        "blockstorage/v3/snapshots/README.md",
+        "docs/python-proxy-waits.md"
       ],
       "remaining": [
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+        "Records that keep attributes as raw JSON (group, group snapshot, consistency group, consistency group snapshot, message, capabilities and quota class records) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only default status and deletion waits are available."
       ]
     },
     {
       "operation": "python:block_storage/v3/wait_for_delete",
       "source_fingerprint": "6e3f8e456a2a18dc479fe899c2e542fb7334953d74b76c991b198b86a1a32c18",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.WaitForDelete",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForDelete"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/capabilities.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.QuotaClassResources"
       ],
       "contracts": [
         {
@@ -20429,6 +20459,13 @@
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections",
             "internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels"
           ]
+        },
+        {
+          "behavior": "Every pinned fetchable block_storage/v3 Resource with a member route (volumes, snapshots, backups, attachments, transfers, QoS specs, types, groups, group snapshots, consistency groups and snapshots, clusters, default types, group types, messages, capabilities and quota class sets) has an SDK collection; blockstorage.WaitForDelete polls each fixed member route until 404, and record collections complete on a deleted status.",
+          "tests": [
+            "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsDeleteEveryFetchableResource",
+            "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsRecordAndClusterStatus"
+          ]
         }
       ],
       "differences": [
@@ -20437,16 +20474,16 @@
         "Go requires positive poll intervals and positive bounded timeouts; WithUnlimitedWait represents no SDK timeout explicitly. Python iterate_timeout zero/negative timeout and interval-zero coercion are not reproduced.",
         "WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.",
         "These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.",
-        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field."
+        "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
+        "Python nullable descriptor/status/progress coercion and Resource-return behavior are outside the explicit Ref/native-model API (see the differences above); native name-resolution paging limits and model decoders remain unchanged.",
+        "Image-v1, Glance wait_for_task and Cloud wait_for_server/wait_for_image workflows are separate declarations and are not promoted by this operation.",
+        "Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go."
       ],
       "documentation": [
         "docs/service-waits.md",
         "blockstorage/v3/volumes/README.md",
-        "blockstorage/v3/snapshots/README.md"
-      ],
-      "remaining": [
-        "The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.",
-        "Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them."
+        "blockstorage/v3/snapshots/README.md",
+        "docs/python-proxy-waits.md"
       ]
     },
     {
@@ -70187,7 +70224,7 @@
     {
       "operation": "python:placement/v1/wait_for_status",
       "source_fingerprint": "8e12798202582f6a06ca8d50568b8c127d9d0b9e6ec3812d543d33cd04acdedc",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.WaitFor",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.WaitFor",
@@ -70197,7 +70234,12 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForStatus",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.InventoryResources",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources"
       ],
       "contracts": [
         {
@@ -70205,24 +70247,39 @@
           "tests": [
             "placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderWaiters"
           ]
+        },
+        {
+          "behavior": "placement/v1.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection: the status attribute when the model declares one, exact case-insensitive ERROR failure, a two-second interval and no SDK timeout; caller options apply last. A model without a status attribute fails with resource.ErrUnsupported before HTTP unless resource.WithStatusAttribute selects an exported string field; numeric and boolean attributes are rejected like Python's lower() failure.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations"
+          ]
+        },
+        {
+          "behavior": "All pinned fetchable Placement Resources have SDK collections. No Placement model declares status, so the default fails before HTTP; ResourceProvider name and Allocation project_id/user_id/consumer_type are selectable string attributes, while numeric inventory attributes are rejected before HTTP.",
+          "tests": [
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations",
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource"
+          ]
         }
       ],
       "differences": [
         "Python accepts any Resource and attribute and returns immediately without HTTP when it already matches; Go waits by ID, always fetches first and returns the final model.",
-        "Python defaults to failures=['ERROR'], interval 2s and wait=None (unbounded); Go defaults to no failure states for placement, 2s and 5 minutes, adjustable with options."
+        "Python defaults to failures=['ERROR'], interval 2s and wait=None (unbounded); Go defaults to no failure states for placement, 2s and 5 minutes, adjustable with options.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
+        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.",
+        "Go selects exported Go field names or JSON tags (Allocation uses project_id); inventory and trait-set attributes are numeric or lists, which Python's lower() call also rejects."
       ],
       "documentation": [
         "placement/v1/python-parity.md",
-        "placement/v1/python-inventory-and-deletion-waits.md"
-      ],
-      "remaining": [
-        "Go waiters exist only for ResourceProviders and ResourceClasses; Python can wait on any attribute of any fetchable Resource, while Go waits only on exported string status fields (inventory attributes are numeric) and has no inventory/trait/allocation status waiter."
+        "placement/v1/python-inventory-and-deletion-waits.md",
+        "docs/python-proxy-waits.md"
       ]
     },
     {
       "operation": "python:placement/v1/wait_for_delete",
       "source_fingerprint": "eff2b38c9b43aced1a9efe82e9f6aed9a6cbc9a90788dcc1c1b19b03d3da20fa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.WaitForDeletion",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceclasses.API.WaitForDeletion",
@@ -70230,7 +70287,10 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.InventoryResources",
-        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources"
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources"
       ],
       "contracts": [
         {
@@ -70250,18 +70310,34 @@
           "tests": [
             "api/r2_small_placement_test.go:TestR2SmallPlacementInventoryAndTraitDeletionWaits"
           ]
+        },
+        {
+          "behavior": "placement/v1.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations"
+          ]
+        },
+        {
+          "behavior": "All pinned fetchable Placement Resources (resource providers, resource classes, inventories, traits, provider traits and allocations) have SDK collections; each deletion wait polls the fixed member route until 404. An empty allocation set is a successful observation, so an allocation deletion wait reaches its deadline as in Python.",
+          "tests": [
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource",
+            "api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations"
+          ]
         }
       ],
       "differences": [
         "Python returns the original Resource; Go returns only an error.",
-        "Python defaults to interval 2s and wait 120s; Go defaults to 2s and 5 minutes, so WithTimeout(120*time.Second) matches."
+        "Python defaults to interval 2s and wait 120s; Go defaults to 2s and 5 minutes, so WithTimeout(120*time.Second) matches.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.",
+        "WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.",
+        "Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.",
+        "The placement Proxy wait=120 is the placement/v1.WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default, which resource.WithTimeout adjusts."
       ],
       "documentation": [
         "placement/v1/python-parity.md",
-        "placement/v1/python-inventory-and-deletion-waits.md"
-      ],
-      "remaining": [
-        "Go deletion waiters now cover resource providers, resource classes, inventories and traits; other fetchable Placement Resources (provider traits, allocations records) have no Go collection."
+        "placement/v1/python-inventory-and-deletion-waits.md",
+        "docs/python-proxy-waits.md"
       ]
     },
     {
@@ -93574,7 +93650,7 @@
     {
       "operation": "python:identity/v3/wait_for_delete",
       "source_fingerprint": "16ac46c22a26506c67dc2b6a28b68c2bdcdeadb3536541f71333e58b77d1fa06",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.WaitForDeletion",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.WaitForDeletion",
@@ -93584,7 +93660,15 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.MappingResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.AccessRuleResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ConfigResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Resources"
       ],
       "contracts": [
         {
@@ -93592,17 +93676,31 @@
           "tests": [
             "identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers"
           ]
+        },
+        {
+          "behavior": "identity.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "All 21 pinned fetchable identity/v3 Resources (access rules, application credentials, credentials, domains, domain configs, endpoints, endpoint groups, federation protocols, groups, identity providers, limits, mappings, policies, projects, regions, registered limits, roles, services, service providers, trusts, users) have SDK collections; each deletion wait polls the fixed member route until 404.",
+          "tests": [
+            "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource"
+          ]
         }
       ],
       "differences": [
-        "Go defaults to a five-minute timeout while the identity v3 Proxy default is wait=120; resource.WithTimeout reproduces it."
+        "Go defaults to a five-minute timeout while the identity v3 Proxy default is wait=120; resource.WithTimeout reproduces it.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.",
+        "WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.",
+        "Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.",
+        "The identity v3 Proxy wait=120 is the identity.WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default, which resource.WithTimeout adjusts."
       ],
       "documentation": [
-        "identity/v3/python-parity-catalog.md"
-      ],
-      "remaining": [
-        "Python accepts any fetchable Resource; Go offers typed collections per package, and a custom resource.NewCollection with a Get adapter for others, which this review does not verify per resource.",
-        "Python returns the original Resource on deletion; Go returns only an error (a documented design choice)."
+        "identity/v3/python-parity-catalog.md",
+        "docs/python-proxy-waits.md"
       ]
     },
     {
@@ -93618,7 +93716,15 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
+        "github.com/JSYoo5B/go-openstacksdk/identity.WaitForStatus",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.MappingResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.AccessRuleResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ConfigResources",
+        "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Resources"
       ],
       "contracts": [
         {
@@ -93633,17 +93739,33 @@
           "tests": [
             "identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers"
           ]
+        },
+        {
+          "behavior": "identity.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection: the status attribute when the model declares one, exact case-insensitive ERROR failure, a two-second interval and no SDK timeout; caller options apply last. A model without a status attribute fails with resource.ErrUnsupported before HTTP unless resource.WithStatusAttribute selects an exported string field; numeric and boolean attributes are rejected like Python's lower() failure.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Every pinned fetchable identity/v3 Resource has an SDK collection; typed models such as Project and IdentityProvider compare a selected string attribute case-insensitively and fail on ERROR.",
+          "tests": [
+            "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors",
+            "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource"
+          ]
         }
       ],
       "differences": [
-        "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait. resource.WithPollInterval reproduces the 2-second interval."
+        "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait. resource.WithPollInterval reproduces the 2-second interval.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
+        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None."
       ],
       "documentation": [
-        "identity/v3/python-parity-catalog.md"
+        "identity/v3/python-parity-catalog.md",
+        "docs/python-proxy-waits.md"
       ],
       "remaining": [
-        "Python accepts any fetchable Resource; Go offers typed collections per package, and a custom resource.NewCollection with a Get adapter for others, which this review does not verify per resource.",
-        "Python returns a Resource whose cached attribute already equals the target without HTTP; Go always sends the first GET (a documented design choice)."
+        "Records that keep attributes as raw JSON (endpoint groups and domain configs) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only deletion waits are available."
       ]
     },
     {
@@ -99748,7 +99870,35 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute",
+        "github.com/JSYoo5B/go-openstacksdk/network.WaitForStatus",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/serviceprofiles.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/flavors.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/labels.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/rules.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapflows.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairs.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairgroups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portchains.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/servicegraphs.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.MinimumPacketRateResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.PacketRateLimitResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.NetworkAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.PortAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.RouterAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Resources"
       ],
       "contracts": [
         {
@@ -99756,28 +99906,74 @@
           "tests": [
             "network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortWaiters"
           ]
+        },
+        {
+          "behavior": "network.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection: the status attribute when the model declares one, exact case-insensitive ERROR failure, a two-second interval and no SDK timeout; caller options apply last. A model without a status attribute fails with resource.ErrUnsupported before HTTP unless resource.WithStatusAttribute selects an exported string field; numeric and boolean attributes are rejected like Python's lower() failure.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Typed collectionless Neutron models (for example LocalIP, TapFlow, TapService, metering, SFC, flavors, service profiles, BGP VPN associations) now have GET-bound collections; TapFlow and TapService status is selected by default and LocalIP attributes such as IPMode by WithStatusAttribute.",
+          "tests": [
+            "api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors",
+            "api/network_proxy_waits_test.go:TestNetworkProxyWaitsDeleteForCollectionlessResources"
+          ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/python-parity-core.md",
+        "docs/python-proxy-waits.md"
       ],
       "differences": [
         "Python waits forever with failures=['ERROR'] by default; Go defaults to five minutes and a prefix/suffix failure predicate, which WithUnlimitedWait and WithFailureStates(\"ERROR\") replace.",
-        "Python returns immediately without HTTP when the given Resource already has the target status; Go always sends the first GET."
+        "Python returns immediately without HTTP when the given Resource already has the target status; Go always sends the first GET.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
+        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.",
+        "Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology. Neutron-LBaaS resources are unsupported separately."
       ],
       "remaining": [
-        "Python can wait on any Neutron Resource; resources without a Go collection, such as local IPs, segment ranges, port bindings and auto-allocated topologies, have no Go waiter."
+        "Records that keep attributes as raw JSON (network segment ranges, default security group rules, default statefulness, NDP proxies, conntrack helpers, minimum packet rate and packet rate limit rules) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only deletion waits are available."
       ]
     },
     {
       "operation": "python:network/v2/wait_for_delete",
       "source_fingerprint": "97181af6bbb20af98ec42294dd0c81b704d4b74735616b2cbf1c06bf3b4ad9e7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.WaitForDeletion",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
+        "github.com/JSYoo5B/go-openstacksdk/network.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/serviceprofiles.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/flavors.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/labels.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/rules.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapflows.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairs.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairgroups.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portchains.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/servicegraphs.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.Resources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.MinimumPacketRateResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.PacketRateLimitResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.NetworkAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.PortAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.RouterAssociationResources",
+        "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Resources"
       ],
       "contracts": [
         {
@@ -99785,17 +99981,33 @@
           "tests": [
             "network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortWaiters"
           ]
+        },
+        {
+          "behavior": "network.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors"
+          ]
+        },
+        {
+          "behavior": "Every pinned fetchable Neutron Resource without a generated collection now has a GET-bound collection (local IPs and associations, segment ranges, service profiles, flavors, metering labels/rules, tap flows/services, SFC port pairs/groups/chains/flow classifiers/service graphs, default security group rules, default statefulness, NDP proxies, conntrack helpers, quotas, IP availabilities, QoS rule types, minimum packet rate and packet rate limit rules, BGP VPN network/port/router associations and extensions); each deletion wait polls the fixed member route until 404.",
+          "tests": [
+            "api/network_proxy_waits_test.go:TestNetworkProxyWaitsDeleteForCollectionlessResources"
+          ]
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/python-parity-core.md",
+        "docs/python-proxy-waits.md"
       ],
       "differences": [
         "The Neutron Proxy default is wait=120; Go defaults to five minutes and WithTimeout(120*time.Second) matches.",
-        "Python returns the original Resource; Go returns only an error."
-      ],
-      "remaining": [
-        "Python can wait for any fetchable Neutron Resource to disappear; resources without a Go collection have no deletion waiter."
+        "Python returns the original Resource; Go returns only an error.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.",
+        "WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.",
+        "Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.",
+        "Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology; polling would be a mutation. Neutron-LBaaS resources are unsupported separately (see their get_/find_ reviews).",
+        "Network Proxy wait=120 is now the WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default."
       ]
     },
     {
@@ -143846,10 +144058,12 @@
     {
       "operation": "python:baremetal_introspection/v1/wait_for_status",
       "source_fingerprint": "aaeb5d6501a0a65d2f74765525f39ee8ae0f7886d61b16bf740258f26eb70a62",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinished",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinishedIgnoringError"
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinishedIgnoringError",
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1.WaitForStatus",
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.API.Resources"
       ],
       "contracts": [
         {
@@ -143857,26 +144071,37 @@
           "tests": [
             "api/introspection_contracts_test.go:TestIntrospectionWaiterPollsStableInputUUIDDespiteResponseIdentity"
           ]
+        },
+        {
+          "behavior": "baremetalintrospection/v1.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection: the status attribute when the model declares one, exact case-insensitive ERROR failure, a two-second interval and no SDK timeout; caller options apply last. A model without a status attribute fails with resource.ErrUnsupported before HTTP unless resource.WithStatusAttribute selects an exported string field; numeric and boolean attributes are rejected like Python's lower() failure. Introspection state is selected with WithStatusAttribute(\"state\") on the fixed UUID route; an error state fails; the boolean finished flag is rejected before HTTP.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/introspection_proxy_waits_test.go:TestIntrospectionProxyWaitsAttributeStatusAndGETOnlyDeletion"
+          ]
         }
       ],
       "differences": [
-        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code."
+        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code.",
+        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
+        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.",
+        "introspection.API.Resources.WaitFor without a status attribute keeps returning ErrUnsupported and WaitUntilFinished keeps its finished-flag contract; WaitForStatus is the generic Python-default waiter."
       ],
       "documentation": [
         "baremetalintrospection/v1/introspection/python-helpers.md",
-        "baremetalintrospection/v1/introspection/README.md"
-      ],
-      "remaining": [
-        "Python waits on any Resource, any attribute and any status with failure states, interval, callback and cached fast path; Go has only the finished-state waiter and Resources.WaitFor returns ErrUnsupported for introspection."
+        "baremetalintrospection/v1/introspection/README.md",
+        "docs/python-proxy-waits.md"
       ]
     },
     {
       "operation": "python:baremetal_introspection/v1/wait_for_delete",
       "source_fingerprint": "fb3712dc5ff950003fcdcfe59ed7a8dfc206fd5ec8865cd76c98324ced831439",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinished",
-        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinishedIgnoringError"
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.WaitUntilFinishedIgnoringError",
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1.WaitForDelete",
+        "github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/rules.API.Resources"
       ],
       "contracts": [
         {
@@ -143884,17 +144109,26 @@
           "tests": [
             "api/introspection_contracts_test.go:TestIntrospectionWaiterPollsStableInputUUIDDespiteResponseIdentity"
           ]
+        },
+        {
+          "behavior": "baremetalintrospection/v1.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE. Introspection and rule collections are polled by fixed UUID; a readable aborted introspection reaches the deadline because the inspector has no member DELETE route and keeps status readable.",
+          "tests": [
+            "internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute",
+            "api/introspection_proxy_waits_test.go:TestIntrospectionProxyWaitsAttributeStatusAndGETOnlyDeletion"
+          ]
         }
       ],
       "differences": [
-        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code."
+        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code.",
+        "Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion.",
+        "Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.",
+        "WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.",
+        "Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts."
       ],
       "documentation": [
         "baremetalintrospection/v1/introspection/python-helpers.md",
-        "baremetalintrospection/v1/introspection/README.md"
-      ],
-      "remaining": [
-        "Python polls a Resource until fetch reports not found; the inspector has no delete route and Go has no deletion waiter (Resources.Remove and WaitForDeletion are unsupported)."
+        "baremetalintrospection/v1/introspection/README.md",
+        "docs/python-proxy-waits.md"
       ]
     }
   ]
