@@ -14231,7 +14231,7 @@
           ]
         },
         {
-          "behavior": "Frozen common Engine.List/REST pager supplies plural/body/RFCLink/versioned-path/short-page marker continuation, retained actual scalar JSON marker conversion, complete pagination, raw caps before local filters, single page/break without next request and late native/page errors. SourceFindPolicy opt-in uses binary64 next truthiness; ±1e-400 stop cleanly while truthy nonstring next retains exact actual whole page proof. Dictionary next links are an explicit Go improvement; changed origin/path/filter/cycle are errors.",
+          "behavior": "Frozen common Engine.List/REST pager supplies plural/body/RFCLink/versioned-path/short-page marker continuation, retained actual scalar JSON marker conversion, complete pagination, raw caps before local filters, single page/break without next request and late native/page errors. SourceFindPolicy opt-in uses binary64 next truthiness; \u00b11e-400 stop cleanly while truthy nonstring next retains exact actual whole page proof. Dictionary next links are an explicit Go improvement; changed origin/path/filter/cycle are errors.",
           "tests": [
             "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListPaginationCapsNextTruthinessAndLateErrors"
           ]
@@ -14619,7 +14619,7 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
         "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity.",
         "Raw max_items behavior and exact-boundary cap timing are now owned only by the explicit Source-shaped list path. Other named dynamic limit, nonfinite microversion/empty-route and global runtime/lifecycle contracts remain unresolved; historical typed/native contracts above retain their original boundaries."
@@ -31743,7 +31743,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -31820,7 +31820,7 @@
           ]
         },
         {
-          "behavior": "Source Header delete_after conversion reuses DescriptorIntegerJSON (unsigned digit strings/Unicode/arbitrary integers, signed/space/nonnumeric→zero, nondecimal isdigit→error); bool descriptor preserves bool(nonempty string).",
+          "behavior": "Source Header delete_after conversion reuses DescriptorIntegerJSON (unsigned digit strings/Unicode/arbitrary integers, signed/space/nonnumeric\u2192zero, nondecimal isdigit\u2192error); bool descriptor preserves bool(nonempty string).",
           "tests": [
             "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD",
             "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterEverySystemAliasAndEmptyInput",
@@ -32224,7 +32224,7 @@
         "objectstorage/v1/temp_url_key.md"
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
         "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
@@ -32293,7 +32293,7 @@
         "objectstorage/v1/temp_url_key.md"
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
         "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
@@ -39748,7 +39748,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -39849,7 +39849,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -40107,7 +40107,7 @@
           ]
         },
         {
-          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status→Backup.reset_status→Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
+          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status\u2192Backup.reset_status\u2192Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
           "tests": [
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsPreserveNativeTypedRestoreAndSelectedVersionReset",
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorLabels",
@@ -43717,7 +43717,7 @@
           ]
         },
         {
-          "behavior": "The default standalone Wait wire context carries a deadline179–181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
+          "behavior": "The default standalone Wait wire context carries a deadline179\u2013181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
           "tests": [
             "compute/server_ready_boundaries_test.go:TestWaitForServerDefaultWholeBudgetIs180Seconds",
             "compute/server_ready_boundaries_test.go:TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel"
@@ -47202,7 +47202,7 @@
         "Go exposes a typed request and concrete options with a result separating the source boolean Deleted from actual absence, present DOWN, accepted logical attempts, last public-Get verification and failed-response evidence. An accepted DELETE is not itself verified disappearance; retry0 intentionally has no verification. This does not reproduce Python's scalar return or mutable Resource/Munch/session surface.",
         "The delete's verification deliberately reuses ordinary cloud Get semantics rather than always using GetFloatingIPByID. Mutation backend, query fallback backend and normalization source remain distinct. Nova's source-synthetic logical ACTIVE is separated from raw Wire; a DOWN success can describe a still-existing row and never asserts an actual ACTIVE wait or deletion convergence.",
         "Typed safe UTF-8/path IDs, explicit source/location/strict/direct-get policy and optional one shared operation timeout are Go API choices. Defaults add no SDK deadline; a bulk zero-valued options replacement sets retry0, while dedicated default preparation retains retry1. The mapping does not establish every Python dynamic retry argument, configuration or has_service/session policy.",
-        "Owned mutation transport follows the cloud-style passive HTTP200–399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
+        "Owned mutation transport follows the cloud-style passive HTTP200\u2013399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
         "Direct UUID verification intentionally preserves source getter trust: a different response ID with DOWN can satisfy the source boolean, with the actual row retained and Absent=false. The result is a source success policy rather than identity-checked requested-resource disappearance. Dedicated deletion options do not add filters or expression parameters that are absent from the source deletion signature.",
         "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade.",
         "The declared ID/retry deletion contract is mapped. Connection/profile use_direct_get configuration is expressed as an explicit Go option with default false; typed safe IDs and int retries, exact missing-catalog fallback, guarded context/accepted-error behavior, and the local legacy version preflight are documented Go choices. Inherited mutable Resource/session/cache APIs remain separately tracked in the SDK scope rather than missing arguments of this declaration.",
@@ -47647,7 +47647,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -47707,7 +47707,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -47767,7 +47767,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -82878,7 +82878,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Lazy Source detail=True chooses /group_snapshots/detail; false chooses summary collection. Known server query mapping limit/marker/offset/sort_dir/sort_key/sort and all_projects→all_tenants plus wire alias preserve client-key precedence including null, bool/number/text/array/object request expansion. Unknown query values are discarded without Marshaler calls; typed/raw scope conflicts and invalid pagination controls fail before HTTP/discovery.",
+          "behavior": "Lazy Source detail=True chooses /group_snapshots/detail; false chooses summary collection. Known server query mapping limit/marker/offset/sort_dir/sort_key/sort and all_projects\u2192all_tenants plus wire alias preserve client-key precedence including null, bool/number/text/array/object request expansion. Unknown query values are discarded without Marshaler calls; typed/raw scope conflicts and invalid pagination controls fail before HTTP/discovery.",
           "tests": [
             "blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap",
             "blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotRawPagingInputPrecedesDiscovery",
@@ -84165,7 +84165,7 @@
           ]
         },
         {
-          "behavior": "Page next truthiness uses existing cloudfilter.PythonJSONTruthy: Source binary64 underflow±1e-400 falsey ignored, nonzero1e-300 and overflow±1e400 truthy nonstring cause actual203 page error with no second listHTTP; local filter exact decimals remain explicit separate policy. LIST-only reserved helper rejects Source/Proxy controls by raw presence before Marshaler/HTTP for null/false/zero bulk/callback/single options, preserving typed controls and unknown case-sensitive discard.",
+          "behavior": "Page next truthiness uses existing cloudfilter.PythonJSONTruthy: Source binary64 underflow\u00b11e-400 falsey ignored, nonzero1e-300 and overflow\u00b11e400 truthy nonstring cause actual203 page error with no second listHTTP; local filter exact decimals remain explicit separate policy. LIST-only reserved helper rejects Source/Proxy controls by raw presence before Marshaler/HTTP for null/false/zero bulk/callback/single options, preserving typed controls and unknown case-sensitive discard.",
           "tests": [
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListNextUsesPythonBinary64TruthinessAndActualPage",
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTTP"
@@ -84233,7 +84233,7 @@
       ],
       "contracts": [
         {
-          "behavior": "POST consistencygroups/create_from_src with consistencygroup-from-src, four null defaults, falsey empty IDs→null, literal optional sourceIDs and name/description empty preserved; no prerequisite lookup/request-seed, exactly-one-source remains actual server400 validation.",
+          "behavior": "POST consistencygroups/create_from_src with consistencygroup-from-src, four null defaults, falsey empty IDs\u2192null, literal optional sourceIDs and name/description empty preserved; no prerequisite lookup/request-seed, exactly-one-source remains actual server400 validation.",
           "tests": [
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupCreateFromSourceNullDefaultsAndLiteralReferences"
           ]
@@ -86350,7 +86350,7 @@
         "UnknownLISTkwargs ignoredbeforemarshal and noHeaderfilter; safeconcreteoptions reject Resourceconstructor/session/basepath override. Go rawmax_items and limit are finite nonnegative machineintegers under sharedpager; safeorigin/collection/filter/cycle checks and finitepagebound replace Source broadretargeting. HTTPLinkRFC/dictionarylinks are explicitGocompatibility with exactversionedalias.",
         "Engine acceptedfinal200..399 differs from pinnedgeneric valid100..399, strictUTF8 differs Requests replacementdecode. Actualnative status/body/header/methodURL and physicalsource/cancelmixedcauses remainobservable. StopFaultRetryCallbacks is explicitGo guard preventing faultcallback/resend; cleanRetryFunc/reauth remain. Ordinary new retry headers remain allowed; all four conditional headers are fixed to selected values or required absence, and injection/replacement/OmitHeaders fails before HTTP attempt two. Existing selected headers and protocol absence remain protected. OkCodes expansion mayretry but cannot establishsuccess outsideoriginalacceptance. Faulty401 has native *ErrUnableToReauthenticate public ErrOriginal/ErrReauth, which do not Unwrap; inspect the original receipt and guard cause separately. A willing hook is suppressed while existing clean401 renewal remains.",
         "PinnedNeutron27 get_security_group_rule ADMIN_OR_SG_OWNER_READER/projectscope applies collection/member. StockDB collectsfilteredcandidates usingadmincontext, controllerfilters eachrow byactualpolicy; emptysuccessisnormal and notproofof fullauthority. No localRBAC inference/expansion; policyoverride/extensions/livecloudacceptance remainactualdeploymentwork distinctfromfixtures.",
-        "Source Proxy._list openstack/proxy.py866–916 accepts named deprecated jmespath_filters and applies a truthy-string JMESPath expression with arbitrary output. This bounded Resource record API does not implement the transform (SDK-S1) and rejects presence before marshaling/HTTP instead of silently losing it. Explicit null/false/empty presence is also rejected, unlike Source falsey passthrough. Unknown kwargs and known canonical/wire aliases retain their existing behavior."
+        "Source Proxy._list openstack/proxy.py866\u2013916 accepts named deprecated jmespath_filters and applies a truthy-string JMESPath expression with arbitrary output. This bounded Resource record API does not implement the transform (SDK-S1) and rejects presence before marshaling/HTTP instead of silently losing it. Explicit null/false/empty presence is also rejected, unlike Source falsey passthrough. Unknown kwargs and known canonical/wire aliases retain their existing behavior."
       ],
       "remaining": []
     },
@@ -104792,7 +104792,7 @@
       "differences": [
         "Go returns owned FlavorRAMResult with selected Flavor and actual consumed Inventory, instead of only mutable Python Flavor. Resource/default/location, Wire, per-row list Envelope and separate extra-specs whole response evidence remain distinct; local no-match uses errors.Is(ErrNoFlavorByRAM), comparison/membership errors use ErrInvalidOption.",
         "Public any inputs are SDK-owned JSON-domain primitive/container snapshots, not required application builder interfaces. RawMessage preserves numeric spelling. Python arbitrary classes/operators, NaN/Infinity runtime float values, configurable huge-integer string conversion limits and custom runtime callback timing are not reproduced. Safe Go IDs/finite explicit-charset JSON/header/selected-source policy and existing foundation SDK-R1/SDK-C1/SDK-S1 remain explicit; supported increment0.",
-        "Actual imported pinned Source under Python3.14.8 ran49 cloud→NovaProxy→Flavor/Resource cases, plus2 status199 list/extra cases. Only Adapter Response/connection were substituted. Mock/Go/race/main proof is not actual authenticated backend/role/deployment acceptance.",
+        "Actual imported pinned Source under Python3.14.8 ran49 cloud\u2192NovaProxy\u2192Flavor/Resource cases, plus2 status199 list/extra cases. Only Adapter Response/connection were substituted. Mock/Go/race/main proof is not actual authenticated backend/role/deployment acceptance.",
         "Existing AllFlavors default false remains unchanged while this helper owns default true. Root Connection forwarding is not added; conn.Compute(ctx) returns the service. Existing native and generic flavor reader policies are preserved. Existing RAM/status tests plus new explicit-charset integration/root validation are distinct from actual Python Source execution.",
         "Explicit response profile now supports Latin1 and UTF16/32 BOM or LE/BE on RAM Source-status reads. Unmarked charset sniffing, BOMless generic UTF16/32 native-endian decoding, arbitrary Requests codecs and nonfinite/permissive JSON remain documented Go format differences rather than claims of universal Requests decoding. PageEnvelope is physical whole-page bytes while Envelope is the decoded flat row; extra Envelope remains physical response bytes."
       ],
@@ -105288,7 +105288,7 @@
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
         "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
         "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
-        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Actual imported pinned cloud search/get/list\u2192Nova Proxy\u2192Resource list/find/constructor/descriptor\u2192cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
       ],
       "documentation": [
@@ -105400,7 +105400,7 @@
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
         "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
         "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
-        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Actual imported pinned cloud search/get/list\u2192Nova Proxy\u2192Resource list/find/constructor/descriptor\u2192cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
       ],
       "documentation": [
@@ -105582,7 +105582,10 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerRecords",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetServer",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed",
+        "github.com/JSYoo5B/go-openstacksdk.CloudServerResultView"
       ],
       "contracts": [
         {
@@ -105597,31 +105600,39 @@
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally",
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
           ]
+        },
+        {
+          "behavior": "GetServer finds with FindRecord forcing details=True (a 404 identity falls back to the detailed list; a missing server is nil), then applies the interface expansion by default, the hostvars with WithCloudServerDetailed and none with WithCloudServerBare. With deprecated filters it lists bare, selects locally, expands the single match, returns nil for none, AmbiguousError for several and rejects a JMESPath value.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands"
+          ]
         }
       ],
       "differences": [
-        "The filters branch is spread over SearchServerRecords; the multiple-match error is the caller's check on Records."
+        "The filters branch reuses SearchServerRecords and GetServer; several matches are resource.AmbiguousError instead of SDKException, and no deprecation warning is emitted.",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced.",
-        "No single get_server helper joins find_server (details=True) with the optional expansion; FindRecord and ExpandServerInterfaces remain separate calls."
+        "The deprecated filters branch inherits the search_servers JMESPath item: Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_by_id",
       "source_fingerprint": "083751ecbdb5249cf59b5e9f75426e549dae39b77ccf2a6c20d5e7e1777cdfa4",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Get",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID",
         "github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare",
-        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerAddressOptions"
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerAddressOptions",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed"
       ],
       "contracts": [
         {
@@ -105629,17 +105640,22 @@
           "tests": [
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound"
           ]
+        },
+        {
+          "behavior": "GetServerByID rejects WithCloudServerDetailed before HTTP because get_server_by_id only adds interfaces.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands"
+          ]
         }
       ],
       "differences": [
-        "Go returns a CloudServerResult holding the typed server and an owned address view; bare is a Go extension (Python always expands)."
+        "Go returns a CloudServerResult holding the typed server and an owned address view; bare is a Go extension (Python always expands).",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced."
       ]
     },
     {
@@ -105654,7 +105670,10 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
-        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions"
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ListServers",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare"
       ],
       "contracts": [
         {
@@ -105664,18 +105683,25 @@
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown",
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with WithCloudServerDetailed, none with WithCloudServerBare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow"
+          ]
         }
       ],
       "differences": [
-        "Go returns ServerFindRecord values (Source Resource view, received row, receipt) instead of mutable Resources; bare=True behavior only, no expansion."
+        "ListServerRecords is the bare=True record reader; ListServers returns CloudServerResult values with the Source record, typed server and expansion. The results built before a list or expansion failure are returned beside the error instead of discarding them.",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "Python's default bare=False expansion and detailed=True hostvars are not applied by ListServerRecords; Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced.",
-        "The delegated proxy servers listing (python:compute/v2/servers) remains unresolved."
+        "The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
       ]
     },
     {
@@ -105691,7 +105717,11 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters",
-        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression"
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.SearchServers",
+        "github.com/JSYoo5B/go-openstacksdk.CloudServerResultView",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare"
       ],
       "contracts": [
         {
@@ -105701,29 +105731,38 @@
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters",
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure"
           ]
+        },
+        {
+          "behavior": "SearchServers lists with the default expansion, then filters locally over CloudServerResultView so dictionary filters see expansion keys such as public_v4 and JMESPath sees the detailed flavor name; filters never reach Nova.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow"
+          ]
         }
       ],
       "differences": [
-        "Go returns ServerFindRecord values (Source Resource view, received row, receipt) instead of mutable Resources; bare=True behavior only, no expansion."
+        "SearchServerRecords is the bare=True record search; SearchServers returns CloudServerResult values with Value, Servers, Inventory and Expression instead of mutable Resources.",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "Python's default bare=False expansion/detailed hostvars are not applied by the search. Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced.",
-        "Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows."
+        "Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.",
+        "The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/update_server",
       "source_fingerprint": "97c3052531012e7251ce54fe20526bf88ef01b77a995e0b54b790d6fae6b002f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update",
         "github.com/JSYoo5B/go-openstacksdk.Connection.UpdateServer",
-        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare"
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed"
       ],
       "contracts": [
         {
@@ -105738,23 +105777,28 @@
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes",
             "connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer"
           ]
+        },
+        {
+          "behavior": "UpdateServer expands the PUT response with interfaces by default and with hostvars that describe the updated server under WithCloudServerDetailed.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion"
+          ]
         }
       ],
       "differences": [
-        "Concrete CloudServerUpdate (name, description) replaces **kwargs; an empty name cannot be sent by the typed builder and is rejected."
+        "Concrete CloudServerUpdate (name, description) replaces **kwargs; an empty name cannot be sent by the typed builder and is rejected.",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/rebuild_server",
       "source_fingerprint": "af4a072d333d5c4accfe3057aab0c634c35c87eec22f1f8965c14d319a6715ca",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild",
         "github.com/JSYoo5B/go-openstacksdk.Connection.RebuildServer",
@@ -105764,7 +105808,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerAdminPassword",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionBare",
-        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer"
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer",
+        "github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionDetailed"
       ],
       "contracts": [
         {
@@ -105780,18 +105825,22 @@
             "connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer",
             "connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay"
           ]
+        },
+        {
+          "behavior": "Without bare the rebuild action response is expanded with interfaces, or with hostvars under WithCloudServerActionDetailed, keeping the returned admin password; each call sends the rebuild once.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion"
+          ]
         }
       ],
       "differences": [
-        "Python's missing image raises TypeError; Go returns ErrInvalidOption. A failed wait returns the action result beside the error."
+        "Python's missing image raises TypeError; Go returns ErrInvalidOption. A failed wait returns the action result beside the error.",
+        "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Default (non-bare) address expansion reuses the independently reviewed ExpandServerInterfaces, whose own review (get_server_public_ip) is unresolved; the Python Resource/Munch normalization, location, detailed=True hostvars (get_openstack_vars) and session/cache semantics are not reproduced.",
-        "The default non-bare expansion path of the rebuilt server has no rebuild-specific fixture; only bare results are tested."
       ]
     },
     {
@@ -105975,7 +106024,7 @@
         "README.md"
       ],
       "remaining": [
-        "Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 café observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.",
+        "Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 caf\u00e9 observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.",
         "Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved."
       ]
     },
@@ -106142,29 +106191,85 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_openstack_vars",
       "source_fingerprint": "0e5c3abf3baeddb31c27daf6ee7b625e15f60a75b433c0b6566235e5876848e8",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "differences": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetOpenStackVars",
+        "github.com/JSYoo5B/go-openstacksdk.CloudServerHostvars.MarshalJSON",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindIdentity",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.ListByServer",
+        "github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetVolumes"
       ],
-      "remaining": [
-        "Python returns meta.get_hostvars_from_server, which expands addresses, flavor, image, volumes, region, cloud and location into an Ansible hostvars mapping; Go has no equivalent helper."
+      "contracts": [
+        {
+          "behavior": "GetOpenStackVars follows get_hostvars_from_server order: Neutron port/floating IP supplementation and address roles, flavor FindIdentity, GET servers/{id} and servers/{id}/os-security-groups, the image list of get_image_name and the Cinder volume list. The supplied server is not modified. The mapping carries public_v4, private_v4, interface_ip, access_ipv4 and access_ipv6, the supplemented floating address, the named flavor and image, location and the attached volumes with the device of their first attachment, but neither the security groups nor volumes of other servers.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsExpandInPythonOrderWithoutMutatingServer"
+          ]
+        },
+        {
+          "behavior": "Without a truthy flavor id the embedded original_name becomes the name without a lookup. A server without an image object (Nova's boot-from-volume empty string) maps image to {id: ''} without an image lookup. A failing security group read is recorded in SecurityGroupsError and not returned.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsOriginalNameBootFromVolumeAndRecordedFailures"
+          ]
+        },
+        {
+          "behavior": "A catalog without block storage skips volumes without error, a Cinder failure is recorded in VolumesError, a missing flavor or image sets no name (a flavor id never falls back to original_name), a non-string flavor id is ErrInvalidOption, and an image lookup failure is returned beside the partial hostvars without running the volume step.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsVolumeServiceAndLookupFailures"
+          ]
+        },
+        {
+          "behavior": "Cancellation and a nil server fail before any HTTP.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsCancellationAndInvalidInputSendNothing"
+          ]
+        }
+      ],
+      "differences": [
+        "Python returns a Munch built from the mutable Server Resource (attribute names, class attributes and Resource-typed flavor/image values). Go returns typed CloudServerHostvars; its MarshalJSON renders the record Source Resource view (or the typed server JSON plus a computed location) with addresses, public_v4, public_v6, private_v4, interface_ip, access_ipv4, access_ipv6, the named flavor and image and volumes set over it. This is the shared SDK-R1 mutable Resource boundary of docs/sdk-support-ledger.md.",
+        "Python writes the list_server_security_groups result onto the supplied server and swallows SDKException. Go never mutates the supplied server, returns the groups in SecurityGroups and records any non-cancellation failure in SecurityGroupsError. The secgroup_source configuration gate is not modelled, so the requests are sent as with the default neutron source.",
+        "has_service('volume') is the presence of a block-storage endpoint for GetVolumes; Python swallows SDKException from get_volumes while Go records any non-cancellation listing failure in VolumesError. The mounts argument of get_hostvars_from_server is not reachable from get_openstack_vars.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here. The typed native server drops a nonempty string image, which Go treats like Nova's boot-from-volume empty string; non-string flavor or image ids are rejected instead of being passed to the Python lookups."
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md",
+        "compute/cloud-server-composed-python.md"
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_meta",
       "source_fingerprint": "fb09595e234f67930ba59e1e2659820e893769957473d4f101e8a72ebfe0e583",
-      "status": "unresolved",
-      "go_api": [],
-      "contracts": [],
-      "differences": [],
-      "documentation": [
-        "compute/python-cloud-parity.md"
+      "status": "go_mapping",
+      "go_api": [
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerMeta",
+        "github.com/JSYoo5B/go-openstacksdk.CloudServerGroups",
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetOpenStackVars"
       ],
-      "remaining": [
-        "Python returns server_vars from meta.get_hostvars_from_server plus inventory groups from meta.get_groups_from_server; Go has no equivalent helper."
+      "contracts": [
+        {
+          "behavior": "GetServerMeta returns the GetOpenStackVars hostvars and get_groups_from_server groups in order: cloud, region, cloud_region, metadata group, each nonempty comma-separated groups entry, instance-ID, flavor-NAME and image-NAME when a name was set, then meta-KEY_VALUE per metadata item.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsExpandInPythonOrderWithoutMutatingServer",
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsOriginalNameBootFromVolumeAndRecordedFailures"
+          ]
+        },
+        {
+          "behavior": "Cancellation fails before any HTTP.",
+          "tests": [
+            "connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsCancellationAndInvalidInputSendNothing"
+          ]
+        }
+      ],
+      "differences": [
+        "Python emits a deprecation warning and returns dict(server_vars=Munch, groups=list); Go returns CloudServerMeta with typed hostvars and the group list, and Groups is empty when expansion fails.",
+        "Metadata groups follow sorted key order because the typed server metadata is a Go map, while Python follows the response mapping order. Cloud and region come from CurrentLocation, and an unknown value renders as an empty string.",
+        "Python's Resource-typed flavor and image always contain a name key, so a missing name yields flavor-None/image-None groups; Go adds those groups only when a name was set (dict semantics of meta.py). Python reads az from a key the Server Resource mapping does not carry, so neither side emits availability-zone groups. These are the shared SDK-R1 boundary of docs/sdk-support-ledger.md."
+      ],
+      "documentation": [
+        "compute/python-cloud-parity.md",
+        "compute/cloud-server-composed-python.md"
       ]
     },
     {
@@ -106453,7 +106558,7 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
         "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity."
       ],
@@ -106546,7 +106651,7 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
         "Numeric cap/limit and cap-boundary next-request behavior are precise reachable named remaining items below; this review does not convert those missing behaviors into generic SDK runtime differences or claim full parity."
       ],
@@ -107868,7 +107973,7 @@
           ]
         },
         {
-          "behavior": "Dirty comparison uses private raw Source Body presence rather than coerced/default/alias getters: missing name→null is dirty; tenant_id-only→same project_id is dirty; shared:\"false\"→true is dirty; shared:true→1 is equal. Only changed keys enter PUT, partial response seed retains old/new raw state, and equal update returns original private receipt without invented PUT proof.",
+          "behavior": "Dirty comparison uses private raw Source Body presence rather than coerced/default/alias getters: missing name\u2192null is dirty; tenant_id-only\u2192same project_id is dirty; shared:\"false\"\u2192true is dirty; shared:true\u21921 is equal. Only changed keys enter PUT, partial response seed retains old/new raw state, and equal update returns original private receipt without invented PUT proof.",
           "tests": [
             "network/cloud_qos_policy_mutations_test.go:TestCloudQoSPolicyUpdateRawDirtyMissingAliasAndOnlyChangedPayload",
             "network/v2/extensions/qos/policies/python_cloud_mutations_test.go:TestPolicyCloudMutationListConstructorRawLedgerAndPartialResponseSeed"
@@ -108089,7 +108194,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -108360,7 +108465,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -108633,7 +108738,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -110070,7 +110175,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -110157,7 +110262,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -110244,7 +110349,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -111856,7 +111961,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source create_container returns a Container or None; Go returns ContainerCreateResult.Container plus separate Initial/Creation/Refreshed and Existing facts. Public=false sends no operation ACL, while existing ACL is never updated."
       ],
       "remaining": []
@@ -111982,7 +112087,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source set_container_access returns a mutable Resource; Go exposes Requested separately from actual Acknowledgement/Refreshed/Container receipts. A POST missing read_ACL does not assert that the server now has the requested ACL."
       ],
       "remaining": []
@@ -112055,7 +112160,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source returns an access string and SDKException for missing or unknown ACL; Go returns ContainerAccessResult.Access plus the actual HEAD record, with ErrNotFound on clean missing and native HTTP causes retained."
       ],
       "remaining": []
@@ -112681,7 +112786,7 @@
         "Go supports limited explicitheadercharset/BOM/validUTF8 policies with golang.org/x/textv0.41.0 andsimplePythonaliasnormalization; these do notreplaceRequests2.34.2 charset_normalizer3.5.2 apparent_encoding orfullCPython textcodec lookup/errorsemantics. Unresolved detector scopeincludesallunmarkedbytes, notmerelynonUTF8; knownNUL/malformedBOM/unicode_escape/cp1006/palmos negatives retainUnsupported+actualbytes.",
         "Sourceget_object outfileNone/falseynonNone truthiness is represented by typednilcontrols, explicitemptyOutfile/OmitContent, concretepathorborrowedio.Writer. Pythonarbitrary filelikebool/callbacks/Resources are nottransferredtoGo. QueryString/Streamignored formalcontrols staylibraryowned, noapplicationinterface builderrequired.",
         "NonemptyGooutput chunk is typedpositive1..16MiB validated beforeHTTP/fileopen, whileSource mayopenpaththenvalidate dynamicchunk type; memory/discardignoreChunkSize. Go detects io.ErrShortWrite whereSource ignoreswrite returncount, optionalFlush supportsstandardunbuffered Go writers, andownedpath/HTTPbody cleanup occurs onall errors instead ofSourcefinally absence.",
-        "Accepted outputorder is rawGET/status→lowerheadercopy→pathopen→decoderinit→reads/writes→Flush/Close. SourceObject rawheadercopy is retained withoutdemanding eagerdescriptorcasts. CallerPathError concreteerrors.As type remainsavailable; no reusedcachedstream-error snapshot canerase it.",
+        "Accepted outputorder is rawGET/status\u2192lowerheadercopy\u2192pathopen\u2192decoderinit\u2192reads/writes\u2192Flush/Close. SourceObject rawheadercopy is retained withoutdemanding eagerdescriptorcasts. CallerPathError concreteerrors.As type remainsavailable; no reusedcachedstream-error snapshot canerase it.",
         "Names followSDK safeUTF8 literalSwiftvalidation andwholeobject PathEscape, source/provider/accountendpoint/version/header facts are capturedbeforeoptions andremainsticky throughnativecallbacks/Read/Write/Flush/Close. Late writer/reader resource.ErrNotFound is aphasefailure with actualreceivedproof, not cleanHTTP404 suppression.",
         "Decoder behavior andnative clean401/429/498 policyreuse existingownedSwift streamhelpers, accepted100..399 doesnotexpandnativeStreamObject200/206/304. Error bodyproof maybeactual currentcompressedphysicalbytes orcurrentdecodedwriterchunk asstageappropriate; noentireobjectbuffer iskeptforoutputmodes.",
         "ActualpinnedSource cloud/Proxy/Object/Requests/urllib3 execution has65observations withmemoryHTTPadapter/eagerRequests-like buffering andonlypathopen recordingstub. Sourcefield/runtimefiles arehash-recorded; oracle/mains/fixtures donotprove liveauth/filesystemACL/release. Originalpins areGophercloudv2.15.0 andopenstacksdkef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; fullsupported count remains0."
@@ -112691,7 +112796,7 @@
         "objectstorage/cloud-object-get-python.md"
       ],
       "remaining": [
-        "Requests Response.text with encoding=None runs charset_normalizer3.5.2 statistical apparent_encoding across the entire received bytes. The Go limitedUTF8/BOM policy does not reproduce that detector for allvalidUTF8, NUL, malformedBOM, legacy/binary/mixedlanguage inputs. ActualSource examples: unmarkedcaf e9→UTF16BE U6361/U66E9, validUTF8 00 41 00 42→AB, malformedff fe 41→alternatecodepage. Known detector-required inputs currently returnErrUnsupported withactualfulldecodedbytesproof; exactautomaticdefaulttext parity remainsopen.",
+        "Requests Response.text with encoding=None runs charset_normalizer3.5.2 statistical apparent_encoding across the entire received bytes. The Go limitedUTF8/BOM policy does not reproduce that detector for allvalidUTF8, NUL, malformedBOM, legacy/binary/mixedlanguage inputs. ActualSource examples: unmarkedcaf e9\u2192UTF16BE U6361/U66E9, validUTF8 00 41 00 42\u2192AB, malformedff fe 41\u2192alternatecodepage. Known detector-required inputs currently returnErrUnsupported withactualfulldecodedbytesproof; exactautomaticdefaulttext parity remainsopen.",
         "FullCPython3.14 textcodec/alias lookup anderrors=replace semantics are not mappedbythelimitedmanual+IANA/xtext subset. KnownvalidPythonunicode_escape, raw_unicode_escape, cp1006, palmos andother unsupportedcodecs returnErrUnsupported; unknownIANA names canstillincludevalidPythonaliases notclassifiedbythissubset. Entirecodecnamespace andallcodepage mappings/replacementcases needexplicitlibraryownedcoverage before namedget_object can bepromoted."
       ]
     },
@@ -113364,7 +113469,11 @@
         "github.com/JSYoo5B/go-openstacksdk.CloudNames",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError",
-        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters"
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
       ],
       "contracts": [
         {
@@ -113380,17 +113489,28 @@
           "tests": [
             "connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames"
           ]
+        },
+        {
+          "behavior": "ListHosts expands every host into hostvars by default, keeps only the interface expansion with WithInventoryExpand(false), skips expansion with WithInventoryBare, maps private to the private interface address, and fails a cloud whose expansion lookup fails while recording swallowed security group failures.",
+          "tests": [
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion",
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate",
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError"
+          ]
         }
       ],
       "differences": [
-        "Go returns typed compute servers with explicit failures instead of swallowing SDKException."
+        "Go returns typed compute servers with explicit failures instead of swallowing SDKException.",
+        "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
+        "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "docs/connection-r2-misc.md"
+        "docs/connection-r2-misc.md",
+        "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "The default expand=True hostvars (interface and floating IP expansion) and the private flag are not applied; the underlying list_servers parity remains unresolved.",
-        "use_direct_get and cache refresh have no Go counterpart."
+        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
       ]
     },
     {
@@ -113406,7 +113526,11 @@
         "github.com/JSYoo5B/go-openstacksdk.CloudNames",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError",
-        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters"
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
       ],
       "contracts": [
         {
@@ -113414,17 +113538,27 @@
           "tests": [
             "connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
           ]
+        },
+        {
+          "behavior": "SearchHosts filters InventoryHostView rows, so filters see hostvars keys such as public_v4, interface_ip and flavor.name, and the private flag changes interface_ip and access_ipv4.",
+          "tests": [
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion",
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate"
+          ]
         }
       ],
       "differences": [
-        "Filter keys are the JSON field names of the Go compute server record."
+        "Filter keys are the JSON field names of the Go compute server record.",
+        "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
+        "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "docs/connection-r2-misc.md"
+        "docs/connection-r2-misc.md",
+        "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "The default expand=True hostvars (interface and floating IP expansion) and the private flag are not applied; the underlying list_servers parity remains unresolved.",
-        "use_direct_get and cache refresh have no Go counterpart."
+        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
       ]
     },
     {
@@ -113440,7 +113574,11 @@
         "github.com/JSYoo5B/go-openstacksdk.CloudNames",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError",
-        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters"
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
+        "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
       ],
       "contracts": [
         {
@@ -113448,17 +113586,26 @@
           "tests": [
             "connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost"
           ]
+        },
+        {
+          "behavior": "GetHost selects one expanded host by identifier and hostvars filters and rejects a JMESPath value.",
+          "tests": [
+            "connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion"
+          ]
         }
       ],
       "differences": [
-        "Go returns resource.AmbiguousError instead of SDKException."
+        "Go returns resource.AmbiguousError instead of SDKException.",
+        "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
+        "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "docs/connection-r2-misc.md"
+        "docs/connection-r2-misc.md",
+        "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "The default expand=True hostvars (interface and floating IP expansion) and the private flag are not applied; the underlying list_servers parity remains unresolved.",
-        "use_direct_get and cache refresh have no Go counterpart."
+        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
       ]
     },
     {

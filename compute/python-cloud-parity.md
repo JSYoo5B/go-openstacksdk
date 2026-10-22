@@ -510,28 +510,54 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerRecords`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetServer`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
+- `github.com/JSYoo5B/go-openstacksdk.CloudServerResultView`
 
 - FindRecord reproduces the find_server(details=True) lookup that get_server performs before expansion.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers`.
+- The deprecated filters branch maps to SearchServerRecords (local filters over a complete list, bare, one match required by the caller); expansion of found servers shares GetServerByID's tested ExpandServerInterfaces path.
+  Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
+- GetServer finds with FindRecord forcing details=True (a 404 identity falls back to the detailed list; a missing server is nil), then applies the interface expansion by default, the hostvars with WithCloudServerDetailed and none with WithCloudServerBare. With deprecated filters it lists bare, selects locally, expands the single match, returns nil for none, AmbiguousError for several and rejects a JMESPath value.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
+
+Python/Go differences:
+
+- The filters branch reuses SearchServerRecords and GetServer; several matches are resource.AmbiguousError instead of SDKException, and no deprecation warning is emitted.
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 Unresolved boundaries:
 
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
-- The deprecated filters argument switches to search_servers and _utils._filter_list; Go has no public SDK helper for that path.
+- The deprecated filters branch inherits the search_servers JMESPath item: Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_by_id`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Get`
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAddressOptions`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
 
-Unresolved boundaries:
+- GetServerByID returns nil for a 404, a server expanded with ExpandServerInterfaces by default, skips expansion with the bare option and returns other failures.
+  Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
+- GetServerByID rejects WithCloudServerDetailed before HTTP because get_server_by_id only adds interfaces.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
 
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
-- Python returns None on NotFoundException; Go Get returns the 404 error and only caller-side status handling could produce None.
+Python/Go differences:
+
+- Go returns a CloudServerResult holding the typed server and an owned address view; bare is a Go extension (Python always expands).
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 ### `python:cloud/_compute/ComputeCloudMixin/list_servers`
 
@@ -541,11 +567,30 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ListServerRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ListServers`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
+
+- ListServerRecords streams GET servers/detail (or servers without details), sends all_tenants=True only for the all-projects option, pushes explicit query and applies no local filter.
+  Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP`.
+- ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with WithCloudServerDetailed, none with WithCloudServerBare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
+
+Python/Go differences:
+
+- ListServerRecords is the bare=True record reader; ListServers returns CloudServerResult values with the Source record, typed server and expansion. The results built before a list or expansion failure are returned beside the error instead of discarding them.
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 Unresolved boundaries:
 
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
-- The delegated proxy servers listing is itself unresolved.
+- The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved.
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_servers`
 
@@ -554,43 +599,89 @@ Status: `unresolved`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServers`
+- `github.com/JSYoo5B/go-openstacksdk.CloudServerResultView`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
+
+- SearchServerRecords lists every server then applies exact/glob name-or-ID plus ordered dictionary or JMESPath filters locally, returns expression output without records, keeps consumed rows on a page failure and rejects invalid filters before HTTP.
+  Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure`.
+- SearchServers lists with the default expansion, then filters locally over CloudServerResultView so dictionary filters see expansion keys such as public_v4 and JMESPath sees the detailed flavor name; filters never reach Nova.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
+
+Python/Go differences:
+
+- SearchServerRecords is the bare=True record search; SearchServers returns CloudServerResult values with Value, Servers, Inventory and Expression instead of mutable Resources.
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 Unresolved boundaries:
 
-- Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to servers; the caller would have to filter the listed rows by hand.
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
+- Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.
+- The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved.
 
 ### `python:cloud/_compute/ComputeCloudMixin/update_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateServer`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
 
 - The find and PUT parts match the proxy calls update_server delegates to.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests`.
+- UpdateServer finds strictly, sends one PUT with only the supplied name/description (explicit null description), sends nothing for no attributes, rejects empty/null names before HTTP and returns ErrNotFound for a missing server without PUT.
+  Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer`.
+- UpdateServer expands the PUT response with interfaces by default and with hostvars that describe the updated server under WithCloudServerDetailed.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
+- Concrete CloudServerUpdate (name, description) replaces **kwargs; an empty name cannot be sent by the typed builder and is rejected.
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 ### `python:cloud/_compute/ComputeCloudMixin/rebuild_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Rebuild`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.RebuildServer`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWait`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerTimeout`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerUnlimitedWait`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAdminPassword`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionBare`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionDetailed`
 
 - The rebuild action matches the proxy rebuild_server request.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer`.
+- RebuildServer sends imageRef and a nonempty adminPass, rejects an empty image before HTTP, waits for ACTIVE with ERROR failure, restores the returned or supplied admin password on the waited server and never replays the rebuild on a failed wait.
+  Tests: `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer`, `connection_r2_cloud_compute_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay`.
+- Without bare the rebuild action response is expanded with interfaces, or with hostvars under WithCloudServerActionDetailed, keeping the returned admin password; each call sends the rebuild once.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- With the default bare=False Python passes the server through _expand_server, which calls meta.add_server_interfaces (Neutron/Nova floating IP and port lookups that fill public_v4, public_v6, private_v4 and interface_ip, or meta.get_hostvars_from_server when detailed=True); Go Get/Find/List/Update/Rebuild results are not expanded and compute.Service.ExpandServerInterfaces is a separate call that is not integrated into these helpers, so the returned server differs.
-- With wait=True Python runs compute.wait_for_server for timeout seconds and copies adminPass onto the ACTIVE server; python:compute/v2/wait_for_server is unresolved and Go has no helper that keeps the admin password.
+- Python's missing image raises TypeError; Go returns ErrInvalidOption. A failed wait returns the action result beside the error.
+- Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 
 ### `python:cloud/_compute/ComputeCloudMixin/delete_server`
 
@@ -768,19 +859,54 @@ Unresolved boundaries:
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_openstack_vars`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Python returns meta.get_hostvars_from_server, which expands addresses, flavor, image, volumes, region, cloud and location into an Ansible hostvars mapping; Go has no equivalent helper.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetOpenStackVars`
+- `github.com/JSYoo5B/go-openstacksdk.CloudServerHostvars.MarshalJSON`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindIdentity`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups.API.ListByServer`
+- `github.com/JSYoo5B/go-openstacksdk/image.Service.GetImageRecordName`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetVolumes`
+
+- GetOpenStackVars follows get_hostvars_from_server order: Neutron port/floating IP supplementation and address roles, flavor FindIdentity, GET servers/{id} and servers/{id}/os-security-groups, the image list of get_image_name and the Cinder volume list. The supplied server is not modified. The mapping carries public_v4, private_v4, interface_ip, access_ipv4 and access_ipv6, the supplemented floating address, the named flavor and image, location and the attached volumes with the device of their first attachment, but neither the security groups nor volumes of other servers.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsExpandInPythonOrderWithoutMutatingServer`.
+- Without a truthy flavor id the embedded original_name becomes the name without a lookup. A server without an image object (Nova's boot-from-volume empty string) maps image to {id: ''} without an image lookup. A failing security group read is recorded in SecurityGroupsError and not returned.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsOriginalNameBootFromVolumeAndRecordedFailures`.
+- A catalog without block storage skips volumes without error, a Cinder failure is recorded in VolumesError, a missing flavor or image sets no name (a flavor id never falls back to original_name), a non-string flavor id is ErrInvalidOption, and an image lookup failure is returned beside the partial hostvars without running the volume step.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsVolumeServiceAndLookupFailures`.
+- Cancellation and a nil server fail before any HTTP.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsCancellationAndInvalidInputSendNothing`.
+
+Python/Go differences:
+
+- Python returns a Munch built from the mutable Server Resource (attribute names, class attributes and Resource-typed flavor/image values). Go returns typed CloudServerHostvars; its MarshalJSON renders the record Source Resource view (or the typed server JSON plus a computed location) with addresses, public_v4, public_v6, private_v4, interface_ip, access_ipv4, access_ipv6, the named flavor and image and volumes set over it. This is the shared SDK-R1 mutable Resource boundary of docs/sdk-support-ledger.md.
+- Python writes the list_server_security_groups result onto the supplied server and swallows SDKException. Go never mutates the supplied server, returns the groups in SecurityGroups and records any non-cancellation failure in SecurityGroupsError. The secgroup_source configuration gate is not modelled, so the requests are sent as with the default neutron source.
+- has_service('volume') is the presence of a block-storage endpoint for GetVolumes; Python swallows SDKException from get_volumes while Go records any non-cancellation listing failure in VolumesError. The mounts argument of get_hostvars_from_server is not reachable from get_openstack_vars.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here. The typed native server drops a nonempty string image, which Go treats like Nova's boot-from-volume empty string; non-string flavor or image ids are rejected instead of being passed to the Python lookups.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_meta`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Python returns server_vars from meta.get_hostvars_from_server plus inventory groups from meta.get_groups_from_server; Go has no equivalent helper.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerMeta`
+- `github.com/JSYoo5B/go-openstacksdk.CloudServerGroups`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetOpenStackVars`
+
+- GetServerMeta returns the GetOpenStackVars hostvars and get_groups_from_server groups in order: cloud, region, cloud_region, metadata group, each nonempty comma-separated groups entry, instance-ID, flavor-NAME and image-NAME when a name was set, then meta-KEY_VALUE per metadata item.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsExpandInPythonOrderWithoutMutatingServer`, `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsOriginalNameBootFromVolumeAndRecordedFailures`.
+- Cancellation fails before any HTTP.
+  Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerHostvarsCancellationAndInvalidInputSendNothing`.
+
+Python/Go differences:
+
+- Python emits a deprecation warning and returns dict(server_vars=Munch, groups=list); Go returns CloudServerMeta with typed hostvars and the group list, and Groups is empty when expansion fails.
+- Metadata groups follow sorted key order because the typed server metadata is a Go map, while Python follows the response mapping order. Cloud and region come from CurrentLocation, and an unknown value renders as an empty string.
+- Python's Resource-typed flavor and image always contain a name key, so a missing name yields flavor-None/image-None groups; Go adds those groups only when a name was set (dict semantics of meta.py). Python reads az from a key the Server Resource mapping does not carry, so neither side emits availability-zone groups. These are the shared SDK-R1 boundary of docs/sdk-support-ledger.md.
 
 ## References
 
