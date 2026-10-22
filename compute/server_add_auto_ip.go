@@ -102,8 +102,14 @@ func WithAddAutoIPAddressOptions(options ...ServerAddressOption) AddAutoIPOption
 // InterfaceIP is the pinned helper's return value: the server's interface IP
 // computed from Server, which is the refreshed server only when a refresh or
 // wait happened and otherwise the caller's snapshot. Empty is the helper's None.
+//
+// NeutronFloating is Python _use_neutron_floating for this call: the
+// allocation or reuse step used Neutron, or fell back to Nova after a Neutron
+// 404 (Backend is then FloatingIPNova). It selects skip-attach and timeout
+// cleanup exactly as the pinned helper does.
 type AddAutoIPResult struct {
 	Backend          FloatingIPSource
+	NeutronFloating  bool
 	FloatingIPID     string
 	FloatingIPAddr   string
 	Reused           bool
@@ -140,10 +146,13 @@ func (e *AddAutoIPTimeoutError) Unwrap() error { return context.DeadlineExceeded
 // timeout. Unless the server snapshot already shows that floating address, it
 // then attaches by exact address through AddIPList, except that a freshly
 // allocated Neutron IP skips this step as the allocation already targeted the
-// server. A Nova allocation is always attached. With wait, the server is
-// polled until the address appears or the remaining budget ends with
-// *AddAutoIPTimeoutError; on that timeout a Neutron IP created by this call is
-// deleted unless WithAddAutoIPCleanup(false). Mutations are never replayed.
+// server. With the Neutron source this also holds for an allocation that fell
+// back to Nova after a Neutron 404: like Python, no attach is sent for it. A
+// Nova-source allocation is always attached. With wait, the server is polled
+// until the address appears or the remaining budget ends with
+// *AddAutoIPTimeoutError; on that timeout an IP created by this call under the
+// Neutron source (including the Nova fallback) is deleted unless
+// WithAddAutoIPCleanup(false). Mutations are never replayed.
 func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddAutoIPOption) (*AddAutoIPResult, error) {
 	if ctx == nil {
 		return nil, invalid("context is required")
@@ -178,6 +187,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 			return result, err
 		}
 		result.Backend, result.FloatingIPID, result.FloatingIPAddr, result.Reused = available.Backend, available.ID, available.Address, available.Reused
+		result.NeutronFloating = available.Backend == FloatingIPNeutron || available.FallbackError != nil
 		port, _ = floatingIPRowString(available.FloatingIP, "port_id")
 	} else {
 		create := append([]FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.wait), WithFloatingIPCreateWaitTimeout(o.timeout)}, o.create...)
@@ -187,6 +197,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 			return result, err
 		}
 		result.Backend, result.Created = created.Backend, true
+		result.NeutronFloating = created.Backend == FloatingIPNeutron || created.FallbackError != nil
 		result.FloatingIPID, _ = floatingIPRowString(created.FloatingIP, "id")
 		result.FloatingIPAddr, _ = floatingIPRowString(created.FloatingIP, "floating_ip_address")
 		port, _ = floatingIPRowString(created.FloatingIP, "port_id")
@@ -196,7 +207,9 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 	if result.FloatingIPAddr == "" {
 		return result, invalid("floating IP %q has no floating_ip_address", result.FloatingIPID)
 	}
-	skipAttach := result.Created && result.Backend == FloatingIPNeutron
+	// Python sets skip_attach for every allocation and honours it only in its
+	// Neutron-source branch, including an allocation that fell back to Nova.
+	skipAttach := result.Created && result.NeutronFloating
 	attached, err := serverShowsFloatingAddress(&snapshot, result.FloatingIPAddr)
 	if err != nil {
 		return result, err
@@ -288,7 +301,7 @@ func (s *Service) waitAutoIPAddress(ctx context.Context, result *AddAutoIPResult
 		}
 		err = expired
 	}
-	if result.Created && result.Backend == FloatingIPNeutron && o.cleanup {
+	if result.Created && result.NeutronFloating && o.cleanup {
 		cleanup := context.WithoutCancel(ctx)
 		deleted, deleteErr := s.DeleteFloatingIP(cleanup, DeleteFloatingIPRequest{ID: result.FloatingIPID}, o.delete...)
 		result.Cleanup, result.CleanupError = deleted, deleteErr

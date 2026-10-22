@@ -27,16 +27,18 @@ Go API:
   Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateLookupOnlyAndDirtySelection`, `network/cloud_port_update_test.go:TestCloudPortUpdateNameFallbackAndMissing`.
 - Options own caller JSON, unsupported canonical aliases/revision/extensions and malformed inputs fail before HTTP; canceled context or selected-service mutation cannot send lookup/PUT. A default-client conflict retains a separate lookup record and makes one PUT attempt without fabricated native success. No new mutation retry policy is added; configured provider retry/reauthentication hooks remain in force.
   Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateOwnedOptionsAndPreflight`, `network/cloud_port_update_test.go:TestCloudPortUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
 - Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.
-- Go returns the native Port model, which omits extension attributes.
-- Cloud UpdatePortRecord returns a separate Lookup PortRecord and native PUT Port; NoOp has Lookup and no fabricated Port. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
+- Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.
+- Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native PUT decoder omits unknown extension fields and does not preserve/merge the Python Resource on partial, empty or malformed success JSON; no raw mutation receipt is exposed by this bridge.
 - Ordinary wire-key lookup response dirty comparison is covered; GET/LIST canonical-only attributes and canonical/wire key collision precedence and original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees.
 
 ## Usage examples
@@ -92,6 +94,9 @@ func main() {
         network.WithPortUpdateJSON(json.RawMessage(*attrs)))
     if err != nil { log.Fatal(err) }
     var value any = result.Port
+    if result.Response != nil && result.Response.Merged != nil {
+        value = result.Response.Merged // the Python post-commit resource state
+    }
     if result.NoOp { value = result.Lookup.Resource }
     data, err := json.MarshalIndent(value, "", "  ")
     if err != nil { log.Fatal(err) }

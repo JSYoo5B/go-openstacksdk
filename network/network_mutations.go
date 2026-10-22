@@ -70,62 +70,80 @@ func (s *Service) networkMutationLookup(guard func(context.Context) error) *reso
 // shared roles after an accepted mutation, including a later decode failure.
 // It returns the native network model rather than a mutable Python Resource.
 func (s *Service) CreateNetwork(ctx context.Context, input CreateNetworkRequest, options ...NetworkOption) (*Network, error) {
+	value, _, err := s.createNetwork(ctx, input, options)
+	return value, err
+}
+
+func (s *Service) createNetwork(ctx context.Context, input CreateNetworkRequest, options []NetworkOption) (*Network, *rest.Response, error) {
 	if err := s.validateNetworkMutation(ctx); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	base, guard := s.networkMutationTarget()
 	o, err := prepareNetworkMutation(true, input.Name, options)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if o.hints {
 		if err := s.requireNetworkAvailabilityZone(ctx, guard); err != nil {
-			return nil, wrapNetworkMutation("create/availability zones", err)
+			return nil, nil, wrapNetworkMutation("create/availability zones", err)
 		}
 	}
-	return s.executeNetworkMutation(ctx, "create", http.MethodPost, base, "", guard, o, http.StatusCreated, http.StatusAccepted)
+	return s.executeNetworkMutationResponse(ctx, "create", http.MethodPost, base, "", guard, o, http.StatusCreated, http.StatusAccepted)
 }
 
 // UpdateNetwork preserves supplied false/empty values. IDs avoid a lookup when
 // fields or a revision condition are supplied; names resolve exactly once.
 // With no changes it reads the current network and resets roles without PUT.
 func (s *Service) UpdateNetwork(ctx context.Context, ref resource.Ref, options ...NetworkOption) (*Network, error) {
+	value, _, err := s.updateNetwork(ctx, ref, options, nil)
+	return value, err
+}
+
+// updateNetwork serves UpdateNetwork and UpdateNetworkDetail. A non-nil
+// detailLookup replaces only the optionless current-state lookup so that it
+// can retain every member of the GET response.
+func (s *Service) updateNetwork(ctx context.Context, ref resource.Ref, options []NetworkOption, detailLookup func(context.Context, func(context.Context) error) (*Network, error)) (*Network, *rest.Response, error) {
 	if err := s.validateNetworkMutation(ctx); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	base, guard := s.networkMutationTarget()
 	if err := ref.Validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	o, err := prepareNetworkMutation(false, "", options)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	if len(o.fields) == 0 && o.revision == nil {
-		current, err := s.networkMutationLookup(guard).Find(ctx, ref)
+		var current *Network
+		if detailLookup != nil {
+			current, err = detailLookup(ctx, guard)
+		} else {
+			current, err = s.networkMutationLookup(guard).Find(ctx, ref)
+		}
 		if err == nil {
 			err = validateMutationNetwork(current, ref)
 		}
 		if err != nil {
-			return nil, wrapNetworkMutation("update/lookup", err)
+			return nil, nil, wrapNetworkMutation("update/lookup", err)
 		}
 		if err := ctx.Err(); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if err := guard(ctx); err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		s.mutationRoles.Reset()
-		return current, nil
+		return current, nil, nil
 	}
 	id, err := s.networkMutationLookup(guard).ResolveID(ctx, ref)
 	if err != nil {
-		return nil, wrapNetworkMutation("update/lookup", err)
+		return nil, nil, wrapNetworkMutation("update/lookup", err)
 	}
 	if err := resource.ID(id).Validate(); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return s.executeNetworkMutation(ctx, "update", http.MethodPut, base, id, guard, o, http.StatusOK, http.StatusCreated)
+	return s.executeNetworkMutationResponse(ctx, "update", http.MethodPut, base, id, guard, o, http.StatusOK, http.StatusCreated)
 }
 
 // DeleteNetwork reports false for a missing initial lookup. A successful
@@ -188,6 +206,14 @@ func validateMutationNetwork(value *Network, requested resource.Ref) error {
 }
 
 func (s *Service) executeNetworkMutation(ctx context.Context, operation, method, base, id string, guard func(context.Context) error, o networkMutationOptions, codes ...int) (*Network, error) {
+	value, _, err := s.executeNetworkMutationResponse(ctx, operation, method, base, id, guard, o, codes...)
+	return value, err
+}
+
+// executeNetworkMutationResponse additionally returns the accepted response
+// whenever a native model was decoded, so the Detail facades can project the
+// same single response without another request.
+func (s *Service) executeNetworkMutationResponse(ctx context.Context, operation, method, base, id string, guard func(context.Context) error, o networkMutationOptions, codes ...int) (*Network, *rest.Response, error) {
 	endpoint := base
 	if id != "" {
 		endpoint += "/" + id
@@ -206,24 +232,24 @@ func (s *Service) executeNetworkMutation(ctx context.Context, operation, method,
 		if operation == "update" && ctx.Err() == nil && cleanNetworkDeleteMissing(err) {
 			err = &resource.NotFoundError{Resource: "network", Reference: id, Cause: err}
 		}
-		return nil, wrapNetworkMutation(operation, err)
+		return nil, nil, wrapNetworkMutation(operation, err)
 	}
 	body, err := response.Object("network")
 	if err != nil {
-		return nil, wrapNetworkMutation(operation+"/decode", err)
+		return nil, nil, wrapNetworkMutation(operation+"/decode", err)
 	}
 	var value Network
 	if err := json.Unmarshal(body, &value); err != nil {
-		return nil, wrapNetworkMutation(operation+"/decode", response.Fail(err))
+		return nil, nil, wrapNetworkMutation(operation+"/decode", response.Fail(err))
 	}
 	requested := resource.Ref{}
 	if id != "" {
 		requested = resource.ID(id)
 	}
 	if err := validateMutationNetwork(&value, requested); err != nil {
-		return &value, wrapNetworkMutation(operation+"/verify", response.Fail(err))
+		return &value, response, wrapNetworkMutation(operation+"/verify", response.Fail(err))
 	}
-	return &value, nil
+	return &value, response, nil
 }
 
 func (s *Service) deleteNetworkID(ctx context.Context, id string) (bool, error) {

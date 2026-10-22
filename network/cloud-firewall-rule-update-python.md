@@ -22,15 +22,18 @@ Go API:
   Tests: `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateLookupOnlyAndDirtySelection`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateNameFallbackAndMissing`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateConflictKeepsLookupAndSingleAttempt`.
 - Owned JSON filters normalize falsey JSON to default strict Find kwargs and push ordinary filter fields through member/fallback lookup. Truthy nonobjects and bound name_or_id/ignore_missing collisions fail without HTTP; currently unsupported raw headers/microversion namespaces are rejected. Option snapshots, unsupported cloud keys, cancellation and selected-source mutation are checked before lookup.
   Tests: `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateFiltersStrictBindingAndFalseyDefaults`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateOwnedOptionsAndPreflight`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. A private SDK builder preserves fourteen cloud kwargs without exposing builder-interface responsibility to callers. Lookup is a separate record; Rule uses upstream typed result extraction and provider hooks.
+- UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. The dirty fourteen-key subset is sent as one owned PUT without exposing builder-interface responsibility to callers. Lookup is a separate record; Response is the owned PUT receipt and Rule the native projection of its merged view.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native mutation retains upstream HTTP200-only acceptance, strict typed projection, no unknown/partial/empty/malformed response merge or same mutable Resource identity, and no original mutation receipt.
 - Raw Find headers/microversion member-query versus fallback-formal behavior and base_path/skip_cache/resource_response_key/fetch constructor controls are not fully implemented; currently unsupported reserved filters fail before HTTP. Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
+- Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge.
 
 ## Usage examples
 
@@ -88,6 +91,9 @@ func main() {
         network.WithFirewallRuleUpdateFilters(json.RawMessage(*filters)))
     if err != nil { log.Fatal(err) }
     var value any = result.Rule
+    if result.Response != nil && result.Response.Merged != nil {
+        value = result.Response.Merged // the Python post-commit resource state
+    }
     if result.NoOp {
         value = nil
         if result.Lookup != nil { value = result.Lookup.Resource }

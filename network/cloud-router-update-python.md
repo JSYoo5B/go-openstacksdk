@@ -21,14 +21,16 @@ Go API:
   Tests: `network/cloud_router_update_test.go:TestCloudRouterUpdateEffectiveValuesAndDirtySelection`, `network/cloud_router_update_test.go:TestCloudRouterUpdateIneffectiveBeforeServiceLookup`, `network/cloud_router_update_test.go:TestCloudRouterUpdateNameFallbackAndMissing`.
 - Nonnull routes including [] and false perform fresh complete extraroute discovery before lookup; missing extension drops routes only and can return lookup-free no-op, while other attrs continue. HTTP/late malformed alias/continuation failures never become unsupported-route fallback. Owned options/preflight and canceled-context guards prevent unwanted HTTP; native conflict preserves lookup and no success model.
   Tests: `network/cloud_router_update_test.go:TestCloudRouterUpdateRoutesGateAndDrop`, `network/cloud_router_update_test.go:TestCloudRouterUpdateExtensionFailureCannotBecomeDroppedRoutes`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOwnedOptionsAndPreflight`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOptionCancellationCannotBecomeNoOp`, `network/cloud_router_update_test.go:TestCloudRouterUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record while Router is native mutation output; neither is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
+- UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native PUT result projection omits unknown response fields and does not merge partial/empty/malformed success bodies into the existing Python Resource; no original mutation receipt is exposed.
 - Member GET/LIST canonical-only/canonical-wire collision mapping, arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
 
 ## Usage examples
@@ -84,6 +86,9 @@ func main() {
         network.WithRouterUpdateJSON(json.RawMessage(*attrs)))
     if err != nil { log.Fatal(err) }
     var value any = result.Router
+    if result.Response != nil && result.Response.Merged != nil {
+        value = result.Response.Merged // the Python post-commit resource state
+    }
     if result.NoOp {
         value = nil
         if result.Lookup != nil { value = result.Lookup.Resource }

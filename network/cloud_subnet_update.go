@@ -124,12 +124,15 @@ func subnetUpdateBody(cfg SubnetUpdateOpts) (map[string]json.RawMessage, error) 
 	return body, nil
 }
 
-// SubnetUpdateResult retains the lookup's declared view and wire evidence. Subnet is
-// the native PUT response only; lookup-only/no-dirty branches never fabricate it.
+// SubnetUpdateResult retains the lookup's declared view and wire evidence.
+// Response is the owned receipt of the accepted PUT, and Subnet is the native
+// projection of Response.Merged (the Python post-commit resource state).
+// Lookup-only/no-dirty branches never fabricate either.
 type SubnetUpdateResult struct {
-	Lookup *subnets.SubnetRecord
-	Subnet *subnets.Subnet
-	NoOp   bool
+	Lookup   *subnets.SubnetRecord
+	Subnet   *subnets.Subnet
+	Response *UpdateReceipt
+	NoOp     bool
 }
 
 // UpdateSubnetRecord skips all HTTP for ineffective kwargs, then compares
@@ -212,7 +215,7 @@ func (s *Service) UpdateSubnetRecord(ctx context.Context, identity string, optio
 	if result.Lookup.Resource == nil || result.Lookup.Wire == nil {
 		return result, wrap(qosReadInvalid("subnet lookup did not produce a resource view"))
 	}
-	attrs := []subnets.AttributeOption{}
+	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(body)) {
 		raw := body[key]
 		old, exists := result.Lookup.Wire.Body[key]
@@ -225,7 +228,7 @@ func (s *Service) UpdateSubnetRecord(ctx context.Context, identity string, optio
 				continue
 			}
 		}
-		attrs = append(attrs, subnets.WithAttribute(key, json.RawMessage(bytes.Clone(raw))))
+		attrs[key] = bytes.Clone(raw)
 	}
 	if len(attrs) == 0 {
 		result.NoOp = true
@@ -238,9 +241,9 @@ func (s *Service) UpdateSubnetRecord(ctx context.Context, identity string, optio
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Subnet, err = selected.Subnets.UpdateWithAttributes(ctx, id, attrs...)
-	if err != nil {
-		result.Subnet = nil // A rejected PUT is not a successful native result.
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("subnets", id), "subnet", result.Lookup.Wire.Body, body, attrs)
+	if err == nil {
+		result.Subnet, err = decodeUpdateMerged[subnets.Subnet](result.Response)
 	}
 	return result, wrap(errors.Join(err, guard(ctx)))
 }

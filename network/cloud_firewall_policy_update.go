@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	upstreampolicies "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/policies"
 )
 
 // FirewallPolicyUpdateOpts owns the pinned six-key cloud update_firewall_policy keyword set. Omitted fields
@@ -99,25 +98,16 @@ func WithFirewallPolicyUpdateRules(v ...string) FirewallPolicyUpdateOption {
 	return WithFirewallPolicyUpdateAttribute("firewall_rules", append([]string{}, v...))
 }
 
-// FirewallPolicyUpdateResult retains the lookup's declared view and wire evidence. Policy is
-// the native PUT response only; lookup-only/no-dirty branches never fabricate it.
+// FirewallPolicyUpdateResult retains the lookup's declared view and wire evidence.
+// Response is the owned receipt of the accepted PUT, and Policy is the native
+// projection of Response.Merged (the Python post-commit resource state).
+// Lookup-only/no-dirty branches never fabricate either.
 type FirewallPolicyUpdateResult struct {
 	Lookup      *FirewallRecord
 	Policy      *policies.Policy
+	Response    *UpdateReceipt
 	NoOp        bool
 	RuleLookups []*FirewallRecord
-}
-
-// firewallPolicyUpdateBody is SDK-owned. Application callers supply concrete
-// options, while this private bridge preserves raw kwargs without typed coercion.
-type firewallPolicyUpdateBody struct{ attributes map[string]json.RawMessage }
-
-func (v firewallPolicyUpdateBody) ToFirewallPolicyUpdateMap() (map[string]any, error) {
-	body := make(map[string]json.RawMessage, len(v.attributes))
-	for key, raw := range v.attributes {
-		body[key] = bytes.Clone(raw)
-	}
-	return map[string]any{"firewall_policy": body}, nil
 }
 
 // UpdateFirewallPolicyRecord performs the cloud lookup even for empty kwargs. It compares
@@ -273,10 +263,9 @@ func (s *Service) UpdateFirewallPolicyRecord(ctx context.Context, identity strin
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	mutation := upstreampolicies.Update(ctx, &source.Client, url.PathEscape(id), firewallPolicyUpdateBody{attributes: attrs})
-	result.Policy, err = mutation.Extract()
-	if err != nil {
-		result.Policy = nil // A rejected PUT is not a successful native result.
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_policies", url.PathEscape(id)), "firewall_policy", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	if err == nil {
+		result.Policy, err = decodeUpdateMerged[policies.Policy](result.Response)
 	}
 	return result, wrap(errors.Join(err, guard(ctx)))
 }

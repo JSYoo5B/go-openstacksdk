@@ -99,11 +99,14 @@ func routerUpdateBody(cfg RouterUpdateOpts) (map[string]json.RawMessage, bool, e
 	return body, hasRoutes, err
 }
 
-// RouterUpdateResult retains the lookup's declared view and wire evidence. Router is
-// the native PUT response only; lookup-only/no-dirty branches never fabricate it.
+// RouterUpdateResult retains the lookup's declared view and wire evidence.
+// Response is the owned receipt of the accepted PUT, and Router is the native
+// projection of Response.Merged (the Python post-commit resource state).
+// Lookup-only/no-dirty branches never fabricate either.
 type RouterUpdateResult struct {
 	Lookup        *routers.RouterReadRecord
 	Router        *routers.Router
+	Response      *UpdateReceipt
 	NoOp          bool
 	RoutesDropped bool
 	Extensions    []*extensions.ExtensionRecord
@@ -210,7 +213,7 @@ func (s *Service) UpdateRouterRecord(ctx context.Context, identity string, optio
 	if result.Lookup.Resource == nil || result.Lookup.Wire == nil {
 		return result, wrap(qosReadInvalid("router lookup did not produce a resource view"))
 	}
-	attrs := []routers.AttributeOption{}
+	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(body)) {
 		raw := body[key]
 		old, exists := result.Lookup.Wire.Body[key]
@@ -223,7 +226,7 @@ func (s *Service) UpdateRouterRecord(ctx context.Context, identity string, optio
 				continue
 			}
 		}
-		attrs = append(attrs, routers.WithAttribute(key, json.RawMessage(bytes.Clone(raw))))
+		attrs[key] = bytes.Clone(raw)
 	}
 	if len(attrs) == 0 {
 		result.NoOp = true
@@ -236,9 +239,9 @@ func (s *Service) UpdateRouterRecord(ctx context.Context, identity string, optio
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Router, err = selected.Routers.UpdateWithAttributes(ctx, id, attrs...)
-	if err != nil {
-		result.Router = nil // A rejected PUT is not a successful native result.
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("routers", id), "router", result.Lookup.Wire.Body, body, attrs)
+	if err == nil {
+		result.Router, err = decodeUpdateMerged[routers.Router](result.Response)
 	}
 	return result, wrap(errors.Join(err, guard(ctx)))
 }

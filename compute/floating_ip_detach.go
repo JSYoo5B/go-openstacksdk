@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -40,13 +41,22 @@ const (
 // is the pinned Neutron boolean: true only for DetachedNeutron. It stays false
 // for the Nova branch, whose Python result is None; use Outcome to tell them
 // apart.
+//
+// Backend is the branch the helper ran: FloatingIPNeutron whenever the
+// Neutron floating source is in use (Python _use_neutron_floating), even if
+// the lookup itself fell back to Nova rows (Lookup.Backend and
+// Lookup.FallbackError show that). NeutronLookup and NeutronNotFound are set
+// only when the Neutron branch's lookup failed with a clean 404 and the helper
+// ran the Nova branch, which repeats the lookup into Lookup.
 type DetachFloatingIPResult struct {
-	Backend  FloatingIPSource
-	Outcome  DetachFloatingIPOutcome
-	Detached bool
-	Lookup   *GetFloatingIPResult
-	Response *FloatingIPQueryResponse
-	Failure  *FloatingIPQueryResponse
+	Backend         FloatingIPSource
+	Outcome         DetachFloatingIPOutcome
+	Detached        bool
+	Lookup          *GetFloatingIPResult
+	NeutronLookup   *GetFloatingIPResult
+	NeutronNotFound error
+	Response        *FloatingIPQueryResponse
+	Failure         *FloatingIPQueryResponse
 }
 
 // DetachFloatingIPError reports a failed mutation after a successful lookup.
@@ -95,6 +105,26 @@ func (s *Service) DetachIPFromServer(ctx context.Context, input DetachFloatingIP
 	if lookup != nil {
 		result.Backend, result.Failure = lookup.Backend, lookup.Failure
 	}
+	// p.get selected the backend: neutronMode is Python _use_neutron_floating.
+	if p.neutronMode {
+		result.Backend = FloatingIPNeutron
+		if err == nil {
+			// The Neutron branch also runs on Nova rows that the lookup
+			// normalized after a Neutron list 404.
+			return p.detachNeutron(input, result)
+		}
+		if p.ctx.Err() != nil || !queryNotFound(err) {
+			return result, err
+		}
+		// Python catches NotFoundException from its Neutron branch and runs
+		// the Nova branch, whose own get_floating_ip repeats the lookup.
+		result.NeutronLookup, result.NeutronNotFound = lookup, err
+		lookup, err = p.get(input.FloatingIPID)
+		result.Lookup, result.Backend, result.Failure = lookup, FloatingIPNova, nil
+		if lookup != nil {
+			result.Failure = lookup.Failure
+		}
+	}
 	if err != nil {
 		return result, err
 	}
@@ -119,8 +149,25 @@ func floatingIPRowString(record *FloatingIPRecord, key string) (value string, pr
 }
 
 func (p *floatingIPQueryState) detachNeutron(input DetachFloatingIPRequest, result *DetachFloatingIPResult) (*DetachFloatingIPResult, error) {
-	port, _ := floatingIPRowString(result.Lookup.FloatingIP, "port_id")
-	if result.Lookup.FloatingIP == nil || port == "" {
+	record := result.Lookup.FloatingIP
+	if record == nil {
+		result.Outcome = DetachNotAttached
+		return result, p.state.check(p.ctx)
+	}
+	raw, present := json.RawMessage(nil), false
+	if record.Resource != nil {
+		raw, present = record.Resource.Body["port_id"]
+	}
+	if !present {
+		// A strict-mode normalized Nova row has no port_id; Python's
+		// attribute access on that Munch raises instead of reading None.
+		return result, invalid("floating IP %q row has no port_id attribute", input.FloatingIPID)
+	}
+	attached, err := cloudfilter.PythonTruthy(raw)
+	if err != nil {
+		return result, err
+	}
+	if !attached {
 		result.Outcome = DetachNotAttached
 		return result, p.state.check(p.ctx)
 	}

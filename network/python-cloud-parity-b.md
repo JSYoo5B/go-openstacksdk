@@ -678,14 +678,16 @@ Go API:
   Tests: `network/cloud_router_update_test.go:TestCloudRouterUpdateEffectiveValuesAndDirtySelection`, `network/cloud_router_update_test.go:TestCloudRouterUpdateIneffectiveBeforeServiceLookup`, `network/cloud_router_update_test.go:TestCloudRouterUpdateNameFallbackAndMissing`.
 - Nonnull routes including [] and false perform fresh complete extraroute discovery before lookup; missing extension drops routes only and can return lookup-free no-op, while other attrs continue. HTTP/late malformed alias/continuation failures never become unsupported-route fallback. Owned options/preflight and canceled-context guards prevent unwanted HTTP; native conflict preserves lookup and no success model.
   Tests: `network/cloud_router_update_test.go:TestCloudRouterUpdateRoutesGateAndDrop`, `network/cloud_router_update_test.go:TestCloudRouterUpdateExtensionFailureCannotBecomeDroppedRoutes`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOwnedOptionsAndPreflight`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOptionCancellationCannotBecomeNoOp`, `network/cloud_router_update_test.go:TestCloudRouterUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record while Router is native mutation output; neither is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
+- UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native PUT result projection omits unknown response fields and does not merge partial/empty/malformed success bodies into the existing Python Resource; no original mutation receipt is exposed.
 - Member GET/LIST canonical-only/canonical-wire collision mapping, arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_subnet`
@@ -709,15 +711,17 @@ Go API:
   Tests: `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateEffectiveValuesAndDirtySelection`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateIneffectiveAndConflictBeforeServiceLookup`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOptionCancellationCannotBecomeNoOp`.
 - Effective attrs resolve member/name lookup and compare ordinary raw wire values with Python equality, skip equal-value PUT and commit only changed fields to the resolved ID. Options snapshot JSON, reject unsupported kwargs before HTTP, retain lookup on native conflict without fabricated success and preserve configured provider hooks.
   Tests: `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateNameFallbackAndMissing`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOwnedOptionsAndPreflight`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptProjectionKeepsMergedAuthority`.
 
 Python/Go differences:
 
-- Go returns the native Subnet model instead of a Subnet Resource.
+- Go returns the native Subnet projection plus the owned UpdateReceipt instead of a Subnet Resource.
 - UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native mutation decoder omits unknown fields and does not merge partial/empty/malformed successful bodies into an existing Python Resource; this bridge exposes no raw mutation receipt.
 - Member GET/LIST canonical-only or canonical/wire collision mapping, arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_port`
@@ -741,16 +745,18 @@ Go API:
   Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateLookupOnlyAndDirtySelection`, `network/cloud_port_update_test.go:TestCloudPortUpdateNameFallbackAndMissing`.
 - Options own caller JSON, unsupported canonical aliases/revision/extensions and malformed inputs fail before HTTP; canceled context or selected-service mutation cannot send lookup/PUT. A default-client conflict retains a separate lookup record and makes one PUT attempt without fabricated native success. No new mutation retry policy is added; configured provider retry/reauthentication hooks remain in force.
   Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateOwnedOptionsAndPreflight`, `network/cloud_port_update_test.go:TestCloudPortUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
 - Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.
-- Go returns the native Port model, which omits extension attributes.
-- Cloud UpdatePortRecord returns a separate Lookup PortRecord and native PUT Port; NoOp has Lookup and no fabricated Port. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
+- Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.
+- Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native PUT decoder omits unknown extension fields and does not preserve/merge the Python Resource on partial, empty or malformed success JSON; no raw mutation receipt is exposed by this bridge.
 - Ordinary wire-key lookup response dirty comparison is covered; GET/LIST canonical-only attributes and canonical/wire key collision precedence and original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_qos_policies`
@@ -1341,15 +1347,19 @@ Go API:
   Tests: `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateLookupOnlyAndDirtySelection`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateNameFallbackAndMissing`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateOwnedOptionsAndPreflight`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateConflictKeepsLookupAndSingleAttempt`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateFiltersStrictBindingAndFalseyDefaults`.
 - After target Find, nonnull policy aliases resolve strict egress then ingress regardless input key order, null aliases set wire ID null without policy lookup, then ports resolve in input order with duplicates and without target-filter propagation. [] clears with no port lookup; equal resolved references still resolve before no-PUT. Midphase failures and null ports retain prior target/policy/port evidence and prevent further lookup/PUT.
   Tests: `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateTargetPolicyPortsOrderAndEmptyClear`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateNullPoliciesAndEmptyPorts`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateReferenceFailuresPreservePhaseOrder`, `network/cloud_firewall_group_update_test.go:TestCloudFirewallGroupUpdateResolvedEqualReferencesStillLookUp`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence and Group is native mutation output. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection.
+- UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence; Response is the owned PUT receipt and Group the native projection of its merged view. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
 - Policy references are nonempty JSON strings or null; ports are JSON arrays of nonempty strings. Arbitrary Python iterable/object/nonstring/empty response-ID/runtime-exception behavior and full same-instance Resource lifecycle remain outside this bounded profile.
-- Native HTTP200-only mutation acceptance and typed/unknown/partial/empty/malformed response handling expose no original PUT receipt. Raw Find header/microversion/fetch constructor controls, full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps.
+- Raw Find header/microversion/fetch constructor controls, full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps.
+- Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_policy`
 
@@ -1368,15 +1378,19 @@ Go API:
   Tests: `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateLookupOnlyAndDirtySelection`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateNameFallbackAndMissing`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOwnedOptionsAndPreflight`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateConflictKeepsLookupAndSingleAttempt`.
 - A present firewall_rules key is translated only after target lookup: ordered strict rule lookup repeats duplicate references without forwarding policy filters, [] clears with zero rule lookup, and equal resolved IDs skip PUT only after lookups. A later missing reference retains target/prior rule evidence and stops further work; unsupported JSON reference shapes fail after target lookup. Falsey filters/defaults and bound argument collisions preserve the bounded strict Find contract.
   Tests: `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOrderedRulesTargetFirstAndEmptyClear`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateRuleFailureKeepsPriorEvidence`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateUnsupportedRuleShapesAfterTargetLookup`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateFiltersStrictBindingAndFalseyDefaults`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Policy uses native mutation extraction. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.
+- UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Response is the owned PUT receipt and Policy the native projection of its merged view. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
 - Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.
-- Native HTTP200-only mutation acceptance, typed/unknown/partial/empty/malformed response handling, raw mutation receipt, full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate.
+- Full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate.
+- Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_rule`
 
@@ -1394,15 +1408,18 @@ Go API:
   Tests: `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateLookupOnlyAndDirtySelection`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateNameFallbackAndMissing`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateConflictKeepsLookupAndSingleAttempt`.
 - Owned JSON filters normalize falsey JSON to default strict Find kwargs and push ordinary filter fields through member/fallback lookup. Truthy nonobjects and bound name_or_id/ignore_missing collisions fail without HTTP; currently unsupported raw headers/microversion namespaces are rejected. Option snapshots, unsupported cloud keys, cancellation and selected-source mutation are checked before lookup.
   Tests: `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateFiltersStrictBindingAndFalseyDefaults`, `network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateOwnedOptionsAndPreflight`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. A private SDK builder preserves fourteen cloud kwargs without exposing builder-interface responsibility to callers. Lookup is a separate record; Rule uses upstream typed result extraction and provider hooks.
+- UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. The dirty fourteen-key subset is sent as one owned PUT without exposing builder-interface responsibility to callers. Lookup is a separate record; Response is the owned PUT receipt and Rule the native projection of its merged view.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native mutation retains upstream HTTP200-only acceptance, strict typed projection, no unknown/partial/empty/malformed response merge or same mutable Resource identity, and no original mutation receipt.
 - Raw Find headers/microversion member-query versus fallback-formal behavior and base_path/skip_cache/resource_response_key/fetch constructor controls are not fully implemented; currently unsupported reserved filters fail before HTTP. Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
+- Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge.
 
 ### `python:cloud/_network/NetworkCloudMixin/insert_rule_into_policy`
 
@@ -1563,17 +1580,64 @@ Unresolved boundaries:
 
 Status: `unresolved`.
 
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk/compute.Service.AddAutoIP`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.AddAutoIP`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPWait`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPReuse`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPCleanup`
+
+- Nova reuse: available IP selection, exact-address attach, address wait and interface IP; the caller server is not mutated.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNovaReuseAttachesAndWaits`.
+- A server already showing the floating address is not attached again.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPAlreadyAttachedSkipsAttach`.
+- Neutron allocation (reuse=false) skips the attach, waits for the address and does not delete on success.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNeutronCreateSkipsAttachAndWaits`.
+- A wait timeout is a deadline error; a Neutron IP created by the call is deleted once unless cleanup is disabled, and Nova IPs are never deleted.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNeutronCreateTimeoutDeletesOnceUnlessDisabled`, `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPWaitTimeoutOnNovaReportsDeadlineWithoutCleanup`.
+- Invalid server/options and canceled contexts send nothing.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPValidation`.
+- With the Neutron floating source, an allocation that falls back to Nova after a Neutron 404 (Backend nova, NeutronFloating true) is not attached by either backend, as Python sets skip_attach and honours it in its Neutron-source branch. On a wait timeout that IP is cleaned up through the configured Neutron delete exactly once (a Neutron 404 there is a not-deleted result, not a Nova delete) unless cleanup is disabled.
+  Tests: `connection_cloud_net_ip_fallback_test.go:TestCloudNetAddAutoIPNeutronSourceNovaFallbackAllocationSkipsAttach`, `connection_cloud_net_ip_fallback_test.go:TestCloudNetAddAutoIPNeutronSourceNovaFallbackTimeoutCleansUp`.
+
+Python/Go differences:
+
+- Attach goes through the explicit-address workflow (extra address lookup) instead of a direct attach; results are an AddAutoIPResult with evidence instead of only the interface IP string.
+- Cleanup after a timeout is an explicit option (default on, as Python) and its failure joins the timeout error instead of replacing it.
+
 Unresolved boundaries:
 
-- No Go helper reproduces add_auto_ip: unconditional available_floating_ip or create_floating_ip, attach, optional wait, server refresh and the interface_ip string result, plus deleting a newly created IP on timeout. network.FloatingIPs.Ensure covers only the Neutron reuse and attach part.
+- Dynamic Server/Resource inputs, configuration/vendor aliases, source-version and discovery policy are not compared; the reuse path that receives a Nova-fallback row under the Neutron source still attaches through the explicit-address workflow instead of Python's Neutron attach that swallows NotFound; no authenticated cloud interoperability is claimed.
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/detach_ip_from_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- No Go helper looks the floating IP up through the cloud list, returns False when it has no port, clears port_id with a PUT and returns True, and falls back to the Nova removeFloatingIp server action after a Neutron NotFound.
+- `github.com/JSYoo5B/go-openstacksdk/compute.Service.DetachIPFromServer`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DetachIPFromServer`
+
+- Neutron: lookup, then exactly one PUT floatingips/{id} with port_id null; the result records Detached and the accepted response.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronSendsOneNullPortUpdate`.
+- Neutron: an absent row or a null/empty port_id returns not_attached with no mutation.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronReturnsFalseWithoutMutation`.
+- Neutron update failures (404/409/500) are wrapped, retain the response and never fall back to Nova or replay the PUT.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNeutronUpdateFailureNeverFallsBackToNova`.
+- Nova: one removeFloatingIp action with the row address; a missing IP fails before the action; a rejected action is reported once.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaSendsRemoveFloatingIPAction`, `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaMissingIPFailsBeforeAction`, `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachNovaActionRejectionIsReportedOnce`.
+- Invalid IDs, a nil connection and pre-canceled contexts send nothing; cancellation during the PUT does not replay it.
+  Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachValidatesInputsAndContextBeforeHTTP`, `connection_r2_cloud_net_ip_test.go:TestR2CloudNetDetachCancellationDuringUpdateDoesNotReplay`.
+- With the Neutron floating source the Neutron branch runs even when the lookup fell back to normalized Nova rows: a falsy port_id returns not_attached without HTTP mutation, a truthy port_id sends the one Neutron PUT whose failure is a detach error, and a strict-mode row without port_id fails before mutation. A clean Neutron lookup 404 records NeutronLookup/NeutronNotFound and runs the Nova branch, which repeats the lookup.
+  Tests: `connection_cloud_net_ip_fallback_test.go:TestCloudNetDetachNeutronSourceRunsNeutronBranchOnNovaFallbackRow`, `connection_cloud_net_ip_fallback_test.go:TestCloudNetDetachNeutronSourceTruthyFallbackPortUsesNeutronUpdate`, `connection_cloud_net_ip_fallback_test.go:TestCloudNetDetachNeutronSourceStrictFallbackRowHasNoPortID`, `connection_cloud_net_ip_fallback_test.go:TestCloudNetDetachNeutronLookupNotFoundRunsNovaBranch`.
+
+Python/Go differences:
+
+- The result is a DetachFloatingIPResult with an outcome enum; Python returns True/False/None. Nova acknowledgement is not proof of detachment.
+- Server and floating IP IDs are validated up front; Go options replace the cloud kwargs.
+- Python Munch/Resource attribute access is modeled on the owned normalized JSON row: port_id uses Python JSON truthiness, and a strict-mode Nova row without port_id is an ErrInvalidOption instead of AttributeError. Non-string Python ID objects and Requests/session behavior are the shared arbitrary-object and Requests boundaries in docs/sdk-support-ledger.md; the Neutron-versus-Nova branch follows the configured floating IP source and network service availability.
 
 ## References
 

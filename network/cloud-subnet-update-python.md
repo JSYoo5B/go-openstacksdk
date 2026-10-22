@@ -27,15 +27,17 @@ Go API:
   Tests: `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateEffectiveValuesAndDirtySelection`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateIneffectiveAndConflictBeforeServiceLookup`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOptionCancellationCannotBecomeNoOp`.
 - Effective attrs resolve member/name lookup and compare ordinary raw wire values with Python equality, skip equal-value PUT and commit only changed fields to the resolved ID. Options snapshot JSON, reject unsupported kwargs before HTTP, retain lookup on native conflict without fabricated success and preserve configured provider hooks.
   Tests: `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateNameFallbackAndMissing`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateOwnedOptionsAndPreflight`, `network/cloud_subnet_update_test.go:TestCloudSubnetUpdateConflictKeepsLookupAndSingleAttempt`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptProjectionKeepsMergedAuthority`.
 
 Python/Go differences:
 
-- Go returns the native Subnet model instead of a Subnet Resource.
+- Go returns the native Subnet projection plus the owned UpdateReceipt instead of a Subnet Resource.
 - UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Native mutation decoder omits unknown fields and does not merge partial/empty/malformed successful bodies into an existing Python Resource; this bridge exposes no raw mutation receipt.
 - Member GET/LIST canonical-only or canonical/wire collision mapping, arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
 
 ## Usage examples
@@ -91,6 +93,9 @@ func main() {
         network.WithSubnetUpdateJSON(json.RawMessage(*attrs)))
     if err != nil { log.Fatal(err) }
     var value any = result.Subnet
+    if result.Response != nil && result.Response.Merged != nil {
+        value = result.Response.Merged // the Python post-commit resource state
+    }
     if result.NoOp {
         value = nil
         if result.Lookup != nil { value = result.Lookup.Resource }

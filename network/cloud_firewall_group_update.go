@@ -18,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/ports"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	upstreamgroups "github.com/gophercloud/gophercloud/v2/openstack/networking/v2/extensions/fwaas_v2/groups"
 )
 
 // FirewallGroupUpdateOpts owns the pinned eight-key cloud update_firewall_group keyword set. Omitted fields
@@ -103,26 +102,17 @@ func WithFirewallGroupUpdatePorts(v ...string) FirewallGroupUpdateOption {
 	return WithFirewallGroupUpdateAttribute("ports", append([]string{}, v...))
 }
 
-// FirewallGroupUpdateResult retains the lookup's declared view and wire evidence. Group is
-// the native PUT response only; lookup-only/no-dirty branches never fabricate it.
+// FirewallGroupUpdateResult retains the lookup's declared view and wire evidence.
+// Response is the owned receipt of the accepted PUT, and Group is the native
+// projection of Response.Merged (the Python post-commit resource state).
+// Lookup-only/no-dirty branches never fabricate either.
 type FirewallGroupUpdateResult struct {
 	Lookup        *FirewallRecord
 	Group         *groups.Group
+	Response      *UpdateReceipt
 	NoOp          bool
 	PolicyLookups []*FirewallRecord
 	PortLookups   []*ports.PortRecord
-}
-
-// firewallGroupUpdateBody is SDK-owned. Application callers supply concrete
-// options, while this private bridge preserves raw kwargs without typed coercion.
-type firewallGroupUpdateBody struct{ attributes map[string]json.RawMessage }
-
-func (v firewallGroupUpdateBody) ToFirewallGroupUpdateMap() (map[string]any, error) {
-	body := make(map[string]json.RawMessage, len(v.attributes))
-	for key, raw := range v.attributes {
-		body[key] = bytes.Clone(raw)
-	}
-	return map[string]any{"firewall_group": body}, nil
 }
 
 // UpdateFirewallGroupRecord performs the cloud lookup even for empty kwargs. It compares
@@ -309,10 +299,9 @@ func (s *Service) UpdateFirewallGroupRecord(ctx context.Context, identity string
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	mutation := upstreamgroups.Update(ctx, &source.Client, url.PathEscape(id), firewallGroupUpdateBody{attributes: attrs})
-	result.Group, err = mutation.Extract()
-	if err != nil {
-		result.Group = nil // A rejected PUT is not a successful native result.
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_groups", url.PathEscape(id)), "firewall_group", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	if err == nil {
+		result.Group, err = decodeUpdateMerged[groups.Group](result.Response)
 	}
 	return result, wrap(errors.Join(err, guard(ctx)))
 }

@@ -9,11 +9,11 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 |---|---:|---|
 | Pinned source declarations | 3,362 | Gophercloud/openstacksdk declarations; inherited, descriptor and Resource surfaces tracked separately |
 | Implementation target | 3,216 | All declarations excluding unsupported routes, such as retired server APIs |
-| API mappings | 3,153 (98.0%) | go_mapping decisions against the target; partial verification does not increase this count |
+| API mappings | 3,154 (98.1%) | go_mapping decisions against the target; partial verification does not increase this count |
 | Source-equivalent support | 0 | supported decisions |
-| Unresolved / excluded (unsupported) | 63 / 146 | Unreviewed declarations are included in unresolved totals |
+| Unresolved / excluded (unsupported) | 62 / 146 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 3,362 | Declarations without individual reviews 0 |
-| Behavior contracts | 9,801 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
+| Behavior contracts | 9,811 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
 
 Behavior-contract counts reflect review granularity and must not be used as completed API counts. Unreviewed operations remain unresolved.
@@ -23,12 +23,12 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 <!-- sdk-service-progress:start -->
 | Priority group | API mappings / target | Mapping rate | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|---:|
-| Core services: stages 1 and 2 | 2,094 / 2,154 | 97.2% | 60 | 0 | 138 |
+| Core services: stages 1 and 2 | 2,095 / 2,154 | 97.3% | 59 | 0 | 138 |
 | Following network: stages 3 and 4 | 254 / 254 | 100.0% | 0 | 0 | 0 |
 | Following bare metal: stages 3 and 4 | 205 / 207 | 99.0% | 2 | 0 | 0 |
 | Other following services: stages 3 and 4 | 578 / 578 | 100.0% | 0 | 0 | 2 |
 | Shared foundation | 22 / 23 | 95.7% | 1 | 0 | 6 |
-| Total | 3,153 / 3,216 | 98.0% | 63 | 0 | 146 |
+| Total | 3,154 / 3,216 | 98.1% | 62 | 0 | 146 |
 
 **Core services**
 
@@ -37,7 +37,7 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 | Identity / Keystone | 377 / 379 | 2 | 0 | 10 |
 | Compute / Nova | 316 / 333 | 17 | 0 | 0 |
 | Placement | 69 / 71 | 2 | 0 | 0 |
-| Network / Neutron | 699 / 728 | 29 | 0 | 30 |
+| Network / Neutron | 700 / 728 | 28 | 0 | 30 |
 | Image / Glance | 109 / 109 | 0 | 0 | 11 |
 | Block Storage / Cinder | 396 / 398 | 2 | 0 | 82 |
 | Key Manager / Barbican | 66 / 67 | 1 | 0 | 0 |

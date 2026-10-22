@@ -94,12 +94,16 @@ func WithPortUpdateQoSPolicyID(v string) PortUpdateOption {
 	return WithPortUpdateAttribute("qos_policy_id", v)
 }
 
-// PortUpdateResult retains the lookup's declared view and wire evidence. Port is
-// the native PUT response only; lookup-only/no-dirty branches never fabricate it.
+// PortUpdateResult retains the lookup's declared view and wire evidence.
+// Response is the owned receipt of the accepted PUT, and Port is the native
+// projection of Response.Merged (the Python post-commit resource state);
+// Response.Merged also keeps extension attributes absent from Port.
+// Lookup-only/no-dirty branches never fabricate either.
 type PortUpdateResult struct {
-	Lookup *ports.PortRecord
-	Port   *ports.Port
-	NoOp   bool
+	Lookup   *ports.PortRecord
+	Port     *ports.Port
+	Response *UpdateReceipt
+	NoOp     bool
 }
 
 // UpdatePortRecord performs the cloud lookup even for empty kwargs. It compares
@@ -164,7 +168,7 @@ func (s *Service) UpdatePortRecord(ctx context.Context, identity string, options
 	if result.Lookup.Resource == nil || result.Lookup.Wire == nil {
 		return result, wrap(qosReadInvalid("port lookup did not produce a resource view"))
 	}
-	attrs := []ports.AttributeOption{}
+	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(cfg.Attributes)) {
 		raw := cfg.Attributes[key]
 		old, exists := result.Lookup.Wire.Body[key]
@@ -177,7 +181,7 @@ func (s *Service) UpdatePortRecord(ctx context.Context, identity string, options
 				continue
 			}
 		}
-		attrs = append(attrs, ports.WithAttribute(key, json.RawMessage(bytes.Clone(raw))))
+		attrs[key] = bytes.Clone(raw)
 	}
 	if len(attrs) == 0 {
 		result.NoOp = true
@@ -190,9 +194,9 @@ func (s *Service) UpdatePortRecord(ctx context.Context, identity string, options
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Port, err = selected.Ports.UpdateWithAttributes(ctx, id, attrs...)
-	if err != nil {
-		result.Port = nil // A rejected PUT is not a successful native result.
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("ports", id), "port", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	if err == nil {
+		result.Port, err = decodeUpdateMerged[ports.Port](result.Response)
 	}
 	return result, wrap(errors.Join(err, guard(ctx)))
 }

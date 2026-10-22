@@ -23,15 +23,19 @@ Go API:
   Tests: `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateLookupOnlyAndDirtySelection`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateNameFallbackAndMissing`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOwnedOptionsAndPreflight`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateConflictKeepsLookupAndSingleAttempt`.
 - A present firewall_rules key is translated only after target lookup: ordered strict rule lookup repeats duplicate references without forwarding policy filters, [] clears with zero rule lookup, and equal resolved IDs skip PUT only after lookups. A later missing reference retains target/prior rule evidence and stops further work; unsupported JSON reference shapes fail after target lookup. Falsey filters/defaults and bound argument collisions preserve the bounded strict Find contract.
   Tests: `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateOrderedRulesTargetFirstAndEmptyClear`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateRuleFailureKeepsPriorEvidence`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateUnsupportedRuleShapesAfterTargetLookup`, `network/cloud_firewall_policy_update_test.go:TestCloudFirewallPolicyUpdateFiltersStrictBindingAndFalseyDefaults`.
+- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
+  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
 
 Python/Go differences:
 
-- UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Policy uses native mutation extraction. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.
+- UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Response is the owned PUT receipt and Policy the native projection of its merged view. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.
+- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
 - Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.
-- Native HTTP200-only mutation acceptance, typed/unknown/partial/empty/malformed response handling, raw mutation receipt, full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate.
+- Full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate.
+- Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge.
 
 ## Usage examples
 
@@ -89,6 +93,9 @@ func main() {
         network.WithFirewallPolicyUpdateFilters(json.RawMessage(*filters)))
     if err != nil { log.Fatal(err) }
     var value any = result.Policy
+    if result.Response != nil && result.Response.Merged != nil {
+        value = result.Response.Merged // the Python post-commit resource state
+    }
     if result.NoOp {
         value = nil
         if result.Lookup != nil { value = result.Lookup.Resource }

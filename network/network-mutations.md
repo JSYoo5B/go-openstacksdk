@@ -948,6 +948,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkAvailabilityZoneHints`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkProvider`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkField`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.CreateNetworkDetail`
 
 - Create sends one network envelope with a literal name including empty and default admin_state_up=true. Explicit shared/external false, MTU0 and empty DNS are omitted; port-security false, empty description/project and provider nullable/string segmentation values plus extension false are preserved. Accepted201/202 return native typed ID/time/tag fields and refresh the primed configured default inventory.
   Tests: `network/network_mutations_test.go:TestCreateNetworkCloudDefaultsAndOptionPresence`.
@@ -969,18 +970,21 @@ Go API:
   Tests: `connection_network_mutations_test.go:TestConnectionNetworkMutationRefreshesGetterDefaultNICAndFloatingRoles`.
 - SDK-owned lookup and extension requests use the same source guard as mutation requests. Lookup source changes stop before another physical request or write; a detected backoff source change remains terminal even if RetryFunc restores the original endpoint. Generated/native Create leaves roles cached until explicit Reset.
   Tests: `network/network_mutation_boundaries_test.go:TestNetworkMutationLookupSourceChangeStopsBeforeResendOrWrite`, `network/network_mutation_boundaries_test.go:TestNetworkMutationSourceGuardRemainsFailedAfterCallbackRestoresSource`, `network/network_mutation_boundaries_test.go:TestNetworkMutationRawAndGeneratedLanesRequireExplicitReset`.
+- CreateNetworkDetail sends the same single request as the native facade and returns the owned NetworkDetail: native known fields plus router:external, port_security_enabled, provider network type/physical network/segmentation ID, MTU, DNS domain, is_default, QoS policy, address scopes, availability zones, segments and VLAN flags. Absent router:external/port_security_enabled read as false per the Python Body defaults while null stays nil; Metadata keeps every member including unknown ones plus the response header/status. A known extension type mismatch after an accepted create is a decode error with the response retained, while CreateNetwork keeps its native contract.
+  Tests: `network/network_detail_test.go:TestNetworkDetailCreateExposesExtensionProperties`, `network/network_detail_test.go:TestNetworkDetailPythonDefaultsAndDecodeBoundary`.
 
 Python/Go differences:
 
 - Go owns concrete name/provider/options and JSON snapshots instead of caller builders. Create preserves literal empty name/project strings, applies admin_state_up=true and pinned false/zero/empty omission; typed nullable scalar options model selected source None behaviors without the full dynamic Python truthiness/coercion framework.
 - Provider known fields are independently Optional; segmentation ID accepts owned JSON values including source strings/null/zero. WithNetworkProvider replaces all three known fields and never pops the caller input. Provider type/physical-network values are typed strings/null rather than arbitrary Python values; extra JSON extensions use a separate protected wire-field lane.
 - AZ hints including[] trigger a fresh guarded extension list rather than Python cloud extension caching. Body next and HTTP Link are supported; following an empty page with next is a Go improvement over the pinned generic Resource.list empty-page termination.
-- Description and arbitrary additional JSON fields are Go/Proxy capabilities absent from the strict cloud create signature. Accepted201/202 response validation is stricter than Python mutable Resource translation; the native model lacks some Network extension fields.
+- Description and arbitrary additional JSON fields are Go/Proxy capabilities absent from the strict cloud create signature. Accepted201/202 response validation is stricter than Python mutable Resource translation; CreateNetworkDetail adds the Network extension fields the native model lacks.
 - The owned high facade resets the original successful role cache for an accepted response even if later read/decode/ID/source checks fail. Python cloud resets only after its proxy successfully returns; malformed-body forms and wrong-shaped-body error boundaries therefore differ.
+- The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility.
 
 Unresolved boundaries:
 
-- Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence. Returned native Network omits router:external/provider/MTU/DNS/port-security extension properties; setting them does not expose them in the returned model.
+- Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence.
 - Complete cloud-wide service/private/floating-source/automatic-IP/address/cleanup policy separately. Generated NetworkV2/native raw clients and out-of-band topology mutations bypass the high-Service hooks and still require explicit role Reset. No whole Network Proxy/Resource/native family or server lifecycle is promoted by these cloud rows.
 - Audit dynamic name/admin/shared/external/provider/DNS and explicit None/invalid object behavior outside the offered typed/Optional options, arbitrary Resource header/body alias handling, and complete cached extension/session discovery. The stated Create defaults/ownership are bounded comparisons, not universal Python input equivalence.
 
@@ -1007,6 +1011,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkProvider`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkField`
 - `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkRevision`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateNetworkDetail`
 
 - Update explicit ID with fields issues no GET, sends only selected false/empty/null values plus MTU68 and provider segmentation0, and emits revision_number=0 only as If-Match. Accepted200/201 return the same native ID and refresh the primed configured default inventory.
   Tests: `network/network_mutations_test.go:TestUpdateNetworkPreservesFalseEmptyNullAndRevision`.
@@ -1026,6 +1031,8 @@ Go API:
   Tests: `network/network_mutation_boundaries_test.go:TestNetworkMutationLookupSourceChangeStopsBeforeResendOrWrite`, `network/network_mutation_boundaries_test.go:TestNetworkMutationSourceGuardRemainsFailedAfterCallbackRestoresSource`, `network/network_mutation_boundaries_test.go:TestNetworkMutationRawAndGeneratedLanesRequireExplicitReset`.
 - An explicitly accepted204 in the SDK-owned Name lookup is a terminal empty collection: Update raises NotFound, initial Delete returns false,nil, and neither writes nor resets a primed role cache. Shared list204 processing keeps read/Close/cancellation failures and optional service response validation visible before terminating.
   Tests: `network/network_mutation_boundaries_test.go:TestNetworkMutationNoContentNameLookupKeepsMissingPolicyAndCache`, `internal/rest/list_no_content_test.go:TestListAcceptedNoContentTerminatesWithoutDecodingOrContinuation`.
+- UpdateNetworkDetail sends the same single request as the native facade and returns the owned NetworkDetail: native known fields plus router:external, port_security_enabled, provider network type/physical network/segmentation ID, MTU, DNS domain, is_default, QoS policy, address scopes, availability zones, segments and VLAN flags. Absent router:external/port_security_enabled read as false per the Python Body defaults while null stays nil; Metadata keeps every member including unknown ones plus the response header/status. The optionless branch returns the GET row with all members after the same lookup and role reset; a PUT 404 stays a NotFoundError.
+  Tests: `network/network_detail_test.go:TestNetworkDetailUpdateMutationAndOptionlessLookup`.
 
 Python/Go differences:
 
@@ -1034,10 +1041,11 @@ Python/Go differences:
 - Selected false/empty/null fields are preserved with concrete or Optional options. MTU validation matches the cloud present-value minimum68; owner and AZ fields are create-only. Provider is owned whole selection instead of source input dict pop; source arbitrary type/coercion remains broader.
 - Description/extension fields and nonnegative revision are added Go/native/Proxy capabilities outside cloud valid_kwargs. High revision0 emits If-Match:revision_number=0; low native signed revision and raw callbacks remain their independently reviewed capability.
 - Accepted200/201 require network object and safe matching requested ID; decoded ID verification failure returns the partial native model/error. The high facade resets owned role cache after accepted mutation evidence even when later response/error checks fail, instead of depending solely on Python proxy normal return.
+- The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility.
 
 Unresolved boundaries:
 
-- Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence. Returned native Network omits router:external/provider/MTU/DNS/port-security extension properties; setting them does not expose them in the returned model.
+- Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence.
 - Complete cloud-wide service/private/floating-source/automatic-IP/address/cleanup policy separately. Generated NetworkV2/native raw clients and out-of-band topology mutations bypass the high-Service hooks and still require explicit role Reset. No whole Network Proxy/Resource/native family or server lifecycle is promoted by these cloud rows.
 - Compare complete dynamic kwargs/None/provider input coercion, mutable Resource dirty/noop and alias/header state, and Python session/adapter behavior. Low native networks.Update remains independently go_mapping; this new cloud row does not regrade its exact native revision/callback contract.
 
@@ -1170,6 +1178,22 @@ provider := network.ProviderNetwork{
 created, err := service.CreateNetwork(ctx,
     network.CreateNetworkRequest{Name: "provider-net"},
     network.WithNetworkProvider(provider))
+```
+
+`CreateNetworkDetail` and `UpdateNetworkDetail` send the same requests and return `NetworkDetail`, which adds the extension properties that the native model omits. `Metadata.Body` keeps every response member.
+
+```go
+detail, err := service.CreateNetworkDetail(ctx,
+    network.CreateNetworkRequest{Name: "public"},
+    network.WithNetworkExternal(true),
+    network.WithNetworkMTU(1450))
+if err != nil {
+    return err
+}
+if detail.RouterExternal != nil && *detail.RouterExternal && detail.MTU != nil {
+    fmt.Println(detail.ID, "external, MTU", *detail.MTU)
+}
+fmt.Println(string(detail.Metadata.Body["provider:network_type"]))
 ```
 
 ## References
