@@ -83,3 +83,25 @@ Sources: pinned openstacksdk
 [`Proxy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/shared_file_system/v2/_proxy.py),
 official [Manila quota class API](https://docs.openstack.org/api-ref/shared-file-system/#quota-class-set),
 and [API version history](https://docs.openstack.org/manila/latest/contributor/api_microversion_history.html).
+
+## Python `get_quota_class_set` comparison
+
+Status: `go_mapping`. Compared with pinned
+`openstack/shared_file_system/v2/quota_class_set.py`:
+
+- Python takes a class name or a `QuotaClassSet` and always GETs
+  `/quota-class-sets/{name}` at the adapter's default microversion. It has no
+  deprecated parameter alias for reads (the `quota_class_name` rename applies
+  only to `update_quota_class_set`) and sends no query: the
+  `quota_class_name`/`project_id` query mapping is unused by fetch. Go binds an
+  explicit class name with `InClass` and selects the legacy or modern route from
+  the configured microversion.
+- Python `QuotaClassSet` drops unknown response keys, sets `id` from the
+  response and silently ignores a non-JSON success body. Go keeps every raw
+  field in `Body`, keeps the requested `ClassName` separate from the server
+  `ID`, and reports malformed or non-JSON bodies as errors after one request.
+- Resource inputs, cached instance reuse, dirty-state commit and Adapter
+  selection are the shared SDK-R1/C1/S1 boundary in the
+  [support ledger](../../../docs/sdk-support-ledger.md).
+
+Tests: `api/py_manila_quota_reads_test.go` and `api/manila_quota_class_test.go`.

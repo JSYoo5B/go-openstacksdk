@@ -4299,24 +4299,61 @@
     {
       "operation": "python:load_balancer/v2/update_quota",
       "source_fingerprint": "5fb360fe5ce9750c80e28b5822065f5de5859d01dabc0f1757e00a16d1f6de90",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.ProjectQuotaScope.Update",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithQuotaOptions",
         "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithDefaultLimit",
-        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithUpdateField"
+        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithUpdateField",
+        "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithLegacyQuotaKeys"
       ],
-      "contracts": [],
+      "contracts": [
+        {
+          "behavior": "PUT binds the official /lbaas/quotas/{project} route and sends omitted/nil, zero and -1 native limits distinctly; WithDefaultLimit sends explicit null inheritance and extension values preserve creation-time JSON snapshots.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument"
+          ]
+        },
+        {
+          "behavior": "By default the body uses the documented loadbalancer/healthmonitor keys; WithLegacyQuotaKeys(true) renames only those two keys (including explicit null inheritance) to Python's load_balancer/health_monitor, other limits such as listener and l7policy are unchanged, and the last option wins.",
+          "tests": [
+            "api/py_lb_quota_spelling_test.go:TestOctaviaQuotaLegacyKeysOptInSpelling"
+          ]
+        },
+        {
+          "behavior": "Quota options snapshot pointer values at creation and clone them when reused; exact integers and a stable final JSON body survive reauthentication and mutation of a previously applied private pointer.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSnapshotOmissionExactIntegersAndRetry"
+          ]
+        },
+        {
+          "behavior": "Invalid negative limits, nil options, core/legacy alias extensions (also with WithLegacyQuotaKeys), identity collisions, unserializable extensions, unsupported query/header/arguments, forged spelling arguments and conflicting value/default inputs fail before HTTP.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP",
+            "api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument",
+            "api/py_lb_quota_spelling_test.go:TestOctaviaQuotaLegacyKeysRejectAliasesAndForgedArgumentBeforeHTTP"
+          ]
+        },
+        {
+          "behavior": "PUT accepts 200/202 and preserves rejected HTTP code/header/404 classification; malformed accepted quota bodies retain exact bytes, status, header and decode cause without invoking the retry hook or replaying the accepted mutation. Pre-canceled Update makes no request and cancellation during Update preserves context.Canceled.",
+          "tests": [
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaMalformedAcceptedResponsesRetainEvidenceWithoutRetry",
+            "api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause"
+          ]
+        }
+      ],
       "differences": [
-        "Go sends the Octavia-documented body keys loadbalancer and healthmonitor; Python sends load_balancer and health_monitor."
+        "Go sends the Octavia-documented body keys loadbalancer and healthmonitor by default; WithLegacyQuotaKeys(true) sends Python's load_balancer and health_monitor. Octavia's QuotaBase request type (octavia/api/v2/types/quotas.py, reviewed at upstream octavia 12.0.0.0rc1-74-g12d8e0de) declares both spellings, marks the underscore names deprecated since Rocky and stores either in the same quota column (the canonical key wins when both are sent). Acceptance is source-reviewed and fixture-pinned, not verified against a deployment.",
+        "Pinned Python Quota declares no l7policy/l7rule attributes and does not allow unknown body attributes, so update_quota silently drops L7 limits and the canonical loadbalancer/healthmonitor names before sending. Go sends L7 limits as typed fields and rejects alias extensions before HTTP instead of dropping them.",
+        "Python commit sends only dirty attributes and makes no request when nothing changed; Go always issues exactly one PUT with the supplied limits (an empty quota object when none are set) and never replays it. Python Quota._prepare_request strips id from the body; Go takes the project only from the scope and rejects id/project_id extensions.",
+        "Go performs an explicit fixed-project update and returns a typed/raw snapshot with copied header/status, rather than changing and committing a mutable Python Resource; Resource input/descriptor coercion, cache and adapter/microversion controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).",
+        "Go preserves native-compatible 200/202 success codes; the official Octavia PUT contract documents 202."
       ],
       "documentation": [
         "loadbalancer/v2/quotas/README.md",
         "loadbalancer/v2/quotas/python-update-quota.md"
-      ],
-      "remaining": [
-        "Python sends the singular keys load_balancer and health_monitor (openstack/load_balancer/v2/quota.py). The Octavia API reference documents only loadbalancer and healthmonitor for PUT /lbaas/quotas/{project_id}. Go sends the documented keys and rejects the Python names as alias collisions; whether a server accepts the Python spelling on update is not verified by a deployment or fixture, so no Python-spelling option was added.",
-        "Python Quota defines no L7 limits while Go can send l7policy and l7rule; Python-side unknown-attribute handling for those keys is not mapped."
       ]
     },
     {
@@ -4919,7 +4956,7 @@
     {
       "operation": "python:shared_file_system/v2/get_quota_set",
       "source_fingerprint": "dc4c3ea00eb5b445337b6b68db634c1be2211d84badc538b0c7c163f78de73ef",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets.API.InProject",
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets.API.CurrentProject",
@@ -4963,19 +5000,26 @@
             "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
             "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
           ]
+        },
+        {
+          "behavior": "Accepted non-JSON or empty success bodies fail with an error after a single GET for project and class reads, and a detail-shaped {limit,in_use,reserved} object on the plain limits route is rejected by the typed model instead of being flattened, while Detail keeps limit/in_use/reserved apart.",
+          "tests": [
+            "api/py_manila_quota_reads_test.go:TestPyManilaQuotaReadsRejectNonJSONSuccessBodiesPythonIgnores",
+            "api/py_manila_quota_reads_test.go:TestPyManilaQuotaGetDoesNotFlattenDetailShapedLimits"
+          ]
         }
       ],
       "differences": [
         "The SDK supplies its own typed Manila quota transport, scopes and concrete functional options because Gophercloud v2.15.0 has no matching quota package.",
         "Go binds explicit IDs or exact Keystone names, preserves configured microversions instead of silently upgrading, and returns immutable request identity with raw JSON and HTTP metadata; mutable Python Resources are not accepted as references.",
         "Pinned Python get_quota_set ignores its **query parameter; Go makes Detail, Defaults and user/share-type scope explicit instead of forwarding speculative query parameters.",
-        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version.",
+        "Pinned Python always requests /quota-sets/{project_id} at the adapter's default microversion (no Manila-specific floor), so an unversioned session reaches a route Manila only serves from 2.7. Go chooses legacy os-quota-sets through 2.6 and quota-sets from 2.7 from the configured microversion.",
+        "Common QuotaSet._translate_response flattens object values with in_use/reserved/limit into usage/reservation maps and the limit, keeps unknown keys and silently ignores a non-JSON success body. Plain Manila GET returns scalar limits, so Go's typed int64 limits plus raw Body carry the same information; per-resource usage and reservation come only from the explicit 2.25+ Detail, and malformed or non-JSON bodies are errors.",
+        "Project Resource inputs, mutable QuotaSet reuse, response cache, dirty-state tracking and Adapter selection are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md); Go makes one fresh stateless request per call."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotasets/README.md"
-      ],
-      "remaining": [
-        "Compare inherited common QuotaSet/Resource translation, fallback behavior, cached Resource/dirty-state inputs and adapter/microversion selection beyond the verified service HTTP mapping; no new Go code was needed for the HTTP route."
       ]
     },
     {
@@ -5058,7 +5102,7 @@
     {
       "operation": "python:shared_file_system/v2/get_quota_class_set",
       "source_fingerprint": "312687a48a8022d0c9be3debd7069b36c8dc163b334f41f7b164ec937413a7d2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets.API.InClass",
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets.QuotaClassScope.Get"
@@ -5083,18 +5127,24 @@
             "api/manila_quota_versions_test.go:TestManilaQuotaVersionBlankTypeNeedsLegacyHeaderEvenWithGenericHeader",
             "api/manila_quota_versions_test.go:TestManilaQuotaVersionChangedSourceBlocksEveryScopeOperation"
           ]
+        },
+        {
+          "behavior": "Accepted non-JSON or empty success bodies fail with an error after a single class GET instead of returning a Resource that holds only the requested class name.",
+          "tests": [
+            "api/py_manila_quota_reads_test.go:TestPyManilaQuotaReadsRejectNonJSONSuccessBodiesPythonIgnores"
+          ]
         }
       ],
       "differences": [
         "The SDK owns the absent native transport and fixes an explicit class name; concrete int64 pointer options and functional extensions replace mutable Python Resource inputs.",
         "QuotaClassResource separates requested ClassName from server ID and retains raw response fields and HTTP metadata; the selected service microversion is preserved.",
-        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version."
+        "Quota/class route selection requires a configured numeric microversion (or the omitted2.0 behavior). Connection range discovery can select a numeric version first; the scope does not negotiate or upgrade symbolic latest, nor accept an ignored generic header as evidence of the actual Manila version.",
+        "Pinned Python get_quota_class_set takes a class name or QuotaClassSet and always GETs /quota-class-sets/{name} at the adapter's default microversion; it has no deprecated parameter alias (the quota_class_name rename applies only to update_quota_class_set) and sends no query, since the quota_class_name/project_id query mapping is unused by fetch. Go binds an explicit class name with InClass and selects the legacy or modern route from the configured microversion.",
+        "Python QuotaClassSet does not keep unknown response keys, sets id from the response and silently ignores a non-JSON success body; Go keeps every raw field, separates ClassName from the server ID and reports malformed or non-JSON bodies as errors.",
+        "QuotaClassSet Resource inputs, cached instance reuse, dirty-state commit and Adapter selection are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md); Go makes one fresh stateless request per call."
       ],
       "documentation": [
         "sharedfilesystems/v2/quotaclasssets/README.md"
-      ],
-      "remaining": [
-        "Compare inherited Resource/proxy class-name aliases, cached Resource/dirty-state commit and adapter/microversion/query normalization beyond the verified named-class HTTP mapping."
       ]
     },
     {
@@ -10548,13 +10598,15 @@
     {
       "operation": "python:shared_file_system/v2/access_rules",
       "source_fingerprint": "8f18b6347da3262737680f0d3e7c13cb0668adfacee8966eafda3c8d6cb0ce17",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.API.InShare",
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.List",
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.AccessRuleScope.All",
         "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.WithListBodyFilter",
+        "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules.API.ListAccessAction"
       ],
       "contracts": [
         {
@@ -10588,22 +10640,34 @@
             "api/manila_access_identity_test.go:TestManilaAccessIdentityRejectsMissingInvalidCanonicalIDs",
             "api/manila_access_identity_test.go:TestManilaAccessIdentityKnownCreatedIDSurvivesDecodeFailure"
           ]
+        },
+        {
+          "behavior": "WithListBodyFilter applies Python Resource.list client-side Body filters locally to the fixed share listing: named ShareAccessRule attributes only (share_id stays scope-owned), creation-time JSON snapshots, last-wins per name, object subset/exact/null-as-missing matching through the shared jsonfilter policy, no wire query, MaxItems counting raw rows before filtering, and unknown/unserializable/forged filters failing before HTTP.",
+          "tests": [
+            "api/py_manila_access_body_filters_test.go:TestManilaAccessListBodyFiltersStayLocalAndCountRawRows"
+          ]
+        },
+        {
+          "behavior": "ListAccessAction exposes the legacy share action listing: POST shares/{id}/action with a null value, choosing os-access_list for an empty/2.0-2.6 selection and access_list for 2.7-2.44 from the client microversion without mutating it. 2.45+ fails with ErrUnsupported and latest/invalid versions, wrong service types, empty IDs and canceled contexts fail before HTTP. Only 200 succeeds; rows keep raw fields, ParentShareID and an omitted share_id, a foreign share_id fails with ErrParentMismatch, and envelope/row decode failures keep the accepted response.",
+          "tests": [
+            "api/py_manila_access_list_action_test.go:TestManilaLegacyAccessListActionSelectsActionByMicroversion",
+            "api/py_manila_access_list_action_test.go:TestManilaLegacyAccessListActionRejectsBeforeHTTP",
+            "api/py_manila_access_list_action_test.go:TestManilaLegacyAccessListActionAcceptedAndHTTPErrors"
+          ]
         }
       ],
       "differences": [
         "Go requires an explicit ID/Name share reference and returns stateless native-backed rule snapshots with raw Body/Header and separate ParentShareID, rather than reusing Python Resource input/cache or overlaying a response share_id.",
         "The reviewed modern Manila endpoint returns one collection with no server paging contract. Go does not infer Resource.list marker fallback or follow next links; both Paginated settings consume one GET and MaxItems is only a raw-row bound.",
-        "Known options protect fixed parent and local control keys, but explicitly supplied vendor query values reach the deployment rather than Python unknown-query omission. Only exact lowercase wire identities establish scope ownership; strict typed/parent validation and accepted-response evidence are deliberate Go policies."
+        "Known options protect fixed parent and local control keys, but explicitly supplied vendor query values reach the deployment rather than Python unknown-query omission. Only exact lowercase wire identities establish scope ownership; strict typed/parent validation and accepted-response evidence are deliberate Go policies.",
+        "Python classifies unknown keyword arguments automatically: Body attributes become client-side filters and other unknown keys are discarded. Go uses explicit WithListBodyFilter for local filters and rejects unknown filter names; filters compare the raw response JSON (shared jsonfilter policy) rather than Python descriptor-coerced values such as lock_reason's declared bool type.",
+        "Python forwards per-call base_path, microversion, headers and the deprecated jmespath_filters through Proxy._list. Go fixes the 2.45+ share-access-rules route, uses the client's configured microversion (select another client to change it), takes per-call headers through WithListHeader and provides no JMESPath; remaining Adapter/session controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).",
+        "Pinned Python access_rules has no pre-2.45 path. Go additionally exposes the legacy os-access_list/access_list share action through API.ListAccessAction (reviewed against Manila's v2 shares controller), gated by the selected microversion; it is a separate method and never a silent fallback for the scope List."
       ],
       "documentation": [
         "sharedfilesystems/v2/shareaccessrules/README.md",
         "sharedfilesystems/v2/README.md",
         "docs/listing.md"
-      ],
-      "remaining": [
-        "Compare automatic known Body/query classification, descriptor aliases/defaults/coercion and unknown-query omission; the strict 2.45+ scope has no arbitrary local Body filter API.",
-        "Map inherited per-call base_path/microversion/header controls and deprecated proxy JMESPath behavior beyond the tested local cap/one-response policy.",
-        "The legacy (pre-2.45) access_list action listing is not exposed; AllowAccessAction/DenyAccessAction cover only the create/delete actions."
       ]
     },
     {
@@ -29638,7 +29702,7 @@
     {
       "operation": "python:image/v2/tasks",
       "source_fingerprint": "7c790e9092e795fc429503a88a7e5b032a792d33684fe46ca8a51a517f9fa274",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/image.Service.Tasks",
         "github.com/JSYoo5B/go-openstacksdk/image.Service.AllTasks",
@@ -29652,7 +29716,10 @@
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortKey",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir",
         "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage"
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback",
+        "github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLinkHeader"
       ],
       "contracts": [
         {
@@ -29684,14 +29751,14 @@
           ]
         },
         {
-          "behavior": "Only canonical bodynext advances under captured exact reverseprefix/sameorigin collection; normalize /v2/tasks, preserve initialquery except single advancing marker. Reject foreign/malformed/userinfo/fragment/encoded-dot/duplicate/unknown/droppedquery and cycles before follow; no HTTPLink/first/schema/rowself orlastIDfallback.",
+          "behavior": "Only canonical bodynext advances under captured exact reverseprefix/sameorigin collection; normalize /v2/tasks, preserve initialquery except single advancing marker. Reject foreign/malformed/userinfo/fragment/encoded-dot/duplicate/unknown/droppedquery and cycles before follow; no first/schema/rowself continuation; HTTP Link and lastID fallback only through explicit opt-ins.",
           "tests": [
             "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
             "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps"
           ]
         },
         {
-          "behavior": "Empty pageends; positive localcap/earlybreak/SinglePage stop without unusedrow/nextvalidation orfollow. Iterator keeps deliveredrows at caller when latererror, AllTasks returnsnil/error. No localJSONSchema/runtime policy validation, Python general clientbodyfilters/JMESPath/max_items-to-limit continuation remains broader.",
+          "behavior": "Empty pageends; positive localcap/earlybreak/SinglePage stop without unusedrow/nextvalidation orfollow. Iterator keeps deliveredrows at caller when latererror, AllTasks returnsnil/error. No localJSONSchema/runtime policy validation, Python JMESPath/max_items-to-limit hint remain broader.",
           "tests": [
             "image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption",
             "image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps"
@@ -29714,21 +29781,32 @@
             "image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks",
             "internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry"
           ]
+        },
+        {
+          "behavior": "WithListTasksBodyFilter keeps Python Task Body-attribute filters local (id, name, created_at, updated_at, expires_at, input, message, owner_id->owner, result, schema) with creation-time JSON snapshots, last-wins names, object subset/exact/null-as-missing matching, raw-row MaxItems counting and option replacement clearing; unknown names (including wire owner and query type/status), unserializable values and invalid raw filters fail before HTTP.",
+          "tests": [
+            "image/tasks_python_paging_test.go:TestTaskPythonBodyFiltersStayLocalAndCountRawRows"
+          ]
+        },
+        {
+          "behavior": "WithListTasksMarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.",
+          "tests": [
+            "image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow",
+            "image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackGuards",
+            "image/tasks_python_paging_test.go:TestTaskPythonLinkHeaderContinuation"
+          ]
         }
       ],
       "differences": [
         "Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.",
         "Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.",
         "Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.",
-        "Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.",
-        "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned."
+        "Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, WithListTasksMarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.",
+        "Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned.",
+        "Python discards unknown non-Body keyword arguments and accepts any Body attribute name as a filter; Go exposes the six documented query fields and rejects unknown filter names before HTTP. Mutable Resource/Adapter/session/JMESPath controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md)."
       ],
       "documentation": [
         "image/tasks.md"
-      ],
-      "remaining": [
-        "Pinned Python pager supports Link headers, marker fallback with limit and client-side Body filters (general Body attributes); Go Tasks follows only guarded canonical next links with local caps and has no Body-filter or fallback option.",
-        "Pinned server list Type filter accepts import only though Create Schema supports three types; the facade adds no enum gate and server-owned limits, owner and expiry remain server-side."
       ]
     },
     {

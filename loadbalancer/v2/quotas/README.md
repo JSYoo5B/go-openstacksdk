@@ -41,7 +41,7 @@ Unresolved boundaries:
 
 ### `python:load_balancer/v2/update_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -49,28 +49,26 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithQuotaOptions`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithDefaultLimit`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas.WithLegacyQuotaKeys`
 
-- PUT binds the official project route and sends omitted/nil, zero and -1 native limits distinctly; WithDefaultLimit sends explicit null inheritance and extension values preserve creation-time JSON snapshots.
+- PUT binds the official /lbaas/quotas/{project} route and sends omitted/nil, zero and -1 native limits distinctly; WithDefaultLimit sends explicit null inheritance and extension values preserve creation-time JSON snapshots.
   Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaProjectQuotasUseOfficialPathsAndGlobalDefaults`, `api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument`.
+- By default the body uses the documented loadbalancer/healthmonitor keys; WithLegacyQuotaKeys(true) renames only those two keys (including explicit null inheritance) to Python's load_balancer/health_monitor, other limits such as listener and l7policy are unchanged, and the last option wins.
+  Tests: `api/py_lb_quota_spelling_test.go:TestOctaviaQuotaLegacyKeysOptInSpelling`.
 - Quota options snapshot pointer values at creation and clone them when reused; exact integers and a stable final JSON body survive reauthentication and mutation of a previously applied private pointer.
   Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSnapshotOmissionExactIntegersAndRetry`.
-- Invalid negative limits, nil options, core/legacy aliases, identity collisions, unserializable extensions, unsupported query/header/arguments and conflicting value/default inputs fail before HTTP; duplicate null inheritance is allowed and forged default-limit names fail.
-  Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP`, `api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument`.
-- PUT accepts 200/202 and preserves rejected HTTP code/header/404 classification; malformed accepted quota bodies retain exact bytes, status, header and decode cause without invoking the retry hook or replaying the accepted mutation.
-  Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy`, `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaMalformedAcceptedResponsesRetainEvidenceWithoutRetry`.
-- Pre-canceled Update makes no HTTP request and cancellation during Update preserves context.Canceled.
-  Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause`.
+- Invalid negative limits, nil options, core/legacy alias extensions (also with WithLegacyQuotaKeys), identity collisions, unserializable extensions, unsupported query/header/arguments, forged spelling arguments and conflicting value/default inputs fail before HTTP.
+  Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaInvalidOptionsFailBeforeHTTP`, `api/octavia_project_quotas_list_test.go:TestOctaviaQuotaDefaultInheritanceDuplicateAndForgedArgument`, `api/py_lb_quota_spelling_test.go:TestOctaviaQuotaLegacyKeysRejectAliasesAndForgedArgumentBeforeHTTP`.
+- PUT accepts 200/202 and preserves rejected HTTP code/header/404 classification; malformed accepted quota bodies retain exact bytes, status, header and decode cause without invoking the retry hook or replaying the accepted mutation. Pre-canceled Update makes no request and cancellation during Update preserves context.Canceled.
+  Tests: `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaSuccessCodesAndStrictMissingPolicy`, `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaMalformedAcceptedResponsesRetainEvidenceWithoutRetry`, `api/octavia_project_quotas_contracts_test.go:TestOctaviaQuotaCancellationAndDeadlinePreserveCause`.
 
 Python/Go differences:
 
-- Go sends native canonical loadbalancer/healthmonitor names and explicit library-owned null inheritance options; Python Quota descriptors use load_balancer/health_monitor and plural attributes.
-- Go performs an explicit fixed-project update and returns a typed/raw snapshot, rather than changing and committing a Python Resource dirty state.
+- Go sends the Octavia-documented body keys loadbalancer and healthmonitor by default; WithLegacyQuotaKeys(true) sends Python's load_balancer and health_monitor. Octavia's QuotaBase request type (octavia/api/v2/types/quotas.py, reviewed at upstream octavia 12.0.0.0rc1-74-g12d8e0de) declares both spellings, marks the underscore names deprecated since Rocky and stores either in the same quota column (the canonical key wins when both are sent). Acceptance is source-reviewed and fixture-pinned, not verified against a deployment.
+- Pinned Python Quota declares no l7policy/l7rule attributes and does not allow unknown body attributes, so update_quota silently drops L7 limits and the canonical loadbalancer/healthmonitor names before sending. Go sends L7 limits as typed fields and rejects alias extensions before HTTP instead of dropping them.
+- Python commit sends only dirty attributes and makes no request when nothing changed; Go always issues exactly one PUT with the supplied limits (an empty quota object when none are set) and never replays it. Python Quota._prepare_request strips id from the body; Go takes the project only from the scope and rejects id/project_id extensions.
+- Go performs an explicit fixed-project update and returns a typed/raw snapshot with copied header/status, rather than changing and committing a mutable Python Resource; Resource input/descriptor coercion, cache and adapter/microversion controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).
 - Go preserves native-compatible 200/202 success codes; the official Octavia PUT contract documents 202.
-
-Unresolved boundaries:
-
-- Audit Python Quota._prepare_request ID removal, Resource input/attribute coercion and inherited commit dirty-state/no-op/response normalization semantics; typed option serialization is only a partial mapping.
-- Inherited cache/resource-instance refresh, adapter/microversion and generic dynamic request behaviors remain unaudited; unknown extensions are delegated to the server rather than descriptor-mapped.
 
 ### `python:load_balancer/v2/delete_quota`
 

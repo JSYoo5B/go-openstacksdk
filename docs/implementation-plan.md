@@ -9,11 +9,11 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 |---|---:|---|
 | Pinned source declarations | 3,362 | Gophercloud/openstacksdk declarations; inherited, descriptor and Resource surfaces tracked separately |
 | Implementation target | 3,216 | All declarations excluding unsupported routes, such as retired server APIs |
-| API mappings | 3,143 (97.7%) | go_mapping decisions against the target; partial verification does not increase this count |
+| API mappings | 3,148 (97.9%) | go_mapping decisions against the target; partial verification does not increase this count |
 | Source-equivalent support | 0 | supported decisions |
-| Unresolved / excluded (unsupported) | 73 / 146 | Unreviewed declarations are included in unresolved totals |
+| Unresolved / excluded (unsupported) | 68 / 146 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 3,362 | Declarations without individual reviews 0 |
-| Behavior contracts | 9,775 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
+| Behavior contracts | 9,786 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
 
 Behavior-contract counts reflect review granularity and must not be used as completed API counts. Unreviewed operations remain unresolved.
@@ -23,12 +23,12 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 <!-- sdk-service-progress:start -->
 | Priority group | API mappings / target | Mapping rate | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|---:|
-| Core services: stages 1 and 2 | 2,088 / 2,154 | 96.9% | 66 | 0 | 138 |
-| Following network: stages 3 and 4 | 253 / 254 | 99.6% | 1 | 0 | 0 |
+| Core services: stages 1 and 2 | 2,089 / 2,154 | 97.0% | 65 | 0 | 138 |
+| Following network: stages 3 and 4 | 254 / 254 | 100.0% | 0 | 0 | 0 |
 | Following bare metal: stages 3 and 4 | 205 / 207 | 99.0% | 2 | 0 | 0 |
-| Other following services: stages 3 and 4 | 575 / 578 | 99.5% | 3 | 0 | 2 |
+| Other following services: stages 3 and 4 | 578 / 578 | 100.0% | 0 | 0 | 2 |
 | Shared foundation | 22 / 23 | 95.7% | 1 | 0 | 6 |
-| Total | 3,143 / 3,216 | 97.7% | 73 | 0 | 146 |
+| Total | 3,148 / 3,216 | 97.9% | 68 | 0 | 146 |
 
 **Core services**
 
@@ -38,7 +38,7 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 | Compute / Nova | 311 / 333 | 22 | 0 | 0 |
 | Placement | 69 / 71 | 2 | 0 | 0 |
 | Network / Neutron | 699 / 728 | 29 | 0 | 30 |
-| Image / Glance | 108 / 109 | 1 | 0 | 11 |
+| Image / Glance | 109 / 109 | 0 | 0 | 11 |
 | Block Storage / Cinder | 396 / 398 | 2 | 0 | 82 |
 | Key Manager / Barbican | 66 / 67 | 1 | 0 | 0 |
 | Object Storage / Swift | 62 / 69 | 7 | 0 | 5 |
@@ -47,7 +47,7 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 
 | Service | API mappings / target | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|
-| Load Balancer / Octavia | 143 / 144 | 1 | 0 | 0 |
+| Load Balancer / Octavia | 144 / 144 | 0 | 0 | 0 |
 | DNS / Designate | 110 / 110 | 0 | 0 | 0 |
 | Bare Metal / Ironic | 189 / 189 | 0 | 0 | 0 |
 | Bare Metal Introspection | 16 / 18 | 2 | 0 | 0 |
@@ -58,7 +58,7 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 | Orchestration / Heat | 66 / 66 | 0 | 0 | 0 |
 | Messaging / Zaqar | 37 / 37 | 0 | 0 | 1 |
 | Workflow / Mistral | 30 / 30 | 0 | 0 | 0 |
-| Shared File System / Manila | 193 / 196 | 3 | 0 | 0 |
+| Shared File System / Manila | 196 / 196 | 0 | 0 | 0 |
 | Instance HA / Masakari | 17 / 17 | 0 | 0 | 0 |
 | Metric | 9 / 9 | 0 | 0 | 0 |
 | Reservation / Blazar | 5 / 5 | 0 | 0 | 0 |

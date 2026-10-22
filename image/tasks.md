@@ -79,7 +79,7 @@ Python/Go differences:
 
 ### `python:image/v2/tasks`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -96,6 +96,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSortDir`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksSinglePage`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksBodyFilter`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksMarkerFallback`
+- `github.com/JSYoo5B/go-openstacksdk/image.WithListTasksLinkHeader`
 
 - Tasks is lazy reusable iter.Seq2 with construction-owned option slice and perexecution prepared headers/Limitpointer, FullOpts replacement/lastwins/callbackonce/causes. MaxItems0 unlimited, negativeinvalid; AllTasks returns nonnil empty or wholecollected results, nil/error without partialslice.
   Tests: `image/tasks_options_test.go:TestTaskOptionsReplacementPresenceAndLastWins`, `image/tasks_options_test.go:TestTaskOptionsParallelReusableHelpers`, `image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps`, `image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource`.
@@ -103,30 +106,27 @@ Go API:
   Tests: `image/tasks_core_test.go:TestTaskCoreCompletePreflight`, `image/tasks_options_test.go:TestTaskOptionsCallbacksAndCompleteValidation`, `image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption`, `image/tasks_contracts_test.go:TestTaskContractsFixedRoutesAndInput`, `image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource`.
 - Strict200 and canonical nonnull tasksarray with wholeUTF8/syntax before consumedrow decode; sparse pinned liststub Input/Result/Message remainnil/raw only. Canonical TaskInfo fields/no requestidentityseeding/no perrowGET; wrong consumedrowtype fails while unused malformedrows maybeskipped bycap/break.
   Tests: `image/tasks_core_test.go:TestTaskCoreCanonicalPresenceAndAtomicModels`, `image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption`, `image/tasks_contracts_test.go:TestTaskContractsCanonicalModelsAndRawOwnership`, `image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps`.
-- Only canonical bodynext advances under captured exact reverseprefix/sameorigin collection; normalize /v2/tasks, preserve initialquery except single advancing marker. Reject foreign/malformed/userinfo/fragment/encoded-dot/duplicate/unknown/droppedquery and cycles before follow; no HTTPLink/first/schema/rowself orlastIDfallback.
+- Only canonical bodynext advances under captured exact reverseprefix/sameorigin collection; normalize /v2/tasks, preserve initialquery except single advancing marker. Reject foreign/malformed/userinfo/fragment/encoded-dot/duplicate/unknown/droppedquery and cycles before follow; no first/schema/rowself continuation; HTTP Link and lastID fallback only through explicit opt-ins.
   Tests: `image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption`, `image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps`.
-- Empty pageends; positive localcap/earlybreak/SinglePage stop without unusedrow/nextvalidation orfollow. Iterator keeps deliveredrows at caller when latererror, AllTasks returnsnil/error. No localJSONSchema/runtime policy validation, Python general clientbodyfilters/JMESPath/max_items-to-limit continuation remains broader.
+- Empty pageends; positive localcap/earlybreak/SinglePage stop without unusedrow/nextvalidation orfollow. Iterator keeps deliveredrows at caller when latererror, AllTasks returnsnil/error. No localJSONSchema/runtime policy validation, Python JMESPath/max_items-to-limit hint remain broader.
   Tests: `image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption`, `image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps`.
 - Capture source/provider/Type/Endpoint/base/Microversion at each iteration, ordinary sourceheaders initial beforecallbacks and refreshed onnextpage with stableoptionheaderoverride; original provider authlive. Recheck source/context afterbody and before/afterconsumedrow, no borrowed source mutation.
   Tests: `image/tasks_core_test.go:TestTaskCoreAdvertisedPagesAndLocalConsumption`, `image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy`, `image/tasks_contracts_test.go:TestTaskContractsAdvertisedPagingAndLocalCaps`, `image/tasks_contracts_test.go:TestTaskContractsOwnedOptionsAndSource`.
 - Accepted read/Close/source/context/customcause/root/model/next errors preserve actualwhole response proof, Closeonce/noaccepted replay; original nativeunexpectedstatus/RetryFunc/reauth/backoff/identicalredirect ownedmethodURLbody/status guard remains. No automatictaskcompletion/wait/cleanup/versiondiscovery.
   Tests: `image/tasks_core_test.go:TestTaskCoreAcceptedEvidenceAndStrictStatus`, `image/tasks_core_test.go:TestTaskCoreFixedSourceAndPrebodyPolicy`, `image/tasks_contracts_test.go:TestTaskContractsResponseOwnershipAndNativeHooks`, `internal/cmd/sdkgen/glance_tasks_test.go:TestGlanceTaskFacadePreservesNativeAndRegistry`.
+- WithListTasksBodyFilter keeps Python Task Body-attribute filters local (id, name, created_at, updated_at, expires_at, input, message, owner_id->owner, result, schema) with creation-time JSON snapshots, last-wins names, object subset/exact/null-as-missing matching, raw-row MaxItems counting and option replacement clearing; unknown names (including wire owner and query type/status), unserializable values and invalid raw filters fail before HTTP.
+  Tests: `image/tasks_python_paging_test.go:TestTaskPythonBodyFiltersStayLocalAndCountRawRows`.
+- WithListTasksMarkerFallback (default off, last wins) repeats the fixed collection with the initial query, the explicit positive limit and marker=last raw row id when a nonempty page has no next link, ending at the first empty page; a body next link wins, no positive limit/SinglePage/MaxItems stop it, and a repeated marker or id-less last row fails. WithListTasksLinkHeader follows an RFC 8288 rel=next Link only when the body has no next, under the same origin/path/filter/marker guard; malformed or foreign Links fail with the accepted response only when enabled.
+  Tests: `image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackFollowsLimitAndLastRawRow`, `image/tasks_python_paging_test.go:TestTaskPythonMarkerFallbackGuards`, `image/tasks_python_paging_test.go:TestTaskPythonLinkHeaderContinuation`.
 
 Python/Go differences:
 
 - Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.
 - Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.
 - Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.
-- Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.
+- Pinned Python Resource.list applies Body filters, HTTP Link continuation and limit/marker fallback automatically; Go makes them explicit opt-ins (WithListTasksBodyFilter, WithListTasksLinkHeader, WithListTasksMarkerFallback) and guards every continuation for origin, path, filters and cycles. Python also follows links/tasks_links arrays, turns max_items into a wire limit hint and strips self; Go follows only the canonical body next, never invents a wire limit from MaxItems and keeps self as raw data. Filters compare raw JSON under the shared jsonfilter policy rather than Python object equality.
 - Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned.
-
-Unresolved boundaries:
-
-- Pinned Python mutable Resource/dirty body attributes/same-object returns and configured Adapter/cache/session/microversion/header machinery remain broader than fixed concrete function options and independently owned TaskInfo.
-- Go TaskInfo exact canonical optional string/date pointers and nullable raw object Input/Result preserve raw precision and literal timestamps; native Task time.Time/map[string]any and pinned Python untyped result/date values differ. No type/status normalization or cached/input/ID seeding.
-- Server policy/owner/expiry and deprecated tasks access remain server-owned; no discovery/Schema/authorization gate or authenticated cloud execution/full SDK parity claim.
-- Pinned Python lazypager strips self, supports generalBodyfilters, max_items limit hint, body/HTTPLink/fallbackpagination and mutableResource/sessionframework. Go only guardedcanonical bodynext/localcap/sixquery, sparseRows and nil/errorAll behavior are explicitbounded differences.
-- Pinned server list Type filter accepts import only though Create Schema/domain supports3 types; facade no enum gate allows server rejection. Serverconfiguredlimit/default/clamp/owner/expiry remainserver-owned.
+- Python discards unknown non-Body keyword arguments and accepts any Body attribute name as a filter; Go exposes the six documented query fields and rejects unknown filter names before HTTP. Mutable Resource/Adapter/session/JMESPath controls are the shared SDK-R1/C1/S1 boundary (docs/sdk-support-ledger.md).
 
 ## Usage examples
 
@@ -192,6 +192,21 @@ func listTasks(ctx context.Context, svc *image.Service, marker string) ([]*image
 func allTasks(ctx context.Context, svc *image.Service) ([]*image.TaskInfo, error) {
     return svc.AllTasks(ctx, image.WithListTasksMaxItems(40))
 }
+
+// pythonLikeTasks opts in to the pinned Python Resource.list behaviors:
+// local Body filters (owner_id compares the response owner field), an RFC 8288
+// Link header when the body has no next field, and limit/marker fallback that
+// repeats the collection with marker=<last raw row id> until an empty page.
+// MaxItems counts raw rows before filtering, as Python's max_items does.
+func pythonLikeTasks(ctx context.Context, svc *image.Service, owner string) ([]*image.TaskInfo, error) {
+    return svc.AllTasks(ctx,
+        image.WithListTasksType("import"),
+        image.WithListTasksLimit(20),
+        image.WithListTasksBodyFilter("owner_id", owner),
+        image.WithListTasksBodyFilter("input", map[string]any{"import_from_format": "qcow2"}),
+        image.WithListTasksLinkHeader(true),
+        image.WithListTasksMarkerFallback(true))
+}
 ```
 
 ```python
@@ -203,7 +218,9 @@ def task_examples(conn):
     })
     fetched = conn.image.get_task(created.id)
     rows = list(conn.image.tasks(type="import", status="pending", limit=20))
-    return created, fetched, rows
+    owned = list(conn.image.tasks(type="import", limit=20, owner_id="project-id",
+                                  input={"import_from_format": "qcow2"}))
+    return created, fetched, rows, owned
 ```
 
 ## References

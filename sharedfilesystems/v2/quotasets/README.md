@@ -158,3 +158,28 @@ Contract sources: the pinned openstacksdk
 [`QuotaSet`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/shared_file_system/v2/quota_set.py),
 [`Proxy`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/shared_file_system/v2/_proxy.py),
 and the official [Manila quota API](https://docs.openstack.org/api-ref/shared-file-system/#quota-sets).
+
+## Python `get_quota_set` comparison
+
+Status: `go_mapping`. The comparison against pinned
+`openstack/shared_file_system/v2/quota_set.py` and the common
+`openstack/common/quota_set.py` found these deliberate differences:
+
+- Python always requests `/quota-sets/{project_id}` at the adapter's default
+  microversion, with no Manila-specific floor, so an unversioned session reaches
+  a route Manila serves only from 2.7. Go chooses `os-quota-sets` through 2.6
+  and `quota-sets` from 2.7 from the configured microversion.
+- The common `QuotaSet._translate_response` flattens object values carrying
+  `in_use`/`reserved`/`limit` into `usage`/`reservation` maps and the limit,
+  keeps unknown keys, and silently ignores a non-JSON success body. Manila's
+  plain GET returns scalar limits, so `QuotaSet` plus `Body` carry the same
+  information. Usage and reservations come only from the explicit 2.25+
+  `Detail`. A detail-shaped value on the limits route, a malformed body or a
+  non-JSON body is reported as an error after one request.
+- Project Resource inputs, mutable `QuotaSet` reuse, response caching, dirty
+  state and Adapter selection are the shared SDK-R1/C1/S1 boundary in the
+  [support ledger](../../../docs/sdk-support-ledger.md). Each Go call makes one
+  fresh stateless request.
+
+Tests: `api/py_manila_quota_reads_test.go` together with the project, scoped
+and version contract tests listed in `api/sdk_reviews.json`.
