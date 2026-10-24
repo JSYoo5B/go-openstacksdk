@@ -26,7 +26,7 @@ func (c *Connection) GetNetworkRoles(ctx context.Context) (*network.NetworkRoleS
 	}
 	service, err := c.Network(ctx)
 	if err != nil {
-		if missingCatalogEndpoint(err) {
+		if c.networkLookupUnavailable(ctx, err) {
 			return &network.NetworkRoleSnapshot{}, ctx.Err()
 		}
 		return nil, err

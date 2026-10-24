@@ -19,6 +19,9 @@ OpenStackSDK source is the reference for extracted API/resource metadata
 and Python-compatible behavior. The pinned Cloud filter source includes:
 Copyright (c) 2015 Hewlett-Packard Development Company, L.P.
 Licensed under the Apache License, Version 2.0.
+internal/cloudvendors/data contains unmodified OpenStackSDK vendor profile
+files (openstack/config/vendors) from the same pinned source, licensed under
+the Apache License, Version 2.0.
 
 The project depends on yaml.v2 v2.4.0. Its original NOTICE is retained in
 licenses/yaml-v2.4.0-NOTICE:

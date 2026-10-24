@@ -78,6 +78,17 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 		if err != nil {
 			return nil, fmt.Errorf("load environment authentication: %w", err)
 		}
+		configuration, present, loadErr := loadEnvironmentCloudConfiguration(osEnviron(), o.region)
+		if loadErr != nil {
+			return nil, fmt.Errorf("load environment cloud configuration: %w", loadErr)
+		}
+		if present {
+			o.configuredDefaultNetwork = configuration.defaultNetwork
+			if !o.networkRolesSet {
+				o.networkRoles = configuration.networkRoles
+			}
+			o.applyConfiguredServiceSettings(configuration)
+		}
 	}
 	if cloudName == "" && !o.serverAddressesSet {
 		o.serverAddresses, err = configuredServerAddresses(nil, nil)

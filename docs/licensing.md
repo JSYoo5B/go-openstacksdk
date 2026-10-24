@@ -11,6 +11,7 @@ Project code is licensed under [Apache-2.0](../LICENSE). Included third-party co
 - `golang.org/x/crypto` v0.55.0 provides BLAKE2b/BLAKE2s; indirect `golang.org/x/sys` v0.47.0 supplies CPU support. Preserve The Go Authors' BSD-3-Clause texts. Implementations remain module dependencies.
 - `github.com/klauspost/compress` v1.18.0 provides Swift zstd decoding. Preserve its complete module LICENSE, vendored xxhash MIT and Snappy reference BSD texts; distinguish other Apache/MIT package scopes in the notices.
 - `golang.org/x/text` v0.41.0 provides explicit encoding/transform support. Preserve The Go Authors' BSD-3-Clause license. Statistical Python charset detection remains unimplemented.
+- `internal/cloudvendors/data` is an unmodified copy of the pinned OpenStackSDK `openstack/config/vendors` profile files (Apache-2.0), embedded for built-in vendor profile resolution. Preserve the files unchanged with their README hash list and notice.
 - Pinned OpenStackSDK provides public declarations/resource metadata for comparison. Python and jmespath.py are reference tools, not SDK runtime dependencies. Pins, source attribution, and comparison scope are specified in the integrated notices.
 
 See [THIRD_PARTY_NOTICES.md](../THIRD_PARTY_NOTICES.md) for exact component boundaries and original terms. Dependencies do not change the Go 1.25 module minimum.

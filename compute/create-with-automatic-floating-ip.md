@@ -450,6 +450,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource`
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable`
 
 - The bounded existing-server automatic lane keeps policy skips separate from an undetermined/error decision. Disabled/source-none, private policy, enabled external AccessIPv4, any-family floating tags including an empty address, and explicit empty/null-row inventories return a clean reason without Compute/Network/role/owner work or assignment. Supplied address presence is tested separately from nil refresh.
   Tests: `compute/server_automatic_ip_test.go:TestAutomaticIPKnownSkipsAvoidAllServiceAndOwnerWork`.
@@ -551,6 +552,8 @@ Go API:
   Tests: `connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend`.
 - A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.
   Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
+- With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.
+  Tests: `connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse`.
 
 Python/Go differences:
 
@@ -688,6 +691,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource`
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable`
 
 - Owner-free exact existing-IP preparation/execution allows a foreign recorded owner and stable other-port movement with no allocation or free/project/network filters. Preparation does not mutate, Selection is value-only, original revision0 remains If-Match0 after recheck revision7, and absent/null omit the condition. PUT body is exactly the selected port_id and fixed_ip_address.
   Tests: `network/floating_ip_attach_test.go:TestFloatingIPAttachMovesExactExistingIPWithoutOwnerOrAllocation`.
@@ -761,6 +765,8 @@ Go API:
   Tests: `connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend`.
 - A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.
   Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
+- With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.
+  Tests: `connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse`.
 
 Python/Go differences:
 

@@ -134,16 +134,33 @@ func loadCloudRegionConfiguration(name string, locations []string, region *strin
 		if err != nil {
 			return result, err
 		}
-		public, _, err := readFirstCloudFile(paths)
-		if err != nil {
-			return result, err
-		}
+		public, _, publicErr := readFirstCloudFile(paths)
 		var inherited map[string]any
-		if metadataProfileName != "" {
+		if publicErr == nil && metadataProfileName != "" {
 			inherited, err = decodeCloudNetworkSettings(public, metadataProfileName, true)
 			if err != nil {
 				return result, fmt.Errorf("parse clouds-public.yaml: %w", err)
 			}
+		}
+		// Like _expand_vendor_profile, a profile missing from clouds-public.yaml
+		// falls back to the built-in vendor profiles. The native parser then
+		// receives a document holding that profile, so authentication sees it too.
+		if inherited == nil && metadataProfileName != "" {
+			builtin, found, err := builtinCloudProfile(metadataProfileName)
+			if err != nil {
+				return result, err
+			}
+			if found {
+				inherited = builtin
+				public, err = yaml.Marshal(map[string]any{"public-clouds": map[string]any{profile: builtin}})
+				if err != nil {
+					return result, err
+				}
+				publicErr = nil
+			}
+		}
+		if publicErr != nil {
+			return result, publicErr
 		}
 		if inherited == nil {
 			inherited = make(map[string]any)

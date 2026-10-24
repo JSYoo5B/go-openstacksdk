@@ -17,7 +17,7 @@ func (c *Connection) addressNetworkService(ctx context.Context) (*network.Servic
 		return nil, ctx.Err()
 	}
 	service, err := c.Network(ctx)
-	if missingCatalogEndpoint(err) {
+	if err != nil && c.networkLookupUnavailable(ctx, err) {
 		return nil, ctx.Err()
 	}
 	return service, err

@@ -57,6 +57,9 @@ type connectionOptions struct {
 	// Python default "neutron".
 	secgroupSource    *string
 	secgroupSourceSet bool
+	// lookupFailureUnavailable treats Network endpoint lookup failures as an
+	// unavailable service, like Python has_service returning False.
+	lookupFailureUnavailable bool
 }
 
 type ConnectionOption func(*connectionOptions) error

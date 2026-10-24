@@ -1,8 +1,12 @@
 package openstack
 
 import (
+	"fmt"
 	"maps"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudvendors"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type cloudRegionEntry struct {
@@ -125,4 +129,14 @@ func parseRegionEntry(index int, item any) (cloudRegionEntry, error) {
 	default:
 		return cloudRegionEntry{}, invalid("invalid region entry %d", index)
 	}
+}
+
+// builtinCloudProfile resolves a pinned built-in vendor profile. A shutdown
+// or remote profile is a configuration error.
+func builtinCloudProfile(name string) (map[string]any, bool, error) {
+	profile, found, err := cloudvendors.Profile(name)
+	if err != nil {
+		return nil, found, fmt.Errorf("%w: %w", resource.ErrInvalidOption, err)
+	}
+	return profile, found, nil
 }

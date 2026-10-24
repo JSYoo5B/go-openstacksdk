@@ -43086,7 +43086,8 @@
         "github.com/JSYoo5B/go-openstacksdk/network.PrepareNetworkRoleOptions",
         "github.com/JSYoo5B/go-openstacksdk/network.WithConfiguredNetworks",
         "github.com/JSYoo5B/go-openstacksdk/network.WithExternalNetworkDiscovery",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery"
+        "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -43256,6 +43257,26 @@
           "tests": [
             "connection_cloud_region_config_test.go:TestCloudRegionValuesOverlayNetworkRoleConfiguration"
           ]
+        },
+        {
+          "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
+          "tests": [
+            "connection_cloud_vendor_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
+            "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
+          ]
+        },
+        {
+          "behavior": "Without OS_CLOUD, Python's environment-variable cloud is mapped for role settings: OS_INTERNAL_NETWORK/OS_EXTERNAL_NETWORK legacy roles, OS_USE_* flags (typed string policy) and an OS_PROFILE built-in vendor profile shape discovery, string OS_HAS_* values and shutdown profiles are configuration errors, and a typed WithNetworkRoles policy still replaces the environment roles.",
+          "tests": [
+            "connection_cloud_env_config_test.go:TestEnvironmentCloudSuppliesNetworkRoleConfiguration"
+          ]
+        },
+        {
+          "behavior": "WithServiceLookupFailureAsUnavailable maps has_service returning False when the Network endpoint lookup raises: roles are empty and the lookup is retried on the next call, while the default returns the lookup error and cancellation is returned under either policy.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ],
       "documentation": [
@@ -43272,14 +43293,15 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans. The YAML parser agrees with Python truthiness of the raw value for booleans, null, the empty string and any casing of 'true'; other strings are false in Go but truthy in Python, and numeric or collection values are rejected instead of being truthiness-tested (Python's normalize_keys turns numbers, even 0, into truthy strings). Pinned cloud use_* accessors return the raw configured value; Go returns a bool. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
-        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments."
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
+        "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "has_network configuration-disable and official-service defaults are consumed through ServiceEnabled. Python has_service's False for catalog lookup failures, optional version range/session-endpoint discovery and deprecation warnings are not mapped for role discovery.",
         "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Built-in vendor profiles (openstack/config/vendors, including remote well-known profiles) are not loaded for role settings; only clouds-public.yaml profiles are merged. Environment-variable clouds and argparse handling of the Python loader, and full response/nullable boundaries, are not mapped.",
+        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
         "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
@@ -44132,7 +44154,8 @@
         "github.com/JSYoo5B/go-openstacksdk/network.WithConfiguredNetworks",
         "github.com/JSYoo5B/go-openstacksdk/network.WithExternalNetworkDiscovery",
         "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery",
-        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID"
+        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -44273,6 +44296,26 @@
           "tests": [
             "connection_cloud_region_config_test.go:TestCloudRegionValuesOverlayNetworkRoleConfiguration"
           ]
+        },
+        {
+          "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
+          "tests": [
+            "connection_cloud_vendor_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
+            "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
+          ]
+        },
+        {
+          "behavior": "Without OS_CLOUD, Python's environment-variable cloud is mapped for role settings: OS_INTERNAL_NETWORK/OS_EXTERNAL_NETWORK legacy roles, OS_USE_* flags (typed string policy) and an OS_PROFILE built-in vendor profile shape discovery, string OS_HAS_* values and shutdown profiles are configuration errors, and a typed WithNetworkRoles policy still replaces the environment roles.",
+          "tests": [
+            "connection_cloud_env_config_test.go:TestEnvironmentCloudSuppliesNetworkRoleConfiguration"
+          ]
+        },
+        {
+          "behavior": "WithServiceLookupFailureAsUnavailable maps has_service returning False when the Network endpoint lookup raises: roles are empty and the lookup is retried on the next call, while the default returns the lookup error and cancellation is returned under either policy.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ],
       "documentation": [
@@ -44285,14 +44328,15 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans. The YAML parser agrees with Python truthiness of the raw value for booleans, null, the empty string and any casing of 'true'; other strings are false in Go but truthy in Python, and numeric or collection values are rejected instead of being truthiness-tested (Python's normalize_keys turns numbers, even 0, into truthy strings). Pinned cloud use_* accessors return the raw configured value; Go returns a bool. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
-        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments."
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
+        "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "has_network configuration-disable and official-service defaults are consumed through ServiceEnabled. Python has_service's False for catalog lookup failures, optional version range/session-endpoint discovery and deprecation warnings are not mapped for role discovery.",
         "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Built-in vendor profiles (openstack/config/vendors, including remote well-known profiles) are not loaded for role settings; only clouds-public.yaml profiles are merged. Environment-variable clouds and argparse handling of the Python loader, and full response/nullable boundaries, are not mapped.",
+        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
         "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
@@ -44310,7 +44354,8 @@
         "github.com/JSYoo5B/go-openstacksdk/network.PrepareNetworkRoleOptions",
         "github.com/JSYoo5B/go-openstacksdk/network.WithConfiguredNetworks",
         "github.com/JSYoo5B/go-openstacksdk/network.WithExternalNetworkDiscovery",
-        "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery"
+        "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -44420,6 +44465,26 @@
           "tests": [
             "connection_cloud_region_config_test.go:TestCloudRegionValuesOverlayNetworkRoleConfiguration"
           ]
+        },
+        {
+          "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
+          "tests": [
+            "connection_cloud_vendor_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
+            "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
+          ]
+        },
+        {
+          "behavior": "Without OS_CLOUD, Python's environment-variable cloud is mapped for role settings: OS_INTERNAL_NETWORK/OS_EXTERNAL_NETWORK legacy roles, OS_USE_* flags (typed string policy) and an OS_PROFILE built-in vendor profile shape discovery, string OS_HAS_* values and shutdown profiles are configuration errors, and a typed WithNetworkRoles policy still replaces the environment roles.",
+          "tests": [
+            "connection_cloud_env_config_test.go:TestEnvironmentCloudSuppliesNetworkRoleConfiguration"
+          ]
+        },
+        {
+          "behavior": "WithServiceLookupFailureAsUnavailable maps has_service returning False when the Network endpoint lookup raises: roles are empty and the lookup is retried on the next call, while the default returns the lookup error and cancellation is returned under either policy.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ],
       "documentation": [
@@ -44432,14 +44497,15 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans. The YAML parser agrees with Python truthiness of the raw value for booleans, null, the empty string and any casing of 'true'; other strings are false in Go but truthy in Python, and numeric or collection values are rejected instead of being truthiness-tested (Python's normalize_keys turns numbers, even 0, into truthy strings). Pinned cloud use_* accessors return the raw configured value; Go returns a bool. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
-        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments."
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
+        "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
       ],
       "remaining": [
         "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "has_network configuration-disable and official-service defaults are consumed through ServiceEnabled. Python has_service's False for catalog lookup failures, optional version range/session-endpoint discovery and deprecation warnings are not mapped for role discovery.",
         "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Built-in vendor profiles (openstack/config/vendors, including remote well-known profiles) are not loaded for role settings; only clouds-public.yaml profiles are merged. Environment-variable clouds and argparse handling of the Python loader, and full response/nullable boundaries, are not mapped.",
+        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
         "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
@@ -44561,7 +44627,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -44685,7 +44751,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -44809,7 +44875,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -44953,7 +45019,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -45077,7 +45143,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -45201,7 +45267,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -45325,7 +45391,7 @@
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
         "Aggregate results retain the source IPv4-then-IPv6 order and duplicates; family classification reflects routing configuration and network extensions, not discovered subnet address families. The NAT destination inference preserves the source last-network-with-gateway rule.",
         "Go flags are strict typed booleans; the YAML parser accepts boolean/string values via its explicit conversion policy. Pinned cloud use_* accessors store and return raw configured values, whose Python truthiness can differ. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "For this no-argument named role-list getter, the concrete configured classification/default/order contract and owned RoleNetwork DTO result are the Go mapping. RoleNetwork uses native fields plus router/provider role extensions, not RawResource Body/Wire or full nullable/vendor/location/mutable Network descriptors. Discovery keeps its documented native200/204, linked-empty-page, success-only cache and explicit Reset policies.",
         "The original consumer-only difference describes the configured-default-NIC and Ensure role layer; separate later automatic-IP, private/source/address, pool/explicit-IP and Nova entries now exist and are compared in their own guides. Full Python has_service, CloudRegion loader overlays and Resource/session/cache lifecycle remain independent declared scopes rather than required inputs of this argument-free getter. This row does not promote scalar role getters, automatic-IP consumers or Network Proxy/Resource operations."
       ],
@@ -45340,7 +45406,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithNetworkRoles",
         "github.com/JSYoo5B/go-openstacksdk/network.PrepareNetworkRoleOptions",
         "github.com/JSYoo5B/go-openstacksdk/network.WithExternalNetworkDiscovery",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -45389,6 +45456,26 @@
           "tests": [
             "connection_cloud_region_config_test.go:TestCloudRegionValuesOverlayNetworkRoleConfiguration"
           ]
+        },
+        {
+          "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
+          "tests": [
+            "connection_cloud_vendor_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
+            "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
+          ]
+        },
+        {
+          "behavior": "Without OS_CLOUD, Python's environment-variable cloud is mapped for role settings: OS_INTERNAL_NETWORK/OS_EXTERNAL_NETWORK legacy roles, OS_USE_* flags (typed string policy) and an OS_PROFILE built-in vendor profile shape discovery, string OS_HAS_* values and shutdown profiles are configuration errors, and a typed WithNetworkRoles policy still replaces the environment roles.",
+          "tests": [
+            "connection_cloud_env_config_test.go:TestEnvironmentCloudSuppliesNetworkRoleConfiguration"
+          ]
+        },
+        {
+          "behavior": "WithServiceLookupFailureAsUnavailable maps has_service returning False when the Network endpoint lookup raises: roles are empty and the lookup is retried on the next call, while the default returns the lookup error and cancellation is returned under either policy.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ],
       "documentation": [
@@ -45397,12 +45484,13 @@
       "differences": [
         "Go flags are strict typed booleans. The YAML parser agrees with Python truthiness of the raw value for booleans, null, the empty string and any casing of 'true'; other strings are false in Go but truthy in Python, and numeric or collection values are rejected instead of being truthiness-tested (Python's normalize_keys turns numbers, even 0, into truthy strings). Pinned cloud use_* accessors return the raw configured value; Go returns a bool. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
-        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments."
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
+        "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
       ],
       "remaining": [
-        "has_network configuration-disable and official-service defaults are consumed through ServiceEnabled. Python has_service's False for catalog lookup failures, optional version range/session-endpoint discovery and deprecation warnings are not mapped for role discovery.",
-        "Built-in vendor profiles (openstack/config/vendors, including remote well-known profiles) are not loaded for role settings; only clouds-public.yaml profiles are merged. Environment-variable clouds and argparse handling of the Python loader, and full response/nullable boundaries, are not mapped.",
+        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
         "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
@@ -45415,7 +45503,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithNetworkRoles",
         "github.com/JSYoo5B/go-openstacksdk/network.PrepareNetworkRoleOptions",
         "github.com/JSYoo5B/go-openstacksdk/network.WithInternalNetworkDiscovery",
-        "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles"
+        "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -45464,6 +45553,26 @@
           "tests": [
             "connection_cloud_region_config_test.go:TestCloudRegionValuesOverlayNetworkRoleConfiguration"
           ]
+        },
+        {
+          "behavior": "A profile absent from clouds-public.yaml (or with no such file) resolves to the embedded, unmodified pinned vendor profile: rackspace disables has_network and sets secgroup_source under the cloud's own settings, limestonenetworks supplies per-region networks and default interface, and native authentication receives the profile's auth settings. A clouds-public.yaml entry wins; shutdown and URL profiles are configuration errors, deprecated profiles load without warnings, and embedded files match their documented hashes.",
+          "tests": [
+            "connection_cloud_vendor_config_test.go:TestCloudBuiltinVendorProfilesFeedRoleConfiguration",
+            "internal/cloudvendors/vendors_test.go:TestProfilesResolveStatusNestedAndRemoteNames",
+            "internal/cloudvendors/vendors_test.go:TestEmbeddedFilesMatchREADMEHashes"
+          ]
+        },
+        {
+          "behavior": "Without OS_CLOUD, Python's environment-variable cloud is mapped for role settings: OS_INTERNAL_NETWORK/OS_EXTERNAL_NETWORK legacy roles, OS_USE_* flags (typed string policy) and an OS_PROFILE built-in vendor profile shape discovery, string OS_HAS_* values and shutdown profiles are configuration errors, and a typed WithNetworkRoles policy still replaces the environment roles.",
+          "tests": [
+            "connection_cloud_env_config_test.go:TestEnvironmentCloudSuppliesNetworkRoleConfiguration"
+          ]
+        },
+        {
+          "behavior": "WithServiceLookupFailureAsUnavailable maps has_service returning False when the Network endpoint lookup raises: roles are empty and the lookup is retried on the next call, while the default returns the lookup error and cancellation is returned under either policy.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ],
       "documentation": [
@@ -45472,12 +45581,13 @@
       "differences": [
         "Go flags are strict typed booleans. The YAML parser agrees with Python truthiness of the raw value for booleans, null, the empty string and any casing of 'true'; other strings are false in Go but truthy in Python, and numeric or collection values are rejected instead of being truthiness-tested (Python's normalize_keys turns numbers, even 0, into truthy strings). Pinned cloud use_* accessors return the raw configured value; Go returns a bool. Both-disabled skips discovery; a single disabled flag does not remove that family after discovery.",
         "Go caches only successful discovery, coalesces in-flight work, lets followers use their own contexts, and uses Reset generations to prevent a pre-reset flight from restoring the cache. Python serializes shared discovery with a lock and can swallow SDKException into sticky empty results. Owned returns and observable/retryable errors are deliberate Go policies.",
-        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled), not Python has_service's version/session discovery or its False for lookup failures. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
-        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments."
+        "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
+        "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
+        "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
       ],
       "remaining": [
-        "has_network configuration-disable and official-service defaults are consumed through ServiceEnabled. Python has_service's False for catalog lookup failures, optional version range/session-endpoint discovery and deprecation warnings are not mapped for role discovery.",
-        "Built-in vendor profiles (openstack/config/vendors, including remote well-known profiles) are not loaded for role settings; only clouds-public.yaml profiles are merged. Environment-variable clouds and argparse handling of the Python loader, and full response/nullable boundaries, are not mapped.",
+        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
         "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
       ]
     },
@@ -46005,7 +46115,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerIPWait",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource",
         "github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy",
-        "github.com/JSYoo5B/go-openstacksdk.WithMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk.WithMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "documentation": [
         "compute/server-automatic-ip.md",
@@ -46365,6 +46476,12 @@
           "tests": [
             "connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled"
           ]
+        },
+        {
+          "behavior": "With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
+          ]
         }
       ]
     },
@@ -46611,7 +46728,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithServerIPWait",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource",
         "github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy",
-        "github.com/JSYoo5B/go-openstacksdk.WithMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk.WithMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "documentation": [
         "network/floating-ip-attach.md",
@@ -46870,6 +46988,12 @@
           "behavior": "A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.",
           "tests": [
             "connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled"
+          ]
+        },
+        {
+          "behavior": "With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
           ]
         }
       ]
@@ -110212,7 +110336,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPReuse",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPCleanup",
-        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID"
+        "github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID",
+        "github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable"
       ],
       "contracts": [
         {
@@ -110265,6 +110390,12 @@
           "behavior": "A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.",
           "tests": [
             "connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled"
+          ]
+        },
+        {
+          "behavior": "With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.",
+          "tests": [
+            "connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse"
           ]
         }
       ],

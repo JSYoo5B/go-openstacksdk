@@ -110,6 +110,13 @@ The Cloud filtering reference
 [`openstack/cloud/_utils.py`](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/cloud/_utils.py)
 retains the source attribution: Copyright (c) 2015 Hewlett-Packard Development
 Company, L.P. Other upstream files retain their original owners and notices.
+The built-in vendor profile data in `internal/cloudvendors/data` is an
+unmodified copy of the pinned
+[`openstack/config/vendors`](https://github.com/openstack/openstacksdk/tree/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/config/vendors)
+JSON and YAML files, distributed under the same Apache-2.0 license; the
+directory README lists each file's SHA-256. The Go reader beside it is project
+code.
+
 This attribution is not a claim of project ownership over OpenStackSDK material.
 
 ## CPython 3.14.8: glob parsing port and test reference
