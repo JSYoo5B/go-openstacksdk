@@ -196,10 +196,14 @@ func networkCloudListVersion(raw json.RawMessage) (*string, error) {
 func networkCloudListResourceOptions(policy RecordListOpts) (RecordListOpts, error) {
 	// This call is inside the generator. It must never reject unused raw
 	// headers/base_path/microversion on a literal or nested opaque JMES result.
+	// Source base_path="" makes "while uri" false before any session call, so
+	// KSA never normalizes the microversion; its error is reported only for a
+	// nonempty route.
+	var versionErr error
 	if raw, ok := policy.Query["microversion"]; ok {
 		version, err := networkCloudListVersion(raw)
 		if err != nil {
-			return policy, findInvalid("microversion: %v", err)
+			versionErr = findInvalid("microversion: %v", err)
 		}
 		policy.Microversion = version
 		delete(policy.Query, "microversion")
@@ -210,6 +214,9 @@ func networkCloudListResourceOptions(policy RecordListOpts) (RecordListOpts, err
 		return policy, err
 	}
 	policy.Query, policy.Headers, policy.Microversion, policy.BasePath, policy.order = normalized.Query, normalized.Headers, normalized.Microversion, normalized.BasePath, normalized.Order
+	if versionErr != nil && (policy.BasePath == nil || *policy.BasePath != "") {
+		return policy, versionErr
+	}
 	return copyRecordListOpts(policy), nil
 }
 

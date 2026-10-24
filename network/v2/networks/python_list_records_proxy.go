@@ -79,7 +79,18 @@ func (a *API) ProxyListRecords(ctx context.Context, options ...RecordListOption)
 		return nil, wrap(err)
 	}
 	generator := &RecordListGenerator{Records: func(yield func(*NetworkRecord, error) bool) {
-		for value, err := range engine.List(ctx, recordListOptions(policy)) {
+		// Resource.list with base_path="" never enters "while uri": no HTTP.
+		if policy.BasePath != nil && *policy.BasePath == "" {
+			if err := engine.Check(ctx); err != nil {
+				yield(nil, wrap(err))
+			}
+			return
+		}
+		// The Proxy lane uses Source list controls: raw max_items is compared
+		// before each raw row (a cap equal to a whole page performs the next
+		// marker GET), raw limit spelling is sent and only a Python-truthy
+		// limit drives the marker fallback.
+		for value, err := range engine.ListWithSourceControls(ctx, recordListOptions(policy)) {
 			if !yield(networkListRecord(value), wrap(err)) {
 				return
 			}

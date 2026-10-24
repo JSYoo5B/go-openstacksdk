@@ -618,20 +618,25 @@ func (e *Engine) prepareQuery(policy Options, identity string, forFind bool) (ur
 	}
 	if e.profile.SourceListControls {
 		control.SourceRawLimit = true
+		limitTruthy := false
+		if limit, present := policy.Query["limit"]; present && len(limit) > 0 {
+			var err error
+			limitTruthy, err = e.truthy(limit)
+			if err != nil {
+				return nil, nil, nil, nil, control, err
+			}
+			// Resource.list keeps the original limit object for its whole
+			// loop; a falsey raw limit never drives a marker GET.
+			control.SourceLimitFalsey = !limitTruthy
+		}
 		raw := policy.Query["max_items"]
 		if len(raw) > 0 {
 			truth, err := e.truthy(raw)
 			if err != nil {
 				return nil, nil, nil, nil, control, err
 			}
-			limitTruthy := false
-			if limit := policy.Query["limit"]; len(limit) > 0 {
-				limitTruthy, err = e.truthy(limit)
-				if err != nil {
-					return nil, nil, nil, nil, control, err
-				}
-			}
 			if truth && !limitTruthy {
+				control.SourceLimitFalsey = false
 				values, err := cloudfilter.RequestQueryValues(raw)
 				if err != nil {
 					return nil, nil, nil, nil, control, err

@@ -106,6 +106,11 @@ type ListControl struct {
 	BeforeItem func(context.Context, int) (bool, error)
 	// SourceRawLimit keeps finite Source limit hints on the wire.
 	SourceRawLimit bool
+	// SourceLimitFalsey, with SourceRawLimit, records that the caller found
+	// the raw Source limit Python-falsey (for example false or 0.0). Python
+	// keeps that original limit for the whole loop and then never performs
+	// the limit-driven marker GET, whatever spelling the wire carries.
+	SourceLimitFalsey bool
 }
 
 func queryCopy(query url.Values) url.Values {
@@ -204,6 +209,9 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 		if err != nil {
 			fail(err)
 			return
+		}
+		if control.SourceRawLimit && control.SourceLimitFalsey {
+			limit = 0
 		}
 		markerFallback := spec.Paging.MarkerFallback && (!spec.Paging.AllowFirstServerLimit || limit > 0)
 		if spec.Paging.MarkerFallback && spec.Paging.Marker == nil {
@@ -394,6 +402,9 @@ func ListWithControl[T any](ctx context.Context, spec CollectionSpec[T], query u
 				offsetFloor, _ = paginationOffset(next.Query())
 			}
 			limit, _ = controlledPaginationInput(next.Query(), spec.Paging.AllowZeroLimit, control.SourceRawLimit)
+			if control.SourceRawLimit && control.SourceLimitFalsey {
+				limit = 0
+			}
 			current = next
 		}
 	}

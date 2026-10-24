@@ -442,25 +442,30 @@ func subnetVersion(raw json.RawMessage) (*string, error) {
 	}
 	return &text, nil
 }
+
+// subnetResourceArguments binds Resource.list formals. Source base_path=""
+// makes "while uri" false before any session call, so KSA never normalizes
+// the microversion: an invalid version is reported only for a nonempty route.
 func subnetResourceArguments(v neutronfind.Options) (neutronfind.Options, error) {
 	v = neutronfind.CloneOptions(v)
+	var versionErr error
 	if raw, ok := v.Query["microversion"]; ok {
 		version, err := subnetVersion(raw)
-		if err != nil {
-			return v, err
-		}
-		v.Microversion = version
+		v.Microversion, versionErr = version, err
 		subnetRemoveArgument(&v, "microversion")
 	} else if v.Microversion != nil {
 		raw, _ := json.Marshal(*v.Microversion)
 		version, err := subnetVersion(raw)
-		if err != nil {
-			return v, err
-		}
-		v.Microversion = version
+		v.Microversion, versionErr = version, err
 	}
 	normalized, _, err := neutronfind.NormalizeProxyListOptions(v)
-	return normalized, err
+	if err != nil {
+		return normalized, err
+	}
+	if versionErr != nil && (normalized.BasePath == nil || *normalized.BasePath != "") {
+		return normalized, versionErr
+	}
+	return normalized, nil
 }
 func subnetListIterator(ctx context.Context, engine *neutronfind.Engine, policy RecordListOpts) iter.Seq2[*neutronfind.Record, error] {
 	return func(yield func(*neutronfind.Record, error) bool) {
