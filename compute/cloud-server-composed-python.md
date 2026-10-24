@@ -160,9 +160,12 @@ any other error stops the sequence. No action is replayed.
 
 ## Aggregates
 
-`SearchAggregates` lists every aggregate and filters locally. The filter view is
-rebuilt from the typed Go aggregate with Python attribute names; timestamps are
-re-rendered and `location` and unknown wire fields are absent.
+`SearchAggregates` lists every aggregate and filters locally. The filters run
+over the Source Aggregate attributes built from each row Nova returned:
+Python names (`deleted` becomes `is_deleted`), null and absent members as null,
+timestamp strings exactly as sent, and the computed `location`, whose `zone` is
+the aggregate's `availability_zone`. For example, `{"availability_zone": null}`
+selects aggregates created without an availability zone, as in Python.
 
 ## Limits
 

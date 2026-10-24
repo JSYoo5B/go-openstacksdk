@@ -5,11 +5,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
+	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -24,38 +24,56 @@ type CloudAggregateSearchResult struct {
 	Expression bool
 }
 
-func cloudAggregateTime(value time.Time) json.RawMessage {
-	if value.IsZero() {
+// cloudAggregateView builds the Source Aggregate attribute view the cloud
+// filters see from the row Nova returned. It keeps Python attribute names
+// (deleted as is_deleted), turns absent members into null, keeps null and the
+// original timestamp strings, applies the hosts, metadata and is_deleted
+// conversions of openstack/fields.py, and adds the computed location, whose
+// zone is the aggregate's availability_zone.
+func cloudAggregateView(raw json.RawMessage, location resource.CloudLocation) (json.RawMessage, error) {
+	var members map[string]json.RawMessage
+	if err := json.Unmarshal(raw, &members); err != nil {
+		return nil, err
+	}
+	field := func(name string) json.RawMessage {
+		if value, ok := members[name]; ok {
+			return bytes.TrimSpace(value)
+		}
 		return json.RawMessage("null")
 	}
-	raw, _ := json.Marshal(value.UTC().Format("2006-01-02T15:04:05.000000"))
-	return raw
-}
-
-// cloudAggregateView builds the Source attribute view the cloud filters see:
-// Python attribute names, deleted as is_deleted, and null for unset times.
-func cloudAggregateView(value *aggregates.Aggregate) (json.RawMessage, error) {
-	hosts := value.Hosts
-	if hosts == nil {
-		hosts = []string{}
+	view := make(map[string]json.RawMessage, 11)
+	for _, name := range []string{"id", "name", "uuid", "availability_zone", "created_at", "updated_at", "deleted_at"} {
+		view[name] = field(name)
 	}
-	metadata := value.Metadata
-	if metadata == nil {
-		metadata = map[string]string{}
+	// A non-list hosts value becomes a one-element list and a non-dict
+	// metadata value an empty dict, as _convert_type does; null stays null.
+	switch hosts := field("hosts"); {
+	case bytes.Equal(hosts, []byte("null")) || hosts[0] == '[':
+		view["hosts"] = hosts
+	default:
+		view["hosts"] = append(append(json.RawMessage("["), hosts...), ']')
 	}
-	view := map[string]any{
-		"id": value.ID, "name": value.Name, "uuid": value.UUID, "availability_zone": value.AvailabilityZone,
-		"hosts": hosts, "metadata": metadata, "is_deleted": value.Deleted,
-		"created_at": cloudAggregateTime(value.CreatedAt), "updated_at": cloudAggregateTime(value.UpdatedAt),
-		"deleted_at": cloudAggregateTime(value.DeletedAt),
+	switch metadata := field("metadata"); {
+	case bytes.Equal(metadata, []byte("null")) || metadata[0] == '{':
+		view["metadata"] = metadata
+	default:
+		view["metadata"] = json.RawMessage("{}")
+	}
+	deleted, err := jsonfilter.BooleanJSON(field("deleted"))
+	if err != nil {
+		return nil, err
+	}
+	view["is_deleted"] = deleted
+	if view["location"], err = location.ForResource(nil, view["availability_zone"]); err != nil {
+		return nil, err
 	}
 	return json.Marshal(view)
 }
 
 // SearchAggregates maps search_aggregates: list every host aggregate, then apply
 // the exact/glob name-or-ID phase and the local dictionary or JMESPath filters.
-// No filter is sent to Nova. The filtered view is rebuilt from the typed Go
-// aggregate (see the package notes for what that loses). Only the filter
+// No filter is sent to Nova. The filters run over the Source attribute view
+// built from each row Nova returned (see cloudAggregateView). Only the filter
 // options apply; list, bare and address options are rejected before HTTP.
 func (c *Connection) SearchAggregates(ctx context.Context, nameOrID string, options ...CloudServerReadOption) (*CloudAggregateSearchResult, error) {
 	wrap := func(err error) error {
@@ -75,17 +93,22 @@ func (c *Connection) SearchAggregates(ctx context.Context, nameOrID string, opti
 	if err != nil {
 		return nil, wrap(err)
 	}
+	location, err := c.CurrentLocation()
+	if err != nil {
+		return nil, wrap(err)
+	}
 	result := &CloudAggregateSearchResult{}
 	var views []json.RawMessage
-	for row, err := range service.Aggregates.List(ctx) {
+	for row, err := range service.Aggregates.ListRows(ctx) {
 		if err != nil {
 			return result, wrap(err)
 		}
-		view, err := cloudAggregateView(row)
+		view, err := cloudAggregateView(row.Raw, location)
 		if err != nil {
 			return result, wrap(err)
 		}
-		result.Inventory = append(result.Inventory, row)
+		aggregate := row.Aggregate
+		result.Inventory = append(result.Inventory, &aggregate)
 		views = append(views, view)
 	}
 	selected, err := cloudfilter.SelectSource(views, nameOrID, cfg.Filters, func() error { return cloudread.Context(ctx) })

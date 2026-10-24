@@ -227,18 +227,27 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_aggregates`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.All`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.ListRows`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SearchAggregates`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters`
+- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression`
 
 - All reproduces the unfiltered GET os-aggregates request that search_aggregates starts with.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudAggregateCreateAndList`.
+- SearchAggregates lists every aggregate then applies exact/glob/ID name-or-ID plus dictionary or JMESPath filters locally with no Nova query, and rejects server-only options before HTTP.
+  Tests: `connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally`, `connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP`.
+- Filters run over the Source Aggregate attribute view built from each row Nova returned: Python names (deleted as is_deleted), absent members and null values as null, the original timestamp strings, the hosts/metadata/is_deleted conversions of openstack/fields.py, and the computed location whose zone is the aggregate's availability_zone.
+  Tests: `connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView`, `connection_r2_cloud_compute_aggregates_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- Go has no public SDK helper that applies the cloud _utils._filter_list name_or_id glob match plus dictionary or JMESPath filters to aggregates; the caller would have to filter the listed rows by hand.
+- Go returns typed Aggregates selected by the filters plus the JSON view they ran over, instead of mutable Aggregate Resources; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Rows whose members do not decode into the typed Aggregate (for example a non-boolean deleted or a non-list hosts value, which Nova does not send) fail the search, whereas Python converts them; the view itself applies the Python conversions.
 
 ### `python:cloud/_compute/ComputeCloudMixin/list_hypervisors`
 

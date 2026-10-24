@@ -105628,9 +105628,10 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/search_aggregates",
       "source_fingerprint": "df4f9ed481841d17927aac55e16f72cca925209560328e66d027fb0313f5d040",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.All",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.ListRows",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchAggregates",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters",
         "github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression"
@@ -105648,17 +105649,22 @@
             "connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFiltersLocally",
             "connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP"
           ]
+        },
+        {
+          "behavior": "Filters run over the Source Aggregate attribute view built from each row Nova returned: Python names (deleted as is_deleted), absent members and null values as null, the original timestamp strings, the hosts/metadata/is_deleted conversions of openstack/fields.py, and the computed location whose zone is the aggregate's availability_zone.",
+          "tests": [
+            "connection_r2_cloud_compute_aggregates_test.go:TestR2CloudComputeSearchAggregatesFilterRawSourceView",
+            "connection_r2_cloud_compute_aggregates_view_test.go:TestCloudAggregateViewFollowsSourceTypeConversions"
+          ]
         }
       ],
       "differences": [
-        "The filter view is rebuilt from the typed Go aggregate with Python attribute names; it is not the raw Resource."
+        "Go returns typed Aggregates selected by the filters plus the JSON view they ran over, instead of mutable Aggregate Resources; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Rows whose members do not decode into the typed Aggregate (for example a non-boolean deleted or a non-list hosts value, which Nova does not send) fail the search, whereas Python converts them; the view itself applies the Python conversions."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "The filter view loses raw timestamp strings, location, unknown wire fields and null-versus-empty distinctions of the Source Resource; filters on those attributes can differ."
       ]
     },
     {
