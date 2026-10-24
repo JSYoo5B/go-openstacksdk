@@ -7,7 +7,6 @@ import (
 	"io"
 	"maps"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/metadata"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -27,7 +27,7 @@ func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { retu
 
 func testScope(t *testing.T, collection string, handler http.HandlerFunc) (*Scope, *gophercloud.ServiceClient) {
 	t.Helper()
-	server := httptest.NewServer(handler)
+	server := testcloud.NewServer(handler)
 	t.Cleanup(server.Close)
 	provider := &gophercloud.ProviderClient{HTTPClient: *server.Client()}
 	provider.UseTokenLock()

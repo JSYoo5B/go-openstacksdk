@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strconv"
@@ -14,6 +13,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -132,7 +132,7 @@ func TestObjectMetadataContractsWireAndIdentity(t *testing.T) {
 			}
 		}
 		var calls atomic.Int32
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
 			expected := "/v1/AUTH_a/" + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataKey)
 			if r.Method != "HEAD" || r.URL.EscapedPath() != expected || r.RequestURI != expected || r.URL.RawQuery != "" || r.Header.Get("X-Newest") != "false" || r.Header.Get("X-Auth-Token") != "wire-token" {

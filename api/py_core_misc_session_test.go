@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"net/http/httptest"
 	"sync/atomic"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -17,7 +17,7 @@ const pyCoreMiscTokenBody = `{"token":{"user":{"id":"user-1","name":"alice"},"ca
 
 func pyCoreMiscKeystone(t *testing.T, posts *atomic.Int32) string {
 	t.Helper()
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	srv := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost || r.URL.Path != "/v3/auth/tokens" {
 			http.NotFound(w, r)
 			return

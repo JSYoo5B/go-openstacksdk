@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -16,6 +15,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -219,7 +219,7 @@ func TestObjectReadContractsWireAndBytes(t *testing.T) {
 		container, object := "c %雪", "o%2F/雪 :?#"
 		query := url.Values{"filename": {" a +雪/?#"}, "multipart-manifest": {"opaque"}, "symlink": {"get"}, "version-id": {"v %/雪"}}
 		var count atomic.Int32
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			count.Add(1)
 			want := "/reverse%20prefix/v1/A/" + url.PathEscape(container) + "/" + url.PathEscape(object)
 			if r.Method != "GET" || r.URL.EscapedPath() != want || !reflect.DeepEqual(r.URL.Query(), query) {
@@ -936,7 +936,7 @@ func TestObjectReadContractsNativePolicy(t *testing.T) {
 	t.Run("R19-redirect-and-HTTP-timeout-policy", func(t *testing.T) {
 		for _, same := range []bool{true, false} {
 			var requests, redirects atomic.Int32
-			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				if requests.Add(1) == 1 {
 					target := r.URL.String()
 					if !same {
@@ -958,7 +958,7 @@ func TestObjectReadContractsNativePolicy(t *testing.T) {
 				t.Fatalf("different redirect=%+v err=%v requests=%d", v, err, requests.Load())
 			}
 		}
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("X-Proof", "timeout")
 			w.WriteHeader(200)
 			w.(http.Flusher).Flush()

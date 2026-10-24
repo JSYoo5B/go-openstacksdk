@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -83,7 +84,7 @@ func TestSDKOwnedV1ExactOverridesAndCanceledCalls(t *testing.T) {
 func TestMasakariProjectDiscoveryAndCanonicalHeader(t *testing.T) {
 	var server *httptest.Server
 	discovery, requests := 0, 0
-	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server = testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/proxy/instance-ha/v1/":
 			discovery++

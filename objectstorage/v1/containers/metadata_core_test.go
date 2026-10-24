@@ -5,13 +5,13 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -59,7 +59,7 @@ func containerMetadataProof(t *testing.T, err error, code int, body string) {
 
 func TestContainerMetadataCoreRoutesAndEvidence(t *testing.T) {
 	var calls atomic.Int32
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	s := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		n := calls.Add(1)
 		if r.URL.EscapedPath() != "/reverse%20proxy/v1/AUTH_account/"+url.PathEscape(containerMetadataName) || r.URL.RawQuery != "" || r.Header.Get("X-Auth-Token") != "token" {
 			t.Errorf("wrong container route/header %s %#v", r.RequestURI, r.Header)

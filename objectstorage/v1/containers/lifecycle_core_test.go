@@ -5,11 +5,11 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -79,7 +79,7 @@ func lifecycleProof(t *testing.T, result *ContainerResponse, err error, code int
 
 func TestContainerLifecycleCoreWireIdentity(t *testing.T) {
 	var calls atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		n := calls.Add(1)
 		if r.RequestURI != "/reverse%20prefix/v1/AUTH_account/%EB%8C%80%25%20%3F%23" || r.URL.Path != "/reverse prefix/v1/AUTH_account/대% ?#" {
 			t.Errorf("literal route=%q path=%q", r.RequestURI, r.URL.Path)

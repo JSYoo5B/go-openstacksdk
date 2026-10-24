@@ -6,13 +6,13 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -49,7 +49,7 @@ func infoContractSize(value int64) *int64 { return &value }
 func TestObjectInfoContractsRoutesAndModels(t *testing.T) {
 	t.Run("catalog escaped prefix reaches the wire and each fetch is fresh", func(t *testing.T) {
 		var calls atomic.Int32
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
 			tempKeyNoBody(t, r)
 			if r.Method != http.MethodGet || r.URL.EscapedPath() != "/api%2Fproxy/info" || r.RequestURI != "/api%2Fproxy/info" {

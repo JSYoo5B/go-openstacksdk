@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -33,7 +33,7 @@ func objectWaitExternalLast(t *testing.T, result *objects.ObjectWaitResult, poll
 func TestObjectWaitContractsLiteralHEADAndDeletion(t *testing.T) {
 	var calls atomic.Int32
 	var progress []int
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		call := calls.Add(1)
 		path := "/reverse/a%20b/v1/AUTH_wait/" + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataKey)
 		body, readErr := io.ReadAll(r.Body)

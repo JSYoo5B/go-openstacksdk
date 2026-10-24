@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -13,6 +12,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -40,7 +40,7 @@ func TestObjectDeleteContractsRoutesAndSelection(t *testing.T) {
 		var calls atomic.Int32
 		const version = "opaque/ +%?#한"
 		path := "/reverse/a%2Fb/v1/A/" + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataKey)
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
 			query := url.Values{"version-id": {version}}
 			if r.Method == http.MethodDelete {

@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -144,7 +144,7 @@ func TestContainerLifecycleContractsWireAndIdentity(t *testing.T) {
 			}
 		}
 		var calls atomic.Int32
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			n := calls.Add(1)
 			if r.RequestURI != "/reverse/p%2Fq/v1/AUTH_account/"+url.PathEscape(containerMetadataName) || r.Header.Get("X-Auth-Token") != "original-token" {
 				t.Errorf("request=%s headers=%v", r.RequestURI, r.Header)

@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -21,6 +20,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -71,7 +71,7 @@ func TestCreateObjectContractsBytesWireAndSnapshots(t *testing.T) {
 	t.Run("real literal PUT including present empty bytes", func(t *testing.T) {
 		var calls atomic.Int32
 		payload := []byte{'a', 0, 0xff, 'z'}
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			index := calls.Add(1)
 			expected := "/reverse/a%20b/v1/AUTH_wire/" + url.PathEscape(objectMetadataContainer) + "/" + url.PathEscape(objectMetadataKey)
 			body, err := io.ReadAll(r.Body)

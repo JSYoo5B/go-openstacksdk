@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"reflect"
 	"strings"
@@ -14,6 +13,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
@@ -139,7 +139,7 @@ func TestTempURLKeyContractsWireAndSelection(t *testing.T) {
 	})
 	t.Run("container setter literal encoded target and separate prefix", func(t *testing.T) {
 		requests := 0
-		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requests++
 			tempKeyNoBody(t, r)
 			want := "/reverse/a%20b/v1/AUTH_account/" + url.PathEscape(tempKeyName)

@@ -6,13 +6,13 @@ import (
 	"io"
 	"maps"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -232,7 +232,7 @@ func TestCloudReadPolicyOwnedWirePolicyKeepsLiveTokenAcrossNativeRetry(t *testin
 	var mu sync.Mutex
 	var observations []observation
 	var requests atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
 			t.Error(err)
@@ -301,7 +301,7 @@ func TestCloudReadPolicyOwnedWirePolicyKeepsLiveTokenAcrossNativeRetry(t *testin
 
 func TestCloudReadPolicySourceMutationInNativeRetryStopsBeforeResend(t *testing.T) {
 	var requests, callbacks atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requests.Add(1)
 		w.Header().Set("X-Request-Id", "actual-rejected")
 		w.WriteHeader(503)

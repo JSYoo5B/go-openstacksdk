@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/orchestration/v1/templateloader"
 )
 
@@ -174,7 +174,7 @@ func TestR2ManilaHeatTemplateObjectReaderAndMissingReaderBehavior(t *testing.T) 
 func TestR2ManilaHeatTemplateHTTPRelativeFilesErrorsCancellationAndLimits(t *testing.T) {
 	t.Parallel()
 	var paths []string
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		paths = append(paths, r.URL.Path)
 		if r.Header.Get("X-Auth-Token") != "" {
 			t.Error("token leaked to template server")

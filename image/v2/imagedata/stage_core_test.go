@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/http/httptest"
 	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeimages "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
@@ -197,7 +197,7 @@ func TestStageCoreBinaryFailuresDoNotReplayOrRedirect(t *testing.T) {
 		})
 	}
 	var calls, sourceRedirects atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		calls.Add(1)
 		writer.Header().Set("Location", "/redirected")
 		writer.WriteHeader(http.StatusSeeOther)

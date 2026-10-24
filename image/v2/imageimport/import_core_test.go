@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/images"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -25,7 +26,7 @@ func TestImportCoreKnownSeedAndHTTPBodySnapshots(t *testing.T) {
 	seed := &images.Image{ID: "fixed", ContainerFormat: "bare", DiskFormat: "qcow2"}
 	var calls atomic.Int32
 	var captured *ImportOpts
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		calls.Add(1)
 		if req.Method != http.MethodPost || req.URL.Path != "/v2/images/fixed/import" || req.Header.Get("X-Image-Meta-Store") != "selected" || req.Header.Get("X-Note") != "initial" {
 			t.Errorf("unexpected request %s %s %#v", req.Method, req.URL.Path, req.Header)
@@ -79,7 +80,7 @@ func TestImportCoreFreshCanonicalFormatsAndNativeDecodeEvidence(t *testing.T) {
 	for _, test := range cases {
 		t.Run(test.name, func(t *testing.T) {
 			var gets, posts atomic.Int32
-			server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+			server := testcloud.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 				if req.Method == http.MethodGet {
 					gets.Add(1)
 					writer.Header().Set("Content-Type", "application/json")
@@ -111,7 +112,7 @@ func TestImportCoreFreshCanonicalFormatsAndNativeDecodeEvidence(t *testing.T) {
 
 func TestImportCorePreflightAndSourceBeforeEveryPhase(t *testing.T) {
 	var calls atomic.Int32
-	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
+	server := testcloud.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, req *http.Request) {
 		calls.Add(1)
 		writer.Header().Set("Content-Type", "application/json")
 		fmt.Fprint(writer, `{"container_format":"bare","disk_format":"raw"}`)
