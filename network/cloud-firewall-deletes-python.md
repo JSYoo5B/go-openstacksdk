@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_network/NetworkCloudMixin/delete_firewall_rule`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -52,16 +52,13 @@ Python/Go differences:
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
 - SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
-- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.
+- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-
-Unresolved boundaries:
-
-- Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.
+- A found ID that is empty or otherwise falsey but not null ("", 0, false, [] or {}) is rejected before DELETE. Python only rejects None, so utils.urljoin turns such an ID into an empty segment and sends DELETE to the collection route, which Neutron refuses with HTTP 405 and Python raises as an HttpException; Go never sends a collection-route DELETE.
 
 ### `python:cloud/_network/NetworkCloudMixin/delete_firewall_policy`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -105,16 +102,13 @@ Python/Go differences:
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
 - SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
-- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.
+- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-
-Unresolved boundaries:
-
-- Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.
+- A found ID that is empty or otherwise falsey but not null ("", 0, false, [] or {}) is rejected before DELETE. Python only rejects None, so utils.urljoin turns such an ID into an empty segment and sends DELETE to the collection route, which Neutron refuses with HTTP 405 and Python raises as an HttpException; Go never sends a collection-route DELETE.
 
 ### `python:cloud/_network/NetworkCloudMixin/delete_firewall_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -158,12 +152,9 @@ Python/Go differences:
 - SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.
 - SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.
 - Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.
-- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.
+- Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud.
 - Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-
-Unresolved boundaries:
-
-- Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.
+- A found ID that is empty or otherwise falsey but not null ("", 0, false, [] or {}) is rejected before DELETE. Python only rejects None, so utils.urljoin turns such an ID into an empty segment and sends DELETE to the collection route, which Neutron refuses with HTTP 405 and Python raises as an HttpException; Go never sends a collection-route DELETE.
 
 ## Usage examples
 
