@@ -48,7 +48,7 @@ Go API:
 
 Python/Go differences:
 
-- Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout.
+- Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; for SDK records that keep a raw JSON Resource view (Adapter.WaitAttributes) it selects a view key by exact Python attribute name, and an absent, null or non-string value fails with ErrUnsupported after that observation (see docs/python-proxy-waits.md); WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout.
 
 Unresolved boundaries:
 

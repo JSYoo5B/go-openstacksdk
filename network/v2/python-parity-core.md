@@ -709,7 +709,7 @@ Python/Go differences:
 
 ### `python:network/v2/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -721,18 +721,21 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithStatusAttribute`
+- `github.com/JSYoo5B/go-openstacksdk/network.WaitForStatus` and the wait collections listed in [Proxy waits](../../docs/python-proxy-waits.md#wait-collections)
 
 - Ports WaitFor polls GET ports/{id} until a case-insensitive status match, reports progress 0 after nonterminal observations, returns resource.ErrFailedState on ERROR with WithFailureStates and a context deadline error after WithTimeout.
   Tests: `network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortWaiters`.
+- network.WaitForStatus applies the Proxy.wait_for_status defaults (status attribute when declared, exact case-insensitive ERROR failure, two-second interval, no SDK timeout) to any SDK collection; typed models select exported string fields with resource.WithStatusAttribute.
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors`.
+- Records that keep their declared Resource view as raw JSON (segment ranges, default security group rules, default statefulness, NDP proxies, conntrack helpers and packet-rate rules) accept resource.WithStatusAttribute with an exact Python attribute name such as ether_type; wire spellings, absent, null and non-string values fail with resource.ErrUnsupported. See [raw JSON records](../../docs/python-proxy-waits.md#raw-json-records).
+  Tests: `api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesNeutron`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues`.
 
 Python/Go differences:
 
 - Python waits forever with failures=['ERROR'] by default; Go defaults to five minutes and a prefix/suffix failure predicate, which WithUnlimitedWait and WithFailureStates("ERROR") replace.
 - Python returns immediately without HTTP when the given Resource already has the target status; Go always sends the first GET.
-
-Unresolved boundaries:
-
-- Python can wait on any Neutron Resource; resources without a Go collection, such as local IPs, segment ranges, port bindings and auto-allocated topologies, have no Go waiter.
+- Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology.
+- For raw JSON records a selected attribute that the view does not carry, or a null or non-string value, fails with resource.ErrUnsupported after the first GET; Python keeps polling None. Status is not selected by default for them, and the router_id and qos_policy_id URI attributes are outside the view.
 
 ### `python:network/v2/wait_for_delete`
 

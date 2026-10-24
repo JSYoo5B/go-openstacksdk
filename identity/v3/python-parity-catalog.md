@@ -859,7 +859,7 @@ Unresolved boundaries:
 
 ### `python:identity/v3/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -877,15 +877,16 @@ Go API:
   Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointWaitHelpers`, `identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers`.
 - Region WaitFor with WithStatusAttribute("description") polls GET regions/{id} on the fixed ID and compares the selected field case-insensitively, like Python attribute selection with lowercased status values.
   Tests: `identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers`.
+- identity.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection, and every fetchable identity v3 Resource has one (see [Proxy waits](../../docs/python-proxy-waits.md#wait-collections)).
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors`, `api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource`.
+- Endpoint group and domain config records keep their declared Resource view as raw JSON; resource.WithStatusAttribute selects an exact Python attribute name of that view, and absent, null and non-string values (including the nested domain config option groups) fail with resource.ErrUnsupported. See [raw JSON records](../../docs/python-proxy-waits.md#raw-json-records).
+  Tests: `api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesKeystone`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues`.
 
 Python/Go differences:
 
 - Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait. resource.WithPollInterval reproduces the 2-second interval.
-
-Unresolved boundaries:
-
-- Python accepts every identity v3 Resource; Go has separate per-package helpers and none for packages outside a Resources collection.
 - Python returns the given Resource without HTTP when its cached attribute already equals the target; Go always sends the first GET and returns a model pointer instead of the refreshed Resource.
+- For raw JSON records a selected attribute that the view does not carry, or a null or non-string value, fails with resource.ErrUnsupported after the first GET; Python keeps polling None. A domain config's domain_id URI attribute is the reference, not a view key.
 
 ## Usage examples
 

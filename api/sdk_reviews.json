@@ -20245,7 +20245,7 @@
     {
       "operation": "python:block_storage/v3/wait_for_status",
       "source_fingerprint": "3318f44e07cbb590791f555d5a282629b15a8828da46c7cf0b1b81e8263436ec",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForState",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForAvailable",
@@ -20342,6 +20342,15 @@
             "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsRecordAndClusterStatus",
             "api/cinder_proxy_waits_test.go:TestCinderProxyWaitsDeleteEveryFetchableResource"
           ]
+        },
+        {
+          "behavior": "Records that keep their declared Resource view as raw JSON (group, group snapshot, consistency group, consistency group snapshot, message, capabilities and quota class records) accept resource.WithStatusAttribute with an exact Python attribute name. The view value is compared case-insensitively with the same default and caller failure states as typed fields, and a selected attribute also drives the deleted check of deletion waits. A wire spelling that differs from the attribute name, an undeclared member of a class that discards unknown Body attributes, and an absent, null, numeric, boolean or object value fail with resource.ErrUnsupported. Group-family records keep their default status accessor when no attribute is selected.",
+          "tests": [
+            "api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesCinder",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeComparesViewStringsLikeTypedFields",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeKeepsBindingStatusDefaultAndDeletion"
+          ]
         }
       ],
       "differences": [
@@ -20353,16 +20362,14 @@
         "State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.",
         "Python nullable descriptor/status/progress coercion and Resource-return behavior are outside the explicit Ref/native-model API (see the differences above); native name-resolution paging limits and model decoders remain unchanged.",
         "Image-v1, Glance wait_for_task and Cloud wait_for_server/wait_for_image workflows are separate declarations and are not promoted by this operation.",
-        "Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go."
+        "Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go.",
+        "For records that keep a raw JSON Resource view, a selected attribute is read from each observation: an attribute the view does not carry, a null value or a non-string value fails with resource.ErrUnsupported after the first GET rather than before HTTP, and a null value fails instead of being polled like Python's None until the timeout. Only group-family records select status by default; message, capabilities and quota class records need resource.WithStatusAttribute. Progress callbacks for these records report zero."
       ],
       "documentation": [
         "docs/service-waits.md",
         "blockstorage/v3/volumes/README.md",
         "blockstorage/v3/snapshots/README.md",
         "docs/python-proxy-waits.md"
-      ],
-      "remaining": [
-        "Records that keep attributes as raw JSON (group, group snapshot, consistency group, consistency group snapshot, message, capabilities and quota class records) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only default status and deletion waits are available."
       ]
     },
     {
@@ -93706,7 +93713,7 @@
     {
       "operation": "python:identity/v3/wait_for_status",
       "source_fingerprint": "180ea92c9a886202acae83c5c6e00cfd8efddcceeb6152f0d6723b5943b03ccd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.WaitFor",
         "github.com/JSYoo5B/go-openstacksdk/identity/v3/regions.API.WaitFor",
@@ -93753,19 +93760,26 @@
             "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors",
             "api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource"
           ]
+        },
+        {
+          "behavior": "Records that keep their declared Resource view as raw JSON (endpoint groups and domain configs) accept resource.WithStatusAttribute with an exact Python attribute name. The view value is compared case-insensitively with the same default and caller failure states as typed fields, and a selected attribute also drives the deleted check of deletion waits. A wire spelling that differs from the attribute name, an undeclared member of a class that discards unknown Body attributes, and an absent, null, numeric, boolean or object value fail with resource.ErrUnsupported. Domain configuration option groups are nested Resources, so no domain config attribute is a string.",
+          "tests": [
+            "api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesKeystone",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeComparesViewStringsLikeTypedFields",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeKeepsBindingStatusDefaultAndDeletion"
+          ]
         }
       ],
       "differences": [
         "Go defaults to a five-minute timeout; Python wait=None waits forever, which Go expresses with resource.WithUnlimitedWait. resource.WithPollInterval reproduces the 2-second interval.",
         "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
-        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None."
+        "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.",
+        "For records that keep a raw JSON Resource view, a selected attribute is read from each observation: an attribute the view does not carry, a null value or a non-string value fails with resource.ErrUnsupported after the first GET rather than before HTTP, and a null value fails instead of being polled like Python's None until the timeout. Status is not selected by default for these records; an undeclared status member that _allow_unknown_attrs_in_body exposes in Python needs resource.WithStatusAttribute(\"status\"). The domain_id URI attribute of a domain config is the reference, not a view key, and cannot be selected, while Python reads it from the fetched Resource. Progress callbacks for these records report zero."
       ],
       "documentation": [
         "identity/v3/python-parity-catalog.md",
         "docs/python-proxy-waits.md"
-      ],
-      "remaining": [
-        "Records that keep attributes as raw JSON (endpoint groups and domain configs) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only deletion waits are available."
       ]
     },
     {
@@ -99861,7 +99875,7 @@
     {
       "operation": "python:network/v2/wait_for_status",
       "source_fingerprint": "b95599954fd5f2caa92d1ccc99d45bb7e1dbfe0d05b40498a891f1b46a40b21f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.WaitFor",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.Wait",
@@ -99920,6 +99934,15 @@
             "api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors",
             "api/network_proxy_waits_test.go:TestNetworkProxyWaitsDeleteForCollectionlessResources"
           ]
+        },
+        {
+          "behavior": "Records that keep their declared Resource view as raw JSON (network segment ranges, default security group rules, default statefulness, NDP proxies, conntrack helpers, minimum packet rate and packet rate limit rules) accept resource.WithStatusAttribute with an exact Python attribute name. The view value is compared case-insensitively with the same default and caller failure states as typed fields, and a selected attribute also drives the deleted check of deletion waits. A wire spelling that differs from the attribute name, an undeclared member of a class that discards unknown Body attributes, and an absent, null, numeric, boolean or object value fail with resource.ErrUnsupported. Classes that allow unknown Body attributes, such as NetworkSegmentRange, expose undeclared response members.",
+          "tests": [
+            "api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesNeutron",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeComparesViewStringsLikeTypedFields",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues",
+            "resource/wait_raw_attributes_test.go:TestWaitRawAttributeKeepsBindingStatusDefaultAndDeletion"
+          ]
         }
       ],
       "documentation": [
@@ -99931,10 +99954,8 @@
         "Python returns immediately without HTTP when the given Resource already has the target status; Go always sends the first GET.",
         "Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.",
         "Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.",
-        "Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology. Neutron-LBaaS resources are unsupported separately."
-      ],
-      "remaining": [
-        "Records that keep attributes as raw JSON (network segment ranges, default security group rules, default statefulness, NDP proxies, conntrack helpers, minimum packet rate and packet rate limit rules) expose no exported string fields, so Python wait_for_status with an explicit attribute on them has no Go equivalent; only deletion waits are available."
+        "Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology. Neutron-LBaaS resources are unsupported separately.",
+        "For records that keep a raw JSON Resource view, a selected attribute is read from each observation: an attribute the view does not carry, a null value or a non-string value fails with resource.ErrUnsupported after the first GET rather than before HTTP, and a null value fails instead of being polled like Python's None until the timeout. Status is not selected by default for these records; an undeclared status member that _allow_unknown_attrs_in_body exposes in Python needs resource.WithStatusAttribute(\"status\"). The router_id and qos_policy_id URI attributes are kept outside the view (Record.RouterID and the bound policy) and cannot be selected, while Python reads them from the fetched Resource. Progress callbacks for these records report zero."
       ]
     },
     {

@@ -17,7 +17,7 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 	if err != nil {
 		return err
 	}
-	statusField, progressField, err := waitFields[T](o)
+	statusField, progressField, err := c.waitFields(o)
 	if err != nil {
 		return c.wrap("wait deleted", err)
 	}
@@ -68,8 +68,8 @@ func (c *Collection[T]) WaitDeleted(ctx context.Context, ref Ref, opts ...WaitOp
 		if value == nil {
 			return nil
 		}
-		if c.binding.Status != nil || statusField != nil {
-			state, err := waitStatus(value, statusField, c.binding.Status)
+		if c.binding.Status != nil || statusField != nil || c.rawWaitAttribute(o) {
+			state, err := c.waitStatus(value, o, statusField)
 			if err != nil {
 				return c.wrap("wait deleted", err)
 			}

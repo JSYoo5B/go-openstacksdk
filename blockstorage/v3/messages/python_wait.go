@@ -9,13 +9,15 @@ import (
 
 // Resources returns a Collection bound to direct GET messages/{id} for the
 // shared wait engine, such as blockstorage.WaitForDelete. Only resource.ID
-// references are supported. MessageRecord keeps attributes as raw JSON, so it
-// exposes no exported string attribute for status waits.
+// references are supported. The record view keeps attributes as raw JSON keyed
+// by Python attribute name; resource.WithStatusAttribute selects one of them
+// by exact name and requires a JSON string value.
 func (a *API) Resources() *resource.Collection[MessageRecord] {
 	return resource.NewCollection(resource.Adapter[MessageRecord]{
-		Kind: "messages",
-		Get:  func(ctx context.Context, id string) (*MessageRecord, error) { return a.GetRecord(ctx, id) },
-		ID:   func(v *MessageRecord) string { return rawText(v.Resource, "id") },
+		WaitAttributes: func(v *MessageRecord) map[string]json.RawMessage { return resource.RawResourceView(v.Resource) },
+		Kind:           "messages",
+		Get:            func(ctx context.Context, id string) (*MessageRecord, error) { return a.GetRecord(ctx, id) },
+		ID:             func(v *MessageRecord) string { return rawText(v.Resource, "id") },
 	})
 }
 

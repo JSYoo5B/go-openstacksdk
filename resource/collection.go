@@ -94,6 +94,12 @@ type Adapter[T any] struct {
 	// FixedWaitStatus prevents replacing a specialized waiter's completion
 	// condition, such as Inspector's Finished boolean, with another attribute.
 	FixedWaitStatus bool
+	// WaitAttributes returns the declared Resource view of a record that keeps
+	// its attributes as raw JSON, keyed by Python attribute name. When set,
+	// WithStatusAttribute selects a key of that view by exact name (a wire
+	// spelling that differs from the attribute name is not a key) instead of
+	// an exported struct field. Status still drives the default condition.
+	WaitAttributes func(*T) map[string]json.RawMessage
 	// WaitGuard is an SDK-owned invariant checked around polling and progress.
 	// Ordinary collections leave it nil.
 	WaitGuard func(context.Context) error
@@ -448,14 +454,14 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 	if err != nil {
 		return nil, err
 	}
-	statusField, progressField, err := waitFields[T](o)
+	statusField, progressField, err := c.waitFields(o)
 	if err != nil {
 		return nil, c.wrap("wait", err)
 	}
 	if c.binding.FixedWaitStatus && o.statusAttribute != "" {
 		return nil, c.wrap("wait", fmt.Errorf("%w: this waiter has a fixed completion condition", ErrUnsupported))
 	}
-	if c.binding.Status == nil && statusField == nil {
+	if c.binding.Status == nil && statusField == nil && !c.rawWaitAttribute(o) {
 		return nil, c.wrap("wait", ErrUnsupported)
 	}
 	ctx, cancel := o.context(ctx)
@@ -489,7 +495,7 @@ func (c *Collection[T]) Wait(ctx context.Context, ref Ref, status string, opts .
 		if v == nil {
 			return nil, &FailedStateError{Resource: c.binding.Kind, ID: id, Status: "missing"}
 		}
-		current, err := waitStatus(v, statusField, c.binding.Status)
+		current, err := c.waitStatus(v, o, statusField)
 		if err != nil {
 			return nil, c.wrap("wait", err)
 		}

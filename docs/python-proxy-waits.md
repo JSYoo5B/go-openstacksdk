@@ -32,7 +32,9 @@ options last.
   as Python raises `AttributeError` for its default attribute. Select another
   exported string field with `resource.WithStatusAttribute`; numeric and
   boolean fields are unsupported, as Python's `lower()` call on them also
-  fails. Cinder collections use their binding status accessor.
+  fails. Cinder collections use their binding status accessor. Records kept
+  as raw JSON select Python attribute names instead; see
+  [Raw JSON records](#raw-json-records).
 - Deletion waits poll every two seconds for up to 120 seconds. Only GET
   requests are sent; a waiter never sends DELETE, abort or any mutation. An
   actual 404 or a successful nil observation completes. A model with a status
@@ -107,14 +109,43 @@ attribute; `clusters.API.Resources()` (cluster name, reads `Status`),
   introspection status readable; deletion waits on it usually reach their
   deadline. `introspection.API.WaitUntilFinished` remains the finished-flag
   waiter.
-- Records that keep attributes as raw JSON (Neutron segment ranges, default
-  security group rules, default statefulness, NDP proxies, conntrack helpers
-  and packet-rate rules; Keystone endpoint groups and domain configs; Cinder
-  group, group snapshot, consistency group, consistency group snapshot,
-  message, capabilities and quota class records) expose no exported string
-  fields. They support deletion waits and, for Cinder group-family records,
-  the default status attribute, but not `resource.WithStatusAttribute`
-  selection of other attributes.
+
+## Raw JSON records
+
+Some records keep their declared Resource view as raw JSON instead of
+exported Go fields: Neutron segment ranges, default security group rules,
+default statefulness, NDP proxies, conntrack helpers and packet-rate rules;
+Keystone endpoint groups and domain configs; Cinder group, group snapshot,
+consistency group, consistency group snapshot, message, capabilities and
+quota class records. Their collections set `resource.Adapter.WaitAttributes`,
+so `resource.WithStatusAttribute` selects a key of the record's `Resource`
+view:
+
+- The name is the exact Python attribute name. Where the wire key differs, the
+  view uses the attribute name: a default security group rule is selected with
+  `ether_type`, not `ethertype`. Names are case-sensitive.
+- A JSON string value is compared like a typed field: case-insensitive target,
+  the same default (`ERROR`, Cinder `error`) and caller failure states, and
+  `deleted` completion for deletion waits when the attribute is selected there.
+- An attribute the view does not carry, a null value and a numeric, boolean,
+  list or object value fail with `resource.ErrUnsupported`. The value is read
+  from each observation, so this error arrives after the first GET rather than
+  before any request. Python keeps polling a `None` value until its timeout.
+- Classes that allow unknown Body attributes (for example NetworkSegmentRange
+  and NDPProxy) keep undeclared response members in the view, so they can be
+  selected; ConntrackHelper and other classes discard them.
+- URI attributes (`router_id`, `qos_policy_id`, a domain config's
+  `domain_id`) are kept outside the view and cannot be selected.
+- Status is selected by default only where the binding declares it (Cinder
+  group-family records); without `resource.WithStatusAttribute` the others
+  fail with `resource.ErrUnsupported` before any request. Progress callbacks
+  report zero.
+
+```go
+rules := defaultrules.New(client).Resources()
+rule, err := network.WaitForStatus(ctx, rules, resource.ID(ruleID), "IPv6",
+	resource.WithStatusAttribute("ether_type"))
+```
 
 ## Differences from Python
 
@@ -126,10 +157,13 @@ attribute; `clusters.API.Resources()` (cluster name, reads `Status`),
 - Python raises `ResourceTimeout`, `ResourceFailure` and `AttributeError`; Go
   returns the context deadline, `resource.ErrFailedState` and
   `resource.ErrUnsupported`.
-- Go selects exported Go field names or JSON tags; Python selects arbitrary
-  attribute names.
+- Go selects exported Go field names or JSON tags of typed models and Python
+  attribute names of raw JSON record views; Python selects any attribute,
+  including URI attributes.
 
 Tests: `internal/servicewait/proxy_test.go`,
+`resource/wait_raw_attributes_test.go`,
+`api/raw_record_wait_attributes_test.go`,
 `api/network_proxy_waits_test.go`, `api/identity_proxy_waits_test.go`,
 `api/placement_proxy_waits_test.go`, `api/introspection_proxy_waits_test.go`,
 `api/cinder_proxy_waits_test.go`.
