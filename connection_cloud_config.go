@@ -36,6 +36,12 @@ type cloudNetworkDocument struct {
 }
 
 func loadCloudConfiguration(name string, locations []string) (cloudConfiguration, error) {
+	return loadCloudRegionConfiguration(name, locations, nil)
+}
+
+// loadCloudRegionConfiguration also applies the values of the selected regions
+// entry; region is the explicit WithRegion value, if any.
+func loadCloudRegionConfiguration(name string, locations []string, region *string) (cloudConfiguration, error) {
 	var result cloudConfiguration
 	if len(locations) == 0 {
 		if path := os.Getenv("OS_CLIENT_CONFIG_FILE"); path != "" {
@@ -107,6 +113,7 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		maps.Copy(settings, overrides)
 		result.parseOptions = append(result.parseOptions, clouds.WithSecureYAML(bytes.NewReader(secure)))
 	}
+	cloudSettings := maps.Clone(settings)
 	profile := header.Profile
 	if profile == "" {
 		profile = header.Cloud
@@ -145,6 +152,10 @@ func loadCloudConfiguration(name string, locations []string) (cloudConfiguration
 		maps.Copy(inherited, settings)
 		settings = inherited
 		result.parseOptions = append(result.parseOptions, clouds.WithCloudsPublicYAML(bytes.NewReader(public)))
+	}
+	settings, err = applyRegionValues(cloudSettings, settings, region)
+	if err != nil {
+		return result, err
 	}
 	result.defaultNetwork, err = configuredDefaultNetwork(settings)
 	if err != nil {

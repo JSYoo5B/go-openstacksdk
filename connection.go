@@ -54,7 +54,7 @@ func Connect(ctx context.Context, opts ...ConnectionOption) (*Connection, error)
 	if o.auth != nil {
 		auth = *o.auth
 	} else if cloudName != "" {
-		configuration, loadErr := loadCloudConfiguration(cloudName, o.cloudFiles)
+		configuration, loadErr := loadCloudRegionConfiguration(cloudName, o.cloudFiles, o.region)
 		if loadErr != nil {
 			return nil, fmt.Errorf("load cloud configuration: %w", loadErr)
 		}

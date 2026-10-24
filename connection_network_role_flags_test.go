@@ -14,9 +14,10 @@ import (
 // typed clouds.yaml policy for use_external_network/use_internal_network with
 // the pinned raw config.get(...) value whose Python truthiness decides
 // _find_interesting_networks. Booleans, null, the empty string and any casing
-// of "true" agree. Other strings are false in Go but truthy in Python, and
-// numbers or collections are configuration errors in Go; these are the
-// documented typed-policy differences.
+// of "true" agree. Other strings are false in Go but truthy in Python. Numbers
+// and collections are configuration errors in Go; Python's normalize_keys
+// turns numbers into nonempty strings (truthy, even 0) and keeps an empty list
+// falsy. These are the documented typed-policy differences.
 func TestNetworkRoleUseFlagsCompareYAMLValuesWithPythonTruthiness(t *testing.T) {
 	type outcome int
 	const (
@@ -37,7 +38,7 @@ func TestNetworkRoleUseFlagsCompareYAMLValuesWithPythonTruthiness(t *testing.T) 
 		{"'TRUE'", enabled, true, false},
 		{"'false'", disabled, true, true},
 		{"'yes'", disabled, true, true},
-		{"0", rejected, false, true},
+		{"0", rejected, true, true},
 		{"1", rejected, true, true},
 		{"[]", rejected, false, true},
 	} {
