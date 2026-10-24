@@ -420,7 +420,7 @@ Python/Go differences:
 
 ### `python:block_storage/v3/fetch_backup_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -436,14 +436,11 @@ Python/Go differences:
 - Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.
 - Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.
 - Fetch requires an UTF-8 JSON object root and stores metadata as owned rawJSON: omission is nil and explicitnull is nonnil null; arbitrary metadata shapes and duplicate literals are retained without float conversion.
-
-Unresolved boundaries:
-
-- Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support.
+- Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support.
 
 ### `python:block_storage/v3/get_backup_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -460,14 +457,11 @@ Python/Go differences:
 - Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.
 - Fetch requires an UTF-8 JSON object root and stores metadata as owned rawJSON: omission is nil and explicitnull is nonnil null; arbitrary metadata shapes and duplicate literals are retained without float conversion.
 - Deprecated GoDoc replaces the Python RemovedInSDK50Warning; no runtime warning is emitted.
-
-Unresolved boundaries:
-
-- Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support.
+- Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support.
 
 ### `python:block_storage/v3/set_backup_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -483,14 +477,11 @@ Python/Go differences:
 - Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.
 - Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.
 - Go uses map[string]string for the documented string kwargs; opaque response is returned without manufacturing the Python input-based mutable cache.
-
-Unresolved boundaries:
-
-- Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support.
+- Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support.
 
 ### `python:block_storage/v3/delete_backup_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -506,10 +497,7 @@ Python/Go differences:
 - Go accepts an explicit validated ID string and returns owned physical evidence instead of a mutable Python Backup Resource; it neither mutates a native Backup cache nor synthesizes observed response metadata from submitted values.
 - Go uses the configured client microversion and ordinary library-owned header options rather than Python session negotiation; Source MetadataMixin adds no per-request3.43 gate.
 - Go validates and escapes literal keys once; it returns partial HTTP acknowledgements rather than None and does not reproduce mutable-resource cache removal KeyError behavior.
-
-Unresolved boundaries:
-
-- Stock Cinder27.0.0 registers no /backups/{id}/metadata child routes. The explicit PythonMetadata compatibility profile reproduces the pinned SDK request/error behavior, including physical404; deployment extension capability remains unverified and is not counted as stock SDK support.
+- Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support.
 
 ### `python:block_storage/v3/get_attachment`
 

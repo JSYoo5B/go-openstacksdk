@@ -739,7 +739,7 @@ Python/Go differences:
 
 ### `python:network/v2/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -747,18 +747,51 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
+- `github.com/JSYoo5B/go-openstacksdk/network.WaitForDelete`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localips.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/localipassociations.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networksegmentranges.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/serviceprofiles.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/flavors.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/labels.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/metering/rules.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapflows.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/taas/tapservices.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairs.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portpairgroups.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/portchains.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/flowclassifiers.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/sfc/servicegraphs.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultstatefulness.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/ndpproxies.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/conntrackhelpers.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.MinimumPacketRateResources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.PacketRateLimitResources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.NetworkAssociationResources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.PortAssociationResources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.RouterAssociationResources`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.Resources`
 
 - Ports WaitForDeletion with WithTimeout(120s) polls GET ports/{id} until 404 and then succeeds.
   Tests: `network/v2/ports/python_parity_core_test.go:TestPythonParityCorePortWaiters`.
+- network.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/network_proxy_waits_test.go:TestNetworkProxyWaitsStatusDefaultsAttributesAndTerminalErrors`.
+- Every pinned fetchable Neutron Resource without a generated collection now has a GET-bound collection (local IPs and associations, segment ranges, service profiles, flavors, metering labels/rules, tap flows/services, SFC port pairs/groups/chains/flow classifiers/service graphs, default security group rules, default statefulness, NDP proxies, conntrack helpers, quotas, IP availabilities, QoS rule types, minimum packet rate and packet rate limit rules, BGP VPN network/port/router associations and extensions); each deletion wait polls the fixed member route until 404.
+  Tests: `api/network_proxy_waits_test.go:TestNetworkProxyWaitsDeleteForCollectionlessResources`.
 
 Python/Go differences:
 
 - The Neutron Proxy default is wait=120; Go defaults to five minutes and WithTimeout(120*time.Second) matches.
 - Python returns the original Resource; Go returns only an error.
-
-Unresolved boundaries:
-
-- Python can wait for any fetchable Neutron Resource to disappear; resources without a Go collection have no deletion waiter.
+- Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.
+- WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.
+- Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.
+- Neutron GET auto-allocated-topology/{project_id} may provision a topology, so Go deliberately provides no waiter for AutoAllocatedTopology; polling would be a mutation. Neutron-LBaaS resources are unsupported separately (see their get_/find_ reviews).
+- Network Proxy wait=120 is now the WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default.
 
 ### `python:network/v2/availability_zones`
 

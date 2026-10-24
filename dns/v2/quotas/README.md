@@ -57,7 +57,7 @@ Python/Go differences:
 
 ### `python:dns/v2/get_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -77,14 +77,11 @@ Python/Go differences:
 
 - The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.
 - The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.
-
-Unresolved boundaries:
-
-- Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping.
+- Pinned Python read: Quota.fetch/_prepare_request send x-auth-sudo-project-id from the alternate-ID project and strip id from PATCH bodies; Go's fixed scope sends the same header and never an id. Python coerces int attributes and drops unknown attributes, while Go uses typed pointer limits (nil omitted, zero sent) plus explicit extensions. Python accepts any non-error status; Go accepts exactly 200 (get/update) and 204 (delete). Resource caching/dirty state and adapter microversions do not exist in Go (Designate v2 has none).
 
 ### `python:dns/v2/update_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -106,14 +103,11 @@ Python/Go differences:
 
 - The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.
 - The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.
-
-Unresolved boundaries:
-
-- Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping.
+- Pinned Python read: Quota.fetch/_prepare_request send x-auth-sudo-project-id from the alternate-ID project and strip id from PATCH bodies; Go's fixed scope sends the same header and never an id. Python coerces int attributes and drops unknown attributes, while Go uses typed pointer limits (nil omitted, zero sent) plus explicit extensions. Python accepts any non-error status; Go accepts exactly 200 (get/update) and 204 (delete). Resource caching/dirty state and adapter microversions do not exist in Go (Designate v2 has none).
 
 ### `python:dns/v2/delete_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -134,32 +128,26 @@ Python/Go differences:
 - The Go singleton returns QuotaResource with fixed ProjectID, raw fields, Header and StatusCode rather than a native Result/Python mutable Resource; context and error are explicit.
 - The fixed scope preserves the configured service client and sends the target through Designate sudo-project headers; WithAllProjects is explicit and does not enumerate other projects.
 - Python delete_quota defaults ignore_missing=True; Go Reset is strict unless WithResetIgnoreMissing(true) is supplied.
-
-Unresolved boundaries:
-
-- Compare inherited DNS Resource/proxy inputs, cached Resource mutation/dirty-state behavior and adapter/microversion selection beyond the verified fixed-project HTTP mapping.
+- Pinned Python read: Quota.fetch/_prepare_request send x-auth-sudo-project-id from the alternate-ID project and strip id from PATCH bodies; Go's fixed scope sends the same header and never an id. Python coerces int attributes and drops unknown attributes, while Go uses typed pointer limits (nil omitted, zero sent) plus explicit extensions. Python accepts any non-error status; Go accepts exactly 200 (get/update) and 204 (delete). Resource caching/dirty state and adapter microversions do not exist in Go (Designate v2 has none).
 
 ### `python:dns/v2/quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.API.CurrentProject`
-- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.ProjectQuotaScope.Get`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.API.Current`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.WithCurrentSudoProject`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas.WithCurrentAllProjects`
 
-- The quota project is fixed once: explicit IDs require no HTTP, exact project names use a separate Keystone client, recorded v2/v3 authentication supplies CurrentProject, and invalid/manual/unscoped references never guess a target.
-  Tests: `api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectReferencesResolveOnceWithSeparateKeystone`, `api/designate_project_quotas_projects_test.go:TestDesignateQuotaProjectResolutionFailuresDoNotCallDNS`, `api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectFreezesRecordedV2V3Identity`, `api/designate_project_quotas_projects_test.go:TestDesignateQuotaCurrentProjectRejectsMissingUnscopedAndInvalidAuth`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- GET and PATCH accept only HTTP200 and decode the unwrapped quota object; native integer fields and raw omitted/null/extension values retain independent HTTP headers/status. Invalid accepted JSON retains raw bytes, headers/status and original decode cause.
-  Tests: `api/designate_project_quotas_contracts_test.go:TestDesignateProjectQuotasUseRootObjectAndOfficialMethods`, `api/designate_project_quotas_contracts_test.go:TestDesignateQuotaDecodeErrorsRetainSuccessfulHTTPEvidence`, `api/designate_project_quotas_contracts_test.go:TestDesignateQuotaSuccessfulCodeContractDoesNotBroaden`.
+- GET /quotas (project-less) accepts only 200, decodes the flat quota object with raw Body, and sends sudo-project/all-projects headers only when supplied; invalid project IDs fail before HTTP.
+  Tests: `api/r2_dns_tasks_test.go:TestR2DNSQuotaCurrentUsesProjectlessRouteAndHeaders`.
 
 Python/Go differences:
 
-- The documented GET /quotas/ is a current-project quota object; the Go scope does not fabricate a multi-project Collection from Python allow_list.
-
-Unresolved boundaries:
-
-- Reconcile the pinned Python generator/list Resource contract with the documented singleton collection-path response before implementing any list mapping; compare inherited query/pagination and adapter behavior.
+- Designate returns one flat quota object for GET /quotas; Python quotas() therefore yields a single Quota. Go returns that one object and does not fabricate a multi-project collection.
+- Go sends the documented X-Auth-Sudo-Project-ID and X-Auth-All-Projects headers (the same names as the pinned Python); an explicit false all-projects value is sent as false while Python sends the header only when truthy and as 'True'.
+- Pinned Python read: Quota.fetch/_prepare_request send x-auth-sudo-project-id from the alternate-ID project and strip id from PATCH bodies; Go's fixed scope sends the same header and never an id. Python coerces int attributes and drops unknown attributes, while Go uses typed pointer limits (nil omitted, zero sent) plus explicit extensions. Python accepts any non-error status; Go accepts exactly 200 (get/update) and 204 (delete). Resource caching/dirty state and adapter microversions do not exist in Go (Designate v2 has none).
 
 ## Usage examples
 

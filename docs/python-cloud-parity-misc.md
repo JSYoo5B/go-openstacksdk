@@ -634,99 +634,157 @@ Python/Go differences:
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/auth_token`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Connection exposes no token accessor; the token lives in the Gophercloud ProviderClient, which is not an SDK API and does not re-authenticate before expiry the way keystoneauth get_token does.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.AuthToken`
+
+- Returns the token obtained at Connect without further HTTP requests, and an empty string when none is held.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionRecordsTokenUserAndCatalogWithoutRequests`, `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionWithoutAuthResultReportsIt`.
+
+Python/Go differences:
+
+- Go reads the token held by the shared provider and never renews a still-held expired token; keystoneauth get_token re-validates and renews. Rejected requests trigger the native reauthentication instead.
+- An absent token is an empty string instead of None.
 
 ### `python:connection/authorize`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Connection exposes no token accessor; the token lives in the Gophercloud ProviderClient, which is not an SDK API and does not re-authenticate before expiry the way keystoneauth get_token does. Connect authenticates eagerly but returns no token string, and keystoneauth failures are not mapped to SDKException.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.Authorize`
+
+- Returns the held token without a request; with no token it reauthenticates once through the provider function, and without one fails with an invalid-option error.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionRecordsTokenUserAndCatalogWithoutRequests`, `api/py_core_misc_session_test.go:TestPyCoreMiscAuthorizeReauthenticatesOnlyWhenTokenMissing`, `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionWithoutAuthResultReportsIt`.
+- A canceled context fails before any call and keeps context.Canceled observable.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionWithoutAuthResultReportsIt`.
+
+Python/Go differences:
+
+- Go reads the token held by the shared provider and never renews a still-held expired token; keystoneauth get_token re-validates and renews. Rejected requests trigger the native reauthentication instead.
+- Failures wrap the native cause rather than SDKException.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/current_user_id`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Connection exposes no accessor for the user ID recorded in the authentication response.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.CurrentUserID`
+
+- Returns the user id recorded in the Keystone token response without a request; a connection without a recorded response returns ErrNoAuthResult.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionRecordsTokenUserAndCatalogWithoutRequests`, `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionWithoutAuthResultReportsIt`.
+
+Python/Go differences:
+
+- Python re-fetches access info through the session and raises ConfigException for non-keystone auth; Go reads the recorded response and returns ErrNoAuthResult.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/service_catalog`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Connection exposes no accessor for the token service catalog.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ServiceCatalog`
+
+- Returns a copy of the recorded catalog (id, name, type and endpoint id, interface, region, region id, url) without a request; mutation of the copy does not alter the recorded response.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionRecordsTokenUserAndCatalogWithoutRequests`.
+- A connection without a recorded token response returns ErrNoAuthResult.
+  Tests: `api/py_core_misc_session_test.go:TestPyCoreMiscConnectionWithoutAuthResultReportsIt`.
+
+Python/Go differences:
+
+- Entries are typed values instead of raw dictionaries and unknown endpoint fields are dropped; Python reads the live access object and may refresh it.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/session`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- Go has no keystoneauth Session equivalent on Connection; the authenticated Gophercloud ProviderClient is not exposed as SDK API.
+- Exposes the keystoneauth Session object; Go shares a Gophercloud ProviderClient and deliberately does not expose a session abstraction.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/close`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- Connection has no Close method; there is no auth cache persistence, session pool shutdown or executor shutdown to trigger, and the caller owns the http.Client.
+- Releases the requests session and thread pool Python creates; the Go Connection owns no such resources because the caller owns the http.Client.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/set_global_request_id`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go has no global request ID setting, so no X-OpenStack-Request-ID header is added to requests.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GlobalRequest`
+
+- The request ID is applied to every request of the derived Connection and never to the receiver.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+- Invalid IDs are rejected.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+
+Python/Go differences:
+
+- Deliberate design choice: Python mutates the existing Connection so later requests change; Go Connections are immutable after construction because requests run concurrently, so the ID is set only by deriving a Connection with GlobalRequest.
+- The per-request global_request_id argument of Proxy.request has no counterpart.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/global_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go cannot derive a Connection that shares the session and sends a global request ID header.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GlobalRequest`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
+
+- The derived Connection shares the provider token and sends the request ID header on compute and network requests, while the parent and already obtained services send none; a derived Connection can be re-derived.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestHeaderOnDerivedConnectionOnly`.
+- Empty, spaced, control, non-ASCII and nil-receiver inputs are rejected before anything is built.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscGlobalRequestRejectsUnsafeIDs`.
+- Custom service clients of a derived Connection carry the header with their own client.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+
+Python/Go differences:
+
+- Python mutates nothing on the receiver either, but also copies configuration through cloud_region.from_session; Go copies the Connection options, shares the provider and starts with a fresh service cache and microversion negotiation.
+- The ID is validated (non-empty printable ASCII without spaces); Python accepts any string.
+- Python can also use the context-manager form; Go callers keep the returned Connection in a variable scope.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/pprint`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK has no printing helper; Python delegates to the standard pprint module and Go callers use fmt or encoding/json themselves.
+- Python-only wrapper around the standard pprint module; Go callers use fmt or encoding/json.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/pformat`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK has no formatting helper; Python delegates to pprint.pformat and Go callers use fmt or encoding/json themselves.
+- Python-only wrapper around pprint.pformat; Go callers use fmt or encoding/json.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/range_search`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- Go has no public helper for the integer range filters (<, >, <=, >=, exact and min/max) applied across a list of dictionaries.
+- Operates on untyped dictionaries with string range expressions; the Go API exposes typed collections and concrete filter options, so no equivalent entry point exists by design.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/search_resources`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- Go has no registry that resolves a 'service.resource' string to a proxy resource and runs the GET-by-ID then filtered list fallback.
+- Resolves a service.resource string through the dynamic Python proxy registry; the Go API is statically typed and has no string-keyed resource registry by design.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/project_cleanup`
 
@@ -738,83 +796,181 @@ Unresolved boundaries:
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go has no boolean service probe that honours has_<service> configuration and version discovery; service accessors return errors that do not distinguish an absent service from other failures.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.HasService`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.HasServiceVersion`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ServiceEnabled`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpoint`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpointContext`
+- `github.com/JSYoo5B/go-openstacksdk.WithServiceEnabled`
+
+- HasService reports catalog or override presence without a request and returns errors for lookup failures.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`, `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+- HasServiceVersion asks SessionEndpointContext for min_version=version and max_version='<major>.latest', so a catalog URL of that major needs no request, other majors consult the version document, and an absent version is false.
+  Tests: `connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
+- has_<service> flags from clouds.yaml or WithServiceEnabled (explicit options win) disable a service before any lookup; unset flags default to official os-service-types types, so aliases such as volumev3 are false unless enabled; non-boolean flags are rejected.
+  Tests: `connection_endpoint_discovery_test.go:TestHasServiceVersionAndServiceFlags`, `connection_endpoint_discovery_test.go:TestCloudsYAMLServiceFlagsAndSecurityGroupSource`, `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+
+Python/Go differences:
+
+- Go returns lookup failures and invalid versions as errors where Python returns False.
+- HasService performs no version discovery; HasServiceVersion with an empty version is has_service without a version (including the implied version of volumev2/volumev3/sharev2/workflowv2).
+- Catalog types match exactly; os-service-types aliases are not resolved during catalog lookup, as for EndpointFor.
+- has_<service> values must be booleans and are validated when the Connection is created instead of asserting at call time; region-specific clouds.yaml values are not read.
+- Version discovery is not cached between calls and the debug log of disabled services is not emitted.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/get_session_endpoint`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go has no public endpoint lookup by service type with min_version and max_version discovery that returns None when the endpoint is missing.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpoint`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SessionEndpointContext`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.EndpointFor`
+- `github.com/JSYoo5B/go-openstacksdk.WithEndpointMinVersion`
+- `github.com/JSYoo5B/go-openstacksdk.WithEndpointMaxVersion`
+
+- Override or catalog endpoint with region, interface and service name; false when absent.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+- SessionEndpointContext follows keystoneauth discovery: an override or a catalog URL already within the bounds and major is returned without a request; otherwise unauthenticated GETs (a 401 retried with the token) of the unversioned URL, matched versioned URL, identity hack and catalog URL select the newest CURRENT/SUPPORTED/STABLE/DEPRECATED version in range by its self link (relative and foreign-host links repaired, project suffix restored); no match is not found and no document falls back to the catalog URL.
+  Tests: `connection_endpoint_discovery_test.go:TestSessionEndpointContextVersionDiscovery`, `connection_endpoint_discovery_test.go:TestSessionEndpointContextProjectPeekWithoutTokenProject`.
+- Invalid, contradictory or alias-mismatched versions are errors before HTTP, overrides skip discovery, version bounds are rejected by the context-free SessionEndpoint, and cancellation stops discovery.
+  Tests: `connection_endpoint_discovery_test.go:TestSessionEndpointContextOverrideInvalidAndCanceled`.
+
+Python/Go differences:
+
+- Go returns (url, found, error); invalid versions, malformed version documents and cancellation are errors where Python raises SDKException.
+- Version discovery runs only in SessionEndpointContext; SessionEndpoint never makes a request.
+- Catalog types match exactly; os-service-types aliases are not resolved during catalog lookup, as for EndpointFor.
+- Discovery documents are not cached between calls; the discovery GET uses the provider HTTP client and the current token without reauthentication.
 
 ### `python:connection/endpoint_for`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go has no public endpoint lookup by service type string with per-call interface and region_name that honours endpoint overrides and returns None when the catalog has no match.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.EndpointFor`
+- `github.com/JSYoo5B/go-openstacksdk.WithEndpointInterface`
+- `github.com/JSYoo5B/go-openstacksdk.WithEndpointRegion`
+- `github.com/JSYoo5B/go-openstacksdk.WithEndpointServiceName`
+
+- A WithEndpoint override of the type wins; otherwise the first matching catalog endpoint by interface (URL suffix ignored) and region is returned, the bool is false when absent, and no request is made.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForCatalogSelectionAndOverride`.
+- Without a recorded token catalog the provider endpoint locator is used with the type, region, interface and name, absence maps to not found, and invalid arguments or other failures are errors.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscEndpointForInvalidAndUnrecordedCatalog`.
+
+Python/Go differences:
+
+- Go returns (url, found, error) instead of None; lookup failures are errors.
+- Catalog types match exactly; os-service-types aliases are not resolved.
+- Overrides are the Connection WithEndpoint options per Service; per-service endpoint/endpoint_override configuration keys are not read.
 
 ### `python:connection/connect_as`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go cannot derive a new Connection from the current configuration with overridden auth arguments and a shared discovery cache; the caller must run Connect again with explicit options.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ConnectAs`
+- `github.com/JSYoo5B/go-openstacksdk.AsUsername`
+- `github.com/JSYoo5B/go-openstacksdk.AsUserID`
+- `github.com/JSYoo5B/go-openstacksdk.AsPassword`
+- `github.com/JSYoo5B/go-openstacksdk.AsUserDomainID`
+- `github.com/JSYoo5B/go-openstacksdk.AsUserDomainName`
+- `github.com/JSYoo5B/go-openstacksdk.AsProjectName`
+- `github.com/JSYoo5B/go-openstacksdk.AsProjectID`
+- `github.com/JSYoo5B/go-openstacksdk.AsProjectDomainID`
+- `github.com/JSYoo5B/go-openstacksdk.AsProjectDomainName`
+- `github.com/JSYoo5B/go-openstacksdk.AsAuthOptions`
+
+- The derived Connection authenticates once with the recorded options overridden by typed settings, applies the user/project discard rules and project domain inheritance, keeps endpoint/region/location facts, and uses its own token.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+- Invalid overrides, nil options, canceled contexts and FromProvider connections make no token request; authentication failures wrap the native cause; a derived Connection does not inherit the global request ID.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`, `connection_r2_misc_derive_test.go:TestR2MiscConnectAsDoesNotInheritGlobalRequestID`.
+
+Python/Go differences:
+
+- Overrides are typed options instead of **kwargs; AsAuthOptions covers other auth settings.
+- No discovery cache is shared because Go keeps none; microversion selection is negotiated again.
+- With a user ID the inherited user domain is dropped because Identity v3 rejects both.
+- Connections created by FromProvider record no credentials and return ErrNoRecordedAuth.
+- Failures wrap the native cause rather than SDKException; context cancellation stays observable and nothing is replayed automatically.
 
 ### `python:connection/connect_as_project`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go cannot derive a new Connection scoped to another project name or project dict from the current configuration; the caller must run Connect again with explicit options.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ConnectAsProject`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ConnectAs`
+
+- A project by name and project domain ID is scoped with the inherited project fields discarded; a project ID selects the ID scope.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsOverridesAuthAndSharesNothing`.
+- An empty project reference is rejected without a request.
+  Tests: `connection_r2_misc_derive_test.go:TestR2MiscConnectAsInvalidInputsMakeNoRequest`.
+
+Python/Go differences:
+
+- The dict form is ProjectRef{ID, Name, DomainID}; a plain string is ProjectRef{Name: name}.
+- Same ownership as ConnectAs.
+- Failures wrap the native cause rather than SDKException; context cancellation stays observable and nothing is replayed automatically.
 
 ### `python:connection/add_service`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- Go has no runtime registration of a ServiceDescription that attaches a new proxy to Connection and enables its service type.
+- `github.com/JSYoo5B/go-openstacksdk.Connection.AddService`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.CustomServiceClient`
+
+- Registration performs no request; the client is built lazily once from the shared provider, endpoint override or locator, and cached; duplicates, built-in names and invalid input are rejected; canceled contexts fail.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceBuildsLazyClientOncePerConnection`.
+- Factory errors and nil clients are reported and a locator is required without an endpoint.
+  Tests: `connection_r2_misc_endpoint_test.go:TestR2MiscAddServiceWithoutEndpointUsesLocatorAndReportsFactoryErrors`.
+
+Python/Go differences:
+
+- Python attaches a ServiceDescription proxy to the Connection class (process-wide) and enables the type; Go registers a Gophercloud client factory on one Connection and returns a ServiceClient, not a typed proxy.
+- Registrations cannot be replaced.
 
 ### `python:cloud/_utils/FileSegment/read`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject.
+- FileSegment is an internal Python file-like upload helper with no public Go counterpart by design; Go callers can use io.SectionReader and segment uploads use internal readers.
 
 ### `python:cloud/_utils/FileSegment/reset`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject.
+- FileSegment is an internal Python file-like upload helper with no public Go counterpart by design; Go callers can use io.SectionReader and segment uploads use internal readers.
 
 ### `python:cloud/_utils/FileSegment/seek`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject.
+- FileSegment is an internal Python file-like upload helper with no public Go counterpart by design; Go callers can use io.SectionReader and segment uploads use internal readers.
 
 ### `python:cloud/_utils/FileSegment/tell`
 
-Status: `unresolved`.
+Status: `unsupported`.
 
 Unresolved boundaries:
 
-- The SDK exposes no public file segment reader; Python FileSegment is an internal upload helper and Go segment uploads use internal readers inside CreateObject.
+- FileSegment is an internal Python file-like upload helper with no public Go counterpart by design; Go callers can use io.SectionReader and segment uploads use internal readers.
 
 ### `python:cloud/inventory/OpenStackInventory/list_hosts`
 

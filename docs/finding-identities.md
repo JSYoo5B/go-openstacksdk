@@ -199,7 +199,7 @@ Python/Go differences:
 
 ### `python:dns/v2/find_recordset`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -225,6 +225,8 @@ Go API:
   Tests: `internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence`, `internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication`, `internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal`, `internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP`, `api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient`.
 - Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases`, `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal`.
+- Within a fixed zone, GET by name is rejected (400) then the zone's list is filtered by name, matching ID or name and returning nil by default when absent.
+  Tests: `api/r2_dns_cloud_test.go:TestR2DNSRecordSetWaitsAndFindIdentityInZone`.
 
 Python/Go differences:
 
@@ -232,26 +234,25 @@ Python/Go differences:
 - Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.
 - Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.
 - The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.
-
-Unresolved boundaries:
-
-- Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.
-- Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.
-- Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.
-- Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.
-- Pinned find_recordset (openstack/dns/v2/_proxy.py:337-364) accepts a zone ID or Zone Resource and passes its ID to _find. The concrete Go Ref-based zone scope keeps a fixed parent; cached parent Resource inputs and the inherited child URI/control overrides require separate mapping.
+- Python Resource.list classifies declared query aliases/unknown names and applies known Body attributes locally; Go sends an explicit wire Query and rejects reserved controls.
+- Python Proxy.request may cache GET responses; the Go lookup is stateless.
+- Python fetch merges into a seeded Resource and tolerates missing/invalid JSON differently; Go uses strict native GetResult extraction and requires safe nonblank result IDs.
+- Python follows RFC Link headers and limit/marker continuation; Go keeps each native pager.
+- Python accepts a Zone Resource and passes its ID; Go's scope is created from a zone reference (InZone) and keeps that fixed parent for GET, fallback and continuation.
 
 ### `python:load_balancer/v2/find_member`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.Members`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.MemberScope.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindFallback`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -271,22 +272,22 @@ Go API:
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases`, `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal`.
 - Fixed-pool Member uses existing LocalStatus policy for typed WithStatus: wire status is omitted, filtering remains local and raw cap precedes that filter. Raw WithQuery(status) alone remains wire-only. Combining typed and raw status keeps the activated local filter and compares the final option value in either order.
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityMemberWireAndTypedStatusRemainSeparate`.
+- Python-shaped lookup on the fixed pool: ID hit, ID miss with and without ignore-missing, exact name hit/miss and duplicate names behave like Python find semantics under explicit references.
+  Tests: `api/py_lb_find_test.go:TestPyLBFindExplicitIDAndNameKeepIgnoreMissingAndDuplicateSemantics`.
 
 Python/Go differences:
 
+- Python member methods take the parent pool as an ID or Pool Resource and put pool_id into the URI; Go passes the pool ID per call or fixes it once in a pools.API.Members scope (an explicit ID needs no lookup request).
+- Python find_* tries GET by ID, falls back to a list by name on 400/403/404 and matches ID or name; Go separates resource.ID and resource.Name references, resolves names through an exact-name list and reports duplicate names as an AmbiguousError (Python DuplicateResource).
+- Python find_*/delete_* default to ignore_missing=True (find with a deprecation warning); Go Find is strict by default and needs resource.WithIgnoreMissing for the Python default, Remove ignores a missing object by default (WithMissingError selects strict) and native API.Delete keeps a 404 as a response error.
 - The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.
 - Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.
 - Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.
 - The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.
 - Pinned find_member (openstack/load_balancer/v2/_proxy.py:542-569) exposes only name_or_id, pool and ignore_missing; explicit Go wire Query and fallback-policy controls are extensions.
 - The fixed Member collection now forwards explicit raw wire status while typed WithStatus retains local filtering. Mixed typed/raw status uses the last value for the activated local filter; it is not the wire-only policy of raw query alone.
-
-Unresolved boundaries:
-
-- Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.
-- Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.
-- Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.
-- Pinned find_member accepts a pool ID or Pool Resource and passes its ID to _find. The concrete Go Ref-based pool scope keeps a fixed parent; cached parent Resource inputs remain a separate mapping obligation.
+- Python find can serve a GET from the connection response cache (openstack/proxy.py request caching) and merges the fetched body into a seeded Resource; Go performs fresh stateless requests and returns a native typed model, with no response cache.
+- Python continuation also follows RFC Link headers and limit/marker fallbacks (Resource._get_next_link); Go retains the native pager and its cycle policy for every list page.
 
 ### `python:identity/v3/find_project`
 
@@ -1576,56 +1577,50 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/update_aggregate`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateAggregate`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Update`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.UpdateRecord`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone`
 
-- get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.
-  Tests: `compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList`, `api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute`.
-- Update sends PUT os-aggregates/{id} with the typed name and availability_zone but rejects an explicit null availability_zone before HTTP.
-  Tests: `compute/v2/aggregates/python_parity_test.go:TestPythonAggregateUpdateCannotSendNullAvailabilityZone`.
+- get_aggregate(name_or_id) is GET os-aggregates/{value} then the list; UpdateAggregate performs it strictly and sends one PUT with only supplied attributes, including availability_zone null.
+  Tests: `connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull`.
+- A missing aggregate returns ErrNotFound and no PUT is sent.
+  Tests: `connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeUpdateAggregateMissingSendsNoPut`.
+- The delegated proxy update (null availability zone, empty name, extension attributes, no-op without attributes) is mapped.
+  Tests: `compute/v2/aggregates/python_update_record_test.go:TestPythonAggregateUpdateRecordSendsNullAndEmptyValues`.
 
 Python/Go differences:
 
-- Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).
-- Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.
-- Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.
-- Python returns a Resource object; Go returns the native typed model.
-- Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.
-- Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.
-
-Unresolved boundaries:
-
-- The delegated proxy update_aggregate is unresolved because UpdateOpts cannot send availability_zone=None.
+- Python raises SDKException for a missing aggregate; Go returns resource.ErrNotFound.
+- Python takes **kwargs; Go takes typed UpdateRecord options.
+- Identities unsafe as a URL segment skip the member GET in Go; Python sends them encoded first. Python compares the integer id with the string in the list fallback so a numeric string never matches there; Go compares text after a 400 or 403.
+- Python returns a Resource; Go returns an AggregateRecord with typed decode, raw fields, headers and status.
 
 ### `python:cloud/_compute/ComputeCloudMixin/delete_aggregate`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteAggregate`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.Delete`
 
-- get_aggregate(name_or_id) sends GET os-aggregates/{name_or_id} with the literal identity, falls back to GET os-aggregates after a 404 and matches the name, and returns nil without error when nothing matches.
-  Tests: `compute/v2/aggregates/python_cloud_find_test.go:TestPythonCloudGetAggregateFindsByLiteralIdentityThenList`, `api/find_identity_python_finds_test.go:TestPythonFindAggregateSendsLiteralIdentityToMemberRoute`.
+- A digit-only identity is deleted with one DELETE and no lookup, and a 404 on it is false; a 500 is an error.
+  Tests: `connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateDigitsSkipLookupAndMapMissingToFalse`, `connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
+- A name is found first (GET then list), a missing aggregate returns false with no DELETE, and cancellation or a blank identity fails before any request.
+  Tests: `connection_py_cloud_compute_aggregates_test.go:TestPyCloudComputeDeleteAggregateByNameAndFailures`.
 
 Python/Go differences:
 
-- Python returns None for a missing resource and raises NotFoundException with ignore_missing=False; Go FindIdentity returns nil, nil by default and resource.ErrNotFound with resource.WithIdentityFindIgnoreMissing(false).
-- Python raises DuplicateResource for two matching rows; Go returns resource.ErrAmbiguous after reading every list page.
-- Identities that are not safe as one URL segment (spaces, slashes, percent signs) skip the member GET in Go and go straight to the list fallback; Python sends them URL-encoded on the GET first.
-- Python returns a Resource object; Go returns the native typed model.
-- Python compares the integer Aggregate id with the string name_or_id in the list fallback, so a numeric string never matches there; Go compares the ID as text after a GET 400 or 403.
-- Python negotiates min(Aggregate _max_microversion 2.81, server maximum) per request; Go sends the microversion configured or negotiated on the Connection client.
-
-Unresolved boundaries:
-
-- A digit string skips the lookup and Python turns the strict DELETE 404 into False; Go Delete returns the 404, and resource.IgnoreMissing or Remove would report success instead of the False result.
+- Python str.isdigit also accepts non-ASCII digits (for example superscripts) that Go sends through the name lookup; Go parses digit-only ASCII/Unicode-decimal text as an integer ID.
+- Python accepts an int input; Go takes a string.
+- The generated Delete binding accepts only HTTP 200 from Nova while Python accepts any status below 400; other 2xx codes return an error in Go.
+- Python returns True/False; Go returns the same boolean plus an error and never replays the DELETE.
 
 ### `python:cloud/_compute/ComputeCloudMixin/set_aggregate_metadata`
 

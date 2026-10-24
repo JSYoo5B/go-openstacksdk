@@ -8,16 +8,18 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `gophercloud:orchestration/v1/stackresources.Find`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.Find`
 
-Unresolved boundaries:
+- Native Find requests GET /stacks/{name}/resources without a query, follows the canonical redirect keeping auth and client headers, returns the stack-wide resource list with decoded fields, and keeps empty lists, 403/404, invalid timestamp, malformed JSON and canceled-context failures.
+  Tests: `api/heat_native_stackresources_test.go:TestHeatNativeStackResourcesFindFollowsNameRedirectAndKeepsErrors`.
 
-- Native Find requests /stacks/{stackName}/resources and returns the stack-wide resource list; StackScope.Find performs a child exact-name/ID lookup under an already fixed name+ID and is not the same operation.
-- Audit and test the generated stack-name Find route, redirect/errors, response decoding, headers and cancellation before assigning a mapping status.
+Python/Go differences:
+
+- Native Find lists every resource of a stack addressed by name; StackScope.Find is a different operation that resolves one child under an already fixed name and ID.
 
 ### `gophercloud:orchestration/v1/stackresources.Get`
 
@@ -74,38 +76,40 @@ Python/Go differences:
 
 ### `gophercloud:orchestration/v1/stackresources.ListTypes`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.ListTypes`
 
-Unresolved boundaries:
+- ListTypes issues one non-paged GET /resource_types, preserves server order, treats 204 as empty and keeps HTTP 500 and cancellation failures.
+  Tests: `api/heat_native_stackresources_test.go:TestHeatNativeResourceTypesListSchemaAndTemplate`.
 
-- ListTypes is a global resource-type operation (GET /resource_types), not a child stack resource scope; a generated facade alone does not establish SDK support.
-- Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation.
+Python/Go differences:
+
+- This is a global resource-type operation on the native API; it is not a stack-scoped child operation and returns plain type names.
 
 ### `gophercloud:orchestration/v1/stackresources.MarkUnhealthy`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.StackScope.MarkUnhealthy`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.ResourceScope.MarkUnhealthy`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithHealthReason`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.MarkUnhealthy`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithMarkUnhealthyOptions`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.WithMarkUnhealthyField`
 
 - A health mutation preserves false and its optional reason, preflights resource_name/owner, blocks unknown or different nested owners, and requires an explicit owning ResourceIdentity to target a child.
   Tests: `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesNestedOwnerCannotMutateRoot`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesUnknownOwnerAndPhysicalFallbackAreBlocked`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesValidationBeforeHTTP`, `api/heat_stackresources_contracts_test.go:TestHeatStackResourcesHealthHTTPErrorsAndMetadataDecodeCause`.
+- Native MarkUnhealthy sends PATCH with the path segment unchanged (including a physical resource ID, no preflight), preserves false, omits an empty reason, applies option and field extensions, accepts 200/202/204, preserves 201/400/403/404/409/500 as errors, rejects typed-field overrides and nil options, and fails before HTTP on cancellation.
+  Tests: `api/heat_native_stackresources_test.go:TestHeatNativeStackResourcesMarkUnhealthyPhysicalIDAndExtensions`.
 
 Python/Go differences:
 
-- The scope takes the required bool and optional SDK-owned reason rather than MarkUnhealthyOptsBuilder, and GET-preflights logical/resource_name targeting before PATCH.
-
-Unresolved boundaries:
-
-- The native/server health endpoint also permits physical-ID targeting; the high-level scope deliberately restricts routing to resource_name and the generated physical-ID API branch has not received a meaningful dedicated HTTP contract test.
-- Audit generated WithMarkUnhealthyOptions/WithMarkUnhealthyField and native builder extension/error behavior separately before judging the entire direct native operation complete.
+- The scope takes the required bool and optional SDK-owned reason rather than MarkUnhealthyOptsBuilder, and GET-preflights logical/resource_name targeting before PATCH; only the native API can target a physical resource ID.
 
 ### `gophercloud:orchestration/v1/stackresources.Metadata`
 
@@ -126,33 +130,37 @@ Python/Go differences:
 
 ### `gophercloud:orchestration/v1/stackresources.Schema`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.Schema`
 
-Unresolved boundaries:
+- Schema issues GET /resource_types/{type}, preserves nulls inside attributes, properties and support status, and keeps 403/404, malformed JSON and cancellation failures.
+  Tests: `api/heat_native_stackresources_test.go:TestHeatNativeResourceTypesListSchemaAndTemplate`.
 
-- Schema is a global resource-type operation (GET /resource_types/{typeName}), not a child stack resource scope; a generated facade alone does not establish SDK support.
-- Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation.
+Python/Go differences:
+
+- This is a global resource-type operation on the native API and returns the native TypeSchema, not a stack-scoped child.
 
 ### `gophercloud:orchestration/v1/stackresources.Template`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackresources.API.Template`
 
-Unresolved boundaries:
+- Template issues GET /resource_types/{type}/template, returns the body re-encoded as indented JSON bytes with nulls kept, and keeps 404, non-JSON body and cancellation failures.
+  Tests: `api/heat_native_stackresources_test.go:TestHeatNativeResourceTypesListSchemaAndTemplate`.
 
-- Template is a global resource-type operation (GET /resource_types/{typeName}/template), not a child stack resource scope; a generated facade alone does not establish SDK support.
-- Audit native request/result serialization and meaningful model/status/header/context/error contracts, add HTTP tests and direct usage documentation.
+Python/Go differences:
+
+- This is a global resource-type operation on the native API; the result is re-marshaled indented JSON (sorted keys), not the server's original byte sequence.
 
 ### `python:orchestration/v1/resources`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -179,12 +187,9 @@ Python/Go differences:
 
 - Go explicitly fixes stack name+canonical ID, uses resource_name as routing identity, and preserves nested actual owners rather than treating every result as root-owned.
 - Go rejects marker/limit and unknown server query keys before HTTP and maps results to native fields plus owner/detail/raw-response metadata rather than Python Resource objects.
-
-Unresolved boundaries:
-
-- Audit inherited Python Stack.find/_find name-or-ID and object inputs, deleted/adopted-stack state policy, and full Resource.list/MRO/descriptor/cache/adapter behavior before whole-operation parity.
-- Audit Python client-side query/filter behavior and inherited pagination against the Heat server single-page restrictions, including unsupported marker/limit and all accepted filter forms.
-- Audit Python Resource unknown Body/URI state, alternate logical-resource ID, descriptor/date coercion and response/error policies separately; tested Go raw fields/header retention does not account for the complete inherited Resource surface.
+- Python resolves a non-Stack argument with _find(ignore_missing=False), which is one GET /stacks/{name} (a DELETE_COMPLETE or ADOPT_COMPLETE stack is NotFound); Go InStack resolves a Name by an exact list scan with duplicate detection or an ID by the identity GET and does not hide deleted stacks.
+- Python declares no resource query keys beyond limit and marker, so keywords such as status or name become client-side filters on Resource attributes and unknown keywords are discarded; Go offers exact local name/status filters, typed nested_depth and with_detail options, and rejects marker, limit and unknown server queries before HTTP because Heat returns a single page.
+- Python builds Resource objects with alternate logical_resource_id and descriptor coercion and returns a lazy generator after the stack is resolved eagerly; Go returns lazy ResourceView values that retain the raw body, headers and nested owner.
 
 ## Usage examples
 

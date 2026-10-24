@@ -47,12 +47,15 @@ Python/Go differences:
 
 ### `python:clustering/v1/set_cluster_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.PythonMetadata`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.SetMetadata`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.ReplaceMetadata`
 
 - Set snapshots input JSON and protected header-only options before lookup, observes metadata via GET and shallow-merges top-level keys while preserving unrelated exact raw numbers/null/unknown values. One full-object PATCH202 stays on the supplied ID route or the once-resolved canonical Name route, uses the source's current token/version and returns independent Previous/Requested/ResponseCluster/Operation without claiming requested values were applied.
   Tests: `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataShallowMergeSnapshotsAndQueuedResult`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataNameResolutionUsesCanonicalRawFields`, `connection_senlin_metadata_test.go:TestConnectionSenlinMetadataSharesSourceAndLocksResolvedRoute`.
@@ -60,42 +63,38 @@ Go API:
   Tests: `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataNoOpsUseExactJSONEquality`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataPreflightRejectsUnsupportedInputs`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataRevalidatesSourceBeforeEveryRequest`, `connection_senlin_metadata_test.go:TestConnectionSenlinMetadataNoOpAndSourceRecheck`.
 - Malformed GET or accepted PATCH envelopes/metadata, missing/foreign/multiple action Location and cancellation after acceptance retain full original HTTP evidence without a resend or action GET. Wrong status and server failures remain native. The RMW concurrency fixture demonstrates that a concurrent key absent from the observed object is not merged into the replacement and queued acceptance does not imply final state.
   Tests: `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataReadFailuresPreserveWholeResponse`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataAcceptedFailuresNeverResendOrFollowLocation`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataCancellationAfterAcceptanceRetainsEvidence`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataReadModifyWriteDoesNotClaimConcurrencyOrCompletion`, `connection_senlin_metadata_test.go:TestConnectionSenlinMetadataAcceptedFailuresKeepOriginalEvidence`.
+- The explicit PythonMetadata profile sends POST/PUT {"metadata": ...} and per-key DELETE routes, preserves nil-as-{} and ordering, returns opaque receipts and partial deletion results, and keeps a stock 404 as an error without fallback to GET+PATCH.
+  Tests: `api/r2_small_clustering_test.go:TestR2SmallClusteringPythonMetadataRoutesAndBodies`, `api/r2_small_clustering_test.go:TestR2SmallClusteringPythonMetadataStock404PartialDeleteAndRejection`.
 
 Python/Go differences:
 
-- Pinned _proxy.py:419-437 forwards metadata kwargs to MetadataMixin.set_metadata, which POSTs /clusters/{id}/metadata and assigns submitted metadata to the mutable Resource cache (common/metadata.py:48-70). The audited Senlin16.0.0 router does not register that route. Go uses supported cluster GET plus PATCH /clusters/{id} with {cluster:{metadata:wholeObject}}, matching the server cluster update action's metadata replacement semantics.
-- Go returns an observed/requested/accepted MetadataResult with a mandatory validated action Location and Changed meaning accepted replacement only. It shallow-merges a GET snapshot, normalizes omitted/null metadata only as an empty merge base, and suppresses empty/equal writes instead of making an unsupported synchronous metadata POST or treating cached submitted values as server state.
-- Input and response snapshots, exact-decimal comparison with strict JSON boolean/number types, explicit ID/Name resolution, context and header ownership are documented Go policies. No extra numeric version gate, conditional-write guarantee, automatic retry, rollback or completion wait is invented.
-
-Unresolved boundaries:
-
-- The functional supported-route alternative is implemented and tested, but synchronous key-wise metadata transport and mutable Resource/cache return semantics are not reproduced. The Go result intentionally separates observed, requested and accepted states; the audited nonexistent routes are not implementation backlog.
-- Server-side atomic key merge or CAS across GET/PATCH and queued action application is not provided or proven. Concurrent updates can be lost; no-op is based on the observed snapshot. This is a documented boundary of the implemented functional layer, not a live-cloud atomicity/completion claim or an authorization to invent metadata routes.
+- The routes are absent from the audited Senlin router, so stock deployments return 404; the profile is an opt-in to the pinned Python request shape and not a capability claim. The GET+PATCH alternative (API.SetMetadata/DeleteMetadata) remains the stock-compatible path and is never used as fallback.
+- Go accepts a validated Senlin cluster ID string and returns opaque receipts instead of a mutable Cluster holding the submitted metadata; metadata is not synthesized from input.
+- Key deletion is sequential and not atomic; Go returns the keys acknowledged before the first failure. Python raises on the first failure without partial output.
 
 ### `python:clustering/v1/delete_cluster_metadata`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.API.PythonMetadata`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters.PythonMetadataProfile.DeleteMetadata`
 
 - Nil keys clear the observed metadata with one whole-object empty replacement; a nonnil empty key slice performs no HTTP and fabricates no observation. Selected duplicate or arbitrary string keys are snapshotted before GET, removed together and sent as one PATCH while preserving exact unrelated values. Missing selected keys and already empty/omitted/null metadata perform GET without PATCH.
   Tests: `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataSelectedDeleteIsOneOwnedReplacement`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataNoOpsUseExactJSONEquality`, `connection_senlin_metadata_test.go:TestConnectionSenlinMetadataReadAliasesAndOwnedDelete`.
 - Header-only capability and source/context validation applies even to the zero-HTTP empty-key branch and after custom option side effects. Name resolution and explicit ID routes remain fixed, native missing/server errors are not hidden, and an accepted replacement retains required action Location/evidence without a retry or automatic follow-up.
   Tests: `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataZeroHTTPDeleteRevalidatesOptionSideEffects`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataPreflightRejectsUnsupportedInputs`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataRevalidatesSourceBeforeEveryRequest`, `api/clustering_cluster_metadata_test.go:TestClusteringClusterMetadataAcceptedFailuresNeverResendOrFollowLocation`, `connection_senlin_metadata_test.go:TestConnectionSenlinMetadataNoOpAndSourceRecheck`.
+- The explicit PythonMetadata profile sends POST/PUT {"metadata": ...} and per-key DELETE routes, preserves nil-as-{} and ordering, returns opaque receipts and partial deletion results, and keeps a stock 404 as an error without fallback to GET+PATCH.
+  Tests: `api/r2_small_clustering_test.go:TestR2SmallClusteringPythonMetadataRoutesAndBodies`, `api/r2_small_clustering_test.go:TestR2SmallClusteringPythonMetadataStock404PartialDeleteAndRejection`.
 
 Python/Go differences:
 
-- Pinned _proxy.py:439-451 iterates selected keys and invokes MetadataMixin.delete_metadata_item's DELETE /clusters/{id}/metadata/{key}; nil keys invoke PUT /clusters/{id}/metadata with an empty object (common/metadata.py:86-92,137-160). Neither metadata subresource route is registered by the audited Senlin16.0.0 router. Go implements deletion intent using supported cluster GET and a single queued whole-object replacement PATCH.
-- Go snapshots a concrete string slice, batches selected-key removal, treats absent selected keys as no change, distinguishes nil clear-all from empty-slice zero HTTP and returns a MetadataResult. Python selected-key requests/cache mutation and None return are not reproduced; no per-key endpoint or fabricated completion is added.
-- Previous/Requested raw maps and accepted ResponseCluster/Operation remain separate and independent. Empty-slice results have no observation, while other no-ops preserve the GET evidence. Explicit ID/Name, header ownership and terminal source/context rechecks are documented Go behavior.
-
-Unresolved boundaries:
-
-- The functional supported-route alternative is implemented and tested, but synchronous key-wise metadata transport and mutable Resource/cache return semantics are not reproduced. The Go result intentionally separates observed, requested and accepted states; the audited nonexistent routes are not implementation backlog.
-- GET/PATCH and later queued action application have no proven atomic key-deletion/CAS contract. Concurrent metadata added after GET can be removed by the full replacement; the result reports accepted intent rather than final application. No retry/rollback or runtime completion guarantee is claimed.
+- The routes are absent from the audited Senlin router, so stock deployments return 404; the profile is an opt-in to the pinned Python request shape and not a capability claim. The GET+PATCH alternative (API.SetMetadata/DeleteMetadata) remains the stock-compatible path and is never used as fallback.
+- Go accepts a validated Senlin cluster ID string and returns opaque receipts instead of a mutable Cluster holding the submitted metadata; metadata is not synthesized from input.
+- Key deletion is sequential and not atomic; Go returns the keys acknowledged before the first failure. Python raises on the first failure without partial output.
 
 ## Usage examples
 

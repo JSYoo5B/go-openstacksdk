@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:load_balancer/v2/get_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -33,11 +33,9 @@ Python/Go differences:
 - The high-level Go route corrects pinned Gophercloud quota URLs that omit lbaas; generated low-level operations retain their existing route.
 - Go references distinguish exact Keystone names from IDs and can derive a recorded-auth scope, while the direct Python proxy accepts a project ID or Quota Resource.
 - Go returns native integer limits plus raw fields/copied header/status rather than Python plural descriptor properties; null and alias conflicts remain distinguishable through Body.
-
-Unresolved boundaries:
-
-- Audit Python Quota Resource input conversion, alternate project_id identity, descriptor coercion and inherited Resource.fetch response/dict/location/cache/skip_cache behavior.
-- Generic fetch/query and adapter/microversion contracts remain unaudited; the explicit Go fields helper and observed HTTP contracts do not establish whole-operation parity.
+- Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.
+- Python exposes plural descriptors (load_balancers from load_balancer, health_monitors from health_monitor, listeners, pools, members) and coerces them to int; Go returns the native integer limits plus raw Body, where null and alias conflicts stay distinguishable.
+- Python Resource.fetch/list normalization (dict/location merge, response cache, skip_cache) has no Go counterpart; Go performs fresh stateless requests and keeps the native model separate from HTTP evidence.
 
 ### `python:load_balancer/v2/update_quota`
 
@@ -72,7 +70,7 @@ Python/Go differences:
 
 ### `python:load_balancer/v2/delete_quota`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -91,15 +89,13 @@ Python/Go differences:
 - Python delete_quota defaults ignore_missing=True; Go Reset defaults strict and requires WithResetIgnoreMissing(true) for suppression.
 - Go returns ResetResponse metadata and keeps native-compatible 202/204 success; Python returns None and official Octavia DELETE documents 204.
 - The scope resets quota overrides through the corrected official route, while generated API.Delete retains its native /quotas path.
-
-Unresolved boundaries:
-
-- Audit Python Quota Resource/string input conversion and inherited Resource.delete response/cache/resource-instance and adapter behavior before whole-operation parity.
-- General dynamic request behavior and deletion effects on Python Resource state remain unmapped; the Go scope returns request metadata without refreshing limits.
+- Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.
+- Python exposes plural descriptors (load_balancers from load_balancer, health_monitors from health_monitor, listeners, pools, members) and coerces them to int; Go returns the native integer limits plus raw Body, where null and alias conflicts stay distinguishable.
+- Python Resource.fetch/list normalization (dict/location merge, response cache, skip_cache) has no Go counterpart; Go performs fresh stateless requests and keeps the native model separate from HTTP evidence.
 
 ### `python:load_balancer/v2/get_quota_default`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -115,15 +111,13 @@ Python/Go differences:
 
 - Both API.Defaults and scope.Defaults return deployment-wide DefaultQuotaResource; a scoped call does not make the defaults project-specific.
 - Go returns native typed/raw limits and copied metadata rather than mutating a Python QuotaDefault Resource; native null integer values require Body to distinguish inheritance from zero.
-
-Unresolved boundaries:
-
-- Audit inherited QuotaDefault/Quota URI/capability/descriptor behavior and Resource.fetch normalization, dict/location/cache/skip_cache semantics.
-- Inherited Resource input/state and adapter/microversion behavior remain unaudited; the dedicated global endpoint alone is not full Python Resource parity.
+- Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.
+- Python exposes plural descriptors (load_balancers from load_balancer, health_monitors from health_monitor, listeners, pools, members) and coerces them to int; Go returns the native integer limits plus raw Body, where null and alias conflicts stay distinguishable.
+- Python Resource.fetch/list normalization (dict/location merge, response cache, skip_cache) has no Go counterpart; Go performs fresh stateless requests and keeps the native model separate from HTTP evidence.
 
 ### `python:load_balancer/v2/quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -147,11 +141,9 @@ Python/Go differences:
 - Go exposes an explicit server-backed ProjectListOpts whitelist although pinned Proxy.quotas documents no supported resource-specific query; generic arbitrary query inputs are rejected.
 - Go follows recognized same-origin quotas_links continuations with cycle checks and retained initial query, instead of implementing all inherited Resource.list pagination fallbacks.
 - Go returns typed/raw project-quota snapshots; projected-away identities remain empty and are not constructed from request filters.
-
-Unresolved boundaries:
-
-- Audit inherited Quota/Resource.list query mapping, descriptor/alternate-ID normalization, dict/location/cache behavior and Python resource-object ownership.
-- Generic Resource pagination/body/header-link and limit/marker fallback, arbitrary query and adapter/microversion behavior are not fully mapped; the tested SDK whitelist and safe next-link policy are only partial.
+- Python Quota.project_id is the alternate ID, so a project ID string or Quota selects /lbaas/quotas/{project}; Go uses an explicit project reference (ID or exact Keystone name) or the recorded authentication scope.
+- Python exposes plural descriptors (load_balancers from load_balancer, health_monitors from health_monitor, listeners, pools, members) and coerces them to int; Go returns the native integer limits plus raw Body, where null and alias conflicts stay distinguishable.
+- Python Resource.fetch/list normalization (dict/location merge, response cache, skip_cache) has no Go counterpart; Go performs fresh stateless requests and keeps the native model separate from HTTP evidence.
 
 ### `gophercloud:loadbalancer/v2/quotas.Get`
 

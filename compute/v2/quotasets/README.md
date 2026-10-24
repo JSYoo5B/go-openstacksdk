@@ -114,77 +114,75 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/delete_compute_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithIdentityClient`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectComputeQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteComputeQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Reset`
 
-- Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
-- The Go reset handles bodyless DELETE without fabricating a quota object and keeps strict 404 by default.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`, `api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
+- delete_compute_quotas strict-finds the project and calls revert_quota_set (bodyless DELETE os-quota-sets/{project}); DeleteComputeQuotas does the same lookup and one DELETE, returning copied response headers.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+- The strict 404 and HTTP cause preservation of the reset are the mapped revert_quota_set contract.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
 
 Python/Go differences:
 
-- The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call.
-- Python cloud returns None; Go returns the reset request target and copied response headers.
-
-Unresolved boundaries:
-
-- Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity.
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
+- Python returns None; Go returns the reset target and headers.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_compute_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithIdentityClient`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectComputeQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetComputeQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Get`
 
-- Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
-- The ordinary quota limits response and original HTTP/context causes are retained by the project singleton.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`, `api/project_quotas_contracts_test.go:TestProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`, `api/project_quotas_contracts_test.go:TestProjectQuotaCancellationAndTimeoutPreserveCause`.
+- get_compute_quotas(name_or_id) looks the project up with find_project(ignore_missing=False) and then fetches the quota set without usage; GetComputeQuotas performs the same strict lookup before one quota GET and stops with resource.ErrNotFound and no quota request for a missing project.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersLookUpIDThenName`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersHonorCanceledContext`.
+- The delegated compute get_quota_set (usage=False route, normalized known and unknown quota fields, microversion selection) is separately mapped and the helper reuses it.
+  Tests: `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `api/project_quotas_contracts_test.go:TestProjectQuotaLimitsDetailUpdateAndResetPreserveTargetAndResponse`.
 
 Python/Go differences:
 
-- The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call.
-
-Unresolved boundaries:
-
-- Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity.
-- Audit inherited normalized unknown quota attrs and usage/reservation dictionaries and compute maximum microversion selection.
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
 
 ### `python:cloud/_compute/ComputeCloudMixin/set_compute_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.InProject`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithIdentityClient`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectComputeQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SetComputeQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.ProjectQuotaScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithUpdateForce`
 
-- Explicit project IDs bind without a lookup; exact names resolve once with a separate Keystone v3 client and do not replace the target with response quota IDs.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/project_quotas_contracts_test.go:TestProjectQuotaProjectLookupFailuresPreventNovaRequests`, `connection_quotas_test.go:TestConnectionProjectQuotasSuppliesSeparateIdentityClient`, `connection_quotas_test.go:TestConnectionProjectQuotasNeedsNoIdentityForIDOrAuthScope`.
-- Go preserves explicit false/true and omitted force states for concrete quota updates.
-  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited`.
+- set_compute_quotas strict-finds the project, forces force=True over any caller value and sends update_quota_set; SetComputeQuotas looks up once and appends force=true after the caller's options, preserving zero values and omitting unset limits.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeSetQuotasForcesTrueAndKeepsZero`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+- Quota update body building (omission, zero, unlimited, explicit extension fields, protected-key rejection) is the mapped update_quota_set contract.
+  Tests: `api/project_quotas_contracts_test.go:TestProjectQuotaUpdateDistinguishesOmittedFalseZeroAndUnlimited`, `api/project_quotas_contracts_test.go:TestProjectQuotaInvalidOptionsFailBeforeHTTP`.
 
 Python/Go differences:
 
-- The Go caller selects explicit ID or exact Name references and constructs one reusable project scope with an Identity v3 client; Python performs find_project for every cloud helper call.
-- Python cloud forcibly replaces force with True and returns None; Go defaults to native/server force=False, permits explicit WithUpdateForce(True), and returns the updated quota model.
-
-Unresolved boundaries:
-
-- Audit cloud ensure_service_version(Identity v3), inherited project find/object/error behavior and the delegated compute QuotaSet Resource/MRO contract; a scoped subset is not complete cloud-helper parity.
-- Verify a cloud-compatible force=True wrapper or keep the explicit Go default policy documented while completing arbitrary attrs, response and error mapping.
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
+- Python returns None; Go returns the updated quota model. The PUT is sent once and never replayed after an uncertain failure.
 
 ### `python:compute/v2/get_quota_set`
 

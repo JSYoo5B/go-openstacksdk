@@ -26,24 +26,24 @@ Python/Go differences:
 
 ### `python:baremetal_introspection/v1/start_introspection`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartAndGet`
 - `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartIntrospection`
+- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.WithStartIntrospectionQuery`
 
-- Omitted, false and true manage_boot and escaped extension query values reach the POST URL.
-  Tests: `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
-- Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.
-  Tests: `api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP`, `api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause`, `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext`.
+- POST /introspection/{node}?manage_boot=... (omitted, false, true) then one GET of the status; a rejected start is not followed by a read and nothing is replayed.
+  Tests: `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetPostsThenReadsOnceWithoutReplay`, `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
+- A failed status read after an accepted start is a *StartedError; empty identity and canceled contexts fail before HTTP; only 202 starts.
+  Tests: `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetPostsThenReadsOnceWithoutReplay`, `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetRejectsEmptyIdentityAndCancellation`, `api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause`.
 
 Python/Go differences:
 
-- Python returns an Introspection Resource after accepting the request; the Go API returns an error and exposes Resources for later lookup.
-
-Unresolved boundaries:
-
-- Audit the Python node-object/name input and Introspection create/response state against a consistent Go node-reference operation.
+- Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code.
+- The node argument is a name or UUID string used in the URL as given (Python builds a Node from the value without a lookup). Python also sends the identity in the request body; Go sends no body, which the inspector ignores.
+- Python accepts a Node object; Go accepts only the identity string.
 
 ## Usage examples
 

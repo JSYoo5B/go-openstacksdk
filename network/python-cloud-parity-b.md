@@ -1275,60 +1275,72 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/list_firewall_groups`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/groups.API.All`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListFirewallGroups`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListFilters`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListOpts`
 
-- With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_groups, follows the next link and decodes every field the Python resource declares.
-  Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Default and falsey filters send an unfiltered GET fwaas list and follow next links.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Declared query keys are sent to the server (lists repeat, booleans use Python spelling), unknown keys are discarded and Body-only keys are filtered locally with Python equality.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallPoliciesAndRulesLocalFiltersAndPaging`.
+- Invalid truthy filters and list controls fail before HTTP; server errors return no rows; a canceled context sends nothing.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListRejectsBadFiltersBeforeHTTP`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListCancelledAndServerError`.
 
 Python/Go differences:
 
-- Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them.
-
-Unresolved boundaries:
-
-- Python filters the Body-only keys admin_state_up and id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering.
+- Python keeps unknown body attributes; the native Go model drops them and an absent field compares as its zero value.
+- Go takes the filters dictionary as a JSON object option (WithFirewallListFilters) instead of **filters, rejects Proxy/Resource control keys (paginated, base_path, microversion, headers, max_items, jmespath_filters, allow_unknown_params) and returns typed rows instead of Resource objects.
+- Paging follows native next links; a server that continues only through limit/marker without links is not continued.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_firewall_policies`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/policies.API.All`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListFirewallPolicies`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListFilters`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListOpts`
 
-- With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_policies, follows the next link and decodes every field the Python resource declares.
-  Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Default and falsey filters send an unfiltered GET fwaas list and follow next links.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Declared query keys are sent to the server (lists repeat, booleans use Python spelling), unknown keys are discarded and Body-only keys are filtered locally with Python equality.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallPoliciesAndRulesLocalFiltersAndPaging`.
+- Invalid truthy filters and list controls fail before HTTP; server errors return no rows; a canceled context sends nothing.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListRejectsBadFiltersBeforeHTTP`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListCancelledAndServerError`.
 
 Python/Go differences:
 
-- Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them.
-
-Unresolved boundaries:
-
-- Python filters the Body-only keys audited and id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering.
+- Python keeps unknown body attributes; the native Go model drops them and an absent field compares as its zero value.
+- Go takes the filters dictionary as a JSON object option (WithFirewallListFilters) instead of **filters, rejects Proxy/Resource control keys (paginated, base_path, microversion, headers, max_items, jmespath_filters, allow_unknown_params) and returns typed rows instead of Resource objects.
+- Paging follows native next links; a server that continues only through limit/marker without links is not continued.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_firewall_rules`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/fwaas_v2/rules.API.All`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListFirewallRules`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListFilters`
+- `github.com/JSYoo5B/go-openstacksdk/network.WithFirewallListOpts`
 
-- With default arguments the Go FWaaS v2 list sends GET /v2.0/fwaas/firewall_rules, follows the next link and decodes every field the Python resource declares.
-  Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Default and falsey filters send an unfiltered GET fwaas list and follow next links.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBFirewallDefaultLists`.
+- Declared query keys are sent to the server (lists repeat, booleans use Python spelling), unknown keys are discarded and Body-only keys are filtered locally with Python equality.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallGroupListQueryAndLocalFilters`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallPoliciesAndRulesLocalFiltersAndPaging`.
+- Invalid truthy filters and list controls fail before HTTP; server errors return no rows; a canceled context sends nothing.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListRejectsBadFiltersBeforeHTTP`, `api/r2_cloud_net_firewall_test.go:TestR2CloudNetFirewallListCancelledAndServerError`.
 
 Python/Go differences:
 
-- Python keeps unknown body attributes (_allow_unknown_attrs_in_body); the native Go model drops them.
-
-Unresolved boundaries:
-
-- Python filters the Body-only keys id locally while sending declared query keys to the server; the FWaaS v2 collection has no WithFilters/WithBodyFilter classification, so those filter arguments cannot be reproduced without caller-side row filtering.
+- Python keeps unknown body attributes; the native Go model drops them and an absent field compares as its zero value.
+- Go takes the filters dictionary as a JSON object option (WithFirewallListFilters) instead of **filters, rejects Proxy/Resource control keys (paginated, base_path, microversion, headers, max_items, jmespath_filters, allow_unknown_params) and returns typed rows instead of Resource objects.
+- Paging follows native next links; a server that continues only through limit/marker without links is not continued.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_group`
 
@@ -1551,30 +1563,71 @@ Python/Go differences:
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/update_security_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.
-- The Nova branch fills missing name/description from the found group before PUT /os-security-groups/{id}; Go does not provide it.
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.UpdateSecurityGroup`
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.GetSecurityGroup`
+
+- The cloud lookup lists every group without a query and selects locally; duplicate matches fail before any mutation and a disabled security group feature sends no request.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteStrictAfterLookupAndAmbiguous`, `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteFeatureDisabledSendsNothing`, `network/cloud_security_group_reads_test.go:TestCloudSecurityGroupGetDefaultListsAllAndReturnsNoneOneOrAmbiguity`.
+- Neutron sends only supplied name/description/stateful, including empty string and false, sends no request when nothing is supplied, and a missing group is resource.ErrNotFound before any mutation.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupUpdateNeutronSendsOnlySuppliedIncludingFalseAndEmpty`.
+- Nova fills a missing name and description from the found group before PUT /os-security-groups/{id}.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupUpdateNovaFillsNameAndDescription`.
+
+Python/Go differences:
+
+- Go exposes concrete options (SecurityGroupUpdate, SecurityGroupRuleSpec) instead of Python **kwargs; unknown keys cannot be passed.
+- Nova responses are returned as raw security_group/security_group_rule JSON (NovaBody) without the Python munch normalization; Neutron results use native SecGroup/SecGroupRule models instead of Resource objects.
+- Python selects the backend from the cloud secgroup_source and network availability; Go takes the same inputs from SecurityGroupReadDependencies (the Connection supplies them).
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/delete_security_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.
-- No Go helper returns False when the lookup finds nothing and otherwise deletes with ignore_missing=False.
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.DeleteSecurityGroup`
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.GetSecurityGroup`
+
+- The cloud lookup lists every group without a query and selects locally; duplicate matches fail before any mutation and a disabled security group feature sends no request.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteStrictAfterLookupAndAmbiguous`, `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteFeatureDisabledSendsNothing`, `network/cloud_security_group_reads_test.go:TestCloudSecurityGroupGetDefaultListsAllAndReturnsNoneOneOrAmbiguity`.
+- Neutron lists then deletes once and returns false without a mutation when nothing matches; a 404 on the delete after the lookup is an error (ignore_missing=False).
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteNeutronListsThenDeletesOnceAndMissingIsFalse`, `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteStrictAfterLookupAndAmbiguous`.
+- The Nova backend deletes through DELETE /os-security-groups/{id}.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteNovaUsesOSSecurityGroups`.
+
+Python/Go differences:
+
+- Go exposes concrete options (SecurityGroupUpdate, SecurityGroupRuleSpec) instead of Python **kwargs; unknown keys cannot be passed.
+- Nova responses are returned as raw security_group/security_group_rule JSON (NovaBody) without the Python munch normalization; Neutron results use native SecGroup/SecGroupRule models instead of Resource objects.
+- Python selects the backend from the cloud secgroup_source and network availability; Go takes the same inputs from SecurityGroupReadDependencies (the Connection supplies them).
+- Python returns True/False; Go returns the same boolean plus an error value.
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/create_security_group_rule`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
-Unresolved boundaries:
+Go API:
 
-- get_security_group lists every security group without a query and selects one row locally by exact name/ID or glob, raising on duplicates; Go FindRecord/FindIdentity send a member GET and a name query instead, and no public Go helper performs the local selection.
-- No Go helper converts -1 ports to null for Neutron or applies the Nova protocol, egress and port-range rules before POST /os-security-group-rules.
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.CreateSecurityGroupRule`
+- `github.com/JSYoo5B/go-openstacksdk/network.SecurityGroupCloud.GetSecurityGroup`
+
+- The cloud lookup lists every group without a query and selects locally; duplicate matches fail before any mutation and a disabled security group feature sends no request.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteStrictAfterLookupAndAmbiguous`, `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupDeleteFeatureDisabledSendsNothing`, `network/cloud_security_group_reads_test.go:TestCloudSecurityGroupGetDefaultListsAllAndReturnsNoneOneOrAmbiguity`.
+- Neutron maps port -1 to null, keeps null body keys, defaults direction/ethertype and adds tenant_id and description only when supplied.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupRuleNeutronBodyKeepsNullsAndMapsMinusOne`, `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupRuleNeutronProjectAndDescriptionOnlyWhenGiven`.
+- Nova requires a protocol, rejects egress before mutation, and fills ICMP -1 and TCP/UDP 1-65535 port defaults.
+  Tests: `api/py_cloud_net_security_group_writes_test.go:TestPyCloudNetSecurityGroupRuleNovaRulesAndValidation`.
+
+Python/Go differences:
+
+- Go exposes concrete options (SecurityGroupUpdate, SecurityGroupRuleSpec) instead of Python **kwargs; unknown keys cannot be passed.
+- Nova responses are returned as raw security_group/security_group_rule JSON (NovaBody) without the Python munch normalization; Neutron results use native SecGroup/SecGroupRule models instead of Resource objects.
+- Python selects the backend from the cloud secgroup_source and network availability; Go takes the same inputs from SecurityGroupReadDependencies (the Connection supplies them).
+- Python project_id maps to the tenant_id body key; Go ProjectID does the same, and a pointer distinguishes unset from an empty string.
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip`
 

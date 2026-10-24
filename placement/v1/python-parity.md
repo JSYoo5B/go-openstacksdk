@@ -382,15 +382,25 @@ Python/Go differences:
 
 ### `python:placement/v1/create_resource_provider_inventory`
 
-Status: `unresolved`.
+Status: `go_mapping`.
+
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.CreateInventory`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryField`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryHeader`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.WithCreateInventoryOptions`
+
+- CreateInventory POSTs resource_class and total (zero preserved) plus optional fields and requires 201; extension fields and reserved headers cannot replace owned values.
+  Tests: `api/r2_small_placement_test.go:TestR2SmallPlacementCreateInventoryBodyAndStatus`.
+- Empty identifiers, owned/colliding fields and reserved headers are rejected before HTTP; a 409 is never replayed, the provider ID is escaped and a canceled context sends nothing.
+  Tests: `api/r2_small_placement_test.go:TestR2SmallPlacementCreateInventoryRejectsBeforeHTTPAndKeepsServerErrors`.
 
 Python/Go differences:
 
 - Python sends POST resource_providers/{id}/inventories without a microversion header and returns the 201 inventory body.
-
-Unresolved boundaries:
-
-- Go has no call for POST resource_providers/{id}/inventories; UpdateInventory only replaces an existing class and UpdateInventories replaces every class, which are different requests.
+- Python returns a mutable ResourceProviderInventory; Go returns InventoryRecord with decoded optional fields and the raw body in Metadata.Body.
+- Python takes total as a keyword-only int and sends nothing else by default; Go requires the CreateInventoryOpts struct.
 
 ### `python:placement/v1/delete_resource_provider_inventory`
 
@@ -680,7 +690,7 @@ Python/Go differences:
 
 ### `python:placement/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -693,22 +703,30 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForStatus`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.InventoryResources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources`
 
 - ResourceProviders.WaitFor with WithStatusAttribute(name) and WithFailureStates(ERROR) polls GET resource_providers/{id} case-insensitively until the target, returns resource.ErrFailedState on a failure value and context.DeadlineExceeded after WithTimeout.
   Tests: `placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderWaiters`.
+- placement/v1.WaitForStatus applies the Proxy.wait_for_status defaults to any SDK collection: the status attribute when the model declares one, exact case-insensitive ERROR failure, a two-second interval and no SDK timeout; caller options apply last. A model without a status attribute fails with resource.ErrUnsupported before HTTP unless resource.WithStatusAttribute selects an exported string field; numeric and boolean attributes are rejected like Python's lower() failure.
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`.
+- All pinned fetchable Placement Resources have SDK collections. No Placement model declares status, so the default fails before HTTP; ResourceProvider name and Allocation project_id/user_id/consumer_type are selectable string attributes, while numeric inventory attributes are rejected before HTTP.
+  Tests: `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource`.
 
 Python/Go differences:
 
 - Python accepts any Resource and attribute and returns immediately without HTTP when it already matches; Go waits by ID, always fetches first and returns the final model.
 - Python defaults to failures=['ERROR'], interval 2s and wait=None (unbounded); Go defaults to no failure states for placement, 2s and 5 minutes, adjustable with options.
-
-Unresolved boundaries:
-
-- Go waiters exist only for the ResourceProviders and ResourceClasses collections; Python can wait on any fetchable placement Resource such as inventories, traits, provider traits and allocations, which have no Go waiter.
+- Go accepts an explicit resource.Ref and a typed SDK collection and always starts with a fresh GET; Python accepts an existing Resource and returns it without HTTP when its cached attribute already equals the target.
+- Python raises ResourceTimeout, ResourceFailure or AttributeError; Go returns the context deadline, resource.ErrFailedState or resource.ErrUnsupported (before HTTP for a missing or non-string attribute). Go requires positive intervals and timeouts; WithUnlimitedWait expresses Python wait=None.
+- Go selects exported Go field names or JSON tags (Allocation uses project_id); inventory and trait-set attributes are numeric or lists, which Python's lower() call also rejects.
 
 ### `python:placement/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -717,20 +735,31 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.WaitDeleted`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.InventoryResources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/traits.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1.WaitForDelete`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/allocations.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/placement/v1/resourceproviders.API.TraitResources`
 
 - ResourceProviders.WaitForDeletion polls GET resource_providers/{id} until 404 and returns context.DeadlineExceeded after WithTimeout.
   Tests: `placement/v1/resourceproviders/python_parity_test.go:TestPythonResourceProviderWaiters`.
 - ResourceClasses.WaitForDeletion polls GET resource_classes/{name} until 404.
   Tests: `placement/v1/resourceclasses/python_parity_test.go:TestPythonResourceClassWaitForDelete`.
+- Inventory and trait collections bound to direct GET complete WaitDeleted on 404 after earlier successful observations.
+  Tests: `api/r2_small_placement_test.go:TestR2SmallPlacementInventoryAndTraitDeletionWaits`.
+- placement/v1.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`.
+- All pinned fetchable Placement Resources (resource providers, resource classes, inventories, traits, provider traits and allocations) have SDK collections; each deletion wait polls the fixed member route until 404. An empty allocation set is a successful observation, so an allocation deletion wait reaches its deadline as in Python.
+  Tests: `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsDeleteEveryFetchableResource`, `api/placement_proxy_waits_test.go:TestPlacementProxyWaitsStatusAttributesAndEmptyAllocations`.
 
 Python/Go differences:
 
 - Python returns the original Resource; Go returns only an error.
 - Python defaults to interval 2s and wait 120s; Go defaults to 2s and 5 minutes, so WithTimeout(120*time.Second) matches.
-
-Unresolved boundaries:
-
-- Go deletion waiters exist only for the ResourceProviders and ResourceClasses collections; Python can wait for inventories, traits and other fetchable placement Resources to return 404, which Go cannot.
+- Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.
+- WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.
+- Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.
+- The placement Proxy wait=120 is the placement/v1.WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default, which resource.WithTimeout adjusts.
 
 ## References
 

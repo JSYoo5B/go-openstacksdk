@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:clustering/v1/collect_cluster_attrs`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -30,11 +30,8 @@ Python/Go differences:
 - The public API-ref says HTTP202, while the audited Senlin16.0.0 router has no cluster_collect success override and WSGI defaults to HTTP200. Both are accepted as synchronous read results, with no fabricated action state and no live-cloud completion claim.
 - Go requires the documented array and canonical valid node id and stores fixed URIClusterID/URIPath separately; raw value bytes preserve missing/null and exact numeric precision. Python Resource.list can wrap singleton collections, removes self, overlays URI fields and constructs mutable descriptor-backed Resource objects.
 - Go follows only same-origin, same-collection explicit links, retaining the fixed escaped path and detecting invalid continuation evidence. It does not guess node-ID marker fallback or expose arbitrary Resource routes.
-
-Unresolved boundaries:
-
-- The separate inherited ClusterAttr.list interface remains unmapped: paginated=False, explicit limit/marker and Resource.id fallback, max_items raw-row counting/wire limit, and per-call base_path/microversion/headers. These controls are available on Resource.list itself but are ignored when passed through this declared collect proxy, so this is inherited-resource comparison scope rather than missing collect query forwarding (resource.py:2155-2440; _proxy.py:645-648).
-- Compare direct inherited ClusterAttr.list Body-filter inputs node_id, inherited id and attr_value, plus constructor node_id/attr_value aliases, including scalar/recursive-subset filtering and constructor alias-to-wire normalization. The collect proxy never forwards such filters; Go currently requires canonical wire id/value and retains separate fixed URI fields instead of Python row URI overlay (cluster_attr.py:16-31; resource.py:2222-2267,2299-2338,917-951).
+- Python passes cluster_id=cluster to Proxy._list unchanged and formats it into /clusters/%(cluster_id)s/attrs/%(path)s, so only an ID string yields a valid URL even though the signature accepts a Cluster; Go resolves the cluster once.
+- Direct ClusterAttr.list controls (paginated, limit/marker with Resource.id fallback, max_items, base_path, microversion, headers, node_id and attr_value Body filters) are not reachable through this proxy method because it drops **query; they are inherited-Resource features outside this operation, and Go accepts only canonical wire id/value fields.
 
 ## Usage examples
 

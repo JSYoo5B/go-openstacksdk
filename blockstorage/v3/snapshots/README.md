@@ -270,7 +270,7 @@ Python/Go differences:
 
 ### `python:block_storage/v3/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -280,6 +280,16 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.WaitForAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForState`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForAvailable`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/capabilities.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.QuotaClassResources`
 
 - Cinder WaitForState requires a target and WaitForAvailable supplies available; both apply exact case-insensitive error, two-second polling and no SDK timeout. The returned model is the actual native observation, not a cached supplied Python Resource.
   Tests: `internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering`, `api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets`.
@@ -299,6 +309,10 @@ Go API:
   Tests: `api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged`, `internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering`.
 - Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.
   Tests: `internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections`, `internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels`.
+- Group, group snapshot, consistency group and consistency group snapshot records and clusters expose their status to blockstorage.WaitForState (case-insensitive target, error failure, deleted completion); status-less models fail before HTTP without a selected attribute.
+  Tests: `api/cinder_proxy_waits_test.go:TestCinderProxyWaitsRecordAndClusterStatus`, `api/cinder_proxy_waits_test.go:TestCinderProxyWaitsDeleteEveryFetchableResource`.
+- Records that keep their declared Resource view as raw JSON (group, group snapshot, consistency group, consistency group snapshot, message, capabilities and quota class records) accept resource.WithStatusAttribute with an exact Python attribute name. The view value is compared case-insensitively with the same default and caller failure states as typed fields, and a selected attribute also drives the deleted check of deletion waits. A wire spelling that differs from the attribute name, an undeclared member of a class that discards unknown Body attributes, and an absent, null, numeric, boolean or object value fail with resource.ErrUnsupported. Group-family records keep their default status accessor when no attribute is selected.
+  Tests: `api/raw_record_wait_attributes_test.go:TestRawRecordWaitAttributesCinder`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeComparesViewStringsLikeTypedFields`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeRejectsMissingNullAndNonStringValues`, `resource/wait_raw_attributes_test.go:TestWaitRawAttributeKeepsBindingStatusDefaultAndDeletion`.
 
 Python/Go differences:
 
@@ -308,22 +322,30 @@ Python/Go differences:
 - WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.
 - These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.
 - State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.
-
-Unresolved boundaries:
-
-- Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.
-- The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.
-- Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them.
+- Python nullable descriptor/status/progress coercion and Resource-return behavior are outside the explicit Ref/native-model API (see the differences above); native name-resolution paging limits and model decoders remain unchanged.
+- Image-v1, Glance wait_for_task and Cloud wait_for_server/wait_for_image workflows are separate declarations and are not promoted by this operation.
+- Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go.
+- For records that keep a raw JSON Resource view, a selected attribute is read from each observation: an attribute the view does not carry, a null value or a non-string value fails with resource.ErrUnsupported after the first GET rather than before HTTP, and a null value fails instead of being polled like Python's None until the timeout. Only group-family records select status by default; message, capabilities and quota class records need resource.WithStatusAttribute. Progress callbacks for these records report zero.
 
 ### `python:block_storage/v3/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.WaitForDelete`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/grouptypes.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/capabilities.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.QuotaClassResources`
 
 - SDK-owned WaitForDelete supplies a two-second interval and120-second SDK timeout. Actual404, successful nil or deleted status complete with error-only success. An ERROR observation does not itself complete or fail this deletion waiter; caller failure-state lists do not change deletion-state policy.
   Tests: `internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering`, `api/service_wait_contracts_test.go:TestServiceWaitContractsDefaultDeadlinesAndConvenienceTargets`, `internal/servicewait/wait_test.go:TestServiceWaitDeleteObservesAbsenceWithoutFailureOrMutation`, `api/service_wait_contracts_test.go:TestServiceWaitContractsDeletionOnlyObservesAndRejectsTerminalErrors`, `resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback`.
@@ -343,6 +365,8 @@ Go API:
   Tests: `api/service_wait_contracts_test.go:TestServiceWaitContractsLegacyAndNativeSignaturesStayUnchanged`, `internal/servicewait/wait_test.go:TestServiceWaitDeadlinesDefaultsParentsAndCallerOrdering`.
 - Generator discovery records only the six audited Server/Cinder Volume-Snapshot/Image-v2 collections with their service wait policy. Existing generated common WaitFor/WaitForDeletion still delegate unchanged; unrelated Backup, Flavor, Task, network and Image-v1 collections receive no inferred service-default policy.
   Tests: `internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPoliciesBindOnlyActualStatusCollections`, `internal/cmd/sdkgen/service_waits_test.go:TestServiceWaitPolicyRejectsParentDriftAndDoesNotInferOtherModels`.
+- Every pinned fetchable block_storage/v3 Resource with a member route (volumes, snapshots, backups, attachments, transfers, QoS specs, types, groups, group snapshots, consistency groups and snapshots, clusters, default types, group types, messages, capabilities and quota class sets) has an SDK collection; blockstorage.WaitForDelete polls each fixed member route until 404, and record collections complete on a deleted status.
+  Tests: `api/cinder_proxy_waits_test.go:TestCinderProxyWaitsDeleteEveryFetchableResource`, `api/cinder_proxy_waits_test.go:TestCinderProxyWaitsRecordAndClusterStatus`.
 
 Python/Go differences:
 
@@ -352,12 +376,9 @@ Python/Go differences:
 - WaitForDelete returns error only, while Python returns an original or fetched Resource. Native HTTP/transport/decoder/context causes remain visible rather than being converted into a synthetic deleted model.
 - These service-default methods supplement existing five-minute Collection/leaf waits and preserve native WaitForStatus context-only one-second exact-case/error-only behavior. Create/upload and Cloud workflow policies are separate.
 - State waiting can report the initial Name List model; deletion waiting resolves Name without a callback and starts progress at its first fixed-ID GET. An explicit status attribute for deletion is a Go extension; pinned Python delete observes its conventional status field.
-
-Unresolved boundaries:
-
-- Arbitrary mutable Resource subclasses, seeded cached current-state short circuit, Resource pointer/cache translation and fetch(skip_cache=True) plus injected session/adapter semantics are not mapped by these typed collection policies.
-- The complete nullable descriptor/status/progress coercion and Python Resource-return contract remain outside this explicit Ref/native-model API. Current native name-resolution paging limits and model decoder behavior remain unchanged.
-- Image-v1 bindings, Glance wait_for_task exact396 recreation across returned task IDs under one budget, and Cloud wait_for_server180s/IP or wait_for_image3600s workflows remain distinct unsupported or unreviewed declarations; this operation review does not close them.
+- Python nullable descriptor/status/progress coercion and Resource-return behavior are outside the explicit Ref/native-model API (see the differences above); native name-resolution paging limits and model decoders remain unchanged.
+- Image-v1, Glance wait_for_task and Cloud wait_for_server/wait_for_image workflows are separate declarations and are not promoted by this operation.
+- Limits and BlockStorageSummary have no member ID; Python's inherited fetch requires one, so neither is waitable in Python or Go.
 
 ### `python:block_storage/v3/manage_snapshot`
 

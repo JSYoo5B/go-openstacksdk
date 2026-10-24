@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:clustering/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -38,14 +38,14 @@ Python/Go differences:
 - Go requires a nonempty string target, positive duration intervals and exported typed string attributes. Python nullable target/attribute and interval=None/zero normalization are distinct; unknown raw Body attributes or nested attribute paths are not inferred.
 - Go passes deadlines into HTTP requests and gives cancellation priority instead of checking timeout only between fetches. Published status/envelope rules preserve exact Body/Header/StatusCode and reject null/malformed success instead of permissive falsy completion.
 - BuildInfo has no new singleton polling route: pinned proxy get uses requires_id=False, while inherited wait fetch uses its normal requires_id=True and a normal ID-less BuildInfo cannot be fetched that way. Services remain list-only rather than inventing GET/delete/status capabilities.
-
-Unresolved boundaries:
-
-- Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path.
+- Python returns the passed Resource immediately, with no request, when its cached attribute already equals the target (wait_for_status), and otherwise fetches with skip_cache=True; Go always begins with a fresh request.
+- Python wait_for_delete returns the original Resource when a fetch is missing or its status equals deleted; Go WaitForDelete returns only an error.
+- Python accepts any Resource subclass and an arbitrary attribute name; Go provides waiters for the typed Senlin models and exported string attributes only, so arbitrary or custom Resource inputs have no equivalent.
+- Python callback receives the progress attribute or 0; Senlin models have no progress field and Go reports zero.
 
 ### `python:clustering/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -75,10 +75,10 @@ Python/Go differences:
 - Go requires a nonempty string target, positive duration intervals and exported typed string attributes. Python nullable target/attribute and interval=None/zero normalization are distinct; unknown raw Body attributes or nested attribute paths are not inferred.
 - Go passes deadlines into HTTP requests and gives cancellation priority instead of checking timeout only between fetches. Published status/envelope rules preserve exact Body/Header/StatusCode and reject null/malformed success instead of permissive falsy completion.
 - BuildInfo has no new singleton polling route: pinned proxy get uses requires_id=False, while inherited wait fetch uses its normal requires_id=True and a normal ID-less BuildInfo cannot be fetched that way. Services remain list-only rather than inventing GET/delete/status capabilities.
-
-Unresolved boundaries:
-
-- Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path.
+- Python returns the passed Resource immediately, with no request, when its cached attribute already equals the target (wait_for_status), and otherwise fetches with skip_cache=True; Go always begins with a fresh request.
+- Python wait_for_delete returns the original Resource when a fetch is missing or its status equals deleted; Go WaitForDelete returns only an error.
+- Python accepts any Resource subclass and an arbitrary attribute name; Go provides waiters for the typed Senlin models and exported string attributes only, so arbitrary or custom Resource inputs have no equivalent.
+- Python callback receives the progress attribute or 0; Senlin models have no progress field and Go reports zero.
 
 ### `python:clustering/v1/get_cluster_policy`
 
@@ -104,7 +104,7 @@ Python/Go differences:
 
 ### `python:clustering/v1/cluster_policies`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -155,12 +155,12 @@ Python/Go differences:
 - Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.
 - Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
-
-Unresolved boundaries:
-
-- Map per-call base_path and the deprecated proxy JMESPath filter forwarded by this proxy; tested max_items/paginated controls limit raw rows locally with no stock-unsupported wire-limit hint.
-- Compare automatic Body/query classification, descriptor defaults/coercion, Python scalar equality and Resource.id alternate-policy_id behavior. Explicit raw Body filters are implemented but Go validates required binding identity before any filter and keeps JSON booleans distinct from numbers.
-- Compare inherited QueryParameters limit/marker transposition and Resource._get_next_link explicit-limit fallback using Resource.id, including short pages and ordinary-id versus alternate-policy_id precedence. Go intentionally rejects initial limit/marker because the pinned server whitelist lacks them.
+- Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
+- Python cluster_policies passes cluster_id=Resource._get_id(cluster) without resolution (the URL accepts what the server accepts) and declares sort, policy_name, policy_type and is_enabled (sent as enabled); with an explicit limit its fallback marker is Resource.id, the alternate policy_id. Go resolves the cluster once, requires the canonical binding identity before any filter and rejects an initial limit or marker because the audited server whitelist lacks them.
+- Go keeps JSON booleans distinct from numbers in raw Body filters and compares exact decimals; Python compares attribute scalars by equality after descriptor coercion.
+- The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
 
 ## Usage examples
 

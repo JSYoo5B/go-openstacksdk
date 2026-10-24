@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:clustering/v1/actions`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -51,11 +51,11 @@ Python/Go differences:
 - Raw JSON comparison keeps exact decimal numbers and distinguishes bool from number; object filters match recursive subsets of nonempty objects, while arrays remain ordered complete values. Missing scalar fields and explicit null compare as null without descriptor coercion or cached Resource mutation.
 - Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
-
-Unresolved boundaries:
-
-- Compare automatic Body/query classification and field/descriptor normalization, per-call base_path and deprecated proxy JMESPath controls before closing the whole list declaration. Explicit local raw Body filters and their aliases are implemented separately.
-- Verify the controller default/capped limit and fallback policy against an actual negotiated server contract; typed explicit-limit wire-ID fallback and local cap/single-page behavior are tested.
+- Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
+- Python maps the keyword target_id to the wire key target (query keys: name, action, status, sort, global_project, cluster_id); Go uses the wire name target and applies no alias.
+- The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
 
 ### `python:clustering/v1/get_action`
 
@@ -75,7 +75,7 @@ Python/Go differences:
 
 ### `python:clustering/v1/update_action`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -92,11 +92,9 @@ Python/Go differences:
 - Go Update/Cancel are stateless requests with explicit ID/Name/context, a required published CANCELLED status and optional owned Force query. Pinned Python Action has no Force field and drops unknown force attrs; Go adds the published query capability.
 - The published update success is202 with no declared response object schema. Go UpdateResult retains even an empty or opaque original Body/Header/StatusCode instead of fabricating an updated Action, requiring an assumed action envelope, or automatically fetching status. Location remains raw header evidence rather than command Submission identity.
 - Input body/query/header and selected>=1.12 requirement are frozen before exact-name resolution and revalidated before PATCH. Typed/response body collisions, force/status query replacement and authentication/version header replacement fail before HTTP.
-
-Unresolved boundaries:
-
-- Map inherited Resource dirty/cache/no-change commit, mutable Resource input and response merge/reset; explicit cancellation PATCH alone does not close that lifecycle.
-- Compare actual controller/cloud accepted response models against the pinned Python Resource commit expectation before declaring update_action result parity.
+- Python Proxy._update commits arbitrary changed Action attributes with PATCH /actions/{id} and returns the Resource holding the submitted values as if they were applied; a call with no attributes sends nothing. Go sends only the published {"action": {"status": "CANCELLED"}} request, requires a status and returns the accepted response evidence.
+- Python uses the session-negotiated microversion; Go requires an explicitly selected numeric version of 1.12 or later and rechecks it before the PATCH.
+- No live Senlin evidence was collected for the accepted response body; Go retains whatever the 202 response contains rather than assuming an Action envelope.
 
 ## Usage examples
 

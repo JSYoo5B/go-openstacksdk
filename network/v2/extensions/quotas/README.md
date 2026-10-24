@@ -253,7 +253,7 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/get_network_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -261,48 +261,43 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Detail`
 
-- Named project quota reads use a separate Keystone lookup; ordinary and detailed values remain distinct.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
+- A project name resolves once through a separate Identity client and is then reused; Get reads GET /quotas/{project} and Detail reads the usage endpoint for the resolved ID.
+  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
 - Limit and detail endpoints preserve fixed project identity and native/raw result fields.
   Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`.
 
 Python/Go differences:
 
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
-
-Unresolved boundaries:
-
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
-- Native Go detail routing is /details.json; Python details=True uses the QuotaDetails /details resource and descriptor aliases.
+- Go callers pass an explicit resource.ID or resource.Name and reuse a fixed scope; Python takes an ambiguous string and repeats the Keystone lookup on every call.
+- An explicit project ID is not verified through Keystone (Python always runs find_project and raises when it finds nothing); a project name that does not resolve fails before any Neutron request.
+- Results are typed Go quota models with raw Body evidence instead of Quota/QuotaDetails Resource objects; Python **kwargs become concrete UpdateOpts fields.
+- Details are read from /quotas/{project}/details.json; Python uses /quotas/{project}/details.
 
 ### `python:cloud/_network/NetworkCloudMixin/set_network_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk.Connection.NetworkProjectQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Update`
+- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithUpdateCheckLimit`
 
-- Named project quota updates preserve the resolved project and concrete optional limit/flag values.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- Typed limit/flag options preserve omission and exact values across reauthentication.
-  Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable`.
+- Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.
+  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
+- Update sends PUT /quotas/{project} with a quota envelope that keeps zero, -1 and an explicit check_limit=false and omits unset limits.
+  Tests: `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasUpdateBodyKeepsZeroUnlimitedAndCheckLimit`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaUpdateOmittedFalseZeroAndSnapshotAcrossReauth`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOptionsSnapshotAtCreationAndRemainReusable`.
 
 Python/Go differences:
 
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
-- Go returns a typed quota response; the Python cloud setter discards the proxy return value.
-
-Unresolved boundaries:
-
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
+- Go callers pass an explicit resource.ID or resource.Name and reuse a fixed scope; Python takes an ambiguous string and repeats the Keystone lookup on every call.
+- An explicit project ID is not verified through Keystone (Python always runs find_project and raises when it finds nothing); a project name that does not resolve fails before any Neutron request.
+- Results are typed Go quota models with raw Body evidence instead of Quota/QuotaDetails Resource objects; Python **kwargs become concrete UpdateOpts fields.
+- An update with no limits sends an empty quota envelope; Python commits only dirty fields and sends no request.
 
 ### `python:cloud/_network/NetworkCloudMixin/delete_network_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -310,20 +305,17 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.ProjectQuotaScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas.WithDeleteIgnoreMissing`
 
-- Quota override deletion supports explicit ignore-missing after fixed project resolution.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- Delete keeps fixed-project metadata and suppresses only explicitly ignored 404 responses.
-  Tests: `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaOperationsKeepTargetRawJSONAndMetadata`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy`.
+- Named project lookup happens once through a separate Identity client; a missing named project fails before any Neutron request.
+  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasGetDetailAndNamedProjectLookup`, `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasMissingNamedProjectFailsBeforeNeutron`.
+- Delete sends DELETE /quotas/{project} without a body; strict versus ignore-missing handling is explicit.
+  Tests: `connection_py_cloud_net_quotas_test.go:TestPyCloudNetNetworkQuotasDeleteSendsNoBody`, `api/neutron_project_quotas_contracts_test.go:TestNeutronProjectQuotaHTTPFailuresAndStrictMissingPolicy`.
 
 Python/Go differences:
 
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
-- Python cloud delegates to default ignore_missing=True; Go requires WithDeleteIgnoreMissing(true) to reproduce missing-quota idempotence.
-
-Unresolved boundaries:
-
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
+- Go callers pass an explicit resource.ID or resource.Name and reuse a fixed scope; Python takes an ambiguous string and repeats the Keystone lookup on every call.
+- An explicit project ID is not verified through Keystone (Python always runs find_project and raises when it finds nothing); a project name that does not resolve fails before any Neutron request.
+- Results are typed Go quota models with raw Body evidence instead of Quota/QuotaDetails Resource objects; Python **kwargs become concrete UpdateOpts fields.
+- Python reaches the proxy delete_quota with ignore_missing=True and returns None; Go exposes the ignore-missing choice and returns the delete response evidence.
 
 ## Usage examples
 

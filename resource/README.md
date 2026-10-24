@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:accelerator/v2/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -20,20 +20,18 @@ Go API:
   Tests: `api/accelerator_attributes_test.go:TestAcceleratorAttributeWaitDeletedStableIDAndContext`.
 - Shared Go WaitDeleted completes on 404, nil successful fetch or case-insensitive deleted status, skips terminal callbacks, stops further GET after callback cancellation and honors explicit unlimited wait with parent deadlines.
   Tests: `resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404`, `resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`.
+- Device status and ARQ state waiters poll with fixed identity, configured failure states are terminal, deletion succeeds on 404 and deadlines/cancellation keep their cause.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelWaitersStatusFailureDeletionAndDeadline`.
 
 Python/Go differences:
 
 - Python returns its original/fetched Resource; Go returns error and fixes an explicit Ref identity once. Shared Go deletion succeeds on 404, nil successful fetch or binding/selected status=deleted, with optional progress callbacks and explicit unlimited wait. Go defaults to five minutes/two seconds and applies context deadlines to HTTP requests.
 - Go callbacks include the initial nonterminal lookup response and read exported integer model progress or zero. Python Resource cache/descriptor/mutation and Adapter semantics remain separate inherited contracts.
-
-Unresolved boundaries:
-
-- Audit Python skip_cache/fetch/Resource identity/error classification and original Resource return behavior against the documented Go error-only contract; callbacks, unlimited wait and deleted/nil success are implemented rather than missing.
-- Add ARQ/device-specific deletion selector/callback and forbidden/network-error observations instead of treating profile/attribute/default native fixtures as universal inherited Resource parity.
+- Python wait helpers take a Resource and may return a cached target status without fetching; Go takes a fixed resource.Ref, always polls through the typed getter, and returns a fresh model (an error only for deletion). Defaults are five minutes and two seconds with context deadlines.
 
 ### `python:accelerator/v2/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -45,19 +43,17 @@ Go API:
   Tests: `api/accelerator_boundaries_test.go:TestAcceleratorActionAndStatusVersionsAreSeparate`, `api/accelerator_read_test.go:TestAcceleratorReadFailuresAndIdentity`, `api/accelerator_read_test.go:TestAcceleratorReadResourcesAndMetadata`, `api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata`, `api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName`.
 - Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.
   Tests: `resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`, `resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields`, `resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`.
+- Device status and ARQ state waiters poll with fixed identity, configured failure states are terminal, deletion succeeds on 404 and deadlines/cancellation keep their cause.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelWaitersStatusFailureDeletionAndDeadline`.
 
 Python/Go differences:
 
-- Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; for SDK records that keep a raw JSON Resource view (Adapter.WaitAttributes) it selects a view key by exact Python attribute name, and an absent, null or non-string value fails with ErrUnsupported after that observation (see docs/python-proxy-waits.md); WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout.
-
-Unresolved boundaries:
-
-- Audit cached initial Resource short-circuit, None target status, descriptor/unknown-field attribute semantics, skip_cache/fetch errors and Resource identity mutation against the documented Go model/Ref policy. The shared waiter options are implemented, but this whole inherited Python operation remains unresolved.
-- Add Cyborg Device/ARQ-specific selector, callback, timeout/in-flight cancellation and configured-failure observations; native Node/Server shared-policy fixtures do not independently establish every Cyborg inherited contract.
+- Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout.
+- Python wait helpers take a Resource and may return a cached target status without fetching; Go takes a fixed resource.Ref, always polls through the typed getter, and returns a fresh model (an error only for deletion). Defaults are five minutes and two seconds with context deadlines.
 
 ### `python:orchestration/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -73,19 +69,18 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 - Shared Go WaitDeleted completes on 404, nil successful fetch or case-insensitive deleted status, skips terminal callbacks, stops further GET after callback cancellation and honors explicit unlimited wait with parent deadlines.
   Tests: `resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404`, `resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`.
+- Transient DELETE_IN_PROGRESS responses are polled until DELETE_COMPLETE, nonterminal responses report zero progress and the terminal one reports none; ADOPT_COMPLETE is not inferred as deletion and a bounded wait ends with context.DeadlineExceeded.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitDeletedTransientAdoptAndCallback`.
 
 Python/Go differences:
 
 - Go deletion wait returns error, uses a five-minute default and treats 404 or DELETE_COMPLETE as completion while ADOPT_COMPLETE is not inferred as deletion. Python returns the Resource and its Stack.fetch treats both complete states as NotFound.
-
-Unresolved boundaries:
-
-- Audit Stack.fetch and cached/mutated Resource return/error semantics, including Python ADOPT_COMPLETE behavior. Unlimited wait and progress callbacks now exist in the shared Go helper; Heat-specific deletion errors remain authoritative.
-- Add Heat transient polling, timeout, in-flight cancellation and callback evidence before whole-operation mapping. Go returns error rather than a Python Resource.
+- Python wait_for_delete returns the original Resource, defaults to a 120 second wait and treats a NotFound from Stack.fetch (404, DELETE_COMPLETE or ADOPT_COMPLETE) or a status equal to deleted as completion; Go StackScope.WaitDeleted returns only an error, defaults to the shared five-minute policy and recognizes HTTP 404 and DELETE_COMPLETE but not ADOPT_COMPLETE.
+- Go returns ErrFailedState immediately for DELETE_FAILED, while Python keeps polling until its timeout.
 
 ### `python:orchestration/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -101,15 +96,16 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 - Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.
   Tests: `resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`, `resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields`, `resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`.
+- Transient responses are polled until the target, callbacks receive 0 for every nonterminal response (Stack has no progress field), bounded waits end with context.DeadlineExceeded, WithFailureStates("ERROR") replaces the *_FAILED default so a CREATE_FAILED stack keeps polling, WithStatusAttribute waits on another string field and parent cancellation stops an unlimited wait in flight.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitTransientTimeoutCustomPolicyAndCancellation`.
 
 Python/Go differences:
 
 - Go stack wait resolves once and polls canonical name/ID, defaults to five minutes/two seconds and treats *_FAILED or ERROR as terminal. Python Proxy delegates a generic Resource with custom failures/attribute/callback and wait=None.
-
-Unresolved boundaries:
-
-- Audit cached/mutated Python Resource, None target status, Stack.fetch, skip_cache and Adapter error/timeout semantics against mandatory Go lookup/context deadlines. Configurable failure states, attribute selection, callbacks and unlimited wait now exist in the shared Go helper.
-- Add stack-specific timeout, in-flight cancellation, custom failure/attribute/callback evidence before whole-operation mapping; existing stack default success/failure fixtures and shared Node/Server tests cover different contracts.
+- Python wait_for_status returns the passed Resource immediately, with no request, when its cached status already equals the target; Go StackScope.Wait always begins with a request on the fixed identity.
+- Python default failures are only ERROR, so a stack in CREATE_FAILED is polled until the timeout (forever when wait=None); the Go default also stops on any *_FAILED state and on ERROR, and WithFailureStates reproduces the Python list.
+- Python fetches with Stack.fetch, which raises NotFound for DELETE_COMPLETE and ADOPT_COMPLETE, so waiting for those targets raises instead of matching; Go returns the status as data.
+- Python raises ResourceTimeout and ResourceFailure and returns the updated mutable Resource; Go returns a StackResource and context/ErrFailedState errors. Attribute names are Go JSON tags or field names of the typed model, not Python descriptor names.
 
 ### `python:compute/v2/find_server`
 
@@ -304,7 +300,7 @@ Python/Go differences:
 
 ### `python:dns/v2/find_recordset`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -330,6 +326,8 @@ Go API:
   Tests: `internal/nativefind/get_test.go:TestNativeIdentityGetPreservesQueryNativeResultCodesAndEvidence`, `internal/nativefind/get_test.go:TestNativeIdentityGetFreezesInputsAndUsesLiveProviderReauthentication`, `internal/nativefind/get_test.go:TestNativeIdentityGetAcceptedDecodeAndContextRemainTerminal`, `internal/nativefind/get_test.go:TestNativeIdentityGetRejectsUnsafeRoutesAndClientURLsBeforeHTTP`, `api/find_identity_identity_network_test.go:TestNativeFindIdentityDualPhaseQueryKeepsLiveProviderAndHTTPClient`.
 - Explicit Go raw status is preserved as a frozen wire query in both GET and fallback LIST even for statusless native models; nil/empty/repeated values and caller name precedence are retained. Raw status alone does not activate local response filtering, and server query rejection remains a terminal LIST error rather than missing suppression.
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases`, `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal`.
+- Within a fixed zone, GET by name is rejected (400) then the zone's list is filtered by name, matching ID or name and returning nil by default when absent.
+  Tests: `api/r2_dns_cloud_test.go:TestR2DNSRecordSetWaitsAndFindIdentityInZone`.
 
 Python/Go differences:
 
@@ -337,26 +335,25 @@ Python/Go differences:
 - Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.
 - Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.
 - The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.
-
-Unresolved boundaries:
-
-- Pinned Resource.list (openstack/resource.py:2217-2234) transposes declared query aliases, discards unknown query names and applies known non-query Body attributes locally. Explicit Go wire Query does not implement that automatic classification or descriptor coercion; reserved Resource control keys are rejected.
-- Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.
-- Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.
-- Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.
-- Pinned find_recordset (openstack/dns/v2/_proxy.py:337-364) accepts a zone ID or Zone Resource and passes its ID to _find. The concrete Go Ref-based zone scope keeps a fixed parent; cached parent Resource inputs and the inherited child URI/control overrides require separate mapping.
+- Python Resource.list classifies declared query aliases/unknown names and applies known Body attributes locally; Go sends an explicit wire Query and rejects reserved controls.
+- Python Proxy.request may cache GET responses; the Go lookup is stateless.
+- Python fetch merges into a seeded Resource and tolerates missing/invalid JSON differently; Go uses strict native GetResult extraction and requires safe nonblank result IDs.
+- Python follows RFC Link headers and limit/marker continuation; Go keeps each native pager.
+- Python accepts a Zone Resource and passes its ID; Go's scope is created from a zone reference (InZone) and keeps that fixed parent for GET, fallback and continuation.
 
 ### `python:load_balancer/v2/find_member`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.Members`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.MemberScope.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindFallback`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -376,22 +373,22 @@ Go API:
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusSurvivesBothPhases`, `api/find_identity_wire_status_test.go:TestNativeFindIdentityWireStatusServerRejectionIsTerminal`.
 - Fixed-pool Member uses existing LocalStatus policy for typed WithStatus: wire status is omitted, filtering remains local and raw cap precedes that filter. Raw WithQuery(status) alone remains wire-only. Combining typed and raw status keeps the activated local filter and compares the final option value in either order.
   Tests: `api/find_identity_wire_status_test.go:TestNativeFindIdentityMemberWireAndTypedStatusRemainSeparate`.
+- Python-shaped lookup on the fixed pool: ID hit, ID miss with and without ignore-missing, exact name hit/miss and duplicate names behave like Python find semantics under explicit references.
+  Tests: `api/py_lb_find_test.go:TestPyLBFindExplicitIDAndNameKeepIgnoreMissingAndDuplicateSemantics`.
 
 Python/Go differences:
 
+- Python member methods take the parent pool as an ID or Pool Resource and put pool_id into the URI; Go passes the pool ID per call or fixes it once in a pools.API.Members scope (an explicit ID needs no lookup request).
+- Python find_* tries GET by ID, falls back to a list by name on 400/403/404 and matches ID or name; Go separates resource.ID and resource.Name references, resolves names through an exact-name list and reports duplicate names as an AmbiguousError (Python DuplicateResource).
+- Python find_*/delete_* default to ignore_missing=True (find with a deprecation warning); Go Find is strict by default and needs resource.WithIgnoreMissing for the Python default, Remove ignores a missing object by default (WithMissingError selects strict) and native API.Delete keeps a 404 as a response error.
 - The concrete Go IdentityFindOpts and WithIdentityFind... helpers own defaults and snapshots. Existing explicit Ref-based Find remains strict; automatic FindIdentity defaults to ignoring logical absence like the pinned Python source.
 - Names unsafe for a raw native member URL are resolved by list only, including NotFoundOnly; GET-only rejects them before HTTP. Names are neither trimmed nor URL-decoded, and every consumed row requires a safe ID.
 - Caller Query is an explicit wire-parameter map used by both GET and LIST; the automatic exact name hint is added only to LIST and never replaces an explicitly present caller key. Native success codes, typed extraction and continuation formats remain intact; accepted raw HTTP metadata is not fabricated.
 - The concrete parent scope fixes one zone/pool ID for GET, all list pages and fallback; no parent or source client is reconfigured by the child lookup.
 - Pinned find_member (openstack/load_balancer/v2/_proxy.py:542-569) exposes only name_or_id, pool and ignore_missing; explicit Go wire Query and fallback-policy controls are extensions.
 - The fixed Member collection now forwards explicit raw wire status while typed WithStatus retains local filtering. Mixed typed/raw status uses the last value for the activated local filter; it is not the wire-only policy of raw query alone.
-
-Unresolved boundaries:
-
-- Pinned Proxy.request (openstack/proxy.py:209-268) can cache GET responses when connection caching is enabled; this native stateless lookup does not implement that response cache or cached Resource state.
-- Pinned Resource.fetch/_translate_response (openstack/resource.py:1780-1828,1338-1394) merges a seeded Resource and handles missing/invalid JSON differently from strict native GetResult extraction and safe nonblank result-ID validation; descriptor defaults/coercion and retained unknown Resource fields are not fully mapped.
-- Pinned Resource._get_next_link (openstack/resource.py:2359-2436) includes RFC Link-header and limit/marker continuation paths. This lookup deliberately retains each native pager; those inherited continuation paths are not fully mapped.
-- Pinned find_member accepts a pool ID or Pool Resource and passes its ID to _find. The concrete Go Ref-based pool scope keeps a fixed parent; cached parent Resource inputs remain a separate mapping obligation.
+- Python find can serve a GET from the connection response cache (openstack/proxy.py request caching) and merges the fetched body into a seeded Resource; Go performs fresh stateless requests and returns a native typed model, with no response cache.
+- Python continuation also follows RFC Link headers and limit/marker fallbacks (Resource._get_next_link); Go retains the native pager and its cycle policy for every list page.
 
 ### `python:identity/v3/find_project`
 

@@ -331,27 +331,29 @@ Python/Go differences:
 
 ### `python:cloud/_identity/IdentityCloudMixin/update_domain`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateDomain`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
-- With domain_id, update_domain is PATCH /v3/domains/<id> that drops falsy name and description and keeps enabled false.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
+- With a domain ID no lookup is made and one PATCH carries only supplied attributes; Enabled=false and an empty description are sent.
+  Tests: `connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainIDSkipsLookupAndDropsEmptyName`.
+- With a name the domain is found by GET then name list, a missing domain returns ErrNotFound with no PATCH, and a call with nothing to change sends no PATCH.
+  Tests: `connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateDomainByNameLooksUpAndNoopSendsNothing`.
+- A canceled context sends nothing.
+  Tests: `connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
 
 Python/Go differences:
 
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python raises SDKException when neither domain_id nor name_or_id is given or the domain is missing.
-- Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
-
-Unresolved boundaries:
-
-- The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding.
+- Python drops falsy name and description (an empty description cannot be sent); Go omits an empty Name but preserves a non-nil empty Description because the update distinguishes them.
+- Python takes domain_id or name_or_id as two strings and raises SDKException when neither is given; Go takes one resource.Ref (ID = domain_id, Name = name_or_id lookup).
+- Python's name path uses the cloud get_domain (find_domain ignore_missing=True) and raises SDKException when missing; Go returns resource.ErrNotFound.
+- When no attribute is supplied Python builds a Domain from the ID alone and sends nothing; Go returns a Domain with only the ID.
+- Python returns a Resource; Go returns the Gophercloud domain model.
 
 ### `python:cloud/_identity/IdentityCloudMixin/delete_domain`
 
@@ -612,25 +614,27 @@ Python/Go differences:
 
 ### `python:cloud/_identity/IdentityCloudMixin/update_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateGroup`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.Update`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
 
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
+- The group is found strictly by GET then name list (extra queries such as domain_id pass to both), and only attributes that differ from the found group are sent; an unchanged call sends no PATCH, matching Resource dirty tracking.
+  Tests: `connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupSendsOnlyChangedAttributes`.
+- A missing group returns ErrNotFound with no PATCH and cancellation sends nothing.
+  Tests: `connection_py_cloud_compute_identity_updates_test.go:TestPyCloudComputeUpdateGroupMissingAndCanceled`.
 
 Python/Go differences:
 
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python commits only attributes that differ from the found Resource and skips the PATCH when nothing changed; Go Update sends every field the caller sets, so an unchanged value is still sent.
-- Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
-
-Unresolved boundaries:
-
-- The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding.
+- Python forwards update_group **kwargs to the find query; Go passes find queries as resource.IdentityFindOption values.
+- Python drops falsy name and description; Go omits an empty Name but compares and sends a non-nil empty Description when it differs.
+- Python returns the found Resource unchanged when nothing differs; Go returns a copy of the found model.
+- Python Proxy.request can serve the lookup GET from a response cache; Go has no client-side GET cache.
 
 ### `python:cloud/_identity/IdentityCloudMixin/delete_group`
 
@@ -875,10 +879,11 @@ Python/Go differences:
 
 ### `python:cloud/_identity/IdentityCloudMixin/grant_role`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GrantRole`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Assign`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate`
@@ -889,31 +894,30 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
-- Once IDs are known, the project and user grant is HEAD /v3/projects/<p>/users/<u>/roles/<r> followed by PUT on the same path; Go Validate returns the 404 as an error.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
+- _get_grant_revoke_params resolves the domain first, then the role without a domain filter, then user, group and project filtered by the domain ID, each strictly; GrantRole sends exactly that GET/list sequence, then HEAD and one PUT.
+  Tests: `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
+- An existing assignment returns false and writes nothing; invalid target combinations fail before any request; a missing row stops before the assignment requests; a canceled context sends nothing.
+  Tests: `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleExistingAssignmentWritesNothing`, `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
+- Non-404 validation failures and failed writes are surfaced rather than treated as absent or successful.
+  Tests: `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleSurfacesNon404ValidationAndWriteFailures`.
 
 Python/Go differences:
 
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python ignores wait and timeout and returns False when the assignment already exists.
-
-Unresolved boundaries:
-
-- The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- Python validate_*_has_*_role returns False for any non-204 HEAD; Go roles.API.Validate and osinherit.API.Validate return the 404 as an error, so deciding that the assignment is absent is caller-side work.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding.
+- Only HTTP 404 on the HEAD check means the assignment is absent in Go. Python's raw session call returns false for every non-204 status, so a 403 or 500 is also read as absent there and the write continues; Go returns those statuses as errors.
+- A failed assignment write is returned as an error in Go; Python ignores the write status and returns True.
+- Python ignores wait and timeout; Go sends no wait and treats a successful write as acknowledgement only.
+- Python's system argument only selects the /system route and is not sent; Go uses a boolean. Empty strings mean not given in Go, while Python distinguishes None from an empty string.
+- Python Proxy.request can serve lookup GETs from a connection response cache; Go has no client-side GET cache.
+- Python returns False for an existing/absent assignment and True after a write; Go returns the same boolean plus an error.
 
 ### `python:cloud/_identity/IdentityCloudMixin/revoke_role`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.RevokeRole`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Validate`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/roles.API.Unassign`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/osinherit.API.Validate`
@@ -924,24 +928,20 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity`
 - `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.FindIdentity`
 
-- Once IDs are known, the project and user revoke is HEAD /v3/projects/<p>/users/<u>/roles/<r> followed by DELETE on the same path.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
+- RevokeRole performs the same strict lookups, then HEAD and one DELETE for project, domain or system scope, using the OS-INHERIT route for inherited project/domain assignments.
+  Tests: `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleProjectUserChecksThenAssigns`.
+- An absent assignment returns false and sends no DELETE; invalid input and missing rows fail before assignment requests; cancellation sends nothing.
+  Tests: `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeRevokeRoleSystemInheritedAndAbsent`, `connection_py_cloud_compute_role_grants_test.go:TestPyCloudComputeGrantRoleRejectsBadTargetsAndMissingRows`.
 
 Python/Go differences:
 
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python ignores wait and timeout and returns False when the assignment does not exist.
-
-Unresolved boundaries:
-
-- The sequence calls Proxy.find_role, whose Go parity is itself unresolved (python:identity/v3/find_role): roles.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_user, whose Go parity is itself unresolved (python:identity/v3/find_user): users.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_group, whose Go parity is itself unresolved (python:identity/v3/find_group): groups.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_project, whose Go parity is itself unresolved (python:identity/v3/find_project): projects.API.FindIdentity sends the same GET by ID and name-filtered list, but the Resource.list query classification, the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- The sequence calls Proxy.find_domain, whose Go parity is itself unresolved (python:identity/v3/find_domain): domains.API.FindIdentity sends the same GET by ID and name-filtered list, but the optional response cache, Resource response translation and inherited continuation paths recorded for that operation are not reproduced.
-- Python validate_*_has_*_role returns False for any non-204 HEAD; Go roles.API.Validate and osinherit.API.Validate return the 404 as an error, so deciding that the assignment is absent is caller-side work.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding.
+- Only HTTP 404 on the HEAD check means the assignment is absent in Go. Python's raw session call returns false for every non-204 status, so a 403 or 500 is also read as absent there and the write continues; Go returns those statuses as errors.
+- A failed assignment write is returned as an error in Go; Python ignores the write status and returns True.
+- Python ignores wait and timeout; Go sends no wait and treats a successful write as acknowledgement only.
+- Python's system argument only selects the /system route and is not sent; Go uses a boolean. Empty strings mean not given in Go, while Python distinguishes None from an empty string.
+- Python Proxy.request can serve lookup GETs from a connection response cache; Go has no client-side GET cache.
+- Python returns False for an existing/absent assignment and True after a write; Go returns the same boolean plus an error.
 
 ### `python:cloud/_identity/IdentityCloudMixin/list_projects`
 

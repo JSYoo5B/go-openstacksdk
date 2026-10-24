@@ -123,7 +123,7 @@ Python/Go differences:
 
 ### `python:clustering/v1/policies`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -155,11 +155,11 @@ Python/Go differences:
 - At an exact page boundary Python Resource.list may issue a continuation GET before checking max_items at the next raw row; the Go Senlin iterator terminates immediately after its cap and does not validate or request an unused continuation.
 - Go exposes WithListHeader and WithListMicroversion separately from query and Body inputs; it preserves SDK ownership of authentication, service-token, authorization and transport/version headers rather than copying an unrestricted Python caller header map.
 - A numeric per-call selection is explicit and does not negotiate or mutate the shared client. Explicit empty selection resets to server-default1.0; a conflicting source MoreHeaders version is rejected instead of silently removed. Common Resources and parent resolution/Get/Wait do not accept these typed List options.
-
-Unresolved boundaries:
-
-- Map inherited per-call base_path and deprecated proxy JMESPath controls; max_items/paginated and raw-row counting before local filters are now tested.
-- Compare Resource field normalization/defaults and the full inherited query surface; explicit Go extension queries currently reach the server instead of Python unknown-key omission.
+- Python Proxy._list also accepts a per-call base_path and the deprecated jmespath_filters (it warns RemovedInSDK60Warning) among its keyword arguments; the Go routes are SDK-owned and neither option is exposed.
+- Python Resource.list validates keywords with allow_unknown_params=True: a keyword that is neither a declared query key nor a Body attribute is silently discarded, and a Body attribute that is not a query key becomes a client-side filter. Go sends explicit extension queries to the server through WithListQuery, applies Body filters only through the explicit WithListFilter with source-validated names, and rejects unknown filter names, reserved names and names owned by typed options before HTTP.
+- Python rows are rebuilt with Resource.existing, which applies descriptor coercion and defaults; Go keeps typed snapshots with the raw JSON and filters compare exact raw JSON values without coercion.
+- Python policy query keys are name, type, sort and global_project.
+- The explicit-limit marker fallback, MaxItems limit hints and short-page continuation are verified with HTTP fixtures only; no live Senlin server default or maximum limit was observed.
 
 ### `python:clustering/v1/find_policy`
 

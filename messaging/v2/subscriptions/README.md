@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:message/v2/create_subscription`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -39,16 +39,14 @@ Python/Go differences:
 
 - Python Subscription age/ttl/subscriber/source/subscription_id descriptors are untyped and options uses dict conversion. Go creation deliberately uses optional int64 TTL with null rejection, a required string subscriber and object-only raw options; the server still evaluates subscriber scheme and TTL range. Response subscription_id is optional and does not have a fabricated nonempty/safe-segment requirement: exact canonical strings/null/omission remain response evidence; wrong-type canonical typed fields still receive deliberate Go strict decode errors.
 - Go returns only the decoded accepted response with owned exact-key Body/Header/StatusCode, not the Python request-seeded Subscription with descriptor/header/URI state. Canonical literal id presence (including null) overrides alternate subscription_id; case variants remain raw extensions. Location is passive and is not used to synthesize an ID.
-
-Unresolved boundaries:
-
 - Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.
 - Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.
 - Direct **attrs still permits broader Python descriptor/coercion/unknown-body and inherited _create base_path/__conflicting_attrs behavior. Concrete Go body/field protection intentionally narrows that surface; passing source fields age/source/id through creation is not a new supported overload.
+- Resource objects, Python str-or-Subscription overloads, **attrs coercion, per-request random Client-ID and cache controls are deliberately not reproduced; Go uses explicit string IDs, concrete options and a stable configured Client-ID (or a typed override).
 
 ### `python:message/v2/get_subscription`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -73,15 +71,13 @@ Python/Go differences:
 
 - Go Get accepts a validated literal ID string and returns an owned exact-key projection; it does not mutate a seeded Python Subscription. Canonical subscriber/source/subscription_id/id values are stricter typed strings, while ttl/age/options and full raw Body remain precise/untyped response data.
 - Python MessageResource.fetch accepts skip_cache/base_path and supplied Resource header descriptors, deriving missing request IDs/project from UUID/session. Go exposes concrete per-call identity/header options on its fixed queue scope with the stable configured Client-ID policy.
-
-Unresolved boundaries:
-
 - Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.
 - Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.
+- Resource objects, Python str-or-Subscription overloads, **attrs coercion, per-request random Client-ID and cache controls are deliberately not reproduced; Go uses explicit string IDs, concrete options and a stable configured Client-ID (or a typed override).
 
 ### `python:message/v2/subscriptions`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -113,16 +109,14 @@ Python/Go differences:
 - Pinned MessageResource.list ignores its headers/microversion/max_items parameters and does not perform generic Resource.list Body-local filter transposition. Go header options and effective local MaxItems are deliberate supported extensions; no generic Body filtering/semantic classification or class-specific automatic maximum-microversion negotiation is claimed.
 - Go extension query forwards nonreserved unknown wire keys, including frozen repeated values; the pinned inherited QueryParameters transpose only retains limit/marker. Go rejects invalid/repeated/empty limit and invalid marker earlier and rejects malformed subscriptions envelopes, invalid consumed typed values, null last-ID and marker cycles with explicit errors.
 - Python per-iterator UUID/session-project derivation and bare cls.existing(**row) objects differ from Go stable configured headers, caller-owned exact raw fields and actual page Header/StatusCode. Go queue scope remains authoritative and does not infer a URI overlay from returned source.
-
-Unresolved boundaries:
-
 - Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.
 - Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.
 - Inherited Proxy._list base_path/__conflicting_attrs/deprecated jmespath filtering and arbitrary Python adapter/session controls are not exposed. Ordinary typed options/query extensions do not implement these wrappers; custom MessageResource list quirks remain explicitly separated from generic Resource filtering/cache contracts.
+- Resource objects, Python str-or-Subscription overloads, **attrs coercion, per-request random Client-ID and cache controls are deliberately not reproduced; Go uses explicit string IDs, concrete options and a stable configured Client-ID (or a typed override).
 
 ### `python:message/v2/delete_subscription`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -148,11 +142,9 @@ Python/Go differences:
 
 - The direct default ignore_missing=True is retained, but Go returns error-only rather than the mutable seeded Subscription/None result of Python _delete. A successful acknowledgement does not fabricate a returned Subscription or update cached model state.
 - Literal child IDs are validated/escaped and header identity is selected by SDK-owned options; Python also accepts Subscription Resource inputs and broader supplied descriptor/session state.
-
-Unresolved boundaries:
-
 - Full inherited Subscription/MessageResource/Resource descriptor, coercion/default, seeded mutable instance, alternate-ID mutation and returned Resource lifecycle/cache behavior are not implemented by caller-owned Go values and explicit string IDs. Python str-or-Subscription input overloads and generic session/adapter/base_path/skip_cache controls remain separate.
 - Pinned MessageResource generates a UUID for an unconfigured logical request/iterator and derives X-PROJECT-ID from the supplied resource/params or session project. Go reuses configured Connection/source Client-ID (or an explicit typed override), requires an effective Client-ID and does not infer an auth-result project; configured or typed project headers supply that policy. Shared client mutation is not part of the Go API.
+- Resource objects, Python str-or-Subscription overloads, **attrs coercion, per-request random Client-ID and cache controls are deliberately not reproduced; Go uses explicit string IDs, concrete options and a stable configured Client-ID (or a typed override).
 
 ## Usage examples
 

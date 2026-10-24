@@ -277,73 +277,77 @@ Python/Go differences:
 
 ### `python:cloud/_block_storage/BlockStorageCloudMixin/get_volume_quotas`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk.Connection.BlockStorageProjectQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectBlockStorageQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetBlockStorageQuotas`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Get`
 
-- A named project is resolved once through a separate Keystone client before Cinder limit requests.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- Explicit project IDs bind without HTTP; exact project names resolve once through a separate Keystone v3 client across all pages, with missing, ambiguous, invalid-ID and authorization failures stopping Cinder calls.
-  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaResolvesExactProjectNameWithSeparateKeystoneClientOnce`, `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaProjectLookupFailuresPreventCinderRequests`, `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-
-Python/Go differences:
-
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
-
-Unresolved boundaries:
-
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
-
-### `python:cloud/_block_storage/BlockStorageCloudMixin/set_volume_quotas`
-
-Status: `unresolved`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk.Connection.BlockStorageProjectQuotas`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
-
-- A named project is resolved once, and typed/extension quota updates use the fixed project target.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- Typed and per-type quota updates preserve zero/unlimited values and detached extension data.
-  Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`, `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaDeepOptionSnapshotAndCoreCollisions`.
-
-Python/Go differences:
-
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
-- Go returns a typed quota response; the Python cloud setter discards the proxy return value.
-
-Unresolved boundaries:
-
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
-
-### `python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_quotas`
-
-Status: `unresolved`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk.Connection.BlockStorageProjectQuotas`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
-
-- A fixed project scope resets quota overrides with strict missing behavior and no automatic read.
-  Tests: `connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`.
-- Reset uses the frozen project and returns native 200 metadata without a follow-up GET.
+- get_volume_quotas strict-finds the project then reads the quota set without usage; GetBlockStorageQuotas looks up once and sends one GET, failing before Cinder for a missing project.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+- Normalized known and unknown quota fields and usage/limit triples are the mapped block storage get_quota_set contract.
   Tests: `api/cinder_project_quotas_responses_test.go:TestCinderProjectQuotaLimitsDefaultsUsageUpdateAndResetKeepFixedTarget`.
 
 Python/Go differences:
 
-- Go callers use explicit resource.ID/resource.Name and a reusable fixed scope; cloud Python uses an ambiguous string and repeats project lookup per call.
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
+- Block storage in Go is Cinder v3 only; the Python helper dispatches over the configured v2 or v3 proxy.
 
-Unresolved boundaries:
+### `python:cloud/_block_storage/BlockStorageCloudMixin/set_volume_quotas`
 
-- Python cloud always runs Keystone find_project even for a string ID and ensures Identity version 3; Go explicit IDs intentionally bypass lookup, and full find_project fallback/version-negotiation/error conversion behavior has not been mapped.
-- Audit the called Python proxy and inherited Resource/Adapter contracts, including Resource/dict input, unknown-attribute coercion, response/dirty/cache behavior; this connection convenience method is only partial evidence.
+Status: `go_mapping`.
+
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectBlockStorageQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.SetBlockStorageQuotas`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Update`
+
+- set_volume_quotas strict-finds the project and sends update_quota_set without a force flag; SetBlockStorageQuotas looks up once, sends one PUT and adds no force.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+- Cinder update body building and error evidence are the mapped update_quota_set contract.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
+
+Python/Go differences:
+
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
+- Block storage in Go is Cinder v3 only; the Python helper dispatches over the configured v2 or v3 proxy.
+- Python returns None; Go returns the updated quota model.
+
+### `python:cloud/_block_storage/BlockStorageCloudMixin/delete_volume_quotas`
+
+Status: `go_mapping`.
+
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Connection.FindProjectBlockStorageQuotas`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.DeleteBlockStorageQuotas`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.ProjectQuotaScope.Reset`
+
+- delete_volume_quotas strict-finds the project and calls revert_quota_set; DeleteBlockStorageQuotas looks up once and sends one DELETE.
+  Tests: `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeDeleteQuotasReturnsResetAndVolumeSideWorks`, `connection_py_cloud_compute_quotas_test.go:TestPyCloudComputeQuotaHelpersMissingProjectStopsBeforeService`.
+- The reset 404/HTTP cause contract is the mapped revert_quota_set behavior.
+  Tests: `api/cinder_project_quotas_contracts_test.go:TestCinderProjectQuotaHTTPFailuresPreserveStatusBodyHeaderAndNotFound`.
+
+Python/Go differences:
+
+- Python Resource inputs and **kwargs are replaced by a project name-or-ID string and typed options; the cloud helpers accept only name_or_id as the project input, so no Resource/dict project input exists to map.
+- Lookup is the strict find_project sequence (GET projects/{value}, then name-filtered list after a 404) on every call, matching Python; the explicit ProjectQuotas scope remains the lookup-free path for known IDs.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding, so there is no separate version check and an Identity endpoint that is not v3 fails at the request.
+- Python Proxy.request can serve the lookup GET from a connection response cache; Go has no client-side GET cache.
+- Python translates responses into mutable Resources; Go returns the typed quota model with raw fields, headers and status.
+- Block storage in Go is Cinder v3 only; the Python helper dispatches over the configured v2 or v3 proxy.
+- Python returns None (its docstring promises the deleted quota set); Go returns the reset response.
 
 ## Usage examples
 

@@ -32,51 +32,54 @@ Unresolved boundaries:
 
 ### `python:dns/v2/recordsets`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets.API.ListByZone`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets.API.ListAll`
 - `github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets.API.InZone`
-- `github.com/JSYoo5B/go-openstacksdk/resource.Collection.List`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets.WithListByZoneOptions`
+- `github.com/JSYoo5B/go-openstacksdk/dns/v2/recordsets.WithListAllOptions`
 
-- The fixed-zone Collection preserves the parent route, name/status/vendor query, explicit limit and default typed all-project/sudo-tenant headers while applying raw consumption controls.
-  Tests: `api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize`, `api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext`, `api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard`, `api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation`, `api/generated_list_controls_test.go:TestGeneratedListPublicZeroControlKeepsDesignateHeaderBuilder`.
+- A zone argument lists /zones/{zone}/recordsets and no zone lists /recordsets; name/type/ttl/data/status/description/limit/marker filters, headers and links.next continuation are preserved.
+  Tests: `api/designate_recordsets_test.go:TestDesignateRecordSetListsUseZoneAndGlobalRoutesFiltersAndLinksNext`.
+- The fixed-zone Collection keeps the parent route, query and explicit limit while applying raw consumption controls.
+  Tests: `api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize`, `api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext`.
 
 Python/Go differences:
 
-- Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
-- The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
-
-Unresolved boundaries:
-
-- The tested controlled Collection fixes a zone; audit the global no-zone /recordsets alternative, every typed filter/header and inherited Recordset Body/query/descriptor contracts separately.
-- Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity.
+- Go uses concrete option types and explicit references (resource.ID / resource.Name) instead of **attrs and Resource objects; the response is the typed native model and unknown response fields are not retained. There is no Resource cache, dirty tracking or Adapter microversion negotiation (Designate v2 has none).
+- List and sudo controls use the native Designate headers X-Auth-All-Projects (sent only when true) and X-Auth-Sudo-Tenant-ID; Python sends x-auth-sudo-project-id.
+- Go uses the separate ListByZone and ListAll entry points instead of an optional zone argument; a zone name must be resolved with InZone first.
 
 ### `python:load_balancer/v2/members`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.ListMembers`
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.WithListMembersQuery`
+- `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.WithListMembersOptions`
 - `github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/pools.API.Members`
-- `github.com/JSYoo5B/go-openstacksdk/resource.Collection.List`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
 
 - The fixed-pool member Collection keeps the parent route and name/vendor query, consumes raw rows before its local provisioning-status filter, and preserves explicit page size.
   Tests: `api/generated_list_controls_test.go:TestGeneratedListControlsPreserveFiltersFixedParentAndExplicitSize`, `api/generated_list_controls_test.go:TestGeneratedListControlsSinglePageAndConsumerBreakSkipUnusedNext`, `api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard`, `api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation`.
+- Python-only member query keys (for example backup) travel through the list extension query.
+  Tests: `api/py_lb_extension_test.go:TestPyLBPythonOnlyWireKeysTravelThroughExtensionOptions`.
+- ListMembers follows members_links, preserves explicit false and zero typed filters and forbids protected collisions.
+  Tests: `api/octavia_pools_test.go:TestOctaviaPoolListMembersFiltersFollowLinksAndPreserveFalse`.
 
 Python/Go differences:
 
+- Python member methods take the parent pool as an ID or Pool Resource and put pool_id into the URI; Go passes the pool ID per call or fixes it once in a pools.API.Members scope (an explicit ID needs no lookup request).
+- Python list methods return a generator of Resource objects; Go List is an iter.Seq2 and All collects it, with common paging controls and no inherited Resource.list link/limit/marker fallbacks beyond the native pager.
+- Python **attrs/**query become concrete typed options plus the library-owned WithCreateField/WithUpdateField/WithListQuery extensions; Python-only wire keys travel through those extensions and protected-field collisions fail before HTTP.
 - Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
 - The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
-
-Unresolved boundaries:
-
-- Audit every Member query/Body alias and descriptor, Python Resource/string pool conversion and inherited resource normalization beyond the fixed explicit pool listing.
-- Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity.
 
 ### `python:compute/v2/server_actions`
 
@@ -225,7 +228,7 @@ Python/Go differences:
 
 ### `python:database/v1/databases`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -233,44 +236,50 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.Collection.List`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/db/v1/databases.DatabaseScope.FilteredResources`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithBodyFilter`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithBodyFilters`
 
-- The fixed-instance database scope retains name/charset/collation and native continuation while applying raw row and first-page controls without inventing initial query capability.
-  Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`.
+- The fixed-instance database scope lists names with character set and collation, follows databases_links, treats 204 as empty and applies raw row and first-page controls.
+  Tests: `api/trove_misc_test.go:TestTroveMiscDatabaseListFollowsLinksAndNativeModelOmitsCharacterSet`, `api/trove_misc_test.go:TestTroveMiscDatabaseListNoContentAndHTTPFailure`, `api/trove_databases_contracts_test.go:TestTroveDatabasesScopeResolvesInstanceOnceAndUsesListLookup`.
+- Existing consumption-control tests keep name/charset/collation and native continuation without inventing initial query capability.
+  Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`.
+- FilteredResources applies Body filters locally on the original rows (subset object match, null for omitted fields, Python attribute aliases) and rejects unknown names and server query extensions.
+  Tests: `api/r2_small_filters_test.go:TestR2SmallTroveBodyFiltersFlavorsInstancesDatabasesUsers`.
 
 Python/Go differences:
 
-- Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
-- The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
-
-Unresolved boundaries:
-
-- Audit Python Database Body/query/descriptor aliases and arbitrary proxy query, instance Resource input and inherited response/cache behavior beyond the verified explicit instance scope.
-- Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity.
+- Python takes an instance ID or Resource (no name lookup); Go resolves a resource.Ref once.
+- Python returns lazy Resource objects; Go returns typed models. Filters are local, use Python attribute names and Go JSON equality (booleans never equal numbers) on the original rows.
+- FilteredResources rejects server query extensions and sends no limit/marker: the native pager follows advertised links only, whereas Python also sends caller limit/marker and falls back to marker paging. Python silently drops unknown query keys; Go rejects unknown Body filter names before HTTP.
+- Python Database ids and identity are the name; the scoped Collection keeps the name as ID.
 
 ### `python:database/v1/users`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/db/v1/users.API.InInstance`
 - `github.com/JSYoo5B/go-openstacksdk/db/v1/users.UserScope.List`
-- `github.com/JSYoo5B/go-openstacksdk/resource.Collection.List`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/db/v1/users.WithHost`
+- `github.com/JSYoo5B/go-openstacksdk/db/v1/users.UserScope.FilteredResources`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithBodyFilter`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithBodyFilters`
 
-- The fixed-instance user scope consumes all account rows before its optional local host and exact-name filters, retaining literal account names, hosts and returned database/password fields.
-  Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`.
+- The fixed-instance user scope lists accounts with their host, follows users_links and filters by host locally after raw consumption.
+  Tests: `api/trove_misc_test.go:TestTroveMiscUserListNativeModelDropsHostAndScopeFiltersByHost`, `api/trove_users_contracts_test.go:TestTroveUsersScopeResolvesInstanceOnceAndUsesListLookup`.
+- Existing consumption-control tests keep literal account names and hosts and native continuation.
+  Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`.
+- FilteredResources applies Body filters locally on the original rows (subset object match, null for omitted fields, Python attribute aliases) and rejects unknown names and server query extensions.
+  Tests: `api/r2_small_filters_test.go:TestR2SmallTroveBodyFiltersFlavorsInstancesDatabasesUsers`.
 
 Python/Go differences:
 
-- Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
-- The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
-- The Go WithHost scope filter follows raw consumption, so max_items does not refill the cap with matching-host accounts.
-
-Unresolved boundaries:
-
-- Audit Python User Body/query/descriptor aliases and arbitrary proxy query, Resource instance inputs and inherited normalization/cache behavior beyond the verified host-scoped listing.
-- Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity.
+- Python takes an instance ID or Resource; Go resolves a resource.Ref once. The Go WithHost filter follows raw consumption.
+- Python returns lazy Resource objects; Go returns typed models. Filters are local, use Python attribute names and Go JSON equality (booleans never equal numbers) on the original rows.
+- FilteredResources rejects server query extensions and sends no limit/marker: the native pager follows advertised links only, whereas Python also sends caller limit/marker and falls back to marker paging. Python silently drops unknown query keys; Go rejects unknown Body filter names before HTTP.
+- The scope WithHost narrowing is not applied to FilteredResources, since Python users() has no host attribute.
 
 ### `python:shared_file_system/v2/access_rules`
 

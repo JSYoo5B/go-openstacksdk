@@ -8,45 +8,43 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `gophercloud:orchestration/v1/stacks.Abandon`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Abandon`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Abandon`
 
+- Abandon sends DELETE /stacks/{name}/{id}/abandon, requires HTTP 200 and preserves every AbandonedStack field including nested nulls, files and environment; 202, 403, 404, 500 and malformed JSON fail, and canceled contexts send nothing.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksAbandonRequiresHTTP200AndPreservesPayload`.
+
 Python/Go differences:
 
 - Go exposes the fixed-identity native typed AbandonedStack response rather than a mutable Resource.
 
-Unresolved boundaries:
-
-- Add DELETE /stacks/{name}/{id}/abandon with required HTTP 200 and an AbandonedStack payload fixture, plus errors/cancellation/decoding and preservation of all returned fields. No existing scope HTTP test calls Abandon.
-
 ### `gophercloud:orchestration/v1/stacks.Delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Delete`
 
 - DELETE uses the fixed name/ID without a lookup; default 404 is ignored and explicit strict 404 returns resource.ErrNotFound.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy`.
+- Native DELETE accepts 202 and 204 and returns 200, 401, 403, 409 and 500 as HTTP errors; the scoped call propagates those errors even with the strict missing policy, and a canceled context sends nothing.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksDeleteAcceptsOnly202And204AndKeepsHTTPErrors`.
 
 Python/Go differences:
 
 - Scoped Go deletion fixes name/ID and ignores 404 by default; native Delete directly returns its HTTP error.
 
-Unresolved boundaries:
-
-- Add positive native DELETE 202/204 fixtures plus forbidden/server-error/cancellation assertions for the mutating request itself. Current scoped delete fixture only returns 404; deletion waiter GET cases do not verify DELETE success or errors.
-
 ### `gophercloud:orchestration/v1/stacks.Find`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -61,14 +59,12 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies`.
 - The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
+- Native Find sends a single GET /stacks/{identity} with no query, follows the canonical redirect for both a name and an ID while keeping auth and client headers, decodes the stack (false, zero, null output values) and keeps 403/404, malformed JSON, null object and cancellation behavior.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksFindUsesSingleIdentityRedirectAndKeepsErrors`.
 
 Python/Go differences:
 
 - Go explicit Name references resolve exact list summaries and ID references fetch details, whereas native Find passes a single identity string to Heat.
-
-Unresolved boundaries:
-
-- Test the unchanged native Find name-or-ID /stacks/{identity} redirect entry point and its result/errors separately; exact-name SDK list resolution plus the canonical ID fixture do not exercise its name-string variant.
 
 ### `gophercloud:orchestration/v1/stacks.Get`
 
@@ -95,7 +91,7 @@ Python/Go differences:
 
 ### `gophercloud:orchestration/v1/stacks.List`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -103,6 +99,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListOptions`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListQuery`
 
 - Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`.
@@ -110,18 +109,17 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerMarkerFallbackCycleAndBreak`.
 - An identical relative next URL produces a cycle error after one request; break skips next-link processing.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerRepeatedLinkUsesCommonGuard`.
+- Native List sends no query for zero options and serializes every ListOpts filter (tenant_id, id, status, name, marker, limit, sort_keys, sort_dir, global_tenant, show_deleted, show_nested, show_hidden, tags, tags_any, not_tags, not_tags_any) plus extension queries, omits false booleans, performs a single request, and handles 204, bad arrays, 403 and cancellation.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksListSerializesEveryTypedFilter`.
 
 Python/Go differences:
 
 - Go SDK resources use linked pages with relative-link resolution and positive-limit marker fallback rather than pinned native SinglePageBase; summaries share a StackResource model and explicit Detailed=false.
-
-Unresolved boundaries:
-
-- Audit and add assertions for native list typed query filters and defaults (tenant/id/status/name/sort, global_tenant, show_deleted/show_nested/show_hidden, tags/tags_any/not_tags/not_tags_any). Current scoped fixtures prove page size/name lookup/paging and selected summary fields, not every declared ListOpts serialization.
+- Native API.List is a single-page SinglePageBase request that never follows links; the scoped collection pages by link or marker.
 
 ### `gophercloud:orchestration/v1/stacks.Update`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -129,17 +127,16 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateField`
 
+- Update sends PUT with the required template, environment, parameters (including false), timeout, comma-joined tags, referenced child-template files and extension fields; omitted options stay omitted; 201/202 succeed; 200/204/400/403/409/500 fail with their code; a missing template, unparseable template, protected-field override and canceled context fail before HTTP.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions`.
+
 Python/Go differences:
 
-- The scope retains name/ID and delegates to concrete native PUT options; no successful PUT contract is established by a PATCH fixture.
-
-Unresolved boundaries:
-
-- Add an actual PUT fixture asserting the required template, Template/Environment/file handling, body/extensions, native 201/202 success codes and errors. Method existence alone is not completion evidence.
+- The scope retains name/ID and delegates to concrete native PUT options; a PATCH is a separate operation with different required fields and success codes.
 
 ### `gophercloud:orchestration/v1/stacks.UpdatePatch`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -151,112 +148,111 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy`.
 - Canceled scoped PATCH is rejected without a request.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
+- UpdatePatch accepts 200, 202 and 204 and fails 201/400/403/409/500; nil tags and empty parameters are omitted while an empty non-nil tag list is sent as an empty string; template and environment are optional, parsed and merged with referenced files; extension fields, unparseable templates, protected-field overrides and cancellation are rejected before HTTP.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksUpdatePatchAcceptsSuccessCodesAndPreservesEmptyTags`.
 
 Python/Go differences:
 
 - Go supplies concrete options and field extensions with a fixed canonical pair and returns error; the native template-optional PATCH behavior is preserved in the exercised subset.
 
-Unresolved boundaries:
-
-- Audit Template/Environment parsing and referenced-file merging, explicit empty versus omitted Tags/Parameters, all native success statuses 200/202/204 and HTTP/decode/option errors. The present PATCH fixture proves template omission, parameters/tags/false extension and 204, not the complete helper surface.
-
 ### `python:orchestration/v1/abandon_stack`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Abandon`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Abandon`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.InStack`
+
+- DELETE /stacks/{name}/{id}/abandon uses the fixed identity without a lookup, requires HTTP 200, returns the abandoned-stack payload (name, id, status, resources and unknown fields decode) and does not replay; 202 and canceled contexts fail without success.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinScopedAbandonAndDeleteUseFixedIdentity`.
+- The native API.Abandon requires HTTP 200 and preserves the payload and native errors.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksAbandonRequiresHTTP200AndPreservesPayload`.
 
 Python/Go differences:
 
-- Python Stack.abandon returns resp.json without its own raise_from_response; Go uses native HTTP-200 validation and typed AbandonedStack extraction.
-
-Unresolved boundaries:
-
-- Audit Proxy._get_resource and Stack.abandon HTTP/JSON/error behavior including a Python Resource argument; add an actual scoped abandon fixture and reconcile unknown response fields. Binding or method existence does not verify abandonment.
+- Python Stack.abandon builds /stacks/{name}/{id}/abandon from the Resource; for an ID string the name is empty and urljoin produces stacks//{id}/abandon. It returns resp.json() without raise_from_response, so an error body is returned as data. Go always uses both canonical components, requires HTTP 200 and reports every other status as an error.
+- Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.
 
 ### `python:orchestration/v1/delete_stack`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithMissingError`
+- `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 
 - DELETE uses the fixed name/ID without a lookup; default 404 is ignored and explicit strict 404 returns resource.ErrNotFound.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy`.
+- Scoped DELETE succeeds on 202 and 204, keeps 403 and 500 as native errors and sends exactly one request per call (no replay, no lookup).
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinScopedAbandonAndDeleteUseFixedIdentity`.
+- Native API.Delete accepts only 202 and 204 and keeps HTTP errors.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksDeleteAcceptsOnly202And204AndKeepsHTTPErrors`.
 
 Python/Go differences:
 
-- Go explicit references/complete identity and concrete missing-policy options replace Python string-or-Stack input and exceptions.
-
-Unresolved boundaries:
-
-- Audit Proxy._delete and inherited Resource.delete/existing identity, microversion, URL preparation and error policy; exercise native successful DELETE and authorization/server errors as well as the 404 policy before mapping the whole operation.
+- Python Proxy._delete(Stack, stack, ignore_missing=True) issues DELETE /stacks/{id} from the Resource, and any status below 400 succeeds; Go issues DELETE /stacks/{name}/{id} for the canonical identity and accepts 202 and 204 only. Python ignores 404 by default and raises NotFoundException with ignore_missing=False; Go ignores by default and uses WithMissingError for the strict policy.
+- Python returns None and gives no completion signal; deletion waiting is the separate wait_for_delete helper (see that review).
+- Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.
 
 ### `python:orchestration/v1/find_stack`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindResolveOutputs`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Find`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Get`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.InStack`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithResolveOutputs`
 
-- Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`.
-- Duplicate exact names across pages fail, strict absence fails and explicit ignore-missing returns nil; empty collection is non-nil.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies`.
-- The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
+- One GET /stacks/{nameOrID} follows Heat's redirect to the canonical location, issues no list request, appends resolve_outputs=False exactly once when requested and returns the typed model plus the complete raw stack object (deletion_time, stack_owner, parent, stack_user_project_id, files_container, environment_files, files, template and extension fields, including an exact large integer).
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted`.
+- 404, DELETE_COMPLETE and ADOPT_COMPLETE are reported as resource.ErrNotFound or nil with WithFindIgnoreMissing; DELETE_FAILED stays visible; 403 is never ignored; a missing stack envelope or identity, an empty reference, a nil option and a canceled context fail before a second request.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted`.
+- The native single-identity Find keeps the same redirect and error behavior, and exact-name list resolution remains available through StackResources.Find with duplicate detection.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksFindUsesSingleIdentityRedirectAndKeepsErrors`, `api/heat_stacks_contracts_test.go:TestHeatStackExactDuplicateNamesAcrossPagesAndMissingPolicies`, `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
 
 Python/Go differences:
 
-- Python defaults ignore_missing=True and returns a detailed Resource through Stack.find/fetch. Go requires explicit ID versus Name, defaults missing lookup to error and returns a summary for Name; duplicates are rejected using a full exact local scan.
-
-Unresolved boundaries:
-
-- Audit Proxy._find and the Resource existing/request/cache/response path used by direct Stack.find/fetch, including resolve_outputs forwarded through find_stack.
-- Add behavioral evidence for Python ambiguous/name redirect and DELETE_COMPLETE/ADOPT_COMPLETE filtering versus Go policies. Name Find does not accept WithResolveOutputs; obtaining details is a separate scoped Get.
+- Python find_stack defaults ignore_missing=True and returns None; Go FindNameOrID returns resource.ErrNotFound by default and uses WithFindIgnoreMissing for nil.
+- Python Stack.find fetches into a mutable Resource and falls back to the whole response body when the stack key is missing; Go requires a stack object with a complete canonical name and ID and returns a StackDetail value.
+- Python resolve_outputs is a find_stack argument; Go uses WithFindResolveOutputs. Neither sends a list request or detects duplicates in this path, because Heat enforces unique names.
+- Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.
 
 ### `python:orchestration/v1/get_stack`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Get`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.FindNameOrID`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithFindResolveOutputs`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Get`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.Get`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithResolveOutputs`
 
-- A fixed name/ID GET returns a detailed native field model; parameter values, output presence, rollback=false, timeout and query omission/resolve_outputs=False are asserted.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`.
-- The ID lookup follows a canonical redirect with the false query written once and retains authentication and client headers.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
-- Changed name/ID, missing/null objects, incomplete identity and bad timestamps fail; 403/404 retain an unexpected-response cause and strict 404 is resource.ErrNotFound.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackIdentityMismatchesAndHTTPErrorsArePreserved`.
-- Invalid compound identities, nil GET option and canceled GET fail without HTTP.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
+- A strict FindNameOrID is Python get_stack: one GET (with resolve_outputs=False only when requested, a followed redirect), missing, DELETE_COMPLETE and ADOPT_COMPLETE stacks are ErrNotFound, and the raw object retains every declared Python Stack field absent from the native model.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinFindNameOrIDUsesOneGETKeepsRawFieldsAndHidesDeleted`.
+- A fixed name/ID GET returns the detailed native model; resolve_outputs=False is written once and the canonical redirect keeps headers.
+  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`, `api/heat_stacks_contracts_test.go:TestHeatStackIDRedirectPreservesCanonicalIDQueryAndHeaders`.
+- Changed identity, missing or null objects, bad timestamps and HTTP 403/404 fail with preserved causes, and invalid identities or canceled contexts send nothing.
+  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackIdentityMismatchesAndHTTPErrorsArePreserved`, `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 
 Python/Go differences:
 
-- Go returns a new typed StackResource and explicit error, retains DELETE_COMPLETE/ADOPT_COMPLETE data in normal GET and validates canonical identity. Python Stack.fetch mutates a Resource and treats those two complete states as NotFound.
-
-Unresolved boundaries:
-
-- Audit Proxy._get and Stack.fetch inherited request preparation, microversion/cache/skip_cache and response translation; cover existing Python Stack input as well as ID input.
-- Reconcile declared Python Stack response fields absent from the native model, including deletion_time, owner/parent IDs, environment/files/template and preview-change fields, before declaring the whole operation mapped.
+- Python Stack.fetch mutates and returns the passed Resource, honors skip_cache and treats DELETE_COMPLETE and ADOPT_COMPLETE as NotFound; Go FindNameOrID returns an independent StackDetail with the same two states missing, while the fixed-identity StackScope.Get and StackResources.Get retain those states as data.
+- Python accepts an ID or a Stack object (GET /stacks/{id}); Go FindNameOrID accepts a name or ID reference string and the scope variants require a complete canonical identity. The typed StackResource still lacks Python-only fields such as deletion_time, owner and parent IDs; StackDetail.Raw carries them without coercion.
+- Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.
 
 ### `python:orchestration/v1/stack_events`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -287,15 +283,14 @@ Python/Go differences:
 
 - Go fixes canonical stack identity and resource logical name once, provides typed immutable request metadata plus raw body/header and uses native marker traversal with cycle protection.
 - Go uses Heat sort_keys through native SortKey and HTTP query extensions; pinned Python StackEvent advertises sort_key. Empty resource name is rejected by ForResource instead of Python falsey resource_name selecting a whole-stack list.
-
-Unresolved boundaries:
-
-- Audit inherited Proxy._get/_list and StackEvent Resource/MRO query mapping, pagination, descriptors/cache/response hydration and Resource input behavior.
-- Add assertions for complete resource-scoped typed options and explicitly resolve Python sort_key versus Heat sort_keys compatibility; no inherited StackEvent.fetch parity is implied by the Go resource-scoped GET feature.
+- Python stack_events fetches a non-Stack argument with Proxy._get(Stack, stack), a GET /stacks/{id} in which DELETE_COMPLETE and ADOPT_COMPLETE become NotFound, and then lists /stacks/{name}/{id}/events or the resource-specific /resources/{resource_name}/events path; Go resolves the parent once with InStack and has distinct stack and resource scopes.
+- Python StackEvent declares resource_action, resource_status, resource_name, resource_type, nested_depth, sort_key and sort_dir plus limit and marker; it sends sort_key, while Heat's documented parameter and the Go native option are sort_keys. Go does not send sort_key unless the caller supplies it as an explicit query.
+- A falsy resource_name selects the whole-stack list in Python; Go ForResource rejects an empty name.
+- Python builds StackEvent Resources with descriptors; Go returns EventResource values with typed fields plus raw body and headers.
 
 ### `python:orchestration/v1/stacks`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -303,6 +298,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackResources.All`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithQuery`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPageSize`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithListOptions`
 
 - Exact local name lookup covers relative next links, avoids additional detail GETs, preserves canonical name/ID and distinguishes summaries from detailed ID GETs.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeNameLookupUsesAllPagesAndDistinguishesDetails`.
@@ -310,45 +308,45 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerMarkerFallbackCycleAndBreak`.
 - An identical relative next URL produces a cycle error after one request; break skips next-link processing.
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackSDKPagerRepeatedLinkUsesCommonGuard`.
+- Native List serializes every typed filter (tenant_id, id, status, name, marker, limit, sort_keys, sort_dir, global_tenant, show_deleted, show_nested, show_hidden, tags, tags_any, not_tags, not_tags_any), omits false booleans and zero ListOpts sends no query.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksListSerializesEveryTypedFilter`.
+- Python filter names with no typed Go field (action, owner_id, username) and wire names such as tenant_id, tags_any and not_tags_any reach Heat verbatim through explicit queries; the Python aliases project_id, any_tags and not_any_tags are not translated.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackListForwardsPythonFilterNamesThroughExplicitQueries`.
 
 Python/Go differences:
 
 - Go returns typed summaries with Detailed=false rather than mutable Stack Resources; query names are HTTP names and Python project_id/tag aliases are not automatic Go aliases.
-
-Unresolved boundaries:
-
-- Audit inherited Proxy._list/Resource.list query transformation and descriptor/default handling, particularly project_id->tenant_id and CSV tag aliases any_tags/not_any_tags.
-- Verify all declared Python Stack summary/body fields and MRO list hydration/defaults; current tests prove selected native fields and linked/marker traversal, not complete Python Resource equivalence.
+- Python Stack query mapping accepts action, name, status, project_id (sent as tenant_id), owner_id, username and CSV tags/any_tags/not_tags/not_any_tags (sent as tags, tags_any, not_tags, not_tags_any) plus limit and marker; Go has typed fields for the Heat names it declares and sends other documented filters (action, owner_id, username) only through explicit WithQuery/WithListQuery values, without Python aliases.
+- Python Resource.list discards unknown keywords and turns declared Body attributes (for example status_reason or description) into client filters; Go does not discard: unknown names are sent only when the caller supplies an explicit query, and there is no implicit local Body filtering for stacks.
+- Python rows pass through Stack descriptors with defaults (tags defaults to an empty list, added/deleted/replaced fields and others); Go list summaries are typed ListedStack/StackResource values with Detailed=false and carry no Python defaults.
+- Python also honors per-call base_path and jmespath_filters through Proxy._list; Go does not expose either.
 
 ### `python:orchestration/v1/update_stack`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.Update`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.StackScope.UpdatePatch`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.API.UpdatePatch`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateField`
+- `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stacks.WithUpdateOptions`
 
-- PATCH can omit a template and sends parameters, comma-joined tags and explicit false extension at the fixed name/ID endpoint; 204 succeeds.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeMutationsUseFixedIdentityAndMissingPolicy`.
-- Canceled scoped PATCH is rejected without a request.
-  Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
+- PUT /stacks/{name}/{id} sends template, environment, parameters (including false), timeout, tags and an explicit false extension; a template is required, omitted optional values stay omitted and referenced child templates merge into files.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions`.
+- Scoped Update keeps the fixed identity, honors cancellation before HTTP and reports statuses other than 201/202 with their native code without replay.
+  Tests: `api/heat_native_stacks_test.go:TestHeatNativeStacksUpdateSendsPUTTemplateEnvironmentFilesAndExtensions`, `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 
 Python/Go differences:
 
-- Go separates PUT from template-optional PATCH and returns error, while Python Stack.commit mutates Resource dirty state and translates a response.
-- Pinned Proxy.update_stack passes preview positionally to Stack.commit prepend_key, but Stack.commit preview is keyword-only; the source wiring must not be assumed to exercise a preview endpoint.
-
-Unresolved boundaries:
-
-- Audit inherited _get_resource/_prepare_request, dirty-body/id removal and response translation; provide PUT versus PATCH and preview behavior fixtures rather than treating the PATCH test as Python commit evidence.
-- Define and test compatibility for the pinned positional preview wiring, direct Stack.commit keyword-only preview, template/environment/files and incomplete name-or-ID paths.
+- Python Stack.commit builds PUT /stacks/{name}/{id} (or /stacks/{id} when only one is known) from the dirty attributes of a mutable Resource, translating any status below 400 into the returned Resource; Go sends only its concrete UpdateOpts to the canonical identity and returns an error value.
+- In the pinned proxy, update_stack(preview=True) passes preview positionally to Stack.commit, where it becomes the ignored prepend_key (preview is keyword-only), so Python always performs an ordinary PUT. Go has no preview update and no claim of one; the separate PATCH operation UpdatePatch is Go-only.
+- Python sends the template as a dict and tags as a list; Go sends strings and a comma-joined tags value through the native builder and requires a template.
+- Go returns typed values and errors instead of Python Resource objects or None; a Stack, Resource or ID argument is replaced by an explicit resource.Ref resolved once to a fixed name/ID scope.
 
 ### `python:orchestration/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -364,19 +362,18 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 - Shared Go WaitDeleted completes on 404, nil successful fetch or case-insensitive deleted status, skips terminal callbacks, stops further GET after callback cancellation and honors explicit unlimited wait with parent deadlines.
   Tests: `resource/wait_attributes_test.go:TestWaitDeletedProgressStopsAtDeletedStatusOr404`, `resource/wait_attributes_test.go:TestWaitDeletedNilSuccessfulFetchIsTerminalWithoutCallback`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`.
+- Transient DELETE_IN_PROGRESS responses are polled until DELETE_COMPLETE, nonterminal responses report zero progress and the terminal one reports none; ADOPT_COMPLETE is not inferred as deletion and a bounded wait ends with context.DeadlineExceeded.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitDeletedTransientAdoptAndCallback`.
 
 Python/Go differences:
 
 - Go deletion wait returns error, uses a five-minute default and treats 404 or DELETE_COMPLETE as completion while ADOPT_COMPLETE is not inferred as deletion. Python returns the Resource and its Stack.fetch treats both complete states as NotFound.
-
-Unresolved boundaries:
-
-- Audit Stack.fetch and cached/mutated Resource return/error semantics, including Python ADOPT_COMPLETE behavior. Unlimited wait and progress callbacks now exist in the shared Go helper; Heat-specific deletion errors remain authoritative.
-- Add Heat transient polling, timeout, in-flight cancellation and callback evidence before whole-operation mapping. Go returns error rather than a Python Resource.
+- Python wait_for_delete returns the original Resource, defaults to a 120 second wait and treats a NotFound from Stack.fetch (404, DELETE_COMPLETE or ADOPT_COMPLETE) or a status equal to deleted as completion; Go StackScope.WaitDeleted returns only an error, defaults to the shared five-minute policy and recognizes HTTP 404 and DELETE_COMPLETE but not ADOPT_COMPLETE.
+- Go returns ErrFailedState immediately for DELETE_FAILED, while Python keeps polling until its timeout.
 
 ### `python:orchestration/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -392,15 +389,16 @@ Go API:
   Tests: `api/heat_stacks_contracts_test.go:TestHeatStackScopeValidationAndCancellationBeforeHTTP`.
 - Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.
   Tests: `resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`, `resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields`, `resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`.
+- Transient responses are polled until the target, callbacks receive 0 for every nonterminal response (Stack has no progress field), bounded waits end with context.DeadlineExceeded, WithFailureStates("ERROR") replaces the *_FAILED default so a CREATE_FAILED stack keeps polling, WithStatusAttribute waits on another string field and parent cancellation stops an unlimited wait in flight.
+  Tests: `api/py_heat_senlin_stacks_test.go:TestPyHeatSenlinStackWaitTransientTimeoutCustomPolicyAndCancellation`.
 
 Python/Go differences:
 
 - Go stack wait resolves once and polls canonical name/ID, defaults to five minutes/two seconds and treats *_FAILED or ERROR as terminal. Python Proxy delegates a generic Resource with custom failures/attribute/callback and wait=None.
-
-Unresolved boundaries:
-
-- Audit cached/mutated Python Resource, None target status, Stack.fetch, skip_cache and Adapter error/timeout semantics against mandatory Go lookup/context deadlines. Configurable failure states, attribute selection, callbacks and unlimited wait now exist in the shared Go helper.
-- Add stack-specific timeout, in-flight cancellation, custom failure/attribute/callback evidence before whole-operation mapping; existing stack default success/failure fixtures and shared Node/Server tests cover different contracts.
+- Python wait_for_status returns the passed Resource immediately, with no request, when its cached status already equals the target; Go StackScope.Wait always begins with a request on the fixed identity.
+- Python default failures are only ERROR, so a stack in CREATE_FAILED is polled until the timeout (forever when wait=None); the Go default also stops on any *_FAILED state and on ERROR, and WithFailureStates reproduces the Python list.
+- Python fetches with Stack.fetch, which raises NotFound for DELETE_COMPLETE and ADOPT_COMPLETE, so waiting for those targets raises instead of matching; Go returns the status as data.
+- Python raises ResourceTimeout and ResourceFailure and returns the updated mutable Resource; Go returns a StackResource and context/ErrFailedState errors. Attribute names are Go JSON tags or field names of the typed model, not Python descriptor names.
 
 ## Usage examples
 

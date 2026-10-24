@@ -831,7 +831,7 @@ Python/Go differences:
 
 ### `python:identity/v3/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -844,18 +844,29 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
+- `github.com/JSYoo5B/go-openstacksdk/identity.WaitForDelete`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/identityproviders.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/serviceproviders.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federationprotocols.API.Resources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/federation.API.MappingResources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/applicationcredentials.API.AccessRuleResources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ConfigResources`
+- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpointgroups.API.Resources`
 
 - Region WaitForDeletion with WithTimeout(120s) repeats GET regions/{id} on the fixed ID until 404, reports progress 0 after the nonterminal observation and then succeeds.
   Tests: `identity/v3/regions/python_parity_test.go:TestPythonRegionWaitHelpers`.
+- identity.WaitForDelete applies the Proxy.wait_for_delete defaults to any SDK collection: GET-only polling every two seconds for up to 120 seconds, completing on an actual 404, a successful nil observation or a case-insensitive deleted status of a declared status attribute; a 403 or other error ends the wait without DELETE.
+  Tests: `internal/servicewait/proxy_test.go:TestServiceWaitProxyDefaultsDeadlinesIntervalAndStatusAttribute`, `api/identity_proxy_waits_test.go:TestIdentityProxyWaitsStatusAttributeDefaultsAndTerminalErrors`.
+- All 21 pinned fetchable identity/v3 Resources (access rules, application credentials, credentials, domains, domain configs, endpoints, endpoint groups, federation protocols, groups, identity providers, limits, mappings, policies, projects, regions, registered limits, roles, services, service providers, trusts, users) have SDK collections; each deletion wait polls the fixed member route until 404.
+  Tests: `api/identity_proxy_waits_test.go:TestIdentityProxyWaitsDeleteEveryFetchableResource`.
 
 Python/Go differences:
 
 - Go defaults to a five-minute timeout while the identity v3 Proxy default is wait=120; resource.WithTimeout reproduces it.
-
-Unresolved boundaries:
-
-- Python accepts every identity v3 Resource; Go has separate per-package helpers and none for packages outside a Resources collection.
-- Python returns the original Resource on deletion; Go returns only an error.
+- Go accepts an explicit resource.Ref and a typed SDK collection; Python accepts an existing Resource.
+- WaitForDelete returns only an error; Python returns the original Resource on 404 and the fetched Resource on a deleted status. Native HTTP, transport, decoder and context causes remain visible; a 403 is never treated as absence.
+- Python raises ResourceTimeout; Go returns the context deadline. Go requires positive intervals and timeouts.
+- The identity v3 Proxy wait=120 is the identity.WaitForDelete default; existing generated WaitForDeletion keeps its five-minute common default, which resource.WithTimeout adjusts.
 
 ### `python:identity/v3/wait_for_status`
 

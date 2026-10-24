@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:clustering/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -38,14 +38,14 @@ Python/Go differences:
 - Go requires a nonempty string target, positive duration intervals and exported typed string attributes. Python nullable target/attribute and interval=None/zero normalization are distinct; unknown raw Body attributes or nested attribute paths are not inferred.
 - Go passes deadlines into HTTP requests and gives cancellation priority instead of checking timeout only between fetches. Published status/envelope rules preserve exact Body/Header/StatusCode and reject null/malformed success instead of permissive falsy completion.
 - BuildInfo has no new singleton polling route: pinned proxy get uses requires_id=False, while inherited wait fetch uses its normal requires_id=True and a normal ID-less BuildInfo cannot be fetched that way. Services remain list-only rather than inventing GET/delete/status capabilities.
-
-Unresolved boundaries:
-
-- Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path.
+- Python returns the passed Resource immediately, with no request, when its cached attribute already equals the target (wait_for_status), and otherwise fetches with skip_cache=True; Go always begins with a fresh request.
+- Python wait_for_delete returns the original Resource when a fetch is missing or its status equals deleted; Go WaitForDelete returns only an error.
+- Python accepts any Resource subclass and an arbitrary attribute name; Go provides waiters for the typed Senlin models and exported string attributes only, so arbitrary or custom Resource inputs have no equivalent.
+- Python callback receives the progress attribute or 0; Senlin models have no progress field and Go reports zero.
 
 ### `python:clustering/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -75,10 +75,10 @@ Python/Go differences:
 - Go requires a nonempty string target, positive duration intervals and exported typed string attributes. Python nullable target/attribute and interval=None/zero normalization are distinct; unknown raw Body attributes or nested attribute paths are not inferred.
 - Go passes deadlines into HTTP requests and gives cancellation priority instead of checking timeout only between fetches. Published status/envelope rules preserve exact Body/Header/StatusCode and reject null/malformed success instead of permissive falsy completion.
 - BuildInfo has no new singleton polling route: pinned proxy get uses requires_id=False, while inherited wait fetch uses its normal requires_id=True and a normal ID-less BuildInfo cannot be fetched that way. Services remain list-only rather than inventing GET/delete/status capabilities.
-
-Unresolved boundaries:
-
-- Complete the comparison of cached Resource fast paths, arbitrary Resource/custom typed attribute inputs, response mutation/cache and deletion original-resource return lifecycle; this review proves the documented stateless Ref polling path.
+- Python returns the passed Resource immediately, with no request, when its cached attribute already equals the target (wait_for_status), and otherwise fetches with skip_cache=True; Go always begins with a fresh request.
+- Python wait_for_delete returns the original Resource when a fetch is missing or its status equals deleted; Go WaitForDelete returns only an error.
+- Python accepts any Resource subclass and an arbitrary attribute name; Go provides waiters for the typed Senlin models and exported string attributes only, so arbitrary or custom Resource inputs have no equivalent.
+- Python callback receives the progress attribute or 0; Senlin models have no progress field and Go reports zero.
 
 ## Usage examples
 

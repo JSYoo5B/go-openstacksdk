@@ -8,20 +8,19 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `gophercloud:orchestration/v1/stackevents.Find`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.API.Find`
 - `github.com/JSYoo5B/go-openstacksdk/orchestration/v1/stackevents.API.InStack`
 
+- Native Find requests GET /stacks/{name}/events without a query, follows the canonical redirect keeping auth and client headers, returns the single non-paged events array (null physical ID, both timestamp forms, properties, links) without following next links, and keeps 403/404, invalid timestamp, malformed JSON and canceled-context failures.
+  Tests: `api/heat_native_stackevents_test.go:TestHeatNativeStackEventsFindFollowsNameRedirectAndKeepsErrors`.
+
 Python/Go differences:
 
-- The high-level scope resolves a stack separately and lists at a canonical path; this is not evidence for the native /stacks/{name}/events identity redirect endpoint.
-
-Unresolved boundaries:
-
-- Add native Find fixtures for /stacks/{name}/events canonical redirect, resulting non-paged events extraction and HTTP/decode failures before classifying this direct operation.
+- Native Find takes the stack name only and relies on Heat's redirect, whereas the scope resolves a stack once and lists at the canonical /stacks/{name}/{id}/events path.
 
 ### `gophercloud:orchestration/v1/stackevents.Get`
 
@@ -80,7 +79,7 @@ Python/Go differences:
 
 ### `gophercloud:orchestration/v1/stackevents.ListResourceEvents`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -95,18 +94,16 @@ Go API:
   Tests: `api/heat_stackevents_scope_test.go:TestHeatStackEventsResolvesNameOnceAndSeparatesStackAndResourceLists`.
 - Resource-list repeated marker is rejected; between-item cancellation, malformed options and HTTP errors remain observable.
   Tests: `api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationRejectsRepeatedMarkerBeforeRefetch`, `api/heat_stackevents_pagination_test.go:TestHeatStackEventsPaginationStopsOnBreakAndCancellation`, `api/heat_stackevents_scope_test.go:TestHeatStackEventsPreflightValidatesIdentityPathsAndOptions`, `api/heat_stackevents_pagination_test.go:TestHeatStackEventsPreservesGetAndPaginationHTTPErrors`.
+- The resource-scoped list serializes every ListResourceEventsOpts input (explicit initial Marker, Limit, repeated ResourceActions/Statuses/Names/Types, SortKey, SortDir) plus an extension query and header, repeats them on the next page with only marker replaced by the last event ID, and ends on 204.
+  Tests: `api/heat_native_stackevents_test.go:TestHeatNativeStackEventsResourceListSerializesEveryTypedOption`.
 
 Python/Go differences:
 
 - The logical resource parent is fixed by ForResource rather than repeated as a string; event response name remains separate from the request name.
 
-Unresolved boundaries:
-
-- Add a resource-scoped fixture asserting the full distinct ListResourceEventsOpts inputs: explicit initial Marker and Limit, repeated ResourceActions/Statuses/Types and SortKey/SortDir. Existing resource-list assertions cover ResourceNames/nested_depth/header and marker progression but must not be represented as a full typed-option audit.
-
 ### `python:orchestration/v1/stack_events`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -137,11 +134,10 @@ Python/Go differences:
 
 - Go fixes canonical stack identity and resource logical name once, provides typed immutable request metadata plus raw body/header and uses native marker traversal with cycle protection.
 - Go uses Heat sort_keys through native SortKey and HTTP query extensions; pinned Python StackEvent advertises sort_key. Empty resource name is rejected by ForResource instead of Python falsey resource_name selecting a whole-stack list.
-
-Unresolved boundaries:
-
-- Audit inherited Proxy._get/_list and StackEvent Resource/MRO query mapping, pagination, descriptors/cache/response hydration and Resource input behavior.
-- Add assertions for complete resource-scoped typed options and explicitly resolve Python sort_key versus Heat sort_keys compatibility; no inherited StackEvent.fetch parity is implied by the Go resource-scoped GET feature.
+- Python stack_events fetches a non-Stack argument with Proxy._get(Stack, stack), a GET /stacks/{id} in which DELETE_COMPLETE and ADOPT_COMPLETE become NotFound, and then lists /stacks/{name}/{id}/events or the resource-specific /resources/{resource_name}/events path; Go resolves the parent once with InStack and has distinct stack and resource scopes.
+- Python StackEvent declares resource_action, resource_status, resource_name, resource_type, nested_depth, sort_key and sort_dir plus limit and marker; it sends sort_key, while Heat's documented parameter and the Go native option are sort_keys. Go does not send sort_key unless the caller supplies it as an explicit query.
+- A falsy resource_name selects the whole-stack list in Python; Go ForResource rejects an empty name.
+- Python builds StackEvent Resources with descriptors; Go returns EventResource values with typed fields plus raw body and headers.
 
 ## Usage examples
 

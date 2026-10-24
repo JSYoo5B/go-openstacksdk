@@ -40,24 +40,23 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/get_qos_rule_type_details`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSRuleTypeDetails`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.GetRecord`
 
-- After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
-  Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
+- Two ordered fresh extension listings (qos, then qos-rule-type-details) precede GET qos/rule-types/{name}; every extension row is retained with the Resource/Wire rule type record.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetQoSRuleTypeDetailsGatesThenGet`.
+- A missing qos-rule-type-details alias returns UnavailableExtensionError before any rule type request; a 404 and an empty name are errors.
+  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetQoSRuleTypeDetailsMissingExtensionAndErrors`.
 
 Python/Go differences:
 
-- Stock Neutron27 policy get_rule_type is project reader, but QoSPlugin.get_rule_type adds an is_admin backend check. This cloud detail helper is queued for the core-admin phase, not implemented or counted as a user-cloud read.
-- Pinned details ignores filters and performs two separate fresh full extension GET checks for qos then qos-rule-type-details; the existing low-level GetRecord is not the named cloud helper.
-
-Unresolved boundaries:
-
-- Administrator-phase cloud helper with two fresh ordered full extension checks and filters ignored is deliberately deferred; no user-cycle admin implementation.
+- The Python filters argument is ignored by the pinned source and has no Go parameter.
+- Neutron restricts the details read to administrators by default; Go reports the server denial as the HTTP error and performs no client-side role check.
+- Typed Go options (ruletypes record get options) replace Resource get kwargs; the result is an SDK record, not a Resource.
 
 ## Usage examples
 

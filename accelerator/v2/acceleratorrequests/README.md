@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:accelerator/v2/accelerator_requests`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -19,20 +19,21 @@ Go API:
   Tests: `api/accelerator_status_filter_test.go:TestAcceleratorStatusFilterStaysLocal`.
 - ARQ Get and All reject absent/empty/comma-containing response identities rather than returning an unusable request.
   Tests: `api/accelerator_requests_test.go:TestAcceleratorRequestReadRejectsMissingIdentity`.
+- Every Cyborg list sends no query by default, forwards only explicit WithQuery values, returns a non-nil empty slice and rejects caller limit/marker before HTTP.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelListsQueryEmptyAndCallerPaging`.
+- Breaking out of the iterator after the first item never requests the next advertised page.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelListIteratorBreakStopsPaging`.
 
 Python/Go differences:
 
 - Python models inherit QueryParameters(limit, marker); Resource.list filters declared Body attributes locally and omits other unknown parameters. Go WithQuery forwards explicit query values to Cyborg, with WithName/WithStatus providing explicit local filters where supported; it rejects caller-supplied limit/marker and follows only server continuation links.
 - Pinned Resource.list omits unknown bind_state/instance queries; Go explicitly forwards those controller filters and treats ARQ state as a local status mapping. The controller can return 423 for an instance whose ARQs are not all resolved.
-
-Unresolved boundaries:
-
-- Audit and document the whole inherited Python Proxy._list/Resource.list contract: body-attribute local equality filtering, unknown query omission, paginated/base_path/max_items/jmespath arguments, limit/marker fallback, Link-header continuation, URI rewriting, lazy iteration and Adapter error/microversion behavior. Current fixtures cover the stated Go subset and do not establish those inherited contracts.
-- Add direct ARQ list bind_state=resolved and combined instance/bind_state 423 observations, metadata/null fields, successful multiple items across continuation, empty linked page and break/cycle behavior before claiming the whole list operation.
+- Pinned Resource.list filters declared body attributes locally, drops unknown query keys and supports paginated, base_path, max_items and JMESPath arguments; Go forwards explicit WithQuery values unchanged, rejects caller limit/marker and follows only server continuation links without those arguments.
+- Python passes **attrs/**query and mutable Resource objects with dirty-state and response mutation; Go uses concrete options, explicit resource.Ref identities and returns decoded values with raw JSON and HTTP metadata.
 
 ### `python:accelerator/v2/create_accelerator_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -54,15 +55,11 @@ Python/Go differences:
 
 - Pinned AcceleratorRequest.create_opts removes the request envelope, but _consume_attrs replaces any arqs response with arqs[0], discarding later created resources and failing on an empty array. Go deliberately returns the entire batch including an empty batch and partial successful items together with a decode/read error.
 - Go exposes RawBody and accepted HTTP metadata without cleaning up or reissuing accepted creation on decoder/read failure; it does not emulate Python mutable Resource initialization/response-state updates. Existing provider transport/auth retry hooks remain configured.
-
-Unresolved boundaries:
-
-- Audit Python Proxy._create, Resource initialization/dirty and unknown attributes, create_opts, _transform_create_request, _translate_response and Adapter error/retry/microversion behavior before treating the entire Python create operation as mapped. Concrete body/response tests do not validate that inherited pipeline.
-- The explicit batch/read-failure policy is documented and well tested, but Python initialization/_consume_attrs mappings, body aliases/unknown attributes, response-envelope conversion and Adapter state/exception semantics still require a whole-operation audit rather than completion inferred from Create existence.
+- Python passes **attrs/**query and mutable Resource objects with dirty-state and response mutation; Go uses concrete options, explicit resource.Ref identities and returns decoded values with raw JSON and HTTP metadata.
 
 ### `python:accelerator/v2/delete_accelerator_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -75,20 +72,19 @@ Go API:
   Tests: `api/accelerator_request_binding_test.go:TestAcceleratorRequestDeleteSelectorsAndPolicy`.
 - DeleteByInstance sends only instance=instance plus the caller service token, returns 204 twice under the idempotent fixture, and rejects nil/duplicate/comma/empty IDs before further HTTP.
   Tests: `api/accelerator_request_binding_test.go:TestAcceleratorRequestDeleteSelectorsAndPolicy`.
+- Deletes succeed only on 204, keep 200/403/500 as native errors after one attempt, never replay, and cancellation or deadline sends no extra request.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelDeletesRequire204AndKeepNativeErrors`.
 
 Python/Go differences:
 
 - Pinned inherited Resource.delete appends an ID to /accelerator_requests; the controller instead requires DELETE /accelerator_requests?arqs=uuid[,uuid] or ?instance=uuid. Go deliberately corrects this collection endpoint and exposes explicit single, batch and instance selectors.
 - Single deletion retains default ignore-missing; DeleteMany intentionally keeps 404 strict so partial batch non-deletion is observable. A caller may supply X-Service-Token, while the SDK does not fabricate a valid service identity or client-side authorization result.
-
-Unresolved boundaries:
-
-- Audit Python Proxy._delete/_get_resource and Resource._raw_delete/_translate_response/Adapter behavior for Resource/dict inputs, alternate identity, response-state mutation, cache, microversion and exception classification. UUID DELETE and ignore-missing fixtures cover only the stated Go policy.
-- Audit and document Python member-URL correction versus inherited Resource deletion response-state behavior; add DELETE-specific 403/service-token failure, cancellation, strict 204/other-code and bound/unbound selector observations. The fixture observes header transmission, not Cyborg token validation or authorization.
+- Python ignore_missing defaults to True; Go ignores a missing resource by default, resource.WithMissingError selects the strict policy, and only 204 is success.
+- Python passes **attrs/**query and mutable Resource objects with dirty-state and response mutation; Go uses concrete options, explicit resource.Ref identities and returns decoded values with raw JSON and HTTP metadata.
 
 ### `python:accelerator/v2/get_accelerator_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -99,20 +95,19 @@ Go API:
   Tests: `api/accelerator_requests_test.go:TestAcceleratorRequestReadAndStatePolicy`.
 - GET rejects responses with missing, empty or comma-containing UUID, including the matching list decode boundary.
   Tests: `api/accelerator_requests_test.go:TestAcceleratorRequestReadRejectsMissingIdentity`.
+- Getters send one GET without body or query, keep native 403/404 errors and send nothing for a canceled context.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelGettersHTTPErrorsAndCancellation`.
 
 Python/Go differences:
 
 - Python deprecated fields only emits a warning and never changes the GET; Go omits that argument and returns its own typed value with raw object JSON and HTTP metadata, without mutable Resource/cache semantics.
 - Go UUID identity is distinct from repeated device_profile_name and uses state for its common status mapping. Singletons require exactly one object rather than accepting the first of an arbitrary arqs response through Python _consume_attrs.
-
-Unresolved boundaries:
-
-- Audit Python Proxy._get/_get_resource, Resource.fetch/_translate_response and Adapter behavior for string, existing Resource and dict inputs, response conversion/cache, alternate identity, default microversion and exception classification. The HTTP fixture establishes the Go request/result policy, not complete inherited Python equivalence.
-- Add getter-specific 404/403/metadata/header/cancellation and singular/plural-singleton response observations. The state-wait and missing-identity fixtures do not independently establish all get behavior or the inherited Python first-item decoding policy.
+- The Python fields argument is a warned no-op; Go has no such argument. Python accepts a Resource and mutates/caches it; Go takes an explicit identity string.
+- Python passes **attrs/**query and mutable Resource objects with dirty-state and response mutation; Go uses concrete options, explicit resource.Ref identities and returns decoded values with raw JSON and HTTP metadata.
 
 ### `python:accelerator/v2/patch_accelerator_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -134,15 +129,11 @@ Python/Go differences:
 - Pinned AcceleratorRequest.patch prepares a requires_id=True member URL even though its _convert_patch creates a UUID-keyed object; the Cyborg PATCH endpoint is the collection /accelerator_requests. Go corrects that endpoint and offers concrete Bind/Unbind/Patch/PatchMany documents.
 - Go requires add/remove binding fields and explicitly gates project_id at selected 2.1; it returns metadata for the controller empty 202, rather than a mutable Resource. Python can short-circuit an empty clean patch, derive dirty-state patches, convert field aliases and overwrites its patch microversion argument with _get_microversion.
 - The controller validates service-request authorization for bind/unbind and admin ownership for explicit project_id; a supplied header is only transmitted by Go, and server 403 remains observable. No client-side authorization success is inferred.
-
-Unresolved boundaries:
-
-- Audit inherited Proxy._get_resource, Resource initialization/dirty generated patch/alias conversion, _commit/_translate_response/default microversion and Adapter retry/error policy, and define the documented reduced concrete binding scope before completing the entire Python patch operation.
-- Add canceled binding and strict expected-code/response-body observations and verify controller 2.1 project ownership/server authorization semantics; tests verify selected-version preflight and header/403 propagation, not real service-token/admin validation.
+- Python accepts an arbitrary RFC6902 patch list and rebuilds a member URL; Go sends the UUID-keyed document to the collection endpoint and restricts patches to validated binding fields.
 
 ### `python:accelerator/v2/update_accelerator_request`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -163,16 +154,12 @@ Python/Go differences:
 - Pinned AcceleratorRequest.patch prepares a requires_id=True member URL even though its _convert_patch creates a UUID-keyed object; the Cyborg PATCH endpoint is the collection /accelerator_requests. Go corrects that endpoint and offers concrete Bind/Unbind/Patch/PatchMany documents.
 - Go requires add/remove binding fields and explicitly gates project_id at selected 2.1; it returns metadata for the controller empty 202, rather than a mutable Resource. Python can short-circuit an empty clean patch, derive dirty-state patches, convert field aliases and overwrites its patch microversion argument with _get_microversion.
 - The controller validates service-request authorization for bind/unbind and admin ownership for explicit project_id; a supplied header is only transmitted by Go, and server 403 remains observable. No client-side authorization success is inferred.
-
-Unresolved boundaries:
-
-- Define and document and document the deprecated alias/properties argument/warning replacement policy; the current mapping table covers patch_accelerator_request but not the separate deprecated whole-operation contract.
-- Audit inherited Proxy._get_resource, Resource initialization/dirty generated patch/alias conversion, _commit/_translate_response/default microversion and Adapter retry/error policy, and define the documented reduced concrete binding scope before completing the entire Python patch operation.
-- Add canceled binding and strict expected-code/response-body observations and verify controller 2.1 project ownership/server authorization semantics; tests verify selected-version preflight and header/403 propagation, not real service-token/admin validation.
+- Python accepts an arbitrary RFC6902 patch list and rebuilds a member URL; Go sends the UUID-keyed document to the collection endpoint and restricts patches to validated binding fields.
+- update_accelerator_request is a deprecated alias that warns and delegates to patch; Go omits the alias and warning.
 
 ### `python:accelerator/v2/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -184,15 +171,13 @@ Go API:
   Tests: `api/accelerator_boundaries_test.go:TestAcceleratorActionAndStatusVersionsAreSeparate`, `api/accelerator_read_test.go:TestAcceleratorReadFailuresAndIdentity`, `api/accelerator_read_test.go:TestAcceleratorReadResourcesAndMetadata`, `api/accelerator_profiles_test.go:TestAcceleratorProfileExactNamesAndMetadata`, `api/accelerator_attributes_test.go:TestAcceleratorAttributeReadAndKeyIsNotName`.
 - Shared Go Wait policy supports exact replacement/disabled failure states, model-owned string attribute selection, unlimited wait with parent cancellation, and integer progress callbacks on initial and later nonterminal HTTP results; target/failure/HTTP results omit callbacks.
   Tests: `resource/wait_policy_test.go:TestWaitFailurePolicyReplacementAndTargetPrecedence`, `resource/wait_policy_test.go:TestWaitUnlimitedAndBoundedOptionsPreserveParentContext`, `resource/wait_attributes_test.go:TestWaitStatusAttributeSelectsNativeNodeFields`, `resource/wait_attributes_test.go:TestWaitProgressIncludesEachNonterminalNativeServerResponse`, `resource/wait_attributes_test.go:TestWaitProgressCallbackCancellationStopsFurtherGETs`.
+- Device status and ARQ state waiters poll with fixed identity, configured failure states are terminal, deletion succeeds on 404 and deadlines/cancellation keep their cause.
+  Tests: `api/py_ha_accel_cyborg_test.go:TestPyHAAccelWaitersStatusFailureDeletionAndDeadline`.
 
 Python/Go differences:
 
 - Python accepts an existing Resource and can return its cached target status without fetching. Go Collection.Wait always starts with a Ref lookup/HTTP result, fixes the ID once and uses five-minute/two-second defaults with context deadlines. WithStatusAttribute selects an exported string/nullable-string model field by JSON tag or Go name; WithFailureStates replaces the service predicate, WithProgressCallback reports integer progress and WithUnlimitedWait removes only the SDK timeout.
-
-Unresolved boundaries:
-
-- Audit cached initial Resource short-circuit, None target status, descriptor/unknown-field attribute semantics, skip_cache/fetch errors and Resource identity mutation against the documented Go model/Ref policy. The shared waiter options are implemented, but this whole inherited Python operation remains unresolved.
-- Add Cyborg Device/ARQ-specific selector, callback, timeout/in-flight cancellation and configured-failure observations; native Node/Server shared-policy fixtures do not independently establish every Cyborg inherited contract.
+- Python wait helpers take a Resource and may return a cached target status without fetching; Go takes a fixed resource.Ref, always polls through the typed getter, and returns a fresh model (an error only for deletion). Defaults are five minutes and two seconds with context deadlines.
 
 ## Usage examples
 

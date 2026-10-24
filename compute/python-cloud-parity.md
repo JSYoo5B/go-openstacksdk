@@ -242,18 +242,25 @@ Unresolved boundaries:
 
 ### `python:cloud/_compute/ComputeCloudMixin/list_hypervisors`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.List`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.ListRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.AllRecords`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordDetails`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordQuery`
 
-- Go List reproduces the default details=True GET os-hypervisors/detail request.
-  Tests: `compute/v2/hypervisors/python_parity_test.go:TestPythonHypervisorListAlwaysUsesDetailRoute`.
+- list_hypervisors(filters) is compute.hypervisors(details=True, **filters): WithRecordDetails(true) sends the detail route with caller filters as query keys.
+  Tests: `compute/v2/hypervisors/python_records_test.go:TestHypervisorRecordsSummaryDetailAndDeclaredProjection`.
+- With hypervisor_hostname_pattern below microversion 2.53 the escaped os-hypervisors/{pattern}/search route replaces the detail route and from 2.53 the pattern stays a query key; the SDK-owned record API supplies the route that Gophercloud has no binding for.
+  Tests: `compute/v2/hypervisors/python_records_test.go:TestHypervisorRecordsLegacyHostnameSearchOwnsPatternAndVersion`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- With filters={'hypervisor_hostname_pattern': ...} below microversion 2.53 Python sends GET os-hypervisors/{pattern}/search; Gophercloud v2.15.0 has no binding for that route and an SDK-owned call would be needed.
+- Python returns a list of mutable Resources; Go returns an iterator or slice of immutable records. Unknown filter keys are discarded by the declared profile.
+- Callers must pass WithRecordDetails(true); the Go default is the summary listing like the bare proxy.
+- Python negotiates min(Hypervisor _max_microversion 2.88, server maximum) per request; Go uses the selected microversion or its own discovery.
 
 ### `python:cloud/_compute/ComputeCloudMixin/create_server_group`
 
@@ -828,34 +835,46 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_compute_limits`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetComputeLimits`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/limits.API.Fetch`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/limits.ProjectLimitsScope.Get`
 
-- Without name_or_id, Fetch sends the same GET limits and returns the absolute limits.
-  Tests: `compute/v2/python_parity_test.go:TestPythonCloudComputeLimitsCurrentProject`.
+- Without a name no Identity request and no tenant query is sent; with a name the project is strict-found by GET then name list and the ID is sent as tenant_id.
+  Tests: `connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsWithoutProjectSendsNoIdentityOrTenant`, `connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetLimitsResolvesProjectToTenantQuery`.
+- Cancellation sends nothing; native absolute/rate decoding is the mapped get_limits contract.
+  Tests: `connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`, `api/nova_project_limits_contracts_test.go:TestNovaLimitsFetchAndProjectGetPreserveLegacyRateAndRawResponse`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- Python resolves name_or_id with identity v3 find_project(ignore_missing=False), a GET projects/{name_or_id} followed by a name-filtered list; the Go project scopes take an explicit resource.ID or resource.Name and python:identity/v3/find_project itself is unresolved, so the same lookup requests cannot be produced.
+- Python returns only the absolute limits object; Go returns the whole LimitsResource whose Absolute field holds them.
+- Python calls utils.ensure_service_version(identity, '3') only when a name is given; Go has only an Identity v3 binding.
+- Python falsy name_or_id (None or empty) skips the lookup; Go treats the empty string the same way.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_compute_usage`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
+- `github.com/JSYoo5B/go-openstacksdk.Connection.GetComputeUsage`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/usage.API.SingleTenant`
 
-- Once the project ID is known, SingleTenant sends the os-simple-tenant-usage request that get_usage sends.
-  Tests: `compute/v2/usage/python_parity_test.go:TestPythonUsageSingleProjectFirstPageMatchesFetch`.
+- The project is strict-found, then one os-simple-tenant-usage/{id} GET is sent with UTC start/end only when supplied; zero range sends no query.
+  Tests: `connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeGetUsageResolvesProjectAndSendsUTCRange`.
+- Invalid dates, blank or missing projects fail before any usage request; the date parser accepts the documented ISO 8601 subset and rejects the rest.
+  Tests: `connection_py_cloud_compute_project_reads_test.go:TestPyCloudComputeUsageDateParsingAndFailures`.
 
-Unresolved boundaries:
+Python/Go differences:
 
-- Python resolves name_or_id with identity v3 find_project(ignore_missing=False), a GET projects/{name_or_id} followed by a name-filtered list; the Go project scopes take an explicit resource.ID or resource.Name and python:identity/v3/find_project itself is unresolved, so the same lookup requests cannot be produced.
-- Python parses string start and end values as ISO 8601 and raises SDKException for invalid dates; Go takes time values and has no such parsing helper.
+- Python parses string dates with the iso8601 library, which accepts more forms than ParseComputeUsageDate (documented subset); naive values are taken as UTC in Go.
+- Python sends start.isoformat() including any offset; Go converts to UTC and sends wall-clock time without an offset.
+- Python fetches one object; Go reads the first value of the usage stream and does not follow pagination links.
+- Python calls utils.ensure_service_version(identity, '3'); Go has only an Identity v3 binding.
+- Python raises SDKException with its own message for invalid dates; Go returns resource.ErrInvalidOption.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_openstack_vars`
 
