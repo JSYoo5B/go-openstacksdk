@@ -712,7 +712,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_active_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -786,26 +786,32 @@ Go API:
   Tests: `compute/server_create_lifecycle_test.go:TestServerWithoutAddressesDeletePolicyIsExplicitAndSingleShot`.
 - With DeleteServerWithoutAddresses, only Python's falsy address maps (null or empty) are deleted. A non-empty map whose rows are all empty or null returns ServerAddressesUnavailableError with EmptyRows and no DELETE in both GetActiveServer and WaitForServer.
   Tests: `compute/server_create_mappings_test.go:TestServerWithoutAddressesDeleteSkipsTruthyEmptyRowMaps`.
+- A supplied null or missing status returns nil,nil without requests, as Python returns None for any status other than ERROR or ACTIVE. ERROR is checked before addresses, so DeleteServerWithoutAddresses never deletes an ERROR server; a null fault, a fault without message or an empty typed message gives 'no further information available' and a message gives 'Compute service reports fault: <message>'. An ACTIVE server with null name/access/image/flavor/metadata/fault fields and a fixed address reaches the disabled automatic decision with no request.
+  Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerNullableStatusFaultAndModelCases`.
+- The address lane follows Python's add_ips_to_server ips branch (add_ip_list and _attach_ip_to_server) like AddIPList: the supplied model's only floating IPv4 short-circuits an item without observation, a Neutron 404 from the association PUT is recorded in AttachmentNotFound with the item incomplete before the next address, an unassociated IP is attached through the _nat_destination_port choice without refresh, and an associated IP on a model without floating addresses refreshes the server with one raw GET in both the asynchronous and the WithActiveServerWait lanes. The legacy Nova address lane short-circuits without refresh and attaches the next address with list, singular recheck and addFloatingIp.
+  Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerAddressLaneFollowsSourceAttachSteps`.
+- One deadline covers every request of the IP stage in both the asynchronous and the WithActiveServerWait lanes: 180 seconds by default, a WithAutomaticIPTimeout override, an earlier parent deadline, or the parent alone with WithUnlimitedAutomaticIPTimeout. Unlimited under a parent without a deadline sends requests without a deadline, except the Neutron IP ACTIVE wait, which keeps its own prepared stage timeout.
+  Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerTimeoutUnlimitedAndParentCombinations`.
+- A parent canceled before the call returns its cause before any request. A parent canceled with a cause after the accepted allocation returns the cause with the known Server and allocated Assignment, without IP readiness GET, raw observation, retry or cleanup.
+  Tests: `compute/server_get_active_combinations_test.go:TestGetActiveServerParentContextCancellation`.
 
 Python/Go differences:
 
 - The typed Service/Connection.GetActiveServer includes selected pool/ordered explicit/automatic Neutron or bounded legacy Nova dispatch after supplied status and real-row readiness checks. Non-ACTIVE returns nil,nil, ERROR retains ErrFailedState, and ACTIVE enters the selected policy. It returns structured AutomaticServerIPResult and attempt evidence rather than a mutable Python Server Resource. Go case-insensitive state comparison remains a deliberate difference.
 - Standalone GetActiveServer defaults to auto/reuse true, asynchronous accepted assignment and a 180-second overall context with five-second raw-poll configuration; WithActiveServerWait(true) adds actual Neutron IP ACTIVE where applicable and exact raw server ACTIVE/target convergence only when assignment is needed. Earlier automatic/create helpers retain their synchronous five-minute/two-second defaults. The overall Go context bounds classification and HTTP work even in the async lane rather than merely passing a timeout into source wait branches.
 - Go ACTIVE nil metadata and explicit empty/null-row inventories return ServerAddressesUnavailableError with the known supplied Server and no refresh, including when auto is disabled; no DELETE is sent unless DeleteServerWithoutAddresses is selected. Wait and creation instead poll raw ACTIVE nil metadata, but still fail explicit zero rows. The pinned helper always deletes ACTIVE servers with a falsy address map and may accept a truthy map containing only empty rows.
-- The bounded Neutron async entry may return DOWN Assignment with no Compute endpoint or readiness/observation. Nova selected assignment requires legacy Compute and returns separate NovaAssignment/action proof; async performs no raw observation but does perform Nova inventory/recheck/action. Source optional Compute refresh for an already-attached address remains different, and full Nova normalization/fallback/model/session contracts remain partial.
-- Go preserves native typed Server/Fault and known resources with typed SDK errors (ServerFaultError for ERROR) rather than a mutable Python Resource. Valid ACTIVE input is detached in production before dependency callbacks or association; non-ACTIVE/ERROR do not inspect unrelated model/address fields. Complete mutable Resource, model/location/interface expansion and ownership cases remain distinct.
+- The bounded Neutron async entry may return DOWN Assignment with no Compute endpoint or readiness/observation. Nova selected assignment requires legacy Compute and returns separate NovaAssignment/action proof; async performs no raw observation but does perform Nova inventory/recheck/action. The address lane performs Python's attached-IP refresh (one raw GET) when the supplied model shows no floating address and the selected IP is associated, also in the async lane; with WithActiveServerWait a refreshed raw ERROR fails as in the other strong readiness checks, where Python only compares addresses.
+- Go preserves native typed Server/Fault and known resources with typed SDK errors (ServerFaultError for ERROR) rather than a mutable Python Resource. Valid ACTIVE input is detached in production before dependency callbacks or association; non-ACTIVE/ERROR do not inspect unrelated model/address fields, and a null or missing status is not ready, as in Python.
 - Earlier creation-only guarded name resolution retains native typed models and200/204/300 list codes while owning page continuation and accepted Read/Close/source errors. It is separate from standalone supplied-model status checking and ordinary native lookup; flavor-name creation keeps its existing no-name-query/no-is_public-default behavior.
 - ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.
 - ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.
 - A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.
 - One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.
+- GetActiveServer inherits the AddIPsToServer lane choice. Its address lane follows Python's add_ip_list steps; its pool and automatic lanes keep the idempotent Ensure path, so a server that already has a matching floating IP keeps it, a Neutron failure does not fall back to the Nova pool and a timed-out created IP is not deleted. AddIPFromPool and AddAutoIP (python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip) provide Python's _add_ip_from_pool and _add_auto_ip ordering and fallback for callers that need it.
+- WithUnlimitedAutomaticIPTimeout removes the overall Go budget and leaves only the parent context; Python always has a numeric timeout. The Neutron IP ACTIVE wait keeps its own prepared stage timeout inside the overall budget.
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-
-Unresolved boundaries:
-
-- Cover the remaining nullable status, address and model cases and the timeout, unlimited and parent-context combinations in fixtures.
-- Complete the Nova floating IP mutation and fallback ordering and the asynchronous attached-IP refresh.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 ## Usage examples
 

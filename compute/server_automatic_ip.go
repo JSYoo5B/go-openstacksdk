@@ -36,8 +36,9 @@ type automaticIPState struct {
 	plan                 network.FloatingIPPlan
 	last                 *Server
 	retainAcceptedServer bool
-	// sourceAttach enables the standalone address-lane short circuit,
-	// attached-IP refresh and Neutron NotFound fall-through.
+	// sourceAttach enables the AddIPList/AddIPsToServer/GetActiveServer
+	// address-lane short circuit, attached-IP refresh, NAT destination port
+	// choice and Neutron NotFound fall-through.
 	sourceAttach        bool
 	observeAssignment   bool
 	requireServerActive bool

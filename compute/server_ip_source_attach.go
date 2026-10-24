@@ -9,10 +9,11 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-// The standalone address lane follows Python's _attach_ip_to_server for each
-// selected IP: the short circuit and the conditional attached-IP refresh run
-// after the exact address lookup and before any port lookup or mutation, and a
-// Neutron NotFound during attachment is recorded instead of failing the call.
+// The AddIPList, AddIPsToServer and GetActiveServer address lane follows
+// Python's _attach_ip_to_server for each selected IP: the short circuit and the
+// conditional attached-IP refresh run after the exact address lookup and before
+// any port lookup or mutation, and a Neutron NotFound during attachment is
+// recorded instead of failing the call.
 
 // sourceFloatingIPv4 returns the version-4 floating-tagged addresses of a
 // server, the candidates of Python's get_server_ip(ext_tag="floating").

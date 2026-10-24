@@ -75,6 +75,12 @@ func (s *Service) GetActiveServer(ctx context.Context, input AutomaticFloatingIP
 	}
 	state.last = owned
 	state.setView(view)
+	// Python's get_active_server calls add_ips_to_server, whose ips branch is
+	// add_ip_list: the address lane shares the standalone _attach_ip_to_server
+	// steps (short circuit, attached-IP refresh, Neutron NotFound fall-through).
+	// The pool and automatic lanes keep the shared Ensure dispatch, as in
+	// AddIPsToServer.
+	state.sourceAttach = state.options.dispatchMode() == ServerIPExplicit
 	return state.ensure(ctx)
 }
 

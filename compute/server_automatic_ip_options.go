@@ -67,13 +67,13 @@ type ServerFloatingIPAttempt struct {
 	Completed        bool
 	Observed         bool
 	Error            error
-	// ShortCircuited reports that the standalone AddIPList/AddIPsToServer
-	// address lane skipped attachment and observation because the current
+	// ShortCircuited reports that the AddIPList, AddIPsToServer or
+	// GetActiveServer address lane skipped attachment and observation because the current
 	// server model already showed the requested address as its only floating
 	// IPv4 address, as Python's _attach_ip_to_server does. Completed is true.
 	ShortCircuited bool
-	// AttachmentNotFound keeps the Neutron 404 that the standalone address
-	// lane recorded after selecting the IP, matching Python's NotFound
+	// AttachmentNotFound keeps the Neutron 404 that the AddIPList,
+	// AddIPsToServer or GetActiveServer address lane recorded after selecting the IP, matching Python's NotFound
 	// fall-through in _attach_ip_to_server. The item continues to the optional
 	// raw observation and the next address. Completed stays false because no
 	// association was confirmed.
