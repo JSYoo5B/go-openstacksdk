@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_console`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -59,11 +59,8 @@ Python/Go differences:
 - Synthetic final informational199 status tests establish policy only, because actual net/http may process1xx internally. SDK action ownership guards block retry/auth hooks after physical/context/source faults; reused FindRecord existing lookup hook semantics remain unchanged.
 - Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds.
 - Cycle11 adds only bounded explicit response charset normalization in the console leaf, reused by existing Service/Connection GetServerConsole. Actual Envelope/Header/ResponseError.Body keep wirebytes while Value comes from normalized JSON. Existing Source68 receipts are unchanged; no new Source matrix, codec registry, guess_json_utf or nonfinite support is claimed. Worker ran gofmt only; root owns Go/race and standalone main validation.
-
-Unresolved boundaries:
-
-- Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 café observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.
-- Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

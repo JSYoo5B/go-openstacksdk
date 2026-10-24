@@ -148,7 +148,7 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/list_networks`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -189,14 +189,11 @@ Python/Go differences:
 - Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.
 - Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.
 - Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.
-
-Unresolved boundaries:
-
-- Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/search_networks`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -237,14 +234,11 @@ Python/Go differences:
 - Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.
 - Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.
 - Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.
-
-Unresolved boundaries:
-
-- Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_subnets`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -303,19 +297,16 @@ Go API:
 
 Python/Go differences:
 
-- This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because the nonfinite-version and shared runtime gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.
+- Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.
 - SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.
 - Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.
 - Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.
-
-Unresolved boundaries:
-
-- Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.
-- Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/search_subnets`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -374,15 +365,12 @@ Go API:
 
 Python/Go differences:
 
-- This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because the nonfinite-version and shared runtime gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.
+- Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.
 - SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.
 - Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.
 - Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.
-
-Unresolved boundaries:
-
-- Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.
-- Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_ports`
 
@@ -614,7 +602,7 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/remove_router_interface`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -649,21 +637,18 @@ Go API:
 Python/Go differences:
 
 - Existing RemoveInterfaceRecord keeps its original parsed-JSON return. The separate Service.RemoveRouterInterface returns Source None as Value null with an SDK-owned diagnostic ResponseJSON and physical response receipt.
-- This implements the named cloud remove_router_interface flow but remains unresolved due to the remaining fullRequests decoder/permissiveJSON gaps with SDK-owned validation/options/port-first selection/None return and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate/discover before argument validation; direct selected/nil Service missing-ID validation remains HTTP0. New leaf helper is only this fixed dependency and no extra Source API is promoted; full SDK supported delta remains0.
+- The cloud remove_router_interface flow uses SDK-owned validation, options, port-first selection, a None-equivalent result and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate and discover before argument validation; a missing ID on a directly selected or nil Service fails without HTTP.
 - Go router input is a validated nonblank UTF8 string ID, escaping slash/percent/query as one segment and rejecting controls/traversal. Source arbitrary Router Resource/dict/null/nonstring dynamic dispatch and URI/class/member/session/cache behavior remain shared SDK-R1/C1/S1 foundation scope. No name lookup is invented, and broad Python runtime objects are not claimed from raw JSON preservation.
 - Go returns an owned diagnostic result with Value:null for Source None plus actual parsed ResponseJSON/Wire/Envelope/Header/StatusCode rather than returning a bare nil. Failed observations never expose successful Value/ResponseJSON or a synthetic Router Resource. Valid JSON numeric tokens preserve Go raw precision; Python floating/runtime representation and wire key order remain explicit Go policies.
 - The closed Source100..399/physical-fault callback suppression opt-in leaves existing native and legacy leaf policies unchanged. Headers are a concrete Go transport convenience with immutable selected source/client/captured framing and live token renewal. Stock Neutron27 project ADMIN_OR_PROJECT_MEMBER gate is documented without inferring parent-owner reader/shared-subnet authorization or live ACL acceptance.
 - Evidence is actual CPython3.14.8 pinned cloud/Proxy/Resource/Router code with Adapter.put/_get_connection fixtures (75 observations), plus independently audited bounded router13 observations. Source/AST, Go/race, main compilation and live backend authorization are separate claims; no live backend was used.
 - Cycle12 changes only the fixed cloud dependency to reuse internal/responsejson.Normalize for bounded explicit charsets. The generic/legacy decoder and common ABI/codec set remain unchanged. BOM is required for bare UTF16/32; explicit LE/BE works without it. Actual raw proof stays separate from normalized diagnostic JSON. Reused Source75 and independent13 observations are not rerun or combined into a new count. Worker ran gofmt only; root owns Go/race/main builds; no mapping promotion is claimed.
-
-Unresolved boundaries:
-
-- Full Requests Response.json codec registry, unknown explicit charsets, charset-free BOM/guess_json_utf/text fallback and bare UTF16/UTF32 without BOM native-endian decoding remain unsupported. The closed cloud helper now supports ISO8859-1/latin1 and UTF16/32 with BOM or explicit LE/BE. Unsupported/malformed declared charset retains ErrUnsupported plus original response evidence, while unmarked nonUTF8 preserves the original decode failure. This narrower reachable decoder gap still prevents complete named mapping.
-- Full permissive Python JSON loading and runtime numeric domain remain unmatched. Source Response.json may accept NaN/Infinity-style values before cloud discards the result and returns None, while the reused Go JSON carrier rejects nonstandard JSON tokens. Finite JSON raw numbers retain Go literal precision rather than claiming all Python loaded-value semantics.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_router`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -685,14 +670,14 @@ Python/Go differences:
 
 - UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
 - Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_subnet`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -721,14 +706,14 @@ Python/Go differences:
 - Go returns the native Subnet projection plus the owned UpdateReceipt instead of a Subnet Resource.
 - UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract.
 - Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_port`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -758,10 +743,9 @@ Python/Go differences:
 - Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.
 - Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
 - Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Configured provider retry and reauthentication hooks apply as for other native calls; the helper sends one PUT and adds no further replay guard.
 
 ### `python:cloud/_network/NetworkCloudMixin/list_qos_policies`
 
@@ -1348,7 +1332,7 @@ Python/Go differences:
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -1374,15 +1358,15 @@ Python/Go differences:
 
 - UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence; Response is the owned PUT receipt and Group the native projection of its merged view. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection.
 - The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Policy references are nonempty JSON strings or null; ports are JSON arrays of nonempty strings. Arbitrary Python iterable/object/nonstring/empty response-ID/runtime-exception behavior and full same-instance Resource lifecycle remain outside this bounded profile.
-- Full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps.
+- Policy references must be nonempty JSON strings or null and ports JSON arrays of nonempty strings; other Python iterables, objects and empty IDs are rejected rather than reproduced.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Referenced ports are resolved through ports.FindRecord and keep its recorded status, encoding and Resource profile.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_policy`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -1408,15 +1392,14 @@ Python/Go differences:
 
 - UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Response is the owned PUT receipt and Policy the native projection of its merged view. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.
 - The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.
-- Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate runtime boundaries.
+- Rule references must be JSON arrays of nonempty strings; other Python iterables, objects and nonstring IDs are rejected rather than reproduced.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/update_firewall_rule`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -1441,10 +1424,10 @@ Python/Go differences:
 
 - UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. The dirty fourteen-key subset is sent as one owned PUT without exposing builder-interface responsibility to callers. Lookup is a separate record; Response is the owned PUT receipt and Rule the native projection of its merged view.
 - The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-
-Unresolved boundaries:
-
-- Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_network/NetworkCloudMixin/insert_rule_into_policy`
 

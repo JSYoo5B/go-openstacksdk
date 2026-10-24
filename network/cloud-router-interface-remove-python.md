@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_network/NetworkCloudMixin/remove_router_interface`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -43,17 +43,14 @@ Go API:
 Python/Go differences:
 
 - Existing RemoveInterfaceRecord keeps its original parsed-JSON return. The separate Service.RemoveRouterInterface returns Source None as Value null with an SDK-owned diagnostic ResponseJSON and physical response receipt.
-- This implements the named cloud remove_router_interface flow but remains unresolved due to the remaining fullRequests decoder/permissiveJSON gaps with SDK-owned validation/options/port-first selection/None return and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate/discover before argument validation; direct selected/nil Service missing-ID validation remains HTTP0. New leaf helper is only this fixed dependency and no extra Source API is promoted; full SDK supported delta remains0.
+- The cloud remove_router_interface flow uses SDK-owned validation, options, port-first selection, a None-equivalent result and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate and discover before argument validation; a missing ID on a directly selected or nil Service fails without HTTP.
 - Go router input is a validated nonblank UTF8 string ID, escaping slash/percent/query as one segment and rejecting controls/traversal. Source arbitrary Router Resource/dict/null/nonstring dynamic dispatch and URI/class/member/session/cache behavior remain shared SDK-R1/C1/S1 foundation scope. No name lookup is invented, and broad Python runtime objects are not claimed from raw JSON preservation.
 - Go returns an owned diagnostic result with Value:null for Source None plus actual parsed ResponseJSON/Wire/Envelope/Header/StatusCode rather than returning a bare nil. Failed observations never expose successful Value/ResponseJSON or a synthetic Router Resource. Valid JSON numeric tokens preserve Go raw precision; Python floating/runtime representation and wire key order remain explicit Go policies.
 - The closed Source100..399/physical-fault callback suppression opt-in leaves existing native and legacy leaf policies unchanged. Headers are a concrete Go transport convenience with immutable selected source/client/captured framing and live token renewal. Stock Neutron27 project ADMIN_OR_PROJECT_MEMBER gate is documented without inferring parent-owner reader/shared-subnet authorization or live ACL acceptance.
 - Evidence is actual CPython3.14.8 pinned cloud/Proxy/Resource/Router code with Adapter.put/_get_connection fixtures (75 observations), plus independently audited bounded router13 observations. Source/AST, Go/race, main compilation and live backend authorization are separate claims; no live backend was used.
 - Cycle12 changes only the fixed cloud dependency to reuse internal/responsejson.Normalize for bounded explicit charsets. The generic/legacy decoder and common ABI/codec set remain unchanged. BOM is required for bare UTF16/32; explicit LE/BE works without it. Actual raw proof stays separate from normalized diagnostic JSON. Reused Source75 and independent13 observations are not rerun or combined into a new count. Worker ran gofmt only; root owns Go/race/main builds; no mapping promotion is claimed.
-
-Unresolved boundaries:
-
-- Full Requests Response.json codec registry, unknown explicit charsets, charset-free BOM/guess_json_utf/text fallback and bare UTF16/UTF32 without BOM native-endian decoding remain unsupported. The closed cloud helper now supports ISO8859-1/latin1 and UTF16/32 with BOM or explicit LE/BE. Unsupported/malformed declared charset retains ErrUnsupported plus original response evidence, while unmarked nonUTF8 preserves the original decode failure. This narrower reachable decoder gap still prevents complete named mapping.
-- Full permissive Python JSON loading and runtime numeric domain remain unmatched. Source Response.json may accept NaN/Infinity-style values before cloud discards the result and returns None, while the reused Go JSON carrier rejects nonstandard JSON tokens. Finite JSON raw numbers retain Go literal precision rather than claiming all Python loaded-value semantics.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

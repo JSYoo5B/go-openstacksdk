@@ -71,7 +71,7 @@ Python/Go differences:
 
 ### `python:key_manager/v1/update_secret`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -111,11 +111,9 @@ Python/Go differences:
 - Literal service-relative BasePath and bounded nonblank escaped commit IDs replace arbitrary URI templates/falsey Source ID routes. Captured source/headers/body stay guarded through native hooks; returned HREFs never trigger metadata/payload reads.
 - SDK-R1/C1/S1 Resource/class/session/cache foundations remain separate gaps. Actual Source61 observations use Proxy/Secret/Resource/Requests2.34.2/urllib32.8.0/CPython3.14.8 with adapterput returning memoryHTTPResponse. No liveBarbican/auth/retry/ACL proof. Worker no Go execution; root owns final checks.
 - Cycle11 closes the declared BOM-or-explicit-LE/BE UTF16/UTF32 plus Latin1 response charset subset through the shared responsejson normalizer; actual wire byte receipts remain separate from normalized views. This does not complete the two named remaining areas or the full Requests loader/codec namespace. Existing standalone mains and Source61 oracle are unchanged; root owns Go validation.
-
-Unresolved boundaries:
-
-- Full existing Python Secret/Resource/dictionary synchronized and dirty-state equality, pending changes, same-instance mutation/recommit, complete MRO/constructor/kwargs binding and URI formatting remain unsupported. Raw self/secret/resource_type/value attrs are ignored but Source duplicate binding raises TypeError beforeHTTP; id/connection/_synchronized/cls are separately rejected. Empty/falsey commit ID routes, arbitrary printf base_path/URI attrs and deferred formal-validation order also remain outside this closed string-ID API.
-- Full Requests Response.json guess_json_utf/unmarked encoding inference, codec namespace beyond UTF16/UTF32 with BOM or explicit LE/BE plus ISO8859-1/Latin1, text fallback and permissive Python float/NaN/Infinity loading remain unmatched. Supported explicit charsets now decode Resource/Wire while raw physical Envelope/Header/Status/Error.Body remain unchanged. Unsupported cp1006 or malformed charset declarations return ErrUnsupported+actualproof; nocharset/UTF8 bytes are cloned without unmarked nonUTF8 inference. Finite Go rawJSON retains number spelling/large integers rather than all Python loaded-value semantics. BOM-less bare utf-16/utf-32 native-endian selection remains unsupported.
+- Python mutable Secret/Resource same-instance state, pending changes, dirty-state equality, MRO/constructor/kwargs binding and URI templates are replaced by the closed string-ID UpdateRecord API (deliberate design choice).
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:key_manager/v1/wait_for_status`
 

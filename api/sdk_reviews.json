@@ -10077,7 +10077,7 @@
     {
       "operation": "python:compute/v2/servers",
       "source_fingerprint": "704f3b43c7bf45acdfe0bf1f2ed3af075045fe6f65c04341f2de45fb92238fcb",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
@@ -10154,11 +10154,9 @@
         "The Python control keyword arguments paginated, max_items, microversion and headers are typed RecordFindOption values; raw control, constructor and positional keys (including details, all_projects and base_path, which raise TypeError in Python) and the deprecated Proxy._list jmespath_filters (Python applies jmespath.search to the lazy generator) fail before HTTP. The cloud SearchServers expression filter is the supported JMESPath path.",
         "A typed all-projects option combined with a raw all_tenants key fails before HTTP instead of letting the typed value win, following the find_server option-ownership policy.",
         "Continuation links that change the fixed origin, collection path or caller filters are rejected with the actual page receipt instead of being followed, as for find_server; exact relative /v2.1/servers[/detail] aliases are accepted.",
-        "Go accepts final 200..399 list representations and rejects informational statuses with actual proof, the bounded status policy shared with find_server."
-      ],
-      "remaining": [
-        "Python returns mutable Server Resources with session/cache/dirty state; that runtime is the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md and is not reproduced by the owned ServerFindRecord snapshots.",
-        "Python forwards dynamic non-integer limit/max_items values; the Go limit and cap controls are nonnegative integers (shared dynamic max_items/limit type boundary)."
+        "Go accepts final 200..399 list representations and rejects informational statuses with actual proof, the bounded status policy shared with find_server.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "limit and max_items accept only nonnegative integers and reject other values before HTTP; Python forwards booleans, negatives, fractions and strings, which end in a server HTTP 400 or a client-side comparison error; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -14285,7 +14283,7 @@
           ]
         },
         {
-          "behavior": "Frozen common Engine.List/REST pager supplies plural/body/RFCLink/versioned-path/short-page marker continuation, retained actual scalar JSON marker conversion, complete pagination, raw caps before local filters, single page/break without next request and late native/page errors. SourceFindPolicy opt-in uses binary64 next truthiness; \u00b11e-400 stop cleanly while truthy nonstring next retains exact actual whole page proof. Dictionary next links are an explicit Go improvement; changed origin/path/filter/cycle are errors.",
+          "behavior": "Frozen common Engine.List/REST pager supplies plural/body/RFCLink/versioned-path/short-page marker continuation, retained actual scalar JSON marker conversion, complete pagination, raw caps before local filters, single page/break without next request and late native/page errors. SourceFindPolicy opt-in uses binary64 next truthiness; ±1e-400 stop cleanly while truthy nonstring next retains exact actual whole page proof. Dictionary next links are an explicit Go improvement; changed origin/path/filter/cycle are errors.",
           "tests": [
             "network/v2/extensions/security/addressgroups/python_list_records_contracts_test.go:TestPythonAddressGroupListPaginationCapsNextTruthinessAndLateErrors"
           ]
@@ -14351,7 +14349,7 @@
     {
       "operation": "python:network/v2/networks",
       "source_fingerprint": "f17889d3f1c3c44a767012f35f62be8f2fe911f7c9271e5727f0b59c3d154ad7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/networks.New",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
@@ -14681,13 +14679,11 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
         "Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.",
-        "Raw max_items behavior and exact-boundary cap timing are now owned only by the explicit Source-shaped list path. Other named nonfinite microversion and global runtime/lifecycle contracts remain unresolved; historical typed/native contracts above retain their original boundaries."
-      ],
-      "remaining": [
-        "Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof."
+        "Raw max_items behavior and exact-boundary cap timing are owned only by the explicit Source-shaped list path; historical typed/native contracts above retain their original boundaries.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -14901,7 +14897,7 @@
     {
       "operation": "python:network/v2/subnets",
       "source_fingerprint": "0418ae6bfbb93e4b18f6cc8e2bd4182340c044acbeb43b9e701f68ec11e2ef5f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.New",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
@@ -15116,15 +15112,13 @@
         "Go defines scalar/repeated query encoding explicitly: booleans are lowercase, JSON number text is preserved, null elements are omitted and empty/null query values retain option presence without URL values. Query objects and nested arrays are rejected; no Subnet CSV format or native-q-tag-derived classification is inferred. Unknown semantic attributes are discarded, while explicit unknown Body options are errors and raw wire extensions remain caller-controlled.",
         "Semantic query name is a server filter rather than a local exact-name predicate. WithName retains its query hint and local exact match; duplicate ownership of the same query or Body destination is rejected across semantic/raw/page/hint/explicit namespaces, including equal values. This is an intentional Go conflict policy rather than permissive Python kwargs merging.",
         "An explicit semantic clear still requires an audited descriptor. Reserved session/paginated/base_path/allow_unknown_params/microversion/headers/max_items/resource_type/jmespath_filters names are not treated as field payloads. Generation additionally requires a live audited Python source checkout and its recorded AST parser minor version.",
-        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because named cap/limit and nonfinite-version gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.",
         "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
         "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
         "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.",
-        "Raw max_items behavior and exact-boundary cap timing are now owned only by the explicit Source-shaped list path. Other named nonfinite microversion and global runtime/lifecycle contracts remain unresolved; historical typed/native contracts above retain their original boundaries."
-      ],
-      "remaining": [
-        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.",
-        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
+        "Raw max_items behavior and exact-boundary cap timing are owned only by the explicit Source-shaped list path; historical typed/native contracts above retain their original boundaries.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -31854,7 +31848,7 @@
           ]
         },
         {
-          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed\u2192sourceordinary\u2192POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
+          "behavior": "Set merges supplied custom suffixes into the fresh complete custom snapshot and resends all resulting custom metadata. Only the nine observed mutable system wire headers are carried; observed→sourceordinary→POSToption precedence retains explicit empty overrides. Auth/readonly/unknown/sysmeta/transient/SLO response fields are never blindly copied.",
           "tests": [
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreEmptyWritesAndNineHeaders",
             "objectstorage/v1/objects/metadata_core_test.go:TestObjectMetadataCoreRoutesAndMerge",
@@ -31931,7 +31925,7 @@
           ]
         },
         {
-          "behavior": "Source Header delete_after conversion reuses DescriptorIntegerJSON (unsigned digit strings/Unicode/arbitrary integers, signed/space/nonnumeric\u2192zero, nondecimal isdigit\u2192error); bool descriptor preserves bool(nonempty string).",
+          "behavior": "Source Header delete_after conversion reuses DescriptorIntegerJSON (unsigned digit strings/Unicode/arbitrary integers, signed/space/nonnumeric→zero, nondecimal isdigit→error); bool descriptor preserves bool(nonempty string).",
           "tests": [
             "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD",
             "objectstorage/v1/objects/metadata_python_test.go:TestSwiftPythonObjectMetadataSetterEverySystemAliasAndEmptyInput",
@@ -32335,7 +32329,7 @@
         "objectstorage/v1/temp_url_key.md"
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
         "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
@@ -32404,7 +32398,7 @@
         "objectstorage/v1/temp_url_key.md"
       ],
       "differences": [
-        "Python proxy returns None after setter wrapper implicit POST\u2192HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
+        "Python proxy returns None after setter wrapper implicit POST→HEAD refresh; Go returns single strict204 acknowledgement and requires explicit GetMetadata for refreshed state.",
         "Python Resource|string cache/descriptor/str(any) behavior and generic success policy are not replicated.",
         "Python follows the POST with a HEAD that refreshes a Resource it then discards; Go sends only the POST.",
         "Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented."
@@ -39859,7 +39853,7 @@
           ]
         },
         {
-          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record\u2192Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
+          "behavior": "The manual API.ExportRecord facade delegates to the existing raw engine, owns ExportRecord/backups outer error context, retains inner causes and physical result, and handles nil API as a local missing-client failure. The actual source target is deprecated v3 Proxy.export_record→Backup.export; Python warnings/filter-as-error are intentionally omitted and existing native API.Export is an independent typed operation.",
           "tests": [
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesPreflightKeepOuterMethodContext",
             "blockstorage/backup_proxy_export_service_test.go:TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjection"
@@ -39960,7 +39954,7 @@
           ]
         },
         {
-          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup\u2192Backup.export_record\u2192response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
+          "behavior": "Connection exposes ExportVolumeBackupRecord and cached Cinder v3 only; direct package and service ExportBackup retain their exact public/outer operation context and underlying causes, including nil API local failure. The actual source graph is v3 Proxy.export_backup→Backup.export_record→response.json; warning/Resource/session/backend/encoding identities are explicit Go mappings, independently of raw and native/v2/Resource review status.",
           "tests": [
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordPreflightAndSafeIDRejectBeforeCinder",
             "connection_volume_backup_export_record_test.go:TestConnectionBackupExportRecordOnlyCachedCinderPreservesSelectedPolicyWithoutLocationConsumption",
@@ -40218,7 +40212,7 @@
           ]
         },
         {
-          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status\u2192Backup.reset_status\u2192Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
+          "behavior": "New service ResetBackupStatus returns owned opaque Applied plus Completed and forces3.64, while existing native ResetStatus remains selected-version accepted202 error-only. The actual source graph is v3 Proxy.reset_backup_status→Backup.reset_status→Backup._action; source Resource/session/warning identities and None return are explicit Go mappings, independently of native/v2/deprecated alias/Resource review status.",
           "tests": [
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsPreserveNativeTypedRestoreAndSelectedVersionReset",
             "blockstorage/backup_proxy_action_service_test.go:TestBackupProxyServiceActionsExposeOwnedLocalFactoriesAndCorrectOuterErrorLabels",
@@ -44014,7 +44008,7 @@
           ]
         },
         {
-          "behavior": "The default standalone Wait wire context carries a deadline179\u2013181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
+          "behavior": "The default standalone Wait wire context carries a deadline179–181seconds from call start and completes one raw request under disabled automatic IP. A short overridden overall budget is identical on raw readiness, Neutron work and Nova convergence. Custom convergence cancellation preserves last matching Server, ACTIVE allocated Assignment and cause with Observed=false; callback ID/name edits do not mutate that returned model.",
           "tests": [
             "compute/server_ready_boundaries_test.go:TestWaitForServerDefaultWholeBudgetIs180Seconds",
             "compute/server_ready_boundaries_test.go:TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel"
@@ -47794,7 +47788,7 @@
         "Go exposes a typed request and concrete options with a result separating the source boolean Deleted from actual absence, present DOWN, accepted logical attempts, last public-Get verification and failed-response evidence. An accepted DELETE is not itself verified disappearance; retry0 intentionally has no verification. This does not reproduce Python's scalar return or mutable Resource/Munch/session surface.",
         "The delete's verification deliberately reuses ordinary cloud Get semantics rather than always using GetFloatingIPByID. Mutation backend, query fallback backend and normalization source remain distinct. Nova's source-synthetic logical ACTIVE is separated from raw Wire; a DOWN success can describe a still-existing row and never asserts an actual ACTIVE wait or deletion convergence.",
         "Typed safe UTF-8/path IDs, explicit source/location/strict/direct-get policy and optional one shared operation timeout are Go API choices. Defaults add no SDK deadline; a bulk zero-valued options replacement sets retry0, while dedicated default preparation retains retry1. The mapping does not establish every Python dynamic retry argument, configuration or has_service/session policy.",
-        "Owned mutation transport follows the cloud-style passive HTTP200\u2013399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
+        "Owned mutation transport follows the cloud-style passive HTTP200–399 response policy rather than promoting Gophercloud's native DELETE status contract. Actual response/body/header proof is retained separately from model parsing and success verification. The tested Neutron accepted Close/cancel/source and terminal retry failures preserve partial evidence, while full redirect/session/retry/default/backend combinations remain unresolved.",
         "Direct UUID verification intentionally preserves source getter trust: a different response ID with DOWN can satisfy the source boolean, with the actual row retained and Absent=false. The result is a source success policy rather than identity-checked requested-resource disappearance. Dedicated deletion options do not add filters or expression parameters that are absent from the source deletion signature.",
         "Selected Compute microversion2.36 or higher is rejected as ErrUnsupported before legacy Nova DELETE. The pinned cloud helper issues its legacy request and can translate an actual404 into false; Go's local version preflight is a deliberate difference and does not establish automatic endpoint/API-version negotiation or downgrade.",
         "The declared ID/retry deletion contract is mapped. Connection/profile use_direct_get configuration is expressed as an explicit Go option with default false; typed safe IDs and int retries, exact missing-catalog fallback, guarded context/accepted-error behavior, and the local legacy version preflight are documented Go choices. Inherited mutable Resource/session/cache APIs remain separately tracked in the SDK scope rather than missing arguments of this declaration.",
@@ -48239,7 +48233,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -48299,7 +48293,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -48359,7 +48353,7 @@
           ]
         },
         {
-          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove\u2192collection delete\u2192owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
+          "behavior": "Collection default ignores a clean native DELETE404, while WithMissingError preserves ErrNotFound, the requested identity and nested native DELETE cause. Actual403/409 remain errors with original status, method/URL, body/header and the Remove→collection delete→owned Delete cause chain. All three routes use existing leaf/cached Connection fixtures and perform one DELETE under the fixture's provider policy.",
           "tests": [
             "api/keymanager_metadata_delete_test.go:TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures"
           ]
@@ -71704,7 +71698,7 @@
     {
       "operation": "python:key_manager/v1/update_secret",
       "source_fingerprint": "fb178306a3ac2cb75f70dddc67a42a63577eb1d141b139aaf301dbe149ff3132",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.Update",
@@ -71779,14 +71773,13 @@
         "Literal service-relative BasePath and bounded nonblank escaped commit IDs replace arbitrary URI templates/falsey Source ID routes. Captured source/headers/body stay guarded through native hooks; returned HREFs never trigger metadata/payload reads.",
         "SDK-R1/C1/S1 Resource/class/session/cache foundations remain separate gaps. Actual Source61 observations use Proxy/Secret/Resource/Requests2.34.2/urllib32.8.0/CPython3.14.8 with adapterput returning memoryHTTPResponse. No liveBarbican/auth/retry/ACL proof. Worker no Go execution; root owns final checks.",
         "Cycle11 closes the declared BOM-or-explicit-LE/BE UTF16/UTF32 plus Latin1 response charset subset through the shared responsejson normalizer; actual wire byte receipts remain separate from normalized views. This does not complete the two named remaining areas or the full Requests loader/codec namespace. Existing standalone mains and Source61 oracle are unchanged; root owns Go validation.",
-        "Python mutable Secret/Resource same-instance state, pending changes, dirty-state equality, MRO/constructor/kwargs binding and URI templates are replaced by the closed string-ID UpdateRecord API (deliberate design choice)."
+        "Python mutable Secret/Resource same-instance state, pending changes, dirty-state equality, MRO/constructor/kwargs binding and URI templates are replaced by the closed string-ID UpdateRecord API (deliberate design choice).",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "keymanager/v1/python-parity.md",
         "keymanager/v1/secrets/python-update-record.md"
-      ],
-      "remaining": [
-        "Full Requests Response.json guess_json_utf/unmarked encoding inference, codec namespace beyond UTF16/UTF32 with BOM or explicit LE/BE plus ISO8859-1/Latin1, text fallback and permissive Python float/NaN/Infinity loading remain unmatched. Supported explicit charsets now decode Resource/Wire while raw physical Envelope/Header/Status/Error.Body remain unchanged. Unsupported cp1006 or malformed charset declarations return ErrUnsupported+actualproof; nocharset/UTF8 bytes are cloned without unmarked nonUTF8 inference. Finite Go rawJSON retains number spelling/large integers rather than all Python loaded-value semantics. BOM-less bare utf-16/utf-32 native-endian selection remains unsupported."
       ]
     },
     {
@@ -83509,7 +83502,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Lazy Source detail=True chooses /group_snapshots/detail; false chooses summary collection. Known server query mapping limit/marker/offset/sort_dir/sort_key/sort and all_projects\u2192all_tenants plus wire alias preserve client-key precedence including null, bool/number/text/array/object request expansion. Unknown query values are discarded without Marshaler calls; typed/raw scope conflicts and invalid pagination controls fail before HTTP/discovery.",
+          "behavior": "Lazy Source detail=True chooses /group_snapshots/detail; false chooses summary collection. Known server query mapping limit/marker/offset/sort_dir/sort_key/sort and all_projects→all_tenants plus wire alias preserve client-key precedence including null, bool/number/text/array/object request expansion. Unknown query values are discarded without Marshaler calls; typed/raw scope conflicts and invalid pagination controls fail before HTTP/discovery.",
           "tests": [
             "blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap",
             "blockstorage/v3/groupsnapshots/python_records_test.go:TestPythonGroupSnapshotRawPagingInputPrecedesDiscovery",
@@ -84796,7 +84789,7 @@
           ]
         },
         {
-          "behavior": "Page next truthiness uses existing cloudfilter.PythonJSONTruthy: Source binary64 underflow\u00b11e-400 falsey ignored, nonzero1e-300 and overflow\u00b11e400 truthy nonstring cause actual203 page error with no second listHTTP; local filter exact decimals remain explicit separate policy. LIST-only reserved helper rejects Source/Proxy controls by raw presence before Marshaler/HTTP for null/false/zero bulk/callback/single options, preserving typed controls and unknown case-sensitive discard.",
+          "behavior": "Page next truthiness uses existing cloudfilter.PythonJSONTruthy: Source binary64 underflow±1e-400 falsey ignored, nonzero1e-300 and overflow±1e400 truthy nonstring cause actual203 page error with no second listHTTP; local filter exact decimals remain explicit separate policy. LIST-only reserved helper rejects Source/Proxy controls by raw presence before Marshaler/HTTP for null/false/zero bulk/callback/single options, preserving typed controls and unknown case-sensitive discard.",
           "tests": [
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListNextUsesPythonBinary64TruthinessAndActualPage",
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTTP"
@@ -84864,7 +84857,7 @@
       ],
       "contracts": [
         {
-          "behavior": "POST consistencygroups/create_from_src with consistencygroup-from-src, four null defaults, falsey empty IDs\u2192null, literal optional sourceIDs and name/description empty preserved; no prerequisite lookup/request-seed, exactly-one-source remains actual server400 validation.",
+          "behavior": "POST consistencygroups/create_from_src with consistencygroup-from-src, four null defaults, falsey empty IDs→null, literal optional sourceIDs and name/description empty preserved; no prerequisite lookup/request-seed, exactly-one-source remains actual server400 validation.",
           "tests": [
             "blockstorage/v3/consistencygroups/python_record_contracts_test.go:TestPythonCinderConsistencyGroupCreateFromSourceNullDefaultsAndLiteralReferences"
           ]
@@ -86981,7 +86974,7 @@
         "UnknownLISTkwargs ignoredbeforemarshal and noHeaderfilter; safeconcreteoptions reject Resourceconstructor/session/basepath override. Go rawmax_items and limit are finite nonnegative machineintegers under sharedpager; safeorigin/collection/filter/cycle checks and finitepagebound replace Source broadretargeting. HTTPLinkRFC/dictionarylinks are explicitGocompatibility with exactversionedalias.",
         "Engine acceptedfinal200..399 differs from pinnedgeneric valid100..399, strictUTF8 differs Requests replacementdecode. Actualnative status/body/header/methodURL and physicalsource/cancelmixedcauses remainobservable. StopFaultRetryCallbacks is explicitGo guard preventing faultcallback/resend; cleanRetryFunc/reauth remain. Ordinary new retry headers remain allowed; all four conditional headers are fixed to selected values or required absence, and injection/replacement/OmitHeaders fails before HTTP attempt two. Existing selected headers and protocol absence remain protected. OkCodes expansion mayretry but cannot establishsuccess outsideoriginalacceptance. Faulty401 has native *ErrUnableToReauthenticate public ErrOriginal/ErrReauth, which do not Unwrap; inspect the original receipt and guard cause separately. A willing hook is suppressed while existing clean401 renewal remains.",
         "PinnedNeutron27 get_security_group_rule ADMIN_OR_SG_OWNER_READER/projectscope applies collection/member. StockDB collectsfilteredcandidates usingadmincontext, controllerfilters eachrow byactualpolicy; emptysuccessisnormal and notproofof fullauthority. No localRBAC inference/expansion; policyoverride/extensions/livecloudacceptance remainactualdeploymentwork distinctfromfixtures.",
-        "Source Proxy._list openstack/proxy.py866\u2013916 accepts named deprecated jmespath_filters and applies a truthy-string JMESPath expression with arbitrary output. This bounded Resource record API does not implement the transform (SDK-S1) and rejects presence before marshaling/HTTP instead of silently losing it. Explicit null/false/empty presence is also rejected, unlike Source falsey passthrough. Unknown kwargs and known canonical/wire aliases retain their existing behavior."
+        "Source Proxy._list openstack/proxy.py866–916 accepts named deprecated jmespath_filters and applies a truthy-string JMESPath expression with arbitrary output. This bounded Resource record API does not implement the transform (SDK-S1) and rejects presence before marshaling/HTTP instead of silently losing it. Explicit null/false/empty presence is also rejected, unlike Source falsey passthrough. Unknown kwargs and known canonical/wire aliases retain their existing behavior."
       ],
       "remaining": []
     },
@@ -105573,7 +105566,7 @@
       "differences": [
         "Go returns owned FlavorRAMResult with selected Flavor and actual consumed Inventory, instead of only mutable Python Flavor. Resource/default/location, Wire, per-row list Envelope and separate extra-specs whole response evidence remain distinct; local no-match uses errors.Is(ErrNoFlavorByRAM), comparison/membership errors use ErrInvalidOption.",
         "Public any inputs are SDK-owned JSON-domain primitive/container snapshots, not required application builder interfaces. RawMessage preserves numeric spelling. Python arbitrary classes/operators, NaN/Infinity runtime float values, configurable huge-integer string conversion limits and custom runtime callback timing are not reproduced. Safe Go IDs/finite explicit-charset JSON/header/selected-source policy and existing foundation SDK-R1/SDK-C1/SDK-S1 remain explicit; supported increment0.",
-        "Actual imported pinned Source under Python3.14.8 ran49 cloud\u2192NovaProxy\u2192Flavor/Resource cases, plus2 status199 list/extra cases. Only Adapter Response/connection were substituted. Mock/Go/race/main proof is not actual authenticated backend/role/deployment acceptance.",
+        "Actual imported pinned Source under Python3.14.8 ran49 cloud→NovaProxy→Flavor/Resource cases, plus2 status199 list/extra cases. Only Adapter Response/connection were substituted. Mock/Go/race/main proof is not actual authenticated backend/role/deployment acceptance.",
         "Existing AllFlavors default false remains unchanged while this helper owns default true. Root Connection forwarding is not added; conn.Compute(ctx) returns the service. Existing native and generic flavor reader policies are preserved. Existing RAM/status tests plus new explicit-charset integration/root validation are distinct from actual Python Source execution.",
         "Explicit response profile now supports Latin1 and UTF16/32 BOM or LE/BE on RAM Source-status reads. Unmarked charset sniffing, BOMless generic UTF16/32 native-endian decoding, arbitrary Requests codecs and nonfinite/permissive JSON remain documented Go format differences rather than claims of universal Requests decoding. PageEnvelope is physical whole-page bytes while Envelope is the decoded flat row; extra Envelope remains physical response bytes."
       ],
@@ -105980,7 +105973,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/search_server_groups",
       "source_fingerprint": "000e6807c23b7b0fc0959886b282fa70197d386c8144e28a1d30032a910e850e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.List",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchServerGroups",
@@ -106069,23 +106062,20 @@
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
         "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
         "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
-        "Actual imported pinned cloud search/get/list\u2192Nova Proxy\u2192Resource list/find/constructor/descriptor\u2192cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
-        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
+        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.",
+        "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-group-reads-python.md",
         "README.md"
-      ],
-      "remaining": [
-        "Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.",
-        "Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns\"1e+23\". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_group",
       "source_fingerprint": "24b229f9c35f3bed55243ec8f3da163b77948451ea300181e30d6cebdd2b5ad8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchServerGroups",
@@ -106181,17 +106171,14 @@
         "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID.",
         "Owned header/version/location snapshots, complete UTF8 JSON and JSON object wire order are Go policy. Existing mutation/API caches and native read/find baselines remain intact. Custom runtime objects/mutable Resource/class/adapter/cache/session/current_location foundation differences remain SDK-R1/SDK-C1/SDK-S1 with supported increment0, separately from the two reachable named JMES gaps retained above.",
         "Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.",
-        "Actual imported pinned cloud search/get/list\u2192Nova Proxy\u2192Resource list/find/constructor/descriptor\u2192cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
-        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob."
+        "Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.",
+        "Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.",
+        "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-group-reads-python.md",
         "README.md"
-      ],
-      "remaining": [
-        "Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.",
-        "Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns\"1e+23\". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity."
       ]
     },
     {
@@ -106357,7 +106344,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server",
       "source_fingerprint": "95df3113389e19e20babaf7bdc399a60dcde3a92b525cf8ad64f20f0bbd2bfee",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces",
@@ -106392,14 +106379,12 @@
       "differences": [
         "The filters branch reuses SearchServerRecords and GetServer; several matches are resource.AmbiguousError instead of SDKException, and no deprecation warning is emitted.",
         "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "The deprecated filters branch inherits the search_servers JMESPath item: Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows."
       ]
     },
     {
@@ -106442,7 +106427,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/list_servers",
       "source_fingerprint": "2028293772dfe5eb963908cf3864185d87d9ea2167346388338092a1b5ebbfc8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces",
@@ -106483,20 +106468,18 @@
       "differences": [
         "ListServerRecords is the bare=True record reader; ListServers returns CloudServerResult values with the Source record, typed server and expansion. The results built before a list or expansion failure are returned beside the error instead of discarding them.",
         "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/search_servers",
       "source_fingerprint": "3fbb723edb16fd44d0cb75225d7963e6cb193bbda8a73d38b4671352508ad9bd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerRecords",
@@ -106539,15 +106522,13 @@
       "differences": [
         "SearchServerRecords is the bare=True record search; SearchServers returns CloudServerResult values with Value, Servers, Inventory and Expression instead of mutable Resources.",
         "Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-composed-python.md"
-      ],
-      "remaining": [
-        "Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.",
-        "The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
@@ -106707,7 +106688,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_console",
       "source_fingerprint": "b6a08c8ee9bacf16ee93031e8c6f276b0b93f06379bb597d4c3e24d192781ae1",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput",
@@ -106813,16 +106794,14 @@
         "Go integer/rawJSON options retain finite literal values instead of prematurely casting Source annotations. Go raw numbers preserve their original decimal spelling/large integers rather than Python float conversion; nonfinite Python values remain an explicit named gap.",
         "Synthetic final informational199 status tests establish policy only, because actual net/http may process1xx internally. SDK action ownership guards block retry/auth hooks after physical/context/source faults; reused FindRecord existing lookup hook semantics remain unchanged.",
         "Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds.",
-        "Cycle11 adds only bounded explicit response charset normalization in the console leaf, reused by existing Service/Connection GetServerConsole. Actual Envelope/Header/ResponseError.Body keep wirebytes while Value comes from normalized JSON. Existing Source68 receipts are unchanged; no new Source matrix, codec registry, guess_json_utf or nonfinite support is claimed. Worker ran gofmt only; root owns Go/race and standalone main validation."
+        "Cycle11 adds only bounded explicit response charset normalization in the console leaf, reused by existing Service/Connection GetServerConsole. Actual Envelope/Header/ResponseError.Body keep wirebytes while Value comes from normalized JSON. Existing Source68 receipts are unchanged; no new Source matrix, codec registry, guess_json_utf or nonfinite support is claimed. Worker ran gofmt only; root owns Go/race and standalone main validation.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/python-cloud-parity.md",
         "compute/cloud-server-console-python.md",
         "README.md"
-      ],
-      "remaining": [
-        "Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 caf\u00e9 observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.",
-        "Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved."
       ]
     },
     {
@@ -107276,7 +107255,7 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_networks",
       "source_fingerprint": "8dab8ab34ae1f4522ddfe1c0d942e01b5c77224ec5360d04ecb199695c5201fa",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.ListNetworkRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
@@ -107363,18 +107342,16 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
-        "Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight."
-      ],
-      "remaining": [
-        "Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof."
+        "Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_networks",
       "source_fingerprint": "5ceee3657246f451f4380fb2161880b84742f8cf5616c291f3ddb7563fd6393b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.SearchNetworkRecords",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudListOpts",
@@ -107461,18 +107438,16 @@
         "SDK-C1: JSON bytes retain exact integers and raw proof; local comparisons use audited CPython-loaded float/bool/int policy. Non-JSON custom objects, nonfinite JSON runtime values and exact unrestricted Python representation/Unicode/marshal behavior remain independent generic contracts. Go wraps structured errors while preserving actual response and physical/context causes.",
         "SDK-S1: source origin, service-relative path/filter/continuation guards and concrete transport options retain the original selected client. Arbitrary adapter/class injection, URI percent-mapping retargeting, foreign/query/fragment/traversal base paths are restricted; existing typed/legacy list APIs retain their baseline rather than receiving hidden Source flags.",
         "New ProxyCloudListRecords raw WithCloudRecordListQuery preserves Resource formal validation timing and original/restored binding behavior. It is the Source-connected lane; older WithRecordListQuery/ProxyListRecords keep the prior eager concrete control contract. Informational final100..199 and Source continuation-link policy apply only to the new cloned profile.",
-        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a\u2192a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
+        "Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.",
         "Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.",
-        "Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight."
-      ],
-      "remaining": [
-        "Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof."
+        "Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/list_subnets",
       "source_fingerprint": "d273c50a478828129ff5aceb3d2483dc679ab7b0c1f63122c5e30a6f069e378e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.AllRecords",
@@ -107601,20 +107576,18 @@
         "README.md"
       ],
       "differences": [
-        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because the nonfinite-version and shared runtime gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.",
         "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
         "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
-        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions."
-      ],
-      "remaining": [
-        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.",
-        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
+        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/search_subnets",
       "source_fingerprint": "04dcd17f09c8cd4810000ba9c969e1208d4f56603c448e33bba3de665db9cd14",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.AllRecords",
@@ -107743,14 +107716,12 @@
         "README.md"
       ],
       "differences": [
-        "This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because the nonfinite-version and shared runtime gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.",
+        "Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.",
         "SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.",
         "Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.",
-        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions."
-      ],
-      "remaining": [
-        "Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.",
-        "Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support."
+        "Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -108296,7 +108267,7 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/remove_router_interface",
       "source_fingerprint": "f6ea72b2e549e3ff72660bbbd80d603be3f9bca89c3e6bb52fc2bb2c5f6613c7",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveInterfaceRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet",
@@ -108374,22 +108345,20 @@
       ],
       "differences": [
         "Existing RemoveInterfaceRecord keeps its original parsed-JSON return. The separate Service.RemoveRouterInterface returns Source None as Value null with an SDK-owned diagnostic ResponseJSON and physical response receipt.",
-        "This implements the named cloud remove_router_interface flow but remains unresolved due to the remaining fullRequests decoder/permissiveJSON gaps with SDK-owned validation/options/port-first selection/None return and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate/discover before argument validation; direct selected/nil Service missing-ID validation remains HTTP0. New leaf helper is only this fixed dependency and no extra Source API is promoted; full SDK supported delta remains0.",
+        "The cloud remove_router_interface flow uses SDK-owned validation, options, port-first selection, a None-equivalent result and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate and discover before argument validation; a missing ID on a directly selected or nil Service fails without HTTP.",
         "Go router input is a validated nonblank UTF8 string ID, escaping slash/percent/query as one segment and rejecting controls/traversal. Source arbitrary Router Resource/dict/null/nonstring dynamic dispatch and URI/class/member/session/cache behavior remain shared SDK-R1/C1/S1 foundation scope. No name lookup is invented, and broad Python runtime objects are not claimed from raw JSON preservation.",
         "Go returns an owned diagnostic result with Value:null for Source None plus actual parsed ResponseJSON/Wire/Envelope/Header/StatusCode rather than returning a bare nil. Failed observations never expose successful Value/ResponseJSON or a synthetic Router Resource. Valid JSON numeric tokens preserve Go raw precision; Python floating/runtime representation and wire key order remain explicit Go policies.",
         "The closed Source100..399/physical-fault callback suppression opt-in leaves existing native and legacy leaf policies unchanged. Headers are a concrete Go transport convenience with immutable selected source/client/captured framing and live token renewal. Stock Neutron27 project ADMIN_OR_PROJECT_MEMBER gate is documented without inferring parent-owner reader/shared-subnet authorization or live ACL acceptance.",
         "Evidence is actual CPython3.14.8 pinned cloud/Proxy/Resource/Router code with Adapter.put/_get_connection fixtures (75 observations), plus independently audited bounded router13 observations. Source/AST, Go/race, main compilation and live backend authorization are separate claims; no live backend was used.",
-        "Cycle12 changes only the fixed cloud dependency to reuse internal/responsejson.Normalize for bounded explicit charsets. The generic/legacy decoder and common ABI/codec set remain unchanged. BOM is required for bare UTF16/32; explicit LE/BE works without it. Actual raw proof stays separate from normalized diagnostic JSON. Reused Source75 and independent13 observations are not rerun or combined into a new count. Worker ran gofmt only; root owns Go/race/main builds; no mapping promotion is claimed."
-      ],
-      "remaining": [
-        "Full Requests Response.json codec registry, unknown explicit charsets, charset-free BOM/guess_json_utf/text fallback and bare UTF16/UTF32 without BOM native-endian decoding remain unsupported. The closed cloud helper now supports ISO8859-1/latin1 and UTF16/32 with BOM or explicit LE/BE. Unsupported/malformed declared charset retains ErrUnsupported plus original response evidence, while unmarked nonUTF8 preserves the original decode failure. This narrower reachable decoder gap still prevents complete named mapping.",
-        "Full permissive Python JSON loading and runtime numeric domain remain unmatched. Source Response.json may accept NaN/Infinity-style values before cloud discards the result and returns None, while the reused Go JSON carrier rejects nonstandard JSON tokens. Finite JSON raw numbers retain Go literal precision rather than claiming all Python loaded-value semantics."
+        "Cycle12 changes only the fixed cloud dependency to reuse internal/responsejson.Normalize for bounded explicit charsets. The generic/legacy decoder and common ABI/codec set remain unchanged. BOM is required for bare UTF16/32; explicit LE/BE works without it. Actual raw proof stays separate from normalized diagnostic JSON. Reused Source75 and independent13 observations are not rerun or combined into a new count. Worker ran gofmt only; root owns Go/race/main builds; no mapping promotion is claimed.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_router",
       "source_fingerprint": "aa06a50620e1989fe510303f2567aad1fca9d7310de39b5a785db8985ac41d0f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateRouterRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithRouterUpdateJSON",
@@ -108438,16 +108407,17 @@
       ],
       "differences": [
         "UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.",
-        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_subnet",
       "source_fingerprint": "589dcfadd625ca39ac18024d1088971d3c31fb869cc7ffe01b9e55b0f43c7f3e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/subnets.WithRecordFindIgnoreMissing",
@@ -108505,16 +108475,17 @@
       "differences": [
         "Go returns the native Subnet projection plus the owned UpdateReceipt instead of a Subnet Resource.",
         "UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract.",
-        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_port",
       "source_fingerprint": "b103ad49d1626adc97f55d0026308a29f4122fffc2e49e2419ac226d94601672",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithRecordFindIgnoreMissing",
@@ -108570,10 +108541,10 @@
         "Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.",
         "Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.",
         "Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.",
-        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Configured provider retry and reauthentication hooks apply as for other native calls; the helper sends one PUT and adds no further replay guard."
       ]
     },
     {
@@ -108839,7 +108810,7 @@
           ]
         },
         {
-          "behavior": "Dirty comparison uses private raw Source Body presence rather than coerced/default/alias getters: missing name\u2192null is dirty; tenant_id-only\u2192same project_id is dirty; shared:\"false\"\u2192true is dirty; shared:true\u21921 is equal. Only changed keys enter PUT, partial response seed retains old/new raw state, and equal update returns original private receipt without invented PUT proof.",
+          "behavior": "Dirty comparison uses private raw Source Body presence rather than coerced/default/alias getters: missing name→null is dirty; tenant_id-only→same project_id is dirty; shared:\"false\"→true is dirty; shared:true→1 is equal. Only changed keys enter PUT, partial response seed retains old/new raw state, and equal update returns original private receipt without invented PUT proof.",
           "tests": [
             "network/cloud_qos_policy_mutations_test.go:TestCloudQoSPolicyUpdateRawDirtyMissingAliasAndOnlyChangedPayload",
             "network/v2/extensions/qos/policies/python_cloud_mutations_test.go:TestPolicyCloudMutationListConstructorRawLedgerAndPartialResponseSeed"
@@ -109060,7 +109031,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -109331,7 +109302,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -109604,7 +109575,7 @@
           ]
         },
         {
-          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing\u2192null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
+          "behavior": "Raw Source dirty equality uses presence and CPython-loaded values rather than projected defaults/getters: missing→null is dirty, true/1 and false/0 are equal, float precision/underflow equality matches Source. PUT contains changed keys only; partial response seeds untouched/new fields only in Resource view while Wire remains actual. No-dirty returns cloned private current receipt without PUT evidence.",
           "tests": [
             "network/cloud_qos_rule_updates_test.go:TestCloudQoSRuleUpdateRawDeltaEqualAndPartialResponse",
             "network/v2/extensions/qos/rules/python_cloud_updates_test.go:TestQoSCloudRuleUpdateRawDirtyPresenceSelectedVersionAndActualPartialWire"
@@ -109784,7 +109755,7 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_group",
       "source_fingerprint": "915cc75336b53eb98ca8ebba1c60cecd3ab09b021b0102e3d36582233d90416b",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallGroupRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallGroupUpdateJSON",
@@ -109840,17 +109811,18 @@
       ],
       "differences": [
         "UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence; Response is the owned PUT receipt and Group the native projection of its merged view. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection.",
-        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Policy references are nonempty JSON strings or null; ports are JSON arrays of nonempty strings. Arbitrary Python iterable/object/nonstring/empty response-ID/runtime-exception behavior and full same-instance Resource lifecycle remain outside this bounded profile.",
-        "Full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Policy references must be nonempty JSON strings or null and ports JSON arrays of nonempty strings; other Python iterables, objects and empty IDs are rejected rather than reproduced.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Referenced ports are resolved through ports.FindRecord and keep its recorded status, encoding and Resource profile."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_policy",
       "source_fingerprint": "6c2f6ded7e2794c459d1cd0d0a9c81852cd04b80382ede7476048c26f7df730f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallPolicyRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallPolicyUpdateJSON",
@@ -109905,17 +109877,17 @@
       ],
       "differences": [
         "UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Response is the owned PUT receipt and Policy the native projection of its merged view. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.",
-        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.",
-        "Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate runtime boundaries."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Rule references must be JSON arrays of nonempty strings; other Python iterables, objects and nonstring IDs are rejected rather than reproduced.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_firewall_rule",
       "source_fingerprint": "7df318963a8453d06b1362a93966603c343d4d9c170199a92457e5ac3aa75a9e",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateFirewallRuleRecord",
         "github.com/JSYoo5B/go-openstacksdk/network.WithFirewallRuleUpdateJSON",
@@ -109966,10 +109938,11 @@
       ],
       "differences": [
         "UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. The dirty fourteen-key subset is sent as one owned PUT without exposing builder-interface responsibility to callers. Lookup is a separate record; Response is the owned PUT receipt and Rule the native projection of its merged view.",
-        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
-      ],
-      "remaining": [
-        "Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -111139,7 +111112,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -111178,11 +111151,11 @@
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
         "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.",
+        "Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "remaining": [
-        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
+        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection."
       ]
     },
     {
@@ -111238,7 +111211,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -111277,11 +111250,11 @@
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
         "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.",
+        "Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "remaining": [
-        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
+        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection."
       ]
     },
     {
@@ -111337,7 +111310,7 @@
           ]
         },
         {
-          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family\u00d7two-method\u00d7four-status\u00d7Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
+          "behavior": "Physical accepted200/rejected401/404/503 GET and DELETE faults preserve actual full bytes/header/status and no successful Resource. Three-family×two-method×four-status×Read+Close/cancel/source72lane fixture closes once, invokes no native retry/reauth hook and keeps custom context cause. Native401 pointer does not unwrap: actual value ErrOriginal and ErrReauth read/close causes are checked independently while retaining any outer joined causes.",
           "tests": [
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
@@ -111376,11 +111349,11 @@
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
         "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below.",
+        "Raw limit filter values in the Find fallback must be nonnegative integers for the marker-fallback decision; Python's truthiness of boolean, fractional or string limits, which Neutron rejects with HTTP 400, is not reproduced; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "remaining": [
-        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
+        "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection."
       ]
     },
     {
@@ -112961,7 +112934,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source create_container returns a Container or None; Go returns ContainerCreateResult.Container plus separate Initial/Creation/Refreshed and Existing facts. Public=false sends no operation ACL, while existing ACL is never updated."
       ],
       "remaining": []
@@ -113087,7 +113060,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source set_container_access returns a mutable Resource; Go exposes Requested separately from actual Acknowledgement/Refreshed/Container receipts. A POST missing read_ACL does not assert that the server now has the requested ACL."
       ],
       "remaining": []
@@ -113160,7 +113133,7 @@
         "Go returns concrete workflow carriers separating actual per-phase HTTP receipts and the Source return Resource; errors remain normal Go errors with native causes instead of Python SDKException.",
         "Go uses bool/string options, validates literal Swift container names and headers before HTTP, snapshots maps deterministically, and rejects ambiguous header aliases and direct X-Container-Read overrides; Python accepts dynamically typed arguments and arbitrary names.",
         "Go retains the existing bounded Swift Resource projection policy: location is nullable and ambiguous repeated/alias response Headers become projection errors with physical proof. SDK-R1/C1/S1 mutable Resource, dirty/session/cache/location contracts remain tracked separately.",
-        "Final HTTP 100\u2013399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
+        "Final HTTP 100–399 statuses follow Source raise_from_response below 400; intermediate informational and redirect processing depend on Go HTTP transport. Server authentication/Swift account ACL configuration and real cloud acceptance are not proved by fixtures.",
         "Source returns an access string and SDKException for missing or unknown ACL; Go returns ContainerAccessResult.Access plus the actual HEAD record, with ErrNotFound on clean missing and native HTTP causes retained."
       ],
       "remaining": []
@@ -113691,7 +113664,7 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/get_object",
       "source_fingerprint": "a69f073d71fb0a0b9d5dee4e2e0356a911084875dff7e4cda09b9683987962d2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject",
@@ -113781,23 +113754,20 @@
         }
       ],
       "differences": [
-        "This meaningful closed cloud GetObjectText API is a partial named implementation, notgo_mapping completion. Operation remainsunresolved and doesnotincreasefullsupported; wholeSDK-R1/C1/S1 resource/session/cache/Connection foundations also remainunsupported. GeneralProxy.get_object mutableObject/Container/dirtyattrs and existing nativeGetObject/DownloadObject review judgments stayunchanged.",
+        "GetObjectText is the closed cloud text API; general Proxy.get_object mutable Object/Container state and the existing native GetObject/DownloadObject reviews are unchanged.",
         "GoObjectGetResult separates lowercaseHeaders, optionalBody *string, actualReceipt, Missing andBytesWritten. SourceNone onclean404 becomes Missingwith actual404receipt, nofakeheaders/text; errorresults may retainreceivedheader/status/partialproof evenwhenSourcewouldraisebeforetuple.",
         "Go supports limited explicitheadercharset/BOM/validUTF8 policies with golang.org/x/textv0.41.0 andsimplePythonaliasnormalization; these do notreplaceRequests2.34.2 charset_normalizer3.5.2 apparent_encoding orfullCPython textcodec lookup/errorsemantics. Unresolved detector scopeincludesallunmarkedbytes, notmerelynonUTF8; knownNUL/malformedBOM/unicode_escape/cp1006/palmos negatives retainUnsupported+actualbytes.",
         "Sourceget_object outfileNone/falseynonNone truthiness is represented by typednilcontrols, explicitemptyOutfile/OmitContent, concretepathorborrowedio.Writer. Pythonarbitrary filelikebool/callbacks/Resources are nottransferredtoGo. QueryString/Streamignored formalcontrols staylibraryowned, noapplicationinterface builderrequired.",
         "NonemptyGooutput chunk is typedpositive1..16MiB validated beforeHTTP/fileopen, whileSource mayopenpaththenvalidate dynamicchunk type; memory/discardignoreChunkSize. Go detects io.ErrShortWrite whereSource ignoreswrite returncount, optionalFlush supportsstandardunbuffered Go writers, andownedpath/HTTPbody cleanup occurs onall errors instead ofSourcefinally absence.",
-        "Accepted outputorder is rawGET/status\u2192lowerheadercopy\u2192pathopen\u2192decoderinit\u2192reads/writes\u2192Flush/Close. SourceObject rawheadercopy is retained withoutdemanding eagerdescriptorcasts. CallerPathError concreteerrors.As type remainsavailable; no reusedcachedstream-error snapshot canerase it.",
+        "Accepted outputorder is rawGET/status→lowerheadercopy→pathopen→decoderinit→reads/writes→Flush/Close. SourceObject rawheadercopy is retained withoutdemanding eagerdescriptorcasts. CallerPathError concreteerrors.As type remainsavailable; no reusedcachedstream-error snapshot canerase it.",
         "Names followSDK safeUTF8 literalSwiftvalidation andwholeobject PathEscape, source/provider/accountendpoint/version/header facts are capturedbeforeoptions andremainsticky throughnativecallbacks/Read/Write/Flush/Close. Late writer/reader resource.ErrNotFound is aphasefailure with actualreceivedproof, not cleanHTTP404 suppression.",
         "Decoder behavior andnative clean401/429/498 policyreuse existingownedSwift streamhelpers, accepted100..399 doesnotexpandnativeStreamObject200/206/304. Error bodyproof maybeactual currentcompressedphysicalbytes orcurrentdecodedwriterchunk asstageappropriate; noentireobjectbuffer iskeptforoutputmodes.",
-        "ActualpinnedSource cloud/Proxy/Object/Requests/urllib3 execution has65observations withmemoryHTTPadapter/eagerRequests-like buffering andonlypathopen recordingstub. Sourcefield/runtimefiles arehash-recorded; oracle/mains/fixtures donotprove liveauth/filesystemACL/release. Originalpins areGophercloudv2.15.0 andopenstacksdkef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; fullsupported count remains0."
+        "ActualpinnedSource cloud/Proxy/Object/Requests/urllib3 execution has65observations withmemoryHTTPadapter/eagerRequests-like buffering andonlypathopen recordingstub. Sourcefield/runtimefiles arehash-recorded; oracle/mains/fixtures donotprove liveauth/filesystemACL/release. Originalpins areGophercloudv2.15.0 andopenstacksdkef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; fullsupported count remains0.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "docs/python-cloud-parity-misc.md",
         "objectstorage/cloud-object-get-python.md"
-      ],
-      "remaining": [
-        "Requests Response.text with encoding=None runs charset_normalizer3.5.2 statistical apparent_encoding across the entire received bytes. The Go limitedUTF8/BOM policy does not reproduce that detector for allvalidUTF8, NUL, malformedBOM, legacy/binary/mixedlanguage inputs. ActualSource examples: unmarkedcaf e9\u2192UTF16BE U6361/U66E9, validUTF8 00 41 00 42\u2192AB, malformedff fe 41\u2192alternatecodepage. Known detector-required inputs currently returnErrUnsupported withactualfulldecodedbytesproof; exactautomaticdefaulttext parity remainsopen.",
-        "FullCPython3.14 textcodec/alias lookup anderrors=replace semantics are not mappedbythelimitedmanual+IANA/xtext subset. KnownvalidPythonunicode_escape, raw_unicode_escape, cp1006, palmos andother unsupportedcodecs returnErrUnsupported; unknownIANA names canstillincludevalidPythonaliases notclassifiedbythissubset. Entirecodecnamespace andallcodepage mappings/replacementcases needexplicitlibraryownedcoverage before namedget_object can bepromoted."
       ]
     },
     {
@@ -114459,7 +114429,7 @@
     {
       "operation": "python:cloud/inventory/OpenStackInventory/list_hosts",
       "source_fingerprint": "ab308cbf581a104fee663015eba0e8c327e69392f95fb488b3fe67d2ef379cd2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts",
         "github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts",
@@ -114511,21 +114481,19 @@
         "Go returns typed compute servers with explicit failures instead of swallowing SDKException.",
         "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
         "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
         "compute/cloud-server-composed-python.md",
         "compute/v2/servers-list-python.md"
-      ],
-      "remaining": [
-        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
       "operation": "python:cloud/inventory/OpenStackInventory/search_hosts",
       "source_fingerprint": "fd468cc8e7a0d52428c7685efb5d46ee69ddc097bd57ac4cca9475a4a533a7cf",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts",
         "github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts",
@@ -114568,21 +114536,19 @@
         "Filter keys are the JSON field names of the Go compute server record.",
         "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
         "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
         "compute/cloud-server-composed-python.md",
         "compute/v2/servers-list-python.md"
-      ],
-      "remaining": [
-        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
       "operation": "python:cloud/inventory/OpenStackInventory/get_host",
       "source_fingerprint": "89d823fe48675da1282180543bb34b37ea6bc1435415cc6f400b614cc4b5cf44",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts",
         "github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts",
@@ -114624,15 +114590,13 @@
         "Go returns resource.AmbiguousError instead of SDKException.",
         "Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).",
         "WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.",
-        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
+        "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.",
+        "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
         "compute/cloud-server-composed-python.md",
         "compute/v2/servers-list-python.md"
-      ],
-      "remaining": [
-        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {

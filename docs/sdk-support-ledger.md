@@ -15,11 +15,23 @@ The [operation review JSON](../api/sdk_reviews.json) records public Go APIs, sou
 
 A completed review cannot retain unresolved behavior. Go mappings must explain observable differences rather than use type differences as a reason to avoid required functionality. Removing a method from an implementation target does not make the overall SDK complete.
 
+## Deliberate runtime differences
+
+The SDK does not reproduce the following Python runtime behaviors. An operation whose only remaining gaps fall in these categories is recorded as `go_mapping`, with the difference stated in its review.
+
+- **Immutable results.** Operations return owned, immutable snapshots with actual wire and HTTP evidence. Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1), and reuse of that object as later input, is not reproduced.
+- **Typed inputs.** Inputs are typed Go values. Arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent.
+- **Integer paging controls.** `limit` and `max_items` accept only nonnegative integers; other values fail before HTTP. Python forwards booleans, negatives, fractions and strings, which Neutron and Nova reject with HTTP 400 (both require an integer of 0 or more) or which fail in a client-side comparison.
+- **Finite JSON numbers.** Only standard finite JSON numbers are accepted. `NaN`, `Infinity` and overflowing literals such as `1e400` return `ErrUnsupported` with the original response, where Python's `json` loads them as floats. A latest microversion must be written as `"latest"`, not as an overflowing number.
+- **No charset guessing.** Text is decoded only from UTF-8, a byte-order mark, or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1). Undeclared non-UTF-8 bytes and other codecs return `ErrUnsupported` with the original bytes, instead of Requests' statistical detection (charset_normalizer) or the full CPython codec registry.
+- **Plain JSON rows in JMESPath filters.** JMESPath string filters, which the pinned Python SDK deprecates with `RemovedInSDK60Warning`, evaluate rows as plain JSON objects. Expressions that depend on the Resource class (`keys`, `values`, `length` or `type` of a row), Resource equality with a literal object, or CPython float arithmetic and serialization can differ. Dictionary filters behave the same.
+
+Caveat: charset guessing matters mainly for Swift object text, whose content is arbitrary user data. An object stored as, for example, undeclared EUC-KR text is returned as an error with its bytes, where Python would guess an encoding. If this becomes a practical problem, an encoding detector can be added as an explicit opt-in; its results would still not match charset_normalizer exactly.
+
 ## Shared unresolved boundaries
 
-- SDK-R1/C1/S1: mutable Resource, adapter/session/cache lifecycles and dynamic descriptors.
-- Full unknown/partial/empty/malformed success-response merging and mutable Resource reuse.
-- Complete Requests encoding, accepted-status profiles, nonfinite JSON, and arbitrary Python object/iterable identities.
+- Full unknown/partial/empty/malformed success-response merging.
+- Accepted-status profiles that have not been compared per operation.
 - Fetch/constructor/header/microversion controls on lookup bindings that have not adopted the corresponding owned entry points.
 - Authenticated deployment acceptance, policy overrides, and release-specific interoperability.
 

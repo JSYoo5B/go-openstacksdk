@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_server_groups`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -51,15 +51,11 @@ Python/Go differences:
 - Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.
 - Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.
 - Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.
-
-Unresolved boundaries:
-
-- Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.
-- Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns"1e+23". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity.
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -104,11 +100,7 @@ Python/Go differences:
 - Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.
 - Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.
 - Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.
-
-Unresolved boundaries:
-
-- Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.
-- Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns"1e+23". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity.
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

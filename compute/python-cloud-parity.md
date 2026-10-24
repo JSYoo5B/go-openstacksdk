@@ -296,7 +296,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_server_groups`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -339,15 +339,11 @@ Python/Go differences:
 - Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.
 - Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.
 - Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.
-
-Unresolved boundaries:
-
-- Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.
-- Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns"1e+23". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity.
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_group`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -392,11 +388,7 @@ Python/Go differences:
 - Nova32 index/show policy is project PROJECT_READER_OR_ADMIN; all_projects index requires ADMIN. Cloud methods keep all_projectsFalse and do not expand privileges. Runtime/mock/race/main proof is not actual authenticated backend, role, ownership or deployment-policy acceptance.
 - Actual imported pinned cloud search/get/list→Nova Proxy→Resource list/find/constructor/descriptor→cloudfilter/JMESPath ran under Python3.14.8 in core114 + class/numeric/empty25 + arithmetic8 =147 cases. Only Adapter HTTP/get_endpoint_data/connection were fixture substitutions. Source files and supplemental references are pinned, with no live backend. Go validation covers 15 basic groups; unresolved named class/numeric namespaces prevent completed/full-supported promotion.
 - Source None name is not representable by the required Go string argument: Source get(None) raisesInvalidRequest without HTTP, while explicit Go empty string is supported as the actual Source trailing collection GET. Search empty is equivalent to Source absent identifier. Safe literal ID/control/traversal/whitespace policy is explicit and never silently replaces an ID. Literal db0* member GET uses Go single-segment db0%2A encoding versus Source Requests retained star; both default find paths use exact matching, not a glob.
-
-Unresolved boundaries:
-
-- Named JMESPath Source ServerGroup subclass typing/equality remains unresolved. Actual pinned Source type([0]) is object but keys([0])/values([0])/length([0]) raise JMESPathTypeError unknown/ServerGroup; Go JSON map loses that concrete validator. Resource.__eq__ is false against an otherwise identical plain canonical10field object, so Source [?@ == identical_literal].id is [] and filtered get None, whereas structural Go maps can match. Nested rules/metadata dicts are distinct from the Resource class. Actual147-case reference includes these reachable operations; they are not hidden as only generic SDK-R1.
-- Named full Python numeric/arithmetic/serialization/nonfinite JMES namespace remains unresolved. Finite binary-loaded comparison and mixed int/float predicate handling are implemented, but arithmetic/serialization retain the existing exact-number engine rather than a complete CPython typed numeric model. Actual Source sum(`[9007199254740992.0,1]`) returns9007199254740992.0; to_string(`1e23`) returns"1e+23". Source literal1e400 search returns inf and filtered get raisesTypeError, while Go loaded JSON rejects nonfinite as unsupported. These named paths stay open, not a claim of full filter parity.
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_compute/ComputeCloudMixin/delete_server_group`
 
@@ -511,7 +503,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -536,10 +528,7 @@ Python/Go differences:
 - The filters branch reuses SearchServerRecords and GetServer; several matches are resource.AmbiguousError instead of SDKException, and no deprecation warning is emitted.
 - Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
-
-Unresolved boundaries:
-
-- The deprecated filters branch inherits the search_servers JMESPath item: Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_by_id`
 
@@ -568,7 +557,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/list_servers`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -596,14 +585,11 @@ Python/Go differences:
 - ListServerRecords is the bare=True record reader; ListServers returns CloudServerResult values with the Source record, typed server and expansion. The results built before a list or expansion failure are returned beside the error instead of discarding them.
 - Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
-
-Unresolved boundaries:
-
-- The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
+- Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items).
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_servers`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -633,11 +619,8 @@ Python/Go differences:
 - SearchServerRecords is the bare=True record search; SearchServers returns CloudServerResult values with Value, Servers, Inventory and Expression instead of mutable Resources.
 - Python returns a mutable Server Resource (or a Munch of it for detailed hostvars); Go returns CloudServerResult with the typed server, the owned ServerAddressView and, when detailed, CloudServerHostvars. Resource normalization, attribute aliases and session/cache state are the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
-
-Unresolved boundaries:
-
-- Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.
-- The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
+- JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items).
 
 ### `python:cloud/_compute/ComputeCloudMixin/update_server`
 
@@ -730,7 +713,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_console`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -781,11 +764,8 @@ Python/Go differences:
 - Synthetic final informational199 status tests establish policy only, because actual net/http may process1xx internally. SDK action ownership guards block retry/auth hooks after physical/context/source faults; reused FindRecord existing lookup hook semantics remain unchanged.
 - Source oracle substitutes only fixedfind return/errors and post memoryHTTPResponse; no liveNova/auth/ACL/retry evidence. Python mainASTPASS; root owns Go gates and standalone mainbuilds.
 - Cycle11 adds only bounded explicit response charset normalization in the console leaf, reused by existing Service/Connection GetServerConsole. Actual Envelope/Header/ResponseError.Body keep wirebytes while Value comes from normalized JSON. Existing Source68 receipts are unchanged; no new Source matrix, codec registry, guess_json_utf or nonfinite support is claimed. Worker ran gofmt only; root owns Go/race and standalone main validation.
-
-Unresolved boundaries:
-
-- Requests Response.json full codec registry, unknown explicit encodings, charset-free BOM/guess_json_utf selection and text fallback remain unmatched. Explicit UTF16(BOM/LE/BE), UTF32(BOM/LE/BE), ISO8859-1/latin1 now normalize through the SDK shared decoder, including the existing Source ISO8859-1 café observation. Unmarked nonUTF8 or unknown/malformed charset still return ErrUnsupported with actual rawresponse. This narrower reachable remainder continues to prevent complete named mapping. Bare utf-16/utf-32 without BOM native-endian selection remains unsupported.
-- Python JSON decoder nonfinite float/NaN/Infinity results cannot be represented by current finite rawJSON result. Source output1e400 becomes float inf; current API returns ErrUnsupported+actualreceipt. Full permissive Python JSON numeric loading remains unresolved.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:cloud/_compute/ComputeCloudMixin/add_server_security_groups`
 

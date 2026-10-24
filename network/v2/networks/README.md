@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:network/v2/networks`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -135,11 +135,8 @@ Python/Go differences:
 - Source cloud list() turns dict results into insertion-ordered keys; Go uses lexical keys and has an explicit z,a→a,z assertion. Opaque nested generators remain in Values with JSON=nil; ordinary outputs have Networks/Values/JSON. Typed-only callers can select Networks while arbitrary JMES callers inspect Values.
 - Neutron27 stock get_network project-reader/service/shared/external/advsvc paths do not guarantee ADMIN-only provider/segments attributes or all-project visibility. SDK injects current-location facts but does not elevate access. Actual pinned Source/AST/fixture/race/build receipts and live authenticated deployment evidence remain distinct.
 - Raw limit spelling and Python truthiness, raw max_items caps and the cap-equals-page marker GET are implemented on the Source-shaped Proxy lanes (shared opt-in Source list controls); typed ListRecords/AllRecords and the semantic Collection lanes keep strict Go integer limit/max_items preflight.
-- Raw max_items behavior and exact-boundary cap timing are now owned only by the explicit Source-shaped list path. Other named nonfinite microversion and global runtime/lifecycle contracts remain unresolved; historical typed/native contracts above retain their original boundaries.
-
-Unresolved boundaries:
-
-- Raw JSON microversion exponent overflow remains a precise named runtime boundary: actual CPython json.loads + runtime KSA normalization accepts positive-overflow 1e400/[1e400] as network latest, while the current Go finite-number conversion rejects it on a nonempty route. KSA-only12 header-normalizer evidence is separately recorded; it is not claimed as pinned Source physical HTTP proof.
+- Raw max_items behavior and exact-boundary cap timing are owned only by the explicit Source-shaped list path; historical typed/native contracts above retain their original boundaries.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## References
 

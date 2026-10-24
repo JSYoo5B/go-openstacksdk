@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_object_store/ObjectStoreCloudMixin/get_object`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -53,7 +53,7 @@ Go API:
 
 Python/Go differences:
 
-- This meaningful closed cloud GetObjectText API is a partial named implementation, notgo_mapping completion. Operation remainsunresolved and doesnotincreasefullsupported; wholeSDK-R1/C1/S1 resource/session/cache/Connection foundations also remainunsupported. GeneralProxy.get_object mutableObject/Container/dirtyattrs and existing nativeGetObject/DownloadObject review judgments stayunchanged.
+- GetObjectText is the closed cloud text API; general Proxy.get_object mutable Object/Container state and the existing native GetObject/DownloadObject reviews are unchanged.
 - GoObjectGetResult separates lowercaseHeaders, optionalBody *string, actualReceipt, Missing andBytesWritten. SourceNone onclean404 becomes Missingwith actual404receipt, nofakeheaders/text; errorresults may retainreceivedheader/status/partialproof evenwhenSourcewouldraisebeforetuple.
 - Go supports limited explicitheadercharset/BOM/validUTF8 policies with golang.org/x/textv0.41.0 andsimplePythonaliasnormalization; these do notreplaceRequests2.34.2 charset_normalizer3.5.2 apparent_encoding orfullCPython textcodec lookup/errorsemantics. Unresolved detector scopeincludesallunmarkedbytes, notmerelynonUTF8; knownNUL/malformedBOM/unicode_escape/cp1006/palmos negatives retainUnsupported+actualbytes.
 - Sourceget_object outfileNone/falseynonNone truthiness is represented by typednilcontrols, explicitemptyOutfile/OmitContent, concretepathorborrowedio.Writer. Pythonarbitrary filelikebool/callbacks/Resources are nottransferredtoGo. QueryString/Streamignored formalcontrols staylibraryowned, noapplicationinterface builderrequired.
@@ -62,11 +62,7 @@ Python/Go differences:
 - Names followSDK safeUTF8 literalSwiftvalidation andwholeobject PathEscape, source/provider/accountendpoint/version/header facts are capturedbeforeoptions andremainsticky throughnativecallbacks/Read/Write/Flush/Close. Late writer/reader resource.ErrNotFound is aphasefailure with actualreceivedproof, not cleanHTTP404 suppression.
 - Decoder behavior andnative clean401/429/498 policyreuse existingownedSwift streamhelpers, accepted100..399 doesnotexpandnativeStreamObject200/206/304. Error bodyproof maybeactual currentcompressedphysicalbytes orcurrentdecodedwriterchunk asstageappropriate; noentireobjectbuffer iskeptforoutputmodes.
 - ActualpinnedSource cloud/Proxy/Object/Requests/urllib3 execution has65observations withmemoryHTTPadapter/eagerRequests-like buffering andonlypathopen recordingstub. Sourcefield/runtimefiles arehash-recorded; oracle/mains/fixtures donotprove liveauth/filesystemACL/release. Originalpins areGophercloudv2.15.0 andopenstacksdkef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; fullsupported count remains0.
-
-Unresolved boundaries:
-
-- Requests Response.text with encoding=None runs charset_normalizer3.5.2 statistical apparent_encoding across the entire received bytes. The Go limitedUTF8/BOM policy does not reproduce that detector for allvalidUTF8, NUL, malformedBOM, legacy/binary/mixedlanguage inputs. ActualSource examples: unmarkedcaf e9→UTF16BE U6361/U66E9, validUTF8 00 41 00 42→AB, malformedff fe 41→alternatecodepage. Known detector-required inputs currently returnErrUnsupported withactualfulldecodedbytesproof; exactautomaticdefaulttext parity remainsopen.
-- FullCPython3.14 textcodec/alias lookup anderrors=replace semantics are not mappedbythelimitedmanual+IANA/xtext subset. KnownvalidPythonunicode_escape, raw_unicode_escape, cp1006, palmos andother unsupportedcodecs returnErrUnsupported; unknownIANA names canstillincludevalidPythonaliases notclassifiedbythissubset. Entirecodecnamespace andallcodepage mappings/replacementcases needexplicitlibraryownedcoverage before namedget_object can bepromoted.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

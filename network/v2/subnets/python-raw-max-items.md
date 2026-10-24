@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:network/v2/subnets`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -93,16 +93,13 @@ Python/Go differences:
 - Go defines scalar/repeated query encoding explicitly: booleans are lowercase, JSON number text is preserved, null elements are omitted and empty/null query values retain option presence without URL values. Query objects and nested arrays are rejected; no Subnet CSV format or native-q-tag-derived classification is inferred. Unknown semantic attributes are discarded, while explicit unknown Body options are errors and raw wire extensions remain caller-controlled.
 - Semantic query name is a server filter rather than a local exact-name predicate. WithName retains its query hint and local exact match; duplicate ownership of the same query or Body destination is rejected across semantic/raw/page/hint/explicit namespaces, including equal values. This is an intentional Go conflict policy rather than permissive Python kwargs merging.
 - An explicit semantic clear still requires an audited descriptor. Reserved session/paginated/base_path/allow_unknown_params/microversion/headers/max_items/resource_type/jmespath_filters names are not treated as field payloads. Generation additionally requires a live audited Python source checkout and its recorded AST parser minor version.
-- This adds owned Source-shaped lazy Subnet records and ordinary cloud list/search orchestration to three exact declarations; status stays unresolved and full SDK supported delta is 0 because named cap/limit and nonfinite-version gaps remain. Existing native List/Resources/Find bindings retain their baseline policies.
+- Source-shaped lazy Subnet records and ordinary cloud list/search orchestration are owned by the SDK; existing native List/Resources/Find bindings retain their baseline policies.
 - SDK APIs are concrete functional options rather than application builders/interfaces. JSON/individual options preserve source order; unspecified Go map order and cloud literal dictionary key results use deterministic lexical order. UTF8 JSON ownership, cancellation/source validation, typed positive controls and same-origin literal relative paths are explicit Go policies.
 - Actual HTTP data is separated from Resource defaults/computed location and JMES literals. LastResponse identifies the last observed yielded resource/error receipt and is not a final-page receipt for empty or fully filtered pages. Native401 preserves ErrOriginal and ErrReauth despite absent Unwrap; physical faults are never presented as clean retry.
 - Pinned Source evidence uses CPython3.14.8 actual cloud/Proxy/Resource/KSA code with identified adapter/config/HTTP fixtures, not a live backend or runtime authorization. Independent six fixture sets total696 observations including348 Subnet observations; KSA overflow-edge is header normalization only. Neutron27 stock get_subnet project-read policy and admin-only segment visibility do not guarantee live deployment permissions.
-- Raw max_items behavior and exact-boundary cap timing are now owned only by the explicit Source-shaped list path. Other named nonfinite microversion and global runtime/lifecycle contracts remain unresolved; historical typed/native contracts above retain their original boundaries.
-
-Unresolved boundaries:
-
-- Named Source nonfinite microversion gap: KSA normalizes JSON float overflow 1e400 and [1e400] to latest, but this finite Go lane rejects nonfinite conversion on a nonempty route. Ordinary finite numeric/string/iterable and falsey/default cases are implemented, not the full Python runtime domain.
-- Shared SDK-R1 mutable Resource/Container/Body/URI/Header descriptors, dirty/cache/serialization lifecycle and arbitrary computed/class members; SDK-C1 Connection/auth/session/discovery configuration and generic request-cache/microversion negotiation; SDK-S1 arbitrary service/Proxy/session/runtime-object behavior remain unresolved. Verified immutable literal same-origin route/header policies are Go constraints rather than claims of arbitrary Python class/URI formatting support.
+- Raw max_items behavior and exact-boundary cap timing are owned only by the explicit Source-shaped list path; historical typed/native contracts above retain their original boundaries.
+- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ## Usage examples
 
