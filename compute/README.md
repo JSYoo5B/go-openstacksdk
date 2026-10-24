@@ -812,6 +812,16 @@ Create property rules:
 - `WithDescription` (2.19), `WithTags` (2.52), `WithHypervisorHostname` (2.74)
   and `WithHostname` (2.90) are checked against the client microversion before
   any request. `WithPersonality` is rejected locally at 2.57 and later.
+- `WithBlockDeviceMappings` sends explicit `block_device_mapping_v2` entries
+  with every per-mapping field (`BootIndex` may be `request.Null[int]()`);
+  generated boot and data-volume mappings follow them. Tag needs 2.42 and
+  volume type 2.67. `WithLegacyBlockDeviceMappings` sends the legacy
+  `block_device_mapping` list and cannot be combined with any v2 mapping.
+  `WithTrustedImageCertificates` needs 2.63.
+- `Servers.CreateReservation` sends `return_reservation_id` and returns only
+  the reservation ID; combine it with `WithServerCount` for several servers.
+  `Servers.Create` with a count returns the single server Nova reports.
+- `config_drive` is a boolean; volume-ID values are not accepted by Nova.
 - Falsy values are not silently dropped: `WithConfigDrive(false)` sends
   `false`, and empty admin passwords, tags and hint keys are rejected.
 
@@ -821,6 +831,14 @@ Readiness errors and cleanup:
   performs one GET and returns the refreshed server, or `ServerFaultError`
   when it is in ERROR. A failed GET returns the POST response with the error;
   the POST is never repeated. It cannot be combined with `WithWait`.
+- `Service.CreateRefreshedServer` (and `Connection.CreateRefreshedServer`)
+  adds Python's `add_server_interfaces` step: it returns the POST response,
+  the refreshed server with the creation `adminPass` copied onto it, and the
+  `ExpandServerInterfaces` address view. `CreateWithAutomaticFloatingIP` also
+  copies the creation `adminPass` onto its returned `Server`.
+- Only Python's falsy address maps (null or `{}`) are deleted under
+  `DeleteServerWithoutAddresses`. A map with only empty rows sets `EmptyRows`
+  and is kept; Python would instead try to add IPs to it.
 
 - A server in ERROR returns `*compute.ServerFaultError`, which unwraps to
   `resource.FailedStateError`. Its message follows Python's two forms
