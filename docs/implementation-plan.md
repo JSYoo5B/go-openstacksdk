@@ -9,9 +9,9 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 |---|---:|---|
 | Pinned source declarations | 3,362 | Gophercloud/openstacksdk declarations; inherited, descriptor and Resource surfaces tracked separately |
 | Implementation target | 3,216 | All declarations excluding unsupported routes, such as retired server APIs |
-| API mappings | 3,211 (99.8%) | go_mapping decisions against the target; partial verification does not increase this count |
+| API mappings | 3,212 (99.9%) | go_mapping decisions against the target; partial verification does not increase this count |
 | Source-equivalent support | 0 | supported decisions |
-| Unresolved / excluded (unsupported) | 5 / 146 | Unreviewed declarations are included in unresolved totals |
+| Unresolved / excluded (unsupported) | 4 / 146 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 3,362 | Declarations without individual reviews 0 |
 | Behavior contracts | 9,941 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
@@ -23,12 +23,12 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 <!-- sdk-service-progress:start -->
 | Priority group | API mappings / target | Mapping rate | Partial/unresolved reviews | Unreviewed | Excluded (unsupported) |
 |---|---:|---:|---:|---:|---:|
-| Core services: stages 1 and 2 | 2,150 / 2,154 | 99.8% | 4 | 0 | 138 |
+| Core services: stages 1 and 2 | 2,151 / 2,154 | 99.9% | 3 | 0 | 138 |
 | Following network: stages 3 and 4 | 254 / 254 | 100.0% | 0 | 0 | 0 |
 | Following bare metal: stages 3 and 4 | 207 / 207 | 100.0% | 0 | 0 | 0 |
 | Other following services: stages 3 and 4 | 578 / 578 | 100.0% | 0 | 0 | 2 |
 | Shared foundation | 22 / 23 | 95.7% | 1 | 0 | 6 |
-| Total | 3,211 / 3,216 | 99.8% | 5 | 0 | 146 |
+| Total | 3,212 / 3,216 | 99.9% | 4 | 0 | 146 |
 
 **Core services**
 
@@ -37,7 +37,7 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 | Identity / Keystone | 379 / 379 | 0 | 0 | 10 |
 | Compute / Nova | 330 / 333 | 3 | 0 | 0 |
 | Placement | 71 / 71 | 0 | 0 | 0 |
-| Network / Neutron | 727 / 728 | 1 | 0 | 30 |
+| Network / Neutron | 728 / 728 | 0 | 0 | 30 |
 | Image / Glance | 109 / 109 | 0 | 0 | 11 |
 | Block Storage / Cinder | 398 / 398 | 0 | 0 | 82 |
 | Key Manager / Barbican | 67 / 67 | 0 | 0 | 0 |
