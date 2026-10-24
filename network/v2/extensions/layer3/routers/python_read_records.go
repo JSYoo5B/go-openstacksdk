@@ -76,7 +76,7 @@ func routerReadRecord(value *neutronfind.Record) *RouterReadRecord {
 	if value == nil {
 		return nil
 	}
-	return &RouterReadRecord{Resource: value.Resource.Clone(), Wire: value.Wire.Clone(), Envelope: bytes.Clone(value.Envelope), Header: value.Header.Clone(), StatusCode: value.StatusCode}
+	return &RouterReadRecord{Resource: value.Resource.Clone(), Wire: value.Wire.Clone(), Envelope: bytes.Clone(value.Envelope), Header: value.Header.Clone(), StatusCode: value.StatusCode, source: value.Source()}
 }
 func applyRouterReadOptions[T any](ctx context.Context, engine *neutronfind.Engine, initial T, clone func(T) T, options []func(*T) error) (T, error) {
 	policy := clone(initial)

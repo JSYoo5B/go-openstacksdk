@@ -78,7 +78,7 @@ func subnetCloudHeader(raw json.RawMessage) (string, error) {
 }
 func subnetCloudReceipt(value *neutronfind.Record, err error) *SubnetRecord {
 	if value != nil {
-		return &SubnetRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, row: value.Row(), fromList: value.FromList()}
+		return &SubnetRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, row: value.Row(), fromList: value.FromList(), source: value.Source()}
 	}
 	original := err
 	var auth *gophercloud.ErrUnableToReauthenticate

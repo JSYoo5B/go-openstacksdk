@@ -273,10 +273,11 @@ func (s *Service) UpdateFirewallGroupRecord(ctx context.Context, identity string
 		translated, _ := json.Marshal(ids)
 		cfg.Attributes["ports"] = translated
 	}
+	lookup := cloudUpdateSource(found.Source().Body(), found.Source().Translate, result.Lookup.Wire)
 	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(cfg.Attributes)) {
 		raw := cfg.Attributes[key]
-		old, exists := result.Lookup.Wire.Body[key]
+		old, exists := lookup.state[key]
 		if exists {
 			same, e := jsonfilter.EqualPythonLoadedJSON(old, raw)
 			if e != nil {
@@ -299,7 +300,7 @@ func (s *Service) UpdateFirewallGroupRecord(ctx context.Context, identity string
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_groups", url.PathEscape(id)), "firewall_group", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_groups", url.PathEscape(id)), "firewall_group", lookup, cfg.Attributes, attrs)
 	if err == nil {
 		result.Group, err = decodeUpdateMerged[groups.Group](result.Response)
 	}

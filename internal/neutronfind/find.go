@@ -142,6 +142,7 @@ type Record struct {
 	row            json.RawMessage
 	fromList       bool
 	microversion   string
+	source         SourceState
 }
 
 func (v *Record) UnmarshalJSON(data []byte) error {
@@ -228,6 +229,7 @@ func (e *Engine) consumeFindBody(body map[string]json.RawMessage, members []clou
 	}
 }
 func (e *Engine) findProject(ctx context.Context, value *Record, seed map[string]json.RawMessage) error {
+	e.sourceState(value, seed)
 	body := findFields(seed)
 	headerSeed := make(map[string]json.RawMessage, len(e.profile.Headers))
 	for _, field := range e.profile.Headers {

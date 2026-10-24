@@ -28,10 +28,14 @@ import (
 // otherwise unparsable accepted body leaves the existing resource state
 // unchanged and is not an error.
 //
-// Merged is the resulting Python resource state: the lookup wire row,
-// overlaid with every effective update attribute (the same values Python
-// assigns to the found Resource before commit), overlaid with Body members.
-// Its Header and StatusCode are those of the PUT response.
+// Merged is the resulting Python resource state keyed by wire name: the
+// lookup's Python body attributes (SourceBody: canonical-only members such as
+// "is_admin_state_up" are stored under their wire key and canonical/wire
+// collisions keep Python's ordered last-member-wins result), overlaid with
+// every effective update attribute (the same values Python assigns to the
+// found Resource before commit), overlaid with Body translated through the
+// same Resource._consume_attrs mapping. Body itself keeps the actual response
+// member names. Its Header and StatusCode are those of the PUT response.
 //
 // ProjectionError is non-nil when some Merged members cannot be decoded into
 // the helper's native typed model (for example a raw caller string for a
@@ -66,7 +70,27 @@ func cloudUpdateCodes() []int {
 // resource-key member that is not an object, is an error after remote success
 // because Python raises AttributeError/TypeError there; the receipt is kept.
 // The request is never replayed.
-func cloudUpdatePut(ctx context.Context, client *gophercloud.ServiceClient, guard func(context.Context) error, endpoint, key string, lookup, effective, sent map[string]json.RawMessage) (*UpdateReceipt, error) {
+// cloudUpdateLookup is the Python body-attribute state of a found resource
+// plus the resource's own response-body mapping.
+type cloudUpdateLookup struct {
+	state     map[string]json.RawMessage
+	translate func(json.RawMessage) (map[string]json.RawMessage, error)
+}
+
+// cloudUpdateSource prefers the Source state captured with the lookup and
+// falls back to the actual wire row only when no Source state exists.
+func cloudUpdateSource(state map[string]json.RawMessage, translate func(json.RawMessage) (map[string]json.RawMessage, error), wire *resource.RawResource) cloudUpdateLookup {
+	if state == nil && wire != nil {
+		state = maps.Clone(wire.Body)
+		delete(state, "self")
+	}
+	if state == nil {
+		state = map[string]json.RawMessage{}
+	}
+	return cloudUpdateLookup{state: state, translate: translate}
+}
+
+func cloudUpdatePut(ctx context.Context, client *gophercloud.ServiceClient, guard func(context.Context) error, endpoint, key string, lookup cloudUpdateLookup, effective, sent map[string]json.RawMessage) (*UpdateReceipt, error) {
 	payload := make(map[string]json.RawMessage, len(sent))
 	for name, raw := range sent {
 		payload[name] = bytes.Clone(raw)
@@ -79,13 +103,19 @@ func cloudUpdatePut(ctx context.Context, client *gophercloud.ServiceClient, guar
 	if err != nil {
 		return receipt, err
 	}
-	body, ignored, cause := cloudUpdateBody(response.Body, key)
+	body, object, ignored, cause := cloudUpdateBody(response.Body, key)
 	if cause != nil {
 		return receipt, response.Fail(cause)
 	}
 	receipt.Body, receipt.BodyIgnored = body, ignored
-	merged := make(map[string]json.RawMessage, len(lookup)+len(effective)+len(body))
-	for _, layer := range []map[string]json.RawMessage{lookup, effective, body} {
+	translated := body
+	if lookup.translate != nil && !ignored {
+		if translated, cause = lookup.translate(object); cause != nil {
+			return receipt, response.Fail(cause)
+		}
+	}
+	merged := make(map[string]json.RawMessage, len(lookup.state)+len(effective)+len(translated))
+	for _, layer := range []map[string]json.RawMessage{lookup.state, effective, translated} {
 		for name, raw := range layer {
 			merged[name] = bytes.Clone(raw)
 		}
@@ -94,30 +124,34 @@ func cloudUpdatePut(ctx context.Context, client *gophercloud.ServiceClient, guar
 	return receipt, nil
 }
 
-func cloudUpdateBody(raw []byte, key string) (map[string]json.RawMessage, bool, error) {
+// cloudUpdateBody returns the selected object's members (without "self") and
+// the selected object's raw JSON for ordered Source translation.
+func cloudUpdateBody(raw []byte, key string) (map[string]json.RawMessage, json.RawMessage, bool, error) {
 	if !json.Valid(raw) {
-		return nil, true, nil
+		return nil, nil, true, nil
 	}
 	trimmed := bytes.TrimSpace(raw)
 	if trimmed[0] != '{' {
-		return nil, false, fmt.Errorf("%w: accepted update response is JSON but not an object", resource.ErrInvalidOption)
+		return nil, nil, false, fmt.Errorf("%w: accepted update response is JSON but not an object", resource.ErrInvalidOption)
 	}
 	var fields map[string]json.RawMessage
 	if err := json.Unmarshal(trimmed, &fields); err != nil {
-		return nil, false, err
+		return nil, nil, false, err
 	}
+	object := json.RawMessage(bytes.Clone(trimmed))
 	if nested, present := fields[key]; present {
 		nested = bytes.TrimSpace(nested)
 		if len(nested) == 0 || nested[0] != '{' {
-			return nil, false, fmt.Errorf("%w: accepted update response %q member is not an object", resource.ErrInvalidOption, key)
+			return nil, nil, false, fmt.Errorf("%w: accepted update response %q member is not an object", resource.ErrInvalidOption, key)
 		}
 		fields = nil
 		if err := json.Unmarshal(nested, &fields); err != nil {
-			return nil, false, err
+			return nil, nil, false, err
 		}
+		object = bytes.Clone(nested)
 	}
 	delete(fields, "self")
-	return maps.Clone(fields), false, nil
+	return maps.Clone(fields), object, false, nil
 }
 
 // decodeUpdateMerged projects the merged Python state into a native typed

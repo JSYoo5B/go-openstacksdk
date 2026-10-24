@@ -192,10 +192,11 @@ func (s *Service) UpdateFirewallRuleRecord(ctx context.Context, identity string,
 	if cause := firewallDeleteLocation(result.Lookup, "firewall_rules", nil); cause != nil {
 		return result, wrap(cause)
 	}
+	lookup := cloudUpdateSource(found.Source().Body(), found.Source().Translate, result.Lookup.Wire)
 	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(cfg.Attributes)) {
 		raw := cfg.Attributes[key]
-		old, exists := result.Lookup.Wire.Body[key]
+		old, exists := lookup.state[key]
 		if exists {
 			same, e := jsonfilter.EqualPythonLoadedJSON(old, raw)
 			if e != nil {
@@ -218,7 +219,7 @@ func (s *Service) UpdateFirewallRuleRecord(ctx context.Context, identity string,
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_rules", url.PathEscape(id)), "firewall_rule", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("fwaas", "firewall_rules", url.PathEscape(id)), "firewall_rule", lookup, cfg.Attributes, attrs)
 	if err == nil {
 		result.Rule, err = decodeUpdateMerged[rules.Rule](result.Response)
 	}

@@ -168,10 +168,11 @@ func (s *Service) UpdatePortRecord(ctx context.Context, identity string, options
 	if result.Lookup.Resource == nil || result.Lookup.Wire == nil {
 		return result, wrap(qosReadInvalid("port lookup did not produce a resource view"))
 	}
+	lookup := cloudUpdateSource(result.Lookup.SourceBody(), result.Lookup.TranslateSourceBody, result.Lookup.Wire)
 	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(cfg.Attributes)) {
 		raw := cfg.Attributes[key]
-		old, exists := result.Lookup.Wire.Body[key]
+		old, exists := lookup.state[key]
 		if exists {
 			same, e := jsonfilter.EqualPythonLoadedJSON(old, raw)
 			if e != nil {
@@ -194,7 +195,7 @@ func (s *Service) UpdatePortRecord(ctx context.Context, identity string, options
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("ports", id), "port", result.Lookup.Wire.Body, cfg.Attributes, attrs)
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("ports", id), "port", lookup, cfg.Attributes, attrs)
 	if err == nil {
 		result.Port, err = decodeUpdateMerged[ports.Port](result.Response)
 	}

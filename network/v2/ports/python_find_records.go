@@ -24,6 +24,7 @@ type PortRecord struct {
 	StatusCode     int
 	row            json.RawMessage
 	fromList       bool
+	source         neutronfind.SourceState
 }
 
 func (v *PortRecord) UnmarshalJSON(data []byte) error {
@@ -218,6 +219,6 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	if value == nil {
 		return nil, wrap(err)
 	}
-	result := &PortRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, row: value.Row(), fromList: value.FromList()}
+	result := &PortRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, row: value.Row(), fromList: value.FromList(), source: value.Source()}
 	return result, wrap(err)
 }

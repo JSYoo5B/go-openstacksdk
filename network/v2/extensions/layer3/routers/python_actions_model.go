@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -27,6 +28,7 @@ type RouterActionRecord struct {
 	Envelope       json.RawMessage
 	Header         http.Header
 	StatusCode     int
+	source         neutronfind.SourceState
 }
 
 func routerActionInvalid(format string, args ...any) error {

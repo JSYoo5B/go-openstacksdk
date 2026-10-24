@@ -213,10 +213,11 @@ func (s *Service) UpdateRouterRecord(ctx context.Context, identity string, optio
 	if result.Lookup.Resource == nil || result.Lookup.Wire == nil {
 		return result, wrap(qosReadInvalid("router lookup did not produce a resource view"))
 	}
+	lookup := cloudUpdateSource(result.Lookup.SourceBody(), result.Lookup.TranslateSourceBody, result.Lookup.Wire)
 	attrs := map[string]json.RawMessage{}
 	for _, key := range slices.Sorted(maps.Keys(body)) {
 		raw := body[key]
-		old, exists := result.Lookup.Wire.Body[key]
+		old, exists := lookup.state[key]
 		if exists {
 			same, e := jsonfilter.EqualPythonLoadedJSON(old, raw)
 			if e != nil {
@@ -239,7 +240,7 @@ func (s *Service) UpdateRouterRecord(ctx context.Context, identity string, optio
 	if err := guard(ctx); err != nil {
 		return result, wrap(err)
 	}
-	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("routers", id), "router", result.Lookup.Wire.Body, body, attrs)
+	result.Response, err = cloudUpdatePut(ctx, &source.Client, guard, source.Client.ServiceURL("routers", id), "router", lookup, body, attrs)
 	if err == nil {
 		result.Router, err = decodeUpdateMerged[routers.Router](result.Response)
 	}
