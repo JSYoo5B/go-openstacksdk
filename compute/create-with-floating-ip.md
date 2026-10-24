@@ -374,7 +374,7 @@ Python/Go differences:
 
 ### `python:cloud/_compute/ComputeCloudMixin/wait_for_server`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -401,6 +401,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerWithoutAddressesPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
 
 - The explicit compound workflow shares server input/body preparation with Create, validates server/IP options and external Ref before runtime lookup, and requires a concrete Network service and known/explicit reuse owner before Nova POST. Connection provides the lazy getter; invalid or missing services/scope return errors without server mutation.
   Tests: `compute/server_floating_ip_test.go:TestServerFloatingIPPreflightPrecedesCreationAndLookups`, `connection_server_floating_ip_test.go:TestConnectionServerFloatingIPMissingNetworkStopsBeforeNovaPOST`.
@@ -458,26 +459,33 @@ Go API:
   Tests: `compute/server_create_mappings_test.go:TestServerWithoutAddressesDeleteSkipsTruthyEmptyRowMaps`.
 - WaitForServer forwards the Neutron pool selector to the shared dispatch: after raw ACTIVE it allocates one pool floating IP with reuse disabled, observes it on the server and reports ServerIPPool with the selected pool network.
   Tests: `compute/server_create_mappings_test.go:TestWaitForServerForwardsPoolSelectorToDispatch`.
+- WaitForServer applies the default (non-bare) cloud get_server interface expansion, meta.add_server_interfaces, to the ACTIVE poll result before the IP stage: the BUILD poll sends no Neutron request, the ACTIVE poll's port and bound floating IP lookups add a supplemental floating row, and Interfaces reports it with public, private and access IPv4. The automatic lane decides on that expanded server and skips as existing floating with no PUT, POST or observation.
+  Tests: `compute/server_wait_lanes_test.go:TestWaitForServerExpandsActivePollBeforeIPDecision`.
+- The WaitForServer address lane inherits GetActiveServer's _attach_ip_to_server steps and evaluates the short circuit on the expanded server: an IP already bound in Neutron but not yet shown by raw Nova is its only floating address, so the item is ShortCircuited and Completed without a refresh, port lookup, PUT or observation. Connection.WaitForServer performs one supplemental floating IP lookup in its ordered explicit fixtures.
+  Tests: `compute/server_wait_lanes_test.go:TestWaitForServerAddressLaneShortCircuitsOnExpandedServer`, `connection_server_ip_dispatch_test.go:TestConnectionExplicitIPDispatchSharesLazyAsyncAndOrderedWaitPolicies`, `connection_server_ip_dispatch_test.go:TestConnectionOrderedIPSourceFailureKeepsFirstObservationAndAcceptedSecondIP`.
+- WaitForServer forwards reuse, NAT destination (by ID or name) and fixed address to the pool and automatic lanes: reuse binds the free IP by PUT and no reuse allocates by POST, each naming the selected port_id and fixed_ip_address (port-n/10.1.0.20 or port-p/10.0.0.10), then waits for IP ACTIVE and observes the address in a third raw GET. Without a selector two candidate ports are ambiguous and nothing is mutated.
+  Tests: `compute/server_wait_lanes_test.go:TestWaitForServerForwardsFixedAddressNATDestinationAndReuse`.
+- Without a Network service (has_service('network') false) or with the Nova floating IP source, WaitForServer uses the legacy Nova backend in the pool (reuse or allocate), automatic and address lanes: one raw ACTIVE readiness GET, the Nova pool/list/get or allocate steps, one addFloatingIp action carrying the fixed address and one raw observation, with NovaAssignment and no Neutron Assignment.
+  Tests: `compute/server_wait_lanes_test.go:TestWaitForServerNovaNetworkFallbackLanes`.
 
 Python/Go differences:
 
 - The review now includes typed existing-server Service/Connection.WaitForServer plus earlier explicit and automatic creation workflows. New standalone Wait fixes the supplied ID and fetches current raw Nova metadata even when the supplied model says ACTIVE or ERROR; supplied status/addresses/fault are not readiness evidence. This differs from the existing Servers/leaf WaitForServer collection surface, which only waits for status with120-second/two-second defaults.
 - Standalone Wait defaults to one 180-second overall context and five-second server/raw polls, with an unlimited server-local stage inside that context unless overridden. The actual default wire deadline is tested; earlier explicit/automatic creation workflows retain their five-minute budgets. Go propagates one continuous deadline across readiness, selected Neutron/Nova execution and observation instead of subtracting source integer elapsed time and restarting a forwarded remaining-time wait.
-- Go raw200/203 failures retain typed matching Server/response proof and original causes. First404 and later403 are terminal in the tested standalone lane; malformed/wrong-ID responses are not adopted, and accepted203 Close/source/cancel/ancestor errors retain a decoded matching model without decode retry. This is not pinned cloud get_server lookup/Resource expansion or its broad Exception/None retry policy.
+- Go raw200/203 failures retain typed matching Server/response proof and original causes. Malformed/wrong-ID responses are not adopted, and accepted203 Close/source/cancel/ancestor errors retain a decoded matching model without decode retry.
 - Raw actual ERROR remains failed even when application failure states are disabled. ACTIVE nil metadata polls; explicit zero rows return ServerAddressesUnavailableError with the last matching model and no DELETE unless DeleteServerWithoutAddresses is selected. Pinned get_active_server always deletes a falsy-address ACTIVE server and may accept a truthy empty-row map. Go case-insensitive state matching and keep-by-default partial results differ from source literal states and Resource/model semantics.
-- Typed Wait consumes selected Neutron or bounded legacy Nova dispatch after owned raw actual ACTIVE readiness. Neutron requires actual IP ACTIVE; Nova has no IP status and retains actual model/action evidence. Both synchronous lanes require per-item exact raw ACTIVE-server target convergence; clean automatic skips have no assignment/Observed=false. Item-time Observed does not prove simultaneous final presence. Full source Resource/default/fallback behavior remains partial.
-- Earlier guarded named-creation evidence retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Standalone Wait takes the supplied ID rather than completing ordinary cloud get_server name/filter/defaultquery/interface expansion; flavor-name creation keeps its existing defaults.
+- Typed Wait consumes selected Neutron or bounded legacy Nova dispatch after owned raw actual ACTIVE readiness. Neutron requires actual IP ACTIVE; Nova has no IP status and retains actual model/action evidence. Both synchronous lanes require per-item exact raw ACTIVE-server target convergence; clean automatic skips have no assignment/Observed=false. Item-time Observed does not prove simultaneous final presence.
+- Earlier guarded named-creation evidence retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors; flavor-name creation keeps its existing defaults.
 - ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.
 - ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.
 - A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.
 - One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.
+- Polling uses the direct GET /servers/{id} of the supplied ID, as Python's cloud get_server does first through compute.find_server (Resource.find fetches the ID before any listing); Go never lists servers per poll. Python's find_server falls back to listing /servers/detail filtered by name when that GET returns 404, 400 or 403 and get_server returns None, so wait_for_server keeps polling; Go treats the first 404 and a later 403 as terminal and returns the last known Server.
+- Python expands every poll result with meta.add_server_interfaces; Go expands only the ACTIVE poll result that enters the IP stage, whose expansion is the only one Python uses, so BUILD polls send no Neutron or role lookups. Interfaces carries the expanded addresses (public/private/IPv6/interface/access and supplemental rows) instead of extra keys on a mutable Server; Server stays the raw Nova model, and after an attachment it is the later raw observation, as Python returns compute.get_server there. A clean HTTP failure of the optional supplement is recorded in Interfaces.SupplementalError as Python ignores it, but the automatic lane still returns it rather than allocating without that information.
+- WaitForServer inherits the GetActiveServer lane choice: its address lane follows Python's add_ip_list/_attach_ip_to_server steps, and its pool and automatic lanes keep the idempotent Ensure path, so a server that already has a matching floating IP keeps it, a Neutron failure does not fall back to the Nova pool and a timed-out created IP is not deleted. AddIPFromPool and AddAutoIP (python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip) provide Python's _add_ip_from_pool and _add_auto_ip ordering and fallback.
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
 - Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-
-Unresolved boundaries:
-
-- Poll through the cloud get_server lookup (default query and interface expansion) instead of the supplied-ID raw GET.
-- Cover Nova-network fallback and IP forwarding beyond explicit lists and the Neutron pool selector (fixed address, NAT destination and reuse) in fixtures.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 ## Usage examples
 

@@ -35,6 +35,10 @@ type laneFixture struct {
 	// shownAfter is the raw GET number from which the server shows the
 	// assigned floating address; zero means immediately after attachment.
 	shownAfter int32
+	// rawStatus gives the raw server status per GET; nil means BUILD.
+	rawStatus func(n int32) string
+	// ipStatus is the floating IP status in every row; empty means DOWN.
+	ipStatus string
 }
 
 func (f *laneFixture) event(value string) {
@@ -56,7 +60,11 @@ func (f *laneFixture) ipRow() string {
 	if f.bound[0] != "" {
 		port, fixed = fmt.Sprintf("%q", f.bound[0]), fmt.Sprintf("%q", f.bound[1])
 	}
-	return fmt.Sprintf(`{"id":"ip-pool","project_id":"owner","floating_network_id":"pool-network","floating_ip_address":%q,"port_id":%s,"fixed_ip_address":%s,"status":"DOWN","revision_number":0}`, dispatchAddresses["pool"], port, fixed)
+	status := f.ipStatus
+	if status == "" {
+		status = "DOWN"
+	}
+	return fmt.Sprintf(`{"id":"ip-pool","project_id":"owner","floating_network_id":"pool-network","floating_ip_address":%q,"port_id":%s,"fixed_ip_address":%s,"status":%q,"revision_number":0}`, dispatchAddresses["pool"], port, fixed, status)
 }
 
 func newLaneFixture(t *testing.T) *laneFixture {
@@ -158,7 +166,11 @@ func newLaneFixture(t *testing.T) *laneFixture {
 		if bound && n >= f.shownAfter {
 			addresses = sourceAddresses(dispatchAddresses["pool"])
 		}
-		testcloud.JSON(w, 200, fmt.Sprintf(`{"server":{"id":"server","name":"raw-%d","status":"BUILD","addresses":%s}}`, n, addresses))
+		status := "BUILD"
+		if f.rawStatus != nil {
+			status = f.rawStatus(n)
+		}
+		testcloud.JSON(w, 200, fmt.Sprintf(`{"server":{"id":"server","name":"raw-%d","status":%q,"addresses":%s}}`, n, status, addresses))
 	})
 	f.cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t.Error("unexpected lane request", r.Method, r.URL)

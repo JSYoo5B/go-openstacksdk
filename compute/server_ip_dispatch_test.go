@@ -65,6 +65,24 @@ func newDispatchFixture(t *testing.T, fail string) *dispatchFixture {
 	f.service = compute.New(f.cloud.Client("compute", "/v2.1"), compute.Dependencies{AddressNetworks: func(context.Context) (*network.Service, error) { return f.network, nil }})
 	f.cloud.Mux.HandleFunc("GET /v2.0/floatingips", func(w http.ResponseWriter, r *http.Request) {
 		key := "pool"
+		if port := r.URL.Query().Get("port_id"); port != "" {
+			// WaitForServer's get_server interface expansion supplements the
+			// ACTIVE poll result with the IPs already bound to the server port.
+			f.event("supplement:" + port)
+			if port != "port" || len(r.URL.Query()) != 1 {
+				t.Error("invalid supplemental filter", r.URL)
+			}
+			f.mu.Lock()
+			var rows []string
+			for _, candidate := range []string{"a", "b", "c", "pool"} {
+				if f.bound[candidate] {
+					rows = append(rows, dispatchIP(candidate, true, "ACTIVE"))
+				}
+			}
+			f.mu.Unlock()
+			testcloud.JSON(w, 200, `{"floatingips":[`+strings.Join(rows, ",")+`]}`)
+			return
+		}
 		if address := r.URL.Query().Get("floating_ip_address"); address != "" {
 			key = ""
 			for candidate, value := range dispatchAddresses {
@@ -102,6 +120,15 @@ func newDispatchFixture(t *testing.T, fail string) *dispatchFixture {
 			t.Error(r.URL)
 		}
 		testcloud.JSON(w, 200, `{"ports":[`+autoPort+`]}`)
+	})
+	// Network role discovery serves the expansion's public/private lookups.
+	f.cloud.Mux.HandleFunc("GET /v2.0/networks", func(w http.ResponseWriter, r *http.Request) {
+		f.event("networks")
+		testcloud.JSON(w, 200, `{"networks":[]}`)
+	})
+	f.cloud.Mux.HandleFunc("GET /v2.0/subnets", func(w http.ResponseWriter, r *http.Request) {
+		f.event("subnets")
+		testcloud.JSON(w, 200, `{"subnets":[]}`)
 	})
 	f.cloud.Mux.HandleFunc("GET /v2.0/ports/port", func(w http.ResponseWriter, r *http.Request) {
 		f.event("port")

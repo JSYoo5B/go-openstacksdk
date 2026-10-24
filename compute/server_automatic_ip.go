@@ -47,6 +47,9 @@ type automaticIPState struct {
 	// withoutAddresses and deleteWait carry the opt-in cleanup policy.
 	withoutAddresses ServerWithoutAddressesPolicy
 	deleteWait       bool
+	// expanded is the interface expansion of state.last made by WaitForServer.
+	// It stays valid until the next raw GET replaces state.last.
+	expanded *ServerAddressView
 }
 
 type serverIPReadiness struct {
@@ -406,7 +409,7 @@ func (state *automaticIPState) rawServer(ctx context.Context) (*ServerAddressVie
 	if server.ID != id {
 		return nil, errors.Join(requestErr, response.Fail(invalid("Nova response does not match server %q", id)), state.check(ctx))
 	}
-	state.last = server
+	state.last, state.expanded = server, nil
 	fault := serverFaultInfo{}
 	if object, objectErr := response.Object("server"); objectErr == nil {
 		fault = rawServerFault(object)
@@ -460,7 +463,12 @@ func (state *automaticIPState) decide(ctx context.Context) error {
 	}
 	var view *ServerAddressView
 	var err error
-	if state.last.Addresses == nil {
+	// WaitForServer already applied the cloud get_server expansion: its
+	// supplemental rows and public/private addresses decide, as in Python.
+	expanded := state.expanded
+	if expanded != nil {
+		view = expanded
+	} else if state.last.Addresses == nil {
 		view, err = state.rawServer(ctx)
 	} else {
 		view, err = parseServerAddresses(state.last, state.address.options.networkOrder)
@@ -470,12 +478,16 @@ func (state *automaticIPState) decide(ctx context.Context) error {
 		return err
 	}
 	state.setView(view)
-	if state.address.servers.dependencies.NetworkPolicy.UseExternalNetwork() && state.address.accessIPv4 != "" {
+	if expanded == nil && state.address.servers.dependencies.NetworkPolicy.UseExternalNetwork() && state.address.accessIPv4 != "" {
 		view.PublicIPv4 = state.address.accessIPv4
 		return state.skip(ctx, AutomaticIPExistingPublicIPv4)
 	}
 	if addressHasType(view, "floating") {
 		return state.skip(ctx, AutomaticIPExistingFloating)
+	}
+	// Python's _needs_floating_ip also skips on the expanded public_v4.
+	if expanded != nil && view.PublicIPv4 != "" {
+		return state.skip(ctx, AutomaticIPExistingPublicIPv4)
 	}
 	empty := true
 	for _, rows := range view.Addresses {
@@ -490,28 +502,32 @@ func (state *automaticIPState) decide(ctx context.Context) error {
 	}
 	// Reuse the owned supplement helper with bound lazy services; do not mutate
 	// the original collection or run full/default/IPv6 expansion twice.
-	reader := *state.address.servers
-	reader.dependencies.AddressNetworks = state.loadNetwork
-	reader.dependencies.AddressCompute = state.rawClient
-	if err := reader.supplementServerAddresses(ctx, state.last.Status, state.address); err != nil {
-		return err
+	if expanded == nil {
+		reader := *state.address.servers
+		reader.dependencies.AddressNetworks = state.loadNetwork
+		reader.dependencies.AddressCompute = state.rawClient
+		if err := reader.supplementServerAddresses(ctx, state.last.Status, state.address); err != nil {
+			return err
+		}
 	}
 	if err := state.address.view.SupplementalError; err != nil {
 		return err
 	}
-	if addressHasType(view, "floating") {
-		return state.skip(ctx, AutomaticIPExistingFloating)
-	}
-	view.PublicIPv4, err = state.address.publicIPv4(ctx, state.address.servers.dependencies.NetworkPolicy.UseExternalNetwork())
-	if err != nil {
-		return err
-	}
-	if view.PublicIPv4 != "" {
-		return state.skip(ctx, AutomaticIPExistingPublicIPv4)
-	}
-	view.PrivateIPv4, err = state.address.privateIPv4(ctx, state.address.servers.dependencies.NetworkPolicy.UseInternalNetwork())
-	if err != nil {
-		return err
+	if expanded == nil {
+		if addressHasType(view, "floating") {
+			return state.skip(ctx, AutomaticIPExistingFloating)
+		}
+		view.PublicIPv4, err = state.address.publicIPv4(ctx, state.address.servers.dependencies.NetworkPolicy.UseExternalNetwork())
+		if err != nil {
+			return err
+		}
+		if view.PublicIPv4 != "" {
+			return state.skip(ctx, AutomaticIPExistingPublicIPv4)
+		}
+		view.PrivateIPv4, err = state.address.privateIPv4(ctx, state.address.servers.dependencies.NetworkPolicy.UseInternalNetwork())
+		if err != nil {
+			return err
+		}
 	}
 	if view.PrivateIPv4 == "" && !addressHasType(view, "fixed") {
 		return state.skip(ctx, AutomaticIPNoFixedAddress)

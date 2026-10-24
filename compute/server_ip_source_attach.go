@@ -49,9 +49,15 @@ func (state *automaticIPState) sourceShortCircuit(ctx context.Context, target st
 	if state.last == nil || state.last.Addresses == nil {
 		return false, nil
 	}
-	view, err := parseServerAddresses(state.last, state.address.options.networkOrder)
-	if err != nil {
-		return false, err
+	// WaitForServer's expanded poll result includes Neutron supplemental
+	// floating rows, as the server Python passes to _attach_ip_to_server.
+	view := state.expanded
+	var err error
+	if view == nil {
+		view, err = parseServerAddresses(state.last, state.address.options.networkOrder)
+		if err != nil {
+			return false, err
+		}
 	}
 	floating := sourceFloatingIPv4(view)
 	if len(floating) == 0 && associated {

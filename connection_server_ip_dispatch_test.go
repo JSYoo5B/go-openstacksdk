@@ -23,7 +23,10 @@ type connectionDispatchState struct {
 	gets    map[string]int
 	puts    int
 	locates int
-	mutate  func() error
+	// supplements counts the port_id floating IP lookups of WaitForServer's
+	// get_server interface expansion.
+	supplements int
+	mutate      func() error
 }
 
 func connectionDispatchIP(key string, bound bool, status string) string {
@@ -54,6 +57,18 @@ func connectionDispatchFixture(t *testing.T) (*testcloud.Cloud, *sdk.Connection,
 		var body string
 		proof := ""
 		switch {
+		case r.URL.Path == "/network/v2.0/floatingips" && r.URL.Query().Has("port_id"):
+			if r.URL.Query().Get("port_id") != "port" || len(r.URL.Query()) != 1 {
+				t.Error(r.URL)
+			}
+			state.supplements++
+			var rows []string
+			for _, key := range []string{"a", "b"} {
+				if state.bound[key] {
+					rows = append(rows, connectionDispatchIP(key, true, "ACTIVE"))
+				}
+			}
+			body = `{"floatingips":[` + strings.Join(rows, ",") + `]}`
 		case r.URL.Path == "/network/v2.0/floatingips":
 			key := "a"
 			if r.URL.Query().Get("floating_ip_address") == "198.51.100.11" {
@@ -115,11 +130,11 @@ func TestConnectionExplicitIPDispatchSharesLazyAsyncAndOrderedWaitPolicies(t *te
 			if err != nil || result == nil || result.Mode != compute.ServerIPExplicit || len(result.Attempts) != 2 || result.Observed != wait || result.Assignment.FloatingIP.ID != "ip-b" || state.puts != 2 || strings.Join(state.lists, ",") != "a,b" {
 				t.Fatal(result, err, state)
 			}
-			wantGets, wantRaw, wantLocates := 1, int32(0), 0
+			wantGets, wantRaw, wantLocates, wantSupplements := 1, int32(0), 0, 0
 			if wait {
-				wantGets, wantRaw, wantLocates = 2, 3, 1
+				wantGets, wantRaw, wantLocates, wantSupplements = 2, 3, 1, 1
 			}
-			if state.gets["a"] != wantGets || state.gets["b"] != wantGets || raw() != wantRaw || state.locates != wantLocates {
+			if state.gets["a"] != wantGets || state.gets["b"] != wantGets || raw() != wantRaw || state.locates != wantLocates || state.supplements != wantSupplements {
 				t.Fatal(state, raw())
 			}
 			for _, attempt := range result.Attempts {
@@ -145,7 +160,7 @@ func TestConnectionOrderedIPSourceFailureKeepsFirstObservationAndAcceptedSecondI
 	opts := append(connectionReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithFloatingIPAddresses("198.51.100.10", "198.51.100.11", "198.51.100.12")))
 	result, err := conn.WaitForServer(context.Background(), input, opts...)
 	var proof *resource.ResponseError
-	if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Facade-Proof") != "accepted-b" || result == nil || result.Observed || result.Server.Name != "observed-a" || len(result.Attempts) != 2 || !result.Attempts[0].Completed || !result.Attempts[0].Observed || result.Attempts[1].Completed || result.Attempts[1].Observed || result.Attempts[1].Error == nil || result.Assignment.FloatingIP.ID != "ip-b" || result.Assignment.FloatingIP.PortID != "port" || state.puts != 2 || raw() != 2 || strings.Join(state.lists, ",") != "a,b" || state.gets["b"] != 1 {
+	if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Facade-Proof") != "accepted-b" || result == nil || result.Observed || result.Server.Name != "observed-a" || len(result.Attempts) != 2 || !result.Attempts[0].Completed || !result.Attempts[0].Observed || result.Attempts[1].Completed || result.Attempts[1].Observed || result.Attempts[1].Error == nil || result.Assignment.FloatingIP.ID != "ip-b" || result.Assignment.FloatingIP.PortID != "port" || state.puts != 2 || raw() != 2 || strings.Join(state.lists, ",") != "a,b" || state.gets["b"] != 1 || state.supplements != 1 {
 		t.Fatal(result, err, proof, state, raw())
 	}
 }

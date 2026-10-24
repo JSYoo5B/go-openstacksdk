@@ -87,6 +87,13 @@ func (s *Service) ExpandServerInterfaces(ctx context.Context, server *Server, op
 	if err := state.servers.supplementServerAddresses(ctx, server.Status, state); err != nil {
 		return state.view, wrapServerAddress("supplement", err)
 	}
+	return state.interfaceView(ctx)
+}
+
+// interfaceView computes the public, private, default-interface and access
+// addresses of meta.add_server_interfaces from the already supplemented view.
+func (state *serverAddressState) interfaceView(ctx context.Context) (*ServerAddressView, error) {
+	var err error
 	view := state.view
 	view.PublicIPv4, err = state.publicIPv4(ctx, state.servers.dependencies.NetworkPolicy.UseExternalNetwork())
 	if err != nil {

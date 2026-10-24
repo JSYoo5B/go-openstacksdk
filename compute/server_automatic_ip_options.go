@@ -92,6 +92,11 @@ type AutomaticServerIPResult struct {
 	Observed       bool
 	Mode           ServerIPDispatchMode
 	Attempts       []ServerFloatingIPAttempt
+	// Interfaces is set by WaitForServer only: the default (non-bare) interface
+	// expansion that Python's cloud get_server applies to each poll result,
+	// computed for the ACTIVE poll result that entered the IP stage. It
+	// describes that server snapshot, not the later raw observation in Server.
+	Interfaces *ServerAddressView
 }
 
 type automaticFloatingIPOptions struct {

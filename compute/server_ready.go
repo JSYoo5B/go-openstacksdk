@@ -88,6 +88,12 @@ func (s *Service) GetActiveServer(ctx context.Context, input AutomaticFloatingIP
 // even when the supplied model says ACTIVE or ERROR. One 180-second budget
 // covers polling, conditional assignment, Neutron IP ACTIVE and Nova convergence.
 // Known raw Server, backend assignment and original causes survive failures.
+//
+// Polling uses the direct GET by ID, as Python's cloud get_server does first
+// through find_server. The ACTIVE poll result then receives the default
+// (non-bare) get_server interface expansion, returned as Interfaces, and the
+// IP stage decides on that expanded server as get_active_server does. The IP
+// stage inherits the GetActiveServer lane choices.
 func (s *Service) WaitForServer(ctx context.Context, input AutomaticFloatingIPRequest, options ...ServerReadyOption) (*AutomaticServerIPResult, error) {
 	state, ctx, cancel, policy, err := s.prepareServerReady(ctx, input, options, true)
 	if err != nil {
@@ -101,8 +107,44 @@ func (s *Service) WaitForServer(ctx context.Context, input AutomaticFloatingIPRe
 		result.Decision.Server = state.last
 		return result, errors.Join(err, state.check(ctx))
 	}
-	state.address.accessIPv4, state.address.accessIPv6 = state.last.AccessIPv4, state.last.AccessIPv6
-	return state.ensure(ctx)
+	interfaces, err := state.expandReadyServer(ctx)
+	if err != nil {
+		result.Server, result.Decision.Server, result.Interfaces = state.last, state.last, interfaces
+		return result, errors.Join(err, state.check(ctx))
+	}
+	// As in GetActiveServer, the address lane follows _attach_ip_to_server.
+	state.sourceAttach = state.options.dispatchMode() == ServerIPExplicit
+	result, err = state.ensure(ctx)
+	if result != nil {
+		result.Interfaces = interfaces
+	}
+	return result, err
+}
+
+// expandReadyServer applies meta.add_server_interfaces, the default expansion
+// of Python's cloud get_server, to the ACTIVE poll result: Neutron (or Nova
+// for the Nova source) supplemental floating rows, then public, private,
+// default-interface and access addresses. The workflow's lazy Network and raw
+// Compute bindings serve the lookups; a clean HTTP failure of the optional
+// supplement is recorded in SupplementalError, as Python ignores it.
+func (state *automaticIPState) expandReadyServer(ctx context.Context) (*ServerAddressView, error) {
+	view, err := parseServerAddresses(state.last, state.address.options.networkOrder)
+	if err != nil {
+		return nil, err
+	}
+	state.setView(view)
+	reader := *state.address.servers
+	reader.dependencies.AddressNetworks = state.loadNetwork
+	reader.dependencies.AddressCompute = state.rawClient
+	if err := reader.supplementServerAddresses(ctx, state.last.Status, state.address); err != nil {
+		return view, wrapServerAddress("supplement", err)
+	}
+	view, err = state.address.interfaceView(ctx)
+	if err != nil {
+		return view, err
+	}
+	state.expanded = view
+	return view, state.check(ctx)
 }
 
 func (s *Service) prepareServerReady(ctx context.Context, input AutomaticFloatingIPRequest, options []ServerReadyOption, wait bool) (*automaticIPState, context.Context, context.CancelFunc, resource.WaitPolicy, error) {
