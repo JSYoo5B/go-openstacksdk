@@ -28,6 +28,13 @@ The SDK does not reproduce the following Python runtime behaviors. An operation 
 
 Caveat: charset guessing matters mainly for Swift object text, whose content is arbitrary user data. An object stored as, for example, undeclared EUC-KR text is returned as an error with its bytes, where Python would guess an encoding. If this becomes a practical problem, an encoding detector can be added as an explicit opt-in; its results would still not match charset_normalizer exactly.
 
+## Server guarantees outside the SDK
+
+Some properties belong to the server, and neither the Python SDK nor this SDK can establish them from a client. Reviews state them as limitations, not as unresolved behavior.
+
+- **Swift consistency.** An accepted upload, a matching status observation or a `HEAD` 404 is an observation of one request at one moment. Replica races, eventual consistency, proxy caching, middleware permissions and backend quota decide when other readers see the change. Segmented uploads cannot be published atomically or rolled back; the SDK keeps unique segment prefixes and cleanup evidence so callers can see what was written.
+- **Go I/O conventions.** Streams are `io.ReadCloser` values that the caller must close and read from one goroutine at a time. File output goes to a caller-supplied writer or to a path the SDK opens and closes itself. Payload integrity checks are explicit options, not implied by a read.
+
 ## Shared unresolved boundaries
 
 - Full unknown/partial/empty/malformed success-response merging.

@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:object_store/v1/get_object`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -30,6 +30,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter`
 
 - One fixed literal GET returns raw binary bytes; no HEAD/list/cache before content
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreWireAndStatus`, `connection_objectstorage_object_read_test.go:TestConnectionObjectReadSharesClientAndOwnsTransfer`.
@@ -47,16 +51,18 @@ Go API:
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsMetadataAndEvidence`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreResponseAndSource`.
 - Fixed target/live auth/normal versus advanced native retry policy, ownership guards/actual status gate and preserved generated Download
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsNativePolicy`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries`, `internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry`.
+- The outfile path opens after the accepted GET, receives the decoded bytes and is closed by the SDK; a clean 404 never opens or truncates it. A borrowed writer is flushed when it supports Flush and never closed.
+  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetPathOutputBinaryOwnedCloseAndMissingNoTruncation`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetBorrowedWriterFlushOnlyAndNoStatisticalTextRead`, `objectstorage/cloud_object_get_test.go:TestSwiftCloudObjectGetFileWriterAndFalseyOutputOptions`.
+- The remember_content text uses the cloud text decoding: Requests header charset rules, a byte-order mark and supported declared charsets, with undeclared non-UTF-8 bytes returned as an explicit error with the actual response.
+  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetRequestsHeaderCharsetDefaultsReplacementAndAliases`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetUnmarkedBOMAndExplicitUTF16UTF32`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetStatisticalCharsetGapIsExplicitWithOwnedActualEvidence`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetDetectorGapIncludesUTF8NULMalformedBOMAndKnownPythonCodecs`.
 
 Python/Go differences:
 
 - Go returns owned raw byte/evidence result; Python returns a mutable Object and only remembers decoded response.text when requested.
 - Go requires explicit literal parent/object and has no outfile path/open/flush or Resource data mutation option.
-
-Unresolved boundaries:
-
-- Python Object/container precedence, attrs/header dirtiness, adapter/session and mutable Resource translation are outside this explicit literal Go API.
-- Python remember_content text decoding and outfile path ownership/borrowed flush semantics are not implemented by this byte-buffer method.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Python's outfile and remember_content arguments map to separate calls: GetObject returns bytes, DownloadObject writes to a caller-supplied writer, and GetCloudObjectText returns the decoded text or, with WithCloudGetOutfile or WithCloudGetWriter, writes to a path the SDK opens and closes or to a borrowed writer it only flushes.
+- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 ### `python:object_store/v1/download_object`
 
@@ -108,7 +114,7 @@ Python/Go differences:
 
 ### `python:object_store/v1/stream_object`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -150,11 +156,8 @@ Python/Go differences:
 
 - Go exposes an eager, explicitly closeable guarded stream with delivered-byte counters and owned evidence; Python exposes requests.iter_content byte chunks.
 - Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior.
-
-Unresolved boundaries:
-
-- Python Requests iterator chunk sizing, iterator lifetime and mutable Resource/session behavior are not reproduced by a guarded io.ReadCloser.
-- Concurrent reads/Close, automatic abandoned-stream cleanup, payload integrity and complete Requests response semantics are outside the contract.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; WithObjectReadBufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

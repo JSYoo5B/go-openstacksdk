@@ -266,15 +266,18 @@ Python/Go differences:
 
 ### `python:cloud/_object_store/ObjectStoreCloudMixin/create_object`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject`
 
-Unresolved boundaries:
+- Cloud create_object uses the CreateObject request sequence of the Proxy create_object: Explicit Data selects one ordinary binary PUT, preserves nonnil empty input and native201/202 raw acknowledgement, and bypasses capabilities, HEAD, hashing and segmentation.
+  Tests: `objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsBytesWireAndSnapshots`, `objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreChecksumDecisions`.
 
-- This helper only delegates to Proxy.create_object, which stays unresolved: Python kwargs headers, mutable Object and container precedence, segment cleanup and exception classes are not reproduced wholesale by the Go upload workflow.
+Python/Go differences:
+
+- The cloud helper delegates to the same CreateObject as python:object_store/v1/create_object and shares its recorded differences.
 
 ### `python:cloud/_object_store/ObjectStoreCloudMixin/update_object`
 

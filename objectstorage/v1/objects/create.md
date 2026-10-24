@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:object_store/v1/create_object`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -70,12 +70,10 @@ Python/Go differences:
 - Go unique slash-terminated generation and physical If-None-Match:* establish clean201 observed segment ownership; segment202 becomes an actual202 semantic error and blocks publication. Exact conservative cleanup replaces deterministic neighbors and image-task-only cleanup, preserving cumulative ambiguous manifest outcomes.
 - Go strict typed digests/options/metadata and explicit0 size differ from Python coercion/falsyzero. It preserves data checksum defaults, file supplied-one recomputation and false-generation comparison fallback, while correcting legacy suffix lookup. SDK hash metadata is not request ETag.
 - Native201/202 ordinary/manifest acknowledgement compatibility remains; no default/manifest request ETag is computed from JSON, and SLO raw JSON preserves logical Content-Type. Native generated Objects.Create remains separate for lower-level extensions.
-
-Unresolved boundaries:
-
-- Python mutable Object/container precedence, dirty header/metadata state, descriptor str(any) coercion, adapter/session/microversion/cache and broad exception-class behavior are not reproduced wholesale.
-- Unique prefixes, conditional segment ownership and cleanup evidence are observed client safeguards; server races, eventual consistency, backend quota/permissions and partial writes cannot establish atomic publication, readable DLO, rollback or cluster completion.
-- Python cloud image-task/autocreated-object integration, broad async/query/native extensions, heartbeat upload reports and completion waits remain separate workflows.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- An upload reports one accepted request sequence: Swift consistency, quota, permissions and partial writes decide when the object is visible, and segmented uploads cannot be published atomically or rolled back, so unique segment prefixes and cleanup evidence are returned instead; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
+- Image-task object creation, upload heartbeat reports and completion waits belong to the cloud image workflows, not to this operation.
 
 ### `python:object_store/v1/is_object_stale`
 

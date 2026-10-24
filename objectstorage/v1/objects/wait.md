@@ -8,7 +8,7 @@ See the [support ledger](../../../docs/sdk-support-ledger.md) for status definit
 
 ### `python:object_store/v1/wait_for_delete`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -50,16 +50,13 @@ Python/Go differences:
 - Go returns bounded last physically-started poll attempts and independently owned raw acknowledgement/error proof plus logical Polls/Complete/Deleted, while Python returns the mutable Resource. Status remains nil for delete and status/failure selectors do not determine completion.
 - Go keeps interval2s/deleteSDK120s with positive duration helpers, pointer0 or UnlimitedWait and caller context deadlines/cancellation; Python iterate_timeout uses wall-clock/numeric coercion, accepts None and rewrites zero interval. Existing Collection.WaitDeleted five-minute/default generic policy stays separate.
 - Go snapshots typed maps/pointers/slices and callbacks, guards fixed original source/body/status codes, preserves live auth and excludes Range/If-* plus existing X-Newest reservations. Python Resource.fetch does not forward prepared request headers to session.get. Go synchronous progress0 callbacks can return errors and clear via nil/Without.
-
-Unresolved boundaries:
-
-- Python Resource identity/container precedence, dirty descriptor/metadata state, adapter/session/cache/microversion behavior and generic exception-class equivalence are not reproduced wholesale.
-- Python generic nil/deleted completion and arbitrary resource/status/progress callbacks differ from the concrete clean HEAD404 observation and last-only Go evidence.
-- HEAD404 observes absence at that route/response; replica races, middleware permissions, proxy caching and cluster-wide deletion completion remain server concerns. Native/read Newest options are separate; this waiter adds no newest extension.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Completion is a clean HEAD 404. An Object has no deleted status, so Python's deleted-status completion and generic progress callbacks have no equivalent, and Go keeps evidence of the last poll only.
+- A HEAD 404 observes absence on that route at that moment; replica races, middleware permissions, proxy caching and cluster-wide deletion are server concerns, and the waiter adds no X-Newest extension; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
 
 ### `python:object_store/v1/wait_for_status`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -105,12 +102,9 @@ Python/Go differences:
 - Go compares one strict relevant single-value UTF8/control-safe header or literal string using EqualFold, preserving absence/empty/case. Missing selected response header retains real HEAD proof with unsupported error; target match precedes failures. Python uses arbitrary getattr and str.lower over mutable Resource descriptor values fetched by GET.
 - Go retains source interval2s/statusSDKunlimited and nilFailureStates ERROR; explicit empty disables failures. Typed positive time helpers, pointer0/unlimited context policy and synchronous func(int)error callback differ from Python numeric/wall-clock/None interval and no modeled callback return error.
 - Go returns nullable Status/Complete and bounded last physically-started phase instead of mutable Resource, preserving accepted/rejected raw evidence and joined processing/source/context causes. Failed current phase or callback commits no new status; later pause timeout can retain last clean value. Full opts/selectors/headers own snapshots, last helper selection wins and fixed original source/live auth stay guarded. A later logical exchange stopped before any physical request retains the prior actual Last and clean Status while Polls still counts that logical exchange.
-
-Unresolved boundaries:
-
-- Python arbitrary Resource attributes, descriptor coercion, unknown/dirty state, cached initial fast path and GET object-content/session/cache behavior remain distinct from the concrete HEAD/string-selector workflow.
-- Python lower normalization and exception classes are not identical to Go EqualFold/typed errors; callbacks cannot emulate arbitrary mutable Resource progress behavior because ordinary Object has no progress.
-- Application-selected metadata/header state is caller/server data and no standard Swift lifecycle status is invented. Matching observation is not an atomic lock, publication/consistency guarantee or whole proxy parity completion.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- An Object has no status attribute: Python's default raises AttributeError before any request and Go returns ErrUnsupported before HTTP. With an explicit selector Go compares HEAD metadata or headers using EqualFold where Python lowercases, which agree for ASCII values, and failures are typed Go errors rather than Python exception classes.
+- A matching observation is one HEAD response, not a lock or a consistency guarantee, and no Swift lifecycle status is invented; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
 
 ## Usage examples
 

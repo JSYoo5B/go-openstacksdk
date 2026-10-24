@@ -32690,7 +32690,7 @@
     {
       "operation": "python:object_store/v1/get_object",
       "source_fingerprint": "2cad5fedfee2b018d9e954ca9dd00fb438727c26025ed3296a7db9a7b6a624d8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
@@ -32709,18 +32709,21 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter"
       ],
       "documentation": [
         "objectstorage/v1/objects/read.md"
       ],
       "differences": [
         "Go returns owned raw byte/evidence result; Python returns a mutable Object and only remembers decoded response.text when requested.",
-        "Go requires explicit literal parent/object and has no outfile path/open/flush or Resource data mutation option."
-      ],
-      "remaining": [
-        "Python Object/container precedence, attrs/header dirtiness, adapter/session and mutable Resource translation are outside this explicit literal Go API.",
-        "Python remember_content text decoding and outfile path ownership/borrowed flush semantics are not implemented by this byte-buffer method."
+        "Go requires explicit literal parent/object and has no outfile path/open/flush or Resource data mutation option.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Python's outfile and remember_content arguments map to separate calls: GetObject returns bytes, DownloadObject writes to a caller-supplied writer, and GetCloudObjectText returns the decoded text or, with WithCloudGetOutfile or WithCloudGetWriter, writes to a path the SDK opens and closes or to a borrowed writer it only flushes.",
+        "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "contracts": [
         {
@@ -32785,6 +32788,23 @@
             "objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsNativePolicy",
             "objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamBoundaries",
             "internal/cmd/sdkgen/swift_object_read_test.go:TestSwiftObjectReadPreservesNativeAndRegistry"
+          ]
+        },
+        {
+          "behavior": "The outfile path opens after the accepted GET, receives the decoded bytes and is closed by the SDK; a clean 404 never opens or truncates it. A borrowed writer is flushed when it supports Flush and never closed.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetPathOutputBinaryOwnedCloseAndMissingNoTruncation",
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetBorrowedWriterFlushOnlyAndNoStatisticalTextRead",
+            "objectstorage/cloud_object_get_test.go:TestSwiftCloudObjectGetFileWriterAndFalseyOutputOptions"
+          ]
+        },
+        {
+          "behavior": "The remember_content text uses the cloud text decoding: Requests header charset rules, a byte-order mark and supported declared charsets, with undeclared non-UTF-8 bytes returned as an explicit error with the actual response.",
+          "tests": [
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetRequestsHeaderCharsetDefaultsReplacementAndAliases",
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetUnmarkedBOMAndExplicitUTF16UTF32",
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetStatisticalCharsetGapIsExplicitWithOwnedActualEvidence",
+            "objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetDetectorGapIncludesUTF8NULMalformedBOMAndKnownPythonCodecs"
           ]
         }
       ]
@@ -32884,7 +32904,7 @@
     {
       "operation": "python:object_store/v1/stream_object",
       "source_fingerprint": "b6c40659e8dc46a86c921f3b17a12c23b696d145a82c67c068d8e36c5ed1c4a2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
@@ -32910,11 +32930,9 @@
       ],
       "differences": [
         "Go exposes an eager, explicitly closeable guarded stream with delivered-byte counters and owned evidence; Python exposes requests.iter_content byte chunks.",
-        "Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior."
-      ],
-      "remaining": [
-        "Python Requests iterator chunk sizing, iterator lifetime and mutable Resource/session behavior are not reproduced by a guarded io.ReadCloser.",
-        "Concurrent reads/Close, automatic abandoned-stream cleanup, payload integrity and complete Requests response semantics are outside the contract."
+        "Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; WithObjectReadBufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md."
       ],
       "contracts": [
         {
@@ -33289,7 +33307,7 @@
     {
       "operation": "python:object_store/v1/create_object",
       "source_fingerprint": "0775a8c4931db0e3c9d05380adcd3e584348773af855bc7c4204a3cf7efa42d0",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectOpts",
@@ -33315,12 +33333,11 @@
         "Go preserves separate capabilities/discovery/ordinary/segment/manifest/cleanup responses and all actual upload attempts, immutable data/spool replay, controlled closure and sticky source/context errors. This corrects FileSegment pos/seek/Close and future.result retry defects rather than reproducing them.",
         "Go unique slash-terminated generation and physical If-None-Match:* establish clean201 observed segment ownership; segment202 becomes an actual202 semantic error and blocks publication. Exact conservative cleanup replaces deterministic neighbors and image-task-only cleanup, preserving cumulative ambiguous manifest outcomes.",
         "Go strict typed digests/options/metadata and explicit0 size differ from Python coercion/falsyzero. It preserves data checksum defaults, file supplied-one recomputation and false-generation comparison fallback, while correcting legacy suffix lookup. SDK hash metadata is not request ETag.",
-        "Native201/202 ordinary/manifest acknowledgement compatibility remains; no default/manifest request ETag is computed from JSON, and SLO raw JSON preserves logical Content-Type. Native generated Objects.Create remains separate for lower-level extensions."
-      ],
-      "remaining": [
-        "Python mutable Object/container precedence, dirty header/metadata state, descriptor str(any) coercion, adapter/session/microversion/cache and broad exception-class behavior are not reproduced wholesale.",
-        "Unique prefixes, conditional segment ownership and cleanup evidence are observed client safeguards; server races, eventual consistency, backend quota/permissions and partial writes cannot establish atomic publication, readable DLO, rollback or cluster completion.",
-        "Python cloud image-task/autocreated-object integration, broad async/query/native extensions, heartbeat upload reports and completion waits remain separate workflows."
+        "Native201/202 ordinary/manifest acknowledgement compatibility remains; no default/manifest request ETag is computed from JSON, and SLO raw JSON preserves logical Content-Type. Native generated Objects.Create remains separate for lower-level extensions.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "An upload reports one accepted request sequence: Swift consistency, quota, permissions and partial writes decide when the object is visible, and segmented uploads cannot be published atomically or rolled back, so unique segment prefixes and cleanup evidence are returned instead; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.",
+        "Image-task object creation, upload heartbeat reports and completion waits belong to the cloud image workflows, not to this operation."
       ],
       "contracts": [
         {
@@ -33551,7 +33568,7 @@
     {
       "operation": "python:object_store/v1/wait_for_delete",
       "source_fingerprint": "fa7f605367fd761bc429d97b38b6bc8b2238fd12534c301acc4f5b42516832cd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
@@ -33573,12 +33590,10 @@
         "Go requires literal container/object and observes bodyless HEAD200/204/404; clean physical404 alone completes deletion. Python generic Resource fetch uses GET and can succeed on falsy resource, deleted status or caught NotFoundException; ordinary Swift Object declares no status. Neither waiter submits DELETE.",
         "Go returns bounded last physically-started poll attempts and independently owned raw acknowledgement/error proof plus logical Polls/Complete/Deleted, while Python returns the mutable Resource. Status remains nil for delete and status/failure selectors do not determine completion.",
         "Go keeps interval2s/deleteSDK120s with positive duration helpers, pointer0 or UnlimitedWait and caller context deadlines/cancellation; Python iterate_timeout uses wall-clock/numeric coercion, accepts None and rewrites zero interval. Existing Collection.WaitDeleted five-minute/default generic policy stays separate.",
-        "Go snapshots typed maps/pointers/slices and callbacks, guards fixed original source/body/status codes, preserves live auth and excludes Range/If-* plus existing X-Newest reservations. Python Resource.fetch does not forward prepared request headers to session.get. Go synchronous progress0 callbacks can return errors and clear via nil/Without."
-      ],
-      "remaining": [
-        "Python Resource identity/container precedence, dirty descriptor/metadata state, adapter/session/cache/microversion behavior and generic exception-class equivalence are not reproduced wholesale.",
-        "Python generic nil/deleted completion and arbitrary resource/status/progress callbacks differ from the concrete clean HEAD404 observation and last-only Go evidence.",
-        "HEAD404 observes absence at that route/response; replica races, middleware permissions, proxy caching and cluster-wide deletion completion remain server concerns. Native/read Newest options are separate; this waiter adds no newest extension."
+        "Go snapshots typed maps/pointers/slices and callbacks, guards fixed original source/body/status codes, preserves live auth and excludes Range/If-* plus existing X-Newest reservations. Python Resource.fetch does not forward prepared request headers to session.get. Go synchronous progress0 callbacks can return errors and clear via nil/Without.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Completion is a clean HEAD 404. An Object has no deleted status, so Python's deleted-status completion and generic progress callbacks have no equivalent, and Go keeps evidence of the last poll only.",
+        "A HEAD 404 observes absence on that route at that moment; replica races, middleware permissions, proxy caching and cluster-wide deletion are server concerns, and the waiter adds no X-Newest extension; see Server guarantees outside the SDK in docs/sdk-support-ledger.md."
       ],
       "contracts": [
         {
@@ -33650,7 +33665,7 @@
     {
       "operation": "python:object_store/v1/wait_for_status",
       "source_fingerprint": "5ddcf26a32357df72b592ab2e7c0369c4c10bbeac50255fce79adf49a52018e2",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForStatus",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
@@ -33672,12 +33687,10 @@
         "Swift Object has no default status/progress descriptor. Python default getattr(status) raises AttributeError before fetch; Go default/unsupported selector returns ErrUnsupported before HTTP. Go accepts library-owned known string attributes or explicit response header, performs fresh HEAD even for captured name/container and does not implement the Python cached initial-match shortcut.",
         "Go compares one strict relevant single-value UTF8/control-safe header or literal string using EqualFold, preserving absence/empty/case. Missing selected response header retains real HEAD proof with unsupported error; target match precedes failures. Python uses arbitrary getattr and str.lower over mutable Resource descriptor values fetched by GET.",
         "Go retains source interval2s/statusSDKunlimited and nilFailureStates ERROR; explicit empty disables failures. Typed positive time helpers, pointer0/unlimited context policy and synchronous func(int)error callback differ from Python numeric/wall-clock/None interval and no modeled callback return error.",
-        "Go returns nullable Status/Complete and bounded last physically-started phase instead of mutable Resource, preserving accepted/rejected raw evidence and joined processing/source/context causes. Failed current phase or callback commits no new status; later pause timeout can retain last clean value. Full opts/selectors/headers own snapshots, last helper selection wins and fixed original source/live auth stay guarded. A later logical exchange stopped before any physical request retains the prior actual Last and clean Status while Polls still counts that logical exchange."
-      ],
-      "remaining": [
-        "Python arbitrary Resource attributes, descriptor coercion, unknown/dirty state, cached initial fast path and GET object-content/session/cache behavior remain distinct from the concrete HEAD/string-selector workflow.",
-        "Python lower normalization and exception classes are not identical to Go EqualFold/typed errors; callbacks cannot emulate arbitrary mutable Resource progress behavior because ordinary Object has no progress.",
-        "Application-selected metadata/header state is caller/server data and no standard Swift lifecycle status is invented. Matching observation is not an atomic lock, publication/consistency guarantee or whole proxy parity completion."
+        "Go returns nullable Status/Complete and bounded last physically-started phase instead of mutable Resource, preserving accepted/rejected raw evidence and joined processing/source/context causes. Failed current phase or callback commits no new status; later pause timeout can retain last clean value. Full opts/selectors/headers own snapshots, last helper selection wins and fixed original source/live auth stay guarded. A later logical exchange stopped before any physical request retains the prior actual Last and clean Status while Polls still counts that logical exchange.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "An Object has no status attribute: Python's default raises AttributeError before any request and Go returns ErrUnsupported before HTTP. With an explicit selector Go compares HEAD metadata or headers using EqualFold where Python lowercases, which agree for ASCII values, and failures are typed Go errors rather than Python exception classes.",
+        "A matching observation is one HEAD response, not a lock or a consistency guarantee, and no Swift lifecycle status is invented; see Server guarantees outside the SDK in docs/sdk-support-ledger.md."
       ],
       "contracts": [
         {
@@ -113214,17 +113227,24 @@
     {
       "operation": "python:cloud/_object_store/ObjectStoreCloudMixin/create_object",
       "source_fingerprint": "cb953138fa389d47c2ed36fb82bd459fa1ed5fb1576a8c83b34bf282e22a0cec",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject"
       ],
-      "contracts": [],
-      "differences": [],
+      "contracts": [
+        {
+          "behavior": "Cloud create_object uses the CreateObject request sequence of the Proxy create_object: Explicit Data selects one ordinary binary PUT, preserves nonnil empty input and native201/202 raw acknowledgement, and bypasses capabilities, HEAD, hashing and segmentation.",
+          "tests": [
+            "objectstorage/v1/objects/create_contracts_test.go:TestCreateObjectContractsBytesWireAndSnapshots",
+            "objectstorage/v1/objects/create_core_test.go:TestObjectCreateCoreChecksumDecisions"
+          ]
+        }
+      ],
+      "differences": [
+        "The cloud helper delegates to the same CreateObject as python:object_store/v1/create_object and shares its recorded differences."
+      ],
       "documentation": [
         "docs/python-cloud-parity-misc.md"
-      ],
-      "remaining": [
-        "This helper only delegates to Proxy.create_object, which stays unresolved: Python kwargs headers, mutable Object and container precedence, segment cleanup and exception classes are not reproduced wholesale by the Go upload workflow."
       ]
     },
     {
