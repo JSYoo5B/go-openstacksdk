@@ -38,6 +38,11 @@ type automaticIPState struct {
 	retainAcceptedServer bool
 	observeAssignment    bool
 	requireServerActive  bool
+	// lastFault applies Python's fault key-presence test to the latest raw GET.
+	lastFault *serverFaultInfo
+	// withoutAddresses and deleteWait carry the opt-in cleanup policy.
+	withoutAddresses ServerWithoutAddressesPolicy
+	deleteWait       bool
 }
 
 type serverIPReadiness struct {
@@ -398,8 +403,13 @@ func (state *automaticIPState) rawServer(ctx context.Context) (*ServerAddressVie
 		return nil, errors.Join(requestErr, response.Fail(invalid("Nova response does not match server %q", id)), state.check(ctx))
 	}
 	state.last = server
+	fault := serverFaultInfo{}
+	if object, objectErr := response.Object("server"); objectErr == nil {
+		fault = rawServerFault(object)
+	}
+	state.lastFault = &fault
 	if state.requireServerActive && strings.EqualFold(server.Status, "ERROR") {
-		return nil, errors.Join(requestErr, response.Fail(&resource.FailedStateError{Resource: "server", ID: id, Status: server.Status}), state.check(ctx))
+		return nil, errors.Join(requestErr, response.Fail(newServerFaultError(server, state.lastFault)), state.check(ctx))
 	}
 	view, err := parseServerAddresses(server, state.address.options.networkOrder)
 	if err != nil {

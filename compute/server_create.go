@@ -2,6 +2,7 @@ package compute
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -39,6 +40,7 @@ type createServerOptions struct {
 	bootVolumeSize                int
 	bootVolumeType                string
 	deleteBootVolumeOnTermination *bool
+	extra                         serverCreateExtras
 }
 
 type CreateServerOption func(*createServerOptions) error
@@ -103,7 +105,9 @@ func WithKeyName(name string) CreateServerOption {
 	return func(o *createServerOptions) error { o.fields["key_name"] = name; return nil }
 }
 
-// WithUserData takes raw bytes; Gophercloud handles base64 encoding.
+// WithUserData takes raw bytes. Like Python's cloud create_server, the SDK
+// always base64-encodes them, even when the input already looks like base64.
+// A non-nil empty slice sends an explicit empty user_data string.
 func WithUserData(data []byte) CreateServerOption {
 	data = append([]byte(nil), data...)
 	return func(o *createServerOptions) error { o.base.UserData = append([]byte(nil), data...); return nil }
@@ -180,6 +184,7 @@ var reservedServerFields = func() map[string]bool {
 type serverBody struct {
 	base   servers.CreateOpts
 	fields map[string]any
+	hints  map[string]json.RawMessage
 }
 
 func (b serverBody) ToServerCreateMap() (map[string]any, error) {
@@ -191,7 +196,19 @@ func (b serverBody) ToServerCreateMap() (map[string]any, error) {
 	if !ok {
 		return nil, fmt.Errorf("unexpected Gophercloud server body")
 	}
+	// Gophercloud passes input through when it already decodes as base64;
+	// Python always encodes the supplied bytes, so the SDK does too.
+	if b.base.UserData != nil {
+		server["user_data"] = base64.StdEncoding.EncodeToString(b.base.UserData)
+	}
 	maps.Copy(server, b.fields)
+	if b.hints != nil {
+		hints := make(map[string]any, len(b.hints))
+		for key, value := range b.hints {
+			hints[key] = append(json.RawMessage(nil), value...)
+		}
+		body[schedulerHintsKey] = hints
+	}
 	return body, nil
 }
 
@@ -269,6 +286,9 @@ func (s *Servers) prepareCreateServerOptions(request CreateServerRequest, opts .
 		if err := request.Image.Validate(); err != nil {
 			return o, fmt.Errorf("image: %w", err)
 		}
+	}
+	if err := o.validateExtras(s.client.Microversion); err != nil {
+		return o, err
 	}
 	return o, nil
 }
@@ -350,7 +370,11 @@ func (s *Servers) prepareServerCreateBody(ctx context.Context, request CreateSer
 	if err := s.prepareServerNetworks(ctx, &o); err != nil {
 		return serverBody{}, err
 	}
-	return serverBody{base: o.base, fields: o.fields}, checkServerCreation(ctx)
+	hints, err := s.prepareServerCreateExtras(ctx, &o)
+	if err != nil {
+		return serverBody{}, err
+	}
+	return serverBody{base: o.base, fields: o.fields, hints: hints}, checkServerCreation(ctx)
 }
 
 func checkServerCreation(ctx context.Context) error {

@@ -17,6 +17,9 @@ type AutomaticServerCreateOptions struct {
 	Server            []CreateServerOption
 	AutomaticIP       []AutomaticFloatingIPOption
 	FloatingIPNetwork resource.Ref
+	// ServerWithoutAddresses defaults to KeepServerWithoutAddresses. The
+	// delete policy sends one DELETE and waits for 404 inside the budget.
+	ServerWithoutAddresses ServerWithoutAddressesPolicy
 }
 
 // AutomaticServerCreateResult retains the original POST separately from the
@@ -30,10 +33,17 @@ type AutomaticServerCreateResult struct {
 var ErrServerAddressesUnavailable = errors.New("server addresses unavailable")
 
 // ServerAddressesUnavailableError is an ACTIVE server with explicit empty
-// address metadata. The SDK returns the server and never deletes it implicitly.
-type ServerAddressesUnavailableError struct{ ServerID string }
+// address metadata. The SDK returns the server and never deletes it implicitly;
+// Deletion is set only when DeleteServerWithoutAddresses was selected.
+type ServerAddressesUnavailableError struct {
+	ServerID string
+	Deletion *ServerDeletion
+}
 
 func (e *ServerAddressesUnavailableError) Error() string {
+	if e.Deletion != nil && e.Deletion.Err != nil {
+		return fmt.Sprintf("ACTIVE server %q: %v AND then could not be deleted", e.ServerID, ErrServerAddressesUnavailable)
+	}
 	return fmt.Sprintf("ACTIVE server %q: %v", e.ServerID, ErrServerAddressesUnavailable)
 }
 func (e *ServerAddressesUnavailableError) Unwrap() error { return ErrServerAddressesUnavailable }
@@ -50,6 +60,9 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	}
 	if s == nil || s.API == nil || s.Servers == nil || s.client == nil || s.client.ProviderClient == nil {
 		return nil, invalid("authenticated compute service is required")
+	}
+	if err := options.ServerWithoutAddresses.validate(); err != nil {
+		return nil, err
 	}
 	state, ctx, cancel, err := s.prepareAutomaticIP(ctx, AutomaticFloatingIPRequest{Server: &Server{ID: "pending-creation"}, Network: options.FloatingIPNetwork}, options.AutomaticIP)
 	if err != nil {
@@ -131,6 +144,7 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	state.address.accessIPv4, state.address.accessIPv6 = created.AccessIPv4, created.AccessIPv6
 	state.decision.Server = created
 	err = state.waitReadyServer(ctx, *policy)
+	err = state.applyWithoutAddresses(ctx, err, options.ServerWithoutAddresses, true)
 	result.Server = state.last
 	if err != nil {
 		return result, errors.Join(err, state.check(ctx))
@@ -171,5 +185,10 @@ func (state *automaticIPState) waitReadyServer(ctx context.Context, policy resou
 		},
 	})
 	_, err := collection.Wait(ctx, resource.ID(state.serverID), "ACTIVE", resource.WithWaitPolicy(policy))
+	var failed *resource.FailedStateError
+	var fault *ServerFaultError
+	if errors.As(err, &failed) && !errors.As(err, &fault) && strings.EqualFold(failed.Status, "ERROR") && state.last != nil && strings.EqualFold(state.last.Status, "ERROR") {
+		err = newServerFaultError(state.last, state.lastFault)
+	}
 	return errors.Join(err, state.check(ctx))
 }
