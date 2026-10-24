@@ -159,18 +159,9 @@ func (s *Service) UpdateFirewallRuleRecord(ctx context.Context, identity string,
 			return nil, wrap(qosReadInvalid("attribute %q requires complete UTF-8 JSON: %v", key, err))
 		}
 	}
-	members, err := qosPolicyCloudPairs(cfg.Filters, false)
+	policy, err := firewallFindOptions(cfg.Filters, nil, nil)
 	if err != nil {
 		return nil, wrap(err)
-	}
-	strict := false
-	policy := neutronfind.Options{IgnoreMissing: &strict, Query: map[string]json.RawMessage{}}
-	for _, member := range members {
-		if member.Key == "name_or_id" || member.Key == "ignore_missing" {
-			return nil, wrap(qosReadInvalid("%q duplicates cloud Find argument", member.Key))
-		}
-		policy.Query[member.Key] = bytes.Clone(member.Value)
-		policy.Order = append(policy.Order, member.Key)
 	}
 	engine, err := neutronfind.New(ctx, &source.Client, firewallDeleteProfile("firewall_rules"), guard)
 	if err != nil {
@@ -178,7 +169,7 @@ func (s *Service) UpdateFirewallRuleRecord(ctx context.Context, identity string,
 	}
 
 	result := &FirewallRuleUpdateResult{}
-	found, err := engine.Find(ctx, identity, policy)
+	found, err := engine.FindWithFetchControls(ctx, identity, policy)
 	result.Lookup = firewallDeleteProof(found, err)
 	if err = errors.Join(err, guard(ctx)); err != nil {
 		return result, wrap(err)

@@ -129,7 +129,7 @@ func TestCloudFirewallRuleUpdateFiltersStrictBindingAndFalseyDefaults(t *testing
 	if err != nil || result == nil || !result.NoOp || len(calls()) != 2 || calls()[0].query.Get("action") != "allow" || calls()[1].query.Get("action") != "allow" {
 		t.Fatal(result, err, calls())
 	}
-	for _, raw := range []string{`"truthy-expression"`, `[1]`, `{"ignore_missing":null}`, `{"name_or_id":null}`, `{"headers":{}}`, `{"microversion":"2.1"}`} {
+	for _, raw := range []string{`"truthy-expression"`, `[1]`, `{"ignore_missing":null}`, `{"name_or_id":null}`} {
 		before := len(calls())
 		result, err = network.New(client).UpdateFirewallRuleRecord(context.Background(), "target", network.WithFirewallRuleUpdateFilters(json.RawMessage(raw)))
 		if err == nil || len(calls()) != before {

@@ -78,7 +78,7 @@ type FirewallDeletion struct {
 }
 
 func firewallDeleteProfile(family string) neutronfind.Profile {
-	p := neutronfind.Profile{Kind: family, Path: "fwaas/" + family, Plural: family, IDKey: "id", NameKey: "name", PreserveUnknownBody: true, NameQueryHint: true, VersionedPath: "/v2.0/fwaas/" + family, SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true}
+	p := neutronfind.Profile{Kind: family, Path: "fwaas/" + family, Plural: family, IDKey: "id", NameKey: "name", PreserveUnknownBody: true, NameQueryHint: true, VersionedPath: "/v2.0/fwaas/" + family, SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, SourceListControls: true, StopFaultRetryCallbacks: true, PythonLoadedEquality: true}
 	var body, query []string
 	switch family {
 	case "firewall_rules":
@@ -244,18 +244,9 @@ func (s *Service) deleteFirewallRecord(ctx context.Context, family, op, identity
 		}
 		cfg = copyFirewallDelete(next)
 	}
-	members, err := qosPolicyCloudPairs(cfg.Filters, false)
+	policy, err := firewallFindOptions(cfg.Filters, cfg.Headers, cfg.Microversion)
 	if err != nil {
 		return fail(err)
-	}
-	strict := false
-	policy := neutronfind.Options{IgnoreMissing: &strict, Query: make(map[string]json.RawMessage), Headers: cfg.Headers, Microversion: cfg.Microversion}
-	for _, m := range members {
-		if m.Key == "name_or_id" || m.Key == "ignore_missing" {
-			return fail(qosReadInvalid("%q duplicates cloud Find argument", m.Key))
-		}
-		policy.Query[m.Key] = bytes.Clone(m.Value)
-		policy.Order = append(policy.Order, m.Key)
 	}
 	engine, err := neutronfind.New(ctx, &source.Client, firewallDeleteProfile(family), guard)
 	if err != nil {
@@ -264,7 +255,9 @@ func (s *Service) deleteFirewallRecord(ctx context.Context, family, op, identity
 	var found *neutronfind.Record
 	// Reuse Collection.Get's clean native404 classifier. This adapter delegates
 	// the one strict Source Find; it never makes a second physical lookup.
-	lookup := resource.NewCollection(resource.Adapter[neutronfind.Record]{Kind: family, ValidateID: func(string) error { return nil }, Get: func(context.Context, string) (*neutronfind.Record, error) { return engine.Find(ctx, identity, policy) }})
+	lookup := resource.NewCollection(resource.Adapter[neutronfind.Record]{Kind: family, ValidateID: func(string) error { return nil }, Get: func(context.Context, string) (*neutronfind.Record, error) {
+		return engine.FindWithFetchControls(ctx, identity, policy)
+	}})
 	found, err = lookup.Get(ctx, identity)
 	result.Lookup = firewallDeleteProof(found, err)
 	if err = errors.Join(err, guard(ctx)); err != nil {
