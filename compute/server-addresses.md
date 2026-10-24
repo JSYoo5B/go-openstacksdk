@@ -8,7 +8,7 @@ See the [support ledger](../docs/sdk-support-ledger.md) for status definitions a
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_public_ip`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -42,16 +42,14 @@ Python/Go differences:
 - Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.
 - TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.
 - The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping.
-
-Unresolved boundaries:
-
-- Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.
-- Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.
-- Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Integration of address expansion into the cloud create, get, active-server and wait workflows is reviewed under those operations; this getter covers selection from the supplied server and its owned address view.
+- Configuration comes from the typed clouds.yaml, built-in vendor profile and OS_* environment loader; values that loader rejects are configuration errors rather than raw strings carried to the getter.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 ### `python:cloud/_compute/ComputeCloudMixin/get_server_private_ip`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -83,12 +81,10 @@ Python/Go differences:
 - Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.
 - TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.
 - The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping.
-
-Unresolved boundaries:
-
-- Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.
-- Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.
-- Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Integration of address expansion into the cloud create, get, active-server and wait workflows is reviewed under those operations; this getter covers selection from the supplied server and its owned address view.
+- Configuration comes from the typed clouds.yaml, built-in vendor profile and OS_* environment loader; values that loader rejects are configuration errors rather than raw strings carried to the getter.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/add_ips_to_server`
 
@@ -256,13 +252,16 @@ Python/Go differences:
 - The selected Neutron pool lane reuses Ensure and may prefer already-attached candidates or allocate attached directly. Bounded Nova pool mode instead selects raw instance_id=null in the literal pool or allocates by POST200, compatibility GET and separate action202; it retains actual pre-action association fields. Source optional-server availability/full normalization and nonreuse refresh/elapsed subtraction remain distinct. Sequential Observed records item-time targets, not simultaneous final presence.
 - Direct Nova/None explicit or precise absent-Network selected execution requires actual legacy Compute capability. Missing Compute, selected microversion>=2.36 and unsupported Neutron port/NAT/project overrides remain typed capability failures; source/backend/config failures do not trigger automatic Neutron-error fallback. Nova has no IP status and receives no synthetic ACTIVE. Token sharing and accepted action proof are preserved separately from observation.
 - AddIPFromPool takes the pool as a typed name or ID Ref, whereas Python matches one string against both the name and ID of external floating networks. Its already-attached check looks for the exact floating address among the server's addresses rather than comparing only Python's first public floating address.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- One context deadline bounds polling and the IP stage, where Python passes timeout - int(elapsed) to the IP stage and can allow up to about one more second.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron and bounded Nova modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.
-- Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service-discovery/API-version/session/catalog policy (has_network configuration-disable now selects Nova) beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.
-- Complete broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows; the pool selector of AddIPsToServer keeps its Ensure-based target-first selection while AddIPFromPool provides the source pool lane. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.
-- Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability.
+- Cover the remaining selector, default, wait and progress combinations and fixed address and NAT forwarding in fixtures.
+- Complete the Nova attach, fallback and error ordering and the ERROR or ACTIVE-without-address cleanup within the ordinary create and get lifecycle.
 
 ## Usage examples
 

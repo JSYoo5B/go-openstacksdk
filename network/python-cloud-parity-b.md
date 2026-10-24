@@ -1627,7 +1627,7 @@ Python/Go differences:
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -1637,6 +1637,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPReuse`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAddAutoIPCleanup`
+- `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.AttachByID`
+- `github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable`
 
 - Nova reuse: available IP selection, exact-address attach, address wait and interface IP; the caller server is not mutated.
   Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPNovaReuseAttachesAndWaits`.
@@ -1650,15 +1652,22 @@ Go API:
   Tests: `connection_r2_cloud_net_ip_test.go:TestR2CloudNetAddAutoIPValidation`.
 - With the Neutron floating source, an allocation that falls back to Nova after a Neutron 404 (Backend nova, NeutronFloating true) is not attached by either backend, as Python sets skip_attach and honours it in its Neutron-source branch. On a wait timeout that IP is cleaned up through the configured Neutron delete exactly once (a Neutron 404 there is a not-deleted result, not a Nova delete) unless cleanup is disabled.
   Tests: `connection_cloud_net_ip_fallback_test.go:TestCloudNetAddAutoIPNeutronSourceNovaFallbackAllocationSkipsAttach`, `connection_cloud_net_ip_fallback_test.go:TestCloudNetAddAutoIPNeutronSourceNovaFallbackTimeoutCleansUp`.
+- Under the Neutron source a reused row obtained from Nova after a Neutron 404 is attached like Python's Neutron branch: one PUT floatingips/{id} with the newest NAT-destination port's first IPv4 address. A port-list or PUT 404 is ignored and recorded without any Nova action; a portless server, missing NAT destination or other PUT failure is returned; a timed-out wait deletes nothing. AttachByID honours an exact fixed address and validates inputs before mutation.
+  Tests: `connection_cloud_net_auto_ip_fallback_test.go:TestCloudNetAddAutoIPReuseNovaFallbackRowUsesNeutronAttachAndIgnoresNotFound`, `connection_cloud_net_auto_ip_fallback_test.go:TestCloudNetAddAutoIPReuseNovaFallbackRowAttachOutcomes`, `connection_cloud_net_auto_ip_fallback_test.go:TestCloudNetFloatingIPAttachByIDSelectsFixedAddressAndValidatesInputs`.
+- A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.
+  Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
+- With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.
+  Tests: `connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse`.
 
 Python/Go differences:
 
 - Attach goes through the explicit-address workflow (extra address lookup) instead of a direct attach; results are an AddAutoIPResult with evidence instead of only the interface IP string.
 - Cleanup after a timeout is an explicit option (default on, as Python) and its failure joins the timeout error instead of replacing it.
-
-Unresolved boundaries:
-
-- Dynamic Server/Resource inputs, configuration/vendor aliases, source-version and discovery policy are not compared; the reuse path that receives a Nova-fallback row under the Neutron source still attaches through the explicit-address workflow instead of Python's Neutron attach that swallows NotFound; no authenticated cloud interoperability is claimed.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- The Neutron or Nova choice uses floating_ip_source and has_network from the typed configuration, as Python's _use_neutron_floating uses floating_ip_source and has_service('network') without version discovery.
+- A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/detach_ip_from_server`
 

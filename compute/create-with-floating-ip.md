@@ -31,6 +31,28 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource`
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithSchedulerHints`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerGroup`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerCount`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithDescription`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAdminPass`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithDiskConfig`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAccessIPv4`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithAccessIPv6`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithTags`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithHostname`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithHypervisorHostname`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPersonality`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithDataVolumes`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithUserData`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerWithoutAddressesPolicy`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithCreateRefresh`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithBlockDeviceMappings`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithLegacyBlockDeviceMappings`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithTrustedImageCertificates`
+- `github.com/JSYoo5B/go-openstacksdk/compute.Servers.CreateReservation`
+- `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateRefreshedServer`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.CreateRefreshedServer`
 
 - Ordered NICs preserve network UUID and port combinations, literal fixed IP, fixed-IP-only/tag-only/empty objects, and omitted versus explicit empty or null tag values in the HTTP body. IDs bypass Neutron lookup and need no Network endpoint.
   Tests: `compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag`, `connection_server_nics_test.go:TestConnectionServerNICIDsNeedNoNetworkEndpoint`.
@@ -110,6 +132,28 @@ Go API:
   Tests: `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer`.
 - The Nova direct-list lane rejects selected Compute2.36/2.44 and Neutron-only port/NAT-network/project overrides with ErrUnsupported before HTTP or attempts; a nonnumeric latest microversion is an invalid option. Known legacy capability preflight for automatic creation separately rejects2.36, explicit port and project overrides before any server POST or other fixture HTTP. These capability limits are distinct from a blanket Nova backend prohibition.
   Tests: `compute/server_ip_nova_test.go:TestNovaServerIPVersionAndNeutronSelectorsFailBeforeHTTP`, `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST`.
+- Create sends Python's top-level OS-SCH-HNT:scheduler_hints object (never os:scheduler_hints) with JSON-snapshotted values; WithServerGroup resolves a name through one os-server-groups list (IDs skip lookup) and wins over a group hint. min/max count, explicit empty description, adminPass, OS-DCF:diskConfig, access IPs, tags, hostname, hypervisor hostname and base64 personality are serialized, count keys are omitted without WithServerCount, and userdata is always base64-encoded even when it already decodes.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerCreatePropertiesSchedulerHintsGroupAndCount`.
+- WithDataVolumes appends boot_index -1/delete_on_termination false volume mappings after the root mapping, prepending a local image mapping (boot_index 0, delete_on_termination true) only for image boot, in Python's order. Existing and new boot volumes keep imageRef empty; names resolve through Block Storage before POST.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerCreateDataVolumeMappingsFollowPythonOrder`.
+- Invalid counts, disk configs, access IP families, unserializable or empty-key hints, empty tags/admin password/volume lists/hostnames/personality and zero refs fail as ErrInvalidOption before any request. Description (2.19), tags (2.52), hypervisor hostname (2.74), hostname (2.90) and personality (removed at 2.57) are checked against the client microversion as ErrUnsupported before HTTP. Missing or duplicate server group names fail after the lookup and before POST.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerCreatePropertiesRejectBeforeRequests`.
+- A raw ERROR server returns ServerFaultError (unwrapping to FailedStateError) using Python's key-presence test: a non-null fault object with a message key gives 'Compute service reports fault: <message>' (empty string kept, null formatted as None); a missing, null or message-less fault gives 'no further information available'. Server carries the observed model like extra_data. A supplied typed Server uses a non-empty Fault.Message.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerFaultErrorFollowsPythonKeyPresence`.
+- ACTIVE without address rows keeps the server by default. DeleteServerWithoutAddresses sends exactly one DELETE and still returns ServerAddressesUnavailableError with Deletion evidence: 204 without a wait in async GetActiveServer, 404 recorded as NotFound without an error, 409 joined as 'AND then could not be deleted' without retry, and WaitForServer/CreateWithAutomaticFloatingIP polling GET until 404. Unknown policies fail before POST.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerWithoutAddressesDeletePolicyIsExplicitAndSingleShot`.
+- Connection.CreateWithAutomaticFloatingIP resolves server group and data volume names through Connection-owned Compute and Block Storage lookups, sends hints and mappings in one POST, and applies the default keep or explicit delete-and-wait policy to an ACTIVE server without addresses while retaining Creation adminPass.
+  Tests: `connection_server_create_lifecycle_test.go:TestConnectionCreateLifecycleResolvesGroupVolumesAndDeletesOnlyWhenSelected`.
+- WithCreateRefresh performs exactly one GET of the created server after an accepted POST and returns the refreshed model; ERROR returns ServerFaultError with Python's fault message and the refreshed Server, while a failed or mismatched GET returns the POST server with the error and never repeats the POST. Combining it with WithWait fails before POST.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerCreateRefreshPerformsOneGetAndReportsFault`.
+- Explicit block_device_mapping_v2 entries serialize every per-mapping field (null boot_index, delete_on_termination, device name/type, disk bus, guest format, volume size/type, tag, no_device) and are placed before generated local-image and data-volume mappings, as Python appends generated mappings to supplied ones. Legacy block_device_mapping entries and trusted_image_certificates are sent as given. Legacy plus v2, invalid source/destination types and empty lists fail as ErrInvalidOption, and tag (2.42), volume type (2.67) and certificates (2.63) fail as ErrUnsupported before POST.
+  Tests: `compute/server_create_mappings_test.go:TestServerCreateExplicitLegacyMappingsAndTrustedCertificates`.
+- CreateReservation sends one POST with return_reservation_id true and the requested min/max count and returns only the reservation ID with response metadata. A server-shaped or empty reservation response is an error without a second POST, and WithWait or WithCreateRefresh fail before POST.
+  Tests: `compute/server_create_mappings_test.go:TestServerCreateReservationReturnsOnlyReservationID`.
+- CreateRefreshedServer performs one POST and one GET, copies the creation adminPass onto the refreshed Server and returns the add_server_interfaces-equivalent ExpandServerInterfaces view. A refreshed ERROR server returns ServerFaultError pointing at the returned Server without expansion, and WithWait fails before POST. The Connection wrapper uses the Connection-owned Compute and Network services.
+  Tests: `compute/server_create_mappings_test.go:TestCreateRefreshedServerExpandsAndCopiesAdminPass`, `connection_server_create_refresh_test.go:TestConnectionCreateRefreshedServerPostsOnceAndExpands`.
+- With DeleteServerWithoutAddresses, only Python's falsy address maps (null or empty) are deleted. A non-empty map whose rows are all empty or null returns ServerAddressesUnavailableError with EmptyRows and no DELETE in both GetActiveServer and WaitForServer.
+  Tests: `compute/server_create_mappings_test.go:TestServerWithoutAddressesDeleteSkipsTruthyEmptyRowMaps`.
 
 Python/Go differences:
 
@@ -120,12 +164,21 @@ Python/Go differences:
 - CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow.
 - The explicit Service/Connection CreateWithAutomaticFloatingIP compound connects owned Nova creation, raw actual ACTIVE/address readiness and selected Neutron or bounded legacy Nova dispatch with separate Creation/last Server/Automatic results. It always waits, rejects alternate status selectors and preserves original creation-only AdminPass. Source create_server defaults wait=false and only forwards IP dispatch through its wait=true path; ordinary Servers.Create and the older explicit workflow retain their separate contracts.
 - The new guarded named-creation lane retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Ordinary native lookup remains separate; flavor-name creation retains its existing no-name-query/no-is_public-default behavior rather than completing the Python flavor-list defaults.
+- Create property options are typed and validated locally: version-gated fields fail against the client microversion before HTTP rather than relying on Nova 400s, falsy values such as config_drive false are sent instead of dropped, empty admin passwords/tags are rejected, and min_count/max_count are omitted unless WithServerCount is used (Python's cloud layer always sends 1/1). Boot indexes are JSON integers where Python sends some as strings, and group/data-volume lookups run after image/flavor/network resolution.
+- ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.
+- ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.
+- config_drive is a typed boolean; Python's documented volume-ID value is not modeled because Nova's create schema accepts only booleans. Servers.Create with a count returns Nova's single server response; CreateReservation returns the reservation ID instead. Python's Server resource has no return_reservation_id attribute, and its reservation_id kwarg is a server body attribute rather than this response shape. Explicit mapping UUIDs are sent literally without name resolution.
+- The creation adminPass is copied onto a detached returned Server when the latest GET has none, as Python sets admin_password; Creation and the Automatic evidence keep the raw models.
+- A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either.
+- Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles; the owned high Network Service mutations now provide the verified bounded cache invalidation. Complete full has_service/private/source/flags, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion. Generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset; bounded roles and mutation hooks do not close the complete cloud create policy.
-- Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model/fault/error/cleanup behavior beyond typed CreateWithAutomaticFloatingIP, which now consumes bounded Neutron and legacy Nova selected dispatch. New Neutron/Nova dispatch fixtures verify image/flavor body, ordered addresses and partial Creation/Server/assignments; they do not expand existing volume/NIC coverage to every dispatch combination. Ordinary Servers.Create/source wait=false refresh/expansion remain separate. Preserve remaining group/scheduler hints, extra/data-volume/count/security/userdata/metadata and full post-create GET/fault/wait contracts.
-- Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto.
+- Check the advertised compute microversion range before using version-gated create features, as Python's supports_microversion and require_microversion do.
+- Complete the auto_ip, explicit IP, ip_pool and Nova floating source default combinations and the volume and NIC dispatch combinations in fixtures, including Python's replacement of the networks argument with auto when no NICs are configured.
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/available_floating_ip`
 
@@ -347,6 +400,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPSource`
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithServerWithoutAddressesPolicy`
 
 - The explicit compound workflow shares server input/body preparation with Create, validates server/IP options and external Ref before runtime lookup, and requires a concrete Network service and known/explicit reuse owner before Nova POST. Connection provides the lazy getter; invalid or missing services/scope return errors without server mutation.
   Tests: `compute/server_floating_ip_test.go:TestServerFloatingIPPreflightPrecedesCreationAndLookups`, `connection_server_floating_ip_test.go:TestConnectionServerFloatingIPMissingNetworkStopsBeforeNovaPOST`.
@@ -396,21 +450,34 @@ Go API:
   Tests: `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPReadinessAndCreationConsumeLegacyBackend`.
 - For strong Ensure, synchronous GetActive, Wait and creation, an exact assigned floating target under late raw BUILD does not complete: one progress failure retains the accepted action and current Server. Raw ERROR returns typed FailedState without progress. Only the first attempt starts; the next IP is not selected. Creation preserves the initial AdminPass. Nova has no IP ACTIVE field to poll or synthesize; these checks prove actual server readiness and raw target policy, while standalone Add keeps its any-status observation contract.
   Tests: `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPUpperObservationRequiresActualActiveServer`.
+- A raw ERROR server returns ServerFaultError (unwrapping to FailedStateError) using Python's key-presence test: a non-null fault object with a message key gives 'Compute service reports fault: <message>' (empty string kept, null formatted as None); a missing, null or message-less fault gives 'no further information available'. Server carries the observed model like extra_data. A supplied typed Server uses a non-empty Fault.Message.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerFaultErrorFollowsPythonKeyPresence`.
+- ACTIVE without address rows keeps the server by default. DeleteServerWithoutAddresses sends exactly one DELETE and still returns ServerAddressesUnavailableError with Deletion evidence: 204 without a wait in async GetActiveServer, 404 recorded as NotFound without an error, 409 joined as 'AND then could not be deleted' without retry, and WaitForServer/CreateWithAutomaticFloatingIP polling GET until 404. Unknown policies fail before POST.
+  Tests: `compute/server_create_lifecycle_test.go:TestServerWithoutAddressesDeletePolicyIsExplicitAndSingleShot`.
+- With DeleteServerWithoutAddresses, only Python's falsy address maps (null or empty) are deleted. A non-empty map whose rows are all empty or null returns ServerAddressesUnavailableError with EmptyRows and no DELETE in both GetActiveServer and WaitForServer.
+  Tests: `compute/server_create_mappings_test.go:TestServerWithoutAddressesDeleteSkipsTruthyEmptyRowMaps`.
+- WaitForServer forwards the Neutron pool selector to the shared dispatch: after raw ACTIVE it allocates one pool floating IP with reuse disabled, observes it on the server and reports ServerIPPool with the selected pool network.
+  Tests: `compute/server_create_mappings_test.go:TestWaitForServerForwardsPoolSelectorToDispatch`.
 
 Python/Go differences:
 
 - The review now includes typed existing-server Service/Connection.WaitForServer plus earlier explicit and automatic creation workflows. New standalone Wait fixes the supplied ID and fetches current raw Nova metadata even when the supplied model says ACTIVE or ERROR; supplied status/addresses/fault are not readiness evidence. This differs from the existing Servers/leaf WaitForServer collection surface, which only waits for status with120-second/two-second defaults.
 - Standalone Wait defaults to one 180-second overall context and five-second server/raw polls, with an unlimited server-local stage inside that context unless overridden. The actual default wire deadline is tested; earlier explicit/automatic creation workflows retain their five-minute budgets. Go propagates one continuous deadline across readiness, selected Neutron/Nova execution and observation instead of subtracting source integer elapsed time and restarting a forwarded remaining-time wait.
 - Go raw200/203 failures retain typed matching Server/response proof and original causes. First404 and later403 are terminal in the tested standalone lane; malformed/wrong-ID responses are not adopted, and accepted203 Close/source/cancel/ancestor errors retain a decoded matching model without decode retry. This is not pinned cloud get_server lookup/Resource expansion or its broad Exception/None retry policy.
-- Raw actual ERROR remains failed even when application failure states are disabled. ACTIVE nil metadata polls; explicit zero rows return ServerAddressesUnavailableError with the last matching model and no DELETE. Pinned get_active_server deletes a falsy-address ACTIVE server and may accept a truthy empty-row map. Go case-insensitive state matching, typed Fault/errors and no-cleanup partial results differ from source literal states and exception/extra_data/model semantics.
+- Raw actual ERROR remains failed even when application failure states are disabled. ACTIVE nil metadata polls; explicit zero rows return ServerAddressesUnavailableError with the last matching model and no DELETE unless DeleteServerWithoutAddresses is selected. Pinned get_active_server always deletes a falsy-address ACTIVE server and may accept a truthy empty-row map. Go case-insensitive state matching and keep-by-default partial results differ from source literal states and Resource/model semantics.
 - Typed Wait consumes selected Neutron or bounded legacy Nova dispatch after owned raw actual ACTIVE readiness. Neutron requires actual IP ACTIVE; Nova has no IP status and retains actual model/action evidence. Both synchronous lanes require per-item exact raw ACTIVE-server target convergence; clean automatic skips have no assignment/Observed=false. Item-time Observed does not prove simultaneous final presence. Full source Resource/default/fallback behavior remains partial.
 - Earlier guarded named-creation evidence retains native typed models and200/204/300 list codes but owns page continuation and accepted Read/Close/source errors. Standalone Wait takes the supplied ID rather than completing ordinary cloud get_server name/filter/defaultquery/interface expansion; flavor-name creation keeps its existing defaults.
+- ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.
+- ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.
+- A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.
+- One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.
+- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
+- Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.
 
 Unresolved boundaries:
 
-- Complete dynamic Server/Resource inputs, full cloud get_server lookup/defaultquery/interface expansion and broad lookup-Exception/None retry beyond the new typed supplied-ID raw waiter. Compare the complete fault/extra_data taxonomy and all state/address/nullable inputs. Standalone180-second/five-second defaults now exist, but Go raw terminal-error, noDELETE and zero-row policies remain deliberate differences.
-- Compare full selected IP/default/fixed/NAT/reuse forwarding and shared configured network/service/flags/cache/source policy plus Nova-network fallback beyond bounded typed Neutron/Nova integration. Standalone Wait and automatic creation consume the shared dispatch, with new Neutron/Nova upper success fixtures limited to explicit lists; ordinary Servers.Create and the full cloud dispatch/model surface remain separate.
-- Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization, integer remaining-budget behavior and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts.
+- Poll through the cloud get_server lookup (default query and interface expansion) instead of the supplied-ID raw GET.
+- Cover Nova-network fallback and IP forwarding beyond explicit lists and the Neutron pool selector (fixed address, NAT destination and reuse) in fixtures.
 
 ## Usage examples
 

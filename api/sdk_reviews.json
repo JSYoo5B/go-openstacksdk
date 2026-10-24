@@ -42733,7 +42733,11 @@
         "ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.",
         "config_drive is a typed boolean; Python's documented volume-ID value is not modeled because Nova's create schema accepts only booleans. Servers.Create with a count returns Nova's single server response; CreateReservation returns the reservation ID instead. Python's Server resource has no return_reservation_id attribute, and its reservation_id kwarg is a server body attribute rather than this response shape. Explicit mapping UUIDs are sent literally without name resolution.",
         "The creation adminPass is copied onto a detached returned Server when the latest GET has none, as Python sets admin_password; Creation and the Automatic evidence keep the raw models.",
-        "A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows."
+        "A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "documentation": [
         "compute/server-network-interfaces.md",
@@ -42750,15 +42754,14 @@
         "compute/server-nova-floating-ip.md"
       ],
       "remaining": [
-        "Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles; the owned high Network Service mutations now provide the verified bounded cache invalidation. Complete full has_service/private/source/flags, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion. Generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset; bounded roles and mutation hooks do not close the complete cloud create policy.",
-        "Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model behavior beyond typed CreateWithAutomaticFloatingIP, which consumes bounded Neutron and legacy Nova dispatch; dispatch fixtures do not cover every volume/NIC combination.",
-        "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
+        "Check the advertised compute microversion range before using version-gated create features, as Python's supports_microversion and require_microversion do.",
+        "Complete the auto_ip, explicit IP, ip_pool and Nova floating source default combinations and the volume and NIC dispatch combinations in fixtures, including Python's replacement of the networks argument with auto when no NICs are configured."
       ]
     },
     {
       "operation": "python:compute/v2/create_server",
       "source_fingerprint": "5672dbfe26ca55fd03196754eb061724ac68b4b597e3ad54190a498dbe94dde8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.Servers.Create",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithNetworkInterfaces",
@@ -42926,10 +42929,9 @@
         "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
         "Create property options are typed and validated locally: version-gated fields fail against the client microversion before HTTP rather than relying on Nova 400s, falsy values such as config_drive false are sent instead of dropped, empty admin passwords/tags are rejected, and min_count/max_count are omitted unless WithServerCount is used (Python's cloud layer always sends 1/1). Boot indexes are JSON integers where Python sends some as strings, and group/data-volume lookups run after image/flavor/network resolution.",
-        "config_drive is a typed boolean; Python's documented volume-ID value is not modeled because Nova's create schema accepts only booleans. Servers.Create with a count returns Nova's single server response; CreateReservation returns the reservation ID instead. Python's Server resource has no return_reservation_id attribute, and its reservation_id kwarg is a server body attribute rather than this response shape. Explicit mapping UUIDs are sent literally without name resolution."
-      ],
-      "remaining": [
-        "Complete the inherited Proxy._create/Server.create input-attribute/descriptor/query/header/URI, defaults, extension handling and full response/error/model/location/session/cache comparison beyond the NIC contracts recorded here."
+        "config_drive is a typed boolean; Python's documented volume-ID value is not modeled because Nova's create schema accepts only booleans. Servers.Create with a count returns Nova's single server response; CreateReservation returns the reservation ID instead. Python's Server resource has no return_reservation_id attribute, and its reservation_id kwarg is a server body attribute rather than this response shape. Explicit mapping UUIDs are sent literally without name resolution.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ]
     },
     {
@@ -43078,7 +43080,7 @@
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_default_network",
       "source_fingerprint": "be23b8e8bc0366356f25675e425fb8096569476dde0542f8c641af07409c8bbd",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connect",
         "github.com/JSYoo5B/go-openstacksdk.WithDefaultNetwork",
@@ -43303,13 +43305,12 @@
         "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
         "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
-        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
-      ],
-      "remaining": [
-        "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
-        "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The consumers of the role snapshot (create_server, add_ips_to_server, get_active_server, wait_for_server) are reviewed under those operations; this operation covers discovery and the returned role."
       ]
     },
     {
@@ -44128,7 +44129,9 @@
         "ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.",
         "ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.",
         "A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.",
-        "One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget."
+        "One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/create-with-floating-ip.md",
@@ -44141,15 +44144,14 @@
         "compute/README.md"
       ],
       "remaining": [
-        "Complete dynamic Server/Resource inputs, full cloud get_server lookup/defaultquery/interface expansion and broad lookup-Exception/None retry beyond the new typed supplied-ID raw waiter, and all state/address/nullable inputs. Standalone 180-second/five-second defaults exist, but Go raw terminal-error and zero-row policies remain deliberate differences.",
-        "Compare full selected IP/default/fixed/NAT/reuse forwarding and shared configured network/service/flags/cache/source policy plus Nova-network fallback beyond bounded typed Neutron/Nova integration. Standalone Wait and automatic creation consume the shared dispatch, with Wait forwarding fixtures limited to explicit lists and the Neutron pool selector; ordinary Servers.Create and the full cloud dispatch/model surface remain separate.",
-        "Compare refreshed Nova public/private/interface selection and Resource/Munch/session/model normalization and timeout/unlimited/parent/lookup/error/cleanup ordering beyond the current standalone and creation fixtures. Bounded exact raw observation and known partial results do not close these full cloud Wait contracts."
+        "Poll through the cloud get_server lookup (default query and interface expansion) instead of the supplied-ID raw GET.",
+        "Cover Nova-network fallback and IP forwarding beyond explicit lists and the Neutron pool selector (fixed address, NAT destination and reuse) in fixtures."
       ]
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_nat_destination",
       "source_fingerprint": "8efbe59efec4645934efae853c55cb17aa2dbb315b6d0a2bcab1f6e8d920f07c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetNATDestination",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles",
@@ -44338,19 +44340,18 @@
         "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
         "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
-        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
-      ],
-      "remaining": [
-        "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
-        "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The consumers of the role snapshot (create_server, add_ips_to_server, get_active_server, wait_for_server) are reviewed under those operations; this operation covers discovery and the returned role."
       ]
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/get_nat_source",
       "source_fingerprint": "2fef025910d596e16198145a5e1d39c32594f46c01337e796f0ddfc600238e59",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetNATSource",
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetNetworkRoles",
@@ -44507,13 +44508,12 @@
         "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
         "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
-        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
-      ],
-      "remaining": [
-        "Complete Python Network/Resource nullable descriptor, dynamic mapping input, identity/cache aliases, unknown-property/model/location and injected session/Adapter comparisons beyond these owned native-plus-extension snapshot assertions.",
-        "Bounded owned high-Service CreateNetwork/UpdateNetwork/DeleteNetwork and the existing Networks.Delete adapter now invalidate shared roles on the verified accepted/no-op/high-delete race paths. Generated NetworkV2/raw-client and out-of-band topology mutations still require explicit Reset; compare remaining Resource cache/locking/session and native pagination/response/model boundaries beyond the inspected discovery and mutation fixtures.",
-        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
-        "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The consumers of the role snapshot (create_server, add_ips_to_server, get_active_server, wait_for_server) are reviewed under those operations; this operation covers discovery and the returned role."
       ]
     },
     {
@@ -45407,7 +45407,7 @@
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/use_external_network",
       "source_fingerprint": "ee8dd438ac7e3e6ef52c46499f9ec2c733ffdcf9d46741a0c1371e606d0d530c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.UseExternalNetwork",
         "github.com/JSYoo5B/go-openstacksdk.WithNetworkRoles",
@@ -45494,17 +45494,15 @@
         "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
         "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
-        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
-      ],
-      "remaining": [
-        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
-        "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The consumers of the role snapshot (create_server, add_ips_to_server, get_active_server, wait_for_server) are reviewed under those operations; this operation covers discovery and the returned role."
       ]
     },
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/use_internal_network",
       "source_fingerprint": "2466847158e21349874657bc127dda300f09817cf62fc594304caf4bef52a1a8",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.UseInternalNetwork",
         "github.com/JSYoo5B/go-openstacksdk.WithNetworkRoles",
@@ -45591,17 +45589,15 @@
         "The Connection maps clean native missing-endpoint detection and the has_network configuration flag with official-service defaults (ServiceEnabled); Python's False for other lookup failures needs WithServiceLookupFailureAsUnavailable, and no version discovery applies to role discovery. Configured default NIC and automatic Ensure floating source use the shared successful role snapshot. Automatic NAT applies only without explicit port/fixed/NAT options and with multiple server-owned ports; strict unique IPv4-pair selection remains. These consumers do not implement private/floating-source flags or automatic IP need/skip decisions.",
         "Region values follow get_one's overlay for SDK-owned settings only; native authentication and endpoint parsing do not see them. Without WithRegion, an entry named by region_name is preferred over the first entry so that the values match the native endpoint region, whereas Python ignores region_name when regions is present. Typed Connect options (WithNetworkRoles, WithServiceEnabled) replace the configured policy for their concern instead of overlaying single keys like get_one keyword arguments.",
         "has_service('network') is mapped by ServiceEnabled (has_network flag, official-service default) plus the endpoint lookup. Python turns every lookup exception into False; Go returns lookup failures other than a missing endpoint unless WithServiceLookupFailureAsUnavailable is set, and always returns cancellation. Role discovery passes no version, so no version-range discovery applies, and Go emits no Python debug log.",
-        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options."
-      ],
-      "remaining": [
-        "Remote vendor profiles named by URL (including the nested URLs of the built-in ovh and vexxhost profiles), which Python fetches from a well-known document and caches process-wide, are rejected instead of fetched. Full response/nullable boundaries are not mapped.",
-        "Configured default NIC, automatic floating source/NAT and the Nova-fallback Neutron attach consume the bounded shared role snapshot, the latter with newest-port/first-IPv4 selection. Complete automatic floating-IP need/skip, private/source flags, pool/explicit-IP/Nova branching, server interface/address normalization, waits/fault/error ordering and cleanup in their consumers. Consuming shared roles does not complete create_server/add_ips_to_server/get_active_server/wait_for_server."
+        "Configuration sources: clouds.yaml with secure.yaml, clouds-public.yaml or embedded built-in vendor profiles, region values, and the OS_* environment cloud when OS_CLOUD is unset. The environment cloud feeds only SDK-owned role, default-network and service settings; native authentication still uses Gophercloud's environment parser, and Python argparse/keyword arguments map to typed Connect options.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The consumers of the role snapshot (create_server, add_ips_to_server, get_active_server, wait_for_server) are reviewed under those operations; this operation covers discovery and the returned role."
       ]
     },
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/create_network",
       "source_fingerprint": "11e6af1d18a660170e5e204ed212179deffaae7341089b840573027313cb4475",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.CreateNetwork",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkName",
@@ -45632,12 +45628,11 @@
         "AZ hints including[] trigger a fresh guarded extension list rather than Python cloud extension caching. Body next and HTTP Link are supported; following an empty page with next is a Go improvement over the pinned generic Resource.list empty-page termination.",
         "Description and arbitrary additional JSON fields are Go/Proxy capabilities absent from the strict cloud create signature. Accepted201/202 response validation is stricter than Python mutable Resource translation; CreateNetworkDetail adds the Network extension fields the native model lacks.",
         "The owned high facade resets the original successful role cache for an accepted response even if later read/decode/ID/source checks fail. Python cloud resets only after its proxy successfully returns; malformed-body forms and wrong-shaped-body error boundaries therefore differ.",
-        "The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility."
-      ],
-      "remaining": [
-        "Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence.",
-        "Complete cloud-wide service/private/floating-source/automatic-IP/address/cleanup policy separately. Generated NetworkV2/native raw clients and out-of-band topology mutations bypass the high-Service hooks and still require explicit role Reset. No whole Network Proxy/Resource/native family or server lifecycle is promoted by these cloud rows.",
-        "Audit dynamic name/admin/shared/external/provider/DNS and explicit None/invalid object behavior outside the offered typed/Optional options, arbitrary Resource header/body alias handling, and complete cached extension/session discovery. The stated Create defaults/ownership are bounded comparisons, not universal Python input equivalence."
+        "The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Cloud-wide automatic IP, floating source and server address policy is reviewed under the server and floating IP operations, not under these network rows.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either."
       ],
       "contracts": [
         {
@@ -45718,7 +45713,7 @@
     {
       "operation": "python:cloud/_network/NetworkCloudMixin/update_network",
       "source_fingerprint": "c1f4ee92a036f35fce2cefb5a4d06ce7435e6c3c991a47ec9d2ee4718a381396",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/network.Service.UpdateNetwork",
         "github.com/JSYoo5B/go-openstacksdk/network.WithNetworkName",
@@ -45748,12 +45743,11 @@
         "Selected false/empty/null fields are preserved with concrete or Optional options. MTU validation matches the cloud present-value minimum68; owner and AZ fields are create-only. Provider is owned whole selection instead of source input dict pop; source arbitrary type/coercion remains broader.",
         "Description/extension fields and nonnegative revision are added Go/native/Proxy capabilities outside cloud valid_kwargs. High revision0 emits If-Match:revision_number=0; low native signed revision and raw callbacks remain their independently reviewed capability.",
         "Accepted200/201 require network object and safe matching requested ID; decoded ID verification failure returns the partial native model/error. The high facade resets owned role cache after accepted mutation evidence even when later response/error checks fail, instead of depending solely on Python proxy normal return.",
-        "The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility."
-      ],
-      "remaining": [
-        "Complete generic Python Network/Resource constructor, descriptors/coercion, connected mutable Resource identity, unknown body properties/location and session/adapter/response/retry/error policies beyond the bounded concrete Go HTTP evidence.",
-        "Complete cloud-wide service/private/floating-source/automatic-IP/address/cleanup policy separately. Generated NetworkV2/native raw clients and out-of-band topology mutations bypass the high-Service hooks and still require explicit role Reset. No whole Network Proxy/Resource/native family or server lifecycle is promoted by these cloud rows.",
-        "Compare complete dynamic kwargs/None/provider input coercion, mutable Resource dirty/noop and alias/header state, and Python session/adapter behavior. Low native networks.Update remains independently go_mapping; this new cloud row does not regrade its exact native revision/callback contract."
+        "The *Detail facades expose typed extension fields with strict JSON types (for example a string MTU is a decode error) where Python Body type conversion coerces lazily on attribute access; CreateNetwork/UpdateNetwork keep the native Network result for compatibility.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Cloud-wide automatic IP, floating source and server address policy is reviewed under the server and floating IP operations, not under these network rows.",
+        "Network roles are cached per Connection and reset by the SDK's own CreateNetwork, UpdateNetwork and DeleteNetwork, as Python resets its role cache only inside cloud create_network, update_network and delete_network; changes made by other clients or through the raw NetworkV2 client need an explicit Reset, which Python does not see either."
       ],
       "contracts": [
         {
@@ -45905,7 +45899,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_public_ip",
       "source_fingerprint": "0f54a8883d3db217ec3a3fa16b6a0e7274d9971104c38ed513e10afcf26a124f",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerPublicIP",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.GetServerPublicIP",
@@ -45985,22 +45979,21 @@
         "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
         "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
         "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.",
-        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping."
+        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Integration of address expansion into the cloud create, get, active-server and wait workflows is reviewed under those operations; this getter covers selection from the supplied server and its owned address view.",
+        "Configuration comes from the typed clouds.yaml, built-in vendor profile and OS_* environment loader; values that loader rejects are configuration errors rather than raw strings carried to the getter.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "documentation": [
         "compute/server-addresses.md",
         "compute/server-automatic-ip.md"
-      ],
-      "remaining": [
-        "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
-        "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
-        "Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow."
       ]
     },
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/get_server_private_ip",
       "source_fingerprint": "3bbb074a43055863dcf7655b7d9045de9c4441d930ebc0ee4438a9510008b35c",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk.Connection.GetServerPrivateIP",
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.GetServerPrivateIP",
@@ -46074,16 +46067,15 @@
         "Native address map loses Python dictionary insertion order. SDK uses sorted network keys, preserves row order and offers WithAddressNetworkOrder including an empty key. Wire version must be present and addr must be a string; null addr is rejected instead of Python dynamic None behavior.",
         "Concrete private/force/prefer booleans normalize bool/string rather than percloud raw Python truthiness. WithServerAddressPolicy replaces file/environment policy after loading; FromProvider reads no cloud/env policy. Unknown sources are rejected. CPython3.13 IPv4 classification is stable while the pinned SDK permits multiple Python runtimes.",
         "TCP selection uses context-bound Go DNS/dial fallback, candidate budget and typed port options; single candidates are unprobed and all failed candidates retain first-candidate fallback. Parent cancellation, callback/source and accepted IO/decode failures remain observable. Ordinary supplemental clean HTTP/DNS/connect failures are diagnostics; source may swallow broader SDKException.",
-        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping."
+        "The independently callable Compute automatic consumer now reuses bounded owned address/role evidence for lazy need/skip and conditional Neutron assignment, then obtains actual raw Nova observation separately. This supplied-native-model getter remains a pure address calculation and is not a Create/Get/Wait lifecycle or full cloud model mapping.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Integration of address expansion into the cloud create, get, active-server and wait workflows is reviewed under those operations; this getter covers selection from the supplied server and its owned address view.",
+        "Configuration comes from the typed clouds.yaml, built-in vendor profile and OS_* environment loader; values that loader rejects are configuration errors rather than raw strings carried to the getter.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "documentation": [
         "compute/server-addresses.md",
         "compute/server-automatic-ip.md"
-      ],
-      "remaining": [
-        "Complete the connected Python Server Resource/normalization, nullable/dynamic field behavior, all inherited descriptor/adapter/session/location/error/retry semantics beyond this supplied-native-model getter and the independently tested owned view. This row is not full Compute Proxy/Resource or cloud SDK parity.",
-        "Close full cloud client/profile/environment-only raw-string loading, service/session availability and runtime-dependent address ordering/probing/error behaviors beyond the typed file/environment policy and tested lazy Connection scope.",
-        "Integrate address expansion and the independently callable bounded automatic Neutron decision/assignment/raw-observation lane into the complete cloud Get/Create/get_active_server/Wait lifecycle. Complete pool/explicit-IP priority, Nova mutation/fallback and full service/source/model/session/cleanup contracts beyond these separate APIs. Supplemental metadata remains need/skip evidence rather than raw Nova observation, and existing explicit CreateWithFloatingIP has not become the full automatic cloud workflow."
       ]
     },
     {
@@ -46151,13 +46143,16 @@
         "Independent AddIPsToServer defaults to one60-second overall context, async and five-second raw poll, with explicit helper wait/timeout overrides. Existing Ensure/automatic creation retain five-minute/two-second synchronous defaults; GetActive/Wait retain their180second/five-second and readiness policies. Go also bounds selection/HTTP work and shares one budget across items, whereas source forwards timeout60 into wait branches and repeated list attachments. Source async pre-attached-IP Compute refresh remains a separate difference.",
         "The selected Neutron pool lane reuses Ensure and may prefer already-attached candidates or allocate attached directly. Bounded Nova pool mode instead selects raw instance_id=null in the literal pool or allocates by POST200, compatibility GET and separate action202; it retains actual pre-action association fields. Source optional-server availability/full normalization and nonreuse refresh/elapsed subtraction remain distinct. Sequential Observed records item-time targets, not simultaneous final presence.",
         "Direct Nova/None explicit or precise absent-Network selected execution requires actual legacy Compute capability. Missing Compute, selected microversion>=2.36 and unsupported Neutron port/NAT/project overrides remain typed capability failures; source/backend/config failures do not trigger automatic Neutron-error fallback. Nova has no IP status and receives no synthetic ACTIVE. Token sharing and accepted action proof are preserved separately from observation.",
-        "AddIPFromPool takes the pool as a typed name or ID Ref, whereas Python matches one string against both the name and ID of external floating networks. Its already-attached check looks for the exact floating address among the server's addresses rather than comparing only Python's first public floating address."
+        "AddIPFromPool takes the pool as a typed name or ID Ref, whereas Python matches one string against both the name and ID of external floating networks. Its already-attached check looks for the exact floating address among the server's addresses rather than comparing only Python's first public floating address.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "One context deadline bounds polling and the IP stage, where Python passes timeout - int(elapsed) to the IP stage and can allow up to about one more second.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron and bounded Nova modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.",
-        "Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service-discovery/API-version/session/catalog policy (has_network configuration-disable now selects Nova) beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.",
-        "Complete broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows; the pool selector of AddIPsToServer keeps its Ensure-based target-first selection while AddIPFromPool provides the source pool lane. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.",
-        "Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability."
+        "Cover the remaining selector, default, wait and progress combinations and fixed address and NAT forwarding in fixtures.",
+        "Complete the Nova attach, fallback and error ordering and the ERROR or ACTIVE-without-address cleanup within the ordinary create and get lifecycle."
       ],
       "contracts": [
         {
@@ -46713,7 +46708,9 @@
         "ERROR servers return ServerFaultError with Python's two message forms and the observed Server instead of SDKException extra_data. Raw reads apply the exact fault/message key-presence test; a supplied typed Server cannot record key presence, so a non-empty Fault.Message counts as present. Non-string fault messages fail the typed decode.",
         "ACTIVE-without-addresses cleanup is an explicit policy: the default keeps the server, and DeleteServerWithoutAddresses performs Python's single DELETE (404 tolerated) and deletion wait inside the remaining workflow budget, recording Deletion evidence. A failed DELETE or wait is joined to ServerAddressesUnavailableError and never retried.",
         "A non-empty address map with only empty or null rows returns ServerAddressesUnavailableError with EmptyRows and is never deleted. Python treats that map as truthy and proceeds to add_ips_to_server; Go does not attempt IP assignment on a server with no address rows.",
-        "One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget."
+        "One context deadline covers raw polling and the IP stage. Python passes timeout - int(elapsed) to get_active_server, so truncation can give its IP stage up to one extra second; Go never exceeds the overall budget.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
         "compute/create-with-automatic-floating-ip.md",
@@ -46725,9 +46722,8 @@
         "compute/README.md"
       ],
       "remaining": [
-        "Complete dynamic Server/Resource inputs, alias/default/coercion behavior for ips/ip_pool/NAT and returned Resource/location/public-private/interface normalization beyond typed supplied-server GetActiveServer. Selected Neutron and bounded Nova pool/list/automatic dispatch and static status/async/sync controls now exist in the shared implementation, but current new upper success fixtures use explicit lists rather than every pool/selector combination.",
-        "Compare remaining nullable/status/model and detached ownership cases beyond the current fixtures, and mutable Resource/descriptor/adapter/session/cache semantics. The zero-row and case-insensitive policies are explicit Go differences.",
-        "Compare full Nova mutation/fallback/service/config/source/destination availability beyond bounded executable assignment consumers. Complete public availability/CRUD/detach/remove, source async attached-IP refresh and Resource/location/normalization, all timeout/unlimited/parent/HTTP/default combinations and full cloud lookup/expansion/broad-exception retry. Sequential Observed remains item-time evidence, not final simultaneous presence."
+        "Cover the remaining nullable status, address and model cases and the timeout, unlimited and parent-context combinations in fixtures.",
+        "Complete the Nova floating IP mutation and fallback ordering and the asynchronous attached-IP refresh."
       ]
     },
     {
@@ -46779,13 +46775,15 @@
         "Network Attach remains one-existing-IP Neutron foundation with safe IDs/IPv4 names and stable association movement. Typed ordered consumers and independent positional AddIPList now execute Neutron or bounded legacy Nova lists. Positional order/duplicates/empty no-op and async whole60second defaults remain; results contain structured Server/Attempts plus separate Neutron Assignment or NovaAssignment rather than mutable Python Resource or dynamic str/list coercion.",
         "The Neutron Attach path consumes all address pages, locally matches exact addresses and pins opaque destination/revision/port invariants. The Nova consumer instead reads unfiltered legacy inventory, validates only the selected candidate, rechecks its ID/address/pool/association and sends addFloatingIp; it has no Neutron port/revision. Both reject ambiguity and late inventory failures before execution; current fixtures do not prove every pagination shape.",
         "Network Attach remains async with an optional common five-minute/two-second Neutron ACTIVE waiter. Independent AddIPList defaults to async/60second whole context/five-second raw poll; WithServerIPWait observes each exact raw IPv4 without requiring server/IP ACTIVE. Existing Ensure/sync ready/create consumers keep stronger ACTIVE checks. Each Observed attempt is historical, not simultaneous final presence of all targets. Source list passes timeout60 independently to each attach; Go uses one shared operation context and preserves partial evidence without cleanup.",
-        "Bounded Nova execution retains actual allocation/pre-action fields and accepted200 allocation or202 empty-action evidence in additive NovaAssignment, without synthesizing IP ACTIVE or overwriting instance_id after action acceptance. Strong workflows still require actual raw server ACTIVE/target convergence; standalone wait observes the exact target under any status. Version<2.36 and no Neutron-only port/NAT/project overrides are deliberate capability restrictions. Full source normalization, configured-Neutron fallback branch semantics and async attached-IP refresh remain distinct."
+        "Bounded Nova execution retains actual allocation/pre-action fields and accepted200 allocation or202 empty-action evidence in additive NovaAssignment, without synthesizing IP ACTIVE or overwriting instance_id after action acceptance. Strong workflows still require actual raw server ACTIVE/target convergence; standalone wait observes the exact target under any status. Version<2.36 and no Neutron-only port/NAT/project overrides are deliberate capability restrictions. Full source normalization, configured-Neutron fallback branch semantics and async attached-IP refresh remain distinct.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Lookup errors while polling return immediately with their cause, following the Gophercloud WaitFor convention; Python's cloud wait_for_server ignores every exception and keeps polling until its timeout. Retries for transient HTTP failures belong to the ProviderClient retry settings; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Compare full dynamic single-string/list/Server Resource inputs and returned mutable Resource/interface/location/normalization against the new typed positional AddIPList. Independent wait=false/timeout60 and required empty-list semantics now have bounded fixtures, but Go common validation, one whole context and structured attempt results remain deliberate differences.",
-        "Compare all fixed/NAT/port, raw-poll/progress, parent/unlimited/default and repeated-input combinations beyond the current standalone and stronger typed consumer fixtures. Ordinary Servers.Create and full cloud lifecycle/returned-interface behavior remain separate. Sequential Observed evidence does not prove all prior IPs remain simultaneously in the final Server.",
-        "Complete source Nova attachment/backend/fallback/error ordering beyond the bounded executable legacy lane and precise missing-Network/direct-source capability cases. has_network configuration-disable now selects the Nova lane; preserve has_service discovery/version/session policy, source conditional async attached-IP refresh, Cloud versus Proxy fixed-address presence semantics and model normalization; full public floating-IP CRUD/detach/remove and authenticated interoperability remain outside these assignment fixtures.",
-        "Complete inherited Resource/descriptor/configuration/location/normalization/cache and authenticated Python/cloud interoperability contracts beyond local HTTP fixtures and example compilation."
+        "Cover the fixed address, NAT, port, raw-poll progress, parent, unlimited, default and repeated-input combinations in fixtures.",
+        "Complete the Nova attachment, fallback and error ordering beyond the legacy lane and the conditional asynchronous attached-IP refresh."
       ],
       "contracts": [
         {
@@ -110347,7 +110345,7 @@
     {
       "operation": "python:cloud/_network_common/NetworkCommonCloudMixin/add_auto_ip",
       "source_fingerprint": "d853187f9ad103a32ffb5228d1d66c50f756e7ab2840240bb1152de37bf0b154",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.Service.AddAutoIP",
         "github.com/JSYoo5B/go-openstacksdk.Connection.AddAutoIP",
@@ -110420,13 +110418,15 @@
       ],
       "differences": [
         "Attach goes through the explicit-address workflow (extra address lookup) instead of a direct attach; results are an AddAutoIPResult with evidence instead of only the interface IP string.",
-        "Cleanup after a timeout is an explicit option (default on, as Python) and its failure joins the timeout error instead of replacing it."
+        "Cleanup after a timeout is an explicit option (default on, as Python) and its failure joins the timeout error instead of replacing it.",
+        "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "The Neutron or Nova choice uses floating_ip_source and has_network from the typed configuration, as Python's _use_neutron_floating uses floating_ip_source and has_service('network') without version discovery.",
+        "A clouds.yaml profile named by URL, including the nested URLs of the built-in ovh and vexxhost profiles, is rejected as a configuration error instead of being fetched from the vendor's well-known document at connect time; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Evidence is local HTTP fixtures and pinned-source comparison; authenticated deployment acceptance is a separate evidence class shared by every operation (see docs/sdk-support-ledger.md)."
       ],
       "documentation": [
         "compute/r2-cloud-floating-ip-helpers.md"
-      ],
-      "remaining": [
-        "Dynamic Server/Resource inputs, configuration/vendor aliases, source-version and session-endpoint discovery policy are not compared, and no authenticated cloud interoperability is claimed."
       ]
     },
     {
