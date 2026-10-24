@@ -61,7 +61,7 @@ func (f *r2CloudNetFixture) count(key string) int {
 
 // newR2CloudNetFixture serves Neutron under /network/v2.0 and Nova under
 // /compute for the named floating IP source. Unhandled requests fail the test.
-func newR2CloudNetFixture(t *testing.T, source compute.FloatingIPSource, handle func(r2CloudNetCall) (int, string)) (*sdk.Connection, *r2CloudNetFixture) {
+func newR2CloudNetFixture(t *testing.T, source compute.FloatingIPSource, handle func(r2CloudNetCall) (int, string), extra ...sdk.ConnectionOption) (*sdk.Connection, *r2CloudNetFixture) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	f := &r2CloudNetFixture{handle: handle}
@@ -91,7 +91,8 @@ func newR2CloudNetFixture(t *testing.T, source compute.FloatingIPSource, handle 
 		}
 		return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
 	})
-	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source)))
+	options := append([]sdk.ConnectionOption{sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source))}, extra...)
+	conn, err := sdk.FromProvider(cloud.Provider, options...)
 	if err != nil {
 		t.Fatal(err)
 	}

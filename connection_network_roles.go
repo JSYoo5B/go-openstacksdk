@@ -6,7 +6,9 @@ import (
 )
 
 // GetNetworkRoles shares one successful network/subnet discovery among all role
-// getters. A missing catalog endpoint yields empty roles. HTTP/configuration
+// getters. A missing catalog endpoint, or the network service disabled by
+// ServiceEnabled (has_network: false), yields empty roles without a request,
+// as Python's has_service('network') check does. HTTP/configuration
 // failures remain errors and are not cached as an empty successful result.
 func (c *Connection) GetNetworkRoles(ctx context.Context) (*network.NetworkRoleSnapshot, error) {
 	if ctx == nil {
@@ -15,7 +17,11 @@ func (c *Connection) GetNetworkRoles(ctx context.Context) (*network.NetworkRoleS
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
+	// _find_interesting_networks: both discovery flags off, then has_service.
 	if !c.UseExternalNetwork() && !c.UseInternalNetwork() {
+		return &network.NetworkRoleSnapshot{}, nil
+	}
+	if !c.ServiceEnabled("network") {
 		return &network.NetworkRoleSnapshot{}, nil
 	}
 	service, err := c.Network(ctx)

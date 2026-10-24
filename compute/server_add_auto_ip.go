@@ -107,6 +107,10 @@ func WithAddAutoIPAddressOptions(options ...ServerAddressOption) AddAutoIPOption
 // allocation or reuse step used Neutron, or fell back to Nova after a Neutron
 // 404 (Backend is then FloatingIPNova). It selects skip-attach and timeout
 // cleanup exactly as the pinned helper does.
+//
+// NeutronAttach is the Neutron port update sent for a reused row that came from
+// that Nova fallback, and NeutronNotFound the NotFound it produced, which the
+// helper ignores like Python.
 type AddAutoIPResult struct {
 	Backend          FloatingIPSource
 	NeutronFloating  bool
@@ -122,6 +126,8 @@ type AddAutoIPResult struct {
 	Available        *AvailableFloatingIPResult
 	Creation         *CreateFloatingIPResult
 	Attach           *AutomaticServerIPResult
+	NeutronAttach    *network.FloatingIPPortUpdate
+	NeutronNotFound  error
 	Cleanup          *DeleteFloatingIPResult
 	CleanupError     error
 	TimeoutRemaining time.Duration
@@ -148,7 +154,10 @@ func (e *AddAutoIPTimeoutError) Unwrap() error { return context.DeadlineExceeded
 // allocated Neutron IP skips this step as the allocation already targeted the
 // server. With the Neutron source this also holds for an allocation that fell
 // back to Nova after a Neutron 404: like Python, no attach is sent for it. A
-// Nova-source allocation is always attached. With wait, the server is polled
+// reused row from that Nova fallback is attached as Python does: by one Neutron
+// PUT floatingips/{id} on the server's NAT destination port, where a NotFound
+// from the port list or the PUT is ignored (recorded in NeutronNotFound) and no
+// Nova action follows. A Nova-source allocation is always attached. With wait, the server is polled
 // until the address appears or the remaining budget ends with
 // *AddAutoIPTimeoutError; on that timeout an IP created by this call under the
 // Neutron source (including the Nova fallback) is deleted unless
@@ -231,6 +240,10 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 	}
 	if skipAttach {
 		result.AttachSkipped = true
+	} else if result.Reused && result.Available != nil && result.Available.FallbackError != nil {
+		if err := s.attachAutoIPFallbackRow(ctx, result); err != nil {
+			return result, err
+		}
 	} else {
 		attach, err := s.AddIPList(ctx, result.Server, []string{result.FloatingIPAddr}, o.attach...)
 		result.Attach = attach

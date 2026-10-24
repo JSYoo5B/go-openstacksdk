@@ -633,6 +633,8 @@ Go API:
   Tests: `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPAutomaticNeutronTopologyDoesNotConsumePoolAsNetwork`.
 - Connection explicit IP assignment and shared role discovery recognize only direct native missing-endpoint pointer/value or a single wrapped absence as clean Network absence. The positive AddIPList cases execute the Nova action; an error joined with a catalog sentinel, wrapped joined error or context.Canceled preserves that cause instead of selecting Nova. Negative cases make exactly one Network locator call with no Compute lookup, fixture HTTP/token read, attempt or assignment; when a partial result exists its backend remains Neutron. This is the tested catalog-error boundary, not full source has_service/discovery/session parity.
   Tests: `connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend`.
+- A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.
+  Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
 
 Python/Go differences:
 
@@ -647,7 +649,7 @@ Python/Go differences:
 Unresolved boundaries:
 
 - Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron and bounded Nova modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.
-- Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service/config/API-version/discovery/session/catalog policy beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.
+- Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service-discovery/API-version/session/catalog policy (has_network configuration-disable now selects Nova) beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.
 - Complete source pool unattached-first availability, nonreuse post-create refresh/timing, broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.
 - Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability.
 
@@ -841,6 +843,8 @@ Go API:
   Tests: `compute/server_ip_nova_test.go:TestNovaServerIPVersionAndNeutronSelectorsFailBeforeHTTP`, `compute/server_ip_nova_boundaries_test.go:TestNovaServerIPKnownCreateCapabilityStopsBeforeServerPOST`.
 - Connection explicit IP assignment and shared role discovery recognize only direct native missing-endpoint pointer/value or a single wrapped absence as clean Network absence. The positive AddIPList cases execute the Nova action; an error joined with a catalog sentinel, wrapped joined error or context.Canceled preserves that cause instead of selecting Nova. Negative cases make exactly one Network locator call with no Compute lookup, fixture HTTP/token read, attempt or assignment; when a partial result exists its backend remains Neutron. This is the tested catalog-error boundary, not full source has_service/discovery/session parity.
   Tests: `connection_server_ip_nova_test.go:TestConnectionNovaIPMixedCatalogFailureCannotSelectBackend`.
+- A disabled has_network flag is the has_service('network') half of _use_neutron_floating: with the Neutron source AddAutoIP, AddIPList and AddIPsToServer use the Nova lane (one addFloatingIp action) and never contact the network endpoint.
+  Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
 
 Python/Go differences:
 
@@ -853,7 +857,7 @@ Unresolved boundaries:
 
 - Compare full dynamic single-string/list/Server Resource inputs and returned mutable Resource/interface/location/normalization against the new typed positional AddIPList. Independent wait=false/timeout60 and required empty-list semantics now have bounded fixtures, but Go common validation, one whole context and structured attempt results remain deliberate differences.
 - Compare all fixed/NAT/port, raw-poll/progress, parent/unlimited/default and repeated-input combinations beyond the current standalone and stronger typed consumer fixtures. Ordinary Servers.Create and full cloud lifecycle/returned-interface behavior remain separate. Sequential Observed evidence does not prove all prior IPs remain simultaneously in the final Server.
-- Complete source Nova attachment/backend/fallback/error ordering beyond the bounded executable legacy lane and precise missing-Network/direct-source capability cases. Preserve full has_service/discovery/version/session policy, source conditional async attached-IP refresh, Cloud versus Proxy fixed-address presence semantics and model normalization; full public floating-IP CRUD/detach/remove and authenticated interoperability remain outside these assignment fixtures.
+- Complete source Nova attachment/backend/fallback/error ordering beyond the bounded executable legacy lane and precise missing-Network/direct-source capability cases. has_network configuration-disable now selects the Nova lane; preserve has_service discovery/version/session policy, source conditional async attached-IP refresh, Cloud versus Proxy fixed-address presence semantics and model normalization; full public floating-IP CRUD/detach/remove and authenticated interoperability remain outside these assignment fixtures.
 - Complete inherited Resource/descriptor/configuration/location/normalization/cache and authenticated Python/cloud interoperability contracts beyond local HTTP fixtures and example compilation.
 
 ## Usage examples

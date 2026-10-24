@@ -9,7 +9,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
+// addressNetworkService returns nil (no Neutron) for a missing endpoint and for
+// a network service disabled by ServiceEnabled, the has_service('network')
+// half of Python's _use_neutron_floating.
 func (c *Connection) addressNetworkService(ctx context.Context) (*network.Service, error) {
+	if !c.ServiceEnabled("network") {
+		return nil, ctx.Err()
+	}
 	service, err := c.Network(ctx)
 	if missingCatalogEndpoint(err) {
 		return nil, ctx.Err()
