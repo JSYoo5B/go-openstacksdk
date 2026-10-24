@@ -26,6 +26,9 @@ type createBodyFixture struct {
 	body     map[string]any
 	hints    any
 	hasHints bool
+	gets     atomic.Int32
+	getCode  int
+	getBody  string
 }
 
 func newCreateBodyFixture(t *testing.T, microversion string) *createBodyFixture {
@@ -54,6 +57,10 @@ func newCreateBodyFixture(t *testing.T, microversion string) *createBodyFixture 
 			t.Error("Gophercloud hint key must not be used")
 		}
 		testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)
+	})
+	f.cloud.Mux.HandleFunc("GET /v2.1/servers/created", func(w http.ResponseWriter, r *http.Request) {
+		f.gets.Add(1)
+		testcloud.JSON(w, f.getCode, f.getBody)
 	})
 	f.cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t.Errorf("unexpected %s %s", r.Method, r.URL)
@@ -328,5 +335,49 @@ func TestServerWithoutAddressesDeletePolicyIsExplicitAndSingleShot(t *testing.T)
 	o.ServerWithoutAddresses = 9
 	if _, err := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), o); !errors.Is(err, resource.ErrInvalidOption) || posts.Load() != 0 {
 		t.Fatal(err, posts.Load())
+	}
+}
+
+func TestServerCreateRefreshPerformsOneGetAndReportsFault(t *testing.T) {
+	f := newCreateBodyFixture(t, "2.90")
+	request := compute.CreateServerRequest{Name: "web", Image: resource.ID("image"), Flavor: resource.ID("flavor")}
+	for name, scenario := range map[string]struct {
+		code   int
+		body   string
+		status string
+	}{
+		"active":    {200, `{"server":{"id":"created","status":"ACTIVE","addresses":{}}}`, "ACTIVE"},
+		"error":     {200, `{"server":{"id":"created","status":"ERROR","fault":{"message":"No valid host"}}}`, "ERROR"},
+		"forbidden": {403, `{"forbidden":{"message":"no"}}`, "BUILD"},
+		"wrong id":  {200, `{"server":{"id":"other","status":"ACTIVE"}}`, "BUILD"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			f.reset("2.90")
+			f.gets.Store(0)
+			f.getCode, f.getBody = scenario.code, scenario.body
+			server, err := f.service.Servers.Create(context.Background(), request, compute.WithCreateRefresh())
+			if server == nil || server.ID != "created" || server.Status != scenario.status || f.posts.Load() != 1 || f.gets.Load() != 1 {
+				t.Fatal(server, err, f.posts.Load(), f.gets.Load())
+			}
+			var fault *compute.ServerFaultError
+			switch name {
+			case "active":
+				if err != nil {
+					t.Fatal(err)
+				}
+			case "error":
+				if !errors.As(err, &fault) || !fault.HasFaultMessage || fault.FaultMessage != "No valid host" || fault.Server != server {
+					t.Fatal(err)
+				}
+			default:
+				if err == nil || errors.As(err, &fault) {
+					t.Fatal(err)
+				}
+			}
+		})
+	}
+	f.reset("2.90")
+	if _, err := f.service.Servers.Create(context.Background(), request, compute.WithCreateRefresh(), compute.WithWait()); !errors.Is(err, resource.ErrInvalidOption) || f.posts.Load() != 0 {
+		t.Fatal(err, f.posts.Load())
 	}
 }

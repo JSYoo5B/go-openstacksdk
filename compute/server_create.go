@@ -233,6 +233,9 @@ func (s *Servers) Create(ctx context.Context, request CreateServerRequest, opts 
 		return nil, err
 	}
 	if !o.wait {
+		if o.extra.refresh {
+			return s.refreshCreatedServer(ctx, created)
+		}
 		return created, nil
 	}
 	ready, err := s.Wait(ctx, resource.ID(created.ID), "ACTIVE", o.waitOptions...)
@@ -286,6 +289,9 @@ func (s *Servers) prepareCreateServerOptions(request CreateServerRequest, opts .
 		if err := request.Image.Validate(); err != nil {
 			return o, fmt.Errorf("image: %w", err)
 		}
+	}
+	if o.extra.refresh && o.wait {
+		return o, invalid("WithCreateRefresh and WithWait are mutually exclusive")
 	}
 	if err := o.validateExtras(s.client.Microversion); err != nil {
 		return o, err

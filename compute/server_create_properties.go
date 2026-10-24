@@ -6,9 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/nativefind"
+	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 
 	"github.com/gophercloud/gophercloud/v2/openstack/compute/v2/servers"
@@ -26,6 +29,7 @@ type serverCreateExtras struct {
 	dataVolumes []resource.Ref
 	description *string
 	files       []ServerFile
+	refresh     bool
 }
 
 // ServerFile is one legacy personality file. Contents are base64-encoded by
@@ -351,4 +355,38 @@ func (s *Servers) prepareServerCreateExtras(ctx context.Context, o *createServer
 		}
 	}
 	return hints, checkServerCreation(ctx)
+}
+
+// WithCreateRefresh follows Python's cloud create_server with wait=False: after
+// an accepted POST, Create performs one GET of the created server and returns
+// that refreshed model. An ERROR server returns ServerFaultError with the
+// refreshed Server. A failed GET returns the POST response with the error; the
+// POST is never repeated. It cannot be combined with WithWait.
+func WithCreateRefresh() CreateServerOption {
+	return func(o *createServerOptions) error { o.extra.refresh = true; return nil }
+}
+
+func (s *Servers) refreshCreatedServer(ctx context.Context, created *Server) (*Server, error) {
+	if err := resource.ID(created.ID).Validate(); err != nil {
+		return created, s.wrap("create/refresh", err)
+	}
+	response, err := rest.DoJSON(ctx, s.client, http.MethodGet, s.client.ServiceURL("servers", url.PathEscape(created.ID)), nil, nil, 200, 203)
+	if err != nil {
+		return created, s.wrap("create/refresh", err)
+	}
+	refreshed, err := rest.Decode[Server](response, "server", func(*Server) *resource.Metadata { return &resource.Metadata{} })
+	if err != nil {
+		return created, s.wrap("create/refresh", err)
+	}
+	if refreshed.ID != created.ID {
+		return created, s.wrap("create/refresh", response.Fail(invalid("Nova response does not match server %q", created.ID)))
+	}
+	if strings.EqualFold(refreshed.Status, "ERROR") {
+		fault := serverFaultInfo{}
+		if object, objectErr := response.Object("server"); objectErr == nil {
+			fault = rawServerFault(object)
+		}
+		return refreshed, newServerFaultError(refreshed, &fault)
+	}
+	return refreshed, nil
 }

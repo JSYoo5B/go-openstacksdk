@@ -42352,7 +42352,8 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithPersonality",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithDataVolumes",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithUserData",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerWithoutAddressesPolicy"
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithServerWithoutAddressesPolicy",
+        "github.com/JSYoo5B/go-openstacksdk/compute.WithCreateRefresh"
       ],
       "contracts": [
         {
@@ -42660,6 +42661,12 @@
           "tests": [
             "connection_server_create_lifecycle_test.go:TestConnectionCreateLifecycleResolvesGroupVolumesAndDeletesOnlyWhenSelected"
           ]
+        },
+        {
+          "behavior": "WithCreateRefresh performs exactly one GET of the created server after an accepted POST and returns the refreshed model; ERROR returns ServerFaultError with Python's fault message and the refreshed Server, while a failed or mismatched GET returns the POST server with the error and never repeats the POST. Combining it with WithWait fails before POST.",
+          "tests": [
+            "compute/server_create_lifecycle_test.go:TestServerCreateRefreshPerformsOneGetAndReportsFault"
+          ]
         }
       ],
       "differences": [
@@ -42690,7 +42697,7 @@
       ],
       "remaining": [
         "Configured default NIC and the bounded automatic floating source/NAT consumers now use shared roles; the owned high Network Service mutations now provide the verified bounded cache invalidation. Complete full has_service/private/source/flags, remaining relationship/model/session policy and advertised min/max/default microversion checks used by supports/require_microversion. Generated NetworkV2/raw-client and out-of-band topology changes still require explicit Reset; bounded roles and mutation hooks do not close the complete cloud create policy.",
-        "Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model behavior beyond typed CreateWithAutomaticFloatingIP, which consumes bounded Neutron and legacy Nova dispatch; dispatch fixtures do not cover every volume/NIC combination. Ordinary Servers.Create without wait still returns the POST response instead of Python's wait=false GET, ERROR fault check and add_server_interfaces expansion, and creation adminPass stays on Creation rather than being copied onto the returned Server.",
+        "Complete full source auto_ip/explicit IP/pool/Nova-source defaults and uncovered forwarding/model behavior beyond typed CreateWithAutomaticFloatingIP, which consumes bounded Neutron and legacy Nova dispatch; dispatch fixtures do not cover every volume/NIC combination. Servers.Create with WithCreateRefresh performs Python's wait=false single GET and ERROR fault check, but does not apply add_server_interfaces expansion to the refreshed server or copy the creation adminPass onto it; without the option Create returns the POST response.",
         "Compare dynamic Resource/dict/Munch inputs, alias precedence, returned model normalization/location and session/cache/descriptor behavior. Explicit Go none maps the Proxy; pinned cloud with no NICs can overwrite kwargs networks with auto."
       ]
     },

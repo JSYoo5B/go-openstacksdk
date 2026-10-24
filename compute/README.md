@@ -817,6 +817,11 @@ Create property rules:
 
 Readiness errors and cleanup:
 
+- `WithCreateRefresh` matches Python's `wait=False` path: after the POST it
+  performs one GET and returns the refreshed server, or `ServerFaultError`
+  when it is in ERROR. A failed GET returns the POST response with the error;
+  the POST is never repeated. It cannot be combined with `WithWait`.
+
 - A server in ERROR returns `*compute.ServerFaultError`, which unwraps to
   `resource.FailedStateError`. Its message follows Python's two forms
   ("Compute service reports fault: ..." or "no further information
