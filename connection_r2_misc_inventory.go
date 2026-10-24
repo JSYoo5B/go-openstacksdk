@@ -129,10 +129,13 @@ func (e *inventoryEntry) connection(ctx context.Context) (*Connection, error) {
 
 // InventoryHost is one server and the inventory cloud that returned it.
 // Hostvars is set by the default expansion (Python expand=True); Interfaces
-// is set by both expansions and is nil with WithInventoryBare.
+// is set by both expansions and is nil with WithInventoryBare. Record is the
+// Source-shaped Proxy.servers row (servers.API.ListCloudRecords) the typed
+// Server was decoded from.
 type InventoryHost struct {
 	Cloud      string
 	Server     *servers.Server
+	Record     *servers.ServerFindRecord
 	Interfaces *compute.ServerAddressView
 	Hostvars   *CloudServerHostvars
 }
@@ -246,41 +249,24 @@ func (i *Inventory) listCloud(ctx context.Context, e *inventoryEntry, opts Inven
 	if err != nil {
 		return nil, err
 	}
-	service, err := conn.Compute(ctx)
+	// Python list_hosts calls cloud.list_servers(detailed=expand,
+	// all_projects=all_projects), which is Proxy.servers(all_projects=...)
+	// over GET /servers/detail followed by _expand_server for every row.
+	cfg := CloudServerReadOpts{
+		List:     []servers.RecordFindOption{servers.WithRecordFindAllProjects(opts.AllProjects)},
+		Bare:     opts.Expansion == InventoryExpandNone,
+		Detailed: opts.Expansion == InventoryExpandHostvars,
+	}
+	if opts.Private {
+		cfg.Address = append(cfg.Address, compute.WithPrivateCloud(true))
+	}
+	results, err := conn.cloudServerListExpanded(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	var listOptions []servers.ListOption
-	if opts.AllProjects {
-		listOptions = append(listOptions, servers.WithListOptions(servers.ListOpts{AllTenants: true}))
-	}
-	var hosts []InventoryHost
-	for server, err := range service.API.Servers.List(ctx, listOptions...) {
-		if err != nil {
-			return nil, err
-		}
-		hosts = append(hosts, InventoryHost{Cloud: e.name, Server: server})
-	}
-	if opts.Expansion == InventoryExpandNone {
-		return hosts, nil
-	}
-	var address []compute.ServerAddressOption
-	if opts.Private {
-		address = append(address, compute.WithPrivateCloud(true))
-	}
-	for index := range hosts {
-		host := &hosts[index]
-		if opts.Expansion == InventoryExpandHostvars {
-			hostvars, err := conn.cloudServerHostvars(ctx, host.Server, nil, address)
-			if err != nil {
-				return nil, err
-			}
-			host.Hostvars, host.Interfaces = hostvars, hostvars.Interfaces
-			continue
-		}
-		if host.Interfaces, err = conn.ExpandServerInterfaces(ctx, host.Server, address...); err != nil {
-			return nil, err
-		}
+	hosts := make([]InventoryHost, len(results))
+	for index, result := range results {
+		hosts[index] = InventoryHost{Cloud: e.name, Server: result.Server, Record: result.Record, Interfaces: result.Interfaces, Hostvars: result.Hostvars}
 	}
 	return hosts, nil
 }

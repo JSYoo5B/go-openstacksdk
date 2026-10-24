@@ -588,6 +588,8 @@ Go API:
   Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP`.
 - ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with WithCloudServerDetailed, none with WithCloudServerBare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.
   Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
+- Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.
+  Tests: `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging`.
 
 Python/Go differences:
 
@@ -597,7 +599,7 @@ Python/Go differences:
 
 Unresolved boundaries:
 
-- The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved.
+- The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
 
 ### `python:cloud/_compute/ComputeCloudMixin/search_servers`
 
@@ -623,6 +625,8 @@ Go API:
   Tests: `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters`, `connection_r2_cloud_compute_servers_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure`.
 - SearchServers lists with the default expansion, then filters locally over CloudServerResultView so dictionary filters see expansion keys such as public_v4 and JMESPath sees the detailed flavor name; filters never reach Nova.
   Tests: `connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
+- Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.
+  Tests: `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging`.
 
 Python/Go differences:
 
@@ -633,7 +637,7 @@ Python/Go differences:
 Unresolved boundaries:
 
 - Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.
-- The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved.
+- The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
 
 ### `python:cloud/_compute/ComputeCloudMixin/update_server`
 

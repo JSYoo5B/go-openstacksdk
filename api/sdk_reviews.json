@@ -10082,7 +10082,19 @@
         "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.All",
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindQuery",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindHeaders",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLocation"
       ],
       "contracts": [
         {
@@ -10093,18 +10105,60 @@
             "api/generated_list_controls_test.go:TestGeneratedListControlsAcrossPagesAndDefaultCycleGuard",
             "api/generated_list_controls_test.go:TestGeneratedListControlsRetainWholePageDecodeAndCancellation"
           ]
+        },
+        {
+          "behavior": "ListCloudRecords maps Proxy.servers: GET /servers/detail by default, GET /servers for details=False, all_tenants=True only for all_projects=True (false and absent send nothing), a raw all_tenants without the typed option passes unchanged, and typed/raw cross-project conflicts fail before HTTP; rows carry the selected microversion and the Python Accept application/json header.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListDetailsAndAllProjectsAlternatives"
+          ]
+        },
+        {
+          "behavior": "Every client-side name of the pinned Server._query_mapping (including limit/marker, id to uuid and the TagMixin pairs) and its Nova name is sent under the Nova name; the client-side name wins over the Nova name, an explicit client null suppresses it, Requests True/False/repeated-array/null-item encoding is kept and unknown non-Body keys are dropped.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes"
+          ]
+        },
+        {
+          "behavior": "Server Body attributes outside the query mapping (host_status, is_locked, metadata) are client filters compared on the descriptor view with Python equality and nested dictionary subsets, never sent to Nova; max_items counts every received row before the client filter and still sends its limit hint.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap"
+          ]
+        },
+        {
+          "behavior": "Resource.list paging follows servers_links, HTTP Link and the relative /v2.1 top-level next, falls back to marker=last ID with the caller or max_items limit until an empty page, checks max_items before each further row so a cap reached at a page boundary still requests (and can fail on) the next page, reads one page for paginated=False, stops on an empty page despite a link and fails a repeated continuation with the actual page receipt after the yielded rows.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging"
+          ]
+        },
+        {
+          "behavior": "Per-call microversion and headers apply to the listing without mutating the shared client, Accept may be replaced, protocol version headers, raw control/constructor keys (base_path, paginated, max_items, microversion, headers, details, all_projects, jmespath_filters), malformed id JSON, negative caps, nil options and cancellation fail before HTTP.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListPerCallMicroversionHeadersAndControls"
+          ]
+        },
+        {
+          "behavior": "Listed rows reuse the Server Body descriptors, aliases, defaults, nested flavor conversion and computed location of FindRecord, keep unknown values only in Wire and expose independent Resource/Wire/Envelope/Header copies.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListRowDescriptorsAndReceipts"
+          ]
         }
       ],
       "documentation": [
-        "docs/listing.md"
+        "docs/listing.md",
+        "compute/v2/servers-list-python.md"
       ],
       "differences": [
         "Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.",
-        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy."
+        "The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.",
+        "servers.API.ListCloudRecords is the Python Proxy.servers counterpart and returns owned ServerFindRecord snapshots; the native API.All/List iterators remain the Gophercloud-shaped alternative covered by the consumption controls above.",
+        "The Python control keyword arguments paginated, max_items, microversion and headers are typed RecordFindOption values; raw control, constructor and positional keys (including details, all_projects and base_path, which raise TypeError in Python) and the deprecated Proxy._list jmespath_filters (Python applies jmespath.search to the lazy generator) fail before HTTP. The cloud SearchServers expression filter is the supported JMESPath path.",
+        "A typed all-projects option combined with a raw all_tenants key fails before HTTP instead of letting the typed value win, following the find_server option-ownership policy.",
+        "Continuation links that change the fixed origin, collection path or caller filters are rejected with the actual page receipt instead of being followed, as for find_server; exact relative /v2.1/servers[/detail] aliases are accepted.",
+        "Go accepts final 200..399 list representations and rejects informational statuses with actual proof, the bounded status policy shared with find_server."
       ],
       "remaining": [
-        "Audit the details=False/all_projects proxy alternatives, every typed filter and inherited Server Body/query/descriptor/normalization contracts beyond the tested detailed listing path.",
-        "Inherited Resource ownership/cache/dirty-state, per-call base_path/microversion/header controls, arbitrary client Body filters and Python next-link/limit/marker fallback remain separate comparisons; these consumption tests do not establish whole-operation parity."
+        "Python returns mutable Server Resources with session/cache/dirty state; that runtime is the shared SDK-R1/C1/S1 boundary of docs/sdk-support-ledger.md and is not reproduced by the owned ServerFindRecord snapshots.",
+        "Python forwards dynamic non-integer limit/max_items values; the Go limit and cap controls are nonnegative integers (shared dynamic max_items/limit type boundary)."
       ]
     },
     {
@@ -105939,6 +105993,14 @@
           "tests": [
             "connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow"
           ]
+        },
+        {
+          "behavior": "Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes",
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap",
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging"
+          ]
         }
       ],
       "differences": [
@@ -105951,7 +106013,7 @@
         "compute/cloud-server-composed-python.md"
       ],
       "remaining": [
-        "The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
+        "The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
@@ -105987,6 +106049,14 @@
           "tests": [
             "connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow"
           ]
+        },
+        {
+          "behavior": "Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.",
+          "tests": [
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes",
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap",
+            "compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging"
+          ]
         }
       ],
       "differences": [
@@ -106000,7 +106070,7 @@
       ],
       "remaining": [
         "Named JMESPath Source Resource subclass typing/equality and numeric/nonfinite namespace differences recorded for the other cloud searches (see search_server_groups) also apply to Resource-backed server rows.",
-        "The rows come from the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
+        "The rows come from the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
@@ -113791,7 +113861,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
-        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords"
       ],
       "contracts": [
         {
@@ -113815,6 +113886,13 @@
             "connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate",
             "connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError"
           ]
+        },
+        {
+          "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
+          "tests": [
+            "connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
+            "connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+          ]
         }
       ],
       "differences": [
@@ -113825,10 +113903,11 @@
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
-        "compute/cloud-server-composed-python.md"
+        "compute/cloud-server-composed-python.md",
+        "compute/v2/servers-list-python.md"
       ],
       "remaining": [
-        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
+        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
@@ -113848,7 +113927,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
-        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords"
       ],
       "contracts": [
         {
@@ -113863,6 +113943,13 @@
             "connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion",
             "connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate"
           ]
+        },
+        {
+          "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
+          "tests": [
+            "connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
+            "connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+          ]
         }
       ],
       "differences": [
@@ -113873,10 +113960,11 @@
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
-        "compute/cloud-server-composed-python.md"
+        "compute/cloud-server-composed-python.md",
+        "compute/v2/servers-list-python.md"
       ],
       "remaining": [
-        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
+        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {
@@ -113896,7 +113984,8 @@
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryBare",
         "github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate",
-        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView"
+        "github.com/JSYoo5B/go-openstacksdk.InventoryHostView",
+        "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords"
       ],
       "contracts": [
         {
@@ -113910,6 +113999,13 @@
           "tests": [
             "connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion"
           ]
+        },
+        {
+          "behavior": "Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.",
+          "tests": [
+            "connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath",
+            "connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery"
+          ]
         }
       ],
       "differences": [
@@ -113920,10 +114016,11 @@
       ],
       "documentation": [
         "docs/connection-r2-misc.md",
-        "compute/cloud-server-composed-python.md"
+        "compute/cloud-server-composed-python.md",
+        "compute/v2/servers-list-python.md"
       ],
       "remaining": [
-        "Hosts are listed through the native servers.API.List (all_tenants=true), whereas Python lists through list_servers over the proxy servers listing (python:compute/v2/servers), whose own whole-operation review remains unresolved."
+        "Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types)."
       ]
     },
     {

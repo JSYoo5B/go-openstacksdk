@@ -3,13 +3,18 @@ package servers
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"iter"
 	"maps"
 	"net/http"
+	"net/url"
 	"slices"
+	"strconv"
 	"strings"
+	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/microversions"
@@ -72,10 +77,7 @@ func (a *API) ListCloudRecords(ctx context.Context, options ...RecordFindOption)
 			}
 			policy = serverFindCopy(next)
 		}
-		_, listQuery, filters, _, control, err := serverFindPrepareQuery(policy, "")
-		if _, named := policy.Query["name"]; err == nil && !named {
-			listQuery.Del("name")
-		}
+		listQuery, filters, control, err := serverListPrepareQuery(policy)
 		location := resource.CloudLocation{}
 		if err == nil {
 			if policy.Location != nil {
@@ -193,4 +195,52 @@ func (a *API) ListCloudRecords(ctx context.Context, options ...RecordFindOption)
 			}
 		}
 	}
+}
+
+// serverListPrepareQuery adapts the shared find query preparation to the
+// Proxy.servers listing. Unlike find_server, whose positional identity owns
+// "id", the listing transposes a caller "id" to the Nova "uuid" filter and
+// prefers it over a raw "uuid" exactly like QueryParameters._transpose. The
+// deprecated Proxy._list jmespath_filters argument is rejected before HTTP:
+// Python applies jmespath.search to the lazy generator itself, which is not a
+// row selection; the cloud SearchServers expression filter is the supported
+// alternative. No automatic name hint is added.
+func serverListPrepareQuery(policy RecordFindOpts) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {
+	owned := serverFindCopy(policy)
+	if _, ok := owned.Query["jmespath_filters"]; ok {
+		return nil, nil, rest.ListControl{}, serverFindInvalid("deprecated jmespath_filters is not a Proxy.servers query; use the cloud SearchServers expression filter")
+	}
+	id, hasID := owned.Query["id"]
+	delete(owned.Query, "id")
+	_, list, filters, _, control, err := serverFindPrepareQuery(owned, "")
+	if err != nil {
+		return nil, nil, control, err
+	}
+	if _, named := owned.Query["name"]; !named {
+		list.Del("name")
+	}
+	if hasID {
+		if !utf8.Valid(id) || !json.Valid(id) {
+			return nil, nil, control, serverFindInvalid("query %q must contain UTF-8 JSON", "id")
+		}
+		values, err := cloudfilter.RequestQueryValues(id)
+		if err != nil {
+			return nil, nil, control, err
+		}
+		list.Del("uuid")
+		if len(values) > 0 {
+			list["uuid"] = slices.Clone(values)
+		}
+	}
+	// Resource.list sends max_items as the limit when the limit is falsey and
+	// checks the cap before constructing each further row, so a cap reached
+	// exactly at a page boundary still requests the following page.
+	if limit := control.MaxItems; limit > 0 {
+		if values := list["limit"]; len(values) == 0 || len(values) == 1 && (values[0] == "0" || values[0] == "") {
+			list.Set("limit", strconv.Itoa(limit))
+		}
+		control.MaxItems, control.LimitHint = 0, false
+		control.BeforeItem = func(_ context.Context, consumed int) (bool, error) { return consumed >= limit, nil }
+	}
+	return list, filters, control, nil
 }

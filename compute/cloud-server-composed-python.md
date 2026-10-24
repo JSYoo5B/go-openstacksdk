@@ -28,6 +28,9 @@ with `WithRecordFindDetails(false)`) as `ServerFindRecord` values that carry the
 Source Resource view, the received row and the page receipt. `all_tenants=True`
 is sent only with `WithRecordFindAllProjects(true)`. Microversion negotiation,
 header policy, paging and location projection are shared with `FindRecord`.
+The full Python `Proxy.servers` query mapping, client Body filters, paging
+fallbacks and per-call controls are described in
+`compute/v2/servers-list-python.md`.
 
 `SearchServerRecords` consumes every row, then applies the cloud name-or-ID
 phase (exact or glob) and the local dictionary or JMESPath filters. Nothing is

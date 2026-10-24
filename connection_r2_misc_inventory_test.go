@@ -87,7 +87,7 @@ func TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery(t *testing.T)
 	if _, err := inventory.ListHosts(ctx, sdk.WithInventoryAllProjects()); err != nil {
 		t.Fatal(err)
 	}
-	if stateA.queries[0] != "" || stateA.queries[1] != "all_tenants=true" || stateB.calls != 2 {
+	if stateA.queries[0] != "" || stateA.queries[1] != "all_tenants=True" || stateB.queries[1] != "all_tenants=True" || stateB.calls != 2 {
 		t.Fatalf("queries %v %v", stateA.queries, stateB.queries)
 	}
 }

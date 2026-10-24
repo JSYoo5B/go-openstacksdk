@@ -976,25 +976,120 @@ Unresolved boundaries:
 
 Status: `unresolved`.
 
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.GetHost`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventory`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventoryFromCloudFiles`
+- `github.com/JSYoo5B/go-openstacksdk.CloudNames`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+
+- Servers of every cloud are listed in order with all_tenants on request; a failing cloud contributes nothing; the default aborts and keeps earlier hosts; continue mode records failures; cancellation aborts without requests.
+  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryFailurePolicyKeepsEarlierHostsAndNeverRetries`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryCancellationAlwaysAborts`.
+- Clouds are enumerated from the first clouds.yaml in file order and connected lazily.
+  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventoryValidationAndCloudNames`.
+- ListHosts expands every host into hostvars by default, keeps only the interface expansion with WithInventoryExpand(false), skips expansion with WithInventoryBare, maps private to the private interface address, and fails a cloud whose expansion lookup fails while recording swallowed security group failures.
+  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`, `connection_cloud_inventory_hostvars_test.go:TestInventoryHostvarsSwallowSecurityGroupFailureButFailCloudOnLookupError`.
+- Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
+  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+
+Python/Go differences:
+
+- Go returns typed compute servers with explicit failures instead of swallowing SDKException.
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
+
 Unresolved boundaries:
 
-- Go has no multi-cloud inventory that connects to every clouds.yaml entry and lists servers across them with fail_on_cloud_config handling.
+- Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
 
 ### `python:cloud/inventory/OpenStackInventory/search_hosts`
 
 Status: `unresolved`.
 
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.GetHost`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventory`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventoryFromCloudFiles`
+- `github.com/JSYoo5B/go-openstacksdk.CloudNames`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+
+- Glob identifier selection, nested filters and JMESPath string filters over server records.
+  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+- SearchHosts filters InventoryHostView rows, so filters see hostvars keys such as public_v4, interface_ip and flavor.name, and the private flag changes interface_ip and access_ipv4.
+  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`, `connection_cloud_inventory_hostvars_test.go:TestInventoryExpandFalseBareAndPrivate`.
+- Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
+  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+
+Python/Go differences:
+
+- Filter keys are the JSON field names of the Go compute server record.
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
+
 Unresolved boundaries:
 
-- Go has no multi-cloud inventory, and no public _utils._filter_list helper for its server list.
+- Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
 
 ### `python:cloud/inventory/OpenStackInventory/get_host`
 
 Status: `unresolved`.
 
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.ListHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.SearchHosts`
+- `github.com/JSYoo5B/go-openstacksdk.Inventory.GetHost`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventory`
+- `github.com/JSYoo5B/go-openstacksdk.NewInventoryFromCloudFiles`
+- `github.com/JSYoo5B/go-openstacksdk.CloudNames`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryContinueOnCloudError`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
+- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
+
+- Single match, nil for none, AmbiguousError for several, invalid expression results.
+  Tests: `connection_r2_misc_inventory_test.go:TestR2MiscInventorySearchAndGetHost`.
+- GetHost selects one expanded host by identifier and hostvars filters and rejects a JMESPath value.
+  Tests: `connection_cloud_inventory_hostvars_test.go:TestInventoryHostsDefaultToHostvarsExpansion`.
+- Hosts are listed through the cloud list_servers path (servers.API.ListCloudRecords): GET /servers/detail with the Python Accept header, all_tenants=True only for all projects, continuation links followed, and each InventoryHost keeps the Source Record row.
+  Tests: `connection_cloud_inventory_proxy_listing_test.go:TestInventoryListsThroughCloudListServersProxyPath`, `connection_r2_misc_inventory_test.go:TestR2MiscInventoryListsEveryCloudInOrderWithAllProjectsQuery`.
+
+Python/Go differences:
+
+- Go returns resource.AmbiguousError instead of SDKException.
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
+- The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
+
 Unresolved boundaries:
 
-- Go has no multi-cloud inventory search that returns one server or None and fails on multiple matches.
+- Hosts are listed through the cloud list_servers path over the proxy servers listing (python:compute/v2/servers), which remains unresolved only for the shared Python runtime boundaries (mutable Server Resource session/cache/dirty state, SDK-R1/C1/S1 of docs/sdk-support-ledger.md, and dynamic non-integer limit/max_items types).
 
 ## References
 
