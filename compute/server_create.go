@@ -185,6 +185,8 @@ type serverBody struct {
 	base   servers.CreateOpts
 	fields map[string]any
 	hints  map[string]json.RawMessage
+	// mappings are explicit v2 entries placed before generated mappings.
+	mappings []ServerBlockDevice
 }
 
 func (b serverBody) ToServerCreateMap() (map[string]any, error) {
@@ -202,6 +204,16 @@ func (b serverBody) ToServerCreateMap() (map[string]any, error) {
 		server["user_data"] = base64.StdEncoding.EncodeToString(b.base.UserData)
 	}
 	maps.Copy(server, b.fields)
+	if len(b.mappings) > 0 {
+		combined := make([]any, 0, len(b.mappings))
+		for _, mapping := range b.mappings {
+			combined = append(combined, mapping.wire())
+		}
+		if generated, ok := server["block_device_mapping_v2"].([]any); ok {
+			combined = append(combined, generated...)
+		}
+		server["block_device_mapping_v2"] = combined
+	}
 	if b.hints != nil {
 		hints := make(map[string]any, len(b.hints))
 		for key, value := range b.hints {
@@ -380,7 +392,7 @@ func (s *Servers) prepareServerCreateBody(ctx context.Context, request CreateSer
 	if err != nil {
 		return serverBody{}, err
 	}
-	return serverBody{base: o.base, fields: o.fields, hints: hints}, checkServerCreation(ctx)
+	return serverBody{base: o.base, fields: o.fields, hints: hints, mappings: cloneBlockDevices(o.extra.mappings)}, checkServerCreation(ctx)
 }
 
 func checkServerCreation(ctx context.Context) error {

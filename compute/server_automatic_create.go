@@ -37,7 +37,11 @@ var ErrServerAddressesUnavailable = errors.New("server addresses unavailable")
 // Deletion is set only when DeleteServerWithoutAddresses was selected.
 type ServerAddressesUnavailableError struct {
 	ServerID string
-	Deletion *ServerDeletion
+	// EmptyRows reports a non-empty address map whose rows are all empty or
+	// null. Python treats such a map as truthy and never deletes the server,
+	// so DeleteServerWithoutAddresses leaves it in place as well.
+	EmptyRows bool
+	Deletion  *ServerDeletion
 }
 
 func (e *ServerAddressesUnavailableError) Error() string {
@@ -146,12 +150,14 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	err = state.waitReadyServer(ctx, *policy)
 	err = state.applyWithoutAddresses(ctx, err, options.ServerWithoutAddresses, true)
 	result.Server = state.last
+	copyCreationAdminPass(result)
 	if err != nil {
 		return result, errors.Join(err, state.check(ctx))
 	}
 	state.address.accessIPv4, state.address.accessIPv6 = state.last.AccessIPv4, state.last.AccessIPv6
 	result.Automatic, err = state.ensure(ctx)
 	result.Server = state.last
+	copyCreationAdminPass(result)
 	return result, errors.Join(err, state.check(ctx))
 }
 
@@ -172,7 +178,7 @@ func (state *automaticIPState) waitReadyServer(ctx context.Context, policy resou
 					rows += len(addresses)
 				}
 				if rows == 0 {
-					return nil, &ServerAddressesUnavailableError{ServerID: state.serverID}
+					return nil, &ServerAddressesUnavailableError{ServerID: state.serverID, EmptyRows: len(state.last.Addresses) > 0}
 				}
 			}
 			return state.last, nil
@@ -191,4 +197,17 @@ func (state *automaticIPState) waitReadyServer(ctx context.Context, policy resou
 		err = newServerFaultError(state.last, state.lastFault)
 	}
 	return errors.Join(err, state.check(ctx))
+}
+
+// copyCreationAdminPass mirrors Python setting admin_password on the returned
+// server: a creation-only adminPass is copied onto the latest Server when the
+// GET model has none. The copy is a detached Server, so Automatic evidence
+// keeps the raw GET model; Creation keeps its own value.
+func copyCreationAdminPass(result *AutomaticServerCreateResult) {
+	if result.Creation == nil || result.Server == nil || result.Server == result.Creation || result.Creation.AdminPass == "" || result.Server.AdminPass != "" {
+		return
+	}
+	copied := *result.Server
+	copied.AdminPass = result.Creation.AdminPass
+	result.Server = &copied
 }

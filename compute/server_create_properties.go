@@ -30,6 +30,10 @@ type serverCreateExtras struct {
 	description *string
 	files       []ServerFile
 	refresh     bool
+
+	mappings     []ServerBlockDevice
+	legacy       []LegacyBlockDevice
+	certificates []string
 }
 
 // ServerFile is one legacy personality file. Contents are base64-encoded by
@@ -282,7 +286,7 @@ func (o *createServerOptions) validateExtras(version string) error {
 	if len(o.extra.files) > 0 && microversionAtLeast(version, 2, 57) {
 		return fmt.Errorf("%w: personality was removed in Compute microversion 2.57 (client uses %q)", resource.ErrUnsupported, version)
 	}
-	return nil
+	return o.validateMappings(version)
 }
 
 type serverGroupName struct {
@@ -295,6 +299,16 @@ type serverGroupName struct {
 func (s *Servers) prepareServerCreateExtras(ctx context.Context, o *createServerOptions) (map[string]json.RawMessage, error) {
 	if o.extra.description != nil {
 		o.fields["description"] = *o.extra.description
+	}
+	if len(o.extra.certificates) > 0 {
+		o.fields["trusted_image_certificates"] = append([]string(nil), o.extra.certificates...)
+	}
+	if len(o.extra.legacy) > 0 {
+		legacy := make([]map[string]any, len(o.extra.legacy))
+		for i, mapping := range o.extra.legacy {
+			legacy[i] = mapping.wire()
+		}
+		o.fields["block_device_mapping"] = legacy
 	}
 	if len(o.extra.files) > 0 {
 		o.base.Personality = make(servers.Personality, len(o.extra.files))

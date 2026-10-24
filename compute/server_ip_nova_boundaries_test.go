@@ -412,7 +412,7 @@ func TestNovaServerIPReadinessAndCreationConsumeLegacyBackend(t *testing.T) {
 			})
 			created, createErr := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), compute.AutomaticServerCreateOptions{Server: automaticCreateOptions().Server, AutomaticIP: common})
 			err = createErr
-			if created == nil || created.Creation.AdminPass != "initial" || created.Server.AdminPass != "" {
+			if created == nil || created.Creation.AdminPass != "initial" || created.Server.AdminPass != "initial" {
 				t.Fatal(created, err, f.trace())
 			}
 			result = created.Automatic

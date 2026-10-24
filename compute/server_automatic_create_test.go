@@ -65,7 +65,7 @@ func TestAutomaticCreateWaitsForRawMetadataAndObservesAssignment(t *testing.T) {
 	var progress []int
 	o.Server = append(o.Server, compute.WithWait(resource.WithPollInterval(time.Millisecond), resource.WithProgressCallback(func(n int) { progress = append(progress, n) })))
 	result, err := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), o)
-	if err != nil || result == nil || result.Creation.AdminPass != "initial-password" || result.Server.AdminPass != "" || result.Server.Status != "ACTIVE" || result.Automatic == nil || !result.Automatic.Observed || result.Automatic.Assignment == nil || posts.Load() != 1 || f.posts.Load() != 1 || f.raw.Load() != 4 || !reflect.DeepEqual(progress, []int{25, 0}) {
+	if err != nil || result == nil || result.Creation.AdminPass != "initial-password" || result.Server.AdminPass != "initial-password" || result.Automatic.Server.AdminPass != "" || result.Server.Status != "ACTIVE" || result.Automatic == nil || !result.Automatic.Observed || result.Automatic.Assignment == nil || posts.Load() != 1 || f.posts.Load() != 1 || f.raw.Load() != 4 || !reflect.DeepEqual(progress, []int{25, 0}) {
 		t.Fatal(result, err, posts.Load(), f.posts.Load(), f.raw.Load(), progress)
 	}
 }

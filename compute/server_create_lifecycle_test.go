@@ -29,6 +29,8 @@ type createBodyFixture struct {
 	gets     atomic.Int32
 	getCode  int
 	getBody  string
+	postCode int
+	postBody string
 }
 
 func newCreateBodyFixture(t *testing.T, microversion string) *createBodyFixture {
@@ -56,7 +58,11 @@ func newCreateBodyFixture(t *testing.T, microversion string) *createBodyFixture 
 		if _, ok := body["os:scheduler_hints"]; ok {
 			t.Error("Gophercloud hint key must not be used")
 		}
-		testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)
+		code, reply := 202, `{"server":{"id":"created","status":"BUILD"}}`
+		if f.postBody != "" {
+			code, reply = f.postCode, f.postBody
+		}
+		testcloud.JSON(w, code, reply)
 	})
 	f.cloud.Mux.HandleFunc("GET /v2.1/servers/created", func(w http.ResponseWriter, r *http.Request) {
 		f.gets.Add(1)
@@ -74,6 +80,8 @@ func (f *createBodyFixture) reset(microversion string) {
 	f.posts.Store(0)
 	f.lookups.Store(0)
 	f.body, f.hints, f.hasHints = nil, nil, false
+	f.gets.Store(0)
+	f.postCode, f.postBody = 0, ""
 }
 
 func TestServerCreatePropertiesSchedulerHintsGroupAndCount(t *testing.T) {

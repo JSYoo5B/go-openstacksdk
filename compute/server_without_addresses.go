@@ -19,7 +19,9 @@ const (
 	// KeepServerWithoutAddresses returns the server with
 	// ServerAddressesUnavailableError and sends no DELETE. It is the default.
 	KeepServerWithoutAddresses ServerWithoutAddressesPolicy = iota
-	// DeleteServerWithoutAddresses follows Python's get_active_server: it
+	// DeleteServerWithoutAddresses follows Python's get_active_server: for a
+	// null or empty address map (Python's falsy addresses; a map with only
+	// empty rows is truthy there and is never deleted) it
 	// sends exactly one DELETE for the server and still returns
 	// ServerAddressesUnavailableError. A 404 DELETE is recorded as NotFound
 	// without an error. When the workflow waits (WaitForServer,
@@ -63,7 +65,7 @@ func (p ServerWithoutAddressesPolicy) validate() error {
 // so errors.Is reaches both causes.
 func (state *automaticIPState) applyWithoutAddresses(ctx context.Context, err error, policy ServerWithoutAddressesPolicy, wait bool) error {
 	var unavailable *ServerAddressesUnavailableError
-	if policy != DeleteServerWithoutAddresses || !errors.As(err, &unavailable) || unavailable.Deletion != nil {
+	if policy != DeleteServerWithoutAddresses || !errors.As(err, &unavailable) || unavailable.Deletion != nil || unavailable.EmptyRows {
 		return err
 	}
 	deletion := state.deleteServer(ctx, wait)

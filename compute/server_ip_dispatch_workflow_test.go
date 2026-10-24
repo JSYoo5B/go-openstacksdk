@@ -49,7 +49,7 @@ func TestServerIPDispatchAllWorkflowConsumersUseTheSameOrderedPolicy(t *testing.
 				})
 				created, createErr := f.service.CreateWithAutomaticFloatingIP(context.Background(), automaticCreateRequest(), compute.AutomaticServerCreateOptions{Server: automaticCreateOptions().Server, AutomaticIP: opts})
 				err = createErr
-				if created == nil || created.Creation.AdminPass != "creation-only" || created.Server.AdminPass != "" {
+				if created == nil || created.Creation.AdminPass != "creation-only" || created.Server.AdminPass != "creation-only" {
 					t.Fatal(created, err)
 				}
 				result = created.Automatic

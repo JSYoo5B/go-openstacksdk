@@ -64,7 +64,7 @@ func (s *Service) GetActiveServer(ctx context.Context, input AutomaticFloatingIP
 		return result, errors.Join(err, state.check(ctx))
 	}
 	if !serverAddressRowsPresent(view) {
-		err := state.applyWithoutAddresses(ctx, &ServerAddressesUnavailableError{ServerID: state.serverID}, state.withoutAddresses, state.deleteWait)
+		err := state.applyWithoutAddresses(ctx, &ServerAddressesUnavailableError{ServerID: state.serverID, EmptyRows: len(state.last.Addresses) > 0}, state.withoutAddresses, state.deleteWait)
 		return result, errors.Join(err, state.check(ctx))
 	}
 	// Detach valid ACTIVE input before callbacks or association; non-ACTIVE and
