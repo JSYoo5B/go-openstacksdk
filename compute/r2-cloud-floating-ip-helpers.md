@@ -26,6 +26,18 @@ Matches `add_auto_ip` for basic use.
 
 Differences: other attaches go through the explicit-address workflow (address lookup by list), so Go sends one extra read compared with Python's direct attach; dynamic Server/Resource inputs and configuration aliases are not accepted.
 
+## `AddIPFromPool`
+
+Matches the pool branch of `add_ips_to_server` (`_add_ip_from_pool`) and returns the same `AddAutoIPResult`.
+
+- Reuse (default, `WithPoolIPReuse`) calls `AvailableFloatingIP` for the pool Ref without a server, so the first unattached IP on that network is chosen, even if another IP is already attached to the server; otherwise an unattached IP is allocated. A Neutron 404 falls back to the Nova pool as in Python.
+- Without reuse, `CreateFloatingIP` allocates on the pool with the server, `WithPoolIPFixedAddress`, `WithPoolIPNATDestination`, the wait flag and the whole `WithPoolIPTimeout` budget (default 60 seconds); the server is then always read again and the remaining budget is kept.
+- Unless the server shows the exact address (after a further read when the IP has a `port_id`), the IP is attached: with the Neutron floating source, including a Nova fallback row, by one `PUT floatingips/{id}` through `network.FloatingIPs.AttachByID` with the fixed address and NAT destination, where a 404 is ignored (`NeutronNotFound`); with Nova by one `addFloatingIp` action through `AddIPList` with the fixed address. Unlike `AddAutoIP`, a fresh allocation is attached again, as Python's pool branch does.
+- `WithPoolIPWait(true)` polls the server for the address within the remaining budget and ends with `*AddAutoIPTimeoutError`. Nothing is deleted on timeout. Mutations are never replayed.
+- `AddIPsToServer` with a pool selector keeps its Ensure-based selection, which prefers an IP already attached to the target; use `AddIPFromPool` for the source pool behavior.
+
+Behavior is covered by `connection_add_ip_from_pool_test.go`.
+
 With a Connection, `WithServiceEnabled("network", false)` or `has_network: false` in clouds.yaml makes the helpers use the Nova lane even with the Neutron source, as Python's `_use_neutron_floating` does.
 
 Behavior is covered by `connection_r2_cloud_net_ip_test.go` and, for the Neutron-to-Nova fallback edges, `connection_cloud_net_ip_fallback_test.go` and `connection_cloud_net_auto_ip_fallback_test.go`; the disabled network service by `connection_network_service_disable_test.go`.

@@ -16,17 +16,24 @@ import (
 // falling through to a Nova addFloatingIp action. Other failures, such as a
 // server without ports, are returned.
 func (s *Service) attachAutoIPFallbackRow(ctx context.Context, result *AddAutoIPResult) error {
+	return s.neutronAttachRow(ctx, result, "", "")
+}
+
+// neutronAttachRow sends the Neutron port update of _neutron_attach_ip_to_server
+// for result's floating IP ID, with an optional fixed address and NAT
+// destination, and ignores a single NotFound like _attach_ip_to_server.
+func (s *Service) neutronAttachRow(ctx context.Context, result *AddAutoIPResult, fixed, nat string) error {
 	if s.Servers == nil || s.Servers.dependencies.AddressNetworks == nil {
-		return invalid("the Neutron attach of a Nova fallback row needs a network service")
+		return invalid("the Neutron attach of a floating IP row needs a network service")
 	}
 	service, err := s.Servers.dependencies.AddressNetworks(ctx)
 	if err != nil {
 		return err
 	}
 	if service == nil || service.FloatingIPs == nil {
-		return invalid("the Neutron attach of a Nova fallback row needs a network service")
+		return invalid("the Neutron attach of a floating IP row needs a network service")
 	}
-	update, err := service.FloatingIPs.AttachByID(ctx, network.AttachFloatingIPByIDRequest{Server: resource.ID(result.Server.ID), FloatingIPID: result.FloatingIPID})
+	update, err := service.FloatingIPs.AttachByID(ctx, network.AttachFloatingIPByIDRequest{Server: resource.ID(result.Server.ID), FloatingIPID: result.FloatingIPID, FixedAddress: fixed, NATDestination: nat})
 	result.NeutronAttach = update
 	if err != nil && ctx.Err() == nil && neutronAttachNotFound(err) {
 		result.NeutronNotFound = err

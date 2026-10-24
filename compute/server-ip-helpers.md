@@ -237,6 +237,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`
 - `github.com/JSYoo5B/go-openstacksdk.WithMicroversion`
 - `github.com/JSYoo5B/go-openstacksdk.WithServiceLookupFailureAsUnavailable`
+- `github.com/JSYoo5B/go-openstacksdk/compute.Service.AddIPFromPool`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.AddIPFromPool`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPReuse`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPWait`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPTimeout`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPFixedAddress`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithPoolIPNATDestination`
 
 - The bounded existing-server automatic lane keeps policy skips separate from an undetermined/error decision. Disabled/source-none, private policy, enabled external AccessIPv4, any-family floating tags including an empty address, and explicit empty/null-row inventories return a clean reason without Compute/Network/role/owner work or assignment. Supplied address presence is tested separately from nil refresh.
   Tests: `compute/server_automatic_ip_test.go:TestAutomaticIPKnownSkipsAvoidAllServiceAndOwnerWork`.
@@ -340,6 +347,12 @@ Go API:
   Tests: `connection_network_service_disable_test.go:TestFloatingIPHelpersUseNovaWhenNetworkServiceDisabled`.
 - With WithServiceLookupFailureAsUnavailable a failing Network endpoint lookup makes the floating IP helpers take the Nova lane like _use_neutron_floating; by default the lookup error is returned before any mutation.
   Tests: `connection_service_lookup_test.go:TestServiceLookupFailureAsUnavailableMapsHasServiceFalse`.
+- AddIPFromPool reuse follows _add_ip_from_pool: available_floating_ip(network=pool) without a server picks the first unattached IP on the pool network even when another IP is already attached to the server, then one Neutron PUT floatingips/{id} on the server port honours the fixed address; a PUT NotFound is ignored and recorded, and no Nova action follows.
+  Tests: `connection_add_ip_from_pool_test.go:TestAddIPFromPoolReuseChoosesUnattachedFirstAndAttachesByID`.
+- AddIPFromPool without reuse allocates on the pool with the server, waits with the whole budget, always reads the server again after the allocation, skips the attach when the address is shown and otherwise attaches again (skip_attach is false in this branch); a timed-out address wait never deletes the allocation.
+  Tests: `connection_add_ip_from_pool_test.go:TestAddIPFromPoolNonReuseRefreshesServerBeforeAttach`.
+- With the Nova source AddIPFromPool reuses the pool's unattached Nova IP and associates it by one addFloatingIp action carrying the fixed address, then observes it when waiting; an empty pool Ref fails before any request.
+  Tests: `connection_add_ip_from_pool_test.go:TestAddIPFromPoolNovaSourceAssociatesWithFixedAddress`.
 
 Python/Go differences:
 
@@ -350,12 +363,13 @@ Python/Go differences:
 - Independent AddIPsToServer defaults to one60-second overall context, async and five-second raw poll, with explicit helper wait/timeout overrides. Existing Ensure/automatic creation retain five-minute/two-second synchronous defaults; GetActive/Wait retain their180second/five-second and readiness policies. Go also bounds selection/HTTP work and shares one budget across items, whereas source forwards timeout60 into wait branches and repeated list attachments. Source async pre-attached-IP Compute refresh remains a separate difference.
 - The selected Neutron pool lane reuses Ensure and may prefer already-attached candidates or allocate attached directly. Bounded Nova pool mode instead selects raw instance_id=null in the literal pool or allocates by POST200, compatibility GET and separate action202; it retains actual pre-action association fields. Source optional-server availability/full normalization and nonreuse refresh/elapsed subtraction remain distinct. Sequential Observed records item-time targets, not simultaneous final presence.
 - Direct Nova/None explicit or precise absent-Network selected execution requires actual legacy Compute capability. Missing Compute, selected microversion>=2.36 and unsupported Neutron port/NAT/project overrides remain typed capability failures; source/backend/config failures do not trigger automatic Neutron-error fallback. Nova has no IP status and receives no synthetic ACTIVE. Token sharing and accepted action proof are preserved separately from observation.
+- AddIPFromPool takes the pool as a typed name or ID Ref, whereas Python matches one string against both the name and ID of external floating networks. Its already-attached check looks for the exact floating address among the server's addresses rather than comparing only Python's first public floating address.
 
 Unresolved boundaries:
 
 - Complete source aliases/coercions, dynamic Server/Resource inputs, fixed/NAT forwarding and returned Resource/interface/location normalization beyond independent typed AddIPsToServer, whose async/60second default and selected Neutron and bounded Nova modes now have bounded fixtures. Compare uncovered selector/default/wait/progress and lifetime combinations; named entry/default alignment does not complete the public source contract.
 - Compare full source backend/fallback/error ordering, dynamic pool/source aliases, normalization/location/Resource and service-discovery/API-version/session/catalog policy (has_network configuration-disable now selects Nova) beyond bounded Nova list/pool/allocate/action and missing-Network/direct-source fixtures. Complete public availability/CRUD/detach/remove contracts separately; capable Nova mutation now exists but unsupported version/selectors/missing endpoint remain receiver-scoped limitations.
-- Complete source pool unattached-first availability, nonreuse post-create refresh/timing, broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.
+- Complete broad lookup Exception/None retry, integer remaining budget, fault/ACTIVE-no-address/delete/cleanup and ordinary Create/Get lifecycle semantics beyond the typed upper workflows; the pool selector of AddIPsToServer keeps its Ensure-based target-first selection while AddIPFromPool provides the source pool lane. Preserve deliberate whole-context/noDELETE/exact-target and sequential-Observed policies without claiming full cloud parity.
 - Complete configuration/vendor-profile/raw-string/nullable, inherited Resource/descriptor/adapter/session/cache and out-of-band invalidation contracts. Local HTTP fixtures and example compilation do not establish authenticated cloud or Python runtime interoperability.
 
 ### `python:cloud/_network_common/NetworkCommonCloudMixin/add_ip_list`
