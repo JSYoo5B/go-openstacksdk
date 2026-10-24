@@ -84,6 +84,10 @@ func (state *automaticIPState) finishExplicit(ctx context.Context, result *Autom
 		result.Attempts[index].Error = err
 	}
 	result.Observed = err == nil && state.observeAssignment
+	for _, attempt := range result.Attempts {
+		// A short-circuited item skipped observation, as in Python.
+		result.Observed = result.Observed && !attempt.ShortCircuited
+	}
 	return result, err
 }
 
@@ -126,7 +130,14 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 	for index, address := range addresses {
 		result.Attempts = append(result.Attempts, ServerFloatingIPAttempt{Index: index, RequestedAddress: address})
 		if state.decision.Backend == FloatingIPNova {
-			assignment, err := state.novaAssignment(ctx, address, state.options.pool)
+			var assignment *NovaFloatingIPAssignment
+			var err error
+			shortCircuit := false
+			if state.sourceAttach {
+				assignment, shortCircuit, err = state.novaSourceAssignment(ctx, address)
+			} else {
+				assignment, err = state.novaAssignment(ctx, address, state.options.pool)
+			}
 			attempt := &result.Attempts[index]
 			attempt.NovaAssignment = assignment
 			if assignment != nil {
@@ -134,6 +145,10 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 			}
 			if err = errors.Join(err, state.check(ctx)); err != nil {
 				return state.finishExplicit(ctx, result, index, err)
+			}
+			if shortCircuit {
+				attempt.ShortCircuited, attempt.Completed = true, true
+				continue
 			}
 			if state.observeAssignment {
 				if err := state.observe(ctx, assignment.FloatingIP.Address); err != nil {
@@ -145,8 +160,11 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 			continue
 		}
 		var assignment *network.FloatingIPAssignment
-		var err error
-		if state.options.dispatchMode() == ServerIPPool {
+		var err, notFound error
+		shortCircuit := false
+		if state.sourceAttach {
+			assignment, shortCircuit, notFound, err = state.attachSourceIP(ctx, address)
+		} else if state.options.dispatchMode() == ServerIPPool {
 			plan, planErr := state.preparePool(ctx)
 			err = planErr
 			if err == nil {
@@ -170,13 +188,18 @@ func (state *automaticIPState) ensureExplicit(ctx context.Context) (*AutomaticSe
 		if assignment == nil || assignment.FloatingIP == nil {
 			return state.finishExplicit(ctx, result, index, invalid("floating IP assignment returned no address"))
 		}
+		if shortCircuit {
+			attempt.ShortCircuited, attempt.Completed = true, true
+			continue
+		}
+		attempt.AttachmentNotFound = notFound
 		if state.observeAssignment {
 			if err := state.observe(ctx, assignment.FloatingIP.FloatingIP); err != nil {
 				return state.finishExplicit(ctx, result, index, err)
 			}
 			attempt.Observed = true
 		}
-		attempt.Completed = true
+		attempt.Completed = notFound == nil
 	}
 	return state.finishExplicit(ctx, result, -1, nil)
 }

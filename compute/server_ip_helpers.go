@@ -87,5 +87,6 @@ func (s *Service) addServerIPs(ctx context.Context, input AutomaticFloatingIPReq
 	}
 	defer cancel()
 	state.retainAcceptedServer = true
+	state.sourceAttach = state.options.dispatchMode() == ServerIPExplicit
 	return state.ensure(ctx)
 }

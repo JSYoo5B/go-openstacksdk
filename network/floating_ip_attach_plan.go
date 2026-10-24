@@ -37,11 +37,11 @@ func (f *FloatingIPs) PrepareAttach(ctx context.Context, input AttachFloatingIPR
 	if err != nil {
 		return FloatingIPAttachPlan{}, err
 	}
-	return f.prepareAttachPlan(ctx, input, policy, planner.guard, planner.NetworkRoles)
+	return f.prepareAttachPlan(ctx, input, policy, planner.guard, planner.NetworkRoles, nil, nil)
 }
 
 func (f *FloatingIPs) prepareAttachPlan(ctx context.Context, input AttachFloatingIPRequest, policy AttachFloatingIPPolicy,
-	guard func(context.Context) error, getRoles func(context.Context) (*NetworkRoleSnapshot, error)) (FloatingIPAttachPlan, error) {
+	guard func(context.Context) error, getRoles func(context.Context) (*NetworkRoleSnapshot, error), selected AttachSelectedIPCheck, pick attachDestinationFunc) (FloatingIPAttachPlan, error) {
 	var zero FloatingIPAttachPlan
 	if err := input.Server.Validate(); err != nil {
 		return zero, fmt.Errorf("server: %w", err)
@@ -77,7 +77,21 @@ func (f *FloatingIPs) prepareAttachPlan(ctx context.Context, input AttachFloatin
 	if err = errors.Join(err, guard(ctx)); err != nil {
 		return zero, floatingIPWrap("select existing IP", err)
 	}
-	destination, err := f.planDestination(ctx, serverID, policy.options.destination, guard, getRoles)
+	if selected != nil {
+		skip, err := selected(ctx, cloneAttachIP(*ip).FloatingIP)
+		if err = errors.Join(err, guard(ctx)); err != nil {
+			return zero, err
+		}
+		if skip {
+			return zero, &AttachSkippedError{FloatingIP: cloneAttachIP(*ip).FloatingIP}
+		}
+	}
+	var destination FloatingIPSelection
+	if pick != nil {
+		destination, err = pick(ctx, serverID, policy.options.destination)
+	} else {
+		destination, err = f.planDestination(ctx, serverID, policy.options.destination, guard, getRoles)
+	}
 	if err = errors.Join(err, guard(ctx)); err != nil {
 		return zero, floatingIPWrap("select attachment destination", err)
 	}
@@ -87,6 +101,8 @@ func (f *FloatingIPs) prepareAttachPlan(ctx context.Context, input AttachFloatin
 		ip:        cloneAttachIP(*ip), policy: policy, service: f, guard: guard,
 	}, nil
 }
+
+type attachDestinationFunc func(ctx context.Context, serverID string, options createFloatingIPOptions) (FloatingIPSelection, error)
 
 // Attach resolves and connects one existing IP. Stable preexisting associations
 // may be moved, subject to Neutron authorization. Concurrent target changes

@@ -36,8 +36,11 @@ type automaticIPState struct {
 	plan                 network.FloatingIPPlan
 	last                 *Server
 	retainAcceptedServer bool
-	observeAssignment    bool
-	requireServerActive  bool
+	// sourceAttach enables the standalone address-lane short circuit,
+	// attached-IP refresh and Neutron NotFound fall-through.
+	sourceAttach        bool
+	observeAssignment   bool
+	requireServerActive bool
 	// lastFault applies Python's fault key-presence test to the latest raw GET.
 	lastFault *serverFaultInfo
 	// withoutAddresses and deleteWait carry the opt-in cleanup policy.
