@@ -770,6 +770,65 @@ if err != nil {
 }
 ```
 
+```python
+server = conn.create_server(
+    name="grouped",
+    image="ubuntu",
+    flavor="small",
+    group="anti-affinity",
+    scheduler_hints={"different_host": ["other-id"]},
+    volumes=["data"],
+    userdata="#cloud-config\n",
+    meta={"role": "web"},
+)
+```
+
+```go
+server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
+    Name: "grouped",
+    Image: resource.Name("ubuntu"),
+    Flavor: resource.Name("small"),
+}, compute.WithServerGroup(resource.Name("anti-affinity")),
+   compute.WithSchedulerHints(map[string]any{"different_host": []string{"other-id"}}),
+   compute.WithDataVolumes(resource.Name("data")),
+   compute.WithUserData([]byte("#cloud-config\n")),
+   compute.WithMetadata(map[string]string{"role": "web"}))
+```
+
+Create property rules:
+
+- Scheduler hints are sent in the top-level `OS-SCH-HNT:scheduler_hints`
+  object, as Python's Server resource does. `WithServerGroup` always sets the
+  `group` hint, replacing a `group` key from `WithSchedulerHints`. Group names
+  are resolved by listing `os-server-groups` before the POST; IDs skip lookup.
+- `WithDataVolumes` adds `block_device_mapping_v2` entries with
+  `boot_index` -1 and `delete_on_termination` false. When booting from an
+  image, a local image mapping with `boot_index` 0 and
+  `delete_on_termination` true is added first. Python sends some boot indexes
+  as strings; Go sends integers.
+- `WithUserData` always base64-encodes the supplied bytes, even when they
+  already decode as base64. `WithServerCount` sends `min_count`/`max_count`;
+  without it both keys are omitted, whereas Python's cloud layer sends 1/1.
+- `WithDescription` (2.19), `WithTags` (2.52), `WithHypervisorHostname` (2.74)
+  and `WithHostname` (2.90) are checked against the client microversion before
+  any request. `WithPersonality` is rejected locally at 2.57 and later.
+- Falsy values are not silently dropped: `WithConfigDrive(false)` sends
+  `false`, and empty admin passwords, tags and hint keys are rejected.
+
+Readiness errors and cleanup:
+
+- A server in ERROR returns `*compute.ServerFaultError`, which unwraps to
+  `resource.FailedStateError`. Its message follows Python's two forms
+  ("Compute service reports fault: ..." or "no further information
+  available"), based on whether the raw `fault` object has a `message` key.
+  `Server` is the observed server, like Python's `extra_data`.
+- An ACTIVE server with no address rows returns
+  `ServerAddressesUnavailableError`. By default no DELETE is sent. Selecting
+  `compute.DeleteServerWithoutAddresses` (`WithServerWithoutAddressesPolicy`
+  or `AutomaticServerCreateOptions.ServerWithoutAddresses`) sends exactly one
+  DELETE, records the result in `Deletion`, and waits for 404 when the
+  workflow waits. A failed DELETE is joined to the error and never retried.
+
 ```go
 ready, err := service.Servers.Wait(ctx, resource.ID(server.ID), "ACTIVE",
     resource.WithTimeout(5*time.Minute), resource.WithPollInterval(time.Second))
