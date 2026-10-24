@@ -108049,6 +108049,14 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt"
           ]
+        },
+        {
+          "behavior": "Lookup.SourceBody is the pinned Python Router body-attribute state: an attribute-named member such as is_admin_state_up is stored under admin_state_up, a wire/canonical collision keeps CPython dict order (first position, last value) and Router's own revision_number declaration maps a Neutron revision_number member to the revision wire key. Supplied values compare against that state, so a canonical-only equal value is a no-op without PUT, and the accepted response is merged through the same mapping while Body keeps the actual member names.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateCanonicalLookupDirtyComparison",
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateRouterRevisionAndSubnetAlias",
+            "internal/neutronfind/source_state_test.go:TestSourceStateConsumeAttrsMapping"
+          ]
         }
       ],
       "documentation": [
@@ -108057,10 +108065,10 @@
       ],
       "differences": [
         "UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Member GET/LIST canonical-only/canonical-wire collision mapping, arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate."
+        "Arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
       ]
     },
     {
@@ -108108,6 +108116,13 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptProjectionKeepsMergedAuthority"
           ]
+        },
+        {
+          "behavior": "Lookup.SourceBody is the pinned Python Subnet body-attribute state: a canonical-only is_dhcp_enabled member is stored under enable_dhcp, so an equal enable_dhcp update is a no-op without PUT; collisions keep CPython dict order and the accepted response is merged through the same mapping while Body keeps the actual member names.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateRouterRevisionAndSubnetAlias",
+            "internal/neutronfind/source_state_test.go:TestSourceStateConsumeAttrsMapping"
+          ]
         }
       ],
       "documentation": [
@@ -108117,10 +108132,10 @@
       "differences": [
         "Go returns the native Subnet projection plus the owned UpdateReceipt instead of a Subnet Resource.",
         "UpdateSubnetRecord owns argument defaults and effective-body selection. NoOp with nil Lookup corresponds to Source None; NoOp with Lookup corresponds to equal raw fields after lookup. Native Subnet is only the mutation result and is not a shared mutable Python Resource. Client capture begins after effective-argument selection; direct option-time client-internal mutation is outside the before-options guard contract.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Member GET/LIST canonical-only or canonical/wire collision mapping, arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate."
+        "Arbitrary Python kwargs/object/numeric type comparison, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
       ]
     },
     {
@@ -108165,6 +108180,13 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt"
           ]
+        },
+        {
+          "behavior": "A fallback LIST row named by attribute names (is_port_security_enabled, is_admin_state_up, binding_host_id) is stored under its wire keys by the Resource.existing constructor rules, without self and with unknown members kept. Only values that differ from that state are sent, and the accepted response's attribute-named members are merged under their wire keys (Merged) while Body keeps the actual names.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateListRowAndResponseMapping",
+            "internal/neutronfind/source_state_test.go:TestSourceStateConsumeAttrsMapping"
+          ]
         }
       ],
       "documentation": [
@@ -108175,10 +108197,10 @@
         "Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.",
         "Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.",
         "Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Ordinary wire-key lookup response dirty comparison is covered; GET/LIST canonical-only attributes and canonical/wire key collision precedence and original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees."
+        "Original arbitrary Python kwargs numeric/object types remain outside this bounded JSON profile. Full Resource lifecycle, adapter/session/cache policy and SDK-R1/C1/S1 remain separate. Native configured retry/auth hooks keep existing behavior; this helper does not establish universal mutation no-replay guarantees."
       ]
     },
     {
@@ -109425,6 +109447,18 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt"
           ]
+        },
+        {
+          "behavior": "Cloud filters reach Resource.find through the shared Source fetch-control profile: base_path routes the initial GET (and fallback LIST), resource_response_key selects its response member, skip_cache has no Go cache to bypass, and these kwargs seed the found Resource as unknown constructor attributes while the PUT keeps the class route and dirty body; list_base_path changes only the fallback LIST route.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallUpdateFindFetchControls"
+          ]
+        },
+        {
+          "behavior": "Firewall lookup state is the actual member set without self (no attribute aliases are declared), so only differing values are sent and the accepted response, including case-variant unknown members, is merged by literal key.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateFirewallIdentityMapping"
+          ]
         }
       ],
       "documentation": [
@@ -109433,12 +109467,11 @@
       ],
       "differences": [
         "UpdateFirewallGroupRecord owns exact decorator kwargs, target-first filters and ordered policy/port resolution. Lookup/PolicyLookups/PortLookups are separate read evidence; Response is the owned PUT receipt and Group the native projection of its merged view. The Source docstring direct-ID suggestion conflicts with its decorator; this helper follows actual rejection.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
         "Policy references are nonempty JSON strings or null; ports are JSON arrays of nonempty strings. Arbitrary Python iterable/object/nonstring/empty response-ID/runtime-exception behavior and full same-instance Resource lifecycle remain outside this bounded profile.",
-        "Raw Find header/microversion/fetch constructor controls, full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps.",
-        "Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge."
+        "Full Requests encoding/nonfinite JSON, arbitrary object/numeric equality and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate. Referenced ports retain the existing ports.FindRecord status/encoding/Resource profile; firewall-engine coverage does not close those port-profile gaps."
       ]
     },
     {
@@ -109479,6 +109512,18 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt"
           ]
+        },
+        {
+          "behavior": "Cloud filters reach Resource.find through the shared Source fetch-control profile: base_path routes the initial GET (and fallback LIST), resource_response_key selects its response member, skip_cache has no Go cache to bypass, and these kwargs seed the found Resource as unknown constructor attributes while the PUT keeps the class route and dirty body; list_base_path changes only the fallback LIST route.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallUpdateFindFetchControls"
+          ]
+        },
+        {
+          "behavior": "Firewall lookup state is the actual member set without self (no attribute aliases are declared), so only differing values are sent and the accepted response, including case-variant unknown members, is merged by literal key.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateFirewallIdentityMapping"
+          ]
         }
       ],
       "documentation": [
@@ -109487,12 +109532,11 @@
       ],
       "differences": [
         "UpdateFirewallPolicyRecord owns kwargs/filters, target-first strict lookup and ordered string-array rule translation. Lookup and RuleLookups retain separate read evidence; Response is the owned PUT receipt and Policy the native projection of its merged view. Empty and equal-update branches return a carrier rather than the same Python mutable Resource.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
         "Rule references use JSON arrays of nonempty strings; arbitrary Python iterables, object/nonstring IDs, Source runtime exception classes and full same-instance Resource lifecycle are outside this bounded profile.",
-        "Full raw Find header/microversion/fetch controls, Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate.",
-        "Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge."
+        "Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache contracts remain separate runtime boundaries."
       ]
     },
     {
@@ -109516,7 +109560,7 @@
           ]
         },
         {
-          "behavior": "Owned JSON filters normalize falsey JSON to default strict Find kwargs and push ordinary filter fields through member/fallback lookup. Truthy nonobjects and bound name_or_id/ignore_missing collisions fail without HTTP; currently unsupported raw headers/microversion namespaces are rejected. Option snapshots, unsupported cloud keys, cancellation and selected-source mutation are checked before lookup.",
+          "behavior": "Owned JSON filters normalize falsey JSON to default strict Find kwargs and push ordinary filter fields through member/fallback lookup. Truthy nonobjects and bound name_or_id/ignore_missing collisions fail without HTTP; raw headers/microversion and fetch controls follow the Source Find phases instead of being rejected. Option snapshots, unsupported cloud keys, cancellation and selected-source mutation are checked before lookup.",
           "tests": [
             "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateFiltersStrictBindingAndFalseyDefaults",
             "network/cloud_firewall_rule_update_test.go:TestCloudFirewallRuleUpdateOwnedOptionsAndPreflight"
@@ -109529,6 +109573,18 @@
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess",
             "network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt"
           ]
+        },
+        {
+          "behavior": "Cloud filters reach Resource.find through the shared Source fetch-control profile: base_path routes the initial GET (and fallback LIST), resource_response_key selects its response member, skip_cache has no Go cache to bypass, and these kwargs seed the found Resource as unknown constructor attributes while the PUT keeps the class route and dirty body; list_base_path changes only the fallback LIST route.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallUpdateFindFetchControls"
+          ]
+        },
+        {
+          "behavior": "Firewall lookup state is the actual member set without self (no attribute aliases are declared), so only differing values are sent and the accepted response, including case-variant unknown members, is merged by literal key.",
+          "tests": [
+            "network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateFirewallIdentityMapping"
+          ]
         }
       ],
       "documentation": [
@@ -109537,11 +109593,10 @@
       ],
       "differences": [
         "UpdateFirewallRuleRecord owns cloud options and filters, strict lookup and raw dirty selection. The dirty fourteen-key subset is sent as one owned PUT without exposing builder-interface responsibility to callers. Lookup is a separate record; Response is the owned PUT receipt and Rule the native projection of its merged view.",
-        "Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
+        "The firewall Body declarations have no attribute aliases (every attribute name equals its wire key), so lookup dirty comparison and receipt merge use the actual members without self through the same Resource._consume_attrs state; a case-variant member stays an unknown member. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md)."
       ],
       "remaining": [
-        "Raw Find headers/microversion member-query versus fallback-formal behavior and base_path/skip_cache/resource_response_key/fetch constructor controls are not fully implemented; currently unsupported reserved filters fail before HTTP. Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.",
-        "Response members named by a Python attribute alias rather than the wire key (canonical/wire collision) are not remapped by the receipt merge."
+        "Full Requests encoding/nonfinite JSON, arbitrary Python object/numeric types and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries."
       ]
     },
     {
@@ -110700,6 +110755,19 @@
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeleteOptionsSourceGuardsAndFabricated404NeverFalse",
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
+        },
+        {
+          "behavior": "Filters reach Resource.find through the shared Source fetch-control profile: filters.headers is an ordinary initial member GET query value and becomes HTTP headers only on the fallback LIST; filters.microversion versions only the initial GET while the fallback LIST and DELETE use the adapter default; base_path/resource_response_key/skip_cache/requires_id/error_message control only the initial fetch and list_base_path only the fallback LIST.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindHeadersAndMicroversionPhases"
+          ]
+        },
+        {
+          "behavior": "Raw max_items is a Source cap compared before each fallback row and also sent as an initial GET query value, with Requests limit hint spelling. A cap equal to a whole page performs Python's next marker GET (its failure stops before DELETE), true counts as 1 and a negative truthy cap stops at the first row so the strict Find reports a clean missing resource.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindCapEqualsWholePage",
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindRawCapValues"
+          ]
         }
       ],
       "documentation": [
@@ -110713,14 +110781,13 @@
         "Python returns a Resource object; Go returns the native typed model.",
         "SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.",
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
-        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default), not a claim that the unimplemented raw Source Find controls are equivalent.",
+        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable rawFind/falsey collection/paging remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
       ],
       "remaining": [
-        "Raw Find kwargs remain incomplete in the common engine: actual Source filters.headers is an ordinary initial GET query then a fallback LIST formal; raw filters.microversion overrides initial GET only while fallback LIST and DELETE return to adapter default. Current raw filters with these names and reserved fetch/constructor controls such as base_path/skip_cache/resource_response_key reject before HTTP rather than reproduce their Source phase-dependent behavior. Concrete Go transport extras are distinct and do not close this named gap.",
         "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Find fallback inherits strict Go integer limit/max_items and guarded marker/continuation policy. Source bool/negative/fractional caps/limits, their error phases and a following GET when the cap equals a whole page are not fully reproduced. That can change when later duplicate/HTTP/physical failure is observed and whether DELETE begins; no full named parity is claimed."
+        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
       ]
     },
     {
@@ -110787,6 +110854,19 @@
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeleteOptionsSourceGuardsAndFabricated404NeverFalse",
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
+        },
+        {
+          "behavior": "Filters reach Resource.find through the shared Source fetch-control profile: filters.headers is an ordinary initial member GET query value and becomes HTTP headers only on the fallback LIST; filters.microversion versions only the initial GET while the fallback LIST and DELETE use the adapter default; base_path/resource_response_key/skip_cache/requires_id/error_message control only the initial fetch and list_base_path only the fallback LIST.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindHeadersAndMicroversionPhases"
+          ]
+        },
+        {
+          "behavior": "Raw max_items is a Source cap compared before each fallback row and also sent as an initial GET query value, with Requests limit hint spelling. A cap equal to a whole page performs Python's next marker GET (its failure stops before DELETE), true counts as 1 and a negative truthy cap stops at the first row so the strict Find reports a clean missing resource.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindCapEqualsWholePage",
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindRawCapValues"
+          ]
         }
       ],
       "documentation": [
@@ -110800,14 +110880,13 @@
         "Python returns a Resource object; Go returns the native typed model.",
         "SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.",
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
-        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default), not a claim that the unimplemented raw Source Find controls are equivalent.",
+        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable rawFind/falsey collection/paging remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
       ],
       "remaining": [
-        "Raw Find kwargs remain incomplete in the common engine: actual Source filters.headers is an ordinary initial GET query then a fallback LIST formal; raw filters.microversion overrides initial GET only while fallback LIST and DELETE return to adapter default. Current raw filters with these names and reserved fetch/constructor controls such as base_path/skip_cache/resource_response_key reject before HTTP rather than reproduce their Source phase-dependent behavior. Concrete Go transport extras are distinct and do not close this named gap.",
         "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Find fallback inherits strict Go integer limit/max_items and guarded marker/continuation policy. Source bool/negative/fractional caps/limits, their error phases and a following GET when the cap equals a whole page are not fully reproduced. That can change when later duplicate/HTTP/physical failure is observed and whether DELETE begins; no full named parity is claimed."
+        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
       ]
     },
     {
@@ -110874,6 +110953,19 @@
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeleteOptionsSourceGuardsAndFabricated404NeverFalse",
             "network/cloud_firewall_deletes_test.go:TestCloudFirewallDeletePhysicalFaultsAreNeverMissingAndKeepActualProof"
           ]
+        },
+        {
+          "behavior": "Filters reach Resource.find through the shared Source fetch-control profile: filters.headers is an ordinary initial member GET query value and becomes HTTP headers only on the fallback LIST; filters.microversion versions only the initial GET while the fallback LIST and DELETE use the adapter default; base_path/resource_response_key/skip_cache/requires_id/error_message control only the initial fetch and list_base_path only the fallback LIST.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindHeadersAndMicroversionPhases"
+          ]
+        },
+        {
+          "behavior": "Raw max_items is a Source cap compared before each fallback row and also sent as an initial GET query value, with Requests limit hint spelling. A cap equal to a whole page performs Python's next marker GET (its failure stops before DELETE), true counts as 1 and a negative truthy cap stops at the first row so the strict Find reports a clean missing resource.",
+          "tests": [
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindCapEqualsWholePage",
+            "network/cloud_firewall_find_kwargs_test.go:TestCloudFirewallDeleteFindRawCapValues"
+          ]
         }
       ],
       "documentation": [
@@ -110887,14 +110979,13 @@
         "Python returns a Resource object; Go returns the native typed model.",
         "SDK-R1: Go returns bool plus owned Lookup/Delete receipt views instead of mutable Python Resource/cache/lifecycle objects. All declared getter fields are projected before return, so an unused malformed field may fail earlier. Source informational status and empty/malformed fetch seed behavior are implemented only on this new closed profile; legacy typed/generated APIs keep their old contracts.",
         "SDK-C1: JSON bytes retain large integers and Source untyped values without native bool/int coercion. Local equality uses shared CPython-loaded numeric policy and exact raw Wire/Envelope proof. Non-JSON custom objects and unrestricted Python runtime/representation/marshal behaviors remain separately tracked; structured Go errors keep actual native status and physical/context causes.",
-        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default), not a claim that the unimplemented raw Source Find controls are equivalent.",
+        "SDK-S1: Go captures the original Neutron service/client/route and uses safe escaped literal member IDs with fixed protocol/header/origin guards. Arbitrary adapter/class retargeting and URI percent-format are restricted. WithFirewallDeleteHeaders/Microversion are explicit Go transport extras (headers across phases, microversion on initial GET+DELETE while fallback LIST keeps captured default). The raw Source Find controls in filters are implemented separately; filters.microversion cannot be combined with WithFirewallDeleteMicroversion because they would select two initial GET versions.",
         "Source has no FWaaS extension/has_service pre-gate for these deletes, and neither does this workflow. Shared-reader access is not permission to delete: official FWaaS2025.2 sample gives owner project member/admin ordinary delete and separate admin-only shared deletion. SDK does not elevate RBAC or unlink attached rules/policies/groups; backend conflict remains actual409.",
-        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable rawFind/falsey collection/paging remaining below."
+        "Actual pinned Source156cases, standalone Python AST/byte-exact Go+Python mains and prepared fixture groups are distinct evidence. Owner did not execute Go/Git or authenticate a live cloud. New deletion bool/receipt closure does not remove the reachable falsey collection DELETE and dynamic limit-type remaining below."
       ],
       "remaining": [
-        "Raw Find kwargs remain incomplete in the common engine: actual Source filters.headers is an ordinary initial GET query then a fallback LIST formal; raw filters.microversion overrides initial GET only while fallback LIST and DELETE return to adapter default. Current raw filters with these names and reserved fetch/constructor controls such as base_path/skip_cache/resource_response_key reject before HTTP rather than reproduce their Source phase-dependent behavior. Concrete Go transport extras are distinct and do not close this named gap.",
         "Actual Source can DELETE the collection route when a found Resource.id is false/0/empty string/array/object. Current safe member-only workflow rejects these falsey nonnull values before DELETE. Explicit null/resolved None ID or a fallback LIST row with no ID has Source InvalidRequest, whereas an initial fetched response omitting its id member retains the requested ID seed and can DELETE that ID. This is a concrete reachable returned-JSON-ID gap, not generic runtime object injection.",
-        "Find fallback inherits strict Go integer limit/max_items and guarded marker/continuation policy. Source bool/negative/fractional caps/limits, their error phases and a following GET when the cap equals a whole page are not fully reproduced. That can change when later duplicate/HTTP/physical failure is observed and whether DELETE begins; no full named parity is claimed."
+        "Dynamic non-integer raw limit filter values (bool/fractional/string) in the Find fallback: Requests query spelling is sent, but their Python truthiness in the later marker-fallback decision is not reproduced (shared dynamic limit-type runtime boundary)."
       ]
     },
     {

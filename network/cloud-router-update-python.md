@@ -23,19 +23,23 @@ Go API:
   Tests: `network/cloud_router_update_test.go:TestCloudRouterUpdateRoutesGateAndDrop`, `network/cloud_router_update_test.go:TestCloudRouterUpdateExtensionFailureCannotBecomeDroppedRoutes`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOwnedOptionsAndPreflight`, `network/cloud_router_update_test.go:TestCloudRouterUpdateOptionCancellationCannotBecomeNoOp`, `network/cloud_router_update_test.go:TestCloudRouterUpdateConflictKeepsLookupAndSingleAttempt`.
 - An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
   Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
+- Lookup.SourceBody is the pinned Python Router body-attribute state: an attribute-named member such as is_admin_state_up is stored under admin_state_up, a wire/canonical collision keeps CPython dict order (first position, last value) and Router's own revision_number declaration maps a Neutron revision_number member to the revision wire key. Supplied values compare against that state, so a canonical-only equal value is a no-op without PUT, and the accepted response is merged through the same mapping while Body keeps the actual member names.
+  Tests: `network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateCanonicalLookupDirtyComparison`, `network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateRouterRevisionAndSubnetAlias`, `internal/neutronfind/source_state_test.go:TestSourceStateConsumeAttrsMapping`.
 
 Python/Go differences:
 
 - UpdateRouterRecord owns formal defaults and optional extraroute handling. RoutesDropped and Extensions expose omission/discovery without adding Source logger behavior. Lookup is an owned record, Response is the owned PUT receipt and Router is the native projection of its merged view; none is the same mutable Python Resource. Client capture follows effective-option selection and retains configured native provider hooks.
-- Receipt merge applies response members by literal wire key; a response key equal to a Python attribute alias is not remapped (see the remaining canonical/wire collision item). The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
+- Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
 
 Unresolved boundaries:
 
-- Member GET/LIST canonical-only/canonical-wire collision mapping, arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate.
+- Arbitrary Python kwargs/object/numeric types, full Requests encoding/nonfinite JSON and SDK-R1/C1/S1 Resource/adapter/session/cache lifecycle remain separate runtime boundaries.
 
 ## Usage examples
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+
+`result.Lookup.SourceBody()` returns the wire-keyed Python body attributes the update compared against, so a lookup row that names an attribute only by its Python attribute name (for example `is_admin_state_up`) is visible under its wire key (`admin_state_up`).
 
 ```python
 import argparse

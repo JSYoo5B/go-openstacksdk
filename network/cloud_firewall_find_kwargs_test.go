@@ -188,3 +188,30 @@ func TestCloudFirewallDeleteFindCapEqualsWholePage(t *testing.T) {
 		t.Fatal(result, err, calls())
 	}
 }
+
+// TestCloudFirewallDeleteFindRawCapValues covers raw JSON max_items values
+// Python compares before each row: true is the integer 1 (and Requests sends
+// the limit hint as "True"), so the next marker GET still happens; a negative
+// truthy cap stops at the first row, so nothing matches and the strict Find
+// reports a clean missing resource without DELETE.
+func TestCloudFirewallDeleteFindRawCapValues(t *testing.T) {
+	client, calls := firewallKwargsClient(t, map[string][]receiptReply{
+		"GET /v2.0/fwaas/firewall_policies/web?max_items=True":            {{status: http.StatusNotFound, body: `{}`}},
+		"GET /v2.0/fwaas/firewall_policies?limit=True&name=web":           {{status: http.StatusOK, body: `{"firewall_policies":[{"id":"p1","name":"web"}]}`}},
+		"GET /v2.0/fwaas/firewall_policies?limit=True&marker=p1&name=web": {{status: http.StatusOK, body: `{"firewall_policies":[]}`}},
+		"DELETE /v2.0/fwaas/firewall_policies/p1":                         {{status: http.StatusNoContent}},
+	})
+	result, err := network.New(client).DeleteFirewallPolicyRecord(context.Background(), "web", network.WithFirewallDeleteFilters(json.RawMessage(`{"max_items":true}`)))
+	if err != nil || result == nil || !result.Deleted || len(calls()) != 4 {
+		t.Fatal(result, err, calls())
+	}
+
+	client, calls = firewallKwargsClient(t, map[string][]receiptReply{
+		"GET /v2.0/fwaas/firewall_policies/web?max_items=-1":  {{status: http.StatusNotFound, body: `{}`}},
+		"GET /v2.0/fwaas/firewall_policies?limit=-1&name=web": {{status: http.StatusOK, body: `{"firewall_policies":[{"id":"p1","name":"web"}]}`}},
+	})
+	result, err = network.New(client).DeleteFirewallPolicyRecord(context.Background(), "web", network.WithFirewallDeleteFilters(json.RawMessage(`{"max_items":-1}`)))
+	if err != nil || result == nil || result.Deleted || len(calls()) != 2 {
+		t.Fatal(result, err, calls())
+	}
+}
