@@ -821,6 +821,16 @@ Go API:
   Tests: `connection_project_cleanup_test.go:TestProjectCleanupParallelismWithinStage`.
 - A service discovery failure returns the partial plan with a ServiceError naming the service; ExecuteProjectCleanup refuses it unless WithAllowIncompletePlan is given.
   Tests: `connection_project_cleanup_test.go:TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution`.
+- Project cleanup discovers block storage backups, snapshots and volumes of the plan's project only (owner attributes excluded), orders backups by levels so that possible dependent backups (later incremental backups of the same volume) are deleted and observed absent first, excludes backups whose possible dependents are not candidates or cannot be ordered, waits for backup and snapshot absence, deletes volumes after their snapshot and attached server candidates without waiting, applies created_at/updated_at filters and the selector to every kind, honours each block_storage skip name, sends each DELETE at most once and reports Deleted, Accepted, AlreadyMissing, Failed, Uncertain and NotAttempted outcomes.
+  Tests: `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStoragePlansBackupLevelsSnapshotsAndVolumes`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageKeepsBackupsWithKeptDependents`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageTimeFiltersAndSkipNames`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageExecutesLevelsAndWaits`, `connection_project_cleanup_blockstorage_test.go:TestProjectCleanupBlockStorageReportsEveryOutcome`.
+- network project cleanup follows openstack/network/v2/_proxy.py _service_cleanup: VPN resources only with a VPN service provider, floating IPs by fip_cleanup_evaluation, security groups except default, networks whose project ports are unused (DHCP and unowned ports ignored, compute server candidates followed) with route removal, interface removal, router, unowned port, subnet and network deletion in dependency order, then routers without ports; shared, external and foreign rows are excluded
+  Tests: `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkPlanFollowsPythonConditions`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkExecutesInPythonOrder`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkOutcomesBlockDependents`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkTimeFiltersFollowPython`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkSelectorAndSkipNames`, `connection_project_cleanup_network_test.go:TestProjectCleanupNetworkRouterConditions`.
+- Image project cleanup lists images with owner=<project ID> as Python does, follows Glance next paging, excludes rows not reporting the plan's project as owner or lacking an ID, applies created_at/updated_at filters and the selector, and deletes each planned image with one DELETE after the compute stages without waiting, reporting accepted, already_missing, failed and uncertain outcomes; skip name image.image prevents listing; a list error is an image ServiceError that blocks execution unless partial execution is allowed.
+  Tests: `connection_project_cleanup_image_test.go:TestProjectCleanupImageDiscoversOnlyOwnedImages`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageFiltersAndSkipName`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageExecuteReportsEveryState`, `connection_project_cleanup_image_test.go:TestProjectCleanupImageListErrorIsServiceError`.
+- object_store project cleanup follows openstack/object_store/v1/_proxy.py _service_cleanup: objects of each container are evaluated (updated_at = listing last_modified, no created_at), a container is evaluated only when all its objects are candidates and depends on them, containers have no time attributes, either object_store skip name skips the service, names are path-escaped, listings page by marker with the Swift count header, and each object/container DELETE is sent once with Accepted/AlreadyMissing/Failed/Uncertain/NotAttempted outcomes.
+  Tests: `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreDiscovery`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreTimeFilters`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreSkipNames`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreListingErrors`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreExecuteReportsEveryState`.
+- Project cleanup plans key_manager containers then secrets from project-scoped Barbican lists (top-level next offset paging, no acl_only/all-projects query), derives IDs from the last path component of container_ref/secret_ref like Python's HREFToUUID, excludes rows without a usable reference or reporting another project_id, applies created/updated filters, selector and the key_manager.container/key_manager.secret skip names, and executes one DELETE per candidate without waits or dependencies, reporting Accepted, AlreadyMissing, Failed, Uncertain and NotAttempted.
+  Tests: `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerDiscoversContainersThenSecrets`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerFiltersSelectorAndSkipNames`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerExecuteReportsEveryState`.
 
 Python/Go differences:
 
@@ -833,15 +843,32 @@ Python/Go differences:
 - Go never lists with all_tenants or all_projects and excludes rows owned by another project; a server group whose members are all server candidates depends on them, which matches Python listing groups only after its servers are deleted.
 - Python's resource_evaluation_fn replaces the time filters; Go applies the time filters first and the selector to the remaining resources. Python ignores a filter it cannot evaluate; Go excludes a resource with an unparsable time.
 - Python reports progress through a status_queue; Go calls a synchronous WithProgress callback for each candidate state change.
+- Python deletes block storage backups in up to ten rounds of backups without dependent backups; the Go plan fixes levels at discovery, treating later incremental backups of the same volume as possible dependents, and keeps a backup whose possible dependents are not all candidates, which can keep a backup Python would eventually delete.
+- Python ignores errors while waiting for deleted backups and snapshots; Go reports the wait error and does not send dependent candidates.
+- Python deletes every volume regardless of snapshots and attachments; Go does not send a volume while one of its snapshot candidates or attached server candidates did not succeed.
+- Python lists snapshots without details; Go lists snapshots/detail to check the owning project.
+- Python lists VPN resources and routers without a project filter; network cleanup lists them with project_id and excludes rows of other owners.
+- Python does not exclude shared or external networks owned by the project; network cleanup excludes them.
+- Python ignores the port and floating IP conditions while identified_resources is empty; network cleanup always applies them, so a port in use by a non-candidate keeps its network and, with time filters, an attached floating IP is kept.
+- Python deletes server ports after they become unowned during its non-dry run; network cleanup plans ports of compute server candidates as port candidates that depend on the server.
+- Python ignores resource_evaluation_fn for floating IPs; network cleanup still consults the selector.
+- Python attempts to delete each interface router after removing an interface; network cleanup plans the router only when its other ports are gateway, HA or SNAT ports and excludes it otherwise.
+- Python aborts its network cleanup when an interface router cannot be read; network cleanup excludes that network when the router is missing or foreign and reports other read failures as a discovery error.
+- Python sends VPN, router, subnet and network deletions regardless of earlier failures; network cleanup excludes VPN resources still used by non-candidate site connections and does not send dependents of unsuccessful candidates.
+- Image cleanup excludes a listed image whose owner field is missing, null or another project; Python relies only on the owner=<project ID> query.
+- Image cleanup reports a refused image DELETE, such as 403 for a protected image, as a failed outcome with response evidence; Python logs the exception and continues.
+- Like Python, image cleanup deletes project-owned images at any visibility, including public ones, and does not list hidden (os_hidden) images.
+- object_store cleanup sends one DELETE per object instead of Python's bulk-delete (and does not read /info), so every object has its own outcome and is sent at most once.
+- object_store listings continue by marker until an empty page when the Swift count header is absent, where Python reads only the first page.
+- object_store cleanup does not wait between object and container deletion, as in Python; a container DELETE rejected with 409 (for example while Swift's listing still shows deleted objects) is reported as Failed.
+- Python's key_manager Resource.id is the raw container_ref/secret_ref href, and its delete URL appends that href to the base path; Go deletes containers/<id> and secrets/<id> using the HREFToUUID last path component, and excludes rows without a usable reference.
+- Go excludes a Barbican row that reports another project_id; Python relies only on Barbican's project-scoped lists.
+- Key manager stages never produce Deleted, because neither Python nor Go waits for absence after a Barbican deletion.
 
 Unresolved boundaries:
 
-- Block storage cleanup (backups with dependents last, snapshots, volumes with absence waits) is not implemented; the service is reported as not yet supported.
-- Network cleanup (VPN resources, floating IPs, non-default security groups, router routes and interfaces, routers, ports, subnets, networks) is not implemented; the service is reported as not yet supported.
-- Image cleanup (images owned by the project) is not implemented; the service is reported as not yet supported.
-- Object storage cleanup (objects, then containers left empty) is not implemented; the service is reported as not yet supported.
-- Key manager cleanup (containers, secrets) is not implemented; the service is reported as not yet supported.
 - Orchestration stacks, load balancers and DNS zones/recordsets (phase 2) are not cleaned; present services are reported as not yet supported.
+
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 
 Status: `go_mapping`.

@@ -92,11 +92,11 @@ Services are examined in Python's dependency order. A service without an endpoin
 | Service | Python cleans | This package |
 |---|---|---|
 | compute | servers (then waits for deletion), server groups without members | servers with absence waits, then server groups. Keypairs are not cleaned, as in Python. |
-| block_storage | backups (dependents first), snapshots, volumes | not yet supported |
-| network | VPN resources, floating IPs, security groups except `default`, router interfaces, routers, ports, subnets, networks | not yet supported |
-| image | images owned by the project | not yet supported |
-| object_store | objects, then empty containers | not yet supported |
-| key_manager | containers, secrets | not yet supported |
+| block_storage | backups (dependents first), snapshots, volumes | backups by dependency level (waits), snapshots (wait), then volumes after their snapshot and attached-server candidates. |
+| network | VPN resources, floating IPs, security groups except `default`, router interfaces, routers, ports, subnets, networks | VPN resources, floating IPs, security groups except `default`, router routes and interfaces, routers, ports, subnets, networks, without waits. |
+| image | images owned by the project | project-owned images at any visibility (owner query), one DELETE each without waits. |
+| object_store | objects, then empty containers | objects, then containers whose objects are all candidates, one DELETE each without waits. |
+| key_manager | containers, secrets | containers, then secrets, without waits or dependencies. Orders are not cleaned, as in Python. |
 | orchestration, load_balancer, dns | stacks; load balancers; zones and floating IP PTR records | not yet supported (phase 2) |
 
 ### Compute
@@ -104,6 +104,54 @@ Services are examined in Python's dependency order. A service without an endpoin
 - Servers come from `GET /servers/detail` and are filtered on `created` and `updated`. Their stage waits for each accepted deletion to be observed absent before server groups are sent.
 - Python lists server groups after its servers are deleted and skips groups that still have members. Here a group whose members are all server candidates is a candidate that depends on those servers; a group with any other member is excluded. Server groups have no `created_at` or `updated_at` in Python's resource, so any time filter excludes them.
 - As in Python, the `compute.server` skip name also skips server groups.
+
+### Block storage
+
+Follows `openstack/block_storage/v3/_proxy.py` `_service_cleanup`. Kinds, in execution order: `block_storage.backup`, `block_storage.snapshot`, `block_storage.volume`. Each skip name skips only its own kind and its list.
+
+- Lists are project-scoped (`backups/detail` sorted by `created_at` descending as Python requests, `snapshots/detail`, `volumes/detail`); a row whose `os-backup-project-attr:project_id`, `os-extended-snapshot-attributes:project_id` or `os-vol-tenant-attr:tenant_id` names another project is excluded.
+- Time filters read `created_at` and `updated_at` for all three kinds.
+- Backups: Python deletes backups without dependent backups in up to ten rounds. The plan uses levels instead. A backup whose `has_dependent_backups` is false (or absent) is level 0. Cinder does not expose an incremental backup's parent, so the possible dependents of a backup with dependent backups are the incremental backups of the same volume created after it; the backup runs one level after all of them and depends on them. It is excluded when one of them is not a candidate, when none is listed, or when its own `created_at` cannot order them. Every backup level waits for absence before the next level starts.
+- Snapshots: deleted after all backup levels; the stage waits for absence.
+- Volumes: deleted last without a wait, as in Python. A volume depends on its snapshot candidates and on compute server candidates named in its `attachments`, so it is not sent while one of them did not succeed. Python attempts such volumes anyway; other volumes, including attached or snapshotted ones whose blockers are not candidates, are attempted as in Python and Cinder decides.
+- Deletions send one `DELETE` each (202 expected); a 404 is AlreadyMissing. Wait polling errors are reported immediately, whereas Python ignores them.
+
+### Network
+
+- Order: VPN ipsec site connections, VPN services, endpoint groups, IKE policies, IPsec policies, floating IPs, security groups, router routes, router interfaces, routers, ports, subnets, networks. No stage waits; Neutron deletes are synchronous.
+- VPN resources are examined only when `GET /service-providers?service_type=VPN` returns a provider. Python's VPN resources have no `created_at`/`updated_at`, so a time filter excludes them. A VPN service, endpoint group or policy still used by a site connection that is not a candidate is excluded; one used by candidate connections depends on them.
+- Floating IPs follow Python's `fip_cleanup_evaluation`, which replaces the time filters: without a time filter every floating IP is a candidate; with one, an attached floating IP is kept and a detached one is a candidate whatever its times. The selector is still consulted.
+- Security groups named `default` are kept; the others are filtered and selected normally.
+- Networks are examined only when none of `network.network`, `network.router`, `network.port` and `network.subnet` is skipped. Shared and external networks are excluded. A network is kept when one of its project ports is in use by anything other than a compute server candidate; DHCP ports and ports without a device owner do not count, and router interface ports are removed. A remaining network is filtered and selected; then, without further evaluation, its interface routers' extra routes are removed (`PUT /routers/{id}/remove_extraroutes`), its interfaces are removed (`PUT /routers/{id}/remove_router_interface`), ports without a device owner and ports of server candidates are deleted, then its subnets and the network. A router whose interface cannot be read or belongs to another project keeps the network.
+- A router whose interfaces are all removed is deleted when its only other ports are gateway, HA or SNAT ports; otherwise it is excluded. Routers of the project without any port are deleted. As in Python, neither case evaluates the time filters or the selector.
+- Dependencies: interfaces depend on their router's route removal; routers on their routes and interfaces; ports of servers on the compute server candidate; subnets on the network's interfaces and ports; the network on all of them and its subnets.
+
+### Image
+
+Follows `openstack/image/v2/_proxy.py` `_service_cleanup`. Kind: `image` (skip name `image.image`).
+
+- Discovery sends `GET /v2/images?owner=<project ID>`, the only query Python sends, and follows Glance's `next` link. Glance therefore lists only images whose owner is the project, at any visibility (private, shared, community or public). It does not list images that other projects own or hidden images (`os_hidden=true`).
+- A listed row whose `owner` is not the plan's project (another project, missing or null) is excluded with a reason. Rows without a usable ID are excluded.
+- Each remaining image goes through the `created_at`/`updated_at` filters and then the selector.
+- Execution runs after all compute, block storage and network stages and before object store. It sends one `DELETE /v2/images/{id}` per candidate and does not wait for absence: Python does not wait, and Glance deletes synchronously. A 404 is `already_missing`. A refusal such as 403 for a protected image is `failed` with the response evidence. A lost response is `uncertain` and is never retried.
+- Image candidates have no dependencies; Python declares only `before: identity`. An image still used by a server or volume is not held back; Glance decides whether the DELETE succeeds.
+
+### Object store
+
+Kinds, in stage order: `object_store.object`, then `object_store.container`. Neither stage waits for absence.
+
+Discovery lists the containers of the token's account and, for each container, its objects (`format=json`, marker paging that ends when the `X-Account-Container-Count` / `X-Container-Object-Count` header is reached or on an empty page). Every object is evaluated by the filters and the selector. A container is evaluated only when every object in it became a candidate (or it has none); otherwise it is excluded with the number of objects it keeps. A selected container depends on all of its object candidates, so it is not sent when any of them Failed, was Uncertain or was not attempted.
+
+Filters follow Python: an object's `updated_at` is the listing's `last_modified` (read as UTC when it has no offset), and objects have no `created_at`. Containers have neither attribute, so any time filter keeps every container.
+
+Either skip name, `object_store.object` or `object_store.container`, skips the whole service, as in Python. Object refs carry the container in `Ref.Parent`; container and object names are path-escaped. Each object and container receives one DELETE (Python's bulk-delete is not used), and a 404 is reported as AlreadyMissing. Swift listings have no owner field: ownership comes from the token's account endpoint.
+
+### Key manager
+
+- Python's `_service_cleanup` deletes every container, then every secret, and declares no cleanup dependencies. Here containers are one stage and secrets the next. Neither stage waits for absence, because Barbican deletes synchronously and Python does not wait. No secret depends on a container, so a failed or uncertain container deletion does not hold back any secret, as in Python.
+- Containers come from `GET /v1/containers` and secrets from `GET /v1/secrets`. The time filters use `created` and `updated`. Lists follow Barbican's top-level `next` offset links. No `acl_only` or all-projects query is sent, so only the token project's containers and secrets are listed. A row that reports another `project_id` is excluded.
+- The ID is the last path component of `container_ref` or `secret_ref`, which is Python's `HREFToUUID` formatter behind `container_id` and `secret_id`. The DELETE goes to `containers/<id>` or `secrets/<id>` on the key manager endpoint. A row whose reference is missing, null, or not an absolute URL with a usable last segment is excluded. (Python's `Resource.id` is the raw href and its delete URL appends the whole href to the base path.)
+- Orders are not cleaned, as in Python. The skip names are `key_manager.container` and `key_manager.secret`.
 
 ## Differences from Python
 
