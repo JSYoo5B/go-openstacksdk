@@ -42,6 +42,7 @@ type kindSpec struct {
 // A core service without an entry is reported as NotYetSupported.
 var implementations = map[string]serviceCleanup{
 	"compute": computeCleanup{},
+	"image":   imageCleanup{},
 }
 
 // serviceInfo is a service that Python's project_cleanup visits.

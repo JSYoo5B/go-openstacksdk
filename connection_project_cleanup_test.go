@@ -86,10 +86,30 @@ func (c *cleanupCloud) serveCompute(t *testing.T, servers, groups string) {
 		c.record("list groups")
 		testcloud.JSON(w, 200, `{"server_groups":[`+groups+`]}`)
 	})
-	c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	c.Mux.HandleFunc("/", cleanupCatchAll(t))
+}
+
+// cleanupEmptyLists are the list paths of registered services other than
+// compute. The catch-all answers them with an empty project-scoped list so
+// that compute-focused tests stay independent of the other services; a test
+// of a service registers its own, more specific handler.
+var cleanupEmptyLists = map[string]string{
+	"/image/v2/images": "images",
+}
+
+// cleanupCatchAll serves cleanupEmptyLists and fails on any other request.
+func cleanupCatchAll(t *testing.T) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if plural, ok := cleanupEmptyLists[r.URL.Path]; ok && r.Method == http.MethodGet {
+			if r.URL.Query().Has("all_tenants") || r.URL.Query().Has("all_projects") {
+				t.Error("all-projects listing", r.URL)
+			}
+			testcloud.JSON(w, 200, `{"`+plural+`":[]}`)
+			return
+		}
 		t.Error("unexpected request", r.Method, r.URL)
 		http.Error(w, "unexpected", 500)
-	})
+	}
 }
 
 func refIDs(candidates []projectcleanup.Candidate) []string {
@@ -141,7 +161,6 @@ func TestProjectCleanupPlanDiscoversWithoutMutation(t *testing.T) {
 	wantUnavailable := []projectcleanup.Unavailable{
 		{Service: "block_storage", Reason: projectcleanup.NotYetSupported},
 		{Service: "network", Reason: projectcleanup.NotYetSupported},
-		{Service: "image", Reason: projectcleanup.NotYetSupported},
 		{Service: "object_store", Reason: projectcleanup.NotInCatalog},
 		{Service: "key_manager", Reason: projectcleanup.NotInCatalog},
 		{Service: "orchestration", Reason: projectcleanup.NotYetSupported},
@@ -488,16 +507,13 @@ func TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution(t *testing.T)
 	cloud.Mux.HandleFunc("GET /compute/v2.1/project/servers/detail", func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 503, `{"computeFault":{"message":"maintenance"}}`)
 	})
-	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t.Error("unexpected request", r.Method, r.URL)
-		http.Error(w, "unexpected", 500)
-	})
+	cloud.Mux.HandleFunc("/", cleanupCatchAll(t))
 	plan, err := cloud.conn.PlanProjectCleanup(context.Background(), projectcleanup.WithAllResources())
 	var serviceErr *projectcleanup.ServiceError
 	if plan == nil || !errors.As(err, &serviceErr) || serviceErr.Service != "compute" || !strings.Contains(err.Error(), "list servers") {
 		t.Fatalf("plan %+v err %v", plan, err)
 	}
-	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 6 {
+	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 5 {
 		t.Fatalf("partial plan %+v", plan)
 	}
 	if _, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan); !errors.Is(err, projectcleanup.ErrIncompletePlan) {
