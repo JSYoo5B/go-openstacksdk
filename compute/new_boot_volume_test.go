@@ -35,6 +35,7 @@ func TestCreateNewBootVolumeMapping(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
+			cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 			client := cloud.Client("compute", "/compute")
 			client.Microversion = tc.microversion
 			service := compute.New(client, compute.Dependencies{
@@ -58,14 +59,17 @@ func TestCreateNewBootVolumeMapping(t *testing.T) {
 				if tc.volumeType != "" {
 					mapping["volume_type"] = tc.volumeType
 				}
-				want := map[string]any{"name": "new-volume-server", "imageRef": "", "flavorRef": "flavor-id", "block_device_mapping_v2": []any{mapping}}
-				if tc.microversion != "" {
-					want["networks"] = "auto"
-				}
+				// The fixture advertises 2.37, so the missing NIC selection becomes auto;
+				// an unselected client raises only this request to 2.37.
+				want := map[string]any{"name": "new-volume-server", "imageRef": "", "flavorRef": "flavor-id", "block_device_mapping_v2": []any{mapping}, "networks": "auto"}
 				if !reflect.DeepEqual(body.Server, want) {
 					t.Errorf("server body=%#v want=%#v", body.Server, want)
 				}
-				if got := r.Header.Get("OpenStack-API-Version"); tc.microversion != "" && got != "compute "+tc.microversion {
+				wantVersion := tc.microversion
+				if wantVersion == "" {
+					wantVersion = "2.37"
+				}
+				if got := r.Header.Get("OpenStack-API-Version"); got != "compute "+wantVersion {
 					t.Errorf("OpenStack-API-Version=%q", got)
 				}
 				testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)
@@ -196,6 +200,7 @@ func TestCreateNewBootVolumeFailedImageResolutionDoesNotCreate(t *testing.T) {
 
 func TestCreateNewBootVolumeWaitFailurePreservesServer(t *testing.T) {
 	cloud := testcloud.New(t)
+	cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 	service := compute.New(cloud.Client("compute", "/compute"), compute.Dependencies{})
 	cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)

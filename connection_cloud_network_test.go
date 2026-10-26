@@ -164,6 +164,7 @@ func TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection(t *test
 			cloud := testcloud.New(t)
 			opts := defaultNetworkCloudOptions(t, cloud, "    networks: [{name: missing, default_interface: true}]\n")
 			opts = append(opts, sdk.WithMicroversion(sdk.Compute, "2.37"))
+			cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 			opts = append(opts, tc.connection...)
 			var lists atomic.Int32
 			cloud.Mux.HandleFunc("GET /network/v2.0/networks", func(w http.ResponseWriter, r *http.Request) {

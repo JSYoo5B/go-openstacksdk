@@ -46,6 +46,7 @@ func TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag(t *testing.T
 	cloud := testcloud.New(t)
 	client := cloud.Client("compute", "/prefix/v2.1/project")
 	client.Microversion = "2.42"
+	cloud.AdvertiseNova("/prefix/v2.1/", "2.1", "2.100")
 	service := compute.New(client, compute.Dependencies{
 		Network: func(context.Context, resource.Ref) (string, error) { t.Error("ID network lookup"); return "", nil },
 		Port:    func(context.Context, resource.Ref) (string, error) { t.Error("ID port lookup"); return "", nil },
@@ -85,6 +86,7 @@ func TestServerNICOptionsOwnSlicesTagsAndConcurrentReuse(t *testing.T) {
 	client := cloud.Client("compute", "/compute")
 	client.Microversion = "2.100"
 	service := compute.New(client, compute.Dependencies{})
+	cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 	tag := request.Present("original")
 	input := []compute.ServerNetworkInterface{{Network: resource.ID("network"), Tag: tag}}
 	option := compute.WithNetworkInterfaces(input...)
@@ -145,33 +147,116 @@ func TestServerNICSelectionUsesLastValidOption(t *testing.T) {
 	}
 }
 
+// The default networks="auto" follows supports_microversion(compute, "2.37"):
+// the advertised range must contain 2.37 and a selected client version must be
+// at least 2.37. An unselected client raises only the create request to 2.37.
 func TestServerNICDefaultsModesAndVersionBoundaries(t *testing.T) {
+	const modern, legacy, absent = "2.100", "2.36", ""
 	for _, tc := range []struct {
-		name, version string
-		opts          []compute.CreateServerOption
-		want          any
+		name, version, maximum string
+		opts                   []compute.CreateServerOption
+		want                   any
+		header                 string
+		discoveries            int32
 	}{
-		{"unselected version omits networks", "", nil, nil},
-		{"older version omits networks", "2.36", nil, nil},
-		{"modern version defaults auto", "2.37", nil, "auto"},
-		{"three digit minor defaults auto", "2.100", nil, "auto"},
-		{"explicit none", "2.37", []compute.CreateServerOption{compute.WithNetworkMode("none")}, "none"},
-		{"explicit auto", "2.37", []compute.CreateServerOption{compute.WithNetworkMode("auto")}, "auto"},
+		{"unselected without discovery omits networks", "", absent, nil, nil, "", 1},
+		{"unselected below advertised 2.37 omits networks", "", legacy, nil, nil, "", 1},
+		{"unselected advertised 2.37 defaults auto at 2.37", "", modern, nil, "auto", "2.37", 1},
+		{"older selection omits networks without discovery", "2.36", modern, nil, nil, "2.36", 0},
+		{"modern selection defaults auto", "2.37", modern, nil, "auto", "2.37", 1},
+		{"three digit minor defaults auto", "2.100", modern, nil, "auto", "2.100", 1},
+		{"selection beyond advertised range omits networks", "2.40", legacy, nil, nil, "2.40", 1},
+		{"selection without discovery omits networks", "2.37", absent, nil, nil, "2.37", 1},
+		{"explicit none", "2.37", modern, []compute.CreateServerOption{compute.WithNetworkMode("none")}, "none", "2.37", 0},
+		{"explicit auto", "2.37", modern, []compute.CreateServerOption{compute.WithNetworkMode("auto")}, "auto", "2.37", 0},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("compute", "/compute")
 			client.Microversion = tc.version
+			minimum := "2.1"
+			if tc.maximum == absent {
+				minimum = ""
+			}
+			discoveries := cloud.AdvertiseNova("/compute/", minimum, tc.maximum)
 			service := compute.New(client, compute.Dependencies{})
 			cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
+				if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != tc.header {
+					t.Errorf("request microversion=%q want=%q", got, tc.header)
+				}
 				checkNICServerBody(t, r, tc.want)
 				testcloud.JSON(w, 202, `{"server":{"id":"created"}}`)
 			})
 			if _, err := service.Servers.Create(context.Background(), nicCreateRequest(), tc.opts...); err != nil {
 				t.Fatal(err)
 			}
+			if got := discoveries.Load(); got != tc.discoveries || client.Microversion != tc.version {
+				t.Fatalf("discoveries=%d want=%d client version=%q", got, tc.discoveries, client.Microversion)
+			}
 		})
 	}
+}
+
+// A NIC tag follows require_microversion(compute, "2.42"): an unsupported
+// advertised range or selection fails before the POST, and a non-clean
+// discovery failure is returned instead of guessing.
+func TestServerNICTagRequiresAdvertisedRange(t *testing.T) {
+	tagged := compute.WithNetworkInterfaces(compute.ServerNetworkInterface{Network: resource.ID("net-id"), Tag: request.Present("eth0")})
+	for _, tc := range []struct {
+		name, version, minimum, maximum string
+		header                          string
+		wantErr                         error
+		discoveries                     int32
+	}{
+		{"unselected advertised 2.42 raises the request", "", "2.1", "2.100", "2.42", nil, 1},
+		{"unselected advertised below 2.42 rejects", "", "2.1", "2.41", "", resource.ErrUnsupported, 1},
+		{"unselected without discovery rejects", "", "", "", "", resource.ErrUnsupported, 1},
+		{"selected beyond advertised range rejects", "2.42", "2.1", "2.41", "", resource.ErrUnsupported, 1},
+		{"selected 2.42 within range keeps the selection", "2.42", "2.1", "2.100", "2.42", nil, 1},
+		{"selected below 2.42 rejects without discovery", "2.41", "2.1", "2.100", "", resource.ErrUnsupported, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cloud := testcloud.New(t)
+			client := cloud.Client("compute", "/compute")
+			client.Microversion = tc.version
+			discoveries := cloud.AdvertiseNova("/compute/", tc.minimum, tc.maximum)
+			var posts atomic.Int32
+			cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
+				posts.Add(1)
+				if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != tc.header {
+					t.Errorf("request microversion=%q want=%q", got, tc.header)
+				}
+				checkNICServerBody(t, r, []any{map[string]any{"uuid": "net-id", "tag": "eth0"}})
+				testcloud.JSON(w, 202, `{"server":{"id":"created"}}`)
+			})
+			service := compute.New(client, compute.Dependencies{})
+			_, err := service.Servers.Create(context.Background(), nicCreateRequest(), tagged)
+			if tc.wantErr == nil && err != nil || tc.wantErr != nil && !errors.Is(err, tc.wantErr) {
+				t.Fatalf("err=%v want=%v", err, tc.wantErr)
+			}
+			wantPosts := int32(1)
+			if tc.wantErr != nil {
+				wantPosts = 0
+			}
+			if posts.Load() != wantPosts || discoveries.Load() != tc.discoveries {
+				t.Fatalf("posts=%d discoveries=%d want %d/%d", posts.Load(), discoveries.Load(), wantPosts, tc.discoveries)
+			}
+		})
+	}
+	t.Run("discovery failure is returned before POST", func(t *testing.T) {
+		cloud := testcloud.New(t)
+		cloud.Mux.HandleFunc("GET /compute/{$}", func(w http.ResponseWriter, r *http.Request) { http.Error(w, "down", 503) })
+		cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
+			t.Error("a failed discovery must not reach the POST")
+		})
+		service := compute.New(cloud.Client("compute", "/compute"), compute.Dependencies{})
+		if _, err := service.Servers.Create(context.Background(), nicCreateRequest(), tagged); err == nil || errors.Is(err, resource.ErrUnsupported) {
+			t.Fatalf("err=%v", err)
+		}
+		if _, err := service.Servers.Create(context.Background(), nicCreateRequest()); err == nil {
+			t.Fatal("automatic networks must not guess after a failed discovery")
+		}
+	})
 }
 
 func TestServerNICInvalidOptionsFailBeforeDependencyLookup(t *testing.T) {

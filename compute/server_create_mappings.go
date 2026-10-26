@@ -248,7 +248,7 @@ func (s *Servers) CreateReservation(ctx context.Context, request CreateServerReq
 		return nil, s.wrap("create reservation", err)
 	}
 	encoded["server"].(map[string]any)["return_reservation_id"] = true
-	response, err := rest.DoJSON(ctx, s.client, http.MethodPost, s.client.ServiceURL("servers"), encoded, nil, 200, 202)
+	response, err := rest.DoJSON(ctx, createClient(s.client, body.microversion), http.MethodPost, s.client.ServiceURL("servers"), encoded, nil, 200, 202)
 	if err != nil {
 		return nil, s.wrap("create reservation", err)
 	}

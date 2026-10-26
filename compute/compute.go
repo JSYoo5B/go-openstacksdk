@@ -61,6 +61,10 @@ type Dependencies struct {
 	AddressCompute  func(context.Context) (*gophercloud.ServiceClient, error)
 	NetworkPolicy   network.NetworkRolePolicy
 	ServerAddresses ServerAddressPolicy
+	// AdvertisedMinimum and AdvertisedMaximum are the Compute bounds that
+	// Connection read while negotiating the client microversion. When both are
+	// set, create_server version gates reuse them instead of discovering again.
+	AdvertisedMinimum, AdvertisedMaximum string
 	// CloudLocation supplies recorded/configured normalization facts without I/O.
 	// Connection installs it; direct clients default to their recorded scope.
 	CloudLocation func() (resource.CloudLocation, error)

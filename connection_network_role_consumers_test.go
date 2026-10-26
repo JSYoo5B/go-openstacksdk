@@ -158,13 +158,15 @@ func TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault(t *testing.T) {
 				if scenario == "disabled" {
 					roleOpts = append(roleOpts, network.WithExternalNetworkDiscovery(false), network.WithInternalNetworkDiscovery(false))
 				}
+				cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 				cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 					creates.Add(1)
 					var body struct{ Server map[string]any }
 					_ = json.NewDecoder(r.Body).Decode(&body)
-					value, present := body.Server["networks"]
-					if version == "2.37" && value != "auto" || version == "" && present {
-						t.Error(body.Server)
+					// The fixture advertises 2.37: an unselected client also sends
+					// auto, raising only this request to 2.37.
+					if body.Server["networks"] != "auto" || r.Header.Get("X-OpenStack-Nova-API-Version") != "2.37" {
+						t.Error(body.Server, r.Header)
 					}
 					testcloud.JSON(w, 202, `{"server":{"id":"created"}}`)
 				})

@@ -199,6 +199,7 @@ func TestConnectionDefaultNetworkDisableAndExplicitSelections(t *testing.T) {
 				locates.Add(1)
 				return "", errors.New("default network must not be resolved")
 			}
+			cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 			cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 				var body struct{ Server map[string]any }
 				_ = json.NewDecoder(r.Body).Decode(&body)

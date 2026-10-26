@@ -60,6 +60,7 @@ func TestServerDefaultNetworkDependencyFailureCancellationAndValidation(t *testi
 
 func TestServerDefaultNetworkDoesNotLeakBetweenRequestsAndPreservesWaitFailure(t *testing.T) {
 	cloud := testcloud.New(t)
+	cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 	var calls, creates, waits atomic.Int32
 	client := cloud.Client("compute", "/compute")
 	client.Microversion = "2.37"

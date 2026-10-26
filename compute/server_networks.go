@@ -13,8 +13,10 @@ import (
 // ServerNetworkInterface selects one Nova NIC. Network and Port may both be
 // supplied; Nova checks their compatibility. Zero references are omitted.
 // FixedIP is sent literally. Tag zero omits the key; request.Present and
-// request.Null preserve a supplied string or null. Tag requires Compute 2.42
-// or later whenever it is set, including an empty string or null.
+// request.Null preserve a supplied string or null. A set tag, including an
+// empty string or null, follows Python's require_microversion(compute, "2.42"):
+// the advertised Compute range must contain 2.42 and a selected client
+// microversion must be at least 2.42, otherwise Create fails before the POST.
 type ServerNetworkInterface struct {
 	Network resource.Ref
 	Port    resource.Ref
@@ -68,6 +70,8 @@ func WithNetworkInterfaces(nics ...ServerNetworkInterface) CreateServerOption {
 // WithNetworkMode replaces earlier NIC selections with Nova's auto or none
 // mode. Both modes require a selected Compute microversion of at least 2.37.
 // It does not change the shared client version or perform extra discovery.
+// Without any NIC, mode or default network, Create sends auto itself when
+// Python's supports_microversion(compute, "2.37") holds for the advertised range.
 func WithNetworkMode(mode string) CreateServerOption {
 	return func(o *createServerOptions) error {
 		if mode != "auto" && mode != "none" {
@@ -91,7 +95,7 @@ func (o *createServerOptions) validateNetworkVersion(version string) error {
 		return fmt.Errorf("%w: network mode requires Compute microversion 2.37 or later (client uses %q)", resource.ErrUnsupported, version)
 	}
 	for _, nic := range o.networkInterfaces {
-		if nic.Tag.IsSet() && !networkMicroversionAtLeast(version, 42) {
+		if nic.Tag.IsSet() && version != "" && !networkMicroversionAtLeast(version, 42) {
 			return fmt.Errorf("%w: network interface tag requires Compute microversion 2.42 or later (client uses %q)", resource.ErrUnsupported, version)
 		}
 	}
@@ -121,11 +125,32 @@ func (s *Servers) prepareServerNetworks(ctx context.Context, o *createServerOpti
 	if len(o.networkInterfaces) == 0 {
 		if o.networkMode != "" {
 			o.base.Networks = o.networkMode
-		} else if networkMicroversionAtLeast(s.client.Microversion, 37) {
-			// Nova requires an explicit selection at 2.37 and later.
-			o.base.Networks = "auto"
+		} else {
+			// Python replaces the missing selection with auto only when
+			// supports_microversion(compute, "2.37") holds.
+			supported, err := s.supportsCreateMicroversion(ctx, o, "2.37")
+			if err != nil {
+				return err
+			}
+			if supported {
+				o.base.Networks = "auto"
+			}
 		}
 		return nil
+	}
+	for _, nic := range o.networkInterfaces {
+		if !nic.Tag.IsSet() {
+			continue
+		}
+		// Python calls require_microversion(compute, "2.42") for any tag.
+		supported, err := s.supportsCreateMicroversion(ctx, o, "2.42")
+		if err != nil {
+			return err
+		}
+		if !supported {
+			return fmt.Errorf("%w: network interface tag requires advertised and selected Compute support for 2.42 (client uses %q)", resource.ErrUnsupported, s.client.Microversion)
+		}
+		break
 	}
 	rows := make([]map[string]any, len(o.networkInterfaces))
 	for i, nic := range o.networkInterfaces {

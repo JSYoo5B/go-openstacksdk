@@ -34,6 +34,7 @@ func TestCreateBootVolumeIDsAndDeletionPolicy(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
+			cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 			var posts atomic.Int32
 			service := compute.New(cloud.Client("compute", "/compute"), compute.Dependencies{
 				Volume: func(context.Context, resource.Ref) (string, error) {
@@ -234,6 +235,7 @@ func TestCreateBootVolumeWaitFailurePreservesServerAndVolume(t *testing.T) {
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
+			cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 			service := compute.New(cloud.Client("compute", "/compute"), compute.Dependencies{})
 			cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 				testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)
@@ -255,6 +257,7 @@ func TestCreateBootVolumeWaitFailurePreservesServerAndVolume(t *testing.T) {
 
 func TestCreateBootVolumeNovaFailurePreservesCause(t *testing.T) {
 	cloud := testcloud.New(t)
+	cloud.AdvertiseNova("/compute/", "2.1", "2.100")
 	service := compute.New(cloud.Client("compute", "/compute"), compute.Dependencies{})
 	cloud.Mux.HandleFunc("POST /compute/servers", func(w http.ResponseWriter, r *http.Request) {
 		testcloud.JSON(w, 409, `{"conflictingRequest":{"message":"volume is in use"}}`)

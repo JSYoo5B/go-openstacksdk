@@ -43,6 +43,7 @@ func newCreateBodyFixture(t *testing.T, microversion string) *createBodyFixture 
 		f.lookups.Add(1)
 		return "resolved-" + ref.String(), nil
 	}})
+	f.cloud.AdvertiseNova("/v2.1/", "2.1", "2.100")
 	f.cloud.Mux.HandleFunc("GET /v2.1/os-server-groups", func(w http.ResponseWriter, r *http.Request) {
 		f.lookups.Add(1)
 		testcloud.JSON(w, 200, `{"server_groups":[{"id":"group-id","name":"anti"},{"id":"dup-1","name":"dup"},{"id":"dup-2","name":"dup"}]}`)

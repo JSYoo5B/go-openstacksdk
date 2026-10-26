@@ -127,7 +127,7 @@ func (s *Service) CreateWithAutomaticFloatingIP(ctx context.Context, request Cre
 	if err != nil {
 		return nil, errors.Join(err, state.check(ctx))
 	}
-	response, postErr := rest.DoJSONGuarded(ctx, client, state.check, http.MethodPost, client.ServiceURL("servers"), encoded, nil, 200, 202)
+	response, postErr := rest.DoJSONGuarded(ctx, createClient(client, body.microversion), state.check, http.MethodPost, client.ServiceURL("servers"), encoded, nil, 200, 202)
 	if response == nil {
 		return nil, postErr
 	}

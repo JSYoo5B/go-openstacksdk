@@ -36,6 +36,7 @@ func setupServerIPFixture(t *testing.T, cloud *testcloud.Cloud, scenario string,
 		t.Fatal(err)
 	}
 	counts := &serverIPCounts{}
+	cloud.AdvertiseNova("/compute/v2.1/", "2.1", "2.100")
 	cloud.Mux.HandleFunc("POST /compute/v2.1/project/servers", func(w http.ResponseWriter, r *http.Request) {
 		counts.creates.Add(1)
 		for _, inspect := range inspectCreate {
@@ -275,7 +276,9 @@ func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) 
 			}
 			mutex.Lock()
 			defer mutex.Unlock()
-			if len(deadlines) != 6 {
+			// Compute version discovery for the default networks decision is
+			// the first stage and shares the same workflow deadline.
+			if len(deadlines) != 7 {
 				t.Fatalf("unexpected stages: %v", deadlines)
 			}
 			for _, deadline := range deadlines {

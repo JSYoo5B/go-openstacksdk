@@ -199,7 +199,9 @@ func (c *Connection) Compute(ctx context.Context) (*compute.Service, error) {
 		if err != nil {
 			return nil, err
 		}
+		selection := c.options.microversionSelections[serviceKey(Compute, serviceDefinitions[Compute].version)]
 		c.compute = compute.New(client, compute.Dependencies{
+			AdvertisedMinimum: selection.SupportedMinimum, AdvertisedMaximum: selection.SupportedMaximum,
 			BackupImages:  c.Image,
 			CloudLocation: c.CurrentLocation,
 			NetworkRoles:  c.GetNetworkRoles, AddressNetworks: c.addressNetworkService,

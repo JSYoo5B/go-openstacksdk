@@ -66,6 +66,7 @@ func TestConnectionServerNICsResolveExactNamesAndOwnInputs(t *testing.T) {
 		}
 		testcloud.JSON(w, 202, `{"server":{"id":"created","status":"BUILD"}}`)
 	})
+	cloud.AdvertiseNova("/compute/v2.1/", "2.1", "2.100")
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t.Errorf("unexpected lookup/wait: %s %s", r.Method, r.URL)
 		http.Error(w, "unexpected request", 500)

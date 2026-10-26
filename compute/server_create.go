@@ -41,6 +41,10 @@ type createServerOptions struct {
 	bootVolumeType                string
 	deleteBootVolumeOnTermination *bool
 	extra                         serverCreateExtras
+	// advertised and requestMicroversion record the create_server gates
+	// decided from the Compute advertised range during body preparation.
+	advertised          serverCreateAdvertised
+	requestMicroversion string
 }
 
 type CreateServerOption func(*createServerOptions) error
@@ -187,6 +191,9 @@ type serverBody struct {
 	hints  map[string]json.RawMessage
 	// mappings are explicit v2 entries placed before generated mappings.
 	mappings []ServerBlockDevice
+	// microversion is set only when an advertised gate raised this request
+	// above an unselected client version.
+	microversion string
 }
 
 func (b serverBody) ToServerCreateMap() (map[string]any, error) {
@@ -392,7 +399,7 @@ func (s *Servers) prepareServerCreateBody(ctx context.Context, request CreateSer
 	if err != nil {
 		return serverBody{}, err
 	}
-	return serverBody{base: o.base, fields: o.fields, hints: hints, mappings: cloneBlockDevices(o.extra.mappings)}, checkServerCreation(ctx)
+	return serverBody{base: o.base, fields: o.fields, hints: hints, mappings: cloneBlockDevices(o.extra.mappings), microversion: o.requestMicroversion}, checkServerCreation(ctx)
 }
 
 func checkServerCreation(ctx context.Context) error {
@@ -404,7 +411,7 @@ func (s *Servers) createServerPrepared(ctx context.Context, request CreateServer
 	if err != nil {
 		return nil, err
 	}
-	created, err := servers.Create(ctx, s.client, body, nil).Extract()
+	created, err := servers.Create(ctx, createClient(s.client, body.microversion), body, nil).Extract()
 	if err != nil {
 		return nil, s.wrap("create", err)
 	}

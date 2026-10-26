@@ -42337,7 +42337,7 @@
     {
       "operation": "python:cloud/_compute/ComputeCloudMixin/create_server",
       "source_fingerprint": "45daa231f24b83562883e27a7faa75396e19b66535f2a9cfbd2a3bb5a7af3007",
-      "status": "unresolved",
+      "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/compute.Servers.Create",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithNetworkInterfaces",
@@ -42406,17 +42406,19 @@
           ]
         },
         {
-          "behavior": "Mode auto/none requires selected Compute 2.37+, and every present tag, including empty or null, requires selected 2.42+. Invalid options/Refs/version gates fail before dependency lookup; the shared client version and Nova headers are preserved.",
+          "behavior": "Explicit mode auto/none requires selected Compute 2.37+ without discovery. Every present tag, including empty or null, follows require_microversion(compute, \"2.42\"): a selected version below 2.42 fails before dependency lookup, and otherwise the advertised range must contain 2.42 (an unselected client then raises only that POST to 2.42) or Create returns ErrUnsupported before the POST. A non-clean discovery failure is returned before the POST. Invalid options/Refs fail before dependency lookup; the shared client version is preserved.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICInvalidOptionsFailBeforeDependencyLookup",
-            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag"
+            "compute/server_networks_test.go:TestServerNICWirePreservesCombinationsOrderAndExplicitEmptyTag",
+            "compute/server_networks_test.go:TestServerNICTagRequiresAdvertisedRange"
           ]
         },
         {
-          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "Without explicit NICs, mode or a Connection/YAML default, Create follows supports_microversion(compute, \"2.37\") from openstack/utils.py: the advertised Compute range must contain 2.37 and a selected client version must be at least 2.37. Then networks is auto; an unselected client raises only this POST to 2.37 and leaves the shared client unset. A selection below 2.37 omits networks without discovery; a range below 2.37, a clean 404/405 discovery or a selection beyond the advertised range omits the key. One discovery GET per create; Connection negotiation reuses its recorded advertised bounds without another discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
-            "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
+            "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto",
+            "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault"
           ]
         },
         {
@@ -42512,7 +42514,7 @@
           ]
         },
         {
-          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default and keeps Nova auto at selected2.37 or omits networks when unset. Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
+          "behavior": "Both-disabled discovery or a clean pointer/value missing Network endpoint yields no configured default, so Nova auto follows the advertised 2.37 check (including an unselected client raised to 2.37 for that POST). Explicit default ID/disable and explicit NIC/mode bypass configured role discovery; explicit typed default names keep their exact-name resolution lane.",
           "tests": [
             "connection_network_role_consumers_test.go:TestConnectionDefaultNICEmptyRolesUseNovaNetworkDefault",
             "connection_cloud_network_test.go:TestConnectDefaultNetworkOverridesDisableAndExplicitCreateSelection",
@@ -42718,12 +42720,25 @@
           "tests": [
             "compute/server_create_mappings_test.go:TestServerWithoutAddressesDeleteSkipsTruthyEmptyRowMaps"
           ]
+        },
+        {
+          "behavior": "Through CreateWithAutomaticFloatingIP the boot source, data volumes and NIC selection combine in one POST: image boot with explicit NIC and data volume (local image mapping then data mapping), existing boot volume with fixed-IP and port NICs (empty imageRef), new image-backed boot volume with a default network and data volume, a new boot volume without NICs at advertised 2.37 (networks auto, request 2.37, one discovery) and image boot without NICs below advertised 2.37 (no networks key, no version header). Explicit NICs and default networks need no discovery.",
+          "tests": [
+            "compute/server_create_combinations_test.go:TestAutomaticCreateCombinesBootVolumesAndNetworkSelections"
+          ]
+        },
+        {
+          "behavior": "After creation, add_ips_to_server precedence holds: a Neutron pool wins over explicit addresses and auto (allocated in the pool, no address lookup), explicit addresses win over enabled auto (reuse, no allocation), auto by default allocates on the external network after a networks=auto POST, and source none disables auto. The legacy Nova source at a pinned 2.35 client takes the default pool for auto, the selected pool over addresses, or the explicit address, each with one accepted addFloatingIp action and raw observation, while the POST omits networks without discovery.",
+          "tests": [
+            "compute/server_create_combinations_test.go:TestAutomaticCreateIPLanesFollowPythonPrecedence"
+          ]
         }
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback.",
+        "Version gates follow supports_microversion/require_microversion with the client's selected microversion as the adapter default. Python sends an unselected request at min(Server._max_microversion 2.100, advertised maximum); Go keeps the base version and raises only the create POST to the gate it needs (2.37 for auto, 2.42 for tags), so other body fields keep their base-version validation. A selection below the gate decides without discovery. Python's discovery failure yields unsupported; Go treats only a clean 404/405 or missing bound as unsupported and returns other discovery failures before the POST rather than silently changing the networks body. Explicit WithNetworkMode keeps its selected-2.37 check without discovery, which Python's cloud layer does not expose.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
         "CreateWithFloatingIP explicitly requests one Neutron IPv4 assignment and always waits actual server/IP ACTIVE under a five-minute budget including pre-creation runtime work. Python cloud wait timeout defaults to180s after creation and refreshes server interface addresses; generic Create remains asynchronous and the source auto_ip need/skip policy is not inferred from this explicit workflow.",
         "The explicit Service/Connection CreateWithAutomaticFloatingIP compound connects owned Nova creation, raw actual ACTIVE/address readiness and selected Neutron or bounded legacy Nova dispatch with separate Creation/last Server/Automatic results. It always waits, rejects alternate status selectors and preserves original creation-only AdminPass. Source create_server defaults wait=false and only forwards IP dispatch through its wait=true path; ordinary Servers.Create and the older explicit workflow retain their separate contracts.",
@@ -42752,10 +42767,6 @@
         "compute/server-ready.md",
         "compute/server-ip-dispatch.md",
         "compute/server-nova-floating-ip.md"
-      ],
-      "remaining": [
-        "Check the advertised compute microversion range before using version-gated create features, as Python's supports_microversion and require_microversion do.",
-        "Complete the auto_ip, explicit IP, ip_pool and Nova floating source default combinations and the volume and NIC dispatch combinations in fixtures, including Python's replacement of the networks argument with auto when no NICs are configured."
       ]
     },
     {
@@ -42820,7 +42831,7 @@
           ]
         },
         {
-          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "Without explicit NICs, mode or a Connection/YAML default, Create follows supports_microversion(compute, \"2.37\") from openstack/utils.py: the advertised Compute range must contain 2.37 and a selected client version must be at least 2.37. Then networks is auto; an unselected client raises only this POST to 2.37 and leaves the shared client unset. A selection below 2.37 omits networks without discovery; a range below 2.37, a clean 404/405 discovery or a selection beyond the advertised range omits the key. One discovery GET per create; Connection negotiation reuses its recorded advertised bounds without another discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
             "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
@@ -42926,12 +42937,13 @@
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback.",
         "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
         "Create property options are typed and validated locally: version-gated fields fail against the client microversion before HTTP rather than relying on Nova 400s, falsy values such as config_drive false are sent instead of dropped, empty admin passwords/tags are rejected, and min_count/max_count are omitted unless WithServerCount is used (Python's cloud layer always sends 1/1). Boot indexes are JSON integers where Python sends some as strings, and group/data-volume lookups run after image/flavor/network resolution.",
         "config_drive is a typed boolean; Python's documented volume-ID value is not modeled because Nova's create schema accepts only booleans. Servers.Create with a count returns Nova's single server response; CreateReservation returns the reservation ID instead. Python's Server resource has no return_reservation_id attribute, and its reservation_id kwarg is a server body attribute rather than this response shape. Explicit mapping UUIDs are sent literally without name resolution.",
         "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
-        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md."
+        "Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.",
+        "Version gates follow supports_microversion/require_microversion with the client's selected microversion as the adapter default. Python sends an unselected request at min(Server._max_microversion 2.100, advertised maximum); Go keeps the base version and raises only the create POST to the gate it needs (2.37 for auto, 2.42 for tags), so other body fields keep their base-version validation. A selection below the gate decides without discovery. Python's discovery failure yields unsupported; Go treats only a clean 404/405 or missing bound as unsupported and returns other discovery failures before the POST rather than silently changing the networks body. Explicit WithNetworkMode keeps its selected-2.37 check without discovery, which Python's cloud layer does not expose."
       ]
     },
     {
@@ -42982,7 +42994,7 @@
           ]
         },
         {
-          "behavior": "No explicit selection or Connection/YAML default sends auto at selected 2.37+ and omits the networks key at older or unset versions. Connection negotiation reuses its selected client/discovery result without extra NIC discovery or Neutron lookup.",
+          "behavior": "Without explicit NICs, mode or a Connection/YAML default, Create follows supports_microversion(compute, \"2.37\") from openstack/utils.py: the advertised Compute range must contain 2.37 and a selected client version must be at least 2.37. Then networks is auto; an unselected client raises only this POST to 2.37 and leaves the shared client unset. A selection below 2.37 omits networks without discovery; a range below 2.37, a clean 404/405 discovery or a selection beyond the advertised range omits the key. One discovery GET per create; Connection negotiation reuses its recorded advertised bounds without another discovery or Neutron lookup.",
           "tests": [
             "compute/server_networks_test.go:TestServerNICDefaultsModesAndVersionBoundaries",
             "connection_server_nics_test.go:TestConnectionNegotiatedVersionControlsDefaultNetworkAuto"
@@ -43072,8 +43084,9 @@
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
         "Network and port are explicit safe Ref IDs/names. Connection adds port name resolution, while Python cloud port/port-id values are literal IDs. The SDK copies inputs instead of mutating Python NIC dictionaries.",
-        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback. Version checks use the selected client and do not implement all Python endpoint capability/default-network policy.",
-        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success."
+        "The final selection option wins. Empty network/NIC selections are invalid options rather than Python empty-list fallback.",
+        "Connection supplies configured defaults without an application builder/resolver. Explicit Ref IDs bypass Neutron and Ref names use exact-name lookup. Configured YAML/role defaults match name OR ID through shared successful role discovery, while explicit typed default Name remains fresh. Discovery errors preserve their causes and are not cached as empty success.",
+        "Version gates follow supports_microversion/require_microversion with the client's selected microversion as the adapter default. Python sends an unselected request at min(Server._max_microversion 2.100, advertised maximum); Go keeps the base version and raises only the create POST to the gate it needs (2.37 for auto, 2.42 for tags), so other body fields keep their base-version validation. A selection below the gate decides without discovery. Python's discovery failure yields unsupported; Go treats only a clean 404/405 or missing bound as unsupported and returns other discovery failures before the POST rather than silently changing the networks body. Explicit WithNetworkMode keeps its selected-2.37 check without discovery, which Python's cloud layer does not expose."
       ],
       "remaining": []
     },
