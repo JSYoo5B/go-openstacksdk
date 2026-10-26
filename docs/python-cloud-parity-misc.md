@@ -789,10 +789,59 @@ Unresolved boundaries:
 
 Status: `unresolved`.
 
+Go API:
+
+- `github.com/JSYoo5B/go-openstacksdk.Connection.PlanProjectCleanup`
+- `github.com/JSYoo5B/go-openstacksdk.Connection.ExecuteProjectCleanup`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllResources`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithCreatedBefore`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithUpdatedBefore`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSkip`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithSelector`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithParallelism`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithDeletionWait`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress`
+- `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan`
+
+- PlanProjectCleanup sends only project-scoped GETs (no all_tenants/all_projects), fixes the token project (ID, name, domain), orders compute servers before server groups with the server stage waiting for absence, keeps raw rows and times, excludes rows owned by another project and server groups with members that are not server candidates, and reports core services without an implementation as not yet supported, missing ones as not in catalog, disabled ones as disabled and present phase-2 services as not yet supported.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupPlanDiscoversWithoutMutation`, `connection_project_cleanup_test.go:TestProjectCleanupReportsDisabledCoreServices`.
+- Without a filter or selector PlanProjectCleanup fails before HTTP unless WithAllResources is given; unknown skip names are rejected; an unscoped token cannot plan; ExecuteProjectCleanup refuses a modified or hand-built plan and a Connection whose token project differs from the plan's.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan`.
+- WithCreatedBefore/WithUpdatedBefore keep resources at or before the cutoff (ISO 8601, no offset means UTC); missing, null or empty times and kinds without the attribute are excluded, and unparsable values are excluded with a reason.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupTimeFiltersExcludeMissingAndUnparsableTimes`, `projectcleanup/timefilter_test.go:TestTimeFilterFollowsPythonISO8601Rules`.
+- WithSelector sees copies of filtered resources and can include or exclude them, a selector error fails the plan, and WithSkip uses Python's names (compute.server also skips server groups, as in Python).
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupSelectorAndSkipNames`.
+- ExecuteProjectCleanup sends each DELETE once without a prior GET and reports Deleted (absence observed), Accepted, AlreadyMissing (404), Failed with status, headers and body, Uncertain (no response, not retried) and NotAttempted for dependents of failed or uncertain candidates, returning the full Result with an error.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupExecuteReportsEveryState`.
+- A waiting stage observes every accepted server as absent before the next stage; a polling error is returned at once as WaitErr and makes dependents NotAttempted.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupWaitsForServerAbsenceBeforeDependents`.
+- A progress callback error or context cancellation stops new DELETEs; already-sent candidates keep their observed state and later ones are NotAttempted.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupStopsOnProgressErrorAndCancellation`.
+- Execution is sequential by default and WithParallelism(n) bounds concurrent DELETEs within a stage while progress callbacks never overlap.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupParallelismWithinStage`.
+- A service discovery failure returns the partial plan with a ServiceError naming the service; ExecuteProjectCleanup refuses it unless WithAllowIncompletePlan is given.
+  Tests: `connection_project_cleanup_test.go:TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution`.
+
+Python/Go differences:
+
+- Python's dry_run=True runs the cleanup code without deleting and dry_run=False discovers again while deleting; Go discovers once in PlanProjectCleanup and ExecuteProjectCleanup acts only on that plan, refusing modified plans and a different current project.
+- Python cleans every resource when no filter is given; Go requires WithAllResources in that case.
+- Python logs per-resource exceptions and returns None; Go returns one Outcome per candidate and an error when any candidate is Failed, Uncertain, locally not attempted or not observed absent after a required wait.
+- No mutation is retried; a request without a response is Uncertain, and its dependents are not sent.
+- Cancellation or a progress callback error stops new mutations only; accepted work may continue on the service and nothing is rolled back.
+- Python runs services concurrently along its dependency graph in a thread pool; Go runs stages sequentially, with optional WithParallelism inside a stage.
+- Go never lists with all_tenants or all_projects and excludes rows owned by another project; a server group whose members are all server candidates depends on them, which matches Python listing groups only after its servers are deleted.
+- Python's resource_evaluation_fn replaces the time filters; Go applies the time filters first and the selector to the remaining resources. Python ignores a filter it cannot evaluate; Go excludes a resource with an unparsable time.
+- Python reports progress through a status_queue; Go calls a synchronous WithProgress callback for each candidate state change.
+
 Unresolved boundaries:
 
-- Go has no project cleanup workflow with service dependency ordering, dry run, filters, evaluation callback and status queue.
-
+- Block storage cleanup (backups with dependents last, snapshots, volumes with absence waits) is not implemented; the service is reported as not yet supported.
+- Network cleanup (VPN resources, floating IPs, non-default security groups, router routes and interfaces, routers, ports, subnets, networks) is not implemented; the service is reported as not yet supported.
+- Image cleanup (images owned by the project) is not implemented; the service is reported as not yet supported.
+- Object storage cleanup (objects, then containers left empty) is not implemented; the service is reported as not yet supported.
+- Key manager cleanup (containers, secrets) is not implemented; the service is reported as not yet supported.
+- Orchestration stacks, load balancers and DNS zones/recordsets (phase 2) are not cleaned; present services are reported as not yet supported.
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 
 Status: `go_mapping`.
