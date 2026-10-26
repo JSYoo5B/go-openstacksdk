@@ -159,7 +159,6 @@ func TestProjectCleanupPlanDiscoversWithoutMutation(t *testing.T) {
 		t.Fatalf("exclusions %v", reasons)
 	}
 	wantUnavailable := []projectcleanup.Unavailable{
-		{Service: "block_storage", Reason: projectcleanup.NotYetSupported},
 		{Service: "network", Reason: projectcleanup.NotYetSupported},
 		{Service: "object_store", Reason: projectcleanup.NotInCatalog},
 		{Service: "key_manager", Reason: projectcleanup.NotInCatalog},
@@ -513,7 +512,7 @@ func TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution(t *testing.T)
 	if plan == nil || !errors.As(err, &serviceErr) || serviceErr.Service != "compute" || !strings.Contains(err.Error(), "list servers") {
 		t.Fatalf("plan %+v err %v", plan, err)
 	}
-	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 5 {
+	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 4 {
 		t.Fatalf("partial plan %+v", plan)
 	}
 	if _, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan); !errors.Is(err, projectcleanup.ErrIncompletePlan) {
