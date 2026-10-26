@@ -95,6 +95,12 @@ func (c *cleanupCloud) serveCompute(t *testing.T, servers, groups string) {
 // of a service registers its own, more specific handler.
 var cleanupEmptyLists = map[string]string{
 	"/image/v2/images": "images",
+	// network: without a VPN provider and networks, nothing else is listed.
+	"/network/v2.0/service-providers": "service_providers",
+	"/network/v2.0/floatingips":       "floatingips",
+	"/network/v2.0/security-groups":   "security_groups",
+	"/network/v2.0/networks":          "networks",
+	"/network/v2.0/routers":           "routers",
 }
 
 // cleanupCatchAll serves cleanupEmptyLists and fails on any other request.
@@ -159,7 +165,6 @@ func TestProjectCleanupPlanDiscoversWithoutMutation(t *testing.T) {
 		t.Fatalf("exclusions %v", reasons)
 	}
 	wantUnavailable := []projectcleanup.Unavailable{
-		{Service: "network", Reason: projectcleanup.NotYetSupported},
 		{Service: "object_store", Reason: projectcleanup.NotInCatalog},
 		{Service: "key_manager", Reason: projectcleanup.NotInCatalog},
 		{Service: "orchestration", Reason: projectcleanup.NotYetSupported},
@@ -512,7 +517,7 @@ func TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution(t *testing.T)
 	if plan == nil || !errors.As(err, &serviceErr) || serviceErr.Service != "compute" || !strings.Contains(err.Error(), "list servers") {
 		t.Fatalf("plan %+v err %v", plan, err)
 	}
-	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 4 {
+	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 3 {
 		t.Fatalf("partial plan %+v", plan)
 	}
 	if _, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan); !errors.Is(err, projectcleanup.ErrIncompletePlan) {

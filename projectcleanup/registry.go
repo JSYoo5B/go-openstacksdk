@@ -45,6 +45,7 @@ var implementations = map[string]serviceCleanup{
 	"compute":       computeCleanup{},
 	"image":         imageCleanup{},
 	"key_manager":   keyManagerCleanup{},
+	"network":       networkCleanup{},
 	"object_store":  objectStoreCleanup{},
 }
 
