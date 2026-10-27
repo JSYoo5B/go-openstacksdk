@@ -41,9 +41,9 @@ func setCleanupScope(t *testing.T, cloud *testcloud.Cloud, project string, catal
 	}
 }
 
-// cleanupCloud is a project-scoped fixture whose catalog also lists
-// orchestration, so that phase-2 services appear as not yet supported.
-// connection() overrides compute, network, image and block storage.
+// cleanupCloud is a project-scoped fixture whose catalog lists
+// orchestration. Its connection overrides compute, network, image, block
+// storage and orchestration; object storage and key manager are absent.
 type cleanupCloud struct {
 	*testcloud.Cloud
 	conn      *sdk.Connection
@@ -55,7 +55,17 @@ func newCleanupCloud(t *testing.T) *cleanupCloud {
 	t.Helper()
 	cloud := testcloud.New(t)
 	setCleanupScope(t, cloud, "project", "orchestration")
-	return &cleanupCloud{Cloud: cloud, conn: connection(t, cloud)}
+	conn, err := sdk.FromProvider(cloud.Provider,
+		sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"),
+		sdk.WithEndpoint(sdk.Network, cloud.Server.URL+"/network"),
+		sdk.WithEndpoint(sdk.Image, cloud.Server.URL+"/image/v2"),
+		sdk.WithEndpoint(sdk.BlockStorage, cloud.Server.URL+"/volume/v3/project"),
+		sdk.WithEndpoint(sdk.Orchestration, cloud.Server.URL+"/orchestration"),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return &cleanupCloud{Cloud: cloud, conn: conn}
 }
 
 func (c *cleanupCloud) record(event string) {
@@ -167,7 +177,6 @@ func TestProjectCleanupPlanDiscoversWithoutMutation(t *testing.T) {
 	wantUnavailable := []projectcleanup.Unavailable{
 		{Service: "object_store", Reason: projectcleanup.NotInCatalog},
 		{Service: "key_manager", Reason: projectcleanup.NotInCatalog},
-		{Service: "orchestration", Reason: projectcleanup.NotYetSupported},
 	}
 	if !slices.Equal(plan.Unavailable, wantUnavailable) {
 		t.Fatalf("unavailable %+v", plan.Unavailable)
@@ -517,7 +526,7 @@ func TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution(t *testing.T)
 	if plan == nil || !errors.As(err, &serviceErr) || serviceErr.Service != "compute" || !strings.Contains(err.Error(), "list servers") {
 		t.Fatalf("plan %+v err %v", plan, err)
 	}
-	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 3 {
+	if len(plan.Errors) != 1 || len(plan.Candidates()) != 0 || len(plan.Unavailable) != 2 {
 		t.Fatalf("partial plan %+v", plan)
 	}
 	if _, err := cloud.conn.ExecuteProjectCleanup(context.Background(), plan); !errors.Is(err, projectcleanup.ErrIncompletePlan) {

@@ -31,6 +31,7 @@ func (c *cleanupCloud) serveObjectStore(t *testing.T, listings map[string]swiftL
 	// makes the service present and an override supplies its client.
 	conn, err := sdk.FromProvider(c.Provider,
 		sdk.WithEndpoint(sdk.Compute, c.Server.URL+"/compute/v2.1/project"),
+		sdk.WithEndpoint(sdk.Orchestration, c.Server.URL+"/orchestration"),
 		sdk.WithEndpoint(sdk.ObjectStorage, c.Server.URL+"/object-store"),
 	)
 	if err != nil {

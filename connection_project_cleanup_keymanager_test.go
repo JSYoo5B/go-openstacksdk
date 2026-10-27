@@ -25,6 +25,7 @@ func newKeyManagerCleanupCloud(t *testing.T) *cleanupCloud {
 	setCleanupScope(t, cloud.Cloud, "project", "orchestration", "key-manager")
 	conn, err := sdk.FromProvider(cloud.Provider,
 		sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"),
+		sdk.WithEndpoint(sdk.Orchestration, cloud.Server.URL+"/orchestration"),
 		sdk.WithEndpoint(sdk.KeyManager, cloud.Server.URL+"/key-manager"),
 	)
 	if err != nil {

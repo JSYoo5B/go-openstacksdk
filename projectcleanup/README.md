@@ -97,7 +97,8 @@ Services are examined in Python's dependency order. A service without an endpoin
 | image | images owned by the project | project-owned images at any visibility (owner query), one DELETE each without waits. |
 | object_store | objects, then empty containers | objects, then containers whose objects are all candidates, one DELETE each without waits. |
 | key_manager | containers, secrets | containers, then secrets, without waits or dependencies. Orders are not cleaned, as in Python. |
-| orchestration, load_balancer, dns | stacks; load balancers; zones and floating IP PTR records | not yet supported (phase 2) |
+| orchestration | stacks (then waits for each deletion) | top-level stacks before compute and network, one DELETE each on the stack's name/ID route, with absence waits. |
+| load_balancer, dns | load balancers; zones and floating IP PTR records | not yet supported (phase 2) |
 
 ### Compute
 
@@ -152,6 +153,17 @@ Either skip name, `object_store.object` or `object_store.container`, skips the w
 - Containers come from `GET /v1/containers` and secrets from `GET /v1/secrets`. The time filters use `created` and `updated`. Lists follow Barbican's top-level `next` offset links. No `acl_only` or all-projects query is sent, so only the token project's containers and secrets are listed. A row that reports another `project_id` is excluded.
 - The ID is the last path component of `container_ref` or `secret_ref`, which is Python's `HREFToUUID` formatter behind `container_id` and `secret_id`. The DELETE goes to `containers/<id>` or `secrets/<id>` on the key manager endpoint. A row whose reference is missing, null, or not an absolute URL with a usable last segment is excluded. (Python's `Resource.id` is the raw href and its delete URL appends the whole href to the base path.)
 - Orders are not cleaned, as in Python. The skip names are `key_manager.container` and `key_manager.secret`.
+
+### Orchestration
+
+Follows `openstack/orchestration/v1/_proxy.py` `_service_cleanup`. Kind: `stack` (skip name `orchestration.stack`, which prevents listing).
+
+- Python's cleanup dependencies run orchestration before compute, network and identity. Orchestration is discovered first and its stage runs before every compute and network stage, so Heat removes the resources it owns before those services are cleaned.
+- Discovery sends `GET /stacks` without a query, as Python does. Heat's default list contains only the project's top-level stacks; nested stacks are deleted by Heat with their parent and never become candidates. A row without a usable `stack_name` and `id` is excluded, and a row whose `project` names another project is excluded.
+- The time filters read `creation_time` and `updated_time` (Python's `created_at` and `updated_at`). Heat reports `updated_time` as null for a stack that was never updated, so `WithUpdatedBefore` excludes such a stack. The selector sees the stack name as `Name`.
+- Execution sends one `DELETE /stacks/{stack_name}/{id}` per candidate, the canonical route that Python reaches through Heat's redirect from `/stacks/{id}`. A 404 is `already_missing`; a refusal such as 409 is `failed` with the response evidence.
+- After all DELETEs of the stage, each accepted stack is polled with `GET /stacks/{stack_name}/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `DELETE_COMPLETE` is absence (`deleted`). `DELETE_FAILED` ends the wait at once with an `ErrFailedState` wait error. Any other state, including the earlier action's `*_FAILED` state before Heat reports `DELETE_IN_PROGRESS`, keeps polling until `WithDeletionWait` ends.
+- Compute and network candidates do not depend on stacks. Python's dependency walk also runs compute and network after a failed orchestration cleanup. A resource that Heat already removed with its stack is reported as `already_missing`.
 
 ## Differences from Python
 

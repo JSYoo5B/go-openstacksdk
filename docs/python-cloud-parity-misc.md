@@ -831,6 +831,8 @@ Go API:
   Tests: `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreDiscovery`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreTimeFilters`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreSkipNames`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreListingErrors`, `connection_project_cleanup_objectstore_test.go:TestProjectCleanupObjectStoreExecuteReportsEveryState`.
 - Project cleanup plans key_manager containers then secrets from project-scoped Barbican lists (top-level next offset paging, no acl_only/all-projects query), derives IDs from the last path component of container_ref/secret_ref like Python's HREFToUUID, excludes rows without a usable reference or reporting another project_id, applies created/updated filters, selector and the key_manager.container/key_manager.secret skip names, and executes one DELETE per candidate without waits or dependencies, reporting Accepted, AlreadyMissing, Failed, Uncertain and NotAttempted.
   Tests: `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerDiscoversContainersThenSecrets`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerFiltersSelectorAndSkipNames`, `connection_project_cleanup_keymanager_test.go:TestProjectCleanupKeyManagerExecuteReportsEveryState`.
+- orchestration project cleanup follows openstack/orchestration/v1/_proxy.py _service_cleanup: it lists stacks with Heat's default project-scoped query (top-level stacks only), excludes rows without a usable stack_name and id or reporting another project, applies creation_time/updated_time filters and the selector, is discovered and executed before compute and network, sends one DELETE per stack to stacks/{stack_name}/{id}, then waits for each accepted stack with the shared wait engine (404 or DELETE_COMPLETE is Deleted, DELETE_FAILED is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404 and Failed with response evidence for refusals, lets compute run after a failed stack as Python's dependency walk does, and the orchestration.stack skip name prevents listing.
+  Tests: `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationPlansTopLevelStacksBeforeCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationFiltersAndSkip`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationExecutesStacksThenCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack`.
 
 Python/Go differences:
 
@@ -864,10 +866,14 @@ Python/Go differences:
 - Python's key_manager Resource.id is the raw container_ref/secret_ref href, and its delete URL appends that href to the base path; Go deletes containers/<id> and secrets/<id> using the HREFToUUID last path component, and excludes rows without a usable reference.
 - Go excludes a Barbican row that reports another project_id; Python relies only on Barbican's project-scoped lists.
 - Key manager stages never produce Deleted, because neither Python nor Go waits for absence after a Barbican deletion.
+- Python deletes a stack through /stacks/{id} and relies on Heat's redirect to the stack's name/ID location; orchestration cleanup sends the DELETE and the absence polls directly to stacks/{stack_name}/{id} from the listed row and excludes rows without a usable stack_name and id.
+- Python's wait_for_delete for stacks treats only absence (404, DELETE_COMPLETE or ADOPT_COMPLETE) as completion, keeps polling a DELETE_FAILED stack for its fixed 120 seconds and then abandons the waits of the remaining stacks with an exception; orchestration cleanup waits for every accepted stack within WithDeletionWait, reports DELETE_FAILED at once as an ErrFailedState wait error and does not treat ADOPT_COMPLETE as absence.
+- Go excludes a stack row whose project names another project; Python relies only on Heat's project-scoped list.
+- Python lists compute and network resources only after its stacks are deleted; Go plans them before any stack is deleted, so a resource that Heat removed with its stack is reported AlreadyMissing. As in Python, compute and network cleanup does not depend on the outcome of stack deletion.
 
 Unresolved boundaries:
 
-- Orchestration stacks, load balancers and DNS zones/recordsets (phase 2) are not cleaned; present services are reported as not yet supported.
+- Load balancers and DNS zones/recordsets (phase 2) are not cleaned; present services are reported as not yet supported.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 

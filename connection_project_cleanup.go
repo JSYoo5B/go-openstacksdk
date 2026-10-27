@@ -67,6 +67,8 @@ func (c *Connection) projectCleanupClient(ctx context.Context, service string) (
 		value, err = c.ObjectStorage(ctx)
 	case "key_manager":
 		value, err = c.KeyManager(ctx)
+	case "orchestration":
+		value, err = c.Orchestration(ctx)
 	default:
 		return nil, unsupported("project cleanup", service)
 	}

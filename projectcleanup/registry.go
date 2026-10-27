@@ -47,6 +47,7 @@ var implementations = map[string]serviceCleanup{
 	"key_manager":   keyManagerCleanup{},
 	"network":       networkCleanup{},
 	"object_store":  objectStoreCleanup{},
+	"orchestration": orchestrationCleanup{},
 }
 
 // serviceInfo is a service that Python's project_cleanup visits.
@@ -59,23 +60,25 @@ type serviceInfo struct {
 }
 
 // serviceOrder is the discovery order, following Python's dependency graph
-// (compute before block storage, network and image).
+// (orchestration before compute and network; compute before block storage,
+// network and image).
 var serviceOrder = []serviceInfo{
+	{"orchestration", []string{"orchestration"}, false},
 	{"compute", []string{"compute"}, true},
 	{"block_storage", []string{"block-storage", "volumev3", "volumev2", "volume", "block-store"}, true},
 	{"network", []string{"network"}, true},
 	{"image", []string{"image"}, true},
 	{"object_store", []string{"object-store"}, true},
 	{"key_manager", []string{"key-manager"}, true},
-	{"orchestration", []string{"orchestration"}, false},
 	{"load_balancer", []string{"load-balancer"}, false},
 	{"dns", []string{"dns"}, false},
 }
 
-// stageOrder fixes the execution order of all phase-1 kinds. Kinds of
-// services that are not implemented yet are listed so that the order is
-// decided in one place.
+// stageOrder fixes the execution order of every implemented kind, so that
+// the order is decided in one place. Orchestration stacks come first because
+// Python's dependency graph runs orchestration before compute and network.
 var stageOrder = []string{
+	"orchestration.stack",
 	"compute.server",
 	"compute.server_group",
 	"block_storage.backup",
