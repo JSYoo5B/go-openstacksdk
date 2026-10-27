@@ -42,8 +42,9 @@ func setCleanupScope(t *testing.T, cloud *testcloud.Cloud, project string, catal
 }
 
 // cleanupCloud is a project-scoped fixture whose catalog lists
-// orchestration. Its connection overrides compute, network, image, block
-// storage and orchestration; object storage and key manager are absent.
+// orchestration and load-balancer. Its connection overrides compute,
+// network, image, block storage, orchestration and load balancer; object
+// storage and key manager are absent.
 type cleanupCloud struct {
 	*testcloud.Cloud
 	conn      *sdk.Connection
@@ -54,13 +55,14 @@ type cleanupCloud struct {
 func newCleanupCloud(t *testing.T) *cleanupCloud {
 	t.Helper()
 	cloud := testcloud.New(t)
-	setCleanupScope(t, cloud, "project", "orchestration")
+	setCleanupScope(t, cloud, "project", "orchestration", "load-balancer")
 	conn, err := sdk.FromProvider(cloud.Provider,
 		sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"),
 		sdk.WithEndpoint(sdk.Network, cloud.Server.URL+"/network"),
 		sdk.WithEndpoint(sdk.Image, cloud.Server.URL+"/image/v2"),
 		sdk.WithEndpoint(sdk.BlockStorage, cloud.Server.URL+"/volume/v3/project"),
 		sdk.WithEndpoint(sdk.Orchestration, cloud.Server.URL+"/orchestration"),
+		sdk.WithEndpoint(sdk.LoadBalancer, cloud.Server.URL+"/load-balancer"),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -213,12 +215,12 @@ func TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan(t *testing.T) {
 		t.Fatalf("hand-built plan: %v", err)
 	}
 	// The token now belongs to another project: the plan is refused.
-	setCleanupScope(t, cloud.Cloud, "second", "orchestration")
+	setCleanupScope(t, cloud.Cloud, "second", "orchestration", "load-balancer")
 	if _, err := cloud.conn.ExecuteProjectCleanup(ctx, plan); !errors.Is(err, projectcleanup.ErrProjectMismatch) {
 		t.Fatalf("project mismatch: %v", err)
 	}
 	// An unscoped token cannot plan.
-	setCleanupScope(t, cloud.Cloud, "", "orchestration")
+	setCleanupScope(t, cloud.Cloud, "", "orchestration", "load-balancer")
 	if _, err := cloud.conn.PlanProjectCleanup(ctx, projectcleanup.WithAllResources()); !errors.Is(err, projectcleanup.ErrUnscoped) {
 		t.Fatalf("unscoped: %v", err)
 	}

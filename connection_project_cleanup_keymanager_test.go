@@ -22,10 +22,11 @@ import (
 func newKeyManagerCleanupCloud(t *testing.T) *cleanupCloud {
 	t.Helper()
 	cloud := newCleanupCloud(t)
-	setCleanupScope(t, cloud.Cloud, "project", "orchestration", "key-manager")
+	setCleanupScope(t, cloud.Cloud, "project", "orchestration", "load-balancer", "key-manager")
 	conn, err := sdk.FromProvider(cloud.Provider,
 		sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"),
 		sdk.WithEndpoint(sdk.Orchestration, cloud.Server.URL+"/orchestration"),
+		sdk.WithEndpoint(sdk.LoadBalancer, cloud.Server.URL+"/load-balancer"),
 		sdk.WithEndpoint(sdk.KeyManager, cloud.Server.URL+"/key-manager"),
 	)
 	if err != nil {

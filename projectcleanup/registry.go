@@ -45,6 +45,7 @@ var implementations = map[string]serviceCleanup{
 	"compute":       computeCleanup{},
 	"image":         imageCleanup{},
 	"key_manager":   keyManagerCleanup{},
+	"load_balancer": loadBalancerCleanup{},
 	"network":       networkCleanup{},
 	"object_store":  objectStoreCleanup{},
 	"orchestration": orchestrationCleanup{},
@@ -60,25 +61,28 @@ type serviceInfo struct {
 }
 
 // serviceOrder is the discovery order, following Python's dependency graph
-// (orchestration before compute and network; compute before block storage,
-// network and image).
+// (orchestration and load_balancer before compute and network; compute
+// before block storage, network and image).
 var serviceOrder = []serviceInfo{
 	{"orchestration", []string{"orchestration"}, false},
+	{"load_balancer", []string{"load-balancer"}, false},
 	{"compute", []string{"compute"}, true},
 	{"block_storage", []string{"block-storage", "volumev3", "volumev2", "volume", "block-store"}, true},
 	{"network", []string{"network"}, true},
 	{"image", []string{"image"}, true},
 	{"object_store", []string{"object-store"}, true},
 	{"key_manager", []string{"key-manager"}, true},
-	{"load_balancer", []string{"load-balancer"}, false},
 	{"dns", []string{"dns"}, false},
 }
 
 // stageOrder fixes the execution order of every implemented kind, so that
-// the order is decided in one place. Orchestration stacks come first because
-// Python's dependency graph runs orchestration before compute and network.
+// the order is decided in one place. Orchestration stacks and load balancers
+// come first because Python's dependency graph runs both services before
+// compute and network. Python does not order the two against each other;
+// stacks run first so that Heat removes the load balancers it owns.
 var stageOrder = []string{
 	"orchestration.stack",
+	"load_balancer.load_balancer",
 	"compute.server",
 	"compute.server_group",
 	"block_storage.backup",

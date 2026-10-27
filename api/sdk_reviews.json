@@ -114410,6 +114410,16 @@
             "connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationExecutesStacksThenCompute",
             "connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack"
           ]
+        },
+        {
+          "behavior": "load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, and the load_balancer.load_balancer skip name prevents listing.",
+          "tests": [
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerExecutesCascadeDeletesThenCompute",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortKeepsNetwork"
+          ]
         }
       ],
       "differences": [
@@ -114446,7 +114456,10 @@
         "Python deletes a stack through /stacks/{id} and relies on Heat's redirect to the stack's name/ID location; orchestration cleanup sends the DELETE and the absence polls directly to stacks/{stack_name}/{id} from the listed row and excludes rows without a usable stack_name and id.",
         "Python's wait_for_delete for stacks treats only absence (404, DELETE_COMPLETE or ADOPT_COMPLETE) as completion, keeps polling a DELETE_FAILED stack for its fixed 120 seconds and then abandons the waits of the remaining stacks with an exception; orchestration cleanup waits for every accepted stack within WithDeletionWait, reports DELETE_FAILED at once as an ErrFailedState wait error and does not treat ADOPT_COMPLETE as absence.",
         "Go excludes a stack row whose project names another project; Python relies only on Heat's project-scoped list.",
-        "Python lists compute and network resources only after its stacks are deleted; Go plans them before any stack is deleted, so a resource that Heat removed with its stack is reported AlreadyMissing. As in Python, compute and network cleanup does not depend on the outcome of stack deletion."
+        "Python lists compute and network resources only after its stacks are deleted; Go plans them before any stack is deleted, so a resource that Heat removed with its stack is reported AlreadyMissing. As in Python, compute and network cleanup does not depend on the outcome of stack deletion.",
+        "Python deletes every load balancer its unqueried list returns, which for a token allowed to list all projects includes other projects' load balancers; Go sends the same unqueried list but excludes rows whose project_id or tenant_id names another project and rows without project_id.",
+        "Python's wait_for_delete for load balancers treats only 404 as completion (the resource has no status attribute), keeps polling a load balancer in provisioning_status DELETED or ERROR for its fixed 120 seconds and only logs a wait failure; Go treats DELETED as absence, reports ERROR at once as an ErrFailedState wait error and waits within WithDeletionWait.",
+        "Python lists networks only after its load balancers are deleted, so a network that held only a deleted load balancer's Octavia VIP port can be removed in the same run; Go plans networks before any load balancer is deleted, so such a network is excluded as having ports in use (as in Python's dry run) and needs a new plan after execution."
       ],
       "documentation": [
         "projectcleanup/README.md",
@@ -114454,7 +114467,7 @@
         "docs/python-cloud-parity-misc.md"
       ],
       "remaining": [
-        "Load balancers and DNS zones/recordsets (phase 2) are not cleaned; present services are reported as not yet supported."
+        "DNS zones/recordsets (phase 2) are not cleaned; a present DNS service is reported as not yet supported."
       ]
     },
     {

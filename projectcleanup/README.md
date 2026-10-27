@@ -98,7 +98,8 @@ Services are examined in Python's dependency order. A service without an endpoin
 | object_store | objects, then empty containers | objects, then containers whose objects are all candidates, one DELETE each without waits. |
 | key_manager | containers, secrets | containers, then secrets, without waits or dependencies. Orders are not cleaned, as in Python. |
 | orchestration | stacks (then waits for each deletion) | top-level stacks before compute and network, one DELETE each on the stack's name/ID route, with absence waits. |
-| load_balancer, dns | load balancers; zones and floating IP PTR records | not yet supported (phase 2) |
+| load_balancer | load balancers with cascade (then waits for each deletion) | load balancers after orchestration and before compute and network, one cascade DELETE each, with absence waits. |
+| dns | zones and floating IP PTR records | not yet supported (phase 2) |
 
 ### Compute
 
@@ -164,6 +165,18 @@ Follows `openstack/orchestration/v1/_proxy.py` `_service_cleanup`. Kind: `stack`
 - Execution sends one `DELETE /stacks/{stack_name}/{id}` per candidate, the canonical route that Python reaches through Heat's redirect from `/stacks/{id}`. A 404 is `already_missing`; a refusal such as 409 is `failed` with the response evidence.
 - After all DELETEs of the stage, each accepted stack is polled with `GET /stacks/{stack_name}/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `DELETE_COMPLETE` is absence (`deleted`). `DELETE_FAILED` ends the wait at once with an `ErrFailedState` wait error. Any other state, including the earlier action's `*_FAILED` state before Heat reports `DELETE_IN_PROGRESS`, keeps polling until `WithDeletionWait` ends.
 - Compute and network candidates do not depend on stacks. Python's dependency walk also runs compute and network after a failed orchestration cleanup. A resource that Heat already removed with its stack is reported as `already_missing`.
+
+### Load balancer
+
+Follows `openstack/load_balancer/v2/_proxy.py` `_service_cleanup`. Kind: `load_balancer` (skip name `load_balancer.load_balancer`, which prevents listing).
+
+- Python's cleanup dependencies run load_balancer before compute and network. The load balancer is discovered after orchestration and its stage runs after the stack stage and before every compute and network stage. Python does not order load_balancer against orchestration; stacks run first, so a load balancer that Heat removes with its stack is reported as `already_missing`.
+- Discovery sends `GET /v2.0/lbaas/loadbalancers` without a query, as Python does, and follows `loadbalancers_links`. Octavia lists only the token project's load balancers unless the token may list every project; a row whose `project_id` or `tenant_id` names another project is excluded, and so is a row without `project_id` or without a usable `id`. Python deletes every listed row, including other projects' load balancers for such a token.
+- The time filters read `created_at` and `updated_at`. Octavia reports `updated_at` as null for a load balancer that was never updated, so `WithUpdatedBefore` excludes it. Load balancers in any provisioning status are evaluated, as in Python.
+- Execution sends one `DELETE /v2.0/lbaas/loadbalancers/{id}?cascade=true` per candidate, as Python's `delete_load_balancer(cascade=True)` does, so Octavia also removes the listeners, pools, members, health monitors and L7 policies. A 404 is `already_missing`; a refusal such as 409 for a load balancer in a `PENDING_*` state is `failed` with the response evidence; a lost response is `uncertain` and is never retried.
+- After all DELETEs of the stage, each accepted load balancer is polled with `GET /v2.0/lbaas/loadbalancers/{id}` through the shared wait engine, as Python's `wait_for_delete` does. A 404 or `provisioning_status` `DELETED` is absence (`deleted`). `ERROR` ends the wait at once with an `ErrFailedState` wait error. `PENDING_DELETE` and other states keep polling until `WithDeletionWait` ends. Python treats only 404 as absence and only logs a failed wait.
+- Compute and network candidates do not depend on load balancers. Python's dependency walk also runs compute and network after a failed load balancer cleanup.
+- Discovery runs once before any deletion, so a network that holds a load balancer's VIP port (`device_owner` `Octavia`) is excluded as having ports in use, as in Python's dry run. Python's real run lists networks only after its load balancers are deleted; plan again after execution to clean such a network.
 
 ## Differences from Python
 
