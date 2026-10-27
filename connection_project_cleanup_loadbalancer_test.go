@@ -254,28 +254,127 @@ func TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer(t *testi
 	}
 }
 
-// A load balancer's VIP port keeps its network: discovery runs once before
-// any deletion, and Octavia's VIP port (device_owner Octavia) is not a
-// compute server port. Python's non-dry run lists networks only after its
-// load balancers are gone.
-func TestProjectCleanupLoadBalancerVIPPortKeepsNetwork(t *testing.T) {
+// newVIPPortFixture serves networks that hold Octavia VIP ports (device_owner
+// Octavia, device_id lb-<load balancer ID>): net-a holds the VIP port of
+// candidate lb-a plus an unowned port and a subnet, net-b the VIP port of
+// candidate lb-b and a subnet, and net-x the VIP port of lb-x, which belongs
+// to another project and is not a candidate.
+func newVIPPortFixture(t *testing.T) *networkFixture {
 	f := newNetworkFixture(t, ``, map[string]string{
-		"service-providers?service_type=VPN":         ``,
-		"floatingips?project_id=project":             ``,
-		"security-groups?project_id=project":         ``,
-		"networks?project_id=project":                `{"id":"net-lb","project_id":"project"}`,
-		"ports?network_id=net-lb&project_id=project": `{"id":"p-vip","device_owner":"Octavia","device_id":"lb-lb1"}`,
-		"routers?project_id=project":                 ``,
+		"service-providers?service_type=VPN": ``,
+		"floatingips?project_id=project":     ``,
+		"security-groups?project_id=project": ``,
+		"networks?project_id=project": `{"id":"net-a","project_id":"project"},{"id":"net-b","project_id":"project"},` +
+			`{"id":"net-x","project_id":"project"}`,
+		"ports?network_id=net-a&project_id=project": `{"id":"p-vip-a","project_id":"project","device_owner":"Octavia","device_id":"lb-lb-a"},` +
+			`{"id":"p-free","project_id":"project","device_owner":""}`,
+		"ports?network_id=net-b&project_id=project":   `{"id":"p-vip-b","project_id":"project","device_owner":"Octavia","device_id":"lb-lb-b"}`,
+		"ports?network_id=net-x&project_id=project":   `{"id":"p-vip-x","project_id":"project","device_owner":"Octavia","device_id":"lb-lb-x"}`,
+		"subnets?network_id=net-a&project_id=project": `{"id":"sn-a","project_id":"project"}`,
+		"subnets?network_id=net-b&project_id=project": `{"id":"sn-b","project_id":"project"}`,
+		"routers?project_id=project":                  ``,
 	})
-	f.serveLoadBalancers(t, `{"id":"lb1","project_id":"project","vip_port_id":"p-vip","vip_network_id":"net-lb"}`)
+	f.serveLoadBalancers(t, `{"id":"lb-a","project_id":"project","vip_port_id":"p-vip-a","vip_network_id":"net-a"},`+
+		`{"id":"lb-b","project_id":"project","vip_port_id":"p-vip-b","vip_network_id":"net-b"},`+
+		`{"id":"lb-x","project_id":"other","vip_port_id":"p-vip-x","vip_network_id":"net-x"}`)
+	return f
+}
+
+// The Octavia VIP port of a load balancer candidate does not keep its
+// network: the port is not planned (Octavia deletes it with the load
+// balancer), and the network and its subnets depend on the load balancer.
+// Python's non-dry run reaches the same state by listing networks only after
+// its load balancers are gone. A VIP port of a load balancer that is not a
+// candidate still keeps its network.
+func TestProjectCleanupLoadBalancerVIPPortFollowsCandidate(t *testing.T) {
+	f := newVIPPortFixture(t)
 	plan, err := f.conn.PlanProjectCleanup(context.Background(), projectcleanup.WithAllResources())
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got := refIDs(plan.Candidates()); !slices.Equal(got, []string{"load_balancer:lb1"}) {
+	want := []string{"load_balancer:lb-a", "load_balancer:lb-b", "port:p-free", "subnet:sn-a", "subnet:sn-b", "network:net-a", "network:net-b"}
+	if got := refIDs(plan.Candidates()); !slices.Equal(got, want) {
 		t.Fatalf("candidates %v", got)
 	}
-	if reason := exclusionReasons(plan)["network:net-lb"]; !strings.Contains(reason, "p-vip (Octavia lb-lb1)") {
+	lbA := projectcleanup.Ref{Service: "load_balancer", Kind: "load_balancer", ID: "lb-a"}
+	lbB := projectcleanup.Ref{Service: "load_balancer", Kind: "load_balancer", ID: "lb-b"}
+	free := projectcleanup.Ref{Service: "network", Kind: "port", ID: "p-free"}
+	snA := projectcleanup.Ref{Service: "network", Kind: "subnet", ID: "sn-a"}
+	snB := projectcleanup.Ref{Service: "network", Kind: "subnet", ID: "sn-b"}
+	for id, deps := range map[string][]projectcleanup.Ref{
+		"subnet:sn-a": {free, lbA}, "network:net-a": {free, lbA, snA},
+		"subnet:sn-b": {lbB}, "network:net-b": {lbB, snB},
+		"port:p-free": nil,
+	} {
+		kind, ref, _ := strings.Cut(id, ":")
+		if got := candidateByID(plan, kind, ref).DependsOn; !slices.Equal(got, deps) {
+			t.Errorf("%s depends on %v, want %v", id, got, deps)
+		}
+	}
+	reasons := exclusionReasons(plan)
+	if reason := reasons["network:net-x"]; !strings.Contains(reason, "p-vip-x (Octavia lb-lb-x)") {
 		t.Fatalf("network exclusion %q", reason)
+	}
+	if !strings.Contains(reasons["load_balancer:lb-x"], "owned by project other") {
+		t.Fatalf("exclusions %v", reasons)
+	}
+	for _, c := range plan.Candidates() {
+		if strings.HasPrefix(c.ID, "p-vip") {
+			t.Fatalf("VIP port planned: %+v", c)
+		}
+	}
+
+	// Skipping load balancers leaves no candidate, so the VIP ports keep
+	// their networks again.
+	plan, err = f.conn.PlanProjectCleanup(context.Background(), projectcleanup.WithAllResources(), projectcleanup.WithSkip("load_balancer.load_balancer"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := refIDs(plan.Candidates()); len(got) != 0 {
+		t.Fatalf("candidates with skipped load balancers %v", got)
+	}
+	reasons = exclusionReasons(plan)
+	if !strings.Contains(reasons["network:net-a"], "p-vip-a (Octavia lb-lb-a)") || !strings.Contains(reasons["network:net-b"], "p-vip-b (Octavia lb-lb-b)") {
+		t.Fatalf("exclusions %v", reasons)
+	}
+}
+
+// A network whose load balancer was deleted and waited for is cleaned; one
+// whose load balancer DELETE failed is NotAttempted together with its subnet.
+func TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork(t *testing.T) {
+	f := newVIPPortFixture(t)
+	f.serveLoadBalancerMutations(t, map[string]int{"lb-b": 409}, map[string][]string{"lb-a": {"PENDING_DELETE", "DELETED"}})
+	plan, err := f.conn.PlanProjectCleanup(context.Background(), projectcleanup.WithAllResources())
+	if err != nil {
+		t.Fatal(err)
+	}
+	before := len(f.events())
+	result, err := f.conn.ExecuteProjectCleanup(context.Background(), plan, projectcleanup.WithDeletionWait(10*time.Second))
+	if !errors.Is(err, projectcleanup.ErrIncomplete) {
+		t.Fatalf("err %v", err)
+	}
+	outcomes := map[string]projectcleanup.Outcome{}
+	for _, o := range result.Outcomes {
+		outcomes[o.Candidate.Kind+":"+o.Candidate.ID] = o
+	}
+	for key, state := range map[string]projectcleanup.State{
+		"load_balancer:lb-a": projectcleanup.Deleted, "load_balancer:lb-b": projectcleanup.Failed,
+		"port:p-free": projectcleanup.Accepted, "subnet:sn-a": projectcleanup.Accepted, "network:net-a": projectcleanup.Accepted,
+		"subnet:sn-b": projectcleanup.NotAttempted, "network:net-b": projectcleanup.NotAttempted,
+	} {
+		if outcomes[key].State != state {
+			t.Errorf("%s: %s, want %s (%s %v)", key, outcomes[key].State, state, outcomes[key].Reason, outcomes[key].Err)
+		}
+	}
+	if len(result.Outcomes) != 7 {
+		t.Fatalf("outcomes %+v", result.Outcomes)
+	}
+	if reason := outcomes["network:net-b"].Reason; !strings.Contains(reason, "lb-b") {
+		t.Fatalf("network reason %q", reason)
+	}
+	want := []string{"DELETE lb-a?cascade=true", "DELETE lb-b?cascade=true", "GET lb-a", "GET lb-a",
+		"DELETE ports/p-free", "DELETE subnets/sn-a", "DELETE networks/net-a"}
+	if got := f.events()[before:]; !slices.Equal(got, want) {
+		t.Fatalf("requests\n got %v\nwant %v", got, want)
 	}
 }

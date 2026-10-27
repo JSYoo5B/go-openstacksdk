@@ -114365,14 +114365,16 @@
           ]
         },
         {
-          "behavior": "network project cleanup follows openstack/network/v2/_proxy.py _service_cleanup: VPN resources only with a VPN service provider, floating IPs by fip_cleanup_evaluation, security groups except default, networks whose project ports are unused (DHCP and unowned ports ignored, compute server candidates followed) with route removal, interface removal, router, unowned port, subnet and network deletion in dependency order, then routers without ports; shared, external and foreign rows are excluded",
+          "behavior": "network project cleanup follows openstack/network/v2/_proxy.py _service_cleanup: VPN resources only with a VPN service provider, floating IPs by fip_cleanup_evaluation, security groups except default, networks whose project ports are unused (DHCP and unowned ports ignored, compute server candidates followed, and the Octavia VIP port of a load balancer candidate (device_owner Octavia, device_id lb-<load balancer id>) not planned while the network and its subnets depend on that load balancer; a VIP port of a load balancer that is not a candidate keeps the network) with route removal, interface removal, router, unowned port, subnet and network deletion in dependency order, then routers without ports; shared, external and foreign rows are excluded",
           "tests": [
             "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkPlanFollowsPythonConditions",
             "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkExecutesInPythonOrder",
             "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkOutcomesBlockDependents",
             "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkTimeFiltersFollowPython",
             "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkSelectorAndSkipNames",
-            "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkRouterConditions"
+            "connection_project_cleanup_network_test.go:TestProjectCleanupNetworkRouterConditions",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork"
           ]
         },
         {
@@ -114412,13 +114414,14 @@
           ]
         },
         {
-          "behavior": "load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, and the load_balancer.load_balancer skip name prevents listing.",
+          "behavior": "load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, makes a network that holds the Octavia VIP port of a load balancer candidate (and its subnets) depend on that load balancer so it is NotAttempted unless the load balancer is Deleted or AlreadyMissing, and the load_balancer.load_balancer skip name prevents listing.",
           "tests": [
             "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork",
             "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip",
             "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerExecutesCascadeDeletesThenCompute",
             "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer",
-            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortKeepsNetwork"
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortFollowsCandidate",
+            "connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFailureBlocksVIPNetwork"
           ]
         },
         {
@@ -114468,7 +114471,7 @@
         "Python lists compute and network resources only after its stacks are deleted; Go plans them before any stack is deleted, so a resource that Heat removed with its stack is reported AlreadyMissing. As in Python, compute and network cleanup does not depend on the outcome of stack deletion.",
         "Python deletes every load balancer its unqueried list returns, which for a token allowed to list all projects includes other projects' load balancers; Go sends the same unqueried list but excludes rows whose project_id or tenant_id names another project and rows without project_id.",
         "Python's wait_for_delete for load balancers treats only 404 as completion (the resource has no status attribute), keeps polling a load balancer in provisioning_status DELETED or ERROR for its fixed 120 seconds and only logs a wait failure; Go treats DELETED as absence, reports ERROR at once as an ErrFailedState wait error and waits within WithDeletionWait.",
-        "Python lists networks only after its load balancers are deleted, so a network that held only a deleted load balancer's Octavia VIP port can be removed in the same run; Go plans networks before any load balancer is deleted, so such a network is excluded as having ports in use (as in Python's dry run) and needs a new plan after execution.",
+        "Python lists networks only after its load balancers are deleted and waited for (Octavia removes the VIP port it created), so a network that held only a deleted load balancer's VIP port is removed in the same run; Go plans networks before any load balancer is deleted, so it ignores the Octavia VIP port (device_owner Octavia, device_id lb-<id>) of a load balancer candidate and makes the network and its subnets depend on that load balancer: they are NotAttempted when the load balancer is not Deleted or AlreadyMissing, whereas Python proceeds after a failed load balancer wait and then skips the network only if the port is still listed.",
         "Python deletes every zone its unqueried list returns, including zones another project shares with the project; dns cleanup excludes zone rows whose project_id names another project or is not reported.",
         "Python deletes the network floating IPs after unsetting their PTR records whatever the unset result; Go does not send a floating IP DELETE while the PTR unset of the same floating IP is Failed, Uncertain or not attempted, so the PTR record is not left without its floating IP.",
         "Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer."

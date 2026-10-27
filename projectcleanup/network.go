@@ -397,7 +397,8 @@ func hasRoutes(r row) bool {
 // networks follows Python's network loop. A network is examined only when
 // none of its listed ports is in use by something that is not being
 // cleaned: DHCP and unowned ports do not count, router interfaces are
-// removed, and ports of compute server candidates follow their server.
+// removed, ports of compute server candidates follow their server, and the
+// Octavia VIP port of a load balancer candidate goes with the load balancer.
 func (n *networkDiscovery) networks(ctx context.Context) error {
 	nets, err := n.list(ctx, "network", "networks", "networks", n.query("project_id", n.project))
 	if err != nil {
@@ -416,6 +417,8 @@ func (n *networkDiscovery) networks(ctx context.Context) error {
 		}
 		var interfaces, unowned, serverPorts []row
 		var inUse []string
+		// Load balancer candidates whose Octavia VIP ports are on the network.
+		var loadBalancers []Ref
 		for port, err := range listRows(ctx, n.d.Client(), "ports", "ports", n.query("project_id", n.project, "network_id", netID)) {
 			if err != nil {
 				return fmt.Errorf("list ports of network %s: %w", netID, err)
@@ -440,6 +443,10 @@ func (n *networkDiscovery) networks(ctx context.Context) error {
 			default:
 				if _, ok := n.d.Candidate(Ref{Service: "compute", Kind: "server", ID: device}); ok && device != "" {
 					serverPorts = append(serverPorts, port)
+				} else if lb, ok := octaviaLoadBalancer(n.d, owner, device); ok {
+					if !slices.Contains(loadBalancers, lb) {
+						loadBalancers = append(loadBalancers, lb)
+					}
 				} else {
 					inUse = append(inUse, fmt.Sprintf("%s (%s %s)", portID, owner, device))
 				}
@@ -519,6 +526,10 @@ func (n *networkDiscovery) networks(ctx context.Context) error {
 			n.add(pc, "port of server candidate "+device+" on "+reason, Ref{Service: "compute", Kind: "server", ID: device})
 			netDepends = append(netDepends, pc.Ref)
 		}
+		// Octavia deletes its VIP port while deleting the load balancer, so
+		// the port is not planned; its subnets and the network wait for the
+		// load balancer instead.
+		netDepends = append(netDepends, loadBalancers...)
 		subnetRefs := slices.Clone(netDepends)
 		for _, subnet := range subnets {
 			subnetID, subnetName := identity(subnet)
@@ -530,6 +541,24 @@ func (n *networkDiscovery) networks(ctx context.Context) error {
 		n.add(c, c.Reason, netDepends...)
 	}
 	return n.disconnectedRouters(ctx)
+}
+
+// octaviaOwner is the device_owner Octavia sets on the VIP ports it
+// creates; their device_id is "lb-" followed by the load balancer ID.
+const octaviaOwner = "Octavia"
+
+// octaviaLoadBalancer returns the load balancer candidate whose Octavia VIP
+// port has this device_owner and device_id.
+func octaviaLoadBalancer(d *discovery, owner, device string) (Ref, bool) {
+	id, ok := strings.CutPrefix(device, "lb-")
+	if owner != octaviaOwner || !ok || id == "" {
+		return Ref{}, false
+	}
+	ref := Ref{Service: "load_balancer", Kind: "load_balancer", ID: id}
+	if _, ok := d.Candidate(ref); !ok {
+		return Ref{}, false
+	}
+	return ref, true
 }
 
 // routerPorts lists the ports of a router without a project filter, as
