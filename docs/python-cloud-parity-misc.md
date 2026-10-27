@@ -787,7 +787,7 @@ Unresolved boundaries:
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/project_cleanup`
 
-Status: `unresolved`.
+Status: `go_mapping`.
 
 Go API:
 
@@ -803,7 +803,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithProgress`
 - `github.com/JSYoo5B/go-openstacksdk/projectcleanup.WithAllowIncompletePlan`
 
-- PlanProjectCleanup sends only project-scoped GETs (no all_tenants/all_projects), fixes the token project (ID, name, domain), orders compute servers before server groups with the server stage waiting for absence, keeps raw rows and times, excludes rows owned by another project and server groups with members that are not server candidates, and reports core services without an implementation as not yet supported, missing ones as not in catalog, disabled ones as disabled and present phase-2 services as not yet supported.
+- PlanProjectCleanup sends only project-scoped GETs (no all_tenants/all_projects), fixes the token project (ID, name, domain), orders compute servers before server groups with the server stage waiting for absence, keeps raw rows and times, excludes rows owned by another project and server groups with members that are not server candidates, and reports missing core services as not in catalog and disabled ones as disabled; orchestration, load_balancer and dns are examined only when they have an endpoint, and because every service that Python's project_cleanup cleans is implemented, no service is reported as not yet supported.
   Tests: `connection_project_cleanup_test.go:TestProjectCleanupPlanDiscoversWithoutMutation`, `connection_project_cleanup_test.go:TestProjectCleanupReportsDisabledCoreServices`.
 - Without a filter or selector PlanProjectCleanup fails before HTTP unless WithAllResources is given; unknown skip names are rejected; an unscoped token cannot plan; ExecuteProjectCleanup refuses a modified or hand-built plan and a Connection whose token project differs from the plan's.
   Tests: `connection_project_cleanup_test.go:TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan`.
@@ -835,6 +835,8 @@ Go API:
   Tests: `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationPlansTopLevelStacksBeforeCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationFiltersAndSkip`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationExecutesStacksThenCompute`, `connection_project_cleanup_orchestration_test.go:TestProjectCleanupOrchestrationWaitTimeoutKeepsAcceptedStack`.
 - load_balancer project cleanup follows openstack/load_balancer/v2/_proxy.py _service_cleanup: it lists lbaas/loadbalancers without a query as Python does, excludes rows without a usable id, reporting another project_id/tenant_id or not reporting project_id, applies created_at/updated_at filters and the selector, is discovered and executed after orchestration and before compute and network, sends one DELETE lbaas/loadbalancers/{id}?cascade=true per load balancer, then waits for each accepted load balancer with the shared wait engine (404 or provisioning_status DELETED is Deleted, ERROR is an ErrFailedState wait error, other states keep polling until WithDeletionWait), reports AlreadyMissing for 404, Failed with response evidence for refusals and Uncertain for a lost response, lets compute run after a failed load balancer as Python's dependency walk does, and the load_balancer.load_balancer skip name prevents listing.
   Tests: `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerPlansBeforeComputeAndNetwork`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerFiltersSelectorAndSkip`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerExecutesCascadeDeletesThenCompute`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerWaitTimeoutKeepsAcceptedLoadBalancer`, `connection_project_cleanup_loadbalancer_test.go:TestProjectCleanupLoadBalancerVIPPortKeepsNetwork`.
+- dns project cleanup follows openstack/dns/v2/_proxy.py _service_cleanup: it lists zones and then floating IP PTR records (reverse/floatingips) without a query and without X-Auth-All-Projects or X-Auth-Sudo-Project-ID headers, follows Designate's links.next, excludes zones reporting another project_id (including zones shared with the project) or no project_id and rows without a usable id, applies created_at/updated_at filters to zones while any time filter excludes every PTR record (the Python resource has neither attribute), applies the selector, is discovered and executed after load_balancer and before compute and network, sends one DELETE zones/{id} without X-Designate-Delete-Shares per zone and then one PATCH reverse/floatingips/{region}:{id} with {"ptrdname": null} per PTR record without waiting for either, reports 202/200 as Accepted, 404 as AlreadyMissing, refusals as Failed with response evidence and a lost response as Uncertain, makes a network floating IP candidate depend on the PTR record candidate of the same floating IP so it is NotAttempted when the unset did not succeed, and the dns.zone and dns.floating_ip skip names each prevent their own list.
+  Tests: `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPlansZonesAndPTRRecordsBeforeCompute`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSFiltersSelectorAndSkip`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSExecutesZoneDeletesThenPTRUnsets`, `connection_project_cleanup_dns_test.go:TestProjectCleanupDNSPTRFailureKeepsNetworkFloatingIP`.
 
 Python/Go differences:
 
@@ -875,10 +877,9 @@ Python/Go differences:
 - Python deletes every load balancer its unqueried list returns, which for a token allowed to list all projects includes other projects' load balancers; Go sends the same unqueried list but excludes rows whose project_id or tenant_id names another project and rows without project_id.
 - Python's wait_for_delete for load balancers treats only 404 as completion (the resource has no status attribute), keeps polling a load balancer in provisioning_status DELETED or ERROR for its fixed 120 seconds and only logs a wait failure; Go treats DELETED as absence, reports ERROR at once as an ErrFailedState wait error and waits within WithDeletionWait.
 - Python lists networks only after its load balancers are deleted, so a network that held only a deleted load balancer's Octavia VIP port can be removed in the same run; Go plans networks before any load balancer is deleted, so such a network is excluded as having ports in use (as in Python's dry run) and needs a new plan after execution.
-
-Unresolved boundaries:
-
-- DNS zones/recordsets (phase 2) are not cleaned; a present DNS service is reported as not yet supported.
+- Python deletes every zone its unqueried list returns, including zones another project shares with the project; dns cleanup excludes zone rows whose project_id names another project or is not reported.
+- Python deletes the network floating IPs after unsetting their PTR records whatever the unset result; Go does not send a floating IP DELETE while the PTR unset of the same floating IP is Failed, Uncertain or not attempted, so the PTR record is not left without its floating IP.
+- Like Python, dns cleanup neither waits for zone deletion (Designate answers 202 and deletes asynchronously) nor for PTR unsets, so DNS candidates are never Deleted; and like Python it unsets every listed PTR row, including rows whose ptrdname is already null, leaving the outcome to Designate's answer.
 
 ### `python:cloud/openstackcloud/_OpenStackCloudMixin/has_service`
 

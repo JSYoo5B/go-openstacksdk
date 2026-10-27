@@ -26,13 +26,14 @@ type swiftListing struct {
 // listings and records every request with its escaped path. Mutations are
 // answered by deletes, keyed by the escaped path; others fail the test.
 func (c *cleanupCloud) serveObjectStore(t *testing.T, listings map[string]swiftListing, deletes map[string]int) {
-	setCleanupScope(t, c.Cloud, "project", "orchestration", "load-balancer", "object-store")
+	setCleanupScope(t, c.Cloud, "project", "orchestration", "load-balancer", "dns", "object-store")
 	// The fixture provider has no endpoint locator, so the catalog entry
 	// makes the service present and an override supplies its client.
 	conn, err := sdk.FromProvider(c.Provider,
 		sdk.WithEndpoint(sdk.Compute, c.Server.URL+"/compute/v2.1/project"),
 		sdk.WithEndpoint(sdk.Orchestration, c.Server.URL+"/orchestration"),
 		sdk.WithEndpoint(sdk.LoadBalancer, c.Server.URL+"/load-balancer"),
+		sdk.WithEndpoint(sdk.DNS, c.Server.URL+"/dns/v2"),
 		sdk.WithEndpoint(sdk.ObjectStorage, c.Server.URL+"/object-store"),
 	)
 	if err != nil {

@@ -9,11 +9,11 @@ Implementation proceeds through core user APIs, core administrative APIs, manage
 |---|---:|---|
 | Pinned source declarations | 3,362 | Gophercloud/openstacksdk declarations; inherited, descriptor and Resource surfaces tracked separately |
 | Implementation target | 3,216 | All declarations excluding unsupported routes, such as retired server APIs |
-| API mappings | 3,215 (100.0%) | go_mapping decisions against the target; partial verification does not increase this count |
+| API mappings | 3,216 (100.0%) | go_mapping decisions against the target; partial verification does not increase this count |
 | Source-equivalent support | 0 | supported decisions |
-| Unresolved / excluded (unsupported) | 1 / 146 | Unreviewed declarations are included in unresolved totals |
+| Unresolved / excluded (unsupported) | 0 / 146 | Unreviewed declarations are included in unresolved totals |
 | Operation reviews | 3,362 | Declarations without individual reviews 0 |
-| Behavior contracts | 9,967 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
+| Behavior contracts | 9,968 | contracts entries in the [review JSON](../api/sdk_reviews.json); differing granularity prevents using this as an API completion rate |
 <!-- sdk-progress:end -->
 
 Behavior-contract counts reflect review granularity and must not be used as completed API counts. Unreviewed operations remain unresolved.
@@ -27,8 +27,8 @@ Behavior-contract counts reflect review granularity and must not be used as comp
 | Following network: stages 3 and 4 | 254 / 254 | 100.0% | 0 | 0 | 0 |
 | Following bare metal: stages 3 and 4 | 207 / 207 | 100.0% | 0 | 0 | 0 |
 | Other following services: stages 3 and 4 | 578 / 578 | 100.0% | 0 | 0 | 2 |
-| Shared foundation | 22 / 23 | 95.7% | 1 | 0 | 6 |
-| Total | 3,215 / 3,216 | 100.0% | 1 | 0 | 146 |
+| Shared foundation | 23 / 23 | 100.0% | 0 | 0 | 6 |
+| Total | 3,216 / 3,216 | 100.0% | 0 | 0 | 146 |
 
 **Core services**
 

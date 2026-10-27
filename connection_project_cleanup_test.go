@@ -42,9 +42,9 @@ func setCleanupScope(t *testing.T, cloud *testcloud.Cloud, project string, catal
 }
 
 // cleanupCloud is a project-scoped fixture whose catalog lists
-// orchestration and load-balancer. Its connection overrides compute,
-// network, image, block storage, orchestration and load balancer; object
-// storage and key manager are absent.
+// orchestration, load-balancer and dns. Its connection overrides compute,
+// network, image, block storage, orchestration, load balancer and DNS;
+// object storage and key manager are absent.
 type cleanupCloud struct {
 	*testcloud.Cloud
 	conn      *sdk.Connection
@@ -55,7 +55,7 @@ type cleanupCloud struct {
 func newCleanupCloud(t *testing.T) *cleanupCloud {
 	t.Helper()
 	cloud := testcloud.New(t)
-	setCleanupScope(t, cloud, "project", "orchestration", "load-balancer")
+	setCleanupScope(t, cloud, "project", "orchestration", "load-balancer", "dns")
 	conn, err := sdk.FromProvider(cloud.Provider,
 		sdk.WithEndpoint(sdk.Compute, cloud.Server.URL+"/compute/v2.1/project"),
 		sdk.WithEndpoint(sdk.Network, cloud.Server.URL+"/network"),
@@ -63,6 +63,7 @@ func newCleanupCloud(t *testing.T) *cleanupCloud {
 		sdk.WithEndpoint(sdk.BlockStorage, cloud.Server.URL+"/volume/v3/project"),
 		sdk.WithEndpoint(sdk.Orchestration, cloud.Server.URL+"/orchestration"),
 		sdk.WithEndpoint(sdk.LoadBalancer, cloud.Server.URL+"/load-balancer"),
+		sdk.WithEndpoint(sdk.DNS, cloud.Server.URL+"/dns/v2"),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -215,12 +216,12 @@ func TestProjectCleanupRequiresSelectionScopeAndUnchangedPlan(t *testing.T) {
 		t.Fatalf("hand-built plan: %v", err)
 	}
 	// The token now belongs to another project: the plan is refused.
-	setCleanupScope(t, cloud.Cloud, "second", "orchestration", "load-balancer")
+	setCleanupScope(t, cloud.Cloud, "second", "orchestration", "load-balancer", "dns")
 	if _, err := cloud.conn.ExecuteProjectCleanup(ctx, plan); !errors.Is(err, projectcleanup.ErrProjectMismatch) {
 		t.Fatalf("project mismatch: %v", err)
 	}
 	// An unscoped token cannot plan.
-	setCleanupScope(t, cloud.Cloud, "", "orchestration", "load-balancer")
+	setCleanupScope(t, cloud.Cloud, "", "orchestration", "load-balancer", "dns")
 	if _, err := cloud.conn.PlanProjectCleanup(ctx, projectcleanup.WithAllResources()); !errors.Is(err, projectcleanup.ErrUnscoped) {
 		t.Fatalf("unscoped: %v", err)
 	}
@@ -543,20 +544,18 @@ func TestProjectCleanupDiscoveryErrorNeedsExplicitPartialExecution(t *testing.T)
 func TestProjectCleanupReportsDisabledCoreServices(t *testing.T) {
 	cloud := testcloud.New(t)
 	setCleanupScope(t, cloud, "project", "dns")
-	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithServiceEnabled("compute", false), sdk.WithServiceEnabled("dns", true))
+	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithServiceEnabled("compute", false), sdk.WithServiceEnabled("dns", true),
+		sdk.WithEndpoint(sdk.DNS, cloud.Server.URL+"/dns/v2"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		t.Error("unexpected request", r.Method, r.URL)
-		http.Error(w, "unexpected", 500)
-	})
+	cloud.Mux.HandleFunc("/", cleanupCatchAll(t))
 	plan, err := conn.PlanProjectCleanup(context.Background(), projectcleanup.WithAllResources())
 	if err != nil {
 		t.Fatal(err)
 	}
 	got := fmt.Sprint(plan.Unavailable)
-	want := "[{compute disabled} {block_storage not in catalog} {network not in catalog} {image not in catalog} {object_store not in catalog} {key_manager not in catalog} {dns not yet supported}]"
+	want := "[{compute disabled} {block_storage not in catalog} {network not in catalog} {image not in catalog} {object_store not in catalog} {key_manager not in catalog}]"
 	if got != want {
 		t.Fatalf("unavailable %s", got)
 	}

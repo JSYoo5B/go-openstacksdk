@@ -71,6 +71,8 @@ func (c *Connection) projectCleanupClient(ctx context.Context, service string) (
 		value, err = c.Orchestration(ctx)
 	case "load_balancer":
 		value, err = c.LoadBalancer(ctx)
+	case "dns":
+		value, err = c.DNS(ctx)
 	default:
 		return nil, unsupported("project cleanup", service)
 	}

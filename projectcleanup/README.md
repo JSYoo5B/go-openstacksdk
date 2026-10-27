@@ -87,7 +87,7 @@ for _, o := range result.Outcomes {
 
 ## Coverage
 
-Services are examined in Python's dependency order. A service without an endpoint is `NotInCatalog`, a service disabled by `has_<service>` is `Disabled`, and a service that Python cleans but this package does not implement yet is `NotYetSupported`; its resources are kept. Orchestration, load balancer and DNS are reported only when they have an endpoint.
+Services are examined in Python's dependency order. A service without an endpoint is `NotInCatalog`, a service disabled by `has_<service>` is `Disabled`, and a service that Python cleans but this package does not implement would be `NotYetSupported` with its resources kept. Every service that Python's `project_cleanup` cleans is implemented, so current plans do not report `NotYetSupported`. Orchestration, load balancer and DNS are examined only when they have an endpoint and are otherwise not reported.
 
 | Service | Python cleans | This package |
 |---|---|---|
@@ -99,7 +99,7 @@ Services are examined in Python's dependency order. A service without an endpoin
 | key_manager | containers, secrets | containers, then secrets, without waits or dependencies. Orders are not cleaned, as in Python. |
 | orchestration | stacks (then waits for each deletion) | top-level stacks before compute and network, one DELETE each on the stack's name/ID route, with absence waits. |
 | load_balancer | load balancers with cascade (then waits for each deletion) | load balancers after orchestration and before compute and network, one cascade DELETE each, with absence waits. |
-| dns | zones and floating IP PTR records | not yet supported (phase 2) |
+| dns | zones, then floating IP PTR records (unset), without waits | zones, then floating IP PTR records after load balancers and before compute and network, one DELETE or PATCH each, without waits; a network floating IP depends on its PTR record candidate. |
 
 ### Compute
 
@@ -122,7 +122,7 @@ Follows `openstack/block_storage/v3/_proxy.py` `_service_cleanup`. Kinds, in exe
 
 - Order: VPN ipsec site connections, VPN services, endpoint groups, IKE policies, IPsec policies, floating IPs, security groups, router routes, router interfaces, routers, ports, subnets, networks. No stage waits; Neutron deletes are synchronous.
 - VPN resources are examined only when `GET /service-providers?service_type=VPN` returns a provider. Python's VPN resources have no `created_at`/`updated_at`, so a time filter excludes them. A VPN service, endpoint group or policy still used by a site connection that is not a candidate is excluded; one used by candidate connections depends on them.
-- Floating IPs follow Python's `fip_cleanup_evaluation`, which replaces the time filters: without a time filter every floating IP is a candidate; with one, an attached floating IP is kept and a detached one is a candidate whatever its times. The selector is still consulted.
+- Floating IPs follow Python's `fip_cleanup_evaluation`, which replaces the time filters: without a time filter every floating IP is a candidate; with one, an attached floating IP is kept and a detached one is a candidate whatever its times. The selector is still consulted. A floating IP whose PTR record is a `dns.floating_ip` candidate depends on it (see DNS).
 - Security groups named `default` are kept; the others are filtered and selected normally.
 - Networks are examined only when none of `network.network`, `network.router`, `network.port` and `network.subnet` is skipped. Shared and external networks are excluded. A network is kept when one of its project ports is in use by anything other than a compute server candidate; DHCP ports and ports without a device owner do not count, and router interface ports are removed. A remaining network is filtered and selected; then, without further evaluation, its interface routers' extra routes are removed (`PUT /routers/{id}/remove_extraroutes`), its interfaces are removed (`PUT /routers/{id}/remove_router_interface`), ports without a device owner and ports of server candidates are deleted, then its subnets and the network. A router whose interface cannot be read or belongs to another project keeps the network.
 - A router whose interfaces are all removed is deleted when its only other ports are gateway, HA or SNAT ports; otherwise it is excluded. Routers of the project without any port are deleted. As in Python, neither case evaluates the time filters or the selector.
@@ -178,6 +178,18 @@ Follows `openstack/load_balancer/v2/_proxy.py` `_service_cleanup`. Kind: `load_b
 - Compute and network candidates do not depend on load balancers. Python's dependency walk also runs compute and network after a failed load balancer cleanup.
 - Discovery runs once before any deletion, so a network that holds a load balancer's VIP port (`device_owner` `Octavia`) is excluded as having ports in use, as in Python's dry run. Python's real run lists networks only after its load balancers are deleted; plan again after execution to clean such a network.
 
+### DNS
+
+Follows `openstack/dns/v2/_proxy.py` `_service_cleanup`. Kinds, in stage order: `dns.zone`, then `dns.floating_ip`. Each skip name prevents its own list.
+
+- Python's cleanup dependencies run dns before network ("DNS may depend on floating ip"). DNS is discovered after load balancer and before compute and network, and its stages run after the load balancer stage and before every compute and network stage. Python does not order dns against orchestration, load_balancer or compute.
+- Zones come from `GET /v2/zones` without a query or scope header, following Designate's `links.next`. No `X-Auth-All-Projects` or `X-Auth-Sudo-Project-ID` header is ever sent, so Designate answers for the token project. Designate also lists zones that other projects share with this one; a row whose `project_id` names another project, a row without `project_id` and a row without a usable `id` are excluded. Python deletes every listed zone, including shared ones.
+- Zone time filters read `created_at` and `updated_at`. Designate reports `updated_at` as null for a zone that was never updated, so `WithUpdatedBefore` excludes it. Zones in any status are evaluated, as in Python.
+- Execution sends one `DELETE /v2/zones/{id}` per zone candidate without `X-Designate-Delete-Shares`, as Python's `delete_zone` does. Designate deletes the zone's recordsets with it, so recordsets are not separate candidates (Python does not list them either). Designate answers 202 and deletes asynchronously; the stage does not wait, as in Python, so a zone stays `accepted`.
+- Floating IP PTR records come from `GET /v2/reverse/floatingips` without a query or scope header. Their ID is Designate's `<region>:<floatingip-id>`, and the selector sees the floating IP `address` as `Name`. Python's resource has no `created_at` or `updated_at`, so any time filter excludes every PTR record, matching Python's note that floating IPs are not cleaned when filters are set. A row that reports another `project_id` or has no usable `id` is excluded.
+- Execution sends one `PATCH /v2/reverse/floatingips/{region}:{id}` with `{"ptrdname": null}` per PTR candidate, as Python's `unset_floating_ip` does, without a wait. Like Python, a listed row whose `ptrdname` is already null is still sent; Designate's answer decides the outcome. 200 and 202 are `accepted`, 404 is `already_missing`, a refusal is `failed` with the response evidence and a lost response is `uncertain`.
+- A `network.floating_ip` candidate depends on the `dns.floating_ip` candidate whose ID ends with `:<floating IP ID>`. When the PTR unset is `failed`, `uncertain` or not attempted, the floating IP is `not_attempted`, so the PTR record is not orphaned by deleting its floating IP. Python unsets the PTR records first but deletes the floating IPs whatever the result. Zones have no dependents.
+
 ## Differences from Python
 
 - Python's `dry_run=True` runs the same cleanup code without deleting, and `dry_run=False` discovers again while deleting. Here discovery happens once, in `PlanProjectCleanup`, and `ExecuteProjectCleanup` acts only on that plan.
@@ -191,7 +203,7 @@ Follows `openstack/load_balancer/v2/_proxy.py` `_service_cleanup`. Kind: `load_b
 ## Limitations
 
 - Each wait is bounded by `WithDeletionWait` and by the caller's context; a deletion that a service completes after the wait ends stays `Accepted` with `WaitErr`.
-- Only the services marked above are implemented. Plans report the others as `NotYetSupported`, never as cleaned.
+- Only the services and kinds listed above are cleaned. A service that Python cleans and this package did not implement would be reported as `NotYetSupported`, never as cleaned; no such service remains.
 
 ## Planned (not implemented)
 

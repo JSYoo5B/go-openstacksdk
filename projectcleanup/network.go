@@ -283,12 +283,15 @@ func (n *networkDiscovery) vpn(ctx context.Context) error {
 // floatingIPs follows Python's fip_cleanup_evaluation, which replaces the
 // time filters: without filters every floating IP is a candidate; with
 // filters an attached floating IP is kept and a detached one is a candidate
-// whatever its times. A selector is still consulted.
+// whatever its times. A selector is still consulted. A floating IP whose
+// PTR record is a dns candidate depends on it, so the floating IP is not
+// deleted when unsetting its PTR record did not succeed.
 func (n *networkDiscovery) floatingIPs(ctx context.Context) error {
 	rows, err := n.list(ctx, "floating_ip", "floatingips", "floatingips", n.query("project_id", n.project))
 	if err != nil {
 		return err
 	}
+	ptrs := dnsPTRDependencies(n.d)
 	for _, r := range rows {
 		id, name := identity(r)
 		if name == "" {
@@ -315,7 +318,7 @@ func (n *networkDiscovery) floatingIPs(ctx context.Context) error {
 		if n.d.options.selector != nil {
 			reason += ", accepted by selector"
 		}
-		n.add(c, reason)
+		n.add(c, reason, ptrs[id]...)
 	}
 	return nil
 }
