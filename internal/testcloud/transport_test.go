@@ -44,6 +44,19 @@ func TestRecorderRecordsAndLinksRequests(t *testing.T) {
 			t.Fatalf("%+v", call)
 		}
 	}
+	rec.Reset()
+	if rec.Len() != 0 || len(rec.Calls()) != 0 || len(calls) != 4 {
+		t.Fatal("Reset must clear only the recorder", rec.Calls(), calls)
+	}
+	req, _ := http.NewRequestWithContext(context.Background(), http.MethodPost, cloud.Server.URL+"/after", strings.NewReader("next"))
+	resp, err := cloud.Provider.HTTPClient.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if rec.Len() != 1 || rec.Calls()[0].Path != "/after" || rec.Calls()[0].Body != "next" {
+		t.Fatal(rec.Calls())
+	}
 }
 
 func TestRoundTripperFuncIsExact(t *testing.T) {

@@ -104,6 +104,14 @@ func (rec *Recorder) Len() int {
 	return len(rec.calls)
 }
 
+// Reset discards the recorded calls, so later Calls and Len see only the
+// requests that arrive afterwards. The reply function is unchanged.
+func (rec *Recorder) Reset() {
+	rec.mu.Lock()
+	defer rec.mu.Unlock()
+	rec.calls = nil
+}
+
 // Body is a scripted response body for read, close and truncation faults.
 // Reads yield Data; the read that exhausts Data returns ReadErr (io.EOF when
 // ReadErr is nil) together with the last bytes, and later reads return 0 and

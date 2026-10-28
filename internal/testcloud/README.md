@@ -36,7 +36,7 @@ without a server.
 | `func Response(status int, body string, header http.Header) *http.Response` | Sets only `StatusCode`, `Header` (as given, nil stays nil) and a string `Body`. |
 | `func StreamResponse(status int, body io.ReadCloser, header http.Header) *http.Response` | Same, with a caller-supplied body such as `*Body`. |
 | `func NewRecorder(reply func(*http.Request) (*http.Response, error)) *Recorder` | Transport that records each request, then answers through `LinkRequest(reply)`. Safe for concurrent use. |
-| `func (rec *Recorder) Calls() []Call`, `Len() int` | Copy of the recorded calls in arrival order; number of calls. |
+| `func (rec *Recorder) Calls() []Call`, `Len() int`, `Reset()` | Copy of the recorded calls in arrival order; number of calls; discard the calls recorded so far. |
 | `type Call struct{ Method, Path, EscapedPath, RawQuery, Body string; Header http.Header }` | `r.Method`, `r.URL.Path`, `r.URL.EscapedPath()`, `r.URL.RawQuery`, the full request body (`""` for a nil body) and `r.Header.Clone()`. |
 | `type Body struct{ Data string; ReadErr, CloseErr error; OnRead, OnClose func() }` | Scripted response body, see below. `Reads()` and `Closes()` count calls. |
 
