@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeInterfaceTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeInterfaceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeInterfaceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeInterfaceClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -52,7 +42,7 @@ const nativeInterfaceRow = `{"port_state":"ACTIVE","fixed_ips":[{"subnet_id":"sn
 func TestNativeAttachInterfacesRoutesBodiesAndDecode(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls []nativeInterfaceCall
-	cloud.Provider.HTTPClient.Transport = nativeInterfaceTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -66,7 +56,7 @@ func TestNativeAttachInterfacesRoutesBodiesAndDecode(t *testing.T) {
 			return nativeInterfaceWire(200, `{"interfaceAttachments":[`+nativeInterfaceRow+`,{"port_id":"p2"}],"interfaceAttachments_links":[{"rel":"next","href":"http://other/next"}]}`), nil
 		}
 		return nativeInterfaceWire(200, `{"interfaceAttachment":`+nativeInterfaceRow+`}`), nil
-	})
+	}))
 	api := attachinterfaces.New(nativeInterfaceClient(cloud))
 	ctx := context.Background()
 	created, err := api.Create(ctx, "s1", attachinterfaces.CreateOpts{NetworkID: "n1", FixedIPs: []attachinterfaces.FixedIP{{SubnetID: "sn", IPAddress: "10.0.0.5"}, {IPAddress: "10.0.0.6"}}}, attachinterfaces.WithCreateField("tag", "eth1"))
@@ -128,10 +118,10 @@ func TestNativeAttachInterfacesStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeInterfaceTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeInterfaceWire(code, `{"interfaceAttachment":{"port_id":"p1"}}`), nil
-				})
+				}))
 				err := call.call(attachinterfaces.New(nativeInterfaceClient(cloud)))
 				nativeInterfaceOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -155,9 +145,9 @@ func TestNativeAttachInterfacesStrictStatusesAndPreflight(t *testing.T) {
 			{204, "", func(errs []error) bool { return len(errs) == 1 && errors.Is(errs[0], io.EOF) }},
 		} {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = nativeInterfaceTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				return nativeInterfaceWire(tc.code, tc.body), nil
-			})
+			}))
 			var errs []error
 			for value, err := range attachinterfaces.New(nativeInterfaceClient(cloud)).List(ctx, "s1") {
 				if value != nil {
@@ -173,10 +163,10 @@ func TestNativeAttachInterfacesStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("preflight", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeInterfaceTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeInterfaceWire(200, `{}`), nil
-		})
+		}))
 		api := attachinterfaces.New(nativeInterfaceClient(cloud))
 		for name, check := range map[string]func() error{
 			"port_id extension": func() error {

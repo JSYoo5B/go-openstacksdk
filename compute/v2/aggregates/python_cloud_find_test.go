@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // pythonCloudAggregateAPI answers GET os-aggregates/7 and the list; every
 // other member GET is a Nova 404, as for a name sent to the member route.
-func pythonCloudAggregateAPI(t *testing.T) (*aggregates.API, *[]pythonAggregateCall) {
+func pythonCloudAggregateAPI(t *testing.T) (*aggregates.API, *testcloud.Recorder) {
 	t.Helper()
 	return pythonAggregateAPI(t, func(req *http.Request) *http.Response {
 		switch {
@@ -49,8 +50,8 @@ func TestPythonCloudGetAggregateFindsByLiteralIdentityThenList(t *testing.T) {
 		{http.MethodGet, pythonAggregateBase + "/absent", "", "", "2.81"},
 		{http.MethodGet, pythonAggregateBase, "", "", "2.81"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonAggregateCalls(calls), want) {
+		t.Fatalf("%+v", pythonAggregateCalls(calls))
 	}
 }
 
@@ -87,17 +88,17 @@ func TestPythonCloudAggregateActionsResolveTheAggregateFirst(t *testing.T) {
 				{http.MethodGet, pythonAggregateBase, "", "", "2.81"},
 				{http.MethodPost, pythonAggregateBase + "/7/action", "", step.body, "2.81"},
 			}
-			if !reflect.DeepEqual(*calls, want) {
-				t.Fatalf("%+v", *calls)
+			if !reflect.DeepEqual(pythonAggregateCalls(calls), want) {
+				t.Fatalf("%+v", pythonAggregateCalls(calls))
 			}
 			// Python raises SDKException("Host aggregate ... not found.") before
 			// any action; the strict lookup stops with ErrNotFound.
-			*calls = nil
+			calls.Reset()
 			if missing, err := api.FindIdentity(ctx, "absent", resource.WithIdentityFindIgnoreMissing(false)); missing != nil || !errors.Is(err, resource.ErrNotFound) {
 				t.Fatal(missing, err)
 			}
-			if len(*calls) != 2 {
-				t.Fatalf("%+v", *calls)
+			if calls.Len() != 2 {
+				t.Fatalf("%+v", pythonAggregateCalls(calls))
 			}
 		})
 	}

@@ -2,10 +2,8 @@ package diagnostics_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/diagnostics"
@@ -15,25 +13,15 @@ import (
 // pythonDiagnosticsCall records the wire request openstacksdk would also send.
 type pythonDiagnosticsCall struct{ method, path, query, version string }
 
-type pythonDiagnosticsTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonDiagnosticsTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func TestPythonServerDiagnosticsGetMatchesProxyRequest(t *testing.T) {
 	var calls []pythonDiagnosticsCall
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonDiagnosticsTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls = append(calls, pythonDiagnosticsCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("X-OpenStack-Nova-API-Version")})
 		// 2.48 returns the normalized keys without an envelope.
 		body := `{"state":"running","driver":"libvirt","hypervisor":"kvm","hypervisor_os":"ubuntu","uptime":46664,"config_drive":true,"num_cpus":1,"num_disks":1,"num_nics":1,"memory_details":{"maximum":2048,"used":1024},"cpu_details":[{"id":0,"time":17300000000,"utilisation":15}],"disk_details":[{"read_bytes":262144,"read_requests":112,"write_bytes":5778432,"write_requests":488,"errors_count":1}],"nic_details":[{"mac_address":"01:23:45:67:89:ab","rx_octets":2070139,"tx_octets":140208}]}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.48"

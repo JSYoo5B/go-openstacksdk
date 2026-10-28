@@ -264,10 +264,6 @@ func TestActionRecordsOptionsCannotReplaceParentAndKeepNilMapOwnership(t *testin
 	}
 }
 
-type actionRecordFaultTransport func(*http.Request) (*http.Response, error)
-
-func (f actionRecordFaultTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type actionRecordFaultBody struct {
 	io.ReadCloser
 	fault  error
@@ -291,13 +287,13 @@ func TestActionRecordsPhysicalFailuresPreserveActualPageAndStopHooks(t *testing.
 			})
 			cause := errors.New("Close fault")
 			base := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = actionRecordFaultTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				resp, err := base.RoundTrip(r)
 				if resp != nil {
 					resp.Body = &actionRecordFaultBody{ReadCloser: resp.Body, fault: cause, closes: &closes}
 				}
 				return resp, err
-			})
+			}))
 			cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				hooks++
 				return nil

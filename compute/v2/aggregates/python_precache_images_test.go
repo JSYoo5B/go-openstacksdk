@@ -3,12 +3,11 @@ package aggregates_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -27,8 +26,8 @@ func TestPythonAggregatePrecacheImagesFixedVersionLiteralOrder(t *testing.T) {
 	if err := api.PrecacheImages(context.Background(), 7, images, mutate, aggregates.WithPrecacheImagesHeader("X-Trace", "trace")); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 1 || (*calls)[0].method != "POST" || (*calls)[0].path != pythonAggregateBase+"/7/images" || (*calls)[0].body != `{"cache":[{"id":"image/a"},{"id":""},{"id":"image/a"}]}` || (*calls)[0].version != "2.81" {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || calls.Calls()[0].Method != "POST" || calls.Calls()[0].Path != pythonAggregateBase+"/7/images" || calls.Calls()[0].Body != `{"cache":[{"id":"image/a"},{"id":""},{"id":"image/a"}]}` || calls.Calls()[0].Header.Get("X-OpenStack-Nova-API-Version") != "2.81" {
+		t.Fatal(pythonAggregateCalls(calls))
 	}
 	if api.RawClient().Microversion != "2.1" {
 		t.Fatal("mutated selected client")
@@ -39,8 +38,8 @@ func TestPythonAggregatePrecacheImagesEmptyStillPosts(t *testing.T) {
 	if err := api.PrecacheImages(context.Background(), -1, nil); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 1 || (*calls)[0].body != `{"cache":[]}` || (*calls)[0].path != pythonAggregateBase+"/-1/images" {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || calls.Calls()[0].Body != `{"cache":[]}` || calls.Calls()[0].Path != pythonAggregateBase+"/-1/images" {
+		t.Fatal(pythonAggregateCalls(calls))
 	}
 }
 func TestPythonAggregatePrecacheImagesHTTPAndAcceptedCloseFailures(t *testing.T) {
@@ -50,12 +49,12 @@ func TestPythonAggregatePrecacheImagesHTTPAndAcceptedCloseFailures(t *testing.T)
 			api, calls := pythonAggregateAPI(t, func(*http.Request) *http.Response {
 				r := pythonAggregateWire(status, "opaque")
 				r.Header.Set("X-Proof", "receipt")
-				r.Body = precacheCloseBody{Reader: strings.NewReader("opaque"), cause: failure}
+				r.Body = &testcloud.Body{Data: "opaque", CloseErr: failure}
 				return r
 			})
 			err := api.PrecacheImages(context.Background(), 7, []string{"one"})
-			if len(*calls) != 1 {
-				t.Fatal(*calls)
+			if calls.Len() != 1 {
+				t.Fatal(pythonAggregateCalls(calls))
 			}
 			if status == 404 {
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -72,12 +71,6 @@ func TestPythonAggregatePrecacheImagesHTTPAndAcceptedCloseFailures(t *testing.T)
 	}
 }
 
-type precacheCloseBody struct {
-	io.Reader
-	cause error
-}
-
-func (b precacheCloseBody) Close() error { return b.cause }
 func TestPythonAggregatePrecacheImagesInvalidOptionsAndSourceMutation(t *testing.T) {
 	api, calls := pythonAggregateAPI(t, func(*http.Request) *http.Response { return pythonAggregateWire(202, "") })
 	if err := api.PrecacheImages(context.Background(), 7, nil, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -90,8 +83,8 @@ func TestPythonAggregatePrecacheImagesInvalidOptionsAndSourceMutation(t *testing
 	if err := api.PrecacheImages(context.Background(), 7, nil, mutate); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(pythonAggregateCalls(calls))
 	}
 	var absent *aggregates.API
 	if err := absent.PrecacheImages(context.Background(), 7, nil); !errors.Is(err, resource.ErrInvalidOption) {
@@ -115,8 +108,8 @@ func TestPythonAggregatePrecacheImagesSelectedAPIReplacement(t *testing.T) {
 	if err := api.PrecacheImages(context.Background(), 7, nil, replace); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(pythonAggregateCalls(calls))
 	}
 }
 
@@ -135,8 +128,8 @@ func TestPythonAggregatePrecacheImagesRejectsRetryVersionMutation(t *testing.T) 
 	if err := api.PrecacheImages(context.Background(), 7, []string{"image"}); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if hooks != 1 || len(*calls) != 1 || (*calls)[0].version != "2.81" {
-		t.Fatal(hooks, *calls)
+	if hooks != 1 || calls.Len() != 1 || calls.Calls()[0].Header.Get("X-OpenStack-Nova-API-Version") != "2.81" {
+		t.Fatal(hooks, pythonAggregateCalls(calls))
 	}
 }
 func TestPythonAggregatePrecacheImagesReplacesCapturedVersionAliases(t *testing.T) {
@@ -152,7 +145,7 @@ func TestPythonAggregatePrecacheImagesReplacesCapturedVersionAliases(t *testing.
 	if err := api.PrecacheImages(context.Background(), 7, nil); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 1 || client.MoreHeaders["OpenStack-API-Version"] != "compute 2.1" {
-		t.Fatal(*calls, client.MoreHeaders)
+	if calls.Len() != 1 || client.MoreHeaders["OpenStack-API-Version"] != "compute 2.1" {
+		t.Fatal(pythonAggregateCalls(calls), client.MoreHeaders)
 	}
 }

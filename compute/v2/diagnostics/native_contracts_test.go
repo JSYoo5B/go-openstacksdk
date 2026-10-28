@@ -4,10 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/diagnostics"
@@ -16,18 +14,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeDiagnosticsTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeDiagnosticsTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeDiagnosticsWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeDiagnosticsCall struct{ method, path, query string }
@@ -35,10 +23,10 @@ type nativeDiagnosticsCall struct{ method, path, query string }
 func nativeDiagnosticsAPI(t *testing.T, calls *[]nativeDiagnosticsCall, reply func(*http.Request) *http.Response) *diagnostics.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeDiagnosticsTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeDiagnosticsCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	return diagnostics.New(client)

@@ -16,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeMigrationTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeMigrationTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeMigrationWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeMigrationCall struct{ method, path, query string }
@@ -35,10 +25,10 @@ type nativeMigrationCall struct{ method, path, query string }
 func nativeMigrationAPI(t *testing.T, calls *[]nativeMigrationCall, reply func(*http.Request) *http.Response) *migrations.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeMigrationTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeMigrationCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	return migrations.New(client)

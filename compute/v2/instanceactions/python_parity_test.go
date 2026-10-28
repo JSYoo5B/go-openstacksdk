@@ -3,7 +3,6 @@ package instanceactions_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -17,28 +16,18 @@ import (
 // pythonActionCall records the wire request openstacksdk would also send.
 type pythonActionCall struct{ method, path, version string }
 
-type pythonActionTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonActionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func TestPythonServerActionGetReturnsDetailWithEvents(t *testing.T) {
 	ctx := context.Background()
 	var calls []pythonActionCall
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonActionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls = append(calls, pythonActionCall{req.Method, req.URL.Path, req.Header.Get("X-OpenStack-Nova-API-Version")})
 		code, body := 200, `{"instanceAction":{"action":"reboot","request_id":"req-1","instance_uuid":"s1","user_id":"u","project_id":"p","message":null,"start_time":"2026-10-10T01:02:03.000000","updated_at":"2026-10-10T01:02:04.000000","events":[{"event":"compute_reboot_instance","result":"Error","host":"h1","hostId":"hid","traceback":"tb","details":"boom","start_time":"2026-10-10T01:02:03.000000","finish_time":"2026-10-10T01:02:04.000000"}]}}`
 		if strings.HasSuffix(req.URL.Path, "/req-0") {
 			code, body = 404, `{"itemNotFound":{"message":"gone"}}`
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.84"

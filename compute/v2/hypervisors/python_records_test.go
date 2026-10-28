@@ -25,8 +25,8 @@ func TestHypervisorRecordsSummaryDetailAndDeclaredProjection(t *testing.T) {
 				return pythonHypervisorWire(203, `{"hypervisors":[{"id":7,"hypervisor_hostname":"node","service":false,"servers":[1,{"uuid":"vm"}],"free_ram_mb":"raw","x_unknown":true}]}`)
 			})
 			seq := api.ListRecords(context.Background(), hypervisors.WithRecordDetails(detail), hypervisors.WithRecordQuery("with_servers", true))
-			if len(*calls) != 0 {
-				t.Fatal(*calls)
+			if calls.Len() != 0 {
+				t.Fatal(pythonHypervisorCalls(calls))
 			}
 			n := 0
 			for row, err := range seq {
@@ -38,8 +38,8 @@ func TestHypervisorRecordsSummaryDetailAndDeclaredProjection(t *testing.T) {
 					t.Fatal(row)
 				}
 			}
-			if n != 1 || len(*calls) != 1 {
-				t.Fatal(n, *calls)
+			if n != 1 || calls.Len() != 1 {
+				t.Fatal(n, pythonHypervisorCalls(calls))
 			}
 		})
 	}
@@ -88,8 +88,8 @@ func TestHypervisorFindRecordsGETThenConfiguredFallbackPreservesPassiveID(t *tes
 				return pythonHypervisorWire(200, `{"hypervisors":[{"id":7,"hypervisor_hostname":"node"}]}`)
 			})
 			row, err := api.FindRecord(context.Background(), "node", hypervisors.WithRecordDetails(detail))
-			if err != nil || row == nil || len(*calls) != 2 || string(row.Resource.Body["id"]) != "7" {
-				t.Fatal(row, err, *calls)
+			if err != nil || row == nil || calls.Len() != 2 || string(row.Resource.Body["id"]) != "7" {
+				t.Fatal(row, err, pythonHypervisorCalls(calls))
 			}
 		})
 	}
@@ -171,22 +171,22 @@ func TestHypervisorRecordsDefaultDiscoveryAndOptionSnapshots(t *testing.T) {
 	headers["X-Owned"] = "changed"
 	api.RawClient().Endpoint = api.RawClient().ResourceBase
 	rows, err := api.AllRecords(context.Background(), option)
-	if err != nil || len(rows) != 1 || len(*calls) != 2 || len(rows[0].Discovery.Responses) != 1 || string(rows[0].Discovery.Responses[0].Body) != proof {
-		t.Fatal(rows, err, *calls)
+	if err != nil || len(rows) != 1 || calls.Len() != 2 || len(rows[0].Discovery.Responses) != 1 || string(rows[0].Discovery.Responses[0].Body) != proof {
+		t.Fatal(rows, err, pythonHypervisorCalls(calls))
 	}
 }
 func TestHypervisorRecordPreflightAndPhysicalFailureNeverFallback(t *testing.T) {
 	api, calls := pythonHypervisorAPI(t, "2.88", func(r *http.Request) *http.Response { return pythonHypervisorWire(200, `{}`) })
 	_, err := api.FindRecord(context.Background(), "x", nil)
-	if err == nil || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if err == nil || calls.Len() != 0 {
+		t.Fatal(err, pythonHypervisorCalls(calls))
 	}
 	cause := errors.New("cancelled hypervisor")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancel(cause)
 	_, err = api.FindRecord(ctx, "x")
-	if !errors.Is(err, cause) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, cause) || calls.Len() != 0 {
+		t.Fatal(err, pythonHypervisorCalls(calls))
 	}
 }
 
@@ -219,8 +219,8 @@ func TestHypervisorFindPhysicalReadAndCloseFaultsNeverFallback(t *testing.T) {
 				return response
 			})
 			_, err := api.FindRecord(context.Background(), "node")
-			if !errors.Is(err, cause) || len(*calls) != 1 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, cause) || calls.Len() != 1 {
+				t.Fatal(err, pythonHypervisorCalls(calls))
 			}
 		})
 	}
@@ -233,8 +233,8 @@ func TestHypervisorProxyRecordsEvaluateSharedJMESAgainstLazyGenerator(t *testing
 				return pythonHypervisorWire(200, `{"hypervisors":[{"id":"one"}]}`)
 			})
 			result, err := api.ProxyListRecords(context.Background(), hypervisors.WithRecordQuery("jmespath_filters", expr))
-			if len(*calls) != 0 {
-				t.Fatal("JMES consumed generator", *calls)
+			if calls.Len() != 0 {
+				t.Fatal("JMES consumed generator", pythonHypervisorCalls(calls))
 			}
 			if expr == "length(@)" {
 				if err == nil {
@@ -262,8 +262,8 @@ func TestHypervisorProxyRecordsEvaluateSharedJMESAgainstLazyGenerator(t *testing
 					}
 					n++
 				}
-				if n != 1 || len(*calls) != 1 {
-					t.Fatal(n, *calls)
+				if n != 1 || calls.Len() != 1 {
+					t.Fatal(n, pythonHypervisorCalls(calls))
 				}
 			case "{lazy: @}":
 				object, ok := result.Value.(map[string]any)
@@ -280,7 +280,7 @@ func TestHypervisorProxyRecordsEvaluateSharedJMESAgainstLazyGenerator(t *testing
 func TestHypervisorRecordHeadersRejectBeforeUnversionedDiscovery(t *testing.T) {
 	api, calls := pythonHypervisorAPI(t, "", func(r *http.Request) *http.Response { return pythonHypervisorWire(500, `{}`) })
 	_, err := api.AllRecords(context.Background(), hypervisors.WithRecordHeaders(map[string]string{"X-Auth-Token": "foreign"}))
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonHypervisorCalls(calls))
 	}
 }

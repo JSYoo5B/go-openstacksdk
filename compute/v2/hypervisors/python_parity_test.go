@@ -3,10 +3,8 @@ package hypervisors_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
@@ -18,32 +16,28 @@ import (
 // pythonHypervisorCall records the wire request openstacksdk would also send.
 type pythonHypervisorCall struct{ method, path, query, version string }
 
-type pythonHypervisorTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonHypervisorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonHypervisorWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonHypervisorAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*hypervisors.API, *[]pythonHypervisorCall) {
+func pythonHypervisorAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*hypervisors.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonHypervisorCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonHypervisorTransport(func(req *http.Request) (*http.Response, error) {
-		*calls = append(*calls, pythonHypervisorCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("X-OpenStack-Nova-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = microversion
 	return hypervisors.New(client), calls
+}
+
+// pythonHypervisorCalls projects the recorded calls onto the local call fields.
+func pythonHypervisorCalls(rec *testcloud.Recorder) []pythonHypervisorCall {
+	calls := []pythonHypervisorCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonHypervisorCall{call.Method, call.Path, call.RawQuery, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 const pythonHypervisorBase = "/nova/v2.1/os-hypervisors"
@@ -75,11 +69,11 @@ func TestPythonHypervisorGetAndUptimeMatchProxyRequests(t *testing.T) {
 	if _, err := failing.GetUptime(ctx, "hv-uuid"); !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(err)
 	}
-	if want := []pythonHypervisorCall{{http.MethodGet, pythonHypervisorBase + "/hv-uuid", "", "2.88"}}; !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if want := []pythonHypervisorCall{{http.MethodGet, pythonHypervisorBase + "/hv-uuid", "", "2.88"}}; !reflect.DeepEqual(pythonHypervisorCalls(calls), want) {
+		t.Fatalf("%+v", pythonHypervisorCalls(calls))
 	}
-	if want := []pythonHypervisorCall{{http.MethodGet, pythonHypervisorBase + "/hv-uuid/uptime", "", "2.87"}}; !reflect.DeepEqual(*olderCalls, want) {
-		t.Fatalf("%+v", *olderCalls)
+	if want := []pythonHypervisorCall{{http.MethodGet, pythonHypervisorBase + "/hv-uuid/uptime", "", "2.87"}}; !reflect.DeepEqual(pythonHypervisorCalls(olderCalls), want) {
+		t.Fatalf("%+v", pythonHypervisorCalls(olderCalls))
 	}
 }
 
@@ -111,8 +105,8 @@ func TestPythonHypervisorListAlwaysUsesDetailRoute(t *testing.T) {
 		{http.MethodGet, pythonHypervisorBase + "/detail", "", "2.53"},
 		{http.MethodGet, pythonHypervisorBase + "/detail", "hypervisor_hostname_pattern=cmp&with_servers=true", "2.53"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonHypervisorCalls(calls), want) {
+		t.Fatalf("%+v", pythonHypervisorCalls(calls))
 	}
 }
 
@@ -139,7 +133,7 @@ func TestPythonHypervisorFindHasNoNameFallback(t *testing.T) {
 		{http.MethodGet, pythonHypervisorBase + "/hv-uuid", "", "2.88"},
 		{http.MethodGet, pythonHypervisorBase + "/cmp1", "", "2.88"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonHypervisorCalls(calls), want) {
+		t.Fatalf("%+v", pythonHypervisorCalls(calls))
 	}
 }

@@ -3,10 +3,8 @@ package attachinterfaces_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/attachinterfaces"
@@ -17,37 +15,28 @@ import (
 // pythonInterfaceCall records the wire request openstacksdk would also send.
 type pythonInterfaceCall struct{ method, path, query, body string }
 
-type pythonInterfaceTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonInterfaceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonInterfaceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonInterfaceAPI(t *testing.T, reply func(*http.Request) *http.Response) (*attachinterfaces.API, *[]pythonInterfaceCall) {
+func pythonInterfaceAPI(t *testing.T, reply func(*http.Request) *http.Response) (*attachinterfaces.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonInterfaceCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonInterfaceTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonInterfaceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.70"
 	return attachinterfaces.New(client), calls
+}
+
+// pythonInterfaceCalls projects the recorded calls onto the local call fields.
+func pythonInterfaceCalls(rec *testcloud.Recorder) []pythonInterfaceCall {
+	calls := []pythonInterfaceCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonInterfaceCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonInterfaceBase = "/nova/v2.1/servers/s1/os-interface"
@@ -126,7 +115,7 @@ func TestPythonServerInterfaceCreateGetListDeleteMatchProxyRequests(t *testing.T
 		{http.MethodDelete, pythonInterfaceBase + "/p1", "", ""},
 		{http.MethodDelete, pythonInterfaceBase + "/p1", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonInterfaceCalls(calls), want) {
+		t.Fatalf("%+v", pythonInterfaceCalls(calls))
 	}
 }

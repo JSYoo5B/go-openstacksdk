@@ -16,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeHypervisorTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeHypervisorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeHypervisorWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeHypervisorCall struct{ method, path, query, body string }
@@ -35,7 +25,7 @@ type nativeHypervisorCall struct{ method, path, query, body string }
 func nativeHypervisorAPI(t *testing.T, calls *[]nativeHypervisorCall, reply func(*http.Request) *http.Response) (*hypervisors.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeHypervisorTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -43,7 +33,7 @@ func nativeHypervisorAPI(t *testing.T, calls *[]nativeHypervisorCall, reply func
 		}
 		*calls = append(*calls, nativeHypervisorCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	return hypervisors.New(client), cloud

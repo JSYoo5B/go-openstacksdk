@@ -39,8 +39,8 @@ func TestPythonAggregateUpdateRecordSendsNullAndEmptyValues(t *testing.T) {
 		{http.MethodPut, pythonAggregateBase + "/7", "", `{"aggregate":{"availability_zone":null}}`, "2.81"},
 		{http.MethodPut, pythonAggregateBase + "/7", "", `{"aggregate":{"availability_zone":"az2","name":"","uuid":"u"}}`, "2.81"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonAggregateCalls(calls), want) {
+		t.Fatalf("%+v", pythonAggregateCalls(calls))
 	}
 }
 
@@ -59,8 +59,8 @@ func TestPythonAggregateUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) 
 			t.Fatal(err)
 		}
 	}
-	if len(*calls) != 0 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 0 {
+		t.Fatalf("%+v", pythonAggregateCalls(calls))
 	}
 	var operation *resource.OperationError
 	if _, err := api.UpdateRecord(ctx, 7, aggregates.WithUpdateRecordName(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "aggregates" {

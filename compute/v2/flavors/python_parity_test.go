@@ -3,10 +3,8 @@ package flavors_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
@@ -18,37 +16,28 @@ import (
 // pythonFlavorCall records the wire request openstacksdk would also send.
 type pythonFlavorCall struct{ method, path, query, body, version string }
 
-type pythonFlavorTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonFlavorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonFlavorWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonFlavorAPI(t *testing.T, reply func(*http.Request) *http.Response) (*flavors.API, *[]pythonFlavorCall) {
+func pythonFlavorAPI(t *testing.T, reply func(*http.Request) *http.Response) (*flavors.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonFlavorCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonFlavorTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonFlavorCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.61"
 	return flavors.New(client), calls
+}
+
+// pythonFlavorCalls projects the recorded calls onto the local call fields.
+func pythonFlavorCalls(rec *testcloud.Recorder) []pythonFlavorCall {
+	calls := []pythonFlavorCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonFlavorCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 func pythonFlavorInt(value int) *int { return &value }
@@ -98,8 +87,8 @@ func TestPythonFlavorCreateDeleteMatchProxyRequests(t *testing.T) {
 		{http.MethodDelete, pythonFlavorBase + "/f1", "", "", "2.61"},
 		{http.MethodDelete, pythonFlavorBase + "/f1", "", "", "2.61"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonFlavorCalls(calls), want) {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 }
 
@@ -120,8 +109,8 @@ func TestPythonFlavorUpdateCannotClearDescription(t *testing.T) {
 	want := []pythonFlavorCall{
 		{http.MethodPut, pythonFlavorBase + "/f1", "", `{"flavor":{"description":"new"}}`, "2.61"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonFlavorCalls(calls), want) {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 }
 
@@ -153,8 +142,8 @@ func TestPythonFlavorTenantAccessMatchesProxyRequests(t *testing.T) {
 		{http.MethodPost, pythonFlavorBase + "/f1/action", "", `{"removeTenantAccess":{"tenant":"p1"}}`, "2.61"},
 		{http.MethodGet, pythonFlavorBase + "/f1/os-flavor-access", "", "", "2.61"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonFlavorCalls(calls), want) {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 }
 
@@ -189,7 +178,7 @@ func TestPythonFlavorExtraSpecsWriteRequests(t *testing.T) {
 		{http.MethodPut, pythonFlavorBase + "/f1/os-extra_specs/hw:numa_nodes", "", `{"hw:numa_nodes":"2"}`, "2.61"},
 		{http.MethodDelete, pythonFlavorBase + "/f1/os-extra_specs/gone", "", "", "2.61"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonFlavorCalls(calls), want) {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 }

@@ -45,8 +45,8 @@ func TestPythonFlavorUpdateRecordSendsNullAndEmptyDescription(t *testing.T) {
 		{http.MethodPut, pythonFlavorBase + "/f1", "", `{"flavor":{"description":"","x_extension":1}}`, "2.61"},
 		{http.MethodPut, pythonFlavorBase + "/f1", "", `{"flavor":{"description":"new"}}`, "2.61"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonFlavorCalls(calls), want) {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 }
 
@@ -68,8 +68,8 @@ func TestPythonFlavorUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 	if _, err := api.UpdateRecord(ctx, " ", flavors.WithUpdateRecordDescription(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if len(*calls) != 0 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 0 {
+		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 	var operation *resource.OperationError
 	if _, err := api.UpdateRecord(ctx, "f1", flavors.WithUpdateRecordDescription(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "flavors" {

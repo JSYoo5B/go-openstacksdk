@@ -282,7 +282,7 @@ func TestPythonNovaImageListPagingAndWireMarker(t *testing.T) {
 			if shape == "http" {
 				cloud := api.RawClient().ProviderClient
 				original := cloud.HTTPClient.Transport
-				cloud.HTTPClient.Transport = novaImageTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := original.RoundTrip(r)
 					if err == nil && r.URL.Query().Get("marker") == "" {
 						response.Header.Set("Link", `<?marker=next>; rel="next"`)
@@ -517,13 +517,13 @@ func TestPythonNovaImageMetadataFetchAliasSetDeleteContracts(t *testing.T) {
 		original := client.ResourceBase
 		defer func() { client.ResourceBase = original }()
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = novaImageTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := transport.RoundTrip(r)
 			if err == nil {
 				client.ResourceBase = client.Endpoint + "changed/"
 			}
 			return response, err
-		})
+		}))
 		err := api.DeleteMetadata(context.Background(), "a", images.WithDeleteMetadataKeys("one", "two"))
 		var proof *resource.ResponseError
 		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 202 || len(calls.snapshot()) != 1 {
@@ -635,9 +635,9 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 	t.Run("accepted read close failure has real receipt", func(t *testing.T) {
 		api, cloud, _ := novaImageAPI(t, "2.35", func(*http.Request) (int, string) { return 200, `{}` })
 		readErr, closeErr := errors.New("read failed"), errors.New("close failed")
-		cloud.Provider.HTTPClient.Transport = novaImageTransport(func(*http.Request) (*http.Response, error) {
-			return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &novaImageFaultBody{data: []byte(`{"image":`), read: readErr, close: closeErr}}, nil
-		})
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
+			return testcloud.StreamResponse(200, &novaImageFaultBody{data: []byte(`{"image":`), read: readErr, close: closeErr}, http.Header{"X-Request-Id": {"partial"}}), nil
+		}))
 		v, err := api.GetRecord(context.Background(), "a")
 		var proof *resource.ResponseError
 		if v == nil || !errors.Is(err, readErr) || !errors.Is(err, closeErr) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Request-Id") != "partial" || string(v.Envelope) != `{"image":` {
@@ -652,10 +652,6 @@ func TestPythonNovaImageOwnedOptionsGuardsAndEvidence(t *testing.T) {
 		}
 	})
 }
-
-type novaImageTransport func(*http.Request) (*http.Response, error)
-
-func (f novaImageTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type novaImageFaultBody struct {
 	data            []byte
@@ -722,13 +718,13 @@ func TestPythonNovaImageRejectedResponseFailuresStopDeleteAndFind(t *testing.T) 
 						body.onRead = func() { api.RawClient().Endpoint = originalEndpoint + "changed/" }
 						body.onClose = func() { api.RawClient().Endpoint = originalEndpoint }
 					}
-					cloud.Provider.HTTPClient.Transport = novaImageTransport(func(*http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 						calls++
 						if calls > 1 {
-							return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"images":[{"id":"found","name":"ci"}]}`))}, nil
+							return testcloud.Response(200, `{"images":[{"id":"found","name":"ci"}]}`, make(http.Header)), nil
 						}
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"rejected-proof"}}, Body: body}, nil
-					})
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"rejected-proof"}}), nil
+					}))
 					var err error
 					if operation == "find" {
 						value, findErr := api.FindRecord(ctx, "ci")
@@ -793,13 +789,13 @@ func TestPythonNovaImageCleanRejectionsRemainEligibleAfterNativeRetryHook(t *tes
 					retries++
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = novaImageTransport(func(*http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"clean-proof"}}, Body: body}, nil
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"clean-proof"}}), nil
 					}
-					return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"images":[{"id":"found","name":"ci"}]}`))}, nil
-				})
+					return testcloud.Response(200, `{"images":[{"id":"found","name":"ci"}]}`, make(http.Header)), nil
+				}))
 				if operation == "find" {
 					value, err := api.FindRecord(ctx, "ci")
 					if err != nil || calls != 2 {

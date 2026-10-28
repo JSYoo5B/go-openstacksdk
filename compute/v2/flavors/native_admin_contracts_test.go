@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeFlavorAdminTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeFlavorAdminTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeFlavorAdminWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeFlavorAdminCall struct{ method, path, query, body string }
@@ -36,7 +26,7 @@ type nativeFlavorAdminCall struct{ method, path, query, body string }
 func nativeFlavorAdminAPI(t *testing.T, calls *[]nativeFlavorAdminCall, reply func(*http.Request) *http.Response) *flavors.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeFlavorAdminTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +34,7 @@ func nativeFlavorAdminAPI(t *testing.T, calls *[]nativeFlavorAdminCall, reply fu
 		}
 		*calls = append(*calls, nativeFlavorAdminCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	return flavors.New(client)

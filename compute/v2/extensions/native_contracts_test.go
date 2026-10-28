@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions"
@@ -15,18 +14,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeExtensionTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeExtensionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeExtensionWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeExtensionOperation(t *testing.T, err error, operation string) {
@@ -40,10 +29,10 @@ func nativeExtensionOperation(t *testing.T, err error, operation string) {
 type nativeExtensionCall struct{ method, path, query string }
 
 func nativeExtensionRecorder(cloud *testcloud.Cloud, calls *[]nativeExtensionCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeExtensionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeExtensionCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		return reply(req), nil
-	})
+	}))
 }
 
 func nativeExtensionStatus(t *testing.T, err error, operation string, code int, expected []int) {

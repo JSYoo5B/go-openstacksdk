@@ -2,10 +2,8 @@ package migrations_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,18 +14,8 @@ import (
 // pythonMigrationCall records the wire request openstacksdk would also send.
 type pythonMigrationCall struct{ method, path, query, version string }
 
-type pythonMigrationTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonMigrationTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonMigrationWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonMigrationString(value string) *string { return &value }
@@ -38,11 +26,11 @@ func TestPythonMigrationListMapsQueryAndReadsOnePage(t *testing.T) {
 	ctx := context.Background()
 	var calls []pythonMigrationCall
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonMigrationTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls = append(calls, pythonMigrationCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("X-OpenStack-Nova-API-Version")})
 		// Python would follow this next link; Go reads one page.
 		return pythonMigrationWire(200, `{"migrations":[`+pythonMigrationRow+`],"migrations_links":[{"rel":"next","href":"`+cloud.Server.URL+`/nova/v2.1/os-migrations?limit=1&marker=mig-uuid"}]}`), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.80"

@@ -288,16 +288,6 @@ func TestNovaQuotaClassPreflightAndCallbackGuardsPreventRequests(t *testing.T) {
 	}
 }
 
-type quotaClassTransport func(*http.Request) (*http.Response, error)
-
-func (f quotaClassTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	reply, err := f(r)
-	if reply != nil {
-		reply.Request = r
-	}
-	return reply, err
-}
-
 type quotaClassFaultBody struct {
 	io.Reader
 	readErr, closeErr error
@@ -338,10 +328,10 @@ func TestNovaQuotaClassPhysicalErrorsAnd404NeverReplay(t *testing.T) {
 				if mode == "cancel" {
 					fault.onClose = func() { cancel(cause) }
 				}
-				cloud.Provider.HTTPClient.Transport = quotaClassTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls++
-					return &http.Response{StatusCode: 404, Header: http.Header{"Content-Type": {"application/json"}}, Body: fault}, nil
-				})
+					return testcloud.StreamResponse(404, fault, http.Header{"Content-Type": {"application/json"}}), nil
+				}))
 				client := cloud.Client("compute", "/compute/v2.1/")
 				client.Microversion = "2.96"
 				api := quotasets.New(client)
