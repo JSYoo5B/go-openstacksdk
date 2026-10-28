@@ -43,11 +43,11 @@ func TestVolumeResizeAcceptedFaultsKeepActualOpaqueProofAndEveryCause(t *testing
 				retries.Add(1)
 				return errors.New("accepted response cannot retry")
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				wire.Add(1)
 				vstPost(t, req, tc.body, "test-token")
 				return snapshotReadTransportResponse(req, 203, body, "current resize response"), nil
-			})
+			}))
 			result, err := tc.call(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "requested"})
 			var proof *resource.ResponseError
 			if result == nil || result.Completed || result.VolumeID != "requested" || len(result.Discovery) != 0 || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != reply || proof.Header.Get("X-Proof") != "current resize response" || wire.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {

@@ -366,14 +366,14 @@ func TestVolumeTypeAccessAdmitsSub400StatusWhileAccessJSONRemainsRequired(t *tes
 						body = ""
 					}
 				}
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if calls.Add(1) == 1 {
 						volumeTypeAccessContractLookup(t, r, "test-token")
 						return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(`{"volume_type":{"id":"returned-한글"}}`)), "lookup"), nil
 					}
 					volumeTypeAccessContractSecond(t, r, operation, "project", "test-token")
 					return getVolumesContractResponse(r, code, io.NopCloser(strings.NewReader(body)), "access-status"), nil
-				})
+				}))
 				got := volumeTypeAccessContractCall(context.Background(), client, operation, "target", "project")
 				if got.nilResult || got.resolved == nil || got.phase == nil || got.phase.StatusCode != code || string(got.phase.Body) != body || calls.Load() != 2 {
 					t.Fatal(got, calls.Load())

@@ -125,11 +125,11 @@ func TestBackupProxyExportServiceFacadesSeparateOpaqueJSONAndLegacyTypedProjecti
 				retries.Add(1)
 				return original
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				bevWire(t, r, "literal-name", "3.80", "test-token")
 				return snapshotReadTransportResponse(r, tc.status, io.NopCloser(bytes.NewReader(tc.body)), "service proof"), nil
-			})
+			}))
 			result, err := backupProxyExportServiceCall(bevContext(t), service.Backups, tc.method, "literal-name")
 			if err != nil || result == nil || result.id != "literal-name" || result.exported == nil || result.exported.StatusCode != tc.status || !bytes.Equal(result.exported.Body, tc.body) || result.exported.Header.Get("X-Proof") != "service proof" || !bytes.Equal(result.value, tc.value) || calls.Load() != 1 || retries.Load() != 0 || service.Backups.RawClient() != client || client.Microversion != "3.80" || client.MoreHeaders["x-source"] != "entry" {
 				t.Fatal(result, err, calls.Load(), retries.Load())
@@ -211,7 +211,7 @@ func TestBackupProxyExportServiceParsedFailuresKeepCurrentProofAndNeverRetryDeco
 				retries.Add(1)
 				return original
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				bevWire(t, r, "literal", "3.80", "test-token")
 				body := &snapshotReadTransportBody{data: bytes.NewReader(tc.body)}
@@ -220,7 +220,7 @@ func TestBackupProxyExportServiceParsedFailuresKeepCurrentProofAndNeverRetryDeco
 					body.onClose = func() { client.Microversion = "3.81"; cancel(cancelCause) }
 				}
 				return snapshotReadTransportResponse(r, tc.status, body, "current parsed service phase"), nil
-			})
+			}))
 			result, err := api.ExportBackup(ctx, "literal")
 			var physical *resource.ResponseError
 			if result == nil || result.BackupID != "literal" || result.Value != nil || result.Exported == nil || result.Exported.StatusCode != tc.status || !bytes.Equal(result.Exported.Body, tc.body) || result.Exported.Header.Get("X-Proof") != "current parsed service phase" || !errors.As(err, &physical) || physical.StatusCode != tc.status || !bytes.Equal(physical.Body, tc.body) || physical.Header.Get("X-Proof") != "current parsed service phase" || calls.Load() != 1 || retries.Load() != 0 {

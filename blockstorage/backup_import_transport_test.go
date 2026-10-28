@@ -63,11 +63,11 @@ func TestImportVolumeBackupAcceptedFaultsKeepAppliedAndEveryCauseWithoutValue(t 
 				retries.Add(1)
 				return errors.New("accepted import IO cannot retry")
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				bidPost(t, req, "3.40", "test-token")
 				return snapshotReadTransportResponse(req, 203, broken, "accepted import"), nil
-			})
+			}))
 			result, err := blockstorage.ImportVolumeBackup(ctx, client, bidInput())
 			var proof *resource.ResponseError
 			if result == nil || result.Applied == nil || result.Value != nil || result.Backup != nil || len(result.Discovery) != 0 || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != reply || proof.Header.Get("X-Proof") != "accepted import" || calls.Load() != 1 || retries.Load() != 0 || broken.closes.Load() != 1 {
@@ -346,7 +346,7 @@ func TestImportVolumeBackupPhysicalRedirectCannotChangeBodyFramingOrScope(t *tes
 					return nil
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if n != 1 {
 					t.Error("changed physical request reached transport", req.Method, req.URL, req.Header)
@@ -361,7 +361,7 @@ func TestImportVolumeBackupPhysicalRedirectCannotChangeBodyFramingOrScope(t *tes
 					target = other.Server.URL + "/stolen"
 				}
 				return &http.Response{StatusCode: 307, Header: http.Header{"Location": {target}}, Body: io.NopCloser(strings.NewReader("redirect")), Request: req}, nil
-			})
+			}))
 			result, err := blockstorage.ImportVolumeBackup(bmwContext(t), client, bidInput())
 			bitNoAdmission(t, result, err)
 			if kind != "body-fault-repair" && !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 || redirects.Load() != 1 {

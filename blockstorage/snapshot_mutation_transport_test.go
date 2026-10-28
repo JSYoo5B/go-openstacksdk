@@ -55,7 +55,7 @@ func TestVolumeSnapshotMutationAcceptedFailuresRetainCurrentPhaseAndCauses(t *te
 					retries.Add(1)
 					return err
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					current := calls.Add(1)
 					if current == step {
 						return snapshotReadTransportResponse(r, code, broken, "current"), nil
@@ -68,7 +68,7 @@ func TestVolumeSnapshotMutationAcceptedFailuresRetainCurrentPhaseAndCauses(t *te
 					}
 					t.Error("failed accepted phase was replayed", r.Method, r.URL)
 					return nil, errors.New("unexpected request")
-				})
+				}))
 				var proof *blockstorage.VolumeSnapshotMutationPage
 				var err error
 				if strings.HasPrefix(phase, "create") {
@@ -152,7 +152,7 @@ func TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard(t *testin
 				}
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"snapshot":{"id":"snap","status":"available"}}`)), "resolved"), nil
@@ -164,7 +164,7 @@ func TestVolumeSnapshotMutationDelete404RequiresCleanReadCloseAndGuard(t *testin
 					t.Error("faulty404 replayed")
 					return nil, errors.New("unexpected request")
 				}
-			})
+			}))
 			result, err := blockstorage.DeleteVolumeSnapshot(ctx, client, blockstorage.DeleteVolumeSnapshotRequest{NameOrID: "snap"}, blockstorage.WithDeleteVolumeSnapshotWait(true))
 			if result == nil || result.Resolved == nil || result.Applied == nil || result.LastAccepted == nil || result.LastAccepted.StatusCode != 204 || result.LastAccepted.Header.Get("X-Proof") != "applied" || calls.Load() != 3 || rejected.closes.Load() != 1 {
 				t.Fatal(result, err, calls.Load(), rejected.closes.Load())
@@ -201,14 +201,14 @@ func TestVolumeSnapshotMutationCreateRetryCannotReplaceOwnedBodyOrDecoder(t *tes
 			cloud := testcloud.New(t)
 			client := snapshotReadContractClient(cloud)
 			var calls, retries atomic.Int32
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				data, err := io.ReadAll(r.Body)
 				if err != nil || r.Method != http.MethodPost || r.URL.Path != snapshotReadContractBasic || string(data) != `{"snapshot":{"force":false,"name":"owned","volume_id":"vol"}}` {
 					t.Error("literal request changed", r.Method, r.URL, string(data), err)
 				}
 				return snapshotReadTransportResponse(r, 500, io.NopCloser(strings.NewReader(`{"error":"retry"}`)), "rejected"), nil
-			})
+			}))
 			cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, options *gophercloud.RequestOpts, original error, _ uint) error {
 				retries.Add(1)
 				switch change {
@@ -249,7 +249,7 @@ func TestVolumeSnapshotMutationDeletePollingPreservesLiveAuthAndNative404Retry(t
 				cloud.Provider.SetToken("retry-token")
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				step := calls.Add(1)
 				if r.URL.Path != snapshotReadContractBasic+"/snap" || r.Header.Get("OpenStack-API-Version") != "volume 3.60" || r.Header.Get("X-Source") != "entry" {
 					t.Error("selected source changed", r.Method, r.URL, r.Header)
@@ -292,7 +292,7 @@ func TestVolumeSnapshotMutationDeletePollingPreservesLiveAuthAndNative404Retry(t
 				default:
 					return nil, errors.New("unexpected request")
 				}
-			})
+			}))
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 			defer cancel()
 			result, err := blockstorage.DeleteVolumeSnapshot(ctx, client, blockstorage.DeleteVolumeSnapshotRequest{NameOrID: "snap"}, blockstorage.WithDeleteVolumeSnapshotWait(true))

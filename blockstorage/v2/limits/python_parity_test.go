@@ -2,33 +2,21 @@ package limits_test
 
 import (
 	"context"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/limits"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 )
 
-type pythonLimitsTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonLimitsTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func TestPythonLimitsGetIgnoresProject(t *testing.T) {
 	var requests []string
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonLimitsTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		requests = append(requests, req.Method+" "+req.URL.Path+"?"+req.URL.RawQuery)
 		body := `{"limits":{"absolute":{"maxTotalVolumes":10,"maxTotalBackupGigabytes":1000,"totalVolumesUsed":2,"totalBackupsUsed":1},"rate":[{"regex":".*","uri":"*","limit":[{"verb":"POST","next-available":"2026-10-11T00:00:00Z","unit":"MINUTE","value":10,"remaining":9}]}]}}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	// get_limits() and get_limits(project) both GET /limits: v2 Limits has no project URI or query.

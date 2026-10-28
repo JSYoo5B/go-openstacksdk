@@ -80,7 +80,7 @@ func TestAttachVolumeContractsAcceptedBodyFailuresRetainPhaseProofWithoutResend(
 				if mode == "source" {
 					broken.onClose = func() { cinder.Microversion = "3.99" }
 				}
-				cloud.Provider.HTTPClient.Transport = attachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					step := calls.Add(1)
 					if step == failStep {
 						return attachVolumeContractResponse(200, broken, phase+"-failure"), nil
@@ -93,7 +93,7 @@ func TestAttachVolumeContractsAcceptedBodyFailuresRetainPhaseProofWithoutResend(
 					}
 					t.Error("accepted response failure caused resend or cleanup", r.Method, r.URL)
 					return attachVolumeContractResponse(500, io.NopCloser(strings.NewReader(`{}`)), "unexpected"), nil
-				})
+				}))
 				result, err := blockstorage.AttachVolume(ctx, nova, cinder, attachVolumeContractInput())
 				var accepted *resource.ResponseError
 				if err == nil || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != bodyText || accepted.Header.Get("X-Proof") != phase+"-failure" || result == nil || calls.Load() != failStep || retries.Load() != 0 || broken.closes.Load() != 1 || result.Ready != nil {
@@ -207,7 +207,7 @@ func TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation(t *te
 			cloud := testcloud.New(t)
 			nova, cinder := attachVolumeContractClients(cloud)
 			var calls, options atomic.Int32
-			cloud.Provider.HTTPClient.Transport = attachVolumeContractTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") })
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, errors.New("unexpected HTTP") }))
 			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), func(*blockstorage.AttachVolumeOpts) error { options.Add(1); mutation.change(nova); return nil }, func(*blockstorage.AttachVolumeOpts) error { options.Add(1); return nil })
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || options.Load() != 1 {
 				t.Fatalf("result=%+v error=%v HTTP=%d options=%d", result, err, calls.Load(), options.Load())
@@ -217,14 +217,14 @@ func TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation(t *te
 			cloud := testcloud.New(t)
 			nova, cinder := attachVolumeContractClients(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = attachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("available", `[]`))), "checked"), nil
 				}
 				attachVolumeContractWire(t, r, http.MethodPost, attachVolumeContractCreatePath, "test-token")
 				mutation.change(cinder)
 				return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractCreated())), "created"), nil
-			})
+			}))
 			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput())
 			var accepted *resource.ResponseError
 			if result == nil || result.Created == nil || result.Created.StatusCode != 200 || string(result.Created.Body) != attachVolumeContractCreated() || result.Created.Attachment != nil || result.LastAccepted != nil || result.Ready != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &accepted) || accepted.Header.Get("X-Proof") != "created" || calls.Load() != 2 {
@@ -236,7 +236,7 @@ func TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation(t *te
 		cloud := testcloud.New(t)
 		nova, cinder := attachVolumeContractClients(cloud)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = attachVolumeContractTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 			switch calls.Add(1) {
 			case 1:
 				return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("available", `[]`))), "checked"), nil
@@ -245,7 +245,7 @@ func TestAttachVolumeContractsRejectSourceChangesAtOptionsAndAfterMutation(t *te
 			default:
 				return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("attaching", `[]`))), "poll"), nil
 			}
-		})
+		}))
 		result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{ProgressCallback: func(int) error { nova.Microversion = "2.99"; return nil }}))
 		attachVolumeContractCreatedProof(t, result)
 		if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 3 || result.LastAccepted == nil || result.Ready != nil {
@@ -258,7 +258,7 @@ func TestAttachVolumeContractsWaitBudgetStartsAfterCreatedResponse(t *testing.T)
 	cloud := testcloud.New(t)
 	nova, cinder := attachVolumeContractClients(cloud)
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = attachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch calls.Add(1) {
 		case 1:
 			return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("available", `[]`))), "checked"), nil
@@ -271,7 +271,7 @@ func TestAttachVolumeContractsWaitBudgetStartsAfterCreatedResponse(t *testing.T)
 		default:
 			return attachVolumeContractResponse(200, io.NopCloser(strings.NewReader(attachVolumeContractObservation("in-use", `null`))), "ready"), nil
 		}
-	})
+	}))
 	timeout := 50 * time.Millisecond
 	result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeWaitPolicy(blockstorage.AttachVolumeWaitOpts{Timeout: &timeout}))
 	attachVolumeContractCreatedProof(t, result)

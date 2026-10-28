@@ -50,11 +50,11 @@ func TestExportVolumeBackupAcceptedIOCancellationAndSourceFailuresKeepCurrentOwn
 				retries.Add(1)
 				return original
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				bevWire(t, r, "literal", "3.60", "test-token")
 				return snapshotReadTransportResponse(r, 203, broken, "current opaque"), nil
-			})
+			}))
 			result, err := blockstorage.ExportVolumeBackup(ctx, client, blockstorage.ExportVolumeBackupRequest{BackupID: "literal"})
 			var physical *resource.ResponseError
 			if err == nil || result == nil || result.BackupID != "literal" || result.Exported == nil || result.Exported.StatusCode != 203 || !bytes.Equal(result.Exported.Body, original) || result.Exported.Header.Get("X-Proof") != "current opaque" || !errors.As(err, &physical) || physical.StatusCode != 203 || !bytes.Equal(physical.Body, original) || physical.Header.Get("X-Proof") != "current opaque" || calls.Load() != 1 || retries.Load() != 0 || broken.closes.Load() != 1 {

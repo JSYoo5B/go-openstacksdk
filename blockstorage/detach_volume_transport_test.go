@@ -20,13 +20,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type detachVolumeContractTransport func(*http.Request) (*http.Response, error)
-
-func (f detachVolumeContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
 func detachVolumeContractResponse(code int, body io.ReadCloser, proof string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Proof": {proof}})
 }
 
 type detachVolumeContractBody struct {
@@ -91,7 +86,7 @@ func TestDetachVolumeTransportAcceptedReadCloseContextAndSourceFailuresRetainOpa
 					retries.Add(1)
 					return err
 				}
-				cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					step := calls.Add(1)
 					if step == failStep {
 						return detachVolumeContractResponse(code, broken, phase+"-failure"), nil
@@ -101,7 +96,7 @@ func TestDetachVolumeTransportAcceptedReadCloseContextAndSourceFailuresRetainOpa
 					}
 					t.Error("accepted error caused resend, poll or cleanup", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
-				})
+				}))
 				result, err := blockstorage.DetachVolume(ctx, nova, cinder, detachVolumeContractInput())
 				var accepted *resource.ResponseError
 				if result == nil || err == nil || !errors.As(err, &accepted) || accepted.StatusCode != code || !bytes.Equal(accepted.Body, body) || accepted.Header.Get("X-Proof") != phase+"-failure" || calls.Load() != failStep || retries.Load() != 0 || broken.closes.Load() != 1 || result.Ready != nil {
@@ -202,10 +197,10 @@ func TestDetachVolumeTransportSnapshotsHeadersLiveDistinctProvidersAndSourceGuar
 			cloud := testcloud.New(t)
 			nova, _ := detachVolumeContractClients(cloud)
 			var calls, options atomic.Int32
-			cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nil, errors.New("unexpected request")
-			})
+			}))
 			result, err := blockstorage.DetachVolume(context.Background(), nova, nil, detachVolumeContractInput(), blockstorage.WithDetachVolumeWait(false), func(*blockstorage.DetachVolumeOpts) error { options.Add(1); mutation.change(nova); return nil }, func(*blockstorage.DetachVolumeOpts) error { options.Add(1); return nil })
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || options.Load() != 1 {
 				t.Fatalf("result=%+v error=%v calls=%d options=%d", result, err, calls.Load(), options.Load())
@@ -216,12 +211,12 @@ func TestDetachVolumeTransportSnapshotsHeadersLiveDistinctProvidersAndSourceGuar
 			nova, cinder := detachVolumeContractClients(cloud)
 			var calls atomic.Int32
 			opaque := []byte{0, 0xff, 'x'}
-			cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				detachVolumeContractWire(t, r, http.MethodDelete, detachVolumeContractDeletePath, "test-token")
 				mutation.change(cinder)
 				return detachVolumeContractResponse(202, io.NopCloser(strings.NewReader(string(opaque))), "deleted"), nil
-			})
+			}))
 			result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput())
 			detachVolumeContractDeleted(t, result, 202, opaque)
 			var accepted *resource.ResponseError
@@ -234,12 +229,12 @@ func TestDetachVolumeTransportSnapshotsHeadersLiveDistinctProvidersAndSourceGuar
 		cloud := testcloud.New(t)
 		nova, cinder := detachVolumeContractClients(cloud)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 			if calls.Add(1) == 1 {
 				return detachVolumeContractResponse(204, io.NopCloser(strings.NewReader("")), "deleted"), nil
 			}
 			return detachVolumeContractResponse(200, io.NopCloser(strings.NewReader(detachVolumeContractObservation("detaching", `[]`))), "poll"), nil
-		})
+		}))
 		result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{ProgressCallback: func(int) error { nova.Microversion = "2.99"; return nil }}))
 		detachVolumeContractDeleted(t, result, 204, nil)
 		if !errors.Is(err, resource.ErrInvalidOption) || result.LastAccepted == nil || result.Ready != nil || calls.Load() != 2 {
@@ -253,7 +248,7 @@ func TestDetachVolumeTransportWaitBudgetStartsAfterDeleteAndZeroRemainsUnlimited
 		cloud := testcloud.New(t)
 		nova, cinder := detachVolumeContractClients(cloud)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if calls.Add(1) == 1 {
 				if _, bounded := r.Context().Deadline(); bounded {
 					t.Error("wait-only deadline leaked into DELETE")
@@ -262,7 +257,7 @@ func TestDetachVolumeTransportWaitBudgetStartsAfterDeleteAndZeroRemainsUnlimited
 				return detachVolumeContractResponse(202, body, "deleted"), nil
 			}
 			return detachVolumeContractResponse(200, io.NopCloser(strings.NewReader(detachVolumeContractObservation("available", `null`))), "ready"), nil
-		})
+		}))
 		timeout := 50 * time.Millisecond
 		result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{Timeout: &timeout}))
 		detachVolumeContractDeleted(t, result, 202, []byte("opaque"))
@@ -431,13 +426,13 @@ func TestDetachVolumeTransportRejectedIOAndContextDoNotInventAcceptedAcknowledge
 			defer cancel(nil)
 			cause := errors.New("detach transport failed")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if cancelled {
 					cancel(cause)
 				}
 				return nil, cause
-			})
+			}))
 			result, err := blockstorage.DetachVolume(ctx, nova, nil, detachVolumeContractInput(), blockstorage.WithDetachVolumeWait(false))
 			var accepted *resource.ResponseError
 			if result == nil || result.Deleted != nil || result.LastAccepted != nil || result.Ready != nil || !errors.Is(err, cause) || cancelled && !errors.Is(err, context.Canceled) || errors.As(err, &accepted) || calls.Load() != 1 {
@@ -472,7 +467,7 @@ func TestDetachVolumeTransportBlockedPollCancellationKeepsPriorAcceptedObservati
 			}
 			var calls atomic.Int32
 			firstPoll := detachVolumeContractObservation("detaching", `null`)
-			cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					detachVolumeContractWire(t, r, http.MethodDelete, detachVolumeContractDeletePath, "test-token")
@@ -489,7 +484,7 @@ func TestDetachVolumeTransportBlockedPollCancellationKeepsPriorAcceptedObservati
 					t.Error("blocked poll caused extra request", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
 				}
-			})
+			}))
 			timeout, interval := 200*time.Millisecond, time.Millisecond
 			policy := blockstorage.DetachVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval}
 			if callerCancelled {
@@ -518,7 +513,7 @@ func TestDetachVolumeTransportLaterFailureKeepsPriorAcceptedProof(t *testing.T) 
 	cause := errors.New("later Cinder transport failed")
 	var calls atomic.Int32
 	body := detachVolumeContractObservation("detaching", `null`)
-	cloud.Provider.HTTPClient.Transport = detachVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch calls.Add(1) {
 		case 1:
 			detachVolumeContractWire(t, r, http.MethodDelete, detachVolumeContractDeletePath, "test-token")
@@ -533,7 +528,7 @@ func TestDetachVolumeTransportLaterFailureKeepsPriorAcceptedProof(t *testing.T) 
 			t.Error("transport failure caused extra request", r.Method, r.URL)
 			return nil, errors.New("unexpected request")
 		}
-	})
+	}))
 	interval := time.Millisecond
 	result, err := blockstorage.DetachVolume(context.Background(), nova, cinder, detachVolumeContractInput(), blockstorage.WithDetachVolumeWaitPolicy(blockstorage.DetachVolumeWaitOpts{PollInterval: &interval}))
 	detachVolumeContractDeleted(t, result, 204, nil)

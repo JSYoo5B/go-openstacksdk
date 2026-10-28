@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"reflect"
 	"slices"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -20,18 +19,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeVolumeTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeVolumeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeVolumeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeVolumeCall struct{ method, path, query, body string }
@@ -39,7 +28,7 @@ type nativeVolumeCall struct{ method, path, query, body string }
 func nativeVolumeAPI(t *testing.T, calls *[]nativeVolumeCall, reply func(*http.Request) *http.Response) (*volumes.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeVolumeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -47,7 +36,7 @@ func nativeVolumeAPI(t *testing.T, calls *[]nativeVolumeCall, reply func(*http.R
 		}
 		*calls = append(*calls, nativeVolumeCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return volumes.New(client), cloud

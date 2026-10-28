@@ -99,11 +99,11 @@ func TestVolumeStateActionsAcceptedFaultsKeepAppliedAndEveryCauseWithoutCompleti
 				retries.Add(1)
 				return errors.New("accepted volume response cannot retry")
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				vstPost(t, req, tc.body, "test-token")
 				return snapshotReadTransportResponse(req, 203, broken, "actual volume action"), nil
-			})
+			}))
 			result, err := tc.call(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "requested"})
 			var proof *resource.ResponseError
 			if result == nil || result.VolumeID != "requested" || result.Microversion != "3.80" || result.Completed || len(result.Discovery) != 0 || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != reply || proof.Header.Get("X-Proof") != "actual volume action" || calls.Load() != 1 || retries.Load() != 0 || broken.closes.Load() != 1 {
@@ -287,14 +287,14 @@ func TestVolumeStateActionPhysicalRedirectMutationRemainsStickyAfterRepair(t *te
 					return nil
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				if calls.Add(1) != 1 {
 					t.Error("changed physical volume request reached transport", req.Method, req.URL, req.Header)
 					return snapshotReadTransportResponse(req, 203, io.NopCloser(strings.NewReader("must not arrive")), "unexpected"), nil
 				}
 				vstPost(t, req, body, "test-token")
 				return &http.Response{StatusCode: 307, Header: http.Header{"Location": {req.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect")), Request: req}, nil
-			})
+			}))
 			result, err := blockstorage.ReserveVolume(bmwContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "requested"})
 			vstNoApplied(t, result, err, "ReserveVolume")
 			if kind != "body-fault-repair" && !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 || redirects.Load() != 1 {

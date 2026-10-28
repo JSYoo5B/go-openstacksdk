@@ -291,7 +291,7 @@ func TestImportVolumeBackupDiscoveryFaultsSourceDriftAndCancellationAreTerminal(
 					return nil
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				bidGet(t, req, bidVersionPath, "test-token")
 				if (expanded || mode == "retry-joined") && n == 1 {
@@ -308,7 +308,7 @@ func TestImportVolumeBackupDiscoveryFaultsSourceDriftAndCancellationAreTerminal(
 					code = 405
 				}
 				return snapshotReadTransportResponse(req, code, broken, "current discovery"), nil
-			})
+			}))
 			result, err := blockstorage.ImportVolumeBackup(ctx, client, bidInput())
 			wantCalls, wantProofs := int32(1), 0
 			if expanded {

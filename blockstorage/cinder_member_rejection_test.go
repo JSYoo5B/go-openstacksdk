@@ -99,7 +99,7 @@ func TestCinderMemberCompatibleRejectionsKeepPureReadAndCloseFaultsTerminal(t *t
 						body.closeError = closeCause
 					}
 					var members, lists atomic.Int32
-					cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						if r.URL.Path == snapshotReadContractBase+route+"/literal" {
 							members.Add(1)
 							snapshotReadContractWire(t, r, snapshotReadContractBase+route+"/literal", "test-token")
@@ -110,7 +110,7 @@ func TestCinderMemberCompatibleRejectionsKeepPureReadAndCloseFaultsTerminal(t *t
 						}
 						lists.Add(1)
 						return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"`+plural+`":[]}`)), "unexpected-fallback"), nil
-					})
+					}))
 					result, err := cinderMemberRejectionCall(cinderMemberRejectionContext(t), client, entry)
 					cinderMemberRejectionAssert(t, entry, result, err, status, rejected)
 					if (fault != "Close" && !errors.Is(err, readCause)) || (fault != "Read" && !errors.Is(err, closeCause)) || (fault == "Close" && errors.Is(err, readCause)) || (fault == "Read" && errors.Is(err, closeCause)) || members.Load() != 1 || lists.Load() != 0 || body.closes.Load() != 1 {
@@ -132,7 +132,7 @@ func TestCinderMemberCleanCompatibleRejectionsRetainFallbackAndByIDContrast(t *t
 				rejected := `{"error":"clean native rejection"}`
 				body := &snapshotReadTransportBody{data: strings.NewReader(rejected)}
 				var members, lists atomic.Int32
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.URL.Path == snapshotReadContractBase+route+"/literal" {
 						members.Add(1)
 						snapshotReadContractWire(t, r, snapshotReadContractBase+route+"/literal", "test-token")
@@ -147,7 +147,7 @@ func TestCinderMemberCleanCompatibleRejectionsRetainFallbackAndByIDContrast(t *t
 						t.Error(r.URL)
 					}
 					return snapshotReadTransportResponse(r, 203, io.NopCloser(strings.NewReader(`{"`+plural+`":[{"id":"actual","name":"literal"}]}`)), "current-list"), nil
-				})
+				}))
 				result, err := cinderMemberRejectionCall(cinderMemberRejectionContext(t), client, entry)
 				if entry == "Snapshot ByID" {
 					cinderMemberRejectionAssert(t, entry, result, err, status, rejected)
@@ -179,7 +179,7 @@ func TestCinderMemberNativeRetryCannotSwallowRejectedIOOrReplaceOriginalStatus(t
 					readCause, closeCause, callbackCause := errors.New("native retry original Read"), errors.New("native retry original Close"), errors.New("native retry caller sentinel")
 					body := &snapshotReadTransportBody{data: strings.NewReader(rejected), readError: readCause, closeError: closeCause}
 					var requests, callbacks, lists atomic.Int32
-					cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						if r.URL.Path != snapshotReadContractBase+route+"/literal" {
 							lists.Add(1)
 							return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"`+plural+`":[]}`)), "unexpected-fallback"), nil
@@ -195,7 +195,7 @@ func TestCinderMemberNativeRetryCannotSwallowRejectedIOOrReplaceOriginalStatus(t
 						// If IO is swallowed, give the retry a valid success so the regression
 						// fails promptly instead of relying on its five-second context bound.
 						return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"`+singular+`":{"id":"literal"}}`)), "unexpected-resend"), nil
-					})
+					}))
 					cloud.Provider.RetryFunc = func(_ context.Context, method, target string, options *gophercloud.RequestOpts, original error, count uint) error {
 						callback := callbacks.Add(1)
 						var native gophercloud.ErrUnexpectedResponseCode

@@ -40,11 +40,11 @@ func TestVolumeFlagsAcceptedFaultsKeepOpaqueProofAndJoinedCauses(t *testing.T) {
 				retries.Add(1)
 				return errors.New("accepted flag cannot retry")
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				wire.Add(1)
 				vstPost(t, req, tc.body, "test-token")
 				return snapshotReadTransportResponse(req, 203, body, "flag current response"), nil
-			})
+			}))
 			result, err := tc.call(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "requested"})
 			var proof *resource.ResponseError
 			if result == nil || result.Completed || result.VolumeID != "requested" || len(result.Discovery) != 0 || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != reply || proof.Header.Get("X-Proof") != "flag current response" || wire.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {

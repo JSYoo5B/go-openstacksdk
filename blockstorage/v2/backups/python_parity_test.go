@@ -3,7 +3,6 @@ package backups_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -19,36 +18,27 @@ import (
 // pythonBackupCall records the wire request openstacksdk block_storage v2 would also send.
 type pythonBackupCall struct{ method, path, query, body, version string }
 
-type pythonBackupTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonBackupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonBackupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonBackupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *[]pythonBackupCall) {
+func pythonBackupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonBackupCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonBackupCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return backups.New(client), calls
+}
+
+// pythonBackupCalls projects recorded calls onto the compared fields.
+func pythonBackupCalls(rec *testcloud.Recorder) []pythonBackupCall {
+	calls := []pythonBackupCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonBackupCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("OpenStack-API-Version")})
+	}
+	return calls
 }
 
 const pythonBackupBase = "/cinder/v2/project/backups"
@@ -86,16 +76,16 @@ func TestPythonBackupListDetailsAndQuery(t *testing.T) {
 		}
 		ids = append(ids, value.ID)
 	}
-	if !reflect.DeepEqual(ids, []string{"bk-1", "bk-2", "bk-1", "bk-2"}) || len(*calls) != 4 {
-		t.Fatalf("%v %+v", ids, *calls)
+	if !reflect.DeepEqual(ids, []string{"bk-1", "bk-2", "bk-1", "bk-2"}) || calls.Len() != 4 {
+		t.Fatalf("%v %+v", ids, pythonBackupCalls(calls))
 	}
-	first, _ := url.ParseQuery((*calls)[0].query)
+	first, _ := url.ParseQuery(pythonBackupCalls(calls)[0].query)
 	want := url.Values{"limit": {"1"}, "name": {"nightly"}, "status": {"available"}, "volume_id": {"vol-1"}, "all_tenants": {"True"}, "sort_key": {"name"}, "sort_dir": {"asc"}}
-	if (*calls)[0].path != pythonBackupBase+"/detail" || !reflect.DeepEqual(first, want) || (*calls)[1].query != "marker=bk-1" {
-		t.Fatalf("%+v", *calls)
+	if pythonBackupCalls(calls)[0].path != pythonBackupBase+"/detail" || !reflect.DeepEqual(first, want) || pythonBackupCalls(calls)[1].query != "marker=bk-1" {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
-	if (*calls)[2].path != pythonBackupBase || (*calls)[2].query != "name=nightly" || (*calls)[0].version != "" {
-		t.Fatalf("%+v", *calls)
+	if pythonBackupCalls(calls)[2].path != pythonBackupBase || pythonBackupCalls(calls)[2].query != "name=nightly" || pythonBackupCalls(calls)[0].version != "" {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }
 
@@ -158,8 +148,8 @@ func TestPythonBackupGetCreateRestoreExportImportAndReset(t *testing.T) {
 		{http.MethodPost, pythonBackupBase + "/bk-1/action", "", `{"os-reset_status":{"status":"error"}}`, ""},
 		{http.MethodPost, pythonBackupBase + "/bk-1/action", "", `{"os-force_delete":{}}`, ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonBackupCalls(calls), want) {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }
 
@@ -197,8 +187,8 @@ func TestPythonBackupDeleteIgnoresMissing(t *testing.T) {
 			case err != nil:
 				t.Fatal(err)
 			}
-			if len(*calls) != 1 || (*calls)[0].method != http.MethodDelete || (*calls)[0].path != pythonBackupBase+"/bk-1" {
-				t.Fatalf("%+v", *calls)
+			if calls.Len() != 1 || pythonBackupCalls(calls)[0].method != http.MethodDelete || pythonBackupCalls(calls)[0].path != pythonBackupBase+"/bk-1" {
+				t.Fatalf("%+v", pythonBackupCalls(calls))
 			}
 		})
 	}
@@ -221,7 +211,7 @@ func TestPythonBackupFindHasNoProxyFallback(t *testing.T) {
 	if err != nil || byName.ID != "bk-1" {
 		t.Fatal(byName, err)
 	}
-	if len(*calls) != 2 || (*calls)[0].path != pythonBackupBase+"/nightly" || (*calls)[1].path != pythonBackupBase+"/detail" || (*calls)[1].query != "" {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 2 || pythonBackupCalls(calls)[0].path != pythonBackupBase+"/nightly" || pythonBackupCalls(calls)[1].path != pythonBackupBase+"/detail" || pythonBackupCalls(calls)[1].query != "" {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }

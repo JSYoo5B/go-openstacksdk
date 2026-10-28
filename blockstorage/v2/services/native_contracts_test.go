@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,18 +15,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeCinderServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeCinderServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeCinderServiceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeCinderServiceCall struct{ method, path, query, body string }
@@ -35,7 +24,7 @@ type nativeCinderServiceCall struct{ method, path, query, body string }
 func nativeCinderServiceAPI(t *testing.T, calls *[]nativeCinderServiceCall, reply func(*http.Request) *http.Response) (*services.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeCinderServiceTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -43,7 +32,7 @@ func nativeCinderServiceAPI(t *testing.T, calls *[]nativeCinderServiceCall, repl
 		}
 		*calls = append(*calls, nativeCinderServiceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return services.New(client), cloud

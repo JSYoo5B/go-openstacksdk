@@ -96,11 +96,11 @@ func TestExportVolumeBackupOwnsOpaqueBodyAndHeadersAcrossIndependentCalls(t *tes
 	original := bytes.Clone(body)
 	headers := http.Header{"Content-Type": {"application/octet-stream"}, "X-Proof": {"owned"}, "X-Multiple": {"one", "two"}}
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		bevWire(t, r, "literal", "3.60", "test-token")
 		return &http.Response{StatusCode: 200, Header: headers, Body: io.NopCloser(bytes.NewReader(body)), Request: r}, nil
-	})
+	}))
 	first, err := blockstorage.ExportVolumeBackup(bevContext(t), client, blockstorage.ExportVolumeBackupRequest{BackupID: "literal"})
 	if err != nil || first == nil || first.Exported == nil {
 		t.Fatal(first, err)

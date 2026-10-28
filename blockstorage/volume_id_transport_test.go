@@ -23,13 +23,13 @@ func TestGetVolumeIDAcceptedMemberSchemaAndDescriptorErrorsNeverReturnIDOrFallba
 			client := volumeReadContractClient(cloud)
 			reader := &getVolumesContractReader{data: strings.NewReader(body)}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.URL.Path != volumeReadContractBase+"volumes/target" {
 					t.Error(r.URL)
 				}
 				return getVolumesContractResponse(r, 200, reader, "current-member"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumeID(context.Background(), client, blockstorage.GetVolumeIDRequest{NameOrID: "target"})
 			var accepted *resource.ResponseError
 			if result == nil || result.ID != nil || result.Value != nil || result.Volume != nil || result.Observed == nil || len(result.Pages) != 0 || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Proof") != "current-member" || string(result.Observed.Body) != body {
@@ -54,10 +54,10 @@ func TestGetVolumeIDAcceptedReadCloseCancellationPreservesAllCausesAndProof(t *t
 	body := `{"volume":{"id":"must-not-commit"}}`
 	reader := &getVolumesContractReader{data: strings.NewReader(body), readError: readCause, closeError: closeCause, onClose: func() { cancel(cancelCause) }}
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return getVolumesContractResponse(r, 200, reader, "admitted"), nil
-	})
+	}))
 	result, err := blockstorage.GetVolumeID(ctx, client, blockstorage.GetVolumeIDRequest{NameOrID: "target"})
 	var accepted *resource.ResponseError
 	if result == nil || result.ID != nil || result.Value != nil || result.Volume != nil || result.Observed == nil || len(result.Pages) != 0 || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || string(result.Observed.Body) != body {
@@ -117,7 +117,7 @@ func TestGetVolumeIDLaterFallbackFailuresDoNotBorrowSuppressedMemberOrCommitEarl
 			first := volumeReadContractPage(`[{"id":"would-have-been-ID","name":"target"}]`, "?marker=next")
 			last := volumeReadContractPage(`[]`, "")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					return getVolumesContractResponse(r, 400, io.NopCloser(strings.NewReader(`{"error":"old member"}`)), "old-member"), nil
@@ -136,7 +136,7 @@ func TestGetVolumeIDLaterFallbackFailuresDoNotBorrowSuppressedMemberOrCommitEarl
 					t.Error("SDK resend", r.URL)
 					return nil, errors.New("unexpected fourth request")
 				}
-			})
+			}))
 			result, err := blockstorage.GetVolumeID(ctx, client, blockstorage.GetVolumeIDRequest{NameOrID: "target"})
 			if result == nil || result.ID != nil || result.Value != nil || result.Volume != nil || result.Observed != nil || calls.Load() != 3 || len(result.Pages) < 1 || result.Pages[0].Header.Get("X-Proof") != "first-list" {
 				t.Fatal(result, err, calls.Load())
@@ -183,10 +183,10 @@ func TestGetVolumeIDPostResponseSourceDriftKeepsActualMemberAndNoID(t *testing.T
 				}
 			}}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return getVolumesContractResponse(r, 200, reader, "current-source"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumeID(context.Background(), client, blockstorage.GetVolumeIDRequest{NameOrID: "target"})
 			var accepted *resource.ResponseError
 			if result == nil || result.ID != nil || result.Value != nil || result.Volume != nil || result.Observed == nil || len(result.Pages) != 0 || calls.Load() != 1 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Proof") != "current-source" || string(result.Observed.Body) != body {

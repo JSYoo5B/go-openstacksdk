@@ -27,14 +27,14 @@ func TestCinderVolumeAttachmentAcceptedFailuresKeepIndependentActualProofAndJoin
 				readCause, closeCause, cancelCause := errors.New("accepted attachment Read"), errors.New("accepted attachment Close"), errors.New("attachment caller cancellation")
 				reply := []byte{0xff, 0x00, '{', '!'}
 				var calls, closes, retries atomic.Int32
-				broken := &vsaFaultBody{reader: bytes.NewReader(reply)}
+				broken := &testcloud.Body{Data: string(reply)}
 				if kind != "close" {
-					broken.readErr = readCause
+					broken.ReadErr = readCause
 				}
 				if kind != "read" {
-					broken.closeErr = closeCause
+					broken.CloseErr = closeCause
 				}
-				broken.onClose = func() {
+				broken.OnClose = func() {
 					closes.Add(1)
 					if kind == "read close source and cancellation" {
 						client.ResourceBase += "changed/"
@@ -45,13 +45,13 @@ func TestCinderVolumeAttachmentAcceptedFailuresKeepIndependentActualProofAndJoin
 					retries.Add(1)
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					cdaPost(t, req, "id", action.body, "3.60", "test-token")
 					response := vsaResponse(req, 203, reply, "actual attachment acknowledgement")
 					response.Body = broken
 					return response, nil
-				})
+				}))
 				result, err := action.call(ctx, client, "id")
 				vsaOperation(t, err, action.operation)
 				var proof *resource.ResponseError
@@ -209,7 +209,7 @@ func TestCinderVolumeAttachmentNativeAuthRetriesAndPhysicalGuardsPreserveOrigina
 					}
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					if calls.Add(1) != 1 {
 						t.Error("changed physical request reached transport", req.URL, req.Header)
 						return vsaResponse(req, 203, []byte("unexpected"), "unexpected"), nil
@@ -218,7 +218,7 @@ func TestCinderVolumeAttachmentNativeAuthRetriesAndPhysicalGuardsPreserveOrigina
 					response := vsaResponse(req, 307, []byte("redirect"), "redirect is not an admitted action")
 					response.Header.Set("Location", req.URL.String())
 					return response, nil
-				})
+				}))
 				result, err := action.call(vsaContext(t), client, "id")
 				cdaNoAdmitted(t, result, err, action.operation)
 				if !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 || redirects.Load() != 1 {

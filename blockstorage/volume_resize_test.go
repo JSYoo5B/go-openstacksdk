@@ -193,7 +193,7 @@ func TestVolumeResizeOriginalHTTPPolicyKeepsRejectedNativeEvidence(t *testing.T)
 					client := vsaClient(cloud, "3.60")
 					raw := []byte{0xff, 0x00, 'p'}
 					var calls, retries atomic.Int32
-					cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 						call := calls.Add(1)
 						vrrPayload(t, req, "id", tc.body, "3.60")
 						code := 400
@@ -201,7 +201,7 @@ func TestVolumeResizeOriginalHTTPPolicyKeepsRejectedNativeEvidence(t *testing.T)
 							code = 503
 						}
 						return vsaResponse(req, code, raw, "current rejected resize"), nil
-					})
+					}))
 					if kind == "native expanded400" {
 						cloud.Provider.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, original error, _ uint) error {
 							if !gophercloud.ResponseCodeIs(original, 503) || retries.Add(1) > 1 {

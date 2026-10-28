@@ -38,7 +38,7 @@ func TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllC
 				}
 				reader := &getVolumesContractReader{data: strings.NewReader(body), readError: readCause, closeError: closeCause, onClose: func() { cancel(cancelCause) }}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if n == 1 {
 						volumeTypeAccessContractLookup(t, r, "test-token")
@@ -49,7 +49,7 @@ func TestVolumeTypeAccessAcceptedReadCloseCancellationRetainsCorrectStageAndAllC
 						volumeTypeAccessContractSecond(t, r, operation, "project", "test-token")
 					}
 					return getVolumesContractResponse(r, code, reader, "current-stage"), nil
-				})
+				}))
 				got := volumeTypeAccessContractCall(ctx, client, operation, "target", "project")
 				var physical *resource.ResponseError
 				wantCalls := int32(1)
@@ -88,14 +88,14 @@ func TestGetVolumeTypeAccessInvalidJSONAndTopLevelShapeRetainOnlyActualAccessPro
 			cloud := testcloud.New(t)
 			client := volumeReadContractClient(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					volumeTypeAccessContractLookup(t, r, "test-token")
 					return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(`{"volume_type":{"id":"returned-한글"}}`)), "lookup"), nil
 				}
 				volumeTypeAccessContractSecond(t, r, "GetVolumeTypeAccess", "", "test-token")
 				return getVolumesContractResponse(r, 203, io.NopCloser(strings.NewReader(body)), "access-JSON"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumeTypeAccess(context.Background(), client, blockstorage.GetVolumeTypeAccessRequest{NameOrID: "target"})
 			var physical *resource.ResponseError
 			if result == nil || result.Value != nil || result.Accesses != nil || result.Resolved == nil || result.Resolved.Type == nil || result.Resolved.Observed == nil || result.Resolved.Observed.Header.Get("X-Proof") != "lookup" || result.Observed == nil || result.Observed.StatusCode != 203 || string(result.Observed.Body) != body || calls.Load() != 2 || !errors.As(err, &physical) || physical.StatusCode != 203 || string(physical.Body) != body || physical.Header.Get("X-Proof") != "access-JSON" {
@@ -113,7 +113,7 @@ func TestVolumeTypeAccessCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLoo
 				client := volumeReadContractClient(cloud)
 				var calls atomic.Int32
 				cause := errors.New("current second-stage transport")
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					switch calls.Add(1) {
 					case 1:
 						volumeTypeAccessContractLookup(t, r, "test-token")
@@ -134,7 +134,7 @@ func TestVolumeTypeAccessCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLoo
 						t.Error("SDK retry/relookup/cleanup", r.URL)
 						return nil, errors.New("extra request")
 					}
-				})
+				}))
 				got := volumeTypeAccessContractCall(context.Background(), client, operation, "target", "project")
 				var physical *resource.ResponseError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -186,7 +186,7 @@ func TestVolumeTypeAccessSourceFactsRemainFrozenAfterLookupAndAcceptedSecondResp
 							client.Microversion = "3.61"
 						}
 					}}
-					cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						if calls.Add(1) == 1 {
 							volumeTypeAccessContractLookup(t, r, "test-token")
 							if second {
@@ -196,7 +196,7 @@ func TestVolumeTypeAccessSourceFactsRemainFrozenAfterLookupAndAcceptedSecondResp
 							volumeTypeAccessContractSecond(t, r, operation, "project", "test-token")
 						}
 						return getVolumesContractResponse(r, code, reader, "source-changed"), nil
-					})
+					}))
 					got := volumeTypeAccessContractCall(context.Background(), client, operation, "target", "project")
 					var physical *resource.ResponseError
 					want := int32(1)

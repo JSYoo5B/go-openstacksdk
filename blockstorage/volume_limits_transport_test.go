@@ -46,7 +46,7 @@ func TestGetVolumeLimitsAcceptedReadCloseCancellationOwnsCurrentStageAndJoinsEve
 				cancel(cancelCause)
 			}}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 && stage == "limits" {
 					glIdentityWire(t, r, glProjectsPath+"/ref", "test-token")
 					return glResponse(r, 200, io.NopCloser(strings.NewReader(`{"project":{"id":"requested"}}`)), "project"), nil
@@ -61,7 +61,7 @@ func TestGetVolumeLimitsAcceptedReadCloseCancellationOwnsCurrentStageAndJoinsEve
 					glIdentityWire(t, r, path, "test-token")
 				}
 				return glResponse(r, 203, reader, "current"), nil
-			})
+			}))
 			result, err := glCall(ctx, cinder, identity, input)
 			var physical *resource.ResponseError
 			want := int32(1)
@@ -111,7 +111,7 @@ func TestGetVolumeLimitsNativeRejectionAndTransportErrorsNeverBorrowEarlierProje
 				cinder, identity := volumeReadContractClient(cloud), glIdentity(cloud)
 				var calls atomic.Int32
 				cause := errors.New("current transport failure")
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if stage != "member" && n == 1 {
 						glIdentityWire(t, r, glProjectsPath+"/ref", "test-token")
@@ -134,7 +134,7 @@ func TestGetVolumeLimitsNativeRejectionAndTransportErrorsNeverBorrowEarlierProje
 						return nil, cause
 					}
 					return glResponse(r, 429, io.NopCloser(strings.NewReader(`{"error":"current rejection"}`)), "current rejection"), nil
-				})
+				}))
 				result, err := glCall(context.Background(), cinder, identity, "ref")
 				var physical *resource.ResponseError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -219,12 +219,12 @@ func TestGetVolumeLimitsSelectedSourcesRemainFrozenAcrossBothAcceptedStages(t *t
 						body = `{"limits":{}}`
 					}
 					reader := &getVolumesContractReader{data: strings.NewReader(body), onClose: func() { glMutateSource(source, fact) }}
-					cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						if calls.Add(1) == 1 && stage == "limits" {
 							return glResponse(r, 200, io.NopCloser(strings.NewReader(`{"project":{"id":"requested"}}`)), "project"), nil
 						}
 						return glResponse(r, 203, reader, "current"), nil
-					})
+					}))
 					result, err := glCall(context.Background(), cinder, identity, "ref")
 					var physical *resource.ResponseError
 					want := int32(1)

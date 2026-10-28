@@ -25,12 +25,6 @@ const attachVolumeContractCinderBase = "/reverse/cinder/v3/project/"
 const attachVolumeContractCreatePath = attachVolumeContractNovaBase + "servers/server-1/os-volume_attachments"
 const attachVolumeContractVolumePath = attachVolumeContractCinderBase + "volumes/vol-1"
 
-type attachVolumeContractTransport func(*http.Request) (*http.Response, error)
-
-func (f attachVolumeContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
-
 func attachVolumeContractClients(cloud *testcloud.Cloud) (*gophercloud.ServiceClient, *gophercloud.ServiceClient) {
 	nova, cinder := cloud.Client("compute", "/unused/nova/"), cloud.Client("block-storage", "/unused/cinder/")
 	nova.ResourceBase, cinder.ResourceBase = cloud.Server.URL+attachVolumeContractNovaBase, cloud.Server.URL+attachVolumeContractCinderBase
@@ -74,7 +68,7 @@ func attachVolumeContractPostBody(t *testing.T, r *http.Request, device string) 
 	}
 }
 func attachVolumeContractResponse(status int, body io.ReadCloser, proof string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Proof": {proof}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Proof": {proof}})
 }
 func attachVolumeContractOperation(t *testing.T, err error) {
 	t.Helper()

@@ -22,11 +22,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type deleteVolumeContractTransport func(*http.Request) (*http.Response, error)
-
-func (f deleteVolumeContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
 func deleteVolumeContractResponse(r *http.Request, code int, body io.ReadCloser, proof string) *http.Response {
 	return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: body, Request: r}
 }
@@ -94,7 +89,7 @@ func TestDeleteVolumeTransportAccepted404ReadCloseContextAndSourceFailuresAreTer
 					return err
 				}
 				located := deleteVolumeContractBody(`"available"`)
-				cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					step := calls.Add(1)
 					if step == failStep {
 						return deleteVolumeContractResponse(r, 404, broken, phase+"-failure"), nil
@@ -107,7 +102,7 @@ func TestDeleteVolumeTransportAccepted404ReadCloseContextAndSourceFailuresAreTer
 					}
 					t.Error("404 processing failure caused poll, mutation replay or cleanup", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
-				})
+				}))
 				options := []blockstorage.DeleteVolumeOption{}
 				if phase == "mutation" {
 					options = append(options, blockstorage.WithDeleteVolumeWait(false))
@@ -186,7 +181,7 @@ func TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence(t *testi
 			if phase == "poll" {
 				failStep = 4
 			}
-			cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				step := calls.Add(1)
 				if step == failStep {
 					return nil, wrapped
@@ -202,7 +197,7 @@ func TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence(t *testi
 				}
 				t.Error("nested404 caused mutation replay or cleanup", r.Method, r.URL)
 				return nil, errors.New("unexpected HTTP")
-			})
+			}))
 			ref := resource.ID("volume-1")
 			if phase == "name" {
 				ref = resource.Name("worker")
@@ -233,10 +228,10 @@ func TestDeleteVolumeTransportNestedNative404NeverBecomesLogicalAbsence(t *testi
 		cause := gophercloud.ErrUnexpectedResponseCode{Actual: 404}
 		var calls atomic.Int32
 		body := deleteVolumeContractBody(`"deleted"`)
-		cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return deleteVolumeContractResponse(r, 200, &deleteVolumeContractReader{data: strings.NewReader(body), closeError: cause}, "actual200"), nil
-		})
+		}))
 		result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")})
 		var accepted *resource.ResponseError
 		var nested gophercloud.ErrUnexpectedResponseCode
@@ -288,12 +283,12 @@ func TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards(t *testing.
 		cloud := testcloud.New(t)
 		client := deleteVolumeContractClient(cloud, "3.23")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			deleteVolumeContractWire(t, r, http.MethodGet, deleteVolumeContractListPath, "name=worker", "3.23", "test-token")
 			client.Microversion = "3.24"
 			return deleteVolumeContractResponse(r, 200, io.NopCloser(strings.NewReader(`{"volumes":[]}`)), "name"), nil
-		})
+		}))
 		result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.Name("worker")})
 		if result == nil || result.VolumeID != "" || result.Found || result.Deleted || result.Located != nil || result.Deletion != nil || result.Absent != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 			t.Fatal(result, err, calls.Load())
@@ -309,7 +304,7 @@ func TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards(t *testing.
 				client := deleteVolumeContractClient(cloud, "3.23")
 				var calls atomic.Int32
 				located := deleteVolumeContractBody(`"available"`)
-				cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					step := calls.Add(1)
 					if step == 1 {
 						if during == "accepted initial" {
@@ -325,7 +320,7 @@ func TestDeleteVolumeTransportCapturedHeadersLiveAuthAndSourceGuards(t *testing.
 					}
 					t.Error("changed source allowed another exchange", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
-				})
+				}))
 				options := []blockstorage.DeleteVolumeOption{}
 				if during == "option" {
 					options = append(options, func(*blockstorage.DeleteVolumeOpts) error { change.mutate(client); return nil })
@@ -364,7 +359,7 @@ func TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnl
 	client := deleteVolumeContractClient(cloud, "3.23")
 	var calls atomic.Int32
 	located := deleteVolumeContractBody(`null`)
-	cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch calls.Add(1) {
 		case 1, 2:
 			if _, bounded := r.Context().Deadline(); bounded {
@@ -384,7 +379,7 @@ func TestDeleteVolumeTransportWaitBudgetStartsAfterLookupAndMutationAndZeroIsUnl
 			t.Error("unexpected wait boundary request", r.URL)
 			return nil, errors.New("unexpected HTTP")
 		}
-	})
+	}))
 	timeout := 50 * time.Millisecond
 	result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWaitPolicy(blockstorage.DeleteVolumeWaitOpts{Timeout: &timeout}))
 	deleteVolumeContractLocated(t, result, located)
@@ -439,7 +434,7 @@ func TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousPr
 			var calls atomic.Int32
 			located := deleteVolumeContractBody(`"in-use"`)
 			prior := deleteVolumeContractBody(`null`)
-			cloud.Provider.HTTPClient.Transport = deleteVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					return deleteVolumeContractResponse(r, 200, io.NopCloser(strings.NewReader(located)), "located"), nil
@@ -464,7 +459,7 @@ func TestDeleteVolumeTransportWaitCancellationAndLaterRejectionsRetainPreviousPr
 					t.Error("wait failure caused cleanup/replay", r.URL)
 					return nil, errors.New("unexpected HTTP")
 				}
-			})
+			}))
 			interval, timeout := time.Hour, 200*time.Millisecond
 			policy := blockstorage.DeleteVolumeWaitOpts{Timeout: &timeout, PollInterval: &interval}
 			if mode == "callback cancel" {

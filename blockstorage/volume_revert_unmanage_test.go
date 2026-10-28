@@ -164,11 +164,11 @@ func TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof(
 		cloud := testcloud.New(t)
 		client := vsaClient(cloud, "3.60")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			vsaDiscoveryRequest(t, req, vsaVersionPath)
 			return vsaResponse(req, 200, []byte(`{`), "malformed support"), nil
-		})
+		}))
 		result, err := blockstorage.RevertVolumeToSnapshot(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "snapshot")
 		vsaOperation(t, err, "RevertVolumeToSnapshot")
 		var proof *resource.ResponseError
@@ -180,7 +180,7 @@ func TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof(
 		cloud := testcloud.New(t)
 		client := vsaClient(cloud, "3.60")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 			switch calls.Add(1) {
 			case 1:
 				vsaDiscoveryRequest(t, req, vsaVersionPath)
@@ -195,7 +195,7 @@ func TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof(
 				t.Error("native action failure retried discovery or POST", req.URL)
 				return vsaResponse(req, 500, nil, "unexpected"), nil
 			}
-		})
+		}))
 		result, err := blockstorage.RevertVolumeToSnapshot(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, "snapshot")
 		vsaOperation(t, err, "RevertVolumeToSnapshot")
 		var proof *resource.ResponseError
@@ -232,7 +232,7 @@ func TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof(
 				retries.Add(1)
 				return original
 			}
-			cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if tc.action.required && n == 1 {
 					vsaDiscoveryRequest(t, req, vsaVersionPath)
@@ -242,12 +242,12 @@ func TestVolumeRevertAndUnmanageFailuresKeepOnlyTheActualDiscoveryOrActionProof(
 				} else {
 					vmrRequest(t, req, "id", tc.action.body, "3.60")
 				}
-				broken := &vsaFaultBody{reader: bytes.NewReader(raw), readErr: readCause, closeErr: closeCause, onClose: func() { closes.Add(1); client.ResourceBase += "changed/"; cancel(callerCause) }}
+				broken := &testcloud.Body{Data: string(raw), ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes.Add(1); client.ResourceBase += "changed/"; cancel(callerCause) }}
 				response := vsaResponse(req, code, nil, proofName)
 				response.Body = broken
 				response.ContentLength = int64(len(raw))
 				return response, nil
-			})
+			}))
 			result, err := tc.action.call(ctx, client, "id")
 			vsaOperation(t, err, tc.action.operation)
 			var proof *resource.ResponseError

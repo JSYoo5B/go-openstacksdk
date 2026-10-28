@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
@@ -22,24 +21,14 @@ type pythonSnapshotCall struct {
 	body         map[string]any
 }
 
-type pythonSnapshotTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSnapshotTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonSnapshotWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonSnapshotAPI(t *testing.T, calls *[]pythonSnapshotCall, reply func(*http.Request) *http.Response) (*snapshots.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonSnapshotTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		call := pythonSnapshotCall{method: req.Method, path: req.URL.Path, query: req.URL.Query()}
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -51,7 +40,7 @@ func pythonSnapshotAPI(t *testing.T, calls *[]pythonSnapshotCall, reply func(*ht
 		}
 		*calls = append(*calls, call)
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return snapshots.New(client), cloud

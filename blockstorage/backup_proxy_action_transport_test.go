@@ -105,11 +105,11 @@ func TestBackupProxyActionTransportAcceptedFaultsKeepCurrentProofAndEveryCause(t
 					retries.Add(1)
 					return errors.New("accepted IO cannot retry")
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					backupProxyActionTransportWire(t, req, family, "test-token")
 					return snapshotReadTransportResponse(req, 203, broken, "current action"), nil
-				})
+				}))
 				out, err := backupProxyActionTransportCall(ctx, client, family)
 				var accepted *resource.ResponseError
 				if err == nil || out == nil || out.applied == nil || out.value != nil || out.completed || out.restore != nil && out.restore.Backup != nil || !errors.As(err, &accepted) || accepted.StatusCode != 203 || !bytes.Equal(accepted.Body, reply) || accepted.Header.Get("X-Proof") != "current action" || calls.Load() != 1 || retries.Load() != 0 || broken.closes.Load() != 1 {
@@ -346,14 +346,14 @@ func TestBackupProxyActionTransportSameTarget307CannotChangePhysicalBodyOrFramin
 					}
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					n := physical.Add(1)
 					if n == 1 {
 						backupProxyActionTransportWire(t, req, family, "test-token")
 						return &http.Response{StatusCode: 307, Header: http.Header{"Location": {req.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect")), Request: req}, nil
 					}
 					return snapshotReadTransportResponse(req, 203, io.NopCloser(strings.NewReader(`{}`)), "must not arrive"), nil
-				})
+				}))
 				out, err := backupProxyActionTransportCall(bmwContext(t), client, family)
 				backupProxyActionTransportNoAdmission(t, family, out, err)
 				if !errors.Is(err, resource.ErrInvalidOption) || physical.Load() != 1 || redirects.Load() != 1 {
@@ -419,14 +419,14 @@ func TestBackupProxyActionTransportPhysicalReadCloseFaultsStayTerminalAfterRetry
 					}
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					n := physical.Add(1)
 					if n == 1 {
 						backupProxyActionTransportWire(t, req, family, "test-token")
 						return &http.Response{StatusCode: 307, Header: http.Header{"Location": {req.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect")), Request: req}, nil
 					}
 					return snapshotReadTransportResponse(req, 203, io.NopCloser(strings.NewReader(`{}`)), "must not resend"), nil
-				})
+				}))
 				out, err := backupProxyActionTransportCall(ctx, client, family)
 				backupProxyActionTransportNoAdmission(t, family, out, err)
 				if physical.Load() != 1 || redirects.Load() != 1 || retries.Load() != 1 || broken.closes.Load() != 1 || firstRejected == nil || !errors.Is(err, firstRejected) {
@@ -562,14 +562,14 @@ func TestBackupProxyActionTransportPhysicalResetHeaderRejectionSurvivesRetryRepa
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				n := physical.Add(1)
 				if n == 1 {
 					backupProxyActionTransportWire(t, req, "reset", "test-token")
 					return &http.Response{StatusCode: 307, Header: http.Header{"Location": {req.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect")), Request: req}, nil
 				}
 				return snapshotReadTransportResponse(req, 203, io.NopCloser(strings.NewReader("opaque")), "must not resend"), nil
-			})
+			}))
 			out, err := backupProxyActionTransportCall(ctx, client, "reset")
 			backupProxyActionTransportNoAdmission(t, "reset", out, err)
 			if !errors.Is(err, resource.ErrInvalidOption) || physical.Load() != 1 || redirects.Load() != 1 || retries.Load() != 1 || firstRejected == nil || !errors.Is(err, firstRejected) {

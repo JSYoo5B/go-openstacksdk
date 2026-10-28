@@ -56,9 +56,6 @@ func getVolumesContractOperation(t *testing.T, err error) {
 	}
 }
 
-type getVolumesContractTransport func(*http.Request) (*http.Response, error)
-
-func (f getVolumesContractTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func getVolumesContractResponse(r *http.Request, code int, body io.ReadCloser, proof string) *http.Response {
 	return &http.Response{Request: r, StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: body}
 }
@@ -372,7 +369,7 @@ func TestGetVolumesAcceptedPageFailuresKeepCurrentProofAndLaterRejectionsNeverBo
 				retries.Add(1)
 				return err
 			}
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(first)), "first"), nil
 				}
@@ -392,7 +389,7 @@ func TestGetVolumesAcceptedPageFailuresKeepCurrentProofAndLaterRejectionsNeverBo
 					return nil, r.Context().Err()
 				}
 				return getVolumesContractResponse(r, 200, broken, "current"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumes(ctx, client, blockstorage.GetVolumesRequest{ServerID: "server"})
 			var accepted *resource.ResponseError
 			if result == nil || result.Volumes != nil || err == nil || calls.Load() != 2 || len(result.Pages) == 0 || string(result.Pages[0].Body) != first || result.Pages[0].Header.Get("X-Proof") != "first" {
@@ -666,11 +663,11 @@ func TestGetVolumesPreflightAndCapturedSourceFactsBeforeOptionsOrSubsequentPages
 			client := getVolumesContractClient(cloud)
 			var calls atomic.Int32
 			first := getVolumesContractPage(`[]`, "?page=2")
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				change.apply(client)
 				return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(first)), "actual"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumes(context.Background(), client, blockstorage.GetVolumesRequest{})
 			var accepted *resource.ResponseError
 			if result == nil || result.Volumes != nil || len(result.Pages) != 1 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != first || calls.Load() != 1 {

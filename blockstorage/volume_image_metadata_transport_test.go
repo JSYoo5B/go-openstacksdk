@@ -30,14 +30,14 @@ func TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoined
 				reply := []byte{0xff, 0x00, '{', '!'}
 				member := `{"volume":{"volume_image_metadata":{"a":"1","b":"2"}}}`
 				var calls, closes, retries atomic.Int32
-				broken := &vsaFaultBody{reader: bytes.NewReader(reply)}
+				broken := &testcloud.Body{Data: string(reply)}
 				if kind != "close" {
-					broken.readErr = readCause
+					broken.ReadErr = readCause
 				}
 				if kind != "read" {
-					broken.closeErr = closeCause
+					broken.CloseErr = closeCause
 				}
-				broken.onClose = func() {
+				broken.OnClose = func() {
 					closes.Add(1)
 					if kind == "joined IO source cancellation" {
 						client.ResourceBase += "changed/"
@@ -48,7 +48,7 @@ func TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoined
 					retries.Add(1)
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if phase == "first deletion after member" && n == 1 {
 						vimRequest(t, req, "id", "", "3.60", "test-token")
@@ -72,7 +72,7 @@ func TestVolumeImageMetadataAcceptedFailuresRetainOnlyCurrentPhaseProofAndJoined
 					response := vsaResponse(req, 203, reply, "current accepted phase")
 					response.Body = broken
 					return response, nil
-				})
+				}))
 				var current *rest.Response
 				var err error
 				if phase == "set" {
@@ -339,7 +339,7 @@ func TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolic
 				client := vsaClient(cloud, "3.90")
 				var calls, redirects, closes atomic.Int32
 				closeCause := errors.New("injected member GET body Close")
-				injected := &vsaFaultBody{reader: bytes.NewReader([]byte(`{}`)), closeErr: closeCause, onClose: func() { closes.Add(1) }}
+				injected := &testcloud.Body{Data: `{}`, CloseErr: closeCause, OnClose: func() { closes.Add(1) }}
 				body := ""
 				operation := "DeleteVolumeImageMetadata"
 				if mode == "set" {
@@ -375,7 +375,7 @@ func TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolic
 					}
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					if calls.Add(1) != 1 {
 						t.Error("changed physical metadata request reached transport", req.URL, req.Header)
 						return vsaResponse(req, 203, []byte("unexpected"), "unexpected"), nil
@@ -384,7 +384,7 @@ func TestVolumeImageMetadataNativeRetriesAndPhysicalMutationGuardsKeepBatchPolic
 					response := vsaResponse(req, 307, []byte("redirect"), "not admitted phase")
 					response.Header.Set("Location", req.URL.String())
 					return response, nil
-				})
+				}))
 				var err error
 				var current *rest.Response
 				var completed bool

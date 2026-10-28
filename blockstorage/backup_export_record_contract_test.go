@@ -178,11 +178,11 @@ func TestExportVolumeBackupRecordValuePhysicalProofAndSeparateCallsOwnDifferentS
 	bodyBefore := bytes.Clone(document)
 	headers := http.Header{"X-Proof": {"owned"}, "X-Multiple": {"one", "two"}}
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		bevWire(t, r, "literal", "3.60", "test-token")
 		return &http.Response{StatusCode: 203, Header: headers, Body: io.NopCloser(bytes.NewReader(document)), Request: r}, nil
-	})
+	}))
 	first, err := blockstorage.ExportVolumeBackupRecord(bevContext(t), client, blockstorage.ExportVolumeBackupRecordRequest{BackupID: "literal"})
 	if err != nil || first == nil || first.Exported == nil || !bytes.Equal(first.Value, want) {
 		t.Fatal(first, err)

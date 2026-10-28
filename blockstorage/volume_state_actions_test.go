@@ -87,32 +87,10 @@ func vsaOperation(t *testing.T, err error, name string) {
 	}
 }
 
-type vsaTransport func(*http.Request) (*http.Response, error)
-
-func (f vsaTransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
 func vsaResponse(req *http.Request, code int, body []byte, proof string) *http.Response {
 	return &http.Response{StatusCode: code, Status: fmt.Sprintf("%d fixture", code), Header: http.Header{"X-Proof": []string{proof}}, Body: io.NopCloser(bytes.NewReader(body)), ContentLength: int64(len(body)), Request: req}
 }
 
-type vsaFaultBody struct {
-	reader            *bytes.Reader
-	readErr, closeErr error
-	onClose           func()
-}
-
-func (b *vsaFaultBody) Read(dst []byte) (int, error) {
-	n, err := b.reader.Read(dst)
-	if err == io.EOF && b.readErr != nil {
-		return n, b.readErr
-	}
-	return n, err
-}
-func (b *vsaFaultBody) Close() error {
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.closeErr
-}
 func vsaServiceCall(ctx context.Context, api *volumes.API, name, id string) (*volumes.VolumeActionResult, error) {
 	switch name {
 	case "ReserveVolume":
@@ -165,11 +143,11 @@ func TestVolumeStateActionAdmissionUsesOriginalSub400PolicyAndKeepsNativeRejecti
 			action := vsaActions()[0]
 			raw := []byte{0xff, 'a', 0x00}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				vsaPayload(t, req, "literal-name", action.key, "3.60", "test-token")
 				return vsaResponse(req, code, raw, "status"), nil
-			})
+			}))
 			result, err := action.call(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "literal-name"})
 			if result == nil || result.VolumeID != "literal-name" || result.Microversion != "3.60" || len(result.Discovery) != 0 || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
@@ -230,24 +208,24 @@ func TestVolumeStateActionsAcceptedFaultsKeepActualProofAndAllCauses(t *testing.
 			readCause, closeCause, callerCause := errors.New("state response read"), errors.New("state response Close"), errors.New("state caller canceled")
 			raw := []byte{0xff, 0x00, 'p'}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				vsaPayload(t, req, "id", action.key, "3.60", "test-token")
-				body := &vsaFaultBody{reader: bytes.NewReader(raw)}
+				body := &testcloud.Body{Data: string(raw)}
 				if kind == "read" || kind == "read and close" {
-					body.readErr = readCause
+					body.ReadErr = readCause
 				}
 				if kind != "read" {
-					body.closeErr = closeCause
+					body.CloseErr = closeCause
 				}
 				if kind == "close cancellation and source drift" {
-					body.onClose = func() { client.ResourceBase += "changed/"; cancel(callerCause) }
+					body.OnClose = func() { client.ResourceBase += "changed/"; cancel(callerCause) }
 				}
 				response := vsaResponse(req, 203, nil, "fault")
 				response.Body = body
 				response.ContentLength = int64(len(raw))
 				return response, nil
-			})
+			}))
 			result, err := action.call(ctx, client, blockstorage.VolumeActionRequest{VolumeID: "id"})
 			var proof *resource.ResponseError
 			vsaOperation(t, err, action.name)

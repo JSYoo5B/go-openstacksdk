@@ -93,10 +93,10 @@ func TestSearchVolumesAcceptedReadCloseEnvelopeAndUTF8ErrorsKeepPhysicalProof(t 
 			}
 			reader.data = strings.NewReader(body)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return getVolumesContractResponse(r, 200, reader, "physical"), nil
-			})
+			}))
 			result, err := blockstorage.SearchVolumes(context.Background(), client, blockstorage.SearchVolumesRequest{})
 			var response *resource.ResponseError
 			if result == nil || calls.Load() != 1 || reader.closes.Load() != 1 || len(result.Pages) != 1 || result.Value != nil || result.Volumes != nil || !errors.As(err, &response) || response.StatusCode != 200 || response.Header.Get("X-Proof") != "physical" || string(result.Pages[0].Body) != body {
@@ -117,7 +117,7 @@ func TestSearchVolumesLaterNativeAndTransportErrorsNeverBorrowAcceptedPage(t *te
 			sentinel := errors.New("later transport failed")
 			first := volumeSearchTestPage(`[{"id":"id"}]`, `?marker=2`)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(first)), "accepted"), nil
 				}
@@ -125,7 +125,7 @@ func TestSearchVolumesLaterNativeAndTransportErrorsNeverBorrowAcceptedPage(t *te
 					return nil, sentinel
 				}
 				return getVolumesContractResponse(r, 403, io.NopCloser(strings.NewReader(`{"rejected":"actual"}`)), "rejected"), nil
-			})
+			}))
 			result, err := blockstorage.SearchVolumes(context.Background(), client, blockstorage.SearchVolumesRequest{})
 			var response *resource.ResponseError
 			if result == nil || calls.Load() != 2 || len(result.Pages) != 1 || result.Pages[0].Header.Get("X-Proof") != "accepted" || result.Value != nil || result.Volumes != nil || err == nil || errors.As(err, &response) {
@@ -151,14 +151,14 @@ func TestSearchVolumesBlockedContinuationCancellationKeepsPriorPageAndCause(t *t
 	cause := errors.New("cancel blocked volume search")
 	entered := make(chan struct{})
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls.Add(1) == 1 {
 			return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(volumeSearchTestPage(`[{"id":"id"}]`, `?marker=2`))), "prior"), nil
 		}
 		close(entered)
 		<-r.Context().Done()
 		return nil, r.Context().Err()
-	})
+	}))
 	type outcome struct {
 		result *blockstorage.SearchVolumesResult
 		err    error
@@ -206,10 +206,10 @@ func TestSearchVolumesPostResponseSourceMutationIsTerminalWithCurrentEvidence(t 
 					client.Microversion = "3.60"
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return getVolumesContractResponse(r, 200, reader, "current"), nil
-			})
+			}))
 			result, err := blockstorage.SearchVolumes(context.Background(), client, blockstorage.SearchVolumesRequest{})
 			var response *resource.ResponseError
 			if result == nil || calls.Load() != 1 || len(result.Pages) != 1 || result.Value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &response) || response.Header.Get("X-Proof") != "current" {
@@ -245,13 +245,13 @@ func TestGetVolumeAcceptedMemberErrorsKeepObservedAndNeverReplayList(t *testing.
 				reader.onClose = func() { cancel(sentinel) }
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.URL.Path != volumeSearchTestBase+"volumes/id" {
 					t.Error("member error replayed list", r.URL)
 				}
 				return getVolumesContractResponse(r, 200, reader, "member"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolume(ctx, client, blockstorage.GetVolumeRequest{NameOrID: "id"})
 			var response *resource.ResponseError
 			if result == nil || calls.Load() != 1 || reader.closes.Load() != 1 || result.Observed == nil || result.Observed.StatusCode != 200 || result.Observed.Header.Get("X-Proof") != "member" || string(result.Observed.Body) != body || len(result.Pages) != 0 || result.Volume != nil || result.Value != nil || !errors.As(err, &response) || response.StatusCode != 200 {

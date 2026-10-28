@@ -33,11 +33,11 @@ func TestVolumeTypesAcceptedReadCloseCancellationRetainsAllCausesAndIndependentC
 			}
 			reader := &getVolumesContractReader{data: strings.NewReader(body), readError: readCause, closeError: closeCause, onClose: func() { cancel(cancelCause) }}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				volumeReadContractWire(t, r, path, "test-token")
 				calls.Add(1)
 				return getVolumesContractResponse(r, 200, reader, "current-admitted"), nil
-			})
+			}))
 			got := volumeTypeContractCall(ctx, client, operation, nil)
 			var physical *resource.ResponseError
 			if got.nilResult || got.value != nil || got.types != nil || got.typ != nil || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.Is(got.err, readCause) || !errors.Is(got.err, closeCause) || !errors.Is(got.err, context.Canceled) || !errors.Is(got.err, cancelCause) || !errors.As(got.err, &physical) || physical.StatusCode != 200 || string(physical.Body) != body || physical.Header.Get("X-Proof") != "current-admitted" {
@@ -77,10 +77,10 @@ func TestVolumeTypesStrictCanonicalAcceptedEnvelopesNeverProduceLogicalValues(t 
 				client := volumeReadContractClient(cloud)
 				var calls atomic.Int32
 				reader := &getVolumesContractReader{data: strings.NewReader(body)}
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					return getVolumesContractResponse(r, 200, reader, "canonical-origin"), nil
-				})
+				}))
 				got := volumeTypeContractCall(context.Background(), client, operation, nil)
 				var physical *resource.ResponseError
 				if got.nilResult || got.value != nil || got.types != nil || got.typ != nil || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.As(got.err, &physical) || physical.StatusCode != 200 || string(physical.Body) != body || physical.Header.Get("X-Proof") != "canonical-origin" {
@@ -124,10 +124,10 @@ func TestVolumeTypesPostResponseSourceChangesKeepCurrentAdmittedProofAndStop(t *
 						client.Microversion = "3.61"
 					}
 				}}
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					return getVolumesContractResponse(r, 200, reader, "source-changed"), nil
-				})
+				}))
 				got := volumeTypeContractCall(context.Background(), client, operation, nil)
 				var physical *resource.ResponseError
 				if got.nilResult || got.value != nil || got.types != nil || got.typ != nil || calls.Load() != 1 || !errors.Is(got.err, resource.ErrInvalidOption) || !errors.As(got.err, &physical) || physical.StatusCode != 200 || string(physical.Body) != body || physical.Header.Get("X-Proof") != "source-changed" {
@@ -157,7 +157,7 @@ func TestGetVolumeTypeFallbackFailuresKeepOnlyActualCurrentPhaseEvidence(t *test
 			first := volumeTypeContractPage(`[{"id":"other"}]`, "?marker=last")
 			last := volumeTypeContractPage(`[{"id":"actual","name":"target"}]`, "")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				path := volumeTypeContractPath
 				if n == 1 {
@@ -188,7 +188,7 @@ func TestGetVolumeTypeFallbackFailuresKeepOnlyActualCurrentPhaseEvidence(t *test
 					t.Error("SDK resent or revived member proof", r.URL)
 					return nil, errors.New("extra request")
 				}
-			})
+			}))
 			result, err := blockstorage.GetVolumeType(ctx, client, blockstorage.GetVolumeTypeRequest{NameOrID: "target"})
 			var physical *resource.ResponseError
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -221,11 +221,11 @@ func TestGetVolumeTypeAcceptedReadContainingNative404IsTerminalWithoutFallback(t
 	body := `{"volume_type":{"id":"target"}}`
 	nested := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Body: []byte(`{"error":"nested"}`)}
 	reader := &getVolumesContractReader{data: strings.NewReader(body), readError: nested}
-	cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		volumeReadContractWire(t, r, volumeTypeContractMember, "test-token")
 		calls.Add(1)
 		return getVolumesContractResponse(r, 200, reader, "accepted-200"), nil
-	})
+	}))
 	result, err := blockstorage.GetVolumeType(context.Background(), client, blockstorage.GetVolumeTypeRequest{NameOrID: "target"})
 	var physical *resource.ResponseError
 	var native gophercloud.ErrUnexpectedResponseCode

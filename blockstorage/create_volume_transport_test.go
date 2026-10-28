@@ -21,13 +21,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type createVolumeContractTransport func(*http.Request) (*http.Response, error)
-
-func (f createVolumeContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
 func createVolumeContractResponse(code int, body io.ReadCloser, proof string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Proof": {proof}})
 }
 
 type createVolumeContractReader struct {
@@ -97,7 +92,7 @@ func TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeep
 					retries.Add(1)
 					return err
 				}
-				cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					step := calls.Add(1)
 					if step == failStep {
 						return createVolumeContractResponse(code, broken, phase+"-failure"), nil
@@ -110,7 +105,7 @@ func TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeep
 					}
 					t.Error("accepted error caused another create, action, poll or cleanup", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
-				})
+				}))
 				options := []blockstorage.CreateVolumeOption{}
 				if phase == "bootable" {
 					options = append(options, blockstorage.WithCreateVolumeBootable(true))
@@ -222,14 +217,14 @@ func TestCreateVolumeTransportEntrySnapshotsLiveImageTokenAndSourceMutationGuard
 		cinder, glance := createVolumeContractClients(cloud)
 		image := resource.Name("worker")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			createVolumeContractWire(t, r, http.MethodGet, createVolumeContractGlanceBase+"images", "test-token")
 			cinder.ResourceBase += "changed/"
 			response := createVolumeContractResponse(200, io.NopCloser(strings.NewReader(`{"images":[{"id":"selected-image","name":"worker"}]}`)), "image")
 			response.Request = r
 			return response, nil
-		})
+		}))
 		result, err := blockstorage.CreateVolume(context.Background(), cinder, glance, blockstorage.CreateVolumeRequest{Size: 2, Image: &image})
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 			t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -243,12 +238,12 @@ func TestCreateVolumeTransportEntrySnapshotsLiveImageTokenAndSourceMutationGuard
 			cloud := testcloud.New(t)
 			cinder, _ := createVolumeContractClients(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				createVolumeContractWire(t, r, http.MethodPost, createVolumeContractCreatePath, "test-token")
 				mutation.change(cinder)
 				return createVolumeContractResponse(202, io.NopCloser(strings.NewReader(createVolumeContractBody("creating"))), "created"), nil
-			})
+			}))
 			result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2})
 			var accepted *resource.ResponseError
 			if result == nil || result.Created == nil || string(result.Created.Body) != createVolumeContractBody("creating") || result.Created.Volume != nil || result.LastAccepted != nil || result.Ready != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &accepted) || accepted.StatusCode != 202 || calls.Load() != 1 {
@@ -262,7 +257,7 @@ func TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentConte
 	cloud := testcloud.New(t)
 	cinder, _ := createVolumeContractClients(cloud)
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		switch calls.Add(1) {
 		case 1:
 			if _, bounded := r.Context().Deadline(); bounded {
@@ -288,7 +283,7 @@ func TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentConte
 			t.Error("unexpected budget-boundary request", r.URL)
 			return nil, errors.New("unexpected HTTP")
 		}
-	})
+	}))
 	timeout := 50 * time.Millisecond
 	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitPolicy(blockstorage.CreateVolumeWaitOpts{Timeout: &timeout}))
 	createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
@@ -339,7 +334,7 @@ func TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCrea
 			callbackCause := errors.New("progress stopped create")
 			var calls atomic.Int32
 			pollBody := createVolumeContractBody("creating")
-			cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					return createVolumeContractResponse(202, io.NopCloser(strings.NewReader(createVolumeContractBody("creating"))), "created"), nil
@@ -366,7 +361,7 @@ func TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCrea
 					t.Error("cleanup or bootable after failed wait", r.Method, r.URL)
 					return nil, errors.New("unexpected HTTP")
 				}
-			})
+			}))
 			interval, timeout := time.Hour, 200*time.Millisecond
 			policy := blockstorage.CreateVolumeWaitOpts{PollInterval: &interval, Timeout: &timeout}
 			if mode == "callback cancel" {
@@ -607,13 +602,13 @@ func TestCreateVolumeTransportUnacceptedCauseAndCanceledContextDoNotInventProof(
 			defer cancel(nil)
 			cause := errors.New("creation transport failed")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = createVolumeContractTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if cancelled {
 					cancel(cause)
 				}
 				return nil, cause
-			})
+			}))
 			result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2})
 			var accepted *resource.ResponseError
 			if result == nil || result.Created != nil || result.LastAccepted != nil || result.Ready != nil || result.BootableSet != nil || !errors.Is(err, cause) || cancelled && !errors.Is(err, context.Canceled) || errors.As(err, &accepted) || calls.Load() != 1 {

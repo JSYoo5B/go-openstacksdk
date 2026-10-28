@@ -51,11 +51,11 @@ func TestExportVolumeBackupRecordAcceptedIOCancellationAndSourceFailuresKeepCurr
 				retries.Add(1)
 				return original
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				bevWire(t, r, "literal", "3.60", "test-token")
 				return snapshotReadTransportResponse(r, 203, broken, "current opaque"), nil
-			})
+			}))
 			result, err := blockstorage.ExportVolumeBackupRecord(ctx, client, blockstorage.ExportVolumeBackupRecordRequest{BackupID: "literal"})
 			var physical *resource.ResponseError
 			if err == nil || result == nil || result.BackupID != "literal" || result.Value != nil || result.Exported == nil || result.Exported.StatusCode != 203 || !bytes.Equal(result.Exported.Body, original) || result.Exported.Header.Get("X-Proof") != "current opaque" || !errors.As(err, &physical) || physical.StatusCode != 203 || !bytes.Equal(physical.Body, original) || physical.Header.Get("X-Proof") != "current opaque" || calls.Load() != 1 || retries.Load() != 0 || broken.closes.Load() != 1 {
@@ -292,7 +292,7 @@ func TestExportVolumeBackupRecordRejectsPhysicalRedirectMutationAndKeepsStickyCa
 					return callbackCause
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) != 1 {
 					t.Error("redirect or SDK resend reached physical transport", r.URL)
 					return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`null`)), "must not reach"), nil
@@ -306,7 +306,7 @@ func TestExportVolumeBackupRecordRejectsPhysicalRedirectMutationAndKeepsStickyCa
 					target = other.Server.URL + "/changed/export"
 				}
 				return &http.Response{StatusCode: 302, Header: http.Header{"Location": {target}}, Body: io.NopCloser(strings.NewReader("opaque redirect")), Request: r}, nil
-			})
+			}))
 			result, err := blockstorage.ExportVolumeBackupRecord(ctx, client, blockstorage.ExportVolumeBackupRecordRequest{BackupID: "literal"})
 			var admitted *resource.ResponseError
 			if result == nil || result.BackupID != "literal" || result.Value != nil || result.Exported != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &admitted) || calls.Load() != 1 || stolen.Load() != 0 || redirects.Load() != 1 {

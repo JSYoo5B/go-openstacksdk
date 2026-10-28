@@ -2,37 +2,25 @@ package services_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 )
 
-type pythonServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func TestPythonServicesListFiltersByBinaryAndHost(t *testing.T) {
 	var paths []string
 	var queries []url.Values
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonServiceTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		paths = append(paths, req.Method+" "+req.URL.Path)
 		queries = append(queries, req.URL.Query())
 		body := `{"services":[{"binary":"cinder-volume","host":"host@lvm","zone":"nova","status":"enabled","state":"up","disabled_reason":null,"frozen":false,"replication_status":"disabled","active_backend_id":null,"updated_at":"2026-10-11T01:02:03.000000"}]}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	// services(binary="cinder-volume", host="host@lvm")

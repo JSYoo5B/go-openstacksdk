@@ -46,14 +46,14 @@ func TestExportVolumeBackupSameTargetRedirectCannotAddPhysicalBodyFraming(t *tes
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				call := physical.Add(1)
 				if call == 1 {
 					bevWire(t, r, "literal", "3.60", "test-token")
 					return &http.Response{StatusCode: 302, Header: http.Header{"Location": {r.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect acknowledgement")), Request: r}, nil
 				}
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"must not reach redirected transport"}}, Body: io.NopCloser(strings.NewReader("unexpected physical export")), Request: r}, nil
-			})
+			}))
 			result, err := blockstorage.ExportVolumeBackup(bevContext(t), client, blockstorage.ExportVolumeBackupRequest{BackupID: "literal"})
 			var admitted *resource.ResponseError
 			if result == nil || result.BackupID != "literal" || result.Exported != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &admitted) || physical.Load() != 1 || redirects.Load() != 1 {
@@ -113,14 +113,14 @@ func TestExportVolumeBackupRedirectBodyRejectionSurvivesNativeRetryRestorationAn
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				call := physical.Add(1)
 				if call == 1 {
 					bevWire(t, r, "literal", "3.60", "test-token")
 					return &http.Response{StatusCode: 302, Header: http.Header{"Location": {r.URL.String()}}, Body: io.NopCloser(strings.NewReader("redirect acknowledgement")), Request: r}, nil
 				}
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"must not resend"}}, Body: io.NopCloser(strings.NewReader("unexpected resend")), Request: r}, nil
-			})
+			}))
 			result, err := blockstorage.ExportVolumeBackup(ctx, client, blockstorage.ExportVolumeBackupRequest{BackupID: "literal"})
 			var admitted *resource.ResponseError
 			if result == nil || result.BackupID != "literal" || result.Exported != nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &admitted) || physical.Load() != 1 || redirects.Load() != 1 || retries.Load() != 1 || firstRejection == nil || !errors.Is(err, firstRejection) {

@@ -17,10 +17,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type snapshotReadTransport func(*http.Request) (*http.Response, error)
-
-func (f snapshotReadTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type snapshotReadTransportBody struct {
 	data                  io.Reader
 	readError, closeError error
@@ -147,10 +143,10 @@ func TestVolumeSnapshotReadAcceptedReadCloseCancellationRetainsCurrentPhysicalSt
 				cancel(cancelCause)
 			}}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return snapshotReadTransportResponse(r, 203, reader, "current"), nil
-			})
+			}))
 			var observed *blockstorage.VolumeSnapshotsPage
 			var pages []*blockstorage.VolumeSnapshotsPage
 			var value json.RawMessage
@@ -203,10 +199,10 @@ func TestVolumeSnapshotReadAcceptedSourceFactsAreFrozenThroughBodyClose(t *testi
 			var calls atomic.Int32
 			body := `{"snapshot":{"id":"wire"}}`
 			reader := &snapshotReadTransportBody{data: strings.NewReader(body), onClose: func() { snapshotReadTransportMutate(client, fact) }}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return snapshotReadTransportResponse(r, 203, reader, "drift"), nil
-			})
+			}))
 			result, err := blockstorage.GetVolumeSnapshot(context.Background(), client, blockstorage.GetVolumeSnapshotRequest{NameOrID: "literal"})
 			var physical *resource.ResponseError
 			if result == nil || result.Value != nil || result.Snapshot != nil || result.Observed == nil || len(result.Pages) != 0 || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &physical) || string(physical.Body) != body || result.Observed.Header.Get("X-Proof") != "drift" {

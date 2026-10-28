@@ -186,7 +186,7 @@ func TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements
 					client := vsaClient(cloud, "3.60")
 					raw := []byte{0xff, 0x00, 'p'}
 					var calls, retries atomic.Int32
-					cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 						call := calls.Add(1)
 						vfaPayload(t, req, "id", tc.body, "3.60")
 						code := 400
@@ -194,7 +194,7 @@ func TestVolumeFlagsNativeRejectionsAndExpandedStatusNeverBecomeAcknowledgements
 							code = 503
 						}
 						return vsaResponse(req, code, raw, "actual bool rejection"), nil
-					})
+					}))
 					if kind == "expanded native400" {
 						cloud.Provider.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, original error, _ uint) error {
 							if !gophercloud.ResponseCodeIs(original, 503) || retries.Add(1) > 1 {

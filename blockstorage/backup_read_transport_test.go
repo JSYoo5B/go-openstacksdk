@@ -89,10 +89,10 @@ func TestVolumeBackupReadAcceptedReadCloseCancellationRetainsCurrentPhysicalStag
 				cancel(cancelCause)
 			}}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return snapshotReadTransportResponse(r, 203, reader, "current"), nil
-			})
+			}))
 			var observed *blockstorage.VolumeBackupsPage
 			var pages []*blockstorage.VolumeBackupsPage
 			var value json.RawMessage

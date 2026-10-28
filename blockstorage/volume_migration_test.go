@@ -216,7 +216,7 @@ func TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPag
 			cloud := testcloud.New(t)
 			client := vsaClient(cloud, "3.60")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				n := int(calls.Add(1))
 				if n <= len(tc.codes) {
 					path := vsaVersionPath
@@ -232,7 +232,7 @@ func TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPag
 				}
 				vmrRequest(t, req, "id", `{"os-migrate_volume":{"cluster":""}}`, "3.60")
 				return vsaResponse(req, 399, []byte{0xff, 0x00}, "action only"), nil
-			})
+			}))
 			result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeMigrationCluster(""))
 			expectedPages := 0
 			for i, code := range tc.codes {
@@ -289,21 +289,21 @@ func TestMigrateVolumeFiniteDiscoveryKeepsCurrentProofAndNeverBorrowsRejectedPag
 				readCause, closeCause := errors.New("required discovery Read"), errors.New("required discovery Close")
 				raw := []byte(good)
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					vsaDiscoveryRequest(t, req, vsaVersionPath)
-					broken := &vsaFaultBody{reader: bytes.NewReader(raw)}
+					broken := &testcloud.Body{Data: string(raw)}
 					if kind != "close" {
-						broken.readErr = readCause
+						broken.ReadErr = readCause
 					}
 					if kind != "read" {
-						broken.closeErr = closeCause
+						broken.CloseErr = closeCause
 					}
 					response := vsaResponse(req, code, nil, "faulty support")
 					response.Body = broken
 					response.ContentLength = int64(len(raw))
 					return response, nil
-				})
+				}))
 				result, err := blockstorage.MigrateVolume(vsaContext(t), client, blockstorage.VolumeActionRequest{VolumeID: "id"}, blockstorage.WithVolumeMigrationCluster(""))
 				vsaOperation(t, err, "MigrateVolume")
 				var proof *resource.ResponseError
@@ -665,7 +665,7 @@ func TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmis
 					}
 				}
 				raw := []byte{0xff, 0x00, 'r'}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					vmrRequest(t, req, "id", action.body, "3.60")
 					code := 400
@@ -673,7 +673,7 @@ func TestVolumeMigrationActionsKeepOriginalNativePolicyWhenRetryExpandsHTTPAdmis
 						code = 503
 					}
 					return vsaResponse(req, code, raw, "current rejection"), nil
-				})
+				}))
 				result, err := action.call(vsaContext(t), client, "id", func() error { return nil }, func() error { return nil })
 				vsaOperation(t, err, action.operation)
 				var native gophercloud.ErrUnexpectedResponseCode

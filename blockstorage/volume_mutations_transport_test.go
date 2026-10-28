@@ -36,7 +36,7 @@ func TestVolumeMutationAcceptedReadCloseCancellationRetainsCurrentStageAndAllCau
 				}
 				reader := &getVolumesContractReader{data: strings.NewReader(body), readError: readCause, closeError: closeCause, onClose: func() { cancel(cancelCause) }}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if calls.Add(1) == 1 {
 						vmLookup(t, r, "test-token")
 						if second {
@@ -46,7 +46,7 @@ func TestVolumeMutationAcceptedReadCloseCancellationRetainsCurrentStageAndAllCau
 						vmMutation(t, r, op, "test-token")
 					}
 					return vmResponse(r, code, reader, "current"), nil
-				})
+				}))
 				got := vmCall(ctx, client, op, "ref", vmChanged(), nil)
 				var physical *resource.ResponseError
 				wantCalls := int32(1)
@@ -88,7 +88,7 @@ func TestVolumeMutationCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLooku
 				client := vmClient(cloud)
 				var calls atomic.Int32
 				cause := errors.New("current mutation transport failure")
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					switch calls.Add(1) {
 					case 1:
 						vmLookup(t, r, "test-token")
@@ -109,7 +109,7 @@ func TestVolumeMutationCurrentNativeRejectionNeverBorrowsSuppressedMemberOrLooku
 						t.Error("SDK replay/cleanup", r.URL)
 						return nil, errors.New("extra request")
 					}
-				})
+				}))
 				got := vmCall(context.Background(), client, op, "ref", vmChanged(), nil)
 				var physical *resource.ResponseError
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -160,7 +160,7 @@ func TestVolumeMutationSourceFactsStayFrozenAfterAcceptedLookupOrMutation(t *tes
 							client.Microversion = "3.61"
 						}
 					}}
-					cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						if calls.Add(1) == 1 {
 							vmLookup(t, r, "test-token")
 							if second {
@@ -170,7 +170,7 @@ func TestVolumeMutationSourceFactsStayFrozenAfterAcceptedLookupOrMutation(t *tes
 							vmMutation(t, r, op, "test-token")
 						}
 						return vmResponse(r, code, reader, "source current"), nil
-					})
+					}))
 					got := vmCall(context.Background(), client, op, "ref", vmChanged(), nil)
 					var physical *resource.ResponseError
 					want := int32(1)

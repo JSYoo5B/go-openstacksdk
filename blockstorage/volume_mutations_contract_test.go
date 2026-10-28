@@ -438,7 +438,7 @@ func TestUpdateVolumeAcceptedEmptyAndMalformedJSONKeepRequestedMergedState(t *te
 			cloud := testcloud.New(t)
 			client := vmClient(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					vmLookup(t, r, "test-token")
 					return vmResponse(r, 200, io.NopCloser(strings.NewReader(`{"volume":{"id":"returned-한글","unknown":false}}`)), "lookup"), nil
@@ -448,7 +448,7 @@ func TestUpdateVolumeAcceptedEmptyAndMalformedJSONKeepRequestedMergedState(t *te
 					t.Error(body)
 				}
 				return vmResponse(r, tc.status, io.NopCloser(strings.NewReader(tc.body)), "tolerated"), nil
-			})
+			}))
 			got := vmCall(context.Background(), client, "UpdateVolume", "ref", vmChanged(), nil)
 			if got.err != nil || got.nilResult || got.applied == nil || got.applied.StatusCode != tc.status || string(got.applied.Body) != tc.body || got.volume == nil || string(vmFields(t, got.value)["description"]) != `"requested"` || string(got.volume.Body["unknown"]) != "false" || calls.Load() != 2 {
 				t.Fatal(got, calls.Load())
@@ -463,14 +463,14 @@ func TestUpdateVolumeValidWrongShapesAndInvalidUTF8RetainAppliedWithoutLogicalRe
 			cloud := testcloud.New(t)
 			client := vmClient(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					vmLookup(t, r, "test-token")
 					return vmResponse(r, 200, io.NopCloser(strings.NewReader(`{"volume":{"id":"returned-한글"}}`)), "lookup"), nil
 				}
 				vmMutation(t, r, "UpdateVolume", "test-token")
 				return vmResponse(r, 203, io.NopCloser(strings.NewReader(body)), "bad-current"), nil
-			})
+			}))
 			got := vmCall(context.Background(), client, "UpdateVolume", "ref", vmChanged(), nil)
 			var physical *resource.ResponseError
 			if got.nilResult || got.resolved == nil || got.resolved.Volume == nil || got.applied == nil || string(got.applied.Body) != body || got.value != nil || got.volume != nil || calls.Load() != 2 || !errors.As(got.err, &physical) || physical.StatusCode != 203 || string(physical.Body) != body {

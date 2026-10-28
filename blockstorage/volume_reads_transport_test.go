@@ -31,10 +31,10 @@ func TestVolumeReadsAcceptedReadCloseAndCancellationKeepAllCausesAndCurrentProof
 			}
 			reader := &getVolumesContractReader{data: strings.NewReader(body), readError: readCause, closeError: closeCause, onClose: func() { cancel(cancelCause) }}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return getVolumesContractResponse(r, 200, reader, "physical-current"), nil
-			})
+			}))
 			got := volumeReadContractCall(ctx, client, operation)
 			var accepted *resource.ResponseError
 			if got.nilResult || got.value != nil || got.volume != nil || got.volumes != nil || got.exists != nil || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.Is(got.err, readCause) || !errors.Is(got.err, closeCause) || !errors.Is(got.err, context.Canceled) || !errors.Is(got.err, cancelCause) || !errors.As(got.err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Proof") != "physical-current" {
@@ -77,10 +77,10 @@ func TestVolumeReadStrictAcceptedEnvelopesKeepPhysicalEvidenceWithoutLogicalValu
 				client := volumeReadContractClient(cloud)
 				var calls atomic.Int32
 				reader := &getVolumesContractReader{data: strings.NewReader(body)}
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					return getVolumesContractResponse(r, 200, reader, "schema-origin"), nil
-				})
+				}))
 				got := volumeReadContractCall(context.Background(), client, operation)
 				var proof *resource.ResponseError
 				if got.nilResult || got.value != nil || got.volume != nil || got.volumes != nil || got.exists != nil || calls.Load() != 1 || reader.closes.Load() != 1 || !errors.As(got.err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Proof") != "schema-origin" {
@@ -110,7 +110,7 @@ func TestVolumeExistsFallbackFailureNeverBorrowsEarlierRejectedMember(t *testing
 			first := volumeReadContractPage(`[{"id":"different","name":"other"}]`, "?marker=next")
 			last := volumeReadContractPage(`[{"id":"last","name":"target"}]`, "")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					if r.URL.Path != volumeReadContractBase+"volumes/target" {
@@ -138,7 +138,7 @@ func TestVolumeExistsFallbackFailureNeverBorrowsEarlierRejectedMember(t *testing
 					t.Error("SDK resend or suppressed old member resurrected", r.URL)
 					return nil, errors.New("extra request")
 				}
-			})
+			}))
 			result, err := blockstorage.VolumeExists(ctx, client, blockstorage.VolumeExistsRequest{NameOrID: "target"})
 			if result == nil || result.Exists != nil || result.Value != nil || result.Volume != nil || result.Observed != nil || calls.Load() != 3 || len(result.Pages) < 1 || result.Pages[0].Header.Get("X-Proof") != "first-list" {
 				t.Fatal(result, err, calls.Load())
@@ -172,7 +172,7 @@ func TestListVolumesLaterNativeOrTransportErrorKeepsOnlyActualPriorPages(t *test
 			cause := errors.New("second page transport")
 			first := volumeReadContractPage(`[{"id":"partial"}]`, "?marker=later")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) == 1 {
 					return getVolumesContractResponse(r, 200, io.NopCloser(strings.NewReader(first)), "accepted-first"), nil
 				}
@@ -180,7 +180,7 @@ func TestListVolumesLaterNativeOrTransportErrorKeepsOnlyActualPriorPages(t *test
 					return getVolumesContractResponse(r, 404, io.NopCloser(strings.NewReader(`{"error":"later missing"}`)), "rejected-later"), nil
 				}
 				return nil, cause
-			})
+			}))
 			result, err := blockstorage.ListVolumes(context.Background(), client)
 			var accepted *resource.ResponseError
 			if result == nil || result.Value != nil || result.Volumes != nil || len(result.Pages) != 1 || string(result.Pages[0].Body) != first || result.Pages[0].Header.Get("X-Proof") != "accepted-first" || calls.Load() != 2 || err == nil || errors.As(err, &accepted) {
@@ -225,10 +225,10 @@ func TestVolumeReadsPostResponseSourceChangesStopWithCurrentAdmittedProof(t *tes
 					}
 				}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					return getVolumesContractResponse(r, 200, reader, "changed-current"), nil
-				})
+				}))
 				got := volumeReadContractCall(context.Background(), client, operation)
 				var accepted *resource.ResponseError
 				if got.nilResult || got.value != nil || got.volume != nil || got.volumes != nil || got.exists != nil || calls.Load() != 1 || !errors.Is(got.err, resource.ErrInvalidOption) || !errors.As(got.err, &accepted) || accepted.StatusCode != 200 || string(accepted.Body) != body || accepted.Header.Get("X-Proof") != "changed-current" {
@@ -257,7 +257,7 @@ func TestVolumeReadBlockedContinuationCancellationRetainsActualPagesAndCause(t *
 			cause := errors.New("cancel blocked ordinary read")
 			entered := make(chan struct{})
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = getVolumesContractTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.URL.Path != volumeReadContractPath {
 					return getVolumesContractResponse(r, 404, io.NopCloser(strings.NewReader(`{"error":"missing"}`)), "rejected-member"), nil
@@ -268,7 +268,7 @@ func TestVolumeReadBlockedContinuationCancellationRetainsActualPagesAndCause(t *
 				close(entered)
 				<-r.Context().Done()
 				return nil, r.Context().Err()
-			})
+			}))
 			done := make(chan volumeReadContractOutcome, 1)
 			go func() { done <- volumeReadContractCall(ctx, client, operation) }()
 			select {

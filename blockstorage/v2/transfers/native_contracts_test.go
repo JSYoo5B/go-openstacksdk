@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers"
@@ -18,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeTransferTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTransferTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeTransferWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeTransferCall struct{ method, path, query, body string }
@@ -37,7 +26,7 @@ type nativeTransferCall struct{ method, path, query, body string }
 func nativeTransferAPI(t *testing.T, calls *[]nativeTransferCall, reply func(*http.Request) *http.Response) (*transfers.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeTransferTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +34,7 @@ func nativeTransferAPI(t *testing.T, calls *[]nativeTransferCall, reply func(*ht
 		}
 		*calls = append(*calls, nativeTransferCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return transfers.New(client), cloud

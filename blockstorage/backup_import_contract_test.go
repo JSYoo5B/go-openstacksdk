@@ -281,11 +281,11 @@ func TestImportVolumeBackupLogicalPhysicalAndSeparateCallsOwnIndependentStorage(
 	original := bytes.Clone(reply)
 	headers := http.Header{"X-Proof": {"original"}, "X-Multiple": {"one", "two"}}
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		bipPayload(t, r, "svc", "record", "3.60", "test-token")
 		return &http.Response{StatusCode: 201, Header: headers, Body: io.NopCloser(bytes.NewReader(reply)), Request: r}, nil
-	})
+	}))
 	first, err := bipCall(t, client, "svc", "record")
 	if err != nil || first == nil || first.Applied == nil || first.Backup == nil || first.Value == nil || first.BackupID == nil {
 		t.Fatal(first, err)

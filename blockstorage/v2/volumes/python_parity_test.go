@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/volumes"
@@ -24,24 +23,14 @@ type pythonVolumeCall struct {
 	header       http.Header
 }
 
-type pythonVolumeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonVolumeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonVolumeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func pythonVolumeAPI(t *testing.T, calls *[]pythonVolumeCall, reply func(*http.Request) *http.Response) (*volumes.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonVolumeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		call := pythonVolumeCall{method: req.Method, path: req.URL.Path, query: req.URL.Query(), header: req.Header.Clone()}
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -53,7 +42,7 @@ func pythonVolumeAPI(t *testing.T, calls *[]pythonVolumeCall, reply func(*http.R
 		}
 		*calls = append(*calls, call)
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return volumes.New(client), cloud

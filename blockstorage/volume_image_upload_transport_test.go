@@ -35,14 +35,14 @@ func TestUploadVolumeToImageAcceptedDiscoveryOrActionFailureKeepsCurrentProofAnd
 					code = 300
 				}
 				var calls, closes, retries atomic.Int32
-				broken := &vsaFaultBody{reader: bytes.NewReader(reply)}
+				broken := &testcloud.Body{Data: string(reply)}
 				if kind != "Close" {
-					broken.readErr = readCause
+					broken.ReadErr = readCause
 				}
 				if kind != "Read" {
-					broken.closeErr = closeCause
+					broken.CloseErr = closeCause
 				}
-				broken.onClose = func() {
+				broken.OnClose = func() {
 					closes.Add(1)
 					if kind == "joined Read Close source cancellation" {
 						client.ResourceBase += "changed/"
@@ -53,7 +53,7 @@ func TestUploadVolumeToImageAcceptedDiscoveryOrActionFailureKeepsCurrentProofAnd
 					retries.Add(1)
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if phase == "action after required discovery" && n == 1 {
 						vsaDiscoveryRequest(t, req, vsaVersionPath)
@@ -71,7 +71,7 @@ func TestUploadVolumeToImageAcceptedDiscoveryOrActionFailureKeepsCurrentProofAnd
 					response := vsaResponse(req, code, reply, "current accepted phase")
 					response.Body = broken
 					return response, nil
-				})
+				}))
 				var options []blockstorage.VolumeImageUploadOption
 				if phase != "ordinary action" {
 					options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}
@@ -289,7 +289,7 @@ func TestUploadVolumeToImageLiveNativeRetriesAndPhysicalGuardsKeepBodyAndOrigina
 					}
 					return nil
 				}
-				cloud.Provider.HTTPClient.Transport = vsaTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if req.Method == http.MethodGet {
 						if !required || posts.Load() != 0 {
@@ -306,7 +306,7 @@ func TestUploadVolumeToImageLiveNativeRetriesAndPhysicalGuardsKeepBodyAndOrigina
 					response := vsaResponse(req, 307, []byte("redirect"), "not an admitted upload action")
 					response.Header.Set("Location", req.URL.String())
 					return response, nil
-				})
+				}))
 				var options []blockstorage.VolumeImageUploadOption
 				if required {
 					options = []blockstorage.VolumeImageUploadOption{blockstorage.WithVolumeImageUploadProtected(false)}

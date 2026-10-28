@@ -3,10 +3,8 @@ package transfers_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/transfers"
@@ -18,36 +16,27 @@ import (
 // pythonTransferCall records the wire request openstacksdk block_storage v2 would also send.
 type pythonTransferCall struct{ method, path, query, body string }
 
-type pythonTransferTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonTransferTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonTransferWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonTransferAPI(t *testing.T, reply func(*http.Request) *http.Response) (*transfers.API, *[]pythonTransferCall) {
+func pythonTransferAPI(t *testing.T, reply func(*http.Request) *http.Response) (*transfers.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonTransferCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonTransferTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonTransferCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v2/project/"
 	return transfers.New(client), calls
+}
+
+// pythonTransferCalls projects recorded calls onto the compared fields.
+func pythonTransferCalls(rec *testcloud.Recorder) []pythonTransferCall {
+	calls := []pythonTransferCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonTransferCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonTransferBase = "/cinder/v2/project/os-volume-transfer"
@@ -82,8 +71,8 @@ func TestPythonTransferCreateGetAcceptMatchProxyRequests(t *testing.T) {
 		{http.MethodGet, pythonTransferBase + "/tr-1", "", ""},
 		{http.MethodPost, pythonTransferBase + "/tr-1/accept", "", `{"accept":{"auth_key":"secret"}}`},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTransferCalls(calls), want) {
+		t.Fatalf("%+v", pythonTransferCalls(calls))
 	}
 }
 
@@ -108,8 +97,8 @@ func TestPythonTransferDeleteIgnoresMissing(t *testing.T) {
 			if code == http.StatusNotFound && !errors.Is(strict, resource.ErrNotFound) {
 				t.Fatal(strict)
 			}
-			if len(*calls) != 2 || (*calls)[0] != (pythonTransferCall{http.MethodDelete, pythonTransferBase + "/tr-1", "", ""}) {
-				t.Fatalf("%+v", *calls)
+			if calls.Len() != 2 || pythonTransferCalls(calls)[0] != (pythonTransferCall{http.MethodDelete, pythonTransferBase + "/tr-1", "", ""}) {
+				t.Fatalf("%+v", pythonTransferCalls(calls))
 			}
 		})
 	}
@@ -141,7 +130,7 @@ func TestPythonTransferListAndFindUseDifferentRoutes(t *testing.T) {
 		{http.MethodGet, pythonTransferBase + "/handoff", "", ""},
 		{http.MethodGet, pythonTransferBase + "/detail", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTransferCalls(calls), want) {
+		t.Fatalf("%+v", pythonTransferCalls(calls))
 	}
 }

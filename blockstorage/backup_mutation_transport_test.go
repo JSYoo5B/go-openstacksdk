@@ -56,7 +56,7 @@ func TestVolumeBackupMutationAcceptedFailuresRetainOnlyCurrentProofAndAllCauses(
 					retries.Add(1)
 					return original
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if n == step {
 						method, path, version := "POST", bmwCollection, "3.60"
@@ -89,7 +89,7 @@ func TestVolumeBackupMutationAcceptedFailuresRetainOnlyCurrentProofAndAllCauses(
 					}
 					t.Error("accepted failure replayed", r.Method, r.URL)
 					return nil, errors.New("unexpected request")
-				})
+				}))
 				var proof *blockstorage.VolumeBackupMutationPage
 				var err error
 				if strings.HasPrefix(phase, "create") {
@@ -181,7 +181,7 @@ func TestDeleteVolumeBackupPolling404RequiresCleanBodyAndOriginalNativePolicy(t 
 					return nil
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch n := calls.Add(1); n {
 				case 1:
 					return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"backup":{"id":"actual","status":"available"}}`)), "resolved"), nil
@@ -203,7 +203,7 @@ func TestDeleteVolumeBackupPolling404RequiresCleanBodyAndOriginalNativePolicy(t 
 				default:
 					return nil, errors.New("unexpected poll")
 				}
-			})
+			}))
 			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true))
 			expectedCalls := int32(3)
 			if fault == "expanded404" {
@@ -263,7 +263,7 @@ func TestVolumeBackupMutationNativeAuthAndRetryUseLiveTokenWithOwnedHeadersAndVe
 				if entry == "delete poll" {
 					failingStep = 3
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					method, path, version := "POST", bmwCollection, "3.60"
 					if entry != "create" {
@@ -319,7 +319,7 @@ func TestVolumeBackupMutationNativeAuthAndRetryUseLiveTokenWithOwnedHeadersAndVe
 						return snapshotReadTransportResponse(r, 204, io.NopCloser(strings.NewReader("")), "applied"), nil
 					}
 					return nil, errors.New("unexpected auth request")
-				})
+				}))
 				if entry == "create" {
 					result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupName("owned"))
 					if err != nil || result == nil || result.Ready == nil {
@@ -355,7 +355,7 @@ func TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope(t *t
 					step = 2
 					rejectedCode = 503
 				}
-				cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					n := calls.Add(1)
 					if n < step {
 						return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"backup":{"id":"actual"}}`)), "resolved"), nil
@@ -366,7 +366,7 @@ func TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope(t *t
 					}
 					bmwRequest(t, r, "POST", path, version, "test-token")
 					return snapshotReadTransportResponse(r, rejectedCode, io.NopCloser(strings.NewReader(`{"error":"original"}`)), "rejected"), nil
-				})
+				}))
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, o *gophercloud.RequestOpts, original error, count uint) error {
 					if retries.Add(1) > 1 || count != 1 {
 						return errors.Join(original, errors.New("bounded ownership retry"))
@@ -446,7 +446,7 @@ func TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope(t *t
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				switch calls.Add(1) {
 				case 1:
 					return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"backup":{"id":"actual"}}`)), "resolved"), nil
@@ -462,7 +462,7 @@ func TestVolumeBackupMutationRetryCannotReplaceOwnedBodyDecoderOrFixedScope(t *t
 					t.Error("header-mutated redirect physically resent")
 					return snapshotReadTransportResponse(r, 204, io.NopCloser(strings.NewReader("")), "unexpected resend"), nil
 				}
-			})
+			}))
 			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(true))
 			var physical *resource.ResponseError
 			if !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &physical) || result == nil || result.Resolved == nil || result.Resolved.Value == nil || result.Applied != nil || result.LastAccepted != nil || result.Deleted != nil || calls.Load() != 2 || redirects.Load() != 1 || client.Microversion != "3.60" {
@@ -489,7 +489,7 @@ func TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsencePro
 				o.OkCodes = append(o.OkCodes, 404)
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotReadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if n < step {
 					return snapshotReadTransportResponse(r, 200, io.NopCloser(strings.NewReader(`{"backup":{"id":"actual","status":"available"}}`)), "resolved"), nil
@@ -501,7 +501,7 @@ func TestVolumeBackupMutationExpandedNativeStatusNeverCreatesSuccessOrAbsencePro
 					return snapshotReadTransportResponse(r, 404, io.NopCloser(strings.NewReader(`{"error":"expanded"}`)), "expanded"), nil
 				}
 				return nil, errors.New("unexpected expanded request")
-			})
+			}))
 			var err error
 			if entry == "create" {
 				result, failed := bmwCreate(t, client)
