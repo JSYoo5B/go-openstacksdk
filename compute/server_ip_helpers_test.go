@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -58,7 +59,7 @@ func TestStandaloneServerIPWaitObservesExactAddressWithoutServerOrIPActive(t *te
 		t.Run(status, func(t *testing.T) {
 			f := newDispatchFixture(t, "")
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err == nil && r.URL.Path == "/v2.1/servers/server" {
 					data, readErr := io.ReadAll(response.Body)
@@ -69,7 +70,7 @@ func TestStandaloneServerIPWaitObservesExactAddressWithoutServerOrIPActive(t *te
 					response.Body = io.NopCloser(strings.NewReader(strings.Replace(string(data), `"status":"ACTIVE"`, `"status":"`+status+`"`, 1)))
 				}
 				return response, err
-			})
+			}))
 			server := automaticServer(t, "null")
 			server.Status = "SHUTOFF"
 			options := append(standaloneIPOptions(dispatchOptions()...), compute.WithServerIPWait(true))
@@ -102,7 +103,7 @@ func TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget(t *testing.T) {
 			start := time.Now()
 			var first time.Time
 			requests := 0
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				deadline, ok := r.Context().Deadline()
 				if !ok {
 					t.Fatal("missing HTTP deadline")
@@ -114,7 +115,7 @@ func TestStandaloneServerIPDefaultsUseOneSixtySecondHTTPBudget(t *testing.T) {
 					t.Fatal("renewed item budget", first, deadline)
 				}
 				return base.RoundTrip(r)
-			})
+			}))
 			common := []compute.AutomaticFloatingIPOption{}
 			if mode == "override" {
 				common = append(common, compute.WithAutomaticIPTimeout(17*time.Second))
@@ -214,13 +215,13 @@ func TestStandaloneServerIPSecondFailurePreservesAsyncAndObservedHistory(t *test
 				cause := errors.New("second accepted Close")
 				if failure == "close" {
 					base := f.cloud.Provider.HTTPClient.Transport
-					f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+					f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						response, err := base.RoundTrip(r)
 						if err == nil && r.Method == "PUT" && r.URL.Path == "/v2.0/floatingips/ip-b" {
 							response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { return cause }}
 						}
 						return response, err
-					})
+					}))
 				}
 				options := append(standaloneIPOptions(dispatchOptions()...), compute.WithServerIPWait(wait))
 				result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"], dispatchAddresses["c"]}, options...)
@@ -262,13 +263,13 @@ func TestStandaloneServerIPAutomaticAsyncAndAcceptedRefreshModels(t *testing.T) 
 					return 203, `{"server":{"id":"server","name":"accepted-refresh","status":"BUILD","addresses":` + autoFixed + `}}`
 				}
 				base := f.cloud.Provider.HTTPClient.Transport
-				f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+				f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.URL.Path == "/v2.1/servers/server" {
 						response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { return cause }}
 					}
 					return response, err
-				})
+				}))
 			}
 			result, err := f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: server}, standaloneIPOptions(automaticOptions()...)...)
 			if refreshFailure {
@@ -328,14 +329,14 @@ func TestStandaloneServerIPExpiredObservationKeepsAssignmentAndStopsNextItem(t *
 	f := newDispatchFixture(t, "")
 	base := f.cloud.Provider.HTTPClient.Transport
 	rawCalls := 0
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path == "/v2.1/servers/server" {
 			rawCalls++
 			<-r.Context().Done()
 			return nil, r.Context().Err()
 		}
 		return base.RoundTrip(r)
-	})
+	}))
 	options := []compute.ServerIPOption{compute.WithServerIPWait(true), compute.WithServerIPAutomaticOptions(compute.WithAutomaticIPTimeout(time.Second))}
 	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, options...)
 	if !errors.Is(err, context.DeadlineExceeded) || result == nil || result.Assignment == nil || result.Assignment.FloatingIP.ID != "ip-a" || result.Observed || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Error == nil || rawCalls != 1 || strings.Contains(strings.Join(f.trace(), ","), "list:b") {

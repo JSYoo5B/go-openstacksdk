@@ -231,7 +231,7 @@ func laneDeadlines(t *testing.T, f *laneFixture) func() []time.Time {
 	var mu sync.Mutex
 	var deadlines []time.Time
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		deadline, ok := r.Context().Deadline()
 		if !ok {
 			t.Error("request without deadline", r.URL)
@@ -240,7 +240,7 @@ func laneDeadlines(t *testing.T, f *laneFixture) func() []time.Time {
 		deadlines = append(deadlines, deadline)
 		mu.Unlock()
 		return base.RoundTrip(r)
-	})
+	}))
 	return func() []time.Time {
 		mu.Lock()
 		defer mu.Unlock()

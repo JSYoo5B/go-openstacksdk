@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -81,10 +82,6 @@ func TestAutomaticIPComputedAddressAndRoleUseFlagsPreserveNeedPolicy(t *testing.
 	}
 }
 
-type automaticTransport func(*http.Request) (*http.Response, error)
-
-func (fn automaticTransport) RoundTrip(r *http.Request) (*http.Response, error) { return fn(r) }
-
 type automaticCloseBody struct {
 	io.ReadCloser
 	close func() error
@@ -102,7 +99,7 @@ func TestAutomaticIPAcceptedRawCloseFailuresRetainEvidenceWithoutRetry(t *testin
 			defer cancel(nil)
 			cause := errors.New("accepted raw failure")
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err == nil && r.URL.Path == "/v2.1/servers/server" {
 					response.Header.Set("X-Raw-Proof", "accepted")
@@ -119,7 +116,7 @@ func TestAutomaticIPAcceptedRawCloseFailuresRetainEvidenceWithoutRetry(t *testin
 					}}
 				}
 				return response, err
-			})
+			}))
 			server := automaticServer(t, autoFixed)
 			server.Name = "original known"
 			result, err := f.service.EnsureServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: server}, automaticOptions()...)
@@ -149,13 +146,13 @@ func TestAutomaticIPSelectionAbsenceWithAcceptedCancellationIsFailure(t *testing
 	defer cancel(nil)
 	cause := errors.New("empty inventory canceled")
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := base.RoundTrip(r)
 		if err == nil && r.URL.Path == "/v2.0/ports" {
 			response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { cancel(cause); return nil }}
 		}
 		return response, err
-	})
+	}))
 	decision, err := f.service.PlanServerFloatingIP(ctx, compute.AutomaticFloatingIPRequest{Server: server}, automaticOptions()...)
 	var proof *resource.ResponseError
 	if decision == nil || decision.Reason != compute.AutomaticIPUndetermined || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.As(err, &proof) || proof.StatusCode != 200 || f.posts.Load() != 0 {

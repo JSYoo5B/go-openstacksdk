@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -74,12 +75,12 @@ func TestGetActiveServerAsyncReturnsAcceptedDownIPWithoutCompute(t *testing.T) {
 		},
 	})
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path == "/v2.0/floatingips/ip" {
 			ipGets++
 		}
 		return base.RoundTrip(r)
-	})
+	}))
 	// Even an explicit IP wait supplied by the caller is overridden by async Get.
 	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticEnsureOptions(network.WithEnsureActive())))
 	result, err := f.service.GetActiveServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, opts...)
@@ -140,12 +141,12 @@ func TestWaitForServerForcesIPActiveAndRawConvergence(t *testing.T) {
 	f := newAutomaticFixture(t)
 	ipGets := 0
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path == "/v2.0/floatingips/ip" {
 			ipGets++
 		}
 		return base.RoundTrip(r)
-	})
+	}))
 	f.rawBody = func(n int32) (int, string) {
 		if n == 1 {
 			return 200, `{"server":{"id":"server","status":"ACTIVE","addresses":` + autoFixed + `}}`

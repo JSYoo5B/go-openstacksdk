@@ -18,17 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type backupServerTransport func(*http.Request) (*http.Response, error)
-
-func (f backupServerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	r, err := f(req)
-	if r != nil && r.Request == nil {
-		r.Request = req
-	}
-	return r, err
-}
 func backupServerWire(status int, body, stage string) *http.Response {
-	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Backup-Stage": {stage}}}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Backup-Stage": {stage}})
 }
 
 type backupServerFixture struct {
@@ -53,7 +44,7 @@ func newBackupServerFixture(t *testing.T, reply func(*http.Request) *http.Respon
 		f.calls = append(f.calls, "load-image")
 		return f.image, nil
 	}})
-	cloud.Provider.HTTPClient.Transport = backupServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		f.calls = append(f.calls, req.Method+" "+req.URL.Path)
 		if req.Header.Get("X-Auth-Token") != "test-token" {
 			t.Error(req.Header)
@@ -75,7 +66,7 @@ func newBackupServerFixture(t *testing.T, reply func(*http.Request) *http.Respon
 			return reply(req), nil
 		}
 		return reply(req), nil
-	})
+	}))
 	return f
 }
 

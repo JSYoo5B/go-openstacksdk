@@ -250,7 +250,7 @@ func TestServerIPDispatchSecondFailureRetainsFirstCompletionAndCurrentPartial(t 
 			cause := errors.New("second IP failure")
 			base := f.cloud.Provider.HTTPClient.Transport
 			if failure == "close" || failure == "source" {
-				f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+				f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.Method == "PUT" && r.URL.Path == "/v2.0/floatingips/ip-b" {
 						original := response.Body
@@ -262,7 +262,7 @@ func TestServerIPDispatchSecondFailureRetainsFirstCompletionAndCurrentPartial(t 
 						}}
 					}
 					return response, err
-				})
+				}))
 			}
 			opts := append(dispatchOptions(), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"], dispatchAddresses["c"]))
 			if failure == "IP cancel" {

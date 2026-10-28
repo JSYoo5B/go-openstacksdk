@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -113,7 +114,7 @@ func TestWaitForServerAcceptedGETCloseKeepsRawModelAndResponseProof(t *testing.T
 				return 203, `{"server":{"id":"server","status":"ACTIVE","name":"accepted raw","addresses":` + autoFloating + `}}`
 			}
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err == nil && r.URL.Path == "/v2.1/servers/server" {
 					response.Header.Set("X-Readiness-Proof", "accepted")
@@ -132,7 +133,7 @@ func TestWaitForServerAcceptedGETCloseKeepsRawModelAndResponseProof(t *testing.T
 					}}
 				}
 				return response, err
-			})
+			}))
 			retries := 0
 			f.cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retries++
@@ -160,14 +161,14 @@ func TestWaitForServerSharesWholeDeadlineAndRetainsAssignmentOnCancel(t *testing
 	}
 	var deadlines []time.Time
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		deadline, ok := r.Context().Deadline()
 		if !ok {
 			t.Error("missing deadline", r.URL)
 		}
 		deadlines = append(deadlines, deadline)
 		return base.RoundTrip(r)
-	})
+	}))
 	opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPTimeout(250*time.Millisecond), compute.WithAutomaticIPProgress(func(value *compute.Server) error {
 		value.ID, value.Name = "callback changed", "callback changed"
 		value.Addresses["private"] = []any{}
@@ -193,14 +194,14 @@ func TestWaitForServerDefaultWholeBudgetIs180Seconds(t *testing.T) {
 	start := time.Now()
 	var remaining time.Duration
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		deadline, ok := r.Context().Deadline()
 		if !ok {
 			t.Error("missing default whole deadline")
 		}
 		remaining = deadline.Sub(start)
 		return base.RoundTrip(r)
-	})
+	}))
 	result, err := f.service.WaitForServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}, compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false)))
 	if err != nil || result == nil || remaining < 179*time.Second || remaining > 181*time.Second || f.raw.Load() != 1 {
 		t.Fatal(result, err, remaining, f.raw.Load())

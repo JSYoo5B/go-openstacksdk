@@ -25,10 +25,10 @@ func serverGroupCloudFixture(t *testing.T, reply func(*http.Request) *http.Respo
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := &[]string{}
-	cloud.Provider.HTTPClient.Transport = backupServerTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		*calls = append(*calls, r.Method+" "+r.URL.EscapedPath()+"?"+r.URL.RawQuery)
 		return reply(r), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.64"
@@ -324,10 +324,10 @@ func TestCloudServerGroupReadsPhysicalFaultsCannotFallbackRetryOrBecomeMissing(t
 					if op == "get" {
 						raw = `{"server_group":{"id":"g1"}}`
 					}
-					body := &consoleCloudFaultBody{data: []byte(raw)}
+					body := &testcloud.Body{Data: raw}
 					var client *gophercloud.ServiceClient
 					service, owned, calls := serverGroupCloudFixture(t, func(*http.Request) *http.Response {
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"group physical"}}, Body: body}
+						return testcloud.StreamResponse(status, body, http.Header{"X-Actual": {"group physical"}})
 					})
 					client = owned
 					if op == "discovery" {
@@ -337,12 +337,12 @@ func TestCloudServerGroupReadsPhysicalFaultsCannotFallbackRetryOrBecomeMissing(t
 					original := client.ResourceBase
 					switch kind {
 					case "read-close":
-						body.readErr, body.closeErr = readErr, closeErr
+						body.ReadErr, body.CloseErr = readErr, closeErr
 					case "cancel":
-						body.onClose = func() { cancel(cancelCause) }
+						body.OnClose = func() { cancel(cancelCause) }
 					default:
-						body.onRead = func() { client.ResourceBase = original + "changed/" }
-						body.onClose = func() { client.ResourceBase = original }
+						body.OnRead = func() { client.ResourceBase = original + "changed/" }
+						body.OnClose = func() { client.ResourceBase = original }
 					}
 					retries, reauths, backoffs := 0, 0, 0
 					client.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
@@ -368,8 +368,8 @@ func TestCloudServerGroupReadsPhysicalFaultsCannotFallbackRetryOrBecomeMissing(t
 							t.Fatal(r, e)
 						}
 					}
-					if e == nil || len(*calls) != 1 || body.closed != 1 || retries != 0 || reauths != 0 || backoffs != 0 {
-						t.Fatal(e, *calls, body.closed, retries, reauths, backoffs)
+					if e == nil || len(*calls) != 1 || body.Closes() != 1 || retries != 0 || reauths != 0 || backoffs != 0 {
+						t.Fatal(e, *calls, body.Closes(), retries, reauths, backoffs)
 					}
 					if kind == "read-close" && status != 401 && (!errors.Is(e, readErr) || !errors.Is(e, closeErr)) || kind == "cancel" && (!errors.Is(e, context.Canceled) || !errors.Is(e, cancelCause)) || kind == "restored-source" && !errors.Is(e, resource.ErrInvalidOption) {
 						t.Fatal(e)

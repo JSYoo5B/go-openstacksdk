@@ -441,7 +441,7 @@ func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 			var mu sync.Mutex
 			var deadlines []time.Time
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				deadline, ok := r.Context().Deadline()
 				if !ok {
 					t.Error("request without deadline", r.URL)
@@ -450,7 +450,7 @@ func TestSourceIPListRawPollProgressAndDeadlines(t *testing.T) {
 				deadlines = append(deadlines, deadline)
 				mu.Unlock()
 				return base.RoundTrip(r)
-			})
+			}))
 			parent := 3 * time.Minute
 			extra := []compute.AutomaticFloatingIPOption{compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10"))}
 			switch mode {

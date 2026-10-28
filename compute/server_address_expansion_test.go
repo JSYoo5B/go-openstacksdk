@@ -215,10 +215,6 @@ func TestServerAddressSupplementPartialCleanHTTPFailureAndTerminal204(t *testing
 	}
 }
 
-type addressRoundTripper func(*http.Request) (*http.Response, error)
-
-func (f addressRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type addressCloseBody struct {
 	io.ReadCloser
 	close func() error
@@ -235,7 +231,7 @@ func TestServerAddressSupplementAcceptedFailuresKeepPartialAndGuardComputeOwner(
 			defer cancel(nil)
 			cause := errors.New("accepted close failed")
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = addressRoundTripper(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				body := `{"ports":[{"id":"one","device_id":"server"},{"id":"two","device_id":"server"}]}`
 				if strings.HasSuffix(r.URL.Path, "floatingips") {
@@ -264,7 +260,7 @@ func TestServerAddressSupplementAcceptedFailuresKeepPartialAndGuardComputeOwner(
 					}}
 				}
 				return response, nil
-			})
+			}))
 			server := &compute.Server{ID: "server", Status: "ACTIVE", Addresses: map[string]any{"private": []any{addressRow(4, "10.0.0.1", "fixed")}}}
 			view, err := service.ExpandServerInterfaces(ctx, server, compute.WithAddressReachability(false))
 			if err == nil || view == nil || view.SupplementalError != nil || len(view.Addresses["private"]) != 2 || calls != 3 || len(server.Addresses["private"].([]any)) != 1 {

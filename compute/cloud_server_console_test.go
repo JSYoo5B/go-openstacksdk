@@ -31,7 +31,7 @@ func newConsoleCloudFixture(t *testing.T, reply func(*http.Request) *http.Respon
 	client.Microversion = "2.96"
 	f := &consoleCloudFixture{cloud: cloud, client: client}
 	f.service = compute.New(client, compute.Dependencies{})
-	cloud.Provider.HTTPClient.Transport = backupServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		f.calls = append(f.calls, req.Method+" "+req.URL.EscapedPath()+"?"+req.URL.RawQuery)
 		var raw []byte
 		if req.Body != nil {
@@ -42,7 +42,7 @@ func newConsoleCloudFixture(t *testing.T, reply func(*http.Request) *http.Respon
 			t.Error(req.Header)
 		}
 		return reply(req), nil
-	})
+	}))
 	return f
 }
 func consoleCloudAction(body string) *http.Response { return backupServerWire(200, body, "console") }
@@ -98,7 +98,7 @@ func TestCloudServerConsoleNameFallbackUsesDetailsLocalScopeAndAmbiguity(t *test
 					return backupServerWire(200, `{"servers":[{"id":"s1","name":"vm"}]}`, "list")
 				}
 				if lane == "lookupfault" {
-					return &http.Response{StatusCode: 400, Header: http.Header{"X-Backup-Stage": {"lookup"}}, Body: &consoleCloudFaultBody{data: []byte(`{"bad":"lookup"}`), readErr: fault}}
+					return testcloud.StreamResponse(400, &testcloud.Body{Data: `{"bad":"lookup"}`, ReadErr: fault}, http.Header{"X-Backup-Stage": {"lookup"}})
 				}
 				if lane == "member400" {
 					return backupServerWire(400, `{"bad":"lookup"}`, "member")
@@ -268,56 +268,27 @@ func TestCloudServerConsoleConnectionLocationSnapshotAndGuard(t *testing.T) {
 	}
 }
 
-type consoleCloudFaultBody struct {
-	data              []byte
-	readErr, closeErr error
-	onRead, onClose   func()
-	closed            int
-}
-
-func (b *consoleCloudFaultBody) Read(p []byte) (int, error) {
-	if len(b.data) > 0 {
-		n := copy(p, b.data)
-		b.data = b.data[n:]
-		if b.onRead != nil {
-			b.onRead()
-			b.onRead = nil
-		}
-		return n, nil
-	}
-	if b.readErr != nil {
-		return 0, b.readErr
-	}
-	return 0, io.EOF
-}
-func (b *consoleCloudFaultBody) Close() error {
-	b.closed++
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.closeErr
-}
 func TestCloudServerConsoleDirty400NeverBecomesUnsupported(t *testing.T) {
 	for _, lane := range []string{"read", "close", "cancel", "source", "retry", "expanded-codes"} {
 		t.Run(lane, func(t *testing.T) {
 			readErr, closeErr, cancelErr, retryErr := errors.New("read"), errors.New("close"), errors.New("cancel cause"), errors.New("retry")
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			body := &consoleCloudFaultBody{data: []byte(`{"bad":"actual"}`)}
+			body := &testcloud.Body{Data: `{"bad":"actual"}`}
 			f := newConsoleCloudFixture(t, func(*http.Request) *http.Response {
-				return &http.Response{StatusCode: 400, Header: http.Header{"X-Actual": {"physical"}}, Body: body}
+				return testcloud.StreamResponse(400, body, http.Header{"X-Actual": {"physical"}})
 			})
 			base := f.client.ResourceBase
 			switch lane {
 			case "read":
-				body.readErr = readErr
+				body.ReadErr = readErr
 			case "close":
-				body.closeErr = closeErr
+				body.CloseErr = closeErr
 			case "cancel":
-				body.onRead = func() { cancel(cancelErr) }
+				body.OnRead = func() { cancel(cancelErr) }
 			case "source":
-				body.onRead = func() { f.client.ResourceBase += "wrong/" }
-				body.onClose = func() { f.client.ResourceBase = base }
+				body.OnRead = func() { f.client.ResourceBase += "wrong/" }
+				body.OnClose = func() { f.client.ResourceBase = base }
 			case "retry":
 				f.cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return retryErr }
 			case "expanded-codes":
@@ -346,7 +317,7 @@ func TestCloudServerConsoleCleanRetryStopsAndAcceptedReadKeepsSeparateLookup(t *
 					return backupServerWire(200, `{"server":{"id":"s1"}}`, "lookup")
 				}
 				if lane == "read-failure" {
-					return &http.Response{StatusCode: 200, Header: http.Header{"X-Backup-Stage": {"action"}}, Body: &consoleCloudFaultBody{data: []byte(`{"output":"partial"}`), readErr: cause}}
+					return testcloud.StreamResponse(200, &testcloud.Body{Data: `{"output":"partial"}`, ReadErr: cause}, http.Header{"X-Backup-Stage": {"action"}})
 				}
 				return backupServerWire(400, `{}`, "action")
 			})
@@ -376,14 +347,14 @@ func TestCloudServerConsoleCapturesHeadersBeforeOptionsAndAcrossLookupAction(t *
 			f := newConsoleCloudFixture(t, func(req *http.Request) *http.Response { return consoleCloudAction(`{"output":"ok"}`) })
 			f.client.MoreHeaders = map[string]string{"X-Source": "captured"}
 			var headers []http.Header
-			f.cloud.Provider.HTTPClient.Transport = backupServerTransport(func(req *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				headers = append(headers, req.Header.Clone())
 				if req.Method == "GET" {
 					f.client.MoreHeaders["X-Source"] = "after-lookup"
 					return backupServerWire(200, `{"server":{"id":"s1"}}`, "lookup"), nil
 				}
 				return consoleCloudAction(`{"output":"ok"}`), nil
-			})
+			}))
 			opts := []compute.ServerConsoleOption{func(*compute.ServerConsoleOpts) error { f.client.MoreHeaders["X-Source"] = "after-option"; return nil }}
 			if supplied {
 				opts = append(opts, compute.WithServerConsoleServerJSON(json.RawMessage(`{"id":"s1"}`)))

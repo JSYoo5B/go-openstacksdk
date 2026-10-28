@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -246,7 +247,7 @@ func TestCloudFlavorByRAMOwnsOptionsAndInheritedReadTransportOptions(t *testing.
 	query[0] = compute.WithFlavorQueryExtraSpecs(true)
 	var retained *compute.FlavorRAMOpts
 	original := c.ProviderClient.HTTPClient.Transport
-	c.ProviderClient.HTTPClient.Transport = backupServerTransport(func(req *http.Request) (*http.Response, error) {
+	c.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Header.Get("X-Owned") != "before" {
 			t.Error(req.Header)
 		}
@@ -320,7 +321,7 @@ func TestCloudFlavorByRAMPhysicalFaultsNative401AndCleanRetry(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			attempts := 0
-			body := &consoleCloudFaultBody{data: []byte(`{"flavors":[{"id":"first","ram":4}]}`)}
+			body := &testcloud.Body{Data: `{"flavors":[{"id":"first","ram":4}]}`}
 			var c *gophercloud.ServiceClient
 			s, client, calls := serverGroupCloudFixture(t, func(req *http.Request) *http.Response {
 				attempts++
@@ -336,22 +337,22 @@ func TestCloudFlavorByRAMPhysicalFaultsNative401AndCleanRetry(t *testing.T) {
 				if lane == "clean-retry" {
 					return backupServerWire(200, `{"flavors":[{"id":"first","ram":4,"extra_specs":{"inline":true}}]}`, "complete")
 				}
-				return &http.Response{StatusCode: 200, Header: http.Header{"X-Actual": {"physical"}}, Body: body}
+				return testcloud.StreamResponse(200, body, http.Header{"X-Actual": {"physical"}})
 			})
 			c = client
 			c.Microversion = "2.55"
 			original := c.ResourceBase
 			switch lane {
 			case "list-read-close":
-				body.readErr, body.closeErr = readErr, closeErr
+				body.ReadErr, body.CloseErr = readErr, closeErr
 			case "extra-read-close":
-				body.data = []byte(`{"extra_specs":{"actual":"yes"}}`)
-				body.readErr, body.closeErr = readErr, closeErr
+				body.Data = `{"extra_specs":{"actual":"yes"}}`
+				body.ReadErr, body.CloseErr = readErr, closeErr
 			case "cancel":
-				body.onClose = func() { cancel(cancelErr) }
+				body.OnClose = func() { cancel(cancelErr) }
 			case "restored-source":
-				body.onRead = func() { c.ResourceBase = original + "changed/" }
-				body.onClose = func() { c.ResourceBase = original }
+				body.OnRead = func() { c.ResourceBase = original + "changed/" }
+				body.OnClose = func() { c.ResourceBase = original }
 			}
 			retries := 0
 			if lane == "clean-retry" {
@@ -380,8 +381,8 @@ func TestCloudFlavorByRAMPhysicalFaultsNative401AndCleanRetry(t *testing.T) {
 				}
 				return
 			}
-			if body.closed != 1 {
-				t.Fatal(body.closed, e)
+			if body.Closes() != 1 {
+				t.Fatal(body.Closes(), e)
 			}
 			if strings.HasSuffix(lane, "read-close") && (!errors.Is(e, readErr) || !errors.Is(e, closeErr)) {
 				t.Fatal(e)

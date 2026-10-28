@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -84,7 +85,7 @@ func TestAutomaticCreateAcceptedPOSTAndGETCloseKeepResources(t *testing.T) {
 				return nil
 			})
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				matches := r.Method == "POST" && r.URL.Path == "/v2.1/servers"
 				if scenario == "GET error" {
@@ -109,7 +110,7 @@ func TestAutomaticCreateAcceptedPOSTAndGETCloseKeepResources(t *testing.T) {
 					}}
 				}
 				return response, err
-			})
+			}))
 			retries := 0
 			f.cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retries++
@@ -152,14 +153,14 @@ func TestAutomaticCreateSharesDeadlineAndKeepsAssignmentOnConvergenceCancel(t *t
 	}
 	var deadlines []time.Time
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		deadline, ok := r.Context().Deadline()
 		if !ok {
 			t.Error("missing deadline", r.URL)
 		}
 		deadlines = append(deadlines, deadline)
 		return base.RoundTrip(r)
-	})
+	}))
 	result, err := f.service.CreateWithAutomaticFloatingIP(ctx, automaticCreateRequest(), o)
 	if !errors.Is(err, cause) || result == nil || result.Automatic == nil || result.Automatic.Assignment == nil || !result.Automatic.Assignment.Allocated || result.Automatic.Observed || posts.Load() != 1 || f.posts.Load() != 1 || f.raw.Load() != 2 {
 		t.Fatal(result, err, posts.Load(), f.posts.Load(), f.raw.Load())

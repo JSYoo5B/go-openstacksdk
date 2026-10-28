@@ -24,7 +24,7 @@ func TestNovaServerIPAcceptedActionFailurePreservesPerItemHistory(t *testing.T) 
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause := errors.New("accepted Nova action processing failure")
 		base := f.cloud.Provider.HTTPClient.Transport
-		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+		f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := base.RoundTrip(r)
 			if err == nil && r.Method == "POST" && strings.HasSuffix(r.URL.Path, "/action") && response.Header.Get("X-Proof") == "Nova-attached-"+dispatchAddresses["b"] {
 				response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error {
@@ -40,7 +40,7 @@ func TestNovaServerIPAcceptedActionFailurePreservesPerItemHistory(t *testing.T) 
 				}}
 			}
 			return response, err
-		})
+		}))
 		result, err := f.service.AddIPList(ctx, automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"], dispatchAddresses["c"]}, append(novaIPOptions(), compute.WithServerIPWait(true))...)
 		cancel(nil)
 		var proof *resource.ResponseError
@@ -62,14 +62,14 @@ func TestNovaServerIPAcceptedAllocationAndCompatibilityClosePreserveProof(t *tes
 		f := newNovaIPFixture(t, "")
 		cause := errors.New("accepted " + phase + " Close")
 		base := f.cloud.Provider.HTTPClient.Transport
-		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+		f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			response, err := base.RoundTrip(r)
 			match := phase == "allocation" && r.Method == "POST" && r.URL.Path == "/v2.1/os-floating-ips" || phase == "compatibility" && r.Method == "GET" && r.URL.Path == "/v2.1/os-floating-ips/29"
 			if err == nil && match {
 				response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { return cause }}
 			}
 			return response, err
-		})
+		}))
 		result, err := f.service.AddIPsToServer(context.Background(), compute.AutomaticFloatingIPRequest{Server: automaticServer(t, "null")}, novaIPOptions(compute.WithFloatingIPPool(resource.Name("public")), compute.WithAutomaticEnsureOptions(network.WithEnsureReuse(false)))...)
 		var proof *resource.ResponseError
 		if !errors.Is(err, cause) || !errors.As(err, &proof) || proof.StatusCode != 200 || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.Allocated || result.NovaAssignment.FloatingIP.ID != "29" || result.NovaAssignment.FloatingIP.Address != dispatchAddresses["pool"] || result.NovaAssignment.ActionAccepted || result.NovaAssignment.AllocationResponse.Header.Get("X-Proof") != "Nova-allocated" {
@@ -98,7 +98,7 @@ func TestNovaServerIPUpperObservationRequiresActualActiveServer(t *testing.T) {
 			f := newNovaIPFixture(t, "")
 			f.status = "ACTIVE"
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				f.mu.Lock()
 				target := f.target
 				f.mu.Unlock()
@@ -108,7 +108,7 @@ func TestNovaServerIPUpperObservationRequiresActualActiveServer(t *testing.T) {
 					return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"late-raw"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
 				}
 				return base.RoundTrip(r)
-			})
+			}))
 			cause := errors.New("BUILD target is not ready")
 			progress := 0
 			common := []compute.AutomaticFloatingIPOption{compute.WithAutomaticAddressOptions(compute.WithFloatingIPSource(compute.FloatingIPNova), compute.WithAddressReachability(false)), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"]), compute.WithAutomaticEnsureOptions(network.WithEnsureFixedAddress("10.0.0.10")), compute.WithAutomaticIPPollInterval(time.Millisecond), compute.WithAutomaticIPProgress(func(*compute.Server) error { progress++; return cause })}
@@ -189,13 +189,13 @@ func TestNovaServerIPAlreadyAttachedKeepsRawModelAndSkipsAction(t *testing.T) {
 		row := strings.Replace(novaIPRow("9007199254740993", dispatchAddresses["a"], "public", `"server"`), `"fixed_ip":null`, `"fixed_ip":"10.0.0.10"`, 1)
 		f.rows, f.target = row, dispatchAddresses["a"]
 		base := f.cloud.Provider.HTTPClient.Transport
-		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+		f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.URL.Path == "/v2.1/os-floating-ips/9007199254740993" {
 				f.event("get:attached")
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"already-bound"}}, Body: io.NopCloser(strings.NewReader(`{"floating_ip":` + row + `}`)), Request: r}, nil
 			}
 			return base.RoundTrip(r)
-		})
+		}))
 		result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"]}, append(novaIPOptions(), compute.WithServerIPWait(wait))...)
 		if err != nil || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.AlreadyAttached || result.NovaAssignment.ActionAccepted || result.NovaAssignment.ActionResponse != nil || !result.NovaAssignment.Reused || result.NovaAssignment.Allocated || result.NovaAssignment.FloatingIP.Header.Get("X-Proof") != "already-bound" || result.NovaAssignment.FloatingIP.InstanceID == nil || *result.NovaAssignment.FloatingIP.InstanceID != "server" || !result.Attempts[0].Completed || result.Observed != wait {
 			t.Fatal(result, err, f.trace())
@@ -233,7 +233,7 @@ func TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate(t *testing.T
 	for _, mode := range []string{"address", "pool"} {
 		f := newNovaIPFixture(t, "")
 		base := f.cloud.Provider.HTTPClient.Transport
-		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+		f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.URL.Path != "/v2.1/os-floating-ips" {
 				return base.RoundTrip(r)
 			}
@@ -243,7 +243,7 @@ func TestNovaServerIPLateInventoryPageFailureCannotAttachOrAllocate(t *testing.T
 			}
 			f.event(proof)
 			return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {proof}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-		})
+		}))
 		var result *compute.AutomaticServerIPResult
 		var err error
 		if mode == "address" {
@@ -269,14 +269,14 @@ func TestNovaServerIPOneHTTPBudgetAndOptionSnapshot(t *testing.T) {
 		parentDeadline, _ := ctx.Deadline()
 		var deadlines []time.Time
 		base := f.cloud.Provider.HTTPClient.Transport
-		f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+		f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			d, ok := r.Context().Deadline()
 			if !ok {
 				t.Error("HTTP lacks shared budget")
 			}
 			deadlines = append(deadlines, d)
 			return base.RoundTrip(r)
-		})
+		}))
 		server := automaticServer(t, "null")
 		addresses := []string{dispatchAddresses["a"], dispatchAddresses["b"]}
 		inner, destination := 0, 0
@@ -341,14 +341,14 @@ func TestNovaServerIPRetryCannotChangeOwnedActionOrSource(t *testing.T) {
 func TestNovaServerIPRealDeadlineStopsAfterAcceptedFirstAction(t *testing.T) {
 	f := newNovaIPFixture(t, "")
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.Path == "/v2.1/servers/server" {
 			f.event("blocked-raw")
 			<-r.Context().Done()
 			return nil, r.Context().Err()
 		}
 		return base.RoundTrip(r)
-	})
+	}))
 	result, err := f.service.AddIPList(context.Background(), automaticServer(t, "null"), []string{dispatchAddresses["a"], dispatchAddresses["b"]}, append(novaIPOptions(compute.WithAutomaticIPTimeout(time.Second)), compute.WithServerIPWait(true))...)
 	if !errors.Is(err, context.DeadlineExceeded) || result == nil || result.NovaAssignment == nil || !result.NovaAssignment.ActionAccepted || len(result.Attempts) != 1 || result.Attempts[0].Completed || result.Attempts[0].Error == nil || result.Observed || !reflect.DeepEqual(f.trace(), []string{"list", "get:9007199254740993", "attach:" + dispatchAddresses["a"], "blocked-raw"}) {
 		t.Fatal(result, err, f.trace())
@@ -473,7 +473,7 @@ func TestNovaServerIPSelectedDecoderAndPoolResponseBoundaries(t *testing.T) {
 			options = novaIPOptions()
 		default:
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.Path == "/v2.1/os-floating-ip-pools" {
 					f.event("synthetic-pools")
 					body := `{"floating_ip_pools":[]}`
@@ -485,7 +485,7 @@ func TestNovaServerIPSelectedDecoderAndPoolResponseBoundaries(t *testing.T) {
 					return &http.Response{StatusCode: code, Header: http.Header{}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
 				}
 				return base.RoundTrip(r)
-			})
+			}))
 			options = novaIPOptions()
 		}
 		var result *compute.AutomaticServerIPResult

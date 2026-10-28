@@ -3,10 +3,8 @@ package apiversions_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,18 +14,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeVersionTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeVersionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeVersionWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeVersionOperation(t *testing.T, err error, operation string) {
@@ -41,10 +29,10 @@ func nativeVersionOperation(t *testing.T, err error, operation string) {
 type nativeVersionCall struct{ method, path, query string }
 
 func nativeVersionRecorder(cloud *testcloud.Cloud, calls *[]nativeVersionCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeVersionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeVersionCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		return reply(req), nil
-	})
+	}))
 }
 
 func nativeVersionStatus(t *testing.T, err error, operation string, code int, expected []int) {

@@ -164,7 +164,7 @@ func TestServerIPDispatchOneDeadlineBoundsAllItemsAndPreflightsObservation(t *te
 				parentDeadline, _ := ctx.Deadline()
 				var deadline time.Time
 				base := f.cloud.Provider.HTTPClient.Transport
-				f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+				f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					got, exists := r.Context().Deadline()
 					if deadline.IsZero() {
 						deadline = got
@@ -173,7 +173,7 @@ func TestServerIPDispatchOneDeadlineBoundsAllItemsAndPreflightsObservation(t *te
 						t.Errorf("stage enlarged or restarted deadline: %v / %v", got, deadline)
 					}
 					return base.RoundTrip(r)
-				})
+				}))
 				opts = append(opts, compute.WithAutomaticIPTimeout(500*time.Millisecond))
 				// Expire the same parent after the first item completed and the
 				// second reached observation; no third lookup may start.
@@ -241,14 +241,14 @@ func TestServerIPDispatchAcceptedRawCloseKeepsCurrentServerAndAllKnownIPs(t *tes
 	f := newDispatchFixture(t, "")
 	cause := errors.New("second raw close")
 	base := f.cloud.Provider.HTTPClient.Transport
-	f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := base.RoundTrip(r)
 		if err == nil && r.URL.Path == "/v2.1/servers/server" && f.raw.Load() == 2 {
 			response.Header.Set("X-Raw-Dispatch", "second")
 			response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { return cause }}
 		}
 		return response, err
-	})
+	}))
 	opts := append(dispatchOptions(), compute.WithFloatingIPAddresses(dispatchAddresses["a"], dispatchAddresses["b"], dispatchAddresses["c"]))
 	result, err := f.service.EnsureServerFloatingIP(context.Background(), dispatchInput(t), opts...)
 	var proof *resource.ResponseError

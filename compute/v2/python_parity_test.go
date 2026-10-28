@@ -24,36 +24,17 @@ import (
 // pythonCloudCall records the wire request the openstacksdk cloud helper would also send.
 type pythonCloudCall struct{ method, path, query, body string }
 
-type pythonCloudTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonCloudTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonCloudWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 // pythonCloudService returns the Nova v2 service (microversion 2.96) and a
 // Glance images API sharing one recording transport.
-func pythonCloudService(t *testing.T, reply func(*http.Request) *http.Response) (*v2.Service, *images.API, *[]pythonCloudCall) {
+func pythonCloudService(t *testing.T, reply func(*http.Request) *http.Response) (*v2.Service, *images.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonCloudCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCloudTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-			req.Body = io.NopCloser(strings.NewReader(raw))
-		}
-		*calls = append(*calls, pythonCloudCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	compute := cloud.Client("compute", "/catalog/unused/")
 	compute.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	compute.Microversion = "2.96"
@@ -62,10 +43,15 @@ func pythonCloudService(t *testing.T, reply func(*http.Request) *http.Response) 
 	return v2.New(compute), images.New(glance), calls
 }
 
-func pythonCloudCheck(t *testing.T, calls *[]pythonCloudCall, want []pythonCloudCall) {
+func pythonCloudCheck(t *testing.T, rec *testcloud.Recorder, want []pythonCloudCall) {
 	t.Helper()
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("got  %+v\nwant %+v", *calls, want)
+	// Project onto the local call fields; the recorder also keeps headers.
+	calls := []pythonCloudCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonCloudCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	if !reflect.DeepEqual(calls, want) {
+		t.Fatalf("got  %+v\nwant %+v", calls, want)
 	}
 }
 

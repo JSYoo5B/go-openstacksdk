@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -19,14 +20,14 @@ func TestServerIPWorkflowsKeepAcceptedAssignmentModelOnProcessingError(t *testin
 				return 200, `{"server":{"id":"server","status":"ACTIVE","addresses":` + autoFixed + `}}`
 			}
 			base := f.cloud.Provider.HTTPClient.Transport
-			f.cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+			f.cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				response, err := base.RoundTrip(r)
 				if err == nil && r.Method == "POST" && r.URL.Path == "/v2.0/floatingips" {
 					response.Header.Set("X-IP-Proof", "accepted")
 					response.Body = automaticCloseBody{ReadCloser: response.Body, close: func() error { return cause }}
 				}
 				return response, err
-			})
+			}))
 			input := compute.AutomaticFloatingIPRequest{Server: automaticServer(t, autoFixed)}
 			var result *compute.AutomaticServerIPResult
 			var err error

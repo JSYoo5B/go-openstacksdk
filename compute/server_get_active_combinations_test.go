@@ -145,7 +145,7 @@ func requestDeadlines(t *testing.T, cloud *testcloud.Cloud, hook func(*http.Requ
 		staged[path] = true
 	}
 	base := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = automaticTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		mu.Lock()
 		if deadline, ok := r.Context().Deadline(); staged[r.URL.Path] {
 			if !ok {
@@ -162,7 +162,7 @@ func requestDeadlines(t *testing.T, cloud *testcloud.Cloud, hook func(*http.Requ
 			hook(r)
 		}
 		return response, err
-	})
+	}))
 	return func() ([]time.Time, int) {
 		mu.Lock()
 		defer mu.Unlock()
