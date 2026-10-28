@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -18,7 +19,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Pinned Cloud _compute.py:165-181, 278-289, 524-561. These tables verify
@@ -72,11 +72,21 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
-				th.TestHeader(t, r, "Accept", "application/json")
-				th.TestHeader(t, r, "X-Cloud-Flavor", "owned")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
+				if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+					t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+				}
+				if got := r.Header.Values("X-Cloud-Flavor"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+					t.Errorf("header %s = %q, want %q", "X-Cloud-Flavor", got, "owned")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || callbacks.Load() != 1 {
 					t.Error("Cloud reader changed body or reapplied callbacks", r.URL, string(body), err, callbacks.Load())
@@ -91,10 +101,14 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 						t.Error("Cloud search filters leaked into the server list", r.URL, wantQuery)
 					}
 					if page == 1 {
-						th.TestHeader(t, r, "X-Auth-Token", "test-token")
+						if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+							t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+						}
 						cloud.Provider.SetToken("cloud-flavor-live")
 					} else {
-						th.TestHeader(t, r, "X-Auth-Token", "cloud-flavor-live")
+						if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "cloud-flavor-live" }) {
+							t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "cloud-flavor-live")
+						}
 					}
 					w.Header().Set("X-Cloud-Page", tc.name)
 					if page == 2 && tc.failure == "page403" {
@@ -110,7 +124,9 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 					testcloud.JSON(w, 200, flavorIdentityPage(rows, advertised))
 					return
 				}
-				th.TestHeader(t, r, "X-Auth-Token", "cloud-flavor-live")
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "cloud-flavor-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "cloud-flavor-live")
+				}
 				id := ""
 				if r.URL.Path == flavorIdentityPath+"/7/os-extra_specs" {
 					id = "7"
@@ -236,9 +252,15 @@ func TestComputeCloudFlavorSelectionOwnedOptionsAndLocation(t *testing.T) {
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
 				if r.URL.Path != flavorIdentityPath+"/detail" || r.URL.RawQuery != "is_public=None" {
 					t.Error("Cloud filters/name changed eager inventory query", r.URL)
 				}
@@ -291,11 +313,21 @@ func TestComputeCloudFlavorSelectionOwnedOptionsAndLocation(t *testing.T) {
 		const first = `{"id":"7","name":"owned-a","ram":4,"location":{"cloud":"wire-cloud"}}`
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-Auth-Token", "owned-live")
-			th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-			th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
-			th.TestHeader(t, r, "X-Cloud-Flavor", "owned")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned-live" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "owned-live")
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+				t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+			}
+			if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+				t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+			}
+			if got := r.Header.Values("X-Cloud-Flavor"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+				t.Errorf("header %s = %q, want %q", "X-Cloud-Flavor", got, "owned")
+			}
 			if r.URL.Path != flavorIdentityPath+"/detail" || r.URL.RawQuery != "is_public=None" {
 				t.Error(r.URL)
 			}
@@ -434,21 +466,35 @@ func TestComputeCloudFlavorGetFindBindingAndFilterPreflight(t *testing.T) {
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				index := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				if tc.name == "explicit empty microversion owns member and child without discovery" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
-				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-					th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
 				}
-				th.TestHeader(t, r, "X-Cloud-Flavor", "get")
+				if tc.name == "explicit empty microversion owns member and child without discovery" {
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
+				} else {
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+						t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+					}
+				}
+				if got := r.Header.Values("X-Cloud-Flavor"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "get" }) {
+					t.Errorf("header %s = %q, want %q", "X-Cloud-Flavor", got, "get")
+				}
 				body, readErr := io.ReadAll(r.Body)
 				if readErr != nil || len(body) != 0 || callbacks.Load() != 1 || locations.Load() != 1 {
 					t.Error("GetFlavor recaptured state or sent a body", r.URL, string(body), readErr, callbacks.Load(), locations.Load())
 				}
 				if index == 1 {
-					th.TestHeader(t, r, "X-Auth-Token", "test-token")
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+					}
 					if r.URL.Path != flavorIdentityPath+"/target" || r.URL.RawQuery != tc.query {
 						t.Error("GetFlavor routed through Cloud inventory instead of member Find", r.URL, tc.query)
 					}
@@ -466,7 +512,9 @@ func TestComputeCloudFlavorGetFindBindingAndFilterPreflight(t *testing.T) {
 					}
 					return
 				}
-				th.TestHeader(t, r, "X-Auth-Token", "get-flavor-live")
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "get-flavor-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "get-flavor-live")
+				}
 				if tc.fallback != "" && index == 2 {
 					if r.URL.Path != flavorIdentityPath+"/detail" || r.URL.RawQuery != "is_public=None" {
 						t.Error("GetFlavor fallback changed the owned Find inventory", r.URL)

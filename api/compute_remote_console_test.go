@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // openstacksdk ef55d7d: _proxy.py:2903–2920, server_remote_console.py:18–77.
@@ -56,11 +56,21 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 			var calls, callbacks atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
-				th.TestHeader(t, r, "X-Auth-Token", "remote-live-token")
-				th.TestHeader(t, r, "X-Source", "shared")
-				th.TestHeader(t, r, "X-Call", "owned")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.100")
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "remote-live-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "remote-live-token")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "shared" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "shared")
+				}
+				if got := r.Header.Values("X-Call"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+					t.Errorf("header %s = %q, want %q", "X-Call", got, "owned")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.100" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.100")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || string(body) != tc.body || r.URL.Path != computeRemoteConsolePath || r.URL.RawQuery != "" {
 					t.Error(string(body), tc.body, err, r.URL)
@@ -144,11 +154,17 @@ func TestComputeRemoteConsoleWinningTypeSelectedVersionGates(t *testing.T) {
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if tc.version == "" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
 				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", tc.version)
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != tc.version }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, tc.version)
+					}
 				}
 				if r.URL.Path != computeRemoteConsolePath || r.URL.RawQuery != "" {
 					t.Error("lookup/discovery/legacy request", r.URL)
@@ -198,7 +214,9 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != computeRemoteConsolePath || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -263,8 +281,12 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			index := calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
-			th.TestHeader(t, r, "X-Auth-Token", cloud.Provider.TokenID)
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != cloud.Provider.TokenID }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, cloud.Provider.TokenID)
+			}
 			body, err := io.ReadAll(r.Body)
 			if err != nil || string(body) != `{"remote_console":{"protocol":"vnc","type":"novnc","url":"native-request-extension"}}` || r.URL.Path != computeRemoteConsolePath || r.URL.RawQuery != "" {
 				t.Error(string(body), err, r.URL)

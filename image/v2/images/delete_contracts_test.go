@@ -14,7 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 type nativeDeleteTransport func(*http.Request) (*http.Response, error)
@@ -137,7 +136,9 @@ func TestNativeImageDeleteStrictStatusEvidenceAndErrResult(t *testing.T) {
 			if _, direct := operation.Cause.(gophercloud.ErrUnexpectedResponseCode); !direct {
 				t.Fatal("native cause replaced", operation.Cause)
 			}
-			th.AssertEquals(t, "native rejection bytes", string(native.Body))
+			if string(native.Body) != "native rejection bytes" {
+				t.Fatalf("string(native.Body) = %v, want %v", string(native.Body), "native rejection bytes")
+			}
 		})
 	}
 	t.Run("inherited ErrResult preserves exact error", func(t *testing.T) {

@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -17,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const computeAvailabilityZonesPath = "/reverse/nova/v2.1/project/os-availability-zone"
@@ -43,10 +43,18 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" {
 					t.Error("ordinary AZ reader changed route or sent a body/query", r.URL, string(body), err)
@@ -94,8 +102,12 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 			encoded, _ := json.Marshal(next)
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				index := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				wantQuery := ""
 				if index == 2 {
 					wantQuery = "marker=page-2"
@@ -167,10 +179,18 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 		const row = `{"zoneName":"first","zoneState":{"available":false},"location":{"cloud":"wire-cloud"}}`
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-AZ-Owned", "owned")
-			th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-			th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-AZ-Owned"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+				t.Errorf("header %s = %q, want %q", "X-AZ-Owned", got, "owned")
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+				t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+			}
+			if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+				t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+			}
 			if r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" || locations.Load() != 1 || callbacks.Load() != 2 {
 				t.Error(r.URL, locations.Load(), callbacks.Load())
 			}
@@ -217,9 +237,15 @@ func TestComputeAvailabilityZoneRecordsOrdinaryViewsLazyPagingAndOwnership(t *te
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-			th.TestHeaderUnset(t, r, "OpenStack-API-Version")
-			th.TestHeader(t, r, "X-AZ-Version", "empty")
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+				t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+			}
+			if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+				t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+			}
+			if got := r.Header.Values("X-AZ-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "empty" }) {
+				t.Errorf("header %s = %q, want %q", "X-AZ-Version", got, "empty")
+			}
 			if r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" {
 				t.Error("ordinary AZ operation invented discovery", r.URL)
 			}
@@ -286,9 +312,15 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
 				if r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" {
 					t.Error("Cloud names requested admin detail or query filtering", r.URL)
 				}
@@ -378,7 +410,9 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 			encoded, _ := json.Marshal(next)
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				index := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != computeAvailabilityZonesPath || index == 1 && r.URL.RawQuery != "" || index == 2 && r.URL.RawQuery != "marker=repeated" {
 					t.Error(r.URL)
 				}
@@ -498,10 +532,18 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 		}})
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-AZ-Names", "owned")
-			th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-			th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-AZ-Names"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+				t.Errorf("header %s = %q, want %q", "X-AZ-Names", got, "owned")
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+				t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+			}
+			if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+				t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+			}
 			if r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" || callbacks.Load() != 1 || locations.Load() != 1 {
 				t.Error(r.URL, callbacks.Load(), locations.Load())
 			}
@@ -548,9 +590,15 @@ func TestComputeAvailabilityZoneNativeListTypedSinglePageABI(t *testing.T) {
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
 				if r.URL.Path != computeAvailabilityZonesPath || r.URL.RawQuery != "" {
 					t.Error("native single-page List followed advertised next or requested detail", r.URL)
 				}

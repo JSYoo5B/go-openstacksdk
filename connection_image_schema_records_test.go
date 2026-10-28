@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing.T) {
@@ -30,7 +29,9 @@ func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing
 			cloud, region, projectName := "configured-cloud", "configured-region", "configured-project"
 			facts := resource.CloudLocation{Cloud: &cloud, RegionName: &region, Zone: json.RawMessage(`["bare-zone",900719925474099312345]`), Project: resource.CloudProject{ID: json.RawMessage("900719925474099312345"), Name: &projectName}}
 			wantLocation, err := json.Marshal(facts)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			provider := &gophercloud.ProviderClient{}
 			provider.UseTokenLock()
 			provider.SetToken("before-options")
@@ -46,15 +47,21 @@ func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing
 				return &http.Response{StatusCode: 201, Header: actualHeader, Body: io.NopCloser(strings.NewReader(raw))}, nil
 			})
 			conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"), sdk.WithCloudLocation(facts))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			cloud = "caller changed cloud"
 			facts.Zone[0] = '!'
 			facts.Project.ID[0] = '8'
 			ctx := context.Background()
 			service, err := conn.Image(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			versioned, err := conn.ImageV2(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			client := versioned.RawClient()
 			client.Microversion = "2.10"
 			client.MoreHeaders = map[string]string{"X-Source": "shared"}
@@ -70,30 +77,58 @@ func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing
 			if err != nil || got == nil || got.Kind != tc.kind || got.Resource == nil || got.Wire == nil || got.StatusCode != 201 || got.Header.Get("X-Connection-Proof") != "1" || string(got.Envelope) != raw || callbacks != 1 || calls != 1 {
 				t.Fatal(got, err, calls, callbacks)
 			}
-			th.AssertEquals(t, string(wantLocation), string(got.Resource.Body["location"]))
-			th.AssertEquals(t, `{"server":"foreign"}`, string(got.Wire.Body["location"]))
-			th.AssertEquals(t, "false", string(got.Resource.Body["id"]))
-			th.AssertEquals(t, `[1,null]`, string(got.Resource.Body["name"]))
-			th.AssertEquals(t, `{"nullable":null}`, string(got.Resource.Body["properties"]))
-			if tc.meta {
-				th.AssertEquals(t, 7, len(got.Resource.Body))
-				th.AssertEquals(t, "true", string(got.Resource.Body["additional_properties"]))
-				th.AssertEquals(t, `[false,{},1]`, string(got.Resource.Body["required"]))
-			} else {
-				th.AssertEquals(t, 5, len(got.Resource.Body))
-				th.AssertEquals(t, `{"n":900719925474099312345}`, string(got.Resource.Body["additional_properties"]))
+			if string(got.Resource.Body["location"]) != string(wantLocation) {
+				t.Fatalf("string(got.Resource.Body[\"location\"]) = %v, want %v", string(got.Resource.Body["location"]), string(wantLocation))
 			}
-			th.AssertEquals(t, "", client.MoreHeaders["X-Call"])
-			th.AssertEquals(t, "2.10", client.Microversion)
+			if string(got.Wire.Body["location"]) != `{"server":"foreign"}` {
+				t.Fatalf("string(got.Wire.Body[\"location\"]) = %v, want %v", string(got.Wire.Body["location"]), `{"server":"foreign"}`)
+			}
+			if string(got.Resource.Body["id"]) != "false" {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), "false")
+			}
+			if string(got.Resource.Body["name"]) != `[1,null]` {
+				t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `[1,null]`)
+			}
+			if string(got.Resource.Body["properties"]) != `{"nullable":null}` {
+				t.Fatalf("string(got.Resource.Body[\"properties\"]) = %v, want %v", string(got.Resource.Body["properties"]), `{"nullable":null}`)
+			}
+			if tc.meta {
+				if len(got.Resource.Body) != 7 {
+					t.Fatalf("len(got.Resource.Body) = %v, want %v", len(got.Resource.Body), 7)
+				}
+				if string(got.Resource.Body["additional_properties"]) != "true" {
+					t.Fatalf("string(got.Resource.Body[\"additional_properties\"]) = %v, want %v", string(got.Resource.Body["additional_properties"]), "true")
+				}
+				if string(got.Resource.Body["required"]) != `[false,{},1]` {
+					t.Fatalf("string(got.Resource.Body[\"required\"]) = %v, want %v", string(got.Resource.Body["required"]), `[false,{},1]`)
+				}
+			} else {
+				if len(got.Resource.Body) != 5 {
+					t.Fatalf("len(got.Resource.Body) = %v, want %v", len(got.Resource.Body), 5)
+				}
+				if string(got.Resource.Body["additional_properties"]) != `{"n":900719925474099312345}` {
+					t.Fatalf("string(got.Resource.Body[\"additional_properties\"]) = %v, want %v", string(got.Resource.Body["additional_properties"]), `{"n":900719925474099312345}`)
+				}
+			}
+			if client.MoreHeaders["X-Call"] != "" {
+				t.Fatalf("client.MoreHeaders[\"X-Call\"] = %v, want %v", client.MoreHeaders["X-Call"], "")
+			}
+			if client.Microversion != "2.10" {
+				t.Fatalf("client.Microversion = %v, want %v", client.Microversion, "2.10")
+			}
 			got.Resource.Body["location"][0] = '!'
 			got.Resource.Header.Set("X-Connection-Proof", "view changed")
 			got.Wire.Header.Set("X-Connection-Proof", "wire changed")
 			got.Header.Set("X-Connection-Proof", "record changed")
 			got.Envelope[0] = '!'
 			current, err := conn.CurrentLocation()
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			currentJSON, err := json.Marshal(current)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(currentJSON) != string(wantLocation) || string(got.Wire.Body["location"]) != `{"server":"foreign"}` || actualHeader.Get("X-Connection-Proof") != "1" {
 				t.Fatal("schema view leaked into Connection or actual receipt", string(currentJSON), got)
 			}

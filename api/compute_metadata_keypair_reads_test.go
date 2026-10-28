@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestComputeServerMetadataReadNativeContract(t *testing.T) {
@@ -44,11 +44,21 @@ func TestComputeServerMetadataReadNativeContract(t *testing.T) {
 			const path = "/reverse/nova/v2.1/servers/server-id/metadata"
 			cloud.Mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 				gets.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "metadata-live")
-				th.TestHeader(t, r, "X-Source", "selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "metadata-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "metadata-live")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				if r.URL.RawQuery != "" || r.ContentLength != 0 {
 					t.Error("metadata GET gained query/body", r.URL, r.ContentLength)
 				}
@@ -120,11 +130,21 @@ func TestComputeKeypairGetNativeContract(t *testing.T) {
 			}
 			cloud.Mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 				gets.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "keypair-live")
-				th.TestHeader(t, r, "X-Source", "selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "keypair-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "keypair-live")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				if !reflect.DeepEqual(r.URL.Query(), wantQuery) || r.URL.RawQuery != wantQuery.Encode() || r.ContentLength != 0 {
 					t.Error("name-based GET or optional owner changed", r.URL, r.ContentLength, wantQuery)
 				}

@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient(t *testing.T) {
@@ -27,7 +26,9 @@ func TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient(t *testin
 			cloud := "owned-cloud"
 			facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 			location, err := facts.ForResource(nil, nil)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			provider := &gophercloud.ProviderClient{}
 			provider.UseTokenLock()
 			provider.SetToken("info-0")
@@ -52,12 +53,18 @@ func TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient(t *testin
 				return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("page-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 			})
 			conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			cloud = "caller mutation"
 			upper, err := conn.Image(context.Background())
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			version, err := conn.ImageV2(context.Background())
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			api := upper.API.ServiceInfo
 			if versioned {
 				api = version.ServiceInfo
@@ -72,12 +79,16 @@ func TestConnectionImageServiceInfoRecordsShareLocationAndNativeClient(t *testin
 			storeHeader := serviceinfo.WithStoreRecordListHeaders(headers)
 			headers["X-Call"] = "caller mutation"
 			info, err := api.GetImportInfoRecord(context.Background(), importHeader)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if info == nil || info.Resource == nil || info.Wire == nil || len(info.Resource.Body) != 4 || info.StatusCode != 201 || string(info.Resource.Body["location"]) != string(location) || string(info.Resource.Body["id"]) != "null" || string(info.Resource.Body["import_methods"]) != `{"value":[null,4],"extension":9007199254740993}` || string(info.Wire.Body["location"]) != `{"foreign":true}` || string(info.Wire.Body["vendor"]) != "1e400" || string(info.Envelope) != bodies[0] {
 				t.Fatal("import declared view/provenance", info)
 			}
 			rows, err := api.AllStoreRecords(context.Background(), storeHeader, serviceinfo.WithStoreRecordListLimit(1), serviceinfo.WithStoreRecordListMaxItems(2))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(rows) != 2 || calls != 3 {
 				t.Fatal(rows, calls)
 			}

@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing.T) {
@@ -26,7 +25,9 @@ func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing
 	cloud := "action-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("action-0")
@@ -54,11 +55,17 @@ func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing
 		return &http.Response{Request: req, StatusCode: status, Header: header, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	upper, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source = versioned.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
 	source.Microversion = "2.10"
@@ -66,15 +73,21 @@ func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing
 		t.Fatal("actions replaced shared source")
 	}
 	seed, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, image.WithImageRecordHeader("X-Call", "record-action"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
 	deactivated, err := conn.DeactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: seed}, image.WithImageRecordActionHeader("X-Call", "record-action"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if deactivated == nil || deactivated.Record == nil || deactivated.Acknowledgement == nil {
 		t.Fatal(deactivated)
 	}
 	reactivated, err := conn.ReactivateImageRecord(context.Background(), image.ImageRecordActionRequest{Record: deactivated.Record}, image.WithImageRecordActionHeader("X-Call", "record-action"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	for index, result := range []*image.ImageRecordActionResult{deactivated, reactivated} {
 		if result == nil || result.Record == nil || result.Acknowledgement == nil {
 			t.Fatal(result)

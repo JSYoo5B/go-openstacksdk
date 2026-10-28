@@ -12,7 +12,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func actionRecordsCloud(t *testing.T) (*testcloud.Cloud, *API) {
@@ -34,8 +33,14 @@ func TestActionRecordsSourceMROEventsProjectionAndActualWire(t *testing.T) {
 	body := `{"instanceActions":[{"request_id":"req","instance_uuid":"foreign","action":"reboot","start_time":"literal","events":[{"event":"compute_reboot","hostId":"hash","details":"provided","unknown":17},null,false,4],"unknown":9007199254740993,"self":"wire"}]}`
 	cloud.Mux.HandleFunc("/v2.1/p/servers/server/os-instance-actions", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "compute 2.84", r.Header.Get("OpenStack-API-Version"))
-		testhelper.AssertEquals(t, "2.84", r.Header.Get("X-OpenStack-Nova-API-Version"))
+		if got := r.Header.Get("OpenStack-API-Version"); got != "compute 2.84" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute 2.84")
+			return
+		}
+		if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != "2.84" {
+			t.Errorf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, "2.84")
+			return
+		}
 		w.Header().Set("X-Proof", "actual")
 		testcloud.JSON(w, 203, body)
 	})
@@ -88,9 +93,18 @@ func TestActionRecordsQueryAliasesLocalFiltersRawCapAndParentScope(t *testing.T)
 	calls := 0
 	cloud.Mux.HandleFunc("/v2.1/p/servers/server/os-instance-actions", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "since", r.URL.Query().Get("changes-since"))
-		testhelper.AssertEquals(t, "before", r.URL.Query().Get("changes-before"))
-		testhelper.AssertEquals(t, "2", r.URL.Query().Get("limit"))
+		if got := r.URL.Query().Get("changes-since"); got != "since" {
+			t.Errorf("r.URL.Query().Get(\"changes-since\") = %v, want %v", got, "since")
+			return
+		}
+		if got := r.URL.Query().Get("changes-before"); got != "before" {
+			t.Errorf("r.URL.Query().Get(\"changes-before\") = %v, want %v", got, "before")
+			return
+		}
+		if got := r.URL.Query().Get("limit"); got != "2" {
+			t.Errorf("r.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+			return
+		}
 		if r.URL.Query().Has("action") || r.URL.Query().Has("unknown") {
 			t.Fatal(r.URL)
 		}
@@ -132,8 +146,14 @@ func TestActionRecordsDiscoveryIsLazyAndCeilingOwnsEveryPage(t *testing.T) {
 				if want == "" {
 					want = "2.84"
 				}
-				testhelper.AssertEquals(t, "compute "+want, r.Header.Get("OpenStack-API-Version"))
-				testhelper.AssertEquals(t, want, r.Header.Get("X-OpenStack-Nova-API-Version"))
+				if got := r.Header.Get("OpenStack-API-Version"); got != "compute "+want {
+					t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute "+want)
+					return
+				}
+				if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != want {
+					t.Errorf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, want)
+					return
+				}
 				if pages == 1 {
 					testcloud.JSON(w, 200, `{"instanceActions":[{"request_id":"one"}],"links":[{"rel":"next","href":"`+cloud.Server.URL+`/v2.1/p/servers/server/os-instance-actions?marker=one"}]}`)
 				} else {
@@ -325,8 +345,14 @@ func TestActionRecordsClean401And503RetriesKeepScopeQueryAndVersion(t *testing.T
 			calls, hooks := 0, 0
 			cloud.Mux.HandleFunc("/v2.1/p/servers/server/os-instance-actions", func(w http.ResponseWriter, r *http.Request) {
 				calls++
-				testhelper.AssertEquals(t, "compute 2.84", r.Header.Get("OpenStack-API-Version"))
-				testhelper.AssertEquals(t, "since", r.URL.Query().Get("changes-since"))
+				if got := r.Header.Get("OpenStack-API-Version"); got != "compute 2.84" {
+					t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute 2.84")
+					return
+				}
+				if got := r.URL.Query().Get("changes-since"); got != "since" {
+					t.Errorf("r.URL.Query().Get(\"changes-since\") = %v, want %v", got, "since")
+					return
+				}
 				if calls == 1 {
 					testcloud.JSON(w, status, `{}`)
 					return
@@ -342,11 +368,21 @@ func TestActionRecordsClean401And503RetriesKeepScopeQueryAndVersion(t *testing.T
 					if count != 1 || !errors.As(original, &native) || native.Actual != http.StatusServiceUnavailable {
 						return original
 					}
-					testhelper.AssertEquals(t, http.MethodGet, method)
-					testhelper.AssertEquals(t, cloud.Server.URL+"/v2.1/p/servers/server/os-instance-actions?changes-since=since", target)
-					testhelper.AssertEquals(t, method, native.Method)
-					testhelper.AssertEquals(t, target, native.URL)
-					testhelper.AssertEquals(t, `{}`, string(native.Body))
+					if method != http.MethodGet {
+						t.Fatalf("method = %v, want %v", method, http.MethodGet)
+					}
+					if target != cloud.Server.URL+"/v2.1/p/servers/server/os-instance-actions?changes-since=since" {
+						t.Fatalf("target = %v, want %v", target, cloud.Server.URL+"/v2.1/p/servers/server/os-instance-actions?changes-since=since")
+					}
+					if native.Method != method {
+						t.Fatalf("native.Method = %v, want %v", native.Method, method)
+					}
+					if native.URL != target {
+						t.Fatalf("native.URL = %v, want %v", native.URL, target)
+					}
+					if string(native.Body) != `{}` {
+						t.Fatalf("string(native.Body) = %v, want %v", string(native.Body), `{}`)
+					}
 					return nil
 				}
 			}

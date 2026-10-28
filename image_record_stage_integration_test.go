@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughProperties(t *testing.T) {
@@ -28,7 +27,9 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 	calls := 0
 	reader := strings.NewReader("skip-body")
 	_, err := reader.Seek(5, io.SeekStart)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index > 5 || req.Header.Get("X-Auth-Token") != fmt.Sprintf("stage-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
@@ -58,18 +59,24 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 				t.Fatal(index, req.Header, req.GetBody != nil)
 			}
 			body, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			expected := "body"
 			if index == 4 {
 				expected = ""
 			}
-			th.AssertEquals(t, expected, string(body))
+			if string(body) != expected {
+				t.Fatalf("string(body) = %v, want %v", string(body), expected)
+			}
 		} else if method == http.MethodPatch {
 			var patch []struct {
 				Op, Path string
 				Value    json.RawMessage
 			}
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&patch))
+			if err := json.NewDecoder(req.Body).Decode(&patch); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(patch) != 1 || patch[0].Op != "add" || patch[0].Path != "/gpu" || string(patch[0].Value) != `"True"` {
 				t.Fatal(patch)
 			}
@@ -100,11 +107,17 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 		return &http.Response{Request: req, StatusCode: status, Header: header, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source := versioned.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source"}
 	source.Microversion = "2.10"
@@ -112,25 +125,33 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 		t.Fatal("stage replaced shared source")
 	}
 	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
 	first, err := conn.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: seed, Data: reader}, func(*image.ImageRecordStageOpts) error {
 		source.MoreHeaders["X-Source"] = "mutated"
 		return nil
 	})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if first == nil || first.Record == nil || first.Staged == nil || first.Metadata == nil || calls != 3 || first.Staged.StatusCode != 299 || first.Metadata.StatusCode != 201 || string(first.Staged.Body) != "opaque stage\xff" || string(first.Record.Resource.Body["name"]) != `"seed"` || string(first.Record.Resource.Body["id"]) != `"image /한글:%?"` || len(first.Record.ImportMethods) != 2 {
 		t.Fatal(first, calls)
 	}
 	updated, err := conn.UpdateImagePropertiesRecord(context.Background(), image.ImageRecordPropertiesRequest{Record: first.Record}, image.WithImageRecordProperty("gpu", true))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if updated == nil || !updated.Updated || updated.Record == nil || calls != 4 {
 		t.Fatal(updated, calls)
 	}
 	// The plain borrowed data survives a translated property PATCH. Its cursor
 	// is now EOF, so this second stage sends zero bytes while inferring total9.
 	second, err := service.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: updated.Record})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if second == nil || second.Record == nil || second.Staged.StatusCode != 204 || second.Metadata.StatusCode != 299 || calls != 6 || string(second.Record.Resource.Body["properties"]) != `{"gpu":"True","team":"keep"}` || second.Record.Wire != nil {
 		t.Fatal(second, calls)
 	}
@@ -144,7 +165,9 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 
 func TestConnectionOwnedImageStageRejectsInvalidInvocation(t *testing.T) {
 	conn, err := sdk.FromProvider(&gophercloud.ProviderClient{}, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("stage facade canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

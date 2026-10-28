@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
@@ -62,17 +61,35 @@ func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
 			if tc.meta {
 				wantFields = 7
 			}
-			th.AssertEquals(t, wantFields, len(got.Resource.Body))
-			th.AssertEquals(t, "900719925474099312345", string(got.Resource.Body["id"]))
-			th.AssertEquals(t, `["passive",null]`, string(got.Resource.Body["name"]))
-			th.AssertEquals(t, `{"n":{"default":900719925474099312345}}`, string(got.Resource.Body["properties"]))
-			th.AssertEquals(t, "null", string(got.Resource.Body["location"]))
+			if len(got.Resource.Body) != wantFields {
+				t.Fatalf("len(got.Resource.Body) = %v, want %v", len(got.Resource.Body), wantFields)
+			}
+			if string(got.Resource.Body["id"]) != "900719925474099312345" {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), "900719925474099312345")
+			}
+			if string(got.Resource.Body["name"]) != `["passive",null]` {
+				t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `["passive",null]`)
+			}
+			if string(got.Resource.Body["properties"]) != `{"n":{"default":900719925474099312345}}` {
+				t.Fatalf("string(got.Resource.Body[\"properties\"]) = %v, want %v", string(got.Resource.Body["properties"]), `{"n":{"default":900719925474099312345}}`)
+			}
+			if string(got.Resource.Body["location"]) != "null" {
+				t.Fatalf("string(got.Resource.Body[\"location\"]) = %v, want %v", string(got.Resource.Body["location"]), "null")
+			}
 			if tc.meta {
-				th.AssertEquals(t, "true", string(got.Resource.Body["additional_properties"]))
-				th.AssertEquals(t, `{"nullable":null}`, string(got.Resource.Body["definitions"]))
-				th.AssertEquals(t, `[1,null,{}]`, string(got.Resource.Body["required"]))
+				if string(got.Resource.Body["additional_properties"]) != "true" {
+					t.Fatalf("string(got.Resource.Body[\"additional_properties\"]) = %v, want %v", string(got.Resource.Body["additional_properties"]), "true")
+				}
+				if string(got.Resource.Body["definitions"]) != `{"nullable":null}` {
+					t.Fatalf("string(got.Resource.Body[\"definitions\"]) = %v, want %v", string(got.Resource.Body["definitions"]), `{"nullable":null}`)
+				}
+				if string(got.Resource.Body["required"]) != `[1,null,{}]` {
+					t.Fatalf("string(got.Resource.Body[\"required\"]) = %v, want %v", string(got.Resource.Body["required"]), `[1,null,{}]`)
+				}
 			} else {
-				th.AssertEquals(t, `{"limit":1.00000000000000000001}`, string(got.Resource.Body["additional_properties"]))
+				if string(got.Resource.Body["additional_properties"]) != `{"limit":1.00000000000000000001}` {
+					t.Fatalf("string(got.Resource.Body[\"additional_properties\"]) = %v, want %v", string(got.Resource.Body["additional_properties"]), `{"limit":1.00000000000000000001}`)
+				}
 				if _, exists := got.Resource.Body["definitions"]; exists {
 					t.Fatal("ordinary view gained definitions")
 				}
@@ -80,10 +97,18 @@ func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
 					t.Fatal("ordinary view gained required")
 				}
 			}
-			th.AssertEquals(t, `{"server":"foreign"}`, string(got.Wire.Body["location"]))
-			th.AssertEquals(t, `"https://foreign.test/ref"`, string(got.Wire.Body["$ref"]))
-			th.AssertEquals(t, `{"limit":1.00000000000000000001}`, string(got.Wire.Body["additionalProperties"]))
-			th.AssertEquals(t, false, client.MoreHeaders["X-Option"] != "")
+			if string(got.Wire.Body["location"]) != `{"server":"foreign"}` {
+				t.Fatalf("string(got.Wire.Body[\"location\"]) = %v, want %v", string(got.Wire.Body["location"]), `{"server":"foreign"}`)
+			}
+			if string(got.Wire.Body["$ref"]) != `"https://foreign.test/ref"` {
+				t.Fatalf("string(got.Wire.Body[\"$ref\"]) = %v, want %v", string(got.Wire.Body["$ref"]), `"https://foreign.test/ref"`)
+			}
+			if string(got.Wire.Body["additionalProperties"]) != `{"limit":1.00000000000000000001}` {
+				t.Fatalf("string(got.Wire.Body[\"additionalProperties\"]) = %v, want %v", string(got.Wire.Body["additionalProperties"]), `{"limit":1.00000000000000000001}`)
+			}
+			if client.MoreHeaders["X-Option"] != "" != false {
+				t.Fatalf("client.MoreHeaders[\"X-Option\"] != \"\" = %v, want %v", client.MoreHeaders["X-Option"] != "", false)
+			}
 			if got.Resource.StatusCode != 200 || got.Wire.StatusCode != 200 || got.Resource.Header.Get("X-Task-Proof") != "actual" || got.Wire.Header.Get("X-Task-Proof") != "actual" {
 				t.Fatal("resource receipts absent", got)
 			}
@@ -92,7 +117,9 @@ func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
 			got.Wire.Body["id"][0] = '8'
 			got.Wire.Header.Set("X-Task-Proof", "wire changed")
 			got.Header.Set("X-Task-Proof", "record changed")
-			th.AssertEquals(t, raw, string(got.Envelope))
+			if string(got.Envelope) != raw {
+				t.Fatalf("string(got.Envelope) = %v, want %v", string(got.Envelope), raw)
+			}
 			got.Envelope[0] = '!'
 			if string(got.Wire.Body["properties"]) != `{"n":{"default":900719925474099312345}}` || string(got.Resource.Body["id"]) != "900719925474099312345" || actualHeader.Get("X-Task-Proof") != "actual" {
 				t.Fatal("record, view, wire or transport ownership leaked", got)
@@ -131,15 +158,31 @@ func TestSchemaRecordsFixedKindsClassViewsAndOwnedWire(t *testing.T) {
 			if err != nil || got == nil || got.Resource == nil || got.Wire == nil || calls != 1 {
 				t.Fatal(got, err, calls)
 			}
-			th.AssertEquals(t, tc.ap, string(got.Resource.Body["additional_properties"]))
-			th.AssertEquals(t, tc.properties, string(got.Resource.Body["properties"]))
-			th.AssertEquals(t, tc.definitions, string(got.Resource.Body["definitions"]))
-			th.AssertEquals(t, tc.required, string(got.Resource.Body["required"]))
-			th.AssertEquals(t, "null", string(got.Resource.Body["id"]))
-			th.AssertEquals(t, "null", string(got.Resource.Body["name"]))
-			th.AssertEquals(t, tc.raw, string(got.Envelope))
+			if string(got.Resource.Body["additional_properties"]) != tc.ap {
+				t.Fatalf("string(got.Resource.Body[\"additional_properties\"]) = %v, want %v", string(got.Resource.Body["additional_properties"]), tc.ap)
+			}
+			if string(got.Resource.Body["properties"]) != tc.properties {
+				t.Fatalf("string(got.Resource.Body[\"properties\"]) = %v, want %v", string(got.Resource.Body["properties"]), tc.properties)
+			}
+			if string(got.Resource.Body["definitions"]) != tc.definitions {
+				t.Fatalf("string(got.Resource.Body[\"definitions\"]) = %v, want %v", string(got.Resource.Body["definitions"]), tc.definitions)
+			}
+			if string(got.Resource.Body["required"]) != tc.required {
+				t.Fatalf("string(got.Resource.Body[\"required\"]) = %v, want %v", string(got.Resource.Body["required"]), tc.required)
+			}
+			if string(got.Resource.Body["id"]) != "null" {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), "null")
+			}
+			if string(got.Resource.Body["name"]) != "null" {
+				t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), "null")
+			}
+			if string(got.Envelope) != tc.raw {
+				t.Fatalf("string(got.Envelope) = %v, want %v", string(got.Envelope), tc.raw)
+			}
 			if tc.name == "duplicate first position wire value last" {
-				th.AssertEquals(t, `{"last":3}`, string(got.Wire.Body["additionalProperties"]))
+				if string(got.Wire.Body["additionalProperties"]) != `{"last":3}` {
+					t.Fatalf("string(got.Wire.Body[\"additionalProperties\"]) = %v, want %v", string(got.Wire.Body["additionalProperties"]), `{"last":3}`)
+				}
 			}
 		})
 	}
@@ -199,7 +242,9 @@ func TestSchemaRecordsAcceptedToleranceAndTerminalReceipts(t *testing.T) {
 					}
 				}
 				if tc.wantWire && tc.raw == `{"name":false}` {
-					th.AssertEquals(t, "false", string(got.Resource.Body["name"]))
+					if string(got.Resource.Body["name"]) != "false" {
+						t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), "false")
+					}
 				}
 			}
 			if calls != 1 || retries != 0 || body.closes != 1 {
@@ -266,7 +311,9 @@ func TestSchemaRecordsLocationOptionsAndPreflightBindings(t *testing.T) {
 		cloud, region, projectName := "configured", "region-one", "current-project"
 		facts := resource.CloudLocation{Cloud: &cloud, RegionName: &region, Zone: json.RawMessage(`{"zone":"retained"}`), Project: resource.CloudProject{ID: json.RawMessage("900719925474099312345"), Name: &projectName}}
 		wantLocation, err := json.Marshal(facts)
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		locations, callbacks, calls := 0, 0, 0
 		headers := map[string]string{"X-Option": "snapshot"}
 		option := WithGetSchemaHeaders(headers)
@@ -295,9 +342,15 @@ func TestSchemaRecordsLocationOptionsAndPreflightBindings(t *testing.T) {
 		if err != nil || got == nil || got.Resource == nil || got.Wire == nil || locations != 1 || callbacks != 1 || calls != 1 {
 			t.Fatal(got, err, locations, callbacks, calls)
 		}
-		th.AssertEquals(t, string(wantLocation), string(got.Resource.Body["location"]))
-		th.AssertEquals(t, `{"server":"ignored"}`, string(got.Wire.Body["location"]))
-		th.AssertEquals(t, "12", string(got.Resource.Body["name"]))
+		if string(got.Resource.Body["location"]) != string(wantLocation) {
+			t.Fatalf("string(got.Resource.Body[\"location\"]) = %v, want %v", string(got.Resource.Body["location"]), string(wantLocation))
+		}
+		if string(got.Wire.Body["location"]) != `{"server":"ignored"}` {
+			t.Fatalf("string(got.Wire.Body[\"location\"]) = %v, want %v", string(got.Wire.Body["location"]), `{"server":"ignored"}`)
+		}
+		if string(got.Resource.Body["name"]) != "12" {
+			t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), "12")
+		}
 		retained.Headers["X-Callback"] = "retained changed"
 		if client.MoreHeaders["X-Callback"] != "" {
 			t.Fatal("options mutated source", client.MoreHeaders)

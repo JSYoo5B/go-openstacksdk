@@ -8,13 +8,13 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordCreateTaskPrepared(t *testing.T, ctx context.Context, client *gophercloud.ServiceClient) *preparedImageRecord {
@@ -22,18 +22,26 @@ func imageRecordCreateTaskPrepared(t *testing.T, ctx context.Context, client *go
 	p, err := New(client).prepareImageRecord(ctx, func(opctx context.Context, check func(context.Context) error) (map[string]string, error) {
 		return nil, check(opctx)
 	})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	return p
 }
 
 func imageRecordCreateTaskSeed(t *testing.T, raw string) *ImageRecordCreateTask {
 	t.Helper()
 	var fields map[string]json.RawMessage
-	th.AssertNoErr(t, json.Unmarshal([]byte(raw), &fields))
+	if err := json.Unmarshal([]byte(raw), &fields); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	body, err := normalizeImageRecordCreateTask(fields, json.RawMessage(raw))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	value, err := projectImageRecordCreateTask(body, json.RawMessage(`{"cloud":"seed"}`), nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	value.Envelope, value.Header, value.StatusCode = json.RawMessage(raw), http.Header{"X-Task-Proof": {"seed"}}, 201
 	value.Resource.Header, value.Resource.StatusCode = value.Header.Clone(), value.StatusCode
 	return value
@@ -52,7 +60,9 @@ func TestImageRecordCreateTaskNoWaitPreservesRawMissingAndNonstringDescriptors(t
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.TestMethod(t, req, http.MethodPost)
+				if req.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", req.Method, http.MethodPost)
+				}
 				if req.URL.EscapedPath() != "/reverse/glance/v2/tasks" || req.URL.RawQuery != "" {
 					t.Fatal(req.URL)
 				}
@@ -83,10 +93,16 @@ func TestImageRecordCreateTaskConstructorAndSparseTranslationUseTaskDescriptors(
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
-		th.TestHeader(t, req, "X-Auth-Token", "first-token")
+		if got := req.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "first-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "first-token")
+		}
 		if calls == 1 {
-			th.TestHeader(t, req, "Accept", "application/json")
-			th.TestHeader(t, req, "Content-Type", "application/json")
+			if got := req.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+				t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+			}
+			if got := req.Header.Values("Content-Type"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+				t.Errorf("header %s = %q, want %q", "Content-Type", got, "application/json")
+			}
 			imageRecordImportPayload(t, req, `{"id":["seed"],"name":false,"created_at":7,"expires_at":{},"input":null,"message":[],"owner":"alias wins","result":true,"schema":1e9999,"status":"pending","type":{},"updated_at":"literal"}`)
 			return taskCoreJSON(req, 203, `{"id":"actual","owner":"first","owner_id":"last","result":[1,null],"self":"foreign","unknown":900719925474099312345,"location":{"cloud":"wire"},"tags":["ignored"]}`), nil
 		}
@@ -99,12 +115,16 @@ func TestImageRecordCreateTaskConstructorAndSparseTranslationUseTaskDescriptors(
 	p.location = json.RawMessage(`{"cloud":"captured"}`)
 	attrs := map[string]json.RawMessage{"id": json.RawMessage(`["seed"]`), "name": json.RawMessage("false"), "created_at": json.RawMessage("7"), "expires_at": json.RawMessage("{}"), "input": json.RawMessage("null"), "message": json.RawMessage("[]"), "owner": json.RawMessage(`"wire first"`), "owner_id": json.RawMessage(`"alias wins"`), "result": json.RawMessage("true"), "schema": json.RawMessage("1e9999"), "status": json.RawMessage(`"pending"`), "type": json.RawMessage("{}"), "updated_at": json.RawMessage(`"literal"`), "unknown": json.RawMessage(`[false]`), "location": json.RawMessage(`{"cloud":"constructor"}`), "tags": json.RawMessage(`["discard"]`)}
 	created, createReceipt, err := createImageRecordTask(p, attrs)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if created == nil || createReceipt == nil || string(created.Resource.Body["owner_id"]) != `"last"` || string(created.Resource.Body["location"]) != `{"cloud":"captured"}` || len(created.body) != 12 {
 		t.Fatal(created)
 	}
 	got, getReceipt, err := getCreatedImageRecordTask(p, created)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got == nil || getReceipt == nil || got.StatusCode != 202 || string(got.Resource.Body["result"]) != `[1,null]` || string(got.Resource.Body["owner_id"]) != "null" || string(got.Resource.Body["status"]) != `"success"` || string(got.Resource.Body["schema"]) != "1e9999" {
 		t.Fatal(got)
 	}
@@ -633,7 +653,9 @@ func TestImageRecordCreateTaskNativeRetryFreezesRawSubmissionAndRetainsLiveAuthe
 					return taskCoreJSON(req, 503, `{"error":"retry"}`), nil
 				}
 				if mode == "auth changed" {
-					th.TestHeader(t, req, "X-Auth-Token", "updated-token")
+					if got := req.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "updated-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "updated-token")
+					}
 				}
 				return taskCoreJSON(req, 201, `{"id":"actual"}`), nil
 			})

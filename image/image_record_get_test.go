@@ -8,13 +8,13 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Independent inventory from pinned Image, inherited Resource and TagMixin;
@@ -91,20 +91,26 @@ func TestImageRecordGetProjectionAndIndependentReceipts(t *testing.T) {
 	// Compare all declared fields separately from current location and packed extras.
 	want["location"] = string(got.Resource.Body["location"])
 	want["properties"] = string(got.Resource.Body["properties"])
-	th.CheckDeepEquals(t, want, imageRecordValues(got.Resource))
+	if actual := imageRecordValues(got.Resource); !reflect.DeepEqual(actual, want) {
+		t.Errorf("imageRecordValues(got.Resource) = %#v, want %#v", actual, want)
+	}
 	var captured resource.CloudLocation
 	if err := json.Unmarshal(got.Resource.Body["location"], &captured); err != nil || captured.Cloud == nil || *captured.Cloud != "captured" || string(captured.Project.ID) != `"token project"` {
 		t.Fatal(captured, err)
 	}
 	props := imageRecordProperties(t, got)
-	th.CheckDeepEquals(t, map[string]string{"location": `{"cloud":"wire"}`, "vendor": "1e400", "OpenStack-image-import-methods": `"body decoy"`}, func() map[string]string {
+	if got := (func() map[string]string {
 		m := map[string]string{}
 		for k, v := range props {
 			m[k] = string(v)
 		}
 		return m
-	}())
-	th.CheckDeepEquals(t, []string{"a", "", " a", " b", " b"}, got.ImportMethods)
+	}()); !reflect.DeepEqual(got, map[string]string{"location": `{"cloud":"wire"}`, "vendor": "1e400", "OpenStack-image-import-methods": `"body decoy"`}) {
+		t.Errorf("got %#v, want %#v", got, map[string]string{"location": `{"cloud":"wire"}`, "vendor": "1e400", "OpenStack-image-import-methods": `"body decoy"`})
+	}
+	if !reflect.DeepEqual(got.ImportMethods, []string{"a", "", " a", " b", " b"}) {
+		t.Errorf("got.ImportMethods = %#v, want %#v", got.ImportMethods, []string{"a", "", " a", " b", " b"})
+	}
 	for _, view := range []*resource.RawResource{got.Resource, got.Wire} {
 		if view.StatusCode != 203 || view.Header.Get("X-Task-Proof") != "actual" {
 			t.Fatal(view)
@@ -123,7 +129,9 @@ func TestImageRecordGetProjectionAndIndependentReceipts(t *testing.T) {
 		t.Fatal("owned receipt channels alias", got)
 	}
 	got.Wire.Body["vendor"][0] = '!'
-	th.AssertEquals(t, "1e400", string(imageRecordProperties(t, got)["vendor"]))
+	if actual := string(imageRecordProperties(t, got)["vendor"]); actual != "1e400" {
+		t.Fatalf("string(imageRecordProperties(t, got)[\"vendor\"]) = %v, want %v", actual, "1e400")
+	}
 	got.Envelope[0] = '!'
 	if actualHeader.Get("X-Task-Proof") != "actual" {
 		t.Fatal("actual response header mutated")
@@ -151,11 +159,21 @@ func TestImageRecordGetPackingAliasesAndSeedOverlay(t *testing.T) {
 			if got == nil || err != nil {
 				t.Fatal(got, err)
 			}
-			th.AssertEquals(t, test.id, string(got.Resource.Body["id"]))
-			th.AssertEquals(t, test.owner, string(got.Resource.Body["owner"]))
-			th.AssertEquals(t, test.owner, string(got.Resource.Body["owner_id"]))
-			th.AssertEquals(t, `"seed checksum"`, string(got.Resource.Body["checksum"]))
-			th.AssertEquals(t, test.properties, string(got.Resource.Body["properties"]))
+			if string(got.Resource.Body["id"]) != test.id {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), test.id)
+			}
+			if string(got.Resource.Body["owner"]) != test.owner {
+				t.Fatalf("string(got.Resource.Body[\"owner\"]) = %v, want %v", string(got.Resource.Body["owner"]), test.owner)
+			}
+			if string(got.Resource.Body["owner_id"]) != test.owner {
+				t.Fatalf("string(got.Resource.Body[\"owner_id\"]) = %v, want %v", string(got.Resource.Body["owner_id"]), test.owner)
+			}
+			if string(got.Resource.Body["checksum"]) != `"seed checksum"` {
+				t.Fatalf("string(got.Resource.Body[\"checksum\"]) = %v, want %v", string(got.Resource.Body["checksum"]), `"seed checksum"`)
+			}
+			if string(got.Resource.Body["properties"]) != test.properties {
+				t.Fatalf("string(got.Resource.Body[\"properties\"]) = %v, want %v", string(got.Resource.Body["properties"]), test.properties)
+			}
 			if got.Resource.Header.Get("X-Task-Proof") != "actual" || got.Resource.StatusCode != 200 || seed.Header.Get("X-Task-Proof") != "seed header" || seed.StatusCode != 500 {
 				t.Fatal("seed supplied receipt metadata", got, seed)
 			}
@@ -171,8 +189,12 @@ func TestImageRecordGetPackingAliasesAndSeedOverlay(t *testing.T) {
 			}
 			props := imageRecordProperties(t, got)
 			want := map[string]json.RawMessage{"x": json.RawMessage(`"option override"`), "resource_only": json.RawMessage(`900719925474099312345`), "y": json.RawMessage(`"request y"`), "z": json.RawMessage(`"option z"`)}
-			th.CheckDeepEquals(t, want, props)
-			th.AssertEquals(t, `"resource x"`, string(seed.Body["x"]))
+			if !reflect.DeepEqual(props, want) {
+				t.Errorf("props = %#v, want %#v", props, want)
+			}
+			if string(seed.Body["x"]) != `"resource x"` {
+				t.Fatalf("string(seed.Body[\"x\"]) = %v, want %v", string(seed.Body["x"]), `"resource x"`)
+			}
 		})
 	}
 	t.Run("later options replace resource identity and attributes", func(t *testing.T) {
@@ -232,8 +254,12 @@ func TestImageRecordGetDescriptorIntegration(t *testing.T) {
 			case "hw_vif_multiqueue_enabled":
 				key = "is_hw_vif_multiqueue_enabled"
 			}
-			th.AssertEquals(t, test.want, string(got.Resource.Body[key]))
-			th.AssertEquals(t, test.raw, string(got.Wire.Body[test.field]))
+			if string(got.Resource.Body[key]) != test.want {
+				t.Fatalf("string(got.Resource.Body[key]) = %v, want %v", string(got.Resource.Body[key]), test.want)
+			}
+			if string(got.Wire.Body[test.field]) != test.raw {
+				t.Fatalf("string(got.Wire.Body[test.field]) = %v, want %v", string(got.Wire.Body[test.field]), test.raw)
+			}
 		})
 	}
 }
@@ -274,7 +300,9 @@ func TestImageRecordGetAcceptedToleranceAndNativeErrors(t *testing.T) {
 				if test.raw == `{"id":"different"}` {
 					want["id"] = `"different"`
 				}
-				th.CheckDeepEquals(t, want, imageRecordValues(got.Resource))
+				if actual := imageRecordValues(got.Resource); !reflect.DeepEqual(actual, want) {
+					t.Errorf("imageRecordValues(got.Resource) = %#v, want %#v", actual, want)
+				}
 			} else {
 				if got != nil || !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(got, err)
@@ -346,7 +374,9 @@ func TestImageRecordGetLocationAndConcreteSnapshots(t *testing.T) {
 	if err := json.Unmarshal(got.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "captured" || string(location.Project.ID) != `"token project"` {
 		t.Fatal(location, err)
 	}
-	th.AssertEquals(t, `"image owner"`, string(got.Resource.Body["owner_id"]))
+	if string(got.Resource.Body["owner_id"]) != `"image owner"` {
+		t.Fatalf("string(got.Resource.Body[\"owner_id\"]) = %v, want %v", string(got.Resource.Body["owner_id"]), `"image owner"`)
+	}
 }
 
 func TestImageRecordGetReadCloseAndStickyGuardEvidence(t *testing.T) {
@@ -497,7 +527,9 @@ func TestImageRecordGetCapturesOptionsAndTopLevelAttributesBeforeMarshal(t *test
 	if got == nil || err != nil || calls != 1 || marshals != 1 || got.Wire != nil {
 		t.Fatal(got, err, calls, marshals)
 	}
-	th.CheckDeepEquals(t, map[string]json.RawMessage{"a_callback": json.RawMessage(`{"owned":true}`), "zzz_later": json.RawMessage(`"captured scalar"`)}, imageRecordProperties(t, got))
+	if want, actual := (map[string]json.RawMessage{"a_callback": json.RawMessage(`{"owned":true}`), "zzz_later": json.RawMessage(`"captured scalar"`)}), imageRecordProperties(t, got); !reflect.DeepEqual(actual, want) {
+		t.Errorf("imageRecordProperties(t, got) = %#v, want %#v", actual, want)
+	}
 	if attributes["zzz_later"] != "changed by marshaler" {
 		t.Fatal("mutation callback did not run", attributes)
 	}

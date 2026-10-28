@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughImportUpdateAndStage(t *testing.T) {
@@ -73,13 +73,17 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 		if index >= 4 {
 			header = "later"
 		}
-		th.AssertEquals(t, header, req.Header.Get("X-Source"))
+		if got := req.Header.Get("X-Source"); got != header {
+			t.Fatalf("req.Header.Get(\"X-Source\") = %v, want %v", got, header)
+		}
 		if index == 2 {
 			source.MoreHeaders["X-Source"] = "later"
 		}
 		switch index {
 		case 1:
-			th.AssertEquals(t, "8", req.Header.Get("X-OpenStack-Image-Size"))
+			if got := req.Header.Get("X-OpenStack-Image-Size"); got != "8" {
+				t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "8")
+			}
 			data := make([]byte, 4)
 			n, err := io.ReadFull(req.Body, data)
 			if err != nil || n != 4 || string(data) != "head" {
@@ -88,7 +92,9 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 			_ = req.Body.Close()
 		case 4:
 			var body map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&body))
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(body) != 1 || string(body["method"]) != `{"name":"glance-direct"}` {
 				t.Fatal(body)
 			}
@@ -97,15 +103,23 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 				Op, Path string
 				Value    json.RawMessage
 			}
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&patches))
+			if err := json.NewDecoder(req.Body).Decode(&patches); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(patches) != 1 || patches[0].Op != "add" || patches[0].Path != "/name" || string(patches[0].Value) != `"after"` {
 				t.Fatal(patches)
 			}
 		case 6:
-			th.AssertEquals(t, "8", req.Header.Get("X-OpenStack-Image-Size"))
+			if got := req.Header.Get("X-OpenStack-Image-Size"); got != "8" {
+				t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "8")
+			}
 			data, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, "tail", string(data))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(data) != "tail" {
+				t.Fatalf("string(data) = %v, want %v", string(data), "tail")
+			}
 			_ = req.Body.Close()
 		}
 		if method == http.MethodGet && req.Body != nil {
@@ -138,11 +152,17 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 	})
 	cloud := "connection cloud"
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(resource.CloudLocation{Cloud: &cloud}))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source = versioned.RawClient()
 	source.Microversion = "2.10"
 	source.MoreHeaders = map[string]string{"X-Source": "source"}
@@ -150,7 +170,9 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 		t.Fatal("owned download replaced connection source")
 	}
 	uploaded, err := conn.UploadImageRecord(context.Background(), image.ImageRecordUploadRequest{Data: reader}, image.WithImageRecordUploadContainerFormat("bare"), image.WithImageRecordUploadDiskFormat("qcow2"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if uploaded == nil || uploaded.Record == nil || calls != 2 || reader.Len() != 4 {
 		t.Fatal(uploaded, calls, reader.Len())
 	}
@@ -160,22 +182,34 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 	if err != nil || downloaded == nil || downloaded.Record == nil || downloaded.Metadata == nil || downloaded.Downloaded == nil || downloaded.Metadata.StatusCode != 203 || downloaded.Downloaded.StatusCode != 206 || string(downloaded.Downloaded.Body) != "abc" || downloaded.BytesWritten != 3 || downloaded.Checksum == nil || !downloaded.Checksum.Verified || calls != 4 || reader.Len() != 4 || string(downloaded.Record.Resource.Body["id"]) != `"retarget /한글:%?"` || downloaded.Record.Header.Get("X-Proof") != "phase-2" || downloaded.Downloaded.Header.Get("X-Proof") != "phase-3" {
 		t.Fatal(downloaded, err, calls, reader.Len())
 	}
-	th.CheckDeepEquals(t, []string{"fetch", " only"}, downloaded.Record.ImportMethods)
+	if !reflect.DeepEqual(downloaded.Record.ImportMethods, []string{"fetch", " only"}) {
+		t.Errorf("downloaded.Record.ImportMethods = %#v, want %#v", downloaded.Record.ImportMethods, []string{"fetch", " only"})
+	}
 	var location resource.CloudLocation
-	th.AssertNoErr(t, json.Unmarshal(downloaded.Record.Resource.Body["location"], &location))
-	th.AssertEquals(t, "connection cloud", *location.Cloud)
+	if err := json.Unmarshal(downloaded.Record.Resource.Body["location"], &location); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *location.Cloud != "connection cloud" {
+		t.Fatalf("*location.Cloud = %v, want %v", *location.Cloud, "connection cloud")
+	}
 	imported, err := conn.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: downloaded.Record})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if imported == nil || imported.Record == nil || imported.Acknowledgement.ImageID != fetched || calls != 5 || reader.Len() != 4 {
 		t.Fatal(imported, calls, reader.Len())
 	}
 	updated, err := conn.UpdateImageRecord(context.Background(), image.ImageRecordUpdateRequest{Record: imported.Record, Attributes: map[string]any{"name": "after"}})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if updated == nil || calls != 6 || reader.Len() != 4 {
 		t.Fatal(updated, calls, reader.Len())
 	}
 	staged, err := conn.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: updated})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if staged == nil || staged.Record == nil || calls != 8 || reader.Len() != 0 || string(staged.Record.Resource.Body["name"]) != `"staged"` {
 		t.Fatal(staged, calls, reader.Len())
 	}
@@ -184,9 +218,15 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 		t.Fatal(streamed, err, calls)
 	}
 	data, err := io.ReadAll(streamed.Downloaded.Stream)
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, "abc", string(data))
-	th.AssertNoErr(t, streamed.Downloaded.Stream.Close())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(data) != "abc" {
+		t.Fatalf("string(data) = %v, want %v", string(data), "abc")
+	}
+	if err := streamed.Downloaded.Stream.Close(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if streamed.Checksum.Complete || streamed.Checksum.Verified || streamed.BytesWritten != 0 || reader.Len() != 0 {
 		t.Fatal(streamed, reader.Len())
 	}
@@ -200,7 +240,9 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 
 func TestConnectionOwnedImageDownloadRejectsInvalidInvocation(t *testing.T) {
 	conn, err := sdk.FromProvider(&gophercloud.ProviderClient{}, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("download facade canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -17,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestComputeFlavorGetNativeBindingDTOAndOriginalHTTPErrors(t *testing.T) {
@@ -48,11 +48,21 @@ func TestComputeFlavorGetNativeBindingDTOAndOriginalHTTPErrors(t *testing.T) {
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "flavor-live")
-				th.TestHeader(t, r, "X-Flavor-Source", "native")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "flavor-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "flavor-live")
+				}
+				if got := r.Header.Values("X-Flavor-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "native" }) {
+					t.Errorf("header %s = %q, want %q", "X-Flavor-Source", got, "native")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || r.URL.Path != flavorIdentityPath+"/7" {
 					t.Error("native Get changed its binding", r.URL, string(body), err)
@@ -109,10 +119,18 @@ func TestComputeFlavorGetExtraSpecNativeBindingReturnsWholeStringMap(t *testing.
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "property-native-live")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "property-native-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "property-native-live")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || r.URL.Path != flavorExtraSpecsFetchPath+"/cpu" {
 					t.Error("native property binding changed", r.URL, string(body), err)
@@ -165,10 +183,18 @@ func TestComputeFlavorListDetailNativeBindingEagerOptionsLazyLinkedPages(t *test
 			linked := mode == "two linked pages" || mode == "late403" || mode == "break before second page"
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				call := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "list-detail-live")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "list-detail-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "list-detail-live")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.Path != flavorIdentityPath+"/detail" || callbacks.Load() != 1 {
 					t.Error("native detail route/body/options changed", r.URL, string(body), callbacks.Load(), err)
@@ -310,11 +336,21 @@ func TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBindin
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "property-owned-live")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.100")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.100")
-				th.TestHeader(t, r, "Accept", "application/json")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "property-owned-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "property-owned-live")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.100" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.100")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.100" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.100")
+				}
+				if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+					t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+				}
 				payload, err := io.ReadAll(r.Body)
 				if err != nil || len(payload) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || r.URL.EscapedPath() != flavorExtraSpecsFetchPath+"/"+url.PathEscape(property) {
 					t.Error("property route was normalized or whole-specs fetched", r.URL, string(payload), err)
@@ -371,15 +407,21 @@ func TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBindin
 				return nil
 			})
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || callbacks.Load() != 1 {
 					t.Error(r.URL, string(body), err, callbacks.Load())
 				}
 				if r.URL.Path == computeConsoleDiscoveryPath {
 					discoveries.Add(1)
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
 					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.110"}}`)
 					return
 				}
@@ -388,11 +430,19 @@ func TestComputeFlavorGetExtraSpecsPropertyRawValuesLiteralRouteAndVersionBindin
 					t.Error("property lost its captured identity", r.URL)
 				}
 				if version == "" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
 				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", version)
-					th.TestHeader(t, r, "OpenStack-API-Version", "compute "+version)
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != version }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, version)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute "+version }) {
+						t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute "+version)
+					}
 				}
 				testcloud.JSON(w, 200, `{"cpu":"fresh"}`)
 			})
@@ -465,7 +515,9 @@ func TestComputeFlavorGetExtraSpecsPropertyPreflightAndBindingTerminalReceipts(t
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != flavorExtraSpecsFetchPath+"/cpu" || r.URL.RawQuery != "" || r.ContentLength != 0 {
 					t.Error("property terminal path introduced fallback", r.URL)
 				}

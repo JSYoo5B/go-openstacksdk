@@ -14,7 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testing.T) {
@@ -22,7 +21,9 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 	cloud := "wait-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("wait-0")
@@ -61,18 +62,26 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 		return &http.Response{Request: req, StatusCode: codes[index], Header: header, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	native, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source = native.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
 	if source != service.RawClient() || source.ProviderClient != provider || calls != 0 {
 		t.Fatal("shared source changed")
 	}
 	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "fixed"}, image.WithImageRecordHeader("X-Call", "seed"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	originalBody := string(seed.Envelope)
 	callbacks, options := 0, 0
 	status, err := service.WaitForImageRecordStatus(context.Background(), seed, "active",
@@ -88,7 +97,9 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 			}
 			return nil
 		})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if calls != 3 || options != 1 || callbacks != 1 || status == nil || status == seed || status.StatusCode != 206 || string(status.Resource.Body["id"]) != `"response-other"` || string(status.Resource.Body["size"]) != "100" || string(status.Resource.Body["owner_id"]) != `"updated"` || len(status.ImportMethods) != 0 {
 		t.Fatal(status, calls, options, callbacks)
 	}
@@ -108,7 +119,9 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 			}
 			return nil
 		})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if calls != 5 || options != 2 || callbacks != 2 || deleted == nil || deleted.StatusCode != 201 || deleted.Header.Get("X-Proof") != "response-3" || string(deleted.Resource.Body["id"]) != `"drift-delete"` || string(deleted.Resource.Body["owner_id"]) != `"delete-owner"` || string(deleted.Resource.Body["location"]) != string(location) {
 		t.Fatal(deleted, calls, options, callbacks)
 	}

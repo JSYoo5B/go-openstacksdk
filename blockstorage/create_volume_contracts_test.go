@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -18,7 +19,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const createVolumeContractCinderBase = "/reverse/cinder/v3/project/"
@@ -43,9 +43,15 @@ func createVolumeContractWire(t *testing.T, r *http.Request, method, path, token
 	if strings.HasPrefix(path, createVolumeContractGlanceBase) {
 		source = "glance-entry"
 	}
-	testhelper.TestMethod(t, r, method)
-	testhelper.TestHeader(t, r, "X-Source", source)
-	testhelper.TestHeader(t, r, "X-Auth-Token", token)
+	if r.Method != method {
+		t.Errorf("method = %s, want %s", r.Method, method)
+	}
+	if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != source }) {
+		t.Errorf("header %s = %q, want %q", "X-Source", got, source)
+	}
+	if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != token }) {
+		t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, token)
+	}
 	if r.URL.Path != path {
 		t.Errorf("URL=%s, expected path=%s", r.URL, path)
 	}

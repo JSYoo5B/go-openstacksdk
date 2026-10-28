@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordDeleteStore(rawID string) *serviceinfo.StoreRecord {
@@ -72,9 +71,15 @@ func TestDeleteImageRecordLiteralWholeAndStoreRoutesOwnOpaqueAcknowledgements(t 
 						t.Fatal("literal deletion invented fetch receipt", got.Record)
 					}
 					encodedID, _ := json.Marshal(id)
-					th.AssertEquals(t, string(encodedID), string(got.Record.Resource.Body["id"]))
-					th.AssertEquals(t, `[]`, string(got.Record.Resource.Body["tags"]))
-					th.CheckDeepEquals(t, []string{"a", "", " b"}, got.Record.ImportMethods)
+					if string(got.Record.Resource.Body["id"]) != string(encodedID) {
+						t.Fatalf("string(got.Record.Resource.Body[\"id\"]) = %v, want %v", string(got.Record.Resource.Body["id"]), string(encodedID))
+					}
+					if string(got.Record.Resource.Body["tags"]) != `[]` {
+						t.Fatalf("string(got.Record.Resource.Body[\"tags\"]) = %v, want %v", string(got.Record.Resource.Body["tags"]), `[]`)
+					}
+					if !reflect.DeepEqual(got.Record.ImportMethods, []string{"a", "", " b"}) {
+						t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"a", "", " b"})
+					}
 					var location resource.CloudLocation
 					if err := json.Unmarshal(got.Record.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "captured" {
 						t.Fatal(location, err)
@@ -118,14 +123,24 @@ func TestDeleteImageRecordProjectsPrivateBodyAndPreservesFetchedReceipt(t *testi
 		t.Fatal(got, err, calls, locations)
 	}
 	value := got.Record
-	th.AssertEquals(t, `"fixed"`, string(value.Resource.Body["id"]))
-	th.AssertEquals(t, `4`, string(value.Resource.Body["size"]))
-	th.AssertEquals(t, `true`, string(value.Resource.Body["is_protected"]))
-	th.AssertEquals(t, `["one"]`, string(value.Resource.Body["tags"]))
+	if string(value.Resource.Body["id"]) != `"fixed"` {
+		t.Fatalf("string(value.Resource.Body[\"id\"]) = %v, want %v", string(value.Resource.Body["id"]), `"fixed"`)
+	}
+	if string(value.Resource.Body["size"]) != `4` {
+		t.Fatalf("string(value.Resource.Body[\"size\"]) = %v, want %v", string(value.Resource.Body["size"]), `4`)
+	}
+	if string(value.Resource.Body["is_protected"]) != `true` {
+		t.Fatalf("string(value.Resource.Body[\"is_protected\"]) = %v, want %v", string(value.Resource.Body["is_protected"]), `true`)
+	}
+	if string(value.Resource.Body["tags"]) != `["one"]` {
+		t.Fatalf("string(value.Resource.Body[\"tags\"]) = %v, want %v", string(value.Resource.Body["tags"]), `["one"]`)
+	}
 	if value.StatusCode != 203 || value.Resource.StatusCode != 203 || value.Header.Get("X-Task-Proof") != seed.Header.Get("X-Task-Proof") || !reflect.DeepEqual(value.Wire, seed.Wire) || string(value.Envelope) != fetched || !reflect.DeepEqual(value.bodyState, seed.bodyState) || !reflect.DeepEqual(before, seed) {
 		t.Fatal("deletion overwrote receipt, Body or input", value, seed)
 	}
-	th.CheckDeepEquals(t, []string{"new", " raw"}, value.ImportMethods)
+	if !reflect.DeepEqual(value.ImportMethods, []string{"new", " raw"}) {
+		t.Errorf("value.ImportMethods = %#v, want %#v", value.ImportMethods, []string{"new", " raw"})
+	}
 	if value.Resource.CreatedAt == seed.Resource.CreatedAt || value.Resource.UpdatedAt == seed.Resource.UpdatedAt || value.Resource.CreatedAt == nil || *value.Resource.CreatedAt != "passive created" || value.Resource.UpdatedAt == nil || *value.Resource.UpdatedAt != "passive updated" || !reflect.DeepEqual(value.Resource.Links, seed.Resource.Links) {
 		t.Fatal("passive metadata was lost or aliased", value.Resource, seed.Resource)
 	}

@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"reflect"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestFlavorRecordDeclaredDefaultsDescriptorsAndRawIdentity(t *testing.T) {
@@ -54,12 +54,16 @@ func TestFlavorRecordDeclaredDefaultsDescriptorsAndRawIdentity(t *testing.T) {
 			for key, raw := range row.Resource.Body {
 				actual[key] = string(raw)
 			}
-			th.AssertDeepEquals(t, want, actual)
+			if !reflect.DeepEqual(actual, want) {
+				t.Fatalf("actual = %#v, want %#v", actual, want)
+			}
 			after, err := json.Marshal(row.Wire)
 			if err != nil || !bytes.Equal(before, after) {
 				t.Fatal("projection changed the actual response", string(after), err)
 			}
-			th.AssertEquals(t, check.body, string(row.Envelope))
+			if string(row.Envelope) != check.body {
+				t.Fatalf("string(row.Envelope) = %v, want %v", string(row.Envelope), check.body)
+			}
 		})
 	}
 }
@@ -80,9 +84,15 @@ func TestFlavorRecordResponseAliasOrderAndIndependentReceipts(t *testing.T) {
 			if err := prepareFlavorListRecord(&row.FlavorRecord); err != nil {
 				t.Fatal(err)
 			}
-			th.AssertEquals(t, check.public, string(row.Resource.Body["is_public"]))
-			th.AssertEquals(t, check.ephemeral, string(row.Resource.Body["ephemeral"]))
-			th.AssertEquals(t, check.disabled, string(row.Resource.Body["is_disabled"]))
+			if string(row.Resource.Body["is_public"]) != check.public {
+				t.Fatalf("string(row.Resource.Body[\"is_public\"]) = %v, want %v", string(row.Resource.Body["is_public"]), check.public)
+			}
+			if string(row.Resource.Body["ephemeral"]) != check.ephemeral {
+				t.Fatalf("string(row.Resource.Body[\"ephemeral\"]) = %v, want %v", string(row.Resource.Body["ephemeral"]), check.ephemeral)
+			}
+			if string(row.Resource.Body["is_disabled"]) != check.disabled {
+				t.Fatalf("string(row.Resource.Body[\"is_disabled\"]) = %v, want %v", string(row.Resource.Body["is_disabled"]), check.disabled)
+			}
 		})
 	}
 	seed := map[string]json.RawMessage{"is_public": json.RawMessage("false"), "os-flavor-access:is_public": json.RawMessage("true"), "vendor": json.RawMessage("9")}
@@ -90,10 +100,16 @@ func TestFlavorRecordResponseAliasOrderAndIndependentReceipts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	th.AssertEquals(t, 1, len(normalized))
-	th.AssertEquals(t, "false", string(normalized["is_public"]))
+	if len(normalized) != 1 {
+		t.Fatalf("len(normalized) = %v, want %v", len(normalized), 1)
+	}
+	if string(normalized["is_public"]) != "false" {
+		t.Fatalf("string(normalized[\"is_public\"]) = %v, want %v", string(normalized["is_public"]), "false")
+	}
 	normalized["is_public"][0] = 'x'
-	th.AssertEquals(t, "false", string(seed["is_public"]))
+	if string(seed["is_public"]) != "false" {
+		t.Fatalf("string(seed[\"is_public\"]) = %v, want %v", string(seed["is_public"]), "false")
+	}
 
 	row := flavorListRecord{FlavorRecord: FlavorRecord{Enrichment: &FlavorExtraSpecsRecord{ExtraSpecs: json.RawMessage(`{"old":1}`)}}}
 	metadata := flavorRecordMetadata(&row.FlavorRecord)
@@ -109,16 +125,28 @@ func TestFlavorRecordResponseAliasOrderAndIndependentReceipts(t *testing.T) {
 	if err := prepareFlavorListRecord(&row.FlavorRecord); err != nil {
 		t.Fatal(err)
 	}
-	th.AssertEquals(t, 203, row.StatusCode)
-	th.AssertEquals(t, "actual page", row.Header.Get("X-Proof"))
-	th.AssertEquals(t, "actual page", row.Resource.Header.Get("X-Proof"))
+	if row.StatusCode != 203 {
+		t.Fatalf("row.StatusCode = %v, want %v", row.StatusCode, 203)
+	}
+	if got := row.Header.Get("X-Proof"); got != "actual page" {
+		t.Fatalf("row.Header.Get(\"X-Proof\") = %v, want %v", got, "actual page")
+	}
+	if got := row.Resource.Header.Get("X-Proof"); got != "actual page" {
+		t.Fatalf("row.Resource.Header.Get(\"X-Proof\") = %v, want %v", got, "actual page")
+	}
 	row.Resource.Body["extra_specs"][0] = 'x'
 	row.Resource.Header["X-Proof"][0] = "view caller"
 	row.Header["X-Proof"][0] = "receipt caller"
 	row.Envelope[0] = 'x'
-	th.AssertEquals(t, `{"number":900719925474099312345}`, string(row.Wire.Body["extra_specs"]))
-	th.AssertEquals(t, "actual page", row.Wire.Header.Get("X-Proof"))
-	th.AssertEquals(t, byte('{'), body[0])
+	if string(row.Wire.Body["extra_specs"]) != `{"number":900719925474099312345}` {
+		t.Fatalf("string(row.Wire.Body[\"extra_specs\"]) = %v, want %v", string(row.Wire.Body["extra_specs"]), `{"number":900719925474099312345}`)
+	}
+	if got := row.Wire.Header.Get("X-Proof"); got != "actual page" {
+		t.Fatalf("row.Wire.Header.Get(\"X-Proof\") = %v, want %v", got, "actual page")
+	}
+	if want := byte('{'); body[0] != want {
+		t.Fatalf("body[0] = %v, want %v", body[0], want)
+	}
 	if err := json.Unmarshal([]byte(`{"original_name":"next"}`), &row); err != nil || row.Resource != nil {
 		t.Fatal("reused decoder retained an old projected Resource", err)
 	}
@@ -128,8 +156,12 @@ func TestFlavorRecordResponseAliasOrderAndIndependentReceipts(t *testing.T) {
 	if err := prepareFlavorListRecord(&row.FlavorRecord); err != nil {
 		t.Fatal(err)
 	}
-	th.AssertEquals(t, "next", flavorRecordIdentity(&row.FlavorRecord))
-	th.AssertEquals(t, "next", flavorRecordName(&row.FlavorRecord))
+	if got := flavorRecordIdentity(&row.FlavorRecord); got != "next" {
+		t.Fatalf("flavorRecordIdentity(&row.FlavorRecord) = %v, want %v", got, "next")
+	}
+	if got := flavorRecordName(&row.FlavorRecord); got != "next" {
+		t.Fatalf("flavorRecordName(&row.FlavorRecord) = %v, want %v", got, "next")
+	}
 	if _, present := row.Wire.Body["vendor"]; present {
 		t.Fatal("new row retained an old actual response field")
 	}
@@ -181,8 +213,12 @@ func TestFlavorRecordDescriptorErrorsAndPassiveStringIdentity(t *testing.T) {
 		if err := prepareFlavorListRecord(&row.FlavorRecord); err != nil {
 			t.Fatal(err)
 		}
-		th.AssertEquals(t, check.id, flavorRecordIdentity(&row.FlavorRecord))
-		th.AssertEquals(t, check.name, flavorRecordName(&row.FlavorRecord))
+		if got := flavorRecordIdentity(&row.FlavorRecord); got != check.id {
+			t.Fatalf("flavorRecordIdentity(&row.FlavorRecord) = %v, want %v", got, check.id)
+		}
+		if got := flavorRecordName(&row.FlavorRecord); got != check.name {
+			t.Fatalf("flavorRecordName(&row.FlavorRecord) = %v, want %v", got, check.name)
+		}
 		marker, err := flavorRecordMarker(&row.FlavorRecord)
 		if check.markerOK {
 			if err != nil || marker != check.id {

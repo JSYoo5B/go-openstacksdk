@@ -17,7 +17,6 @@ import (
 
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Reuse the shared Gophercloud-backed transport fixtures. These tests exercise
@@ -287,7 +286,9 @@ func TestImageRecordCreateWorkflowVendorFlagAndPairListFollowSourceUpdate(t *tes
 					t.Fatal("invalid vendor dispatched")
 				}
 				body := taskCorePayload(t, req)
-				th.CheckEquals(t, test.expected, string(body["flag"]))
+				if string(body["flag"]) != test.expected {
+					t.Errorf("string(body[\"flag\"]) = %v, want %v", string(body["flag"]), test.expected)
+				}
 				return taskCoreJSON(req, 201, `{}`), nil
 			}), Dependencies{CreatePolicy: ImageCreatePolicy{RawVendorAgent: json.RawMessage(test.vendor)}})
 			got, err := service.CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "selected", Attributes: map[string]any{"flag": "caller"}}, WithImageRecordCreateAllowDuplicates(true), WithImageRecordCreateDisableVendorAgent(!test.disabled))
@@ -343,7 +344,9 @@ func TestImageRecordCreateWorkflowIsPublicWarningBelongsToSelectedUploadOnly(t *
 							if _, ok := body["is_public"]; ok {
 								t.Fatal("deprecated property retained", body)
 							}
-							th.CheckEquals(t, test.visibility, taskCoreText(t, body["visibility"]))
+							if got := taskCoreText(t, body["visibility"]); got != test.visibility {
+								t.Errorf("taskCoreText(t, body[\"visibility\"]) = %v, want %v", got, test.visibility)
+							}
 						} else {
 							if _, ok := body["visibility"]; ok {
 								t.Fatal("metadata branch inferred visibility", body)
@@ -377,12 +380,18 @@ func TestImageRecordCreatePrefaceFilenameInferencePreservesSourceBugAndDotfiles(
 	for _, base := range []string{"disk.qcow2", ".disk", "..disk", ".disk.raw", "disk."} {
 		t.Run(base, func(t *testing.T) {
 			filename := filepath.Join(dir, base)
-			th.AssertNoErr(t, os.WriteFile(filename, []byte("payload"), 0600))
+			if err := os.WriteFile(filename, []byte("payload"), 0600); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			calls := 0
 			service := NewWithDependencies(taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; t.Fatal("preface dispatched"); return nil, nil }), Dependencies{CreatePolicy: ImageCreatePolicy{ImageFormat: json.RawMessage(`null`)}})
 			p, err := service.prepareImageRecordCreateWorkflow(context.Background(), ImageRecordCreateRequest{Name: filename}, nil)
-			th.AssertNoErr(t, err)
-			th.AssertNoErr(t, p.preface())
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if err := p.preface(); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			want := base
 			switch base {
 			case "disk.qcow2":
@@ -398,11 +407,17 @@ func TestImageRecordCreatePrefaceFilenameInferencePreservesSourceBugAndDotfiles(
 		})
 	}
 	name := filepath.Join(dir, "absent-original")
-	th.AssertNoErr(t, os.WriteFile(name+".qcow2", []byte("payload"), 0600))
+	if err := os.WriteFile(name+".qcow2", []byte("payload"), 0600); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service := New(taskCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("preface dispatched"); return nil, nil }))
 	p, err := service.prepareImageRecordCreateWorkflow(context.Background(), ImageRecordCreateRequest{Name: name}, nil)
-	th.AssertNoErr(t, err)
-	th.AssertNoErr(t, p.preface())
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if err := p.preface(); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if p.input.Filename != "" || p.input.Name != name {
 		t.Fatal("corrected pinned Source typo silently", p.input)
 	}
@@ -423,14 +438,18 @@ func TestImageRecordCreatePrefaceConfiguredFormatTypeIsCheckedOnlyDuringInferenc
 			}
 			service := NewWithDependencies(taskCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("preface dispatched"); return nil, nil }), Dependencies{CreatePolicy: ImageCreatePolicy{ImageFormat: json.RawMessage(`false`)}})
 			p, err := service.prepareImageRecordCreateWorkflow(context.Background(), input, []ImageRecordCreateOption{WithImageRecordCreateDiskFormat("formal format cannot replace cloud helper format")})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			err = p.preface()
 			if mode == "absent" || mode == "directory" {
 				if !errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal("cloud helper format was skipped", err)
 				}
 			} else {
-				th.AssertNoErr(t, err)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 			}
 		})
 	}
@@ -448,8 +467,12 @@ func TestImageRecordCreatePrefaceTruthyFilenameAndDataFailBeforeHashOrDiscovery(
 	for _, data := range []ImageRecordCreateData{ImageRecordCreateBytes(nil), ImageRecordCreateText("")} {
 		service := New(taskCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("preface dispatched"); return nil, nil }))
 		p, err := service.prepareImageRecordCreateWorkflow(context.Background(), ImageRecordCreateRequest{Name: "selected", Filename: "/not-opened-in-preface", Data: data}, nil)
-		th.AssertNoErr(t, err)
-		th.AssertNoErr(t, p.preface())
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if err := p.preface(); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if !p.input.Data.present() || p.input.Data.truthy() {
 			t.Fatal("falsey presence lost")
 		}
@@ -461,7 +484,9 @@ func TestImageRecordCreatePrefaceChecksumValidationComputesBothOrNeither(t *test
 	md5Sum, shaSum := md5.Sum(payload), sha256.Sum256(payload)
 	wantMD5, wantSHA := hex.EncodeToString(md5Sum[:]), hex.EncodeToString(shaSum[:])
 	filename := filepath.Join(t.TempDir(), "disk")
-	th.AssertNoErr(t, os.WriteFile(filename, payload, 0600))
+	if err := os.WriteFile(filename, payload, 0600); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	for _, mode := range []string{"bytes", "file", "supplied MD5 prevents file read", "supplied SHA prevents file read", "empty bytes", "disabled"} {
 		t.Run(mode, func(t *testing.T) {
 			input := ImageRecordCreateRequest{Name: "selected"}
@@ -485,12 +510,20 @@ func TestImageRecordCreatePrefaceChecksumValidationComputesBothOrNeither(t *test
 			}
 			service := New(taskCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("preface dispatched"); return nil, nil }))
 			p, err := service.prepareImageRecordCreateWorkflow(context.Background(), input, options)
-			th.AssertNoErr(t, err)
-			th.AssertNoErr(t, p.preface())
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if err := p.preface(); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			switch mode {
 			case "bytes", "file":
-				th.CheckEquals(t, wantMD5, taskCoreText(t, p.policy.MD5))
-				th.CheckEquals(t, wantSHA, taskCoreText(t, p.policy.SHA256))
+				if got := taskCoreText(t, p.policy.MD5); got != wantMD5 {
+					t.Errorf("taskCoreText(t, p.policy.MD5) = %v, want %v", got, wantMD5)
+				}
+				if got := taskCoreText(t, p.policy.SHA256); got != wantSHA {
+					t.Errorf("taskCoreText(t, p.policy.SHA256) = %v, want %v", got, wantSHA)
+				}
 			case "supplied MD5 prevents file read":
 				if taskCoreText(t, p.policy.MD5) != "supplied" || p.policy.SHA256 != nil {
 					t.Fatal(p.policy)

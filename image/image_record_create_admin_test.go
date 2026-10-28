@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordCreateWholeForwardsOwnerAndVisibilityToServerPolicy(t *testing.T) {
@@ -21,8 +20,12 @@ func TestImageRecordCreateWholeForwardsOwnerAndVisibilityToServerPolicy(t *testi
 						t.Fatal(request.Method, request.URL)
 					}
 					body := taskCorePayload(t, request)
-					th.AssertEquals(t, `"target-project"`, string(body["owner"]))
-					th.AssertEquals(t, `"`+visibility+`"`, string(body["visibility"]))
+					if string(body["owner"]) != `"target-project"` {
+						t.Fatalf("string(body[\"owner\"]) = %v, want %v", string(body["owner"]), `"target-project"`)
+					}
+					if string(body["visibility"]) != `"`+visibility+`"` {
+						t.Fatalf("string(body[\"visibility\"]) = %v, want %v", string(body["visibility"]), `"`+visibility+`"`)
+					}
 					return taskCoreJSON(request, status, `{"id":"created","message":"server policy"}`), nil
 				})
 				result, err := New(client).CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "owner-change", Attributes: map[string]any{"owner": "target-project", "visibility": visibility}}, WithImageRecordCreateAllowDuplicates(true))

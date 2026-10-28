@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const objectRecordParent = "OS::空 白"
@@ -940,10 +939,18 @@ func TestMetadefObjectRecordsQueryExtensionsAndFixedContinuation(t *testing.T) {
 				options = []RecordListOption{WithRecordListFilters(map[string]any{"visibility": "public", "resource_types": "OS::Compute::Server", "sort_key": "created_at", "sort_dir": "desc"})}
 			}
 			rows, err := scope.AllRecords(context.Background(), options...)
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, 2, len(rows))
-			th.AssertEquals(t, 2, calls)
-			th.AssertEquals(t, 299, rows[1].StatusCode)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if len(rows) != 2 {
+				t.Fatalf("len(rows) = %v, want %v", len(rows), 2)
+			}
+			if calls != 2 {
+				t.Fatalf("calls = %v, want %v", calls, 2)
+			}
+			if rows[1].StatusCode != 299 {
+				t.Fatalf("rows[1].StatusCode = %v, want %v", rows[1].StatusCode, 299)
+			}
 		})
 	}
 }
@@ -1039,9 +1046,15 @@ func TestMetadefObjectRecordsConstructorBindingFailuresKeepPartialReceipt(t *tes
 		text := `{"objects":[{"name":"kept","self":{"connection":"ignored"},"base_path":"https://foreign.test/","headers":{"Authorization":"foreign"},"vendor":1e400}]}`
 		client := objectCoreClient(func(req *http.Request) (*http.Response, error) { return objectCoreJSON(req, 203, text), nil })
 		rows, err := objectCoreScope(t, client, objectRecordParent).AllRecords(context.Background())
-		th.AssertNoErr(t, err)
-		th.AssertEquals(t, 1, len(rows))
-		th.AssertEquals(t, 9, len(rows[0].Resource.Body))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if len(rows) != 1 {
+			t.Fatalf("len(rows) = %v, want %v", len(rows), 1)
+		}
+		if len(rows[0].Resource.Body) != 9 {
+			t.Fatalf("len(rows[0].Resource.Body) = %v, want %v", len(rows[0].Resource.Body), 9)
+		}
 		if string(rows[0].Wire.Body["self"]) != `{"connection":"ignored"}` || string(rows[0].Wire.Body["vendor"]) != "1e400" {
 			t.Fatal(rows[0].Wire)
 		}

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -18,7 +19,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const userProjectRecordsPath = "/reverse/identity/v3/users/user-id/projects"
@@ -68,8 +68,12 @@ func TestIdentityUserProjectRecordsSemanticQueriesAliasesAndOwnedOptions(t *test
 			}
 			cloud.Mux.HandleFunc(userProjectRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				if !reflect.DeepEqual(r.URL.Query(), url.Values{wire: {want}}) || r.ContentLength != 0 {
 					t.Error(r.URL, r.ContentLength)
 				}
@@ -118,8 +122,12 @@ func TestIdentityUserProjectRecordsSemanticQueriesAliasesAndOwnedOptions(t *test
 			if !reflect.DeepEqual(r.URL.Query(), url.Values{"name": {"original"}, "tags-any": {"one", "two"}, "enabled": {"true"}}) {
 				t.Error(r.URL)
 			}
-			th.TestHeader(t, r, "X-Trace", "callback")
-			th.TestHeader(t, r, "OpenStack-API-Version", "identity 3.13")
+			if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "callback" }) {
+				t.Errorf("header %s = %q, want %q", "X-Trace", got, "callback")
+			}
+			if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "identity 3.13" }) {
+				t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "identity 3.13")
+			}
 			testcloud.JSON(w, 200, `{"projects":[{"id":"owned"}]}`)
 		})
 		api := users.New(cloud.Client("identity", "/reverse/identity/v3"))
@@ -194,8 +202,12 @@ func TestIdentityUserProjectRecordsLocalBodiesNormalizedViewAndIndependentWire(t
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc(userProjectRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestHeader(t, r, "X-Auth-Token", "record-live")
-			th.TestHeader(t, r, "X-Trace", "owned")
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "record-live" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "record-live")
+			}
+			if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+				t.Errorf("header %s = %q, want %q", "X-Trace", got, "owned")
+			}
 			if r.URL.RawQuery != "" {
 				t.Error(r.URL)
 			}
@@ -236,7 +248,9 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc(userProjectRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 				call := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				want := url.Values{"domain_id": {"domain"}}
 				if mode == "short limit" {
 					want.Set("limit", "5")
@@ -249,7 +263,9 @@ func TestIdentityUserProjectRecordsContinuationFormsRawCapsAndSinglePage(t *test
 					if call == 3 {
 						want.Set("marker", "second")
 					}
-					th.TestHeader(t, r, "X-Auth-Token", "next-token")
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "next-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "next-token")
+					}
 				}
 				if !reflect.DeepEqual(r.URL.Query(), want) {
 					t.Error(r.URL.Query(), want)

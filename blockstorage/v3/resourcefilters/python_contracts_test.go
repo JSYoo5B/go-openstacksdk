@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 type filterCall struct {
@@ -45,9 +44,18 @@ func filterFixture(t *testing.T, version string, handler func(http.ResponseWrite
 	calls := &[]filterCall{}
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		raw, _ := io.ReadAll(r.Body)
-		testhelper.AssertEquals(t, "", string(raw))
-		testhelper.AssertEquals(t, http.MethodGet, r.Method)
-		testhelper.AssertEquals(t, "test-token", r.Header.Get("X-Auth-Token"))
+		if string(raw) != "" {
+			t.Errorf("string(raw) = %v, want %v", string(raw), "")
+			return
+		}
+		if r.Method != http.MethodGet {
+			t.Errorf("r.Method = %v, want %v", r.Method, http.MethodGet)
+			return
+		}
+		if got := r.Header.Get("X-Auth-Token"); got != "test-token" {
+			t.Errorf("r.Header.Get(\"X-Auth-Token\") = %v, want %v", got, "test-token")
+			return
+		}
 		*calls = append(*calls, filterCall{r.Method, r.URL.Path, r.URL.RawQuery, r.Header.Clone()})
 		w.Header().Set("X-Request-Id", "actual-filter")
 		handler(w, r)
@@ -74,9 +82,18 @@ func filterWrapper(t *testing.T, err error) {
 func TestPythonCinderResourceFiltersDeclaredProjectionOwnsLiteralPageEvidence(t *testing.T) {
 	body := `{"resource_filters":[{"id":false,"name":900719925474099312345,"resource":false,"filters":{"field":null},"unknown":[null,0],"self":"passive","location":{"cloud":"untrusted"}}]}`
 	api, calls := filterFixture(t, "3.33", func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "volume 3.33", r.Header.Get("OpenStack-API-Version"))
-		testhelper.AssertEquals(t, "3.33", r.Header.Get("X-OpenStack-Volume-API-Version"))
-		testhelper.AssertEquals(t, "application/json", r.Header.Get("Accept"))
+		if got := r.Header.Get("OpenStack-API-Version"); got != "volume 3.33" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "volume 3.33")
+			return
+		}
+		if got := r.Header.Get("X-OpenStack-Volume-API-Version"); got != "3.33" {
+			t.Errorf("r.Header.Get(\"X-OpenStack-Volume-API-Version\") = %v, want %v", got, "3.33")
+			return
+		}
+		if got := r.Header.Get("Accept"); got != "application/json" {
+			t.Errorf("r.Header.Get(\"Accept\") = %v, want %v", got, "application/json")
+			return
+		}
 		filterJSON(w, 203, body)
 	})
 	rows, err := api.AllRecords(context.Background())

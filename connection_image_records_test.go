@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.T) {
@@ -21,7 +20,9 @@ func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.
 	cloud := "image-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("image-0")
@@ -49,29 +50,41 @@ func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.
 		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}, "Openstack-Image-Import-Methods": {"web-download, glance-direct"}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	cloud = "caller changed"
 	upper, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	client := versioned.RawClient()
 	client.MoreHeaders = map[string]string{"X-Source": "shared"}
 	if upper.RawClient() != client || upper.API.RawClient() != client || client.ProviderClient != provider || calls != 0 {
 		t.Fatal("shared source or eager call")
 	}
 	got, err := upper.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: "get"}, image.WithImageRecordHeader("X-Call", "records"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got == nil || calls != 1 || len(got.Resource.Body) != 65 || string(got.Resource.Body["id"]) != `"get"` || string(got.Resource.Body["owner_id"]) != `"foreign-owner"` || string(got.Resource.Body["location"]) != string(location) || len(got.ImportMethods) != 2 || got.ImportMethods[1] != " glance-direct" {
 		t.Fatal(got, calls)
 	}
 	rows, err := upper.AllImageRecords(context.Background(), image.WithImageRecordListHeader("X-Call", "records"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(rows) != 2 || calls != 3 || string(rows[0].Resource.Body["size"]) != "9007199254740993" || string(rows[1].Resource.Body["is_hidden"]) != "true" {
 		t.Fatal(rows, calls)
 	}
 	found, err := upper.FindImageRecord(context.Background(), "hidden", image.WithFindImageRecordHeader("X-Call", "records"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if found == nil || calls != 6 || found.StatusCode != 206 || string(found.Resource.Body["id"]) != `"passive-id"` || string(found.Resource.Body["location"]) != string(location) || string(found.Wire.Body["location"]) != `{"foreign":true}` {
 		t.Fatal(found, calls)
 	}

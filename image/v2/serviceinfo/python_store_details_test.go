@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestPythonStoreRecordsDetailsSelectsFixedRouteAndSchema(t *testing.T) {
@@ -25,13 +24,17 @@ func TestPythonStoreRecordsDetailsSelectsFixedRouteAndSchema(t *testing.T) {
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
-	th.AssertEquals(t, "true", string(rows[0].Resource.Body["is_default"]))
+	if string(rows[0].Resource.Body["is_default"]) != "true" {
+		t.Fatalf("string(rows[0].Resource.Body[\"is_default\"]) = %v, want %v", string(rows[0].Resource.Body["is_default"]), "true")
+	}
 	for _, field := range []string{"type", "read-only", "weight"} {
 		if rows[0].Resource.Body[field] != nil || rows[0].Wire.Body[field] == nil {
 			t.Fatal(field, rows[0])
 		}
 	}
-	th.AssertEquals(t, body, string(rows[0].Envelope))
+	if string(rows[0].Envelope) != body {
+		t.Fatalf("string(rows[0].Envelope) = %v, want %v", string(rows[0].Envelope), body)
+	}
 }
 func TestPythonStoreRecordsDetailsBasicSelectionAndReusableOptions(t *testing.T) {
 	paths := []string{}

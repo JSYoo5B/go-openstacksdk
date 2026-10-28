@@ -12,7 +12,6 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestFindImageMemberRecordSeededGetAndTolerance(t *testing.T) {
@@ -59,8 +58,12 @@ func TestFindImageMemberRecordSeededGetAndTolerance(t *testing.T) {
 				if err != nil || got == nil || got.Resource == nil || (got.Wire != nil) != test.parsed || got.ImageID == nil || *got.ImageID != memberRecordParent || got.StatusCode != test.code || got.Resource.StatusCode != test.code || got.Header.Get("X-Member-Proof") != "actual" || string(got.Envelope) != test.raw || len(got.Resource.Body) != 9 {
 					t.Fatal(got, err)
 				}
-				th.AssertEquals(t, test.id, string(got.Resource.Body["id"]))
-				th.AssertEquals(t, test.member, string(got.Resource.Body["member_id"]))
+				if string(got.Resource.Body["id"]) != test.id {
+					t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), test.id)
+				}
+				if string(got.Resource.Body["member_id"]) != test.member {
+					t.Fatalf("string(got.Resource.Body[\"member_id\"]) = %v, want %v", string(got.Resource.Body["member_id"]), test.member)
+				}
 				if test.parsed {
 					if got.Wire.StatusCode != test.code || got.Wire.Header.Get("X-Member-Proof") != "actual" {
 						t.Fatal("wire receipt", got.Wire)

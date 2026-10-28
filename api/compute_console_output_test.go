@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -16,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // openstacksdk ef55d7d: _proxy.py:2946–2961 -> server.py:938–952.
@@ -53,10 +53,18 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 			var calls, callbacks atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
-				th.TestHeader(t, r, "X-Auth-Token", "live-console-token")
-				th.TestHeader(t, r, "X-Source", "selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.87")
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "live-console-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "live-console-token")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.87" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.87")
+				}
 				if r.URL.Path != computeConsoleOutputPath || r.URL.RawQuery != "" || r.Header.Get("Accept") != "" {
 					t.Error("action route/query/Accept changed", r.URL, r.Header)
 				}
@@ -186,7 +194,9 @@ func TestComputeConsoleOutputStringProjectionAndHTTPResponseEvidence(t *testing.
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != computeConsoleOutputPath || r.URL.RawQuery != "" {
 					t.Error("unexpected lookup/fallback", r.URL)
 				}
@@ -376,18 +386,26 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 		var calls, callbacks, reauth atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			index := calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
-			th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.87")
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.87" }) {
+				t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.87")
+			}
 			body, err := io.ReadAll(r.Body)
 			if err != nil || string(body) != `{"os-getConsoleOutput":{"length":0}}` || r.URL.Path != computeConsoleOutputPath {
 				t.Error(string(body), err, r.URL)
 			}
 			if index == 1 {
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				w.WriteHeader(401)
 				return
 			}
-			th.TestHeader(t, r, "X-Auth-Token", "reauth-console-token")
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "reauth-console-token" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "reauth-console-token")
+			}
 			testcloud.JSON(w, 200, `{"output":"retry accepted"}`)
 		})
 		cloud.Provider.ReauthFunc = func(context.Context) error {

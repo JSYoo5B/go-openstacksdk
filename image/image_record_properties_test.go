@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordPropertiesBooleanUsesCanonicalComparisonAndCachedSeed(t *testing.T) {
@@ -60,7 +59,9 @@ func TestImageRecordPropertiesBooleanUsesCanonicalComparisonAndCachedSeed(t *tes
 				t.Fatal(location, err)
 			}
 			if test.name == "custom null retains cached nonnull value" {
-				th.AssertEquals(t, "7", string(imageRecordProperties(t, got.Record)["foo"]))
+				if actual := string(imageRecordProperties(t, got.Record)["foo"]); actual != "7" {
+					t.Fatalf("string(imageRecordProperties(t, got.Record)[\"foo\"]) = %v, want %v", actual, "7")
+				}
 			}
 			got.Record.Resource.Body["id"][1] = 'X'
 			got.Record.Wire.Body["id"][1] = 'X'
@@ -162,13 +163,17 @@ func TestImageRecordPropertiesResolveOrderedAliasesAfterCompleteLists(t *testing
 					t.Fatal("resolver must use query-free complete listing, without Find", req.Method, req.URL)
 				}
 				if calls == 2 || calls == 4 {
-					th.AssertEquals(t, "", req.URL.RawQuery)
+					if req.URL.RawQuery != "" {
+						t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "")
+					}
 					if calls == 2 {
 						return taskCoreJSON(req, 200, `{"images":[{"id":"deleted","name":"kernel-early","status":"DeLeTeD"},{"id":"kernel first","name":"kernel-early","status":"ACTIVE"}],"next":"?marker=tail"}`), nil
 					}
 					return taskCoreJSON(req, 200, `{"images":[{"id":"ram first","name":"ram-early","status":"active"}],"next":"?marker=tail"}`), nil
 				}
-				th.AssertEquals(t, "marker=tail", req.URL.RawQuery)
+				if req.URL.RawQuery != "marker=tail" {
+					t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "marker=tail")
+				}
 				if calls == 3 {
 					return taskCoreJSON(req, 200, `{"images":[{"id":"kernel late","name":"kernel*","status":"active"},{"id":"duplicate","name":"kernel-early","status":"queued"}]}`), nil
 				}
@@ -247,7 +252,9 @@ func TestImageRecordPropertiesResolverMissingAndLateFailuresAreTerminal(t *testi
 					t.Fatal("early match bypassed complete resolver", req.Method, req.URL)
 				}
 				if calls == 2 {
-					th.AssertEquals(t, "", req.URL.RawQuery)
+					if req.URL.RawQuery != "" {
+						t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "")
+					}
 					if mode == "missing selection" {
 						return taskCoreJSON(req, 203, `{"images":[{"id":"other","name":"other","status":"active"}]}`), nil
 					}
@@ -427,7 +434,9 @@ func TestImageRecordPropertiesRawValuesPythonStringsAndMetaLast(t *testing.T) {
 		t.Fatal(got, err, calls)
 	}
 	properties := imageRecordProperties(t, got.Record)
-	th.AssertEquals(t, `false`, string(properties["custom"]))
+	if string(properties["custom"]) != `false` {
+		t.Fatalf("string(properties[\"custom\"]) = %v, want %v", string(properties["custom"]), `false`)
+	}
 	if _, present := properties["nullcustom"]; present {
 		t.Fatal("canonical missing None inserted unknown null", properties)
 	}
@@ -461,7 +470,9 @@ func TestImageRecordPropertiesRetainCachedKeysAndDelegateDeclaredPromotion(t *te
 			if got == nil || got.Record == nil || !got.Updated || err != nil || calls != 2 || string(got.Record.Resource.Body[test.field]) != test.value || !reflect.DeepEqual(before, seed) || len(got.Record.bodyState.dirty) != 0 {
 				t.Fatal(got, err, calls, seed)
 			}
-			th.AssertEquals(t, "7", string(imageRecordProperties(t, got.Record)["keep"]))
+			if actual := string(imageRecordProperties(t, got.Record)["keep"]); actual != "7" {
+				t.Fatalf("string(imageRecordProperties(t, got.Record)[\"keep\"]) = %v, want %v", actual, "7")
+			}
 		})
 	}
 }
@@ -636,12 +647,16 @@ func TestImageRecordPropertiesSharedAcceptedTranslationAndPendingResponses(t *te
 			if !got.Updated || err != nil {
 				t.Fatal(got, err)
 			}
-			th.CheckDeepEquals(t, []string{"one", "", " two"}, got.Record.ImportMethods)
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"one", "", " two"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"one", "", " two"})
+			}
 			if !test.pending {
 				if got.Record.Wire == nil || string(got.Record.Resource.Body["name"]) != `"server name"` || len(got.Record.bodyState.dirty) != 0 {
 					t.Fatal(got.Record)
 				}
-				th.AssertEquals(t, `{"exact":900719925474099312345}`, string(imageRecordProperties(t, got.Record)["server"]))
+				if actual := string(imageRecordProperties(t, got.Record)["server"]); actual != `{"exact":900719925474099312345}` {
+					t.Fatalf("string(imageRecordProperties(t, got.Record)[\"server\"]) = %v, want %v", actual, `{"exact":900719925474099312345}`)
+				}
 			} else if got.Record.Wire != nil || len(got.Record.bodyState.dirty) == 0 || string(got.Record.Resource.Body["name"]) != `"client name"` {
 				t.Fatal(got.Record)
 			}
@@ -970,7 +985,9 @@ func TestImageRecordPropertiesSnapshotsCoverDiscoveryAndCommitWithoutRecapture(t
 	if got == nil || got.Record == nil || !got.Updated || err != nil || calls != 3 || locations != 1 || callbacks != 1 || string(got.Record.Resource.Body["id"]) != `"fixed"` {
 		t.Fatal(got, err, calls, locations, callbacks)
 	}
-	th.AssertEquals(t, "7", string(imageRecordProperties(t, got.Record)["cached"]))
+	if actual := string(imageRecordProperties(t, got.Record)["cached"]); actual != "7" {
+		t.Fatalf("string(imageRecordProperties(t, got.Record)[\"cached\"]) = %v, want %v", actual, "7")
+	}
 	var location resource.CloudLocation
 	if err := json.Unmarshal(got.Record.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "captured" || string(location.Project.ID) != `"captured project"` {
 		t.Fatal(location, err)
@@ -1125,7 +1142,9 @@ func TestImageRecordPropertiesCompleteListFailuresPrecedeNumericAliasSelection(t
 					t.Fatal("numeric alias must consume the complete image list", req.Method, req.URL)
 				}
 				if calls == 2 {
-					th.AssertEquals(t, "", req.URL.RawQuery)
+					if req.URL.RawQuery != "" {
+						t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "")
+					}
 					if lateFailure {
 						return taskCoreJSON(req, 203, `{"images":[{"id":"unused","status":"active"}],"next":"?marker=later"}`), nil
 					}

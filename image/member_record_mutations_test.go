@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func memberRecordMutationWrite(service *Service, update bool, ctx context.Context, options ...ImageMemberRecordWriteOption) (*ImageMemberRecord, error) {
@@ -33,7 +32,9 @@ func memberRecordMutationCheckPayload(t *testing.T, req *http.Request, expected 
 	if err := json.Unmarshal([]byte(expected), &want); err != nil {
 		t.Fatal(err)
 	}
-	th.CheckDeepEquals(t, want, actual)
+	if !reflect.DeepEqual(actual, want) {
+		t.Errorf("actual = %#v, want %#v", actual, want)
+	}
 }
 
 func memberRecordMutationSeed(fields map[string]json.RawMessage) *ImageMemberRecord {
@@ -68,8 +69,12 @@ func TestAddImageMemberRecordOwnsFlatDeclaredBodyAndIgnoresUnknown(t *testing.T)
 			if got == nil || err != nil || calls != 1 || len(got.Resource.Body) != 9 || got.ImageID == nil || *got.ImageID != memberRecordParent || got.Wire == nil || string(got.Envelope) != `{}` {
 				t.Fatal(got, err, calls)
 			}
-			th.AssertEquals(t, test.member, string(got.Resource.Body["member_id"]))
-			th.AssertEquals(t, `"image-空白"`, string(got.Resource.Body["image_id"]))
+			if string(got.Resource.Body["member_id"]) != test.member {
+				t.Fatalf("string(got.Resource.Body[\"member_id\"]) = %v, want %v", string(got.Resource.Body["member_id"]), test.member)
+			}
+			if string(got.Resource.Body["image_id"]) != `"image-空白"` {
+				t.Fatalf("string(got.Resource.Body[\"image_id\"]) = %v, want %v", string(got.Resource.Body["image_id"]), `"image-空白"`)
+			}
 			if _, present := got.Resource.Body["vendor"]; present {
 				t.Fatal("unknown attribute leaked to view", got.Resource.Body)
 			}
@@ -123,13 +128,23 @@ func TestUpdateImageMemberRecordCreatesFreshBoundMemberAndRawBody(t *testing.T) 
 			if got == nil || err != nil || calls != 1 || got.Wire != nil || got.StatusCode != 299 || got == seed || got.Resource == seed.Resource {
 				t.Fatal(got, err, calls)
 			}
-			th.AssertEquals(t, `"selected"`, string(got.Resource.Body["member_id"]))
-			th.AssertEquals(t, test.status, string(got.Resource.Body["status"]))
-			if test.name != "literal descriptors" {
-				th.AssertEquals(t, `null`, string(got.Resource.Body["name"]))
-				th.AssertEquals(t, `null`, string(got.Resource.Body["created_at"]))
+			if string(got.Resource.Body["member_id"]) != `"selected"` {
+				t.Fatalf("string(got.Resource.Body[\"member_id\"]) = %v, want %v", string(got.Resource.Body["member_id"]), `"selected"`)
 			}
-			th.CheckDeepEquals(t, before, memberRecordValues(seed))
+			if string(got.Resource.Body["status"]) != test.status {
+				t.Fatalf("string(got.Resource.Body[\"status\"]) = %v, want %v", string(got.Resource.Body["status"]), test.status)
+			}
+			if test.name != "literal descriptors" {
+				if string(got.Resource.Body["name"]) != `null` {
+					t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `null`)
+				}
+				if string(got.Resource.Body["created_at"]) != `null` {
+					t.Fatalf("string(got.Resource.Body[\"created_at\"]) = %v, want %v", string(got.Resource.Body["created_at"]), `null`)
+				}
+			}
+			if got := memberRecordValues(seed); !reflect.DeepEqual(got, before) {
+				t.Errorf("memberRecordValues(seed) = %#v, want %#v", got, before)
+			}
 			if seed.Header.Get("X-Seed") != "old" || got.Header.Get("X-Seed") != "" || *got.ImageID != memberRecordParent {
 				t.Fatal("seed receipt/scope became mutation data", got, seed)
 			}
@@ -231,14 +246,26 @@ func TestGetImageMemberRecordFreshConstructorAliasesAndAcceptedBodies(t *testing
 			if got == nil || err != nil || calls != 1 || retries != 0 || body.closes != 1 || (got.Wire != nil) != test.parsed || got.StatusCode != test.code || string(got.Envelope) != test.body || len(got.Resource.Body) != 9 || got.ImageID == nil || *got.ImageID != memberRecordParent {
 				t.Fatal(got, err, calls, retries, body.closes)
 			}
-			th.AssertEquals(t, test.id, string(got.Resource.Body["id"]))
-			th.AssertEquals(t, test.member, string(got.Resource.Body["member_id"]))
-			th.AssertEquals(t, `null`, string(got.Resource.Body["name"]))
-			th.CheckDeepEquals(t, before, memberRecordValues(seed))
+			if string(got.Resource.Body["id"]) != test.id {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), test.id)
+			}
+			if string(got.Resource.Body["member_id"]) != test.member {
+				t.Fatalf("string(got.Resource.Body[\"member_id\"]) = %v, want %v", string(got.Resource.Body["member_id"]), test.member)
+			}
+			if string(got.Resource.Body["name"]) != `null` {
+				t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `null`)
+			}
+			if got := memberRecordValues(seed); !reflect.DeepEqual(got, before) {
+				t.Errorf("memberRecordValues(seed) = %#v, want %#v", got, before)
+			}
 			if test.name == "response member replaces fallback identity" {
-				th.AssertEquals(t, `[null,false]`, string(got.Resource.Body["status"]))
+				if string(got.Resource.Body["status"]) != `[null,false]` {
+					t.Fatalf("string(got.Resource.Body[\"status\"]) = %v, want %v", string(got.Resource.Body["status"]), `[null,false]`)
+				}
 			} else {
-				th.AssertEquals(t, `null`, string(got.Resource.Body["status"]))
+				if string(got.Resource.Body["status"]) != `null` {
+					t.Fatalf("string(got.Resource.Body[\"status\"]) = %v, want %v", string(got.Resource.Body["status"]), `null`)
+				}
 			}
 		})
 	}
@@ -313,15 +340,27 @@ func TestImageMemberRecordWritesTranslateAcceptedStatusesAndPreserveDefaults(t *
 				if got == nil || err != nil || calls != 1 || retries != 0 || body.closes != 1 || (got.Wire != nil) != test.parsed || got.StatusCode != test.code || string(got.Envelope) != test.raw || len(got.Resource.Body) != 9 || got.Resource.Header.Get("X-Task-Proof") != "actual" || got.ImageID == nil || *got.ImageID != memberRecordParent {
 					t.Fatal(got, err, calls, retries, body.closes)
 				}
-				th.AssertEquals(t, `"image-空白"`, string(got.Resource.Body["image_id"]))
-				th.AssertEquals(t, `null`, string(got.Resource.Body["location"]))
+				if string(got.Resource.Body["image_id"]) != `"image-空白"` {
+					t.Fatalf("string(got.Resource.Body[\"image_id\"]) = %v, want %v", string(got.Resource.Body["image_id"]), `"image-空白"`)
+				}
+				if string(got.Resource.Body["location"]) != `null` {
+					t.Fatalf("string(got.Resource.Body[\"location\"]) = %v, want %v", string(got.Resource.Body["location"]), `null`)
+				}
 				if test.code == 201 {
-					th.AssertEquals(t, `null`, string(got.Resource.Body["id"]))
+					if string(got.Resource.Body["id"]) != `null` {
+						t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), `null`)
+					}
 				}
 				if test.code == 200 {
-					th.AssertEquals(t, `[false,null]`, string(got.Resource.Body["status"]))
-					th.AssertEquals(t, `"foreign"`, string(got.Wire.Body["image_id"]))
-					th.AssertEquals(t, `1e400`, string(got.Wire.Body["vendor"]))
+					if string(got.Resource.Body["status"]) != `[false,null]` {
+						t.Fatalf("string(got.Resource.Body[\"status\"]) = %v, want %v", string(got.Resource.Body["status"]), `[false,null]`)
+					}
+					if string(got.Wire.Body["image_id"]) != `"foreign"` {
+						t.Fatalf("string(got.Wire.Body[\"image_id\"]) = %v, want %v", string(got.Wire.Body["image_id"]), `"foreign"`)
+					}
+					if string(got.Wire.Body["vendor"]) != `1e400` {
+						t.Fatalf("string(got.Wire.Body[\"vendor\"]) = %v, want %v", string(got.Wire.Body["vendor"]), `1e400`)
+					}
 				}
 			})
 		}
@@ -910,5 +949,7 @@ func TestImageMemberRecordMutationResultsDoNotAliasRequestOrPhysicalResponse(t *
 		t.Fatal("record channels alias", got)
 	}
 	got.Wire.Body["schema"][0] = '!'
-	th.AssertEquals(t, `{"large":900719925474099312345}`, string(got.Resource.Body["schema"]))
+	if string(got.Resource.Body["schema"]) != `{"large":900719925474099312345}` {
+		t.Fatalf("string(got.Resource.Body[\"schema\"]) = %v, want %v", string(got.Resource.Body["schema"]), `{"large":900719925474099312345}`)
+	}
 }

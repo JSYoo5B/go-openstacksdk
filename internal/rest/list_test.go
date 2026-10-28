@@ -7,14 +7,15 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 type listItem struct {
@@ -37,14 +38,10 @@ func (v *listItem) UnmarshalJSON(data []byte) error {
 
 func listSpec(t *testing.T, handler http.HandlerFunc) CollectionSpec[listItem] {
 	t.Helper()
-	fake := testhelper.SetupHTTP()
-	t.Cleanup(fake.Teardown)
-	fake.Mux.Handle("/", handler)
-	server := fake.Server
-	provider := &gophercloud.ProviderClient{HTTPClient: *server.Client()}
-	provider.UseTokenLock()
-	provider.SetToken("shared-token")
-	client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: server.URL + "/v1/"}
+	cloud := testcloud.New(t)
+	cloud.Mux.Handle("/", handler)
+	cloud.Provider.SetToken("shared-token")
+	client := &gophercloud.ServiceClient{ProviderClient: cloud.Provider, Endpoint: cloud.Server.URL + "/v1/"}
 	return CollectionSpec[listItem]{Client: client, Path: "items", Kind: "items", SingleKey: "item", PluralKey: "items",
 		ID: func(v *listItem) string { return v.ID }, Name: func(v *listItem) string { return v.Name },
 		Metadata: func(v *listItem) *resource.Metadata { return &v.Metadata }, Get: true, Delete: true}
@@ -90,8 +87,12 @@ func TestListOptionalReaderAndRepresentationsKeepDefaultPolicy(t *testing.T) {
 			var calls, reads atomic.Int32
 			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				testhelper.TestMethod(t, r, http.MethodGet)
-				testhelper.TestHeader(t, r, "X-Auth-Token", "shared-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "shared-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "shared-token")
+				}
 				if r.URL.Path != "/v1/items" || r.URL.Query().Get("owner") != "fixed" {
 					t.Error(r.URL)
 				}
@@ -283,8 +284,12 @@ func TestListFirstServerLimitIsOptInAndFixedAcrossContinuations(t *testing.T) {
 			var calls atomic.Int32
 			spec := listSpec(t, func(w http.ResponseWriter, r *http.Request) {
 				call := int(calls.Add(1))
-				testhelper.TestMethod(t, r, http.MethodGet)
-				testhelper.TestHeader(t, r, "X-Auth-Token", "shared-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "shared-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "shared-token")
+				}
 				want := url.Values{}
 				if call > 1 {
 					want.Set("marker", "one")

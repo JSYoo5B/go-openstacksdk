@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -17,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility(t *testing.T) {
@@ -61,12 +61,24 @@ func TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility(t *testing
 			var calls, callbacks atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodDelete)
-				th.TestHeader(t, r, "X-Auth-Token", "delete-live")
-				th.TestHeader(t, r, "X-Source", "selected")
-				th.TestHeader(t, r, "X-Extension", "owned")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.1")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.1")
+				if r.Method != http.MethodDelete {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "delete-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "delete-live")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-Extension"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+					t.Errorf("header %s = %q, want %q", "X-Extension", got, "owned")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.1" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.1")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.1" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.1")
+				}
 				if r.URL.Path != path || r.URL.EscapedPath() != "/reverse/nova/v2.1/project/os-keypairs/"+url.PathEscape(name) || r.URL.RawQuery != query.Encode() {
 					t.Error("DELETE performed lookup or changed fixed member/owner", r.Method, r.URL, query)
 				}
@@ -139,11 +151,21 @@ func TestComputeKeypairDeleteOwnedDefaultsOwnerAndNativeCompatibility(t *testing
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodDelete)
-				th.TestHeader(t, r, "X-Auth-Token", "native-delete-live")
-				th.TestHeader(t, r, "X-Source", "native selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodDelete {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "native-delete-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "native-delete-live")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "native selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "native selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				if r.URL.Path != path || r.URL.EscapedPath() != path || r.URL.RawQuery != query.Encode() {
 					t.Error("native DELETE changed member or escaped owner/query", r.URL, query)
 				}
@@ -261,8 +283,12 @@ func TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership(t *testing.T) {
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodDelete)
-				th.TestHeader(t, r, "X-Extension", "kept")
+				if r.Method != http.MethodDelete {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+				}
+				if got := r.Header.Values("X-Extension"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "kept" }) {
+					t.Errorf("header %s = %q, want %q", "X-Extension", got, "kept")
+				}
 				if r.URL.Path != "/reverse/nova/v2.1/project/os-keypairs/name" || !reflect.DeepEqual(r.URL.Query(), want) {
 					t.Error(r.URL, want)
 				}
@@ -310,7 +336,9 @@ func TestComputeKeypairDeleteAcceptedFailuresAndNativeRetryGuards(t *testing.T) 
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodDelete)
+				if r.Method != http.MethodDelete {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+				}
 				if r.URL.Path != "/reverse/nova/v2.1/project/os-keypairs/name" || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -387,7 +415,9 @@ func TestComputeKeypairDeleteAcceptedFailuresAndNativeRetryGuards(t *testing.T) 
 		const body = "original native503"
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodDelete)
+			if r.Method != http.MethodDelete {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+			}
 			w.Header().Set("X-Delete-Proof", "retry")
 			testcloud.JSON(w, 503, body)
 		})

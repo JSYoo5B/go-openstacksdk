@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestStoreRecordsProjectionAndOwnedReceipts(t *testing.T) {
@@ -35,18 +35,28 @@ func TestStoreRecordsProjectionAndOwnedReceipts(t *testing.T) {
 		t.Fatal(rows, err, calls)
 	}
 	want := map[string]string{"id": "900719925474099312345", "name": `["passive",null]`, "description": `{"future":true}`, "is_default": "true", "properties": `{"number":1.00000000000000000001}`, "location": "null"}
-	th.CheckDeepEquals(t, want, infoRecordValues(rows[0].Resource))
+	if got := infoRecordValues(rows[0].Resource); !reflect.DeepEqual(got, want) {
+		t.Errorf("infoRecordValues(rows[0].Resource) = %#v, want %#v", got, want)
+	}
 	for _, record := range rows {
 		if record.Resource == nil || record.Wire == nil || record.StatusCode != 203 || record.Resource.StatusCode != 203 || record.Wire.StatusCode != 203 || record.Header.Get("X-Actual") != "owned" || record.Resource.Header.Get("X-Actual") != "owned" || record.Wire.Header.Get("X-Actual") != "owned" || string(record.Envelope) != raw {
 			t.Fatal("page receipt", record)
 		}
 	}
 	for _, key := range []string{"id", "name", "description", "is_default", "properties", "location"} {
-		th.AssertEquals(t, "null", string(rows[1].Resource.Body[key]))
+		if string(rows[1].Resource.Body[key]) != "null" {
+			t.Fatalf("string(rows[1].Resource.Body[key]) = %v, want %v", string(rows[1].Resource.Body[key]), "null")
+		}
 	}
-	th.AssertEquals(t, `[1]`, string(rows[0].Wire.Body["type"]))
-	th.AssertEquals(t, "1e400", string(rows[0].Wire.Body["weight"]))
-	th.AssertEquals(t, `"https://foreign.test/"`, string(rows[0].Wire.Body["self"]))
+	if string(rows[0].Wire.Body["type"]) != `[1]` {
+		t.Fatalf("string(rows[0].Wire.Body[\"type\"]) = %v, want %v", string(rows[0].Wire.Body["type"]), `[1]`)
+	}
+	if string(rows[0].Wire.Body["weight"]) != "1e400" {
+		t.Fatalf("string(rows[0].Wire.Body[\"weight\"]) = %v, want %v", string(rows[0].Wire.Body["weight"]), "1e400")
+	}
+	if string(rows[0].Wire.Body["self"]) != `"https://foreign.test/"` {
+		t.Fatalf("string(rows[0].Wire.Body[\"self\"]) = %v, want %v", string(rows[0].Wire.Body["self"]), `"https://foreign.test/"`)
+	}
 	for _, key := range []string{"type", "read-only", "weight", "self", "vendor"} {
 		if _, exists := rows[0].Resource.Body[key]; exists {
 			t.Fatal("unknown field became declared descriptor", key)
@@ -94,15 +104,23 @@ func TestStoreRecordsDescriptorsAliasesAndLocations(t *testing.T) {
 			if err != nil || len(rows) != 1 || locations != 1 || len(rows[0].Resource.Body) != 6 {
 				t.Fatal(rows, err, locations)
 			}
-			th.AssertEquals(t, test.id, string(rows[0].Resource.Body["id"]))
-			th.AssertEquals(t, test.flag, string(rows[0].Resource.Body["is_default"]))
-			th.AssertEquals(t, test.props, string(rows[0].Resource.Body["properties"]))
+			if string(rows[0].Resource.Body["id"]) != test.id {
+				t.Fatalf("string(rows[0].Resource.Body[\"id\"]) = %v, want %v", string(rows[0].Resource.Body["id"]), test.id)
+			}
+			if string(rows[0].Resource.Body["is_default"]) != test.flag {
+				t.Fatalf("string(rows[0].Resource.Body[\"is_default\"]) = %v, want %v", string(rows[0].Resource.Body["is_default"]), test.flag)
+			}
+			if string(rows[0].Resource.Body["properties"]) != test.props {
+				t.Fatalf("string(rows[0].Resource.Body[\"properties\"]) = %v, want %v", string(rows[0].Resource.Body["properties"]), test.props)
+			}
 			var captured resource.CloudLocation
 			if err := json.Unmarshal(rows[0].Resource.Body["location"], &captured); err != nil || captured.Cloud == nil {
 				t.Fatal(captured, err)
 			}
 			encoded, _ := json.Marshal(*captured.Cloud)
-			th.AssertEquals(t, test.location, string(encoded))
+			if string(encoded) != test.location {
+				t.Fatalf("string(encoded) = %v, want %v", string(encoded), test.location)
+			}
 		})
 	}
 	for _, location := range []string{"null", "false", "[1]", "42", `"literal"`} {
@@ -114,7 +132,9 @@ func TestStoreRecordsDescriptorsAliasesAndLocations(t *testing.T) {
 			if err != nil || len(rows) != 1 {
 				t.Fatal(rows, err)
 			}
-			th.AssertEquals(t, location, string(rows[0].Resource.Body["location"]))
+			if string(rows[0].Resource.Body["location"]) != location {
+				t.Fatalf("string(rows[0].Resource.Body[\"location\"]) = %v, want %v", string(rows[0].Resource.Body["location"]), location)
+			}
 		})
 	}
 }
@@ -226,11 +246,17 @@ func TestStoreRecordsSourcePagingAndRawCaps(t *testing.T) {
 				if calls == 1 {
 					switch mode {
 					case "positive marker fallback", "raw cap filter", "zero plus cap hint":
-						th.AssertEquals(t, "2", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "2" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+						}
 					case "explicit zero":
-						th.AssertEquals(t, "0", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "0" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "0")
+						}
 					default:
-						th.AssertEquals(t, "", req.URL.RawQuery)
+						if req.URL.RawQuery != "" {
+							t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "")
+						}
 					}
 					reply := infoRecordJSON(req, 200, first)
 					if mode == "HTTP Link" {

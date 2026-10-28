@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const memberRecordParent = "image-空白"
@@ -74,19 +73,31 @@ func TestImageMemberRecordsProjectionAndOwnedReceipts(t *testing.T) {
 	}
 	parent, _ := json.Marshal(memberRecordParent)
 	want := map[string]string{"id": "false", "name": "null", "member_id": "false", "created_at": "900719925474099312345", "updated_at": `{"literal":true}`, "status": `["future",null]`, "schema": "false", "image_id": string(parent), "location": "null"}
-	th.CheckDeepEquals(t, want, memberRecordValues(rows[0]))
+	if got := memberRecordValues(rows[0]); !reflect.DeepEqual(got, want) {
+		t.Errorf("memberRecordValues(rows[0]) = %#v, want %#v", got, want)
+	}
 	for _, record := range rows {
 		if record.ImageID == nil || *record.ImageID != memberRecordParent || record.StatusCode != 203 || record.Resource.StatusCode != 203 || record.Wire.StatusCode != 203 || record.Header.Get("X-Member-Proof") != "actual" || record.Resource.Header.Get("X-Member-Proof") != "actual" || record.Wire.Header.Get("X-Member-Proof") != "actual" || string(record.Envelope) != raw {
 			t.Fatal("page provenance", record)
 		}
 	}
 	for _, key := range []string{"id", "name", "member_id", "created_at", "updated_at", "status", "schema", "location"} {
-		th.AssertEquals(t, "null", string(rows[1].Resource.Body[key]))
+		if string(rows[1].Resource.Body[key]) != "null" {
+			t.Fatalf("string(rows[1].Resource.Body[key]) = %v, want %v", string(rows[1].Resource.Body[key]), "null")
+		}
 	}
-	th.AssertEquals(t, `"wire parent"`, string(rows[0].Wire.Body["image_id"]))
-	th.AssertEquals(t, `{"cloud":"wire"}`, string(rows[0].Wire.Body["location"]))
-	th.AssertEquals(t, "1e400", string(rows[0].Wire.Body["vendor"]))
-	th.AssertEquals(t, `"https://foreign.test/"`, string(rows[0].Wire.Body["self"]))
+	if string(rows[0].Wire.Body["image_id"]) != `"wire parent"` {
+		t.Fatalf("string(rows[0].Wire.Body[\"image_id\"]) = %v, want %v", string(rows[0].Wire.Body["image_id"]), `"wire parent"`)
+	}
+	if string(rows[0].Wire.Body["location"]) != `{"cloud":"wire"}` {
+		t.Fatalf("string(rows[0].Wire.Body[\"location\"]) = %v, want %v", string(rows[0].Wire.Body["location"]), `{"cloud":"wire"}`)
+	}
+	if string(rows[0].Wire.Body["vendor"]) != "1e400" {
+		t.Fatalf("string(rows[0].Wire.Body[\"vendor\"]) = %v, want %v", string(rows[0].Wire.Body["vendor"]), "1e400")
+	}
+	if string(rows[0].Wire.Body["self"]) != `"https://foreign.test/"` {
+		t.Fatalf("string(rows[0].Wire.Body[\"self\"]) = %v, want %v", string(rows[0].Wire.Body["self"]), `"https://foreign.test/"`)
+	}
 	if _, exists := rows[0].Resource.Body["self"]; exists {
 		t.Fatal("self became source field")
 	}
@@ -131,8 +142,12 @@ func TestImageMemberRecordsIdentityAliasesAndLocation(t *testing.T) {
 			if err != nil || len(rows) != 1 || calls != 1 || locations != 1 {
 				t.Fatal(rows, err, calls, locations)
 			}
-			th.AssertEquals(t, test.id, string(rows[0].Resource.Body["id"]))
-			th.AssertEquals(t, test.member, string(rows[0].Resource.Body["member_id"]))
+			if string(rows[0].Resource.Body["id"]) != test.id {
+				t.Fatalf("string(rows[0].Resource.Body[\"id\"]) = %v, want %v", string(rows[0].Resource.Body["id"]), test.id)
+			}
+			if string(rows[0].Resource.Body["member_id"]) != test.member {
+				t.Fatalf("string(rows[0].Resource.Body[\"member_id\"]) = %v, want %v", string(rows[0].Resource.Body["member_id"]), test.member)
+			}
 			var captured resource.CloudLocation
 			if err := json.Unmarshal(rows[0].Resource.Body["location"], &captured); err != nil || captured.Cloud == nil || *captured.Cloud != "captured" || string(captured.Project.ID) != `"token project"` {
 				t.Fatal("location snapshot", captured, err)
@@ -238,9 +253,13 @@ func TestImageMemberRecordsPagingAndRawConsumption(t *testing.T) {
 				calls++
 				if calls == 1 {
 					if mode == "marker fallback" || mode == "raw cap filter" {
-						th.AssertEquals(t, "2", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "2" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+						}
 					} else {
-						th.AssertEquals(t, "", req.URL.RawQuery)
+						if req.URL.RawQuery != "" {
+							t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "")
+						}
 					}
 					return deleteCoreHTTP(200, &deleteCoreBody{reader: strings.NewReader(first)}, header), nil
 				}
@@ -306,7 +325,9 @@ func TestImageMemberRecordsPagingAndRawConsumption(t *testing.T) {
 			count++
 			break
 		}
-		th.AssertEquals(t, 1, count)
+		if count != 1 {
+			t.Fatalf("count = %v, want %v", count, 1)
+		}
 	})
 }
 

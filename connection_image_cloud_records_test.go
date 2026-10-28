@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T) {
@@ -21,7 +20,9 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 	cloud := "image-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("image-0")
@@ -42,23 +43,37 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 		return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	cloud = "caller changed"
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	header := image.WithImageRecordQueryHeader("X-Call", "cloud")
 	ctx := context.Background()
 
 	all, err := service.AllCloudImageRecords(ctx, header, image.WithImageRecordQueryShowAll(true))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	searched, err := service.SearchImageRecords(ctx, "ubuntu*", header)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	filtered, err := service.GetCloudImageRecord(ctx, "ubuntu", header, image.WithImageRecordQueryFilters(json.RawMessage(`{}`)))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	found, err := service.GetCloudImageRecord(ctx, "ubuntu", header)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	byID, err := service.GetImageRecordByID(ctx, "a", header)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if calls != 5 || len(all.Images) != 2 || len(searched.Images) != 1 || len(searched.Inventory) != 2 || filtered.Image == nil || found.Image == nil || byID == nil {
 		t.Fatal(all, searched, filtered, found, byID, calls)
 	}

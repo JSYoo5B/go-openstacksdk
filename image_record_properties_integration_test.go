@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.T) {
@@ -51,7 +50,9 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 				Op, Path string
 				Value    json.RawMessage
 			}
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&patch))
+			if err := json.NewDecoder(req.Body).Decode(&patch); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			values := map[string]string{}
 			for _, op := range patch {
 				if op.Op != "add" {
@@ -84,11 +85,17 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 		return &http.Response{Request: req, StatusCode: status, Header: header, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source = versioned.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
 	source.Microversion = "2.10"
@@ -96,10 +103,14 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 		t.Fatal("property helper replaced shared source")
 	}
 	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id}, image.WithImageRecordHeader("X-Call", "property-helper"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	seed.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
 	result, err := conn.UpdateImagePropertiesRecord(context.Background(), image.ImageRecordPropertiesRequest{Record: seed}, image.WithImageRecordProperty("kernel", "kernel*"), image.WithImageRecordProperty("gpu", true), image.WithImageRecordPropertiesHeader("X-Call", "property-helper"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if result == nil || !result.Updated || result.Record == nil || calls != 4 {
 		t.Fatal(result, calls)
 	}
@@ -110,7 +121,9 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 	// Existing nonempty properties make the Source helper return true even
 	// with no new options. The shared Update dirty gate sends no extra PATCH.
 	again, err := conn.UpdateImagePropertiesRecord(context.Background(), image.ImageRecordPropertiesRequest{Record: record})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if again == nil || !again.Updated || again.Record == nil || calls != 4 || again.Record.StatusCode != 202 {
 		t.Fatal(again, calls)
 	}
@@ -125,7 +138,9 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 func TestConnectionOwnedImagePropertiesRejectsInvalidInvocation(t *testing.T) {
 	provider := &gophercloud.ProviderClient{}
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("property facade canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

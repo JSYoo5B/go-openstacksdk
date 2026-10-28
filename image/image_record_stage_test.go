@@ -18,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordStageRead(t *testing.T, request *http.Request) string {
@@ -124,8 +123,12 @@ func TestImageRecordStageFixedRoutesAndOpaqueAcceptedReceipts(t *testing.T) {
 			if got.Staged.StatusCode != code || string(got.Staged.Body) != ackRaw || got.Metadata.StatusCode != 299 || string(got.Metadata.Body) != `{"status":"uploading","name":"after"}` || got.Record.StatusCode != 299 || got.Record.Resource.StatusCode != 299 || len(got.Record.Resource.Body) != 65 || string(got.Record.Resource.Body["status"]) != `"uploading"` || string(got.Record.Resource.Body["size"]) != "4" || string(got.Record.Resource.Body["is_protected"]) != "true" || len(got.Record.bodyState.dirty) != 0 {
 				t.Fatal("phase evidence or seeded translation changed", got)
 			}
-			th.CheckDeepEquals(t, []string{"glance-direct", " web-download"}, got.Record.ImportMethods)
-			th.AssertEquals(t, id, taskCoreText(t, got.Record.Resource.Body["id"]))
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"glance-direct", " web-download"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"glance-direct", " web-download"})
+			}
+			if actual := taskCoreText(t, got.Record.Resource.Body["id"]); actual != id {
+				t.Fatalf("taskCoreText(t, got.Record.Resource.Body[\"id\"]) = %v, want %v", actual, id)
+			}
 			if !reflect.DeepEqual(seed, original) || got.Record == seed || got.Record.data != reader {
 				t.Fatal("input mutation or borrowed retention", got, seed)
 			}
@@ -300,9 +303,15 @@ func TestImageRecordStageValidFetchOverlaysSeedAndCleansRawBody(t *testing.T) {
 	if err != nil || got == nil || got.Record == nil || calls != 3 || locations != 2 || !reflect.DeepEqual(before, seed) || len(got.Record.bodyState.dirty) != 0 || !reflect.DeepEqual(got.Record.bodyState.current, got.Record.bodyState.original) {
 		t.Fatal(got, err, calls, locations)
 	}
-	th.AssertEquals(t, `"pending"`, string(got.Record.Resource.Body["name"]))
-	th.AssertEquals(t, "4", string(got.Record.Resource.Body["size"]))
-	th.AssertEquals(t, `{"new":true}`, string(imageRecordProperties(t, got.Record)["vendor"]))
+	if string(got.Record.Resource.Body["name"]) != `"pending"` {
+		t.Fatalf("string(got.Record.Resource.Body[\"name\"]) = %v, want %v", string(got.Record.Resource.Body["name"]), `"pending"`)
+	}
+	if string(got.Record.Resource.Body["size"]) != "4" {
+		t.Fatalf("string(got.Record.Resource.Body[\"size\"]) = %v, want %v", string(got.Record.Resource.Body["size"]), "4")
+	}
+	if actual := string(imageRecordProperties(t, got.Record)["vendor"]); actual != `{"new":true}` {
+		t.Fatalf("string(imageRecordProperties(t, got.Record)[\"vendor\"]) = %v, want %v", actual, `{"new":true}`)
+	}
 	if len(got.Record.ImportMethods) != 0 {
 		t.Fatal("stage/fetch headers did not reset ImportMethods", got.Record.ImportMethods)
 	}
@@ -426,8 +435,12 @@ func TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor(t *testi
 				t.Fatal(got, err, calls)
 			}
 			if infer {
-				th.CheckDeepEquals(t, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart}, seeker.whences)
-				th.CheckDeepEquals(t, []int64{0, 0, 6}, seeker.offsets)
+				if !reflect.DeepEqual(seeker.whences, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart}) {
+					t.Errorf("seeker.whences = %#v, want %#v", seeker.whences, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart})
+				}
+				if !reflect.DeepEqual(seeker.offsets, []int64{0, 0, 6}) {
+					t.Errorf("seeker.offsets = %#v, want %#v", seeker.offsets, []int64{0, 0, 6})
+				}
 			} else if len(seeker.whences) != 0 {
 				t.Fatal("size policy sought reader", seeker.whences)
 			}

@@ -14,7 +14,6 @@ import (
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
@@ -30,7 +29,9 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 			cloud := "owned-cloud"
 			facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 			wantLocation, err := facts.ForResource(nil, nil)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			provider := &gophercloud.ProviderClient{}
 			provider.UseTokenLock()
 			provider.SetToken("record-0")
@@ -73,12 +74,18 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 				return &http.Response{StatusCode: codes[index], Header: header, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 			})
 			conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			cloud = "caller mutation"
 			upper, err := conn.Image(context.Background())
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			version, err := conn.ImageV2(context.Background())
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			api := upper.API
 			if versioned {
 				api = version
@@ -93,9 +100,13 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 				t.Fatal("owned aggregate replaced shared client or made discovery calls")
 			}
 			scope, err := api.MetadefObjects.InNamespace(context.Background(), parent)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			objects, err := scope.AllRecords(context.Background())
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(objects) != 2 || calls != 2 {
 				t.Fatalf("object pages=%d calls=%d", len(objects), calls)
 			}
@@ -111,7 +122,9 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 			ownedHeaders := ns.WithRecordListHeaders(headers)
 			headers["X-Call"] = "caller mutation"
 			namespaces, err := api.MetadefNamespaces.AllRecords(context.Background(), ownedHeaders, ns.WithRecordListLimit(1), ns.WithRecordListMaxItems(2), ns.WithRecordListFilter("visibility", "public"), ns.WithRecordListFilter("is_protected", false))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(namespaces) != 2 || calls != 4 || retries != 0 {
 				t.Fatalf("namespace pages=%d calls=%d retries=%d", len(namespaces), calls, retries)
 			}

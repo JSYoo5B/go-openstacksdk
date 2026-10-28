@@ -20,7 +20,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const quotaPrefix = "/reverse/barbican/v1"
@@ -324,7 +323,9 @@ func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
 			}
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				testhelper.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != wantPath || r.URL.RawQuery != "" {
 					t.Error("quota GET resolved another path or sent a query", r.Method, r.URL)
 				}
@@ -399,7 +400,9 @@ func TestKeyManagerQuotasStrictGetEnvelopesStatusAndReadEvidence(t *testing.T) {
 		const wantBody = `{"quotas":{"secrets":9007199254740993,"orders":null}}`
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			testhelper.TestMethod(t, r, http.MethodGet)
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
 			if r.URL.Path != quotaPrefix+"/quotas" || r.URL.RawQuery != "" {
 				t.Error("accepted Close changed effective quota route", r.Method, r.URL)
 			}

@@ -14,7 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func selectedCloud(t *testing.T) (*testcloud.Cloud, *gophercloud.ServiceClient, *API) {
@@ -26,9 +25,15 @@ func selectedCloud(t *testing.T) (*testcloud.Cloud, *gophercloud.ServiceClient, 
 }
 func assertVersion(t *testing.T, r *http.Request, version string) {
 	t.Helper()
-	testhelper.AssertEquals(t, "compute "+version, r.Header.Get("OpenStack-API-Version"))
-	testhelper.AssertEquals(t, version, r.Header.Get("X-OpenStack-Nova-API-Version"))
-	testhelper.AssertEquals(t, "test-token", r.Header.Get("X-Auth-Token"))
+	if got := r.Header.Get("OpenStack-API-Version"); got != "compute "+version {
+		t.Fatalf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute "+version)
+	}
+	if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != version {
+		t.Fatalf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, version)
+	}
+	if got := r.Header.Get("X-Auth-Token"); got != "test-token" {
+		t.Fatalf("r.Header.Get(\"X-Auth-Token\") = %v, want %v", got, "test-token")
+	}
 }
 func rawEquals(t *testing.T, fields map[string]json.RawMessage, key, want string) {
 	t.Helper()
@@ -41,11 +46,34 @@ func TestShareCreateDirtyBodyAndSeededDescriptors(t *testing.T) {
 	calls := 0
 	cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "POST", r.Method)
+		if r.Method != "POST" {
+			t.Errorf("r.Method = %v, want %v", r.Method, "POST")
+			return
+		}
 		assertVersion(t, r, "2.97")
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
-		testhelper.AssertEquals(t, "application/json", r.Header.Get("Content-Type"))
-		testhelper.TestJSONRequest(t, r, `{"share":{"share_id":"share","tag":null,"name":"seed"}}`)
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
+		if got := r.Header.Get("Content-Type"); got != "application/json" {
+			t.Errorf("r.Header.Get(\"Content-Type\") = %v, want %v", got, "application/json")
+			return
+		}
+		const wantBody = `{"share":{"share_id":"share","tag":null,"name":"seed"}}`
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			t.Errorf("read request body: %v", err)
+		}
+		var gotJSON, wantJSON any
+		if err := json.Unmarshal(body, &gotJSON); err != nil {
+			t.Errorf("request body is not JSON: %v", err)
+		}
+		if err := json.Unmarshal([]byte(wantBody), &wantJSON); err != nil {
+			t.Errorf("expected body is not JSON: %v", err)
+		}
+		if !reflect.DeepEqual(gotJSON, wantJSON) {
+			t.Errorf("request body = %s, want %s", body, wantBody)
+		}
 		w.Header().Set("X-Proof", "accepted")
 		testcloud.JSON(w, 201, `{"share":{"uuid":"mapping","share_id":"returned","status":"inactive","extension":123456789012345678901234567890,"self":"secret"}}`)
 	})
@@ -83,10 +111,19 @@ func TestShareGetFixesParentMemberAndProxySeed(t *testing.T) {
 	calls := 0
 	cloud.Mux.HandleFunc("/v2.1/projects/p/", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "GET", r.Method)
-		testhelper.AssertEquals(t, "/v2.1/projects/p/servers/server%2Fpart/shares/share%3Fother%23x", r.URL.EscapedPath())
+		if r.Method != "GET" {
+			t.Errorf("r.Method = %v, want %v", r.Method, "GET")
+			return
+		}
+		if got := r.URL.EscapedPath(); got != "/v2.1/projects/p/servers/server%2Fpart/shares/share%3Fother%23x" {
+			t.Errorf("r.URL.EscapedPath() = %v, want %v", got, "/v2.1/projects/p/servers/server%2Fpart/shares/share%3Fother%23x")
+			return
+		}
 		assertVersion(t, r, "2.97")
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
 		if r.Body != nil {
 			body, _ := io.ReadAll(r.Body)
 			if len(body) != 0 {
@@ -160,8 +197,14 @@ func TestShareVersionDiscoveryCeilingAndExplicitSelection(t *testing.T) {
 				discovery, member := 0, 0
 				cloud.Mux.HandleFunc("/v2.1/", func(w http.ResponseWriter, r *http.Request) {
 					discovery++
-					testhelper.AssertEquals(t, "/v2.1/", r.URL.EscapedPath())
-					testhelper.AssertEquals(t, http.MethodGet, r.Method)
+					if got := r.URL.EscapedPath(); got != "/v2.1/" {
+						t.Errorf("r.URL.EscapedPath() = %v, want %v", got, "/v2.1/")
+						return
+					}
+					if r.Method != http.MethodGet {
+						t.Errorf("r.Method = %v, want %v", r.Method, http.MethodGet)
+						return
+					}
 					for name := range r.Header {
 						if isVersionHeader(name) {
 							t.Fatalf("discovery version header leaked %s", name)
@@ -186,8 +229,14 @@ func TestShareVersionDiscoveryCeilingAndExplicitSelection(t *testing.T) {
 					if operation == "Delete" {
 						wantMethod = http.MethodDelete
 					}
-					testhelper.AssertEquals(t, wantMethod, r.Method)
-					testhelper.AssertEquals(t, wantPath, r.URL.EscapedPath())
+					if r.Method != wantMethod {
+						t.Errorf("r.Method = %v, want %v", r.Method, wantMethod)
+						return
+					}
+					if got := r.URL.EscapedPath(); got != wantPath {
+						t.Errorf("r.URL.EscapedPath() = %v, want %v", got, wantPath)
+						return
+					}
 					testcloud.JSON(w, 200, `{"share":{"share_id":"share"},"shares":[{"share_id":"share"}]}`)
 				}
 				cloud.Mux.HandleFunc("/v2.1/p/servers/server/shares", memberHandler)
@@ -294,7 +343,10 @@ func TestShareDeleteDefaultOnlyCleanMissingAndBodylessSuccess(t *testing.T) {
 			t.Run(http.StatusText(status)+string(rune('0'+status%10))+strconvBool(strict), func(t *testing.T) {
 				cloud, _, api := selectedCloud(t)
 				cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares/share", func(w http.ResponseWriter, r *http.Request) {
-					testhelper.AssertEquals(t, "DELETE", r.Method)
+					if r.Method != "DELETE" {
+						t.Errorf("r.Method = %v, want %v", r.Method, "DELETE")
+						return
+					}
 					assertVersion(t, r, "2.97")
 					if r.ContentLength != 0 || r.Body != nil && r.Body != http.NoBody {
 						t.Fatal("DELETE had body")
@@ -327,8 +379,14 @@ func TestShareListProjectionLocalCapAndLazyNoLookahead(t *testing.T) {
 	cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares", func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		assertVersion(t, r, "2.97")
-		testhelper.AssertEquals(t, "2", r.URL.Query().Get("limit"))
-		testhelper.AssertEquals(t, "application/json", r.Header.Get("Accept"))
+		if got := r.URL.Query().Get("limit"); got != "2" {
+			t.Errorf("r.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+			return
+		}
+		if got := r.Header.Get("Accept"); got != "application/json" {
+			t.Errorf("r.Header.Get(\"Accept\") = %v, want %v", got, "application/json")
+			return
+		}
 		testcloud.JSON(w, 200, `{"shares":[{"share_id":"a","status":"inactive"},{"share_id":"b","status":"active","tag":null},{"share_id":"c","status":"active"}],"next":{"invalid":"unconsumed"}}`)
 	})
 	sequence := api.ListRecords(context.Background(), "server", WithListMaxItems(2), WithListFilter("status", "active"))
@@ -358,14 +416,20 @@ func TestShareListAlternateMarkerPresenceAndContinuation(t *testing.T) {
 				calls++
 				switch calls {
 				case 1:
-					testhelper.AssertEquals(t, "1", r.URL.Query().Get("limit"))
+					if got := r.URL.Query().Get("limit"); got != "1" {
+						t.Errorf("r.URL.Query().Get(\"limit\") = %v, want %v", got, "1")
+						return
+					}
 					testcloud.JSON(w, 200, `{"shares":[{"share_id":"alternate"`+primary+`} ]}`)
 				case 2:
 					want := "alternate"
 					if primary != "" {
 						want = "primary"
 					}
-					testhelper.AssertEquals(t, want, r.URL.Query().Get("marker"))
+					if got := r.URL.Query().Get("marker"); got != want {
+						t.Errorf("r.URL.Query().Get(\"marker\") = %v, want %v", got, want)
+						return
+					}
 					testcloud.JSON(w, 200, `{"shares":[]}`)
 				default:
 					t.Fatal("extra page")
@@ -411,7 +475,10 @@ func TestShareListUnknownDiscardAndControlRejectBeforeMarshaler(t *testing.T) {
 			calls, encoded := 0, 0
 			cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares", func(w http.ResponseWriter, r *http.Request) {
 				calls++
-				testhelper.AssertEquals(t, "", r.URL.RawQuery)
+				if r.URL.RawQuery != "" {
+					t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+					return
+				}
 				testcloud.JSON(w, 200, `{"shares":[]}`)
 			})
 			var failure error
@@ -571,7 +638,10 @@ func TestShareCleanAuthenticationRenewalRetainsRequest(t *testing.T) {
 			cloud.Mux.HandleFunc("/v2.1/projects/p/", func(w http.ResponseWriter, r *http.Request) {
 				calls++
 				body, _ := io.ReadAll(r.Body)
-				testhelper.AssertEquals(t, "compute 2.97", r.Header.Get("OpenStack-API-Version"))
+				if got := r.Header.Get("OpenStack-API-Version"); got != "compute 2.97" {
+					t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute 2.97")
+					return
+				}
 				if calls == 1 {
 					firstMethod, firstPath, firstBody = r.Method, r.URL.EscapedPath(), string(body)
 					testcloud.JSON(w, 401, `{"error":"renew"}`)
@@ -580,7 +650,10 @@ func TestShareCleanAuthenticationRenewalRetainsRequest(t *testing.T) {
 				if r.Method != firstMethod || r.URL.EscapedPath() != firstPath || string(body) != firstBody {
 					t.Fatal("renewal changed request")
 				}
-				testhelper.AssertEquals(t, "renewed", r.Header.Get("X-Auth-Token"))
+				if got := r.Header.Get("X-Auth-Token"); got != "renewed" {
+					t.Errorf("r.Header.Get(\"X-Auth-Token\") = %v, want %v", got, "renewed")
+					return
+				}
 				testcloud.JSON(w, 200, `{"share":{"share_id":"share"},"shares":[]}`)
 			})
 			cloud.Provider.ReauthFunc = func(context.Context) error { renewals++; cloud.Provider.SetToken("renewed"); return nil }
@@ -612,7 +685,10 @@ func TestShareOwnedConfigRepairsNilMapsAndCopiesPolicyAroundCallbacks(t *testing
 	cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares/share", func(w http.ResponseWriter, r *http.Request) {
 		calls++
 		assertVersion(t, r, "2.98")
-		testhelper.AssertEquals(t, "last", r.Header.Get("X-Caller"))
+		if got := r.Header.Get("X-Caller"); got != "last" {
+			t.Errorf("r.Header.Get(\"X-Caller\") = %v, want %v", got, "last")
+			return
+		}
 		testcloud.JSON(w, 200, `{"share":{}}`)
 	})
 	_, err := api.GetRecord(context.Background(), "server", "share", func(c *request.Config[ReadOpts]) error {
@@ -647,7 +723,10 @@ func TestShareListActualLinksUseFixedRouteAndSinglePageStopsBeforeLink(t *testin
 				if calls == 1 {
 					testcloud.JSON(w, 200, `{"shares":{"share_id":"one"},"shares_links":[{"rel":"next","href":"`+cloud.Server.URL+`/v2.1/projects/p/servers/server/shares?marker=one"}]}`)
 				} else {
-					testhelper.AssertEquals(t, "one", r.URL.Query().Get("marker"))
+					if got := r.URL.Query().Get("marker"); got != "one" {
+						t.Errorf("r.URL.Query().Get(\"marker\") = %v, want %v", got, "one")
+						return
+					}
 					testcloud.JSON(w, 200, `{"shares":[{"share_id":"two"}],"next":1e-400}`)
 				}
 			})
@@ -711,7 +790,10 @@ func TestShareSourceLoadedLocalEqualityAndDictionaryTruthiness(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cloud, _, api := selectedCloud(t)
 			cloud.Mux.HandleFunc("/v2.1/projects/p/servers/server/shares", func(w http.ResponseWriter, r *http.Request) {
-				testhelper.AssertEquals(t, "", r.URL.RawQuery)
+				if r.URL.RawQuery != "" {
+					t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+					return
+				}
 				testcloud.JSON(w, 200, `{"shares":[`+test.rows+`]}`)
 			})
 			var ids []string

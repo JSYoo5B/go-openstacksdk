@@ -8,13 +8,13 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"slices"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestServerPasswordDefaultAndOptionalDecryption(t *testing.T) {
@@ -31,9 +31,15 @@ func TestServerPasswordDefaultAndOptionalDecryption(t *testing.T) {
 	calls := 0
 	cloud.Mux.HandleFunc("/compute/servers/server/os-server-password", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		th.TestMethod(t, r, http.MethodGet)
-		th.TestHeader(t, r, "X-Auth-Token", "test-token")
-		th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.87")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+		}
+		if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.87" }) {
+			t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.87")
+		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(map[string]string{"password": encrypted})
 	})

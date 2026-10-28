@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordActionCall(service *Service, action string, ctx context.Context, input ImageRecordActionRequest, options ...ImageRecordActionOption) (*ImageRecordActionResult, error) {
@@ -62,7 +61,9 @@ func TestImageRecordActionsLiteralRoutesAndOpaqueAcceptedStatuses(t *testing.T) 
 				if ack.ImageID != id || ack.Action != action || ack.StatusCode != test.code || string(ack.Body) != test.raw || ack.Header.Get("X-Task-Proof") != "actual" || len(record.Resource.Body) != 65 || len(record.ImportMethods) != 0 || record.Resource.StatusCode != 0 || record.StatusCode != 0 || record.Wire != nil || record.Envelope != nil || len(record.Header) != 0 || string(record.Resource.Body["status"]) != "null" {
 					t.Fatal("opaque action receipt overwrote local model or invented fetch/status", got)
 				}
-				th.AssertEquals(t, id, taskCoreText(t, record.Resource.Body["id"]))
+				if got := taskCoreText(t, record.Resource.Body["id"]); got != id {
+					t.Fatalf("taskCoreText(t, record.Resource.Body[\"id\"]) = %v, want %v", got, id)
+				}
 				var location resource.CloudLocation
 				if err := json.Unmarshal(record.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != cloud {
 					t.Fatal(location, err)
@@ -111,7 +112,9 @@ func TestImageRecordActionsProjectPrivateCurrentBodyAndPreserveFetchReceipts(t *
 			}
 			value := got.Record
 			for key, want := range map[string]string{"id": `"fixed"`, "status": `"ACTIVE"`, "size": "4", "is_protected": "true", "tags": `["one"]`} {
-				th.AssertEquals(t, want, string(value.Resource.Body[key]))
+				if string(value.Resource.Body[key]) != want {
+					t.Fatalf("string(value.Resource.Body[key]) = %v, want %v", string(value.Resource.Body[key]), want)
+				}
 			}
 			if value.StatusCode != 203 || value.Resource.StatusCode != 203 || !reflect.DeepEqual(value.Header, seed.Header) || !reflect.DeepEqual(value.Wire, seed.Wire) || string(value.Envelope) != fetched || !reflect.DeepEqual(value.bodyState, seed.bodyState) || len(value.ImportMethods) != 0 || !reflect.DeepEqual(before, seed) {
 				t.Fatal("action changed raw baseline, prior receipt, import reset or input", value, seed)
@@ -225,7 +228,9 @@ func TestImageRecordActionsStrictRawUnicodeIdentity(t *testing.T) {
 				if got == nil || got.Record == nil || got.Acknowledgement == nil || err != nil || calls != 2 || got.Acknowledgement.ImageID != test.target {
 					t.Fatal(got, err, calls)
 				}
-				th.AssertEquals(t, test.target, taskCoreText(t, got.Record.Resource.Body["id"]))
+				if actual := taskCoreText(t, got.Record.Resource.Body["id"]); actual != test.target {
+					t.Fatalf("taskCoreText(t, got.Record.Resource.Body[\"id\"]) = %v, want %v", actual, test.target)
+				}
 			}
 		})
 	}

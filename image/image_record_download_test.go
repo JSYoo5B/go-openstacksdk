@@ -15,6 +15,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strings"
 	"testing"
 	"time"
@@ -22,7 +23,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const imageRecordDownloadABCMD5 = "900150983cd24fb0d6963f7d28e17f72"
@@ -37,7 +37,9 @@ func (f imageRecordDownloadWriterFunc) Write(p []byte) (int, error) { return f(p
 func imageRecordDownloadResource(t *testing.T, raw string) *resource.RawResource {
 	t.Helper()
 	var body map[string]json.RawMessage
-	th.AssertNoErr(t, json.Unmarshal([]byte(raw), &body))
+	if err := json.Unmarshal([]byte(raw), &body); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	return &resource.RawResource{Metadata: resource.Metadata{Body: body}}
 }
 
@@ -49,8 +51,12 @@ func TestImageRecordDownloadAllOutputModesAlwaysFetchBeforeBinaryAndOutputWinsSt
 			binaryBody := &taskCoreBody{reader: strings.NewReader("abc")}
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.TestMethod(t, req, http.MethodGet)
-				th.TestHeaderUnset(t, req, "X-OpenStack-Image-Size")
+				if req.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", req.Method, http.MethodGet)
+				}
+				if got := req.Header.Values("X-OpenStack-Image-Size"); len(got) > 0 {
+					t.Errorf("header %s = %q, want unset", "X-OpenStack-Image-Size", got)
+				}
 				if req.Body != nil || req.URL.RawQuery != "" {
 					t.Fatal(req.Body, req.URL)
 				}
@@ -87,7 +93,9 @@ func TestImageRecordDownloadAllOutputModesAlwaysFetchBeforeBinaryAndOutputWinsSt
 			if err != nil || got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || calls != 2 || metadataBody.closes != 1 || got.Metadata.StatusCode != 203 || got.Record.StatusCode != 203 || got.Downloaded.StatusCode != 299 || string(got.Record.Resource.Body["id"]) != `"fetched"` || string(got.Record.Resource.Body["status"]) != `"saving"` || len(got.Record.Resource.Body) != 65 {
 				t.Fatal(got, err, calls, metadataBody.closes)
 			}
-			th.CheckDeepEquals(t, []string{"metadata", " only"}, got.Record.ImportMethods)
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"metadata", " only"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"metadata", " only"})
+			}
 			if got.Checksum == nil || got.Checksum.Algorithm != "sha256" || string(got.Checksum.Expected) != `"`+imageRecordDownloadABCSHA256+`"` {
 				t.Fatal(got.Checksum)
 			}
@@ -96,10 +104,18 @@ func TestImageRecordDownloadAllOutputModesAlwaysFetchBeforeBinaryAndOutputWinsSt
 					t.Fatal(got, binaryBody.closes)
 				}
 				actual, readErr := io.ReadAll(got.Downloaded.Stream)
-				th.AssertNoErr(t, readErr)
-				th.AssertEquals(t, "abc", string(actual))
-				th.AssertNoErr(t, got.Downloaded.Stream.Close())
-				th.AssertNoErr(t, got.Downloaded.Stream.Close())
+				if readErr != nil {
+					t.Fatalf("unexpected error: %v", readErr)
+				}
+				if string(actual) != "abc" {
+					t.Fatalf("string(actual) = %v, want %v", string(actual), "abc")
+				}
+				if err := got.Downloaded.Stream.Close(); err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
+				if err := got.Downloaded.Stream.Close(); err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				if binaryBody.closes != 1 || got.Checksum.Complete || got.Checksum.Verified || got.BytesWritten != 0 {
 					t.Fatal("stream consumption changed returned proof", got, binaryBody.closes)
 				}
@@ -108,16 +124,24 @@ func TestImageRecordDownloadAllOutputModesAlwaysFetchBeforeBinaryAndOutputWinsSt
 					t.Fatal(got, binaryBody.closes)
 				}
 				if mode == "memory" {
-					th.AssertEquals(t, "abc", string(got.Downloaded.Body))
+					if string(got.Downloaded.Body) != "abc" {
+						t.Fatalf("string(got.Downloaded.Body) = %v, want %v", string(got.Downloaded.Body), "abc")
+					}
 				} else if strings.HasPrefix(mode, "writer") {
 					if got.Downloaded.Body != nil || writer.String() != "abc" || writer.closed != 0 || writer.seeks != 0 || writer.readerFromInvoked {
 						t.Fatal(got, writer)
 					}
-					th.CheckDeepEquals(t, []int{2, 1}, writer.writes)
+					if !reflect.DeepEqual(writer.writes, []int{2, 1}) {
+						t.Errorf("writer.writes = %#v, want %#v", writer.writes, []int{2, 1})
+					}
 				} else {
 					actual, readErr := os.ReadFile(filename)
-					th.AssertNoErr(t, readErr)
-					th.AssertEquals(t, "abc", string(actual))
+					if readErr != nil {
+						t.Fatalf("unexpected error: %v", readErr)
+					}
+					if string(actual) != "abc" {
+						t.Fatalf("string(actual) = %v, want %v", string(actual), "abc")
+					}
 					if got.Downloaded.Body != nil {
 						t.Fatal(got.Downloaded)
 					}
@@ -173,7 +197,9 @@ func TestImageRecordDownloadRawSynchronizedConstructorProjectsAllFieldsWithoutUp
 	}
 	props := imageRecordProperties(t, got.Record)
 	for key, expected := range map[string]string{"__conflicting_attrs": `{"id":"hook must not run"}`, "base_path": `"ordinary metadata"`, "resource_type": `"ordinary type"`, "filename": `"/never-open-attribute"`} {
-		th.AssertEquals(t, expected, string(props[key]))
+		if string(props[key]) != expected {
+			t.Fatalf("string(props[key]) = %v, want %v", string(props[key]), expected)
+		}
 	}
 	got.Record.bodyState.current["size"][1] = '!'
 	got.Record.Resource.Body["name"][0] = '!'
@@ -194,7 +220,9 @@ func TestImageRecordDownloadPrivatePendingRecordIgnoresPublicEditsAndFetchContro
 				return taskCoreJSON(req, 203, "invalid update JSON"), nil
 			}
 			pending, err := service.UpdateImageRecord(context.Background(), ImageRecordUpdateRequest{Record: seed, Attributes: map[string]any{"name": "pending"}})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			reader := strings.NewReader("retained input")
 			pending.data = reader
 			pending.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
@@ -225,7 +253,9 @@ func TestImageRecordDownloadPrivatePendingRecordIgnoresPublicEditsAndFetchContro
 			if err != nil || got == nil || got.Record == nil || calls != 4 || got.Record.data != reader || reader.Len() != len("retained input") || !reflect.DeepEqual(before, pending) || got.Checksum == nil || !got.Checksum.Verified {
 				t.Fatal(got, err, calls)
 			}
-			th.CheckDeepEquals(t, []string{"fetch only"}, got.Record.ImportMethods)
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"fetch only"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"fetch only"})
+			}
 			if !json.Valid([]byte(fetch)) {
 				if !reflect.DeepEqual(got.Record.bodyState, before.bodyState) || got.Record.Wire != nil {
 					t.Fatal(got.Record)
@@ -247,7 +277,9 @@ func TestImageRecordDownloadPrivatePendingRecordIgnoresPublicEditsAndFetchContro
 				}
 			}
 			updated, err := service.UpdateImageRecord(context.Background(), ImageRecordUpdateRequest{Record: got.Record})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if updated == nil || updated.data != reader {
 				t.Fatal(updated)
 			}
@@ -260,7 +292,9 @@ func TestImageRecordDownloadFetchedIdentityIsOnceEscapedAndNeverUsesResponseLink
 		t.Run(rawID, func(t *testing.T) {
 			calls := 0
 			var id string
-			th.AssertNoErr(t, json.Unmarshal([]byte(rawID), &id))
+			if err := json.Unmarshal([]byte(rawID), &id); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
@@ -352,7 +386,9 @@ func TestImageRecordDownloadRawHashSelectionOccursAfterGETAndKeepsLiteralExpecte
 				calls++
 				if calls == 1 {
 					var fields map[string]json.RawMessage
-					th.AssertNoErr(t, json.Unmarshal([]byte(test.metadata), &fields))
+					if err := json.Unmarshal([]byte(test.metadata), &fields); err != nil {
+						t.Fatalf("unexpected error: %v", err)
+					}
 					fields["id"] = json.RawMessage(`"fixed"`)
 					raw, _ := json.Marshal(fields)
 					return taskCoreJSON(req, 203, string(raw)), nil
@@ -497,7 +533,9 @@ func TestImageRecordDownloadCustomPrimaryFactoryRunsOnceAfterBinaryAndKeepsFallb
 				if mode == "unsupported fallback" {
 					expected = "md5"
 				}
-				th.AssertEquals(t, expected, got.Checksum.Algorithm)
+				if got.Checksum.Algorithm != expected {
+					t.Fatalf("got.Checksum.Algorithm = %v, want %v", got.Checksum.Algorithm, expected)
+				}
 				return
 			}
 			if err == nil || bodyReader.Len() != 3 || got.BytesWritten != 0 {
@@ -536,9 +574,15 @@ func TestImageRecordDownloadSHAKESelectsStreamButConsumedModeRequiresDigestLengt
 						t.Fatal(got, err, body.closes)
 					}
 					actual, readErr := io.ReadAll(got.Downloaded.Stream)
-					th.AssertNoErr(t, readErr)
-					th.AssertEquals(t, "abc", string(actual))
-					th.AssertNoErr(t, got.Downloaded.Stream.Close())
+					if readErr != nil {
+						t.Fatalf("unexpected error: %v", readErr)
+					}
+					if string(actual) != "abc" {
+						t.Fatalf("string(actual) = %v, want %v", string(actual), "abc")
+					}
+					if err := got.Downloaded.Stream.Close(); err != nil {
+						t.Fatalf("unexpected error: %v", err)
+					}
 				} else if !errors.Is(err, ErrImageRecordDownloadHashLengthRequired) || !got.Checksum.Complete || string(got.Downloaded.Body) != "abc" || got.BytesWritten != 3 || body.closes != 1 {
 					t.Fatal(got, err, body.closes)
 				}
@@ -572,14 +616,20 @@ func TestImageRecordDownloadStreamMD5CompatibilityKeepsActualHeaderAndRawExpecte
 			if compat == "" {
 				compat = imageRecordDownloadABCMD5
 			}
-			th.AssertEquals(t, compat, got.Downloaded.CompatibilityHeader.Get("Content-MD5"))
+			if actual := got.Downloaded.CompatibilityHeader.Get("Content-MD5"); actual != compat {
+				t.Fatalf("got.Downloaded.CompatibilityHeader.Get(\"Content-MD5\") = %v, want %v", actual, compat)
+			}
 			got.Downloaded.CompatibilityHeader.Set("Content-MD5", "changed")
 			got.Downloaded.ContentMD5[0] = '!'
 			if string(got.Checksum.Expected) != expected || got.Downloaded.Header.Get("Content-MD5") != "actual header decoy" || actualHeader.Get("Content-MD5") != "actual header decoy" {
 				t.Fatal("compatibility projection aliases actual/raw evidence")
 			}
-			th.AssertNoErr(t, got.Downloaded.Stream.Close())
-			th.AssertNoErr(t, got.Downloaded.Stream.Close())
+			if err := got.Downloaded.Stream.Close(); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if err := got.Downloaded.Stream.Close(); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if body.closes != 1 || rawReader.Len() != 3 {
 				t.Fatal(body.closes, rawReader.Len())
 			}
@@ -741,8 +791,12 @@ func TestImageRecordDownloadAcceptedStatusRangeAndEmptyBodyUseWholeChecksumProfi
 			}
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.TestHeader(t, req, "Range", "bytes=0-2")
-				th.TestHeader(t, req, "If-Range", "etag")
+				if got := req.Header.Values("Range"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "bytes=0-2" }) {
+					t.Errorf("header %s = %q, want %q", "Range", got, "bytes=0-2")
+				}
+				if got := req.Header.Values("If-Range"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "etag" }) {
+					t.Errorf("header %s = %q, want %q", "If-Range", got, "etag")
+				}
 				if calls == 1 {
 					return taskCoreJSON(req, 203, `{"id":"fixed"}`), nil
 				}
@@ -779,7 +833,9 @@ func TestImageRecordDownloadAcceptedStatusRangeAndEmptyBodyUseWholeChecksumProfi
 				t.Fatal(got, err, calls)
 			}
 			if match {
-				th.AssertNoErr(t, err)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 			} else if !errors.Is(err, ErrChecksumMismatch) {
 				t.Fatal(err)
 			}
@@ -865,7 +921,9 @@ func TestImageRecordDownloadMemoryWriterFaultsRetainPartialProgressAndCompletedC
 		if err != nil || got == nil || got.BytesWritten != int64(len(payload)) || writer.String() != "prefix-"+payload || writer.closed != 0 || writer.seeks != 0 || writer.readerFromInvoked {
 			t.Fatal(got, err, writer)
 		}
-		th.CheckDeepEquals(t, []int{1024 * 1024, 3}, writer.writes)
+		if !reflect.DeepEqual(writer.writes, []int{1024 * 1024, 3}) {
+			t.Errorf("writer.writes = %#v, want %#v", writer.writes, []int{1024 * 1024, 3})
+		}
 	})
 }
 
@@ -876,7 +934,9 @@ func TestImageRecordDownloadOwnedOutputPathOpensAfterHashSelectionAndLeavesParti
 			marker := errors.New("output path phase")
 			dir := t.TempDir()
 			filename := filepath.Join(dir, "image.bin")
-			th.AssertNoErr(t, os.WriteFile(filename, []byte("previous-long-content"), 0600))
+			if err := os.WriteFile(filename, []byte("previous-long-content"), 0600); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if mode == "missing directory" {
 				filename = filepath.Join(dir, "missing", "image.bin")
 			}
@@ -901,8 +961,12 @@ func TestImageRecordDownloadOwnedOutputPathOpensAfterHashSelectionAndLeavesParti
 				}
 				if mode == "truncate success" || mode == "mismatch persists" || mode == "partial read persists" || mode == "factory error before open" {
 					old, err := os.ReadFile(filename)
-					th.AssertNoErr(t, err)
-					th.AssertEquals(t, "previous-long-content", string(old))
+					if err != nil {
+						t.Fatalf("unexpected error: %v", err)
+					}
+					if string(old) != "previous-long-content" {
+						t.Fatalf("string(old) = %v, want %v", string(old), "previous-long-content")
+					}
 				}
 				return taskCoreHTTP(req, 200, body), nil
 			})
@@ -921,17 +985,27 @@ func TestImageRecordDownloadOwnedOutputPathOpensAfterHashSelectionAndLeavesParti
 			}
 			switch mode {
 			case "truncate success":
-				th.AssertNoErr(t, err)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				actual, readErr := os.ReadFile(filename)
-				th.AssertNoErr(t, readErr)
-				th.AssertEquals(t, "abc", string(actual))
+				if readErr != nil {
+					t.Fatalf("unexpected error: %v", readErr)
+				}
+				if string(actual) != "abc" {
+					t.Fatalf("string(actual) = %v, want %v", string(actual), "abc")
+				}
 				if got.BytesWritten != 3 || got.Checksum == nil || !got.Checksum.Verified {
 					t.Fatal(got)
 				}
 			case "mismatch persists", "partial read persists":
 				actual, readErr := os.ReadFile(filename)
-				th.AssertNoErr(t, readErr)
-				th.AssertEquals(t, "abc", string(actual))
+				if readErr != nil {
+					t.Fatalf("unexpected error: %v", readErr)
+				}
+				if string(actual) != "abc" {
+					t.Fatalf("string(actual) = %v, want %v", string(actual), "abc")
+				}
 				if got.BytesWritten != 3 || err == nil {
 					t.Fatal(got, err)
 				}
@@ -949,8 +1023,12 @@ func TestImageRecordDownloadOwnedOutputPathOpensAfterHashSelectionAndLeavesParti
 				}
 			case "factory error before open":
 				actual, readErr := os.ReadFile(filename)
-				th.AssertNoErr(t, readErr)
-				th.AssertEquals(t, "previous-long-content", string(actual))
+				if readErr != nil {
+					t.Fatalf("unexpected error: %v", readErr)
+				}
+				if string(actual) != "previous-long-content" {
+					t.Fatalf("string(actual) = %v, want %v", string(actual), "previous-long-content")
+				}
 				if !errors.Is(err, marker) || got.BytesWritten != 0 {
 					t.Fatal(got, err)
 				}
@@ -969,7 +1047,9 @@ func TestImageRecordDownloadCapturesConstructorOptionsLocationAndHeadersBeforeCa
 	seed := imageRecordDownloadResource(t, `{"id":"fixed","name":"before","vendor":["before"]}`)
 	option := WithImageRecordDownloadOpts(ImageRecordDownloadOpts{ChunkSize: &chunk, VerifyChecksum: &verify, Headers: headers, StorePreferences: preferences, HashFactory: func(algorithm string) (hash.Hash, error) {
 		factories++
-		th.AssertEquals(t, "sha256", algorithm)
+		if algorithm != "sha256" {
+			t.Fatalf("algorithm = %v, want %v", algorithm, "sha256")
+		}
 		return sha256.New(), nil
 	}})
 	chunk = 99
@@ -990,7 +1070,9 @@ func TestImageRecordDownloadCapturesConstructorOptionsLocationAndHeadersBeforeCa
 			t.Fatal(req.Header)
 		}
 		if calls == 1 {
-			th.AssertEquals(t, "live first", req.Header.Get("X-Auth-Token"))
+			if got := req.Header.Get("X-Auth-Token"); got != "live first" {
+				t.Fatalf("req.Header.Get(\"X-Auth-Token\") = %v, want %v", got, "live first")
+			}
 			if req.URL.RawQuery != "" || req.URL.EscapedPath() != "/reverse/glance/v2/images/fixed" {
 				t.Fatal(req.URL)
 			}
@@ -1022,10 +1104,16 @@ func TestImageRecordDownloadCapturesConstructorOptionsLocationAndHeadersBeforeCa
 	if err != nil || got == nil || calls != 2 || callbacks != 1 || locations != 1 || factories != 1 || got.Checksum == nil || !got.Checksum.Verified || writer.String() != "abc" || string(got.Record.Resource.Body["name"]) != `"before"` || len(imageRecordProperties(t, got.Record)) != 0 {
 		t.Fatal(got, err, calls, callbacks, locations, factories, writer)
 	}
-	th.CheckDeepEquals(t, []int{2, 1}, writer.writes)
+	if !reflect.DeepEqual(writer.writes, []int{2, 1}) {
+		t.Errorf("writer.writes = %#v, want %#v", writer.writes, []int{2, 1})
+	}
 	var location resource.CloudLocation
-	th.AssertNoErr(t, json.Unmarshal(got.Record.Resource.Body["location"], &location))
-	th.AssertEquals(t, "captured cloud", *location.Cloud)
+	if err := json.Unmarshal(got.Record.Resource.Body["location"], &location); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *location.Cloud != "captured cloud" {
+		t.Fatalf("*location.Cloud = %v, want %v", *location.Cloud, "captured cloud")
+	}
 }
 
 func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t *testing.T) {
@@ -1052,7 +1140,9 @@ func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t
 				if mode == "full replace" {
 					discarded = ""
 				}
-				th.AssertEquals(t, discarded, req.Header.Get("X-Discarded"))
+				if got := req.Header.Get("X-Discarded"); got != discarded {
+					t.Fatalf("req.Header.Get(\"X-Discarded\") = %v, want %v", got, discarded)
+				}
 				if calls%2 == 1 {
 					if req.URL.RawQuery != "" {
 						t.Fatal(req.URL)
@@ -1102,14 +1192,18 @@ func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t
 				if mode == "full replace" {
 					expected = []int{3}
 				}
-				th.CheckDeepEquals(t, expected, writer.writes)
+				if !reflect.DeepEqual(writer.writes, expected) {
+					t.Errorf("writer.writes = %#v, want %#v", writer.writes, expected)
+				}
 				if mode == "reusable helpers" {
 					writer = &downloadCoreWriter{}
 					got, err = service.DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed", Output: writer}, opts...)
 					if err != nil || got == nil || calls != 4 || writer.String() != "abc" {
 						t.Fatal(got, err, calls, writer)
 					}
-					th.CheckDeepEquals(t, []int{2, 1}, writer.writes)
+					if !reflect.DeepEqual(writer.writes, []int{2, 1}) {
+						t.Errorf("writer.writes = %#v, want %#v", writer.writes, []int{2, 1})
+					}
 				}
 				return
 			}
@@ -1169,7 +1263,9 @@ func TestImageRecordDownloadNativeRetryAndReauthenticationPreserveFixedGETOwners
 				attempts := 0
 				client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 					calls++
-					th.TestMethod(t, req, http.MethodGet)
+					if req.Method != http.MethodGet {
+						t.Errorf("method = %s, want %s", req.Method, http.MethodGet)
+					}
 					if req.Body != nil {
 						t.Fatal("GET acquired callback body", req.URL)
 					}
@@ -1199,7 +1295,9 @@ func TestImageRecordDownloadNativeRetryAndReauthenticationPreserveFixedGETOwners
 						t.Fatal(attempts, req.Header)
 					}
 					if mode != "reauth" {
-						th.AssertEquals(t, "ordinary", req.Header.Get("X-Retry"))
+						if got := req.Header.Get("X-Retry"); got != "ordinary" {
+							t.Fatalf("req.Header.Get(\"X-Retry\") = %v, want %v", got, "ordinary")
+						}
 					}
 					if mode == "expanded OkCodes" {
 						return taskCoreHTTP(req, 418, second), nil
@@ -1356,7 +1454,9 @@ func TestImageRecordDownloadDeferredStreamReadAndClosePreserveCausesWithoutInven
 				t.Fatal(got, closeErr, again, inner.closes, calls)
 			}
 			if mode == "literal EOF" || mode == "reader cause" {
-				th.AssertNoErr(t, closeErr)
+				if closeErr != nil {
+					t.Fatalf("unexpected error: %v", closeErr)
+				}
 			} else {
 				expected := marker
 				if strings.Contains(mode, "source") {
@@ -1581,7 +1681,9 @@ func TestImageRecordDownloadCustomHashWriteAndSumCannotHideFaultsOrChangeComplet
 			if strings.Contains(mode, "Sum") {
 				expectedSums = 1
 			}
-			th.AssertEquals(t, expectedSums, sums)
+			if sums != expectedSums {
+				t.Fatalf("sums = %v, want %v", sums, expectedSums)
+			}
 		})
 	}
 }

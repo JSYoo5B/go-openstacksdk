@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Python create_console (_proxy.py:2963–3001) owns advertised/selected
@@ -59,17 +59,27 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 			cloud.Provider.SetToken("composition-live")
 			var gets, posts atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				th.TestHeader(t, r, "X-Auth-Token", "composition-live")
-				th.TestHeader(t, r, "X-Console-Source", "selected")
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "composition-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "composition-live")
+				}
+				if got := r.Header.Values("X-Console-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Console-Source", got, "selected")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || r.URL.RawQuery != "" {
 					t.Error(err, r.URL)
 				}
 				if r.Method == http.MethodGet {
 					index := gets.Add(1)
-					th.TestMethod(t, r, http.MethodGet)
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
+					if r.Method != http.MethodGet {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+					}
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
 					wantPath := computeConsoleDiscoveryPath
 					if index == 2 && (tc.firstRejection != 0 || tc.noMatchingRow) {
 						wantPath = computeConsoleDiscoveryRoot
@@ -85,12 +95,20 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 					return
 				}
 				posts.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if tc.version == "" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
 				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", tc.version)
-					th.TestHeader(t, r, "OpenStack-API-Version", "compute "+tc.version)
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != tc.version }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, tc.version)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute "+tc.version }) {
+						t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute "+tc.version)
+					}
 				}
 				if tc.modern {
 					if r.URL.Path != computeRemoteConsolePath || string(body) != `{"remote_console":{"protocol":"vnc","type":"novnc"}}` {
@@ -98,7 +116,9 @@ func TestComputeConsoleCompositionAdvertisedAndSelectedBranches(t *testing.T) {
 					}
 					testcloud.JSON(w, 201, `{"remote_console":{"url":"modern","vendor":9007199254740993}}`)
 				} else {
-					th.TestHeader(t, r, "Accept", "")
+					if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "" }) {
+						t.Errorf("header %s = %q, want %q", "Accept", got, "")
+					}
 					if r.URL.Path != computeConsoleLegacyPath || string(body) != `{"os-getVNCConsole":{"type":"novnc"}}` {
 						t.Error("legacy winner changed", r.URL, string(body))
 					}
@@ -159,12 +179,16 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 					if r.URL.Path != computeConsoleDiscoveryPath || r.URL.RawQuery != "" || r.ContentLength != 0 {
 						t.Error(r.URL, r.ContentLength)
 					}
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
 					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"`+tc.maximum+`"}}`)
 					return
 				}
 				posts.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				body, err := io.ReadAll(r.Body)
 				wantPath := computeConsoleLegacyPath
 				if tc.modern {
@@ -246,7 +270,9 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 		const body = `{"error":"discovery forbidden"}`
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
 			if r.URL.Path != computeConsoleDiscoveryPath {
 				t.Error("forbidden discovery fell back", r.URL)
 			}
@@ -369,7 +395,9 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				if r.Method == http.MethodGet {
 					gets.Add(1)
-					th.TestMethod(t, r, http.MethodGet)
+					if r.Method != http.MethodGet {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+					}
 					if r.URL.Path != computeConsoleDiscoveryPath {
 						t.Error(r.URL)
 					}
@@ -437,7 +465,9 @@ func TestComputeConsoleCompositionGuardsDiscoveryFailuresAndNoErrorFallback(t *t
 					return
 				}
 				posts.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != wantPath {
 					t.Error("failed winning path fell back", r.URL, wantPath)
 				}

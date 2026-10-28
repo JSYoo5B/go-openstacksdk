@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func namespaceRecordRows(t *testing.T, body string, options ...RecordListOption) ([]*Record, error) {
@@ -36,7 +35,9 @@ func namespaceRecordField(t *testing.T, row *Record, key, want string) {
 	if right == nil && left == nil {
 		return
 	}
-	th.CheckDeepEquals(t, right, left)
+	if !reflect.DeepEqual(left, right) {
+		t.Errorf("left = %#v, want %#v", left, right)
+	}
 }
 
 func TestMetadefNamespaceRecordsDeclaredProjectionAndOwnedChannels(t *testing.T) {
@@ -46,12 +47,18 @@ func TestMetadefNamespaceRecordsDeclaredProjectionAndOwnedChannels(t *testing.T)
 		t.Fatalf("rows %d: %v", len(rows), err)
 	}
 	row := rows[0]
-	th.CheckEquals(t, 13, len(row.Resource.Body))
+	if len(row.Resource.Body) != 13 {
+		t.Errorf("len(row.Resource.Body) = %v, want %v", len(row.Resource.Body), 13)
+	}
 	for key, want := range map[string]string{"id": `{"raw":9007199254740993}`, "namespace": `{"raw":9007199254740993}`, "name": `false`, "created_at": `[1]`, "description": `{"any":null}`, "display_name": `7`, "is_protected": `true`, "owner": `null`, "updated_at": `true`, "visibility": `{}`, "tags": `["one"]`, "resource_type_associations": `[{"name":"OS::A","future":9007199254740993},{},{},{},{}]`, "location": `null`} {
 		namespaceRecordField(t, row, key, want)
 	}
-	th.CheckEquals(t, "9007199254740993", string(row.Wire.Body["unknown"]))
-	th.CheckEquals(t, `"false"`, string(row.Wire.Body["protected"]))
+	if string(row.Wire.Body["unknown"]) != "9007199254740993" {
+		t.Errorf("string(row.Wire.Body[\"unknown\"]) = %v, want %v", string(row.Wire.Body["unknown"]), "9007199254740993")
+	}
+	if string(row.Wire.Body["protected"]) != `"false"` {
+		t.Errorf("string(row.Wire.Body[\"protected\"]) = %v, want %v", string(row.Wire.Body["protected"]), `"false"`)
+	}
 	if row.Resource.Body["self"] != nil || row.Resource.Body["properties"] != nil || row.Resource.Body["objects"] != nil || row.Resource.Body["protected"] != nil {
 		t.Fatal("undeclared wire leaked into declared view")
 	}
@@ -181,10 +188,14 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 			calls := 0
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.CheckEquals(t, "public", req.URL.Query().Get("visibility"))
+				if got := req.URL.Query().Get("visibility"); got != "public" {
+					t.Errorf("req.URL.Query().Get(\"visibility\") = %v, want %v", got, "public")
+				}
 				body := `{"namespaces":[{"namespace":"first"}]` + tt.fields + `}`
 				if calls == 2 {
-					th.CheckEquals(t, "next", req.URL.Query().Get("marker"))
+					if got := req.URL.Query().Get("marker"); got != "next" {
+						t.Errorf("req.URL.Query().Get(\"marker\") = %v, want %v", got, "next")
+					}
 					body = `{"namespaces":[],"next":"https://foreign.test/ignored"}`
 				}
 				resp := namespaceCoreJSON(req, 203, body)
@@ -207,9 +218,13 @@ func TestMetadefNamespaceRecordsGenericPaginationAndRawMarkers(t *testing.T) {
 			calls := 0
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.CheckEquals(t, "2", req.URL.Query().Get("limit"))
+				if got := req.URL.Query().Get("limit"); got != "2" {
+					t.Errorf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+				}
 				if calls == 2 {
-					th.CheckEquals(t, tt.marker, req.URL.Query().Get("marker"))
+					if got := req.URL.Query().Get("marker"); got != tt.marker {
+						t.Errorf("req.URL.Query().Get(\"marker\") = %v, want %v", got, tt.marker)
+					}
 					return namespaceCoreJSON(req, 200, `{"namespaces":[]}`), nil
 				}
 				return namespaceCoreJSON(req, 200, `{"namespaces":[`+tt.wire+`]}`), nil
@@ -262,7 +277,9 @@ func TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership(t *testing.T) {
 	calls := 0
 	api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
-		th.CheckEquals(t, "1", req.URL.Query().Get("limit"))
+		if got := req.URL.Query().Get("limit"); got != "1" {
+			t.Errorf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "1")
+		}
 		return namespaceCoreJSON(req, 203, body), nil
 	}))
 	rows, err := api.AllRecords(context.Background(), WithRecordListMaxItems(1), WithRecordListFilter("is_protected", true))
@@ -283,7 +300,9 @@ func TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership(t *testing.T) {
 		consumed++
 		break
 	}
-	th.CheckEquals(t, 1, consumed)
+	if consumed != 1 {
+		t.Errorf("consumed = %v, want %v", consumed, 1)
+	}
 	laterCalls := 0
 	first := `{"namespaces":[{"namespace":"one"}],"next":"?marker=next"}`
 	api = New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
@@ -306,7 +325,9 @@ func TestMetadefNamespaceRecordsCapsPartialsAndIteratorOwnership(t *testing.T) {
 	filters["namespace"] = "caller"
 	var retained *RecordListOpts
 	client := namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
-		th.CheckEquals(t, "owned", req.Header.Get("X-Custom"))
+		if got := req.Header.Get("X-Custom"); got != "owned" {
+			t.Errorf("req.Header.Get(\"X-Custom\") = %v, want %v", got, "owned")
+		}
 		return namespaceCoreJSON(req, 200, `{"namespaces":[{"namespace":"one"}]}`), nil
 	})
 	stream := New(client).ListRecords(context.Background(), option, func(value *RecordListOpts) error { retained = value; return nil })
@@ -534,12 +555,18 @@ func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing
 			calls := 0
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
 				calls++
-				th.CheckEquals(t, "0", req.URL.Query().Get("limit"))
-				th.CheckEquals(t, "/reverse/glance/v2/metadefs/namespaces", req.URL.EscapedPath())
+				if got := req.URL.Query().Get("limit"); got != "0" {
+					t.Errorf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "0")
+				}
+				if got := req.URL.EscapedPath(); got != "/reverse/glance/v2/metadefs/namespaces" {
+					t.Errorf("req.URL.EscapedPath() = %v, want %v", got, "/reverse/glance/v2/metadefs/namespaces")
+				}
 				if calls == 1 {
 					return namespaceCoreJSON(req, 200, `{"namespaces":[{}],"next":"/v2/metadefs/namespaces?limit=0&marker=next"}`), nil
 				}
-				th.CheckEquals(t, "next", req.URL.Query().Get("marker"))
+				if got := req.URL.Query().Get("marker"); got != "next" {
+					t.Errorf("req.URL.Query().Get(\"marker\") = %v, want %v", got, "next")
+				}
 				return namespaceCoreJSON(req, 200, `{"namespaces":[]}`), nil
 			}))
 			rows, err := api.AllRecords(context.Background(), option)
@@ -558,7 +585,9 @@ func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
-				th.CheckEquals(t, tt.want, req.URL.Query().Get("limit"))
+				if got := req.URL.Query().Get("limit"); got != tt.want {
+					t.Errorf("req.URL.Query().Get(\"limit\") = %v, want %v", got, tt.want)
+				}
 				return namespaceCoreJSON(req, 200, `{"namespaces":[{},{}],"next":false}`), nil
 			}))
 			rows, err := api.AllRecords(context.Background(), tt.option, WithRecordListMaxItems(2))
@@ -574,8 +603,12 @@ func TestMetadefNamespaceRecordsExplicitZeroLimitAndBindingCollisions(t *testing
 	zero = 8
 	headers["X-Owned"] = "caller"
 	api := New(namespaceCoreClient(func(req *http.Request) (*http.Response, error) {
-		th.CheckEquals(t, "0", req.URL.Query().Get("limit"))
-		th.CheckEquals(t, "true", req.Header.Get("X-Owned"))
+		if got := req.URL.Query().Get("limit"); got != "0" {
+			t.Errorf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "0")
+		}
+		if got := req.Header.Get("X-Owned"); got != "true" {
+			t.Errorf("req.Header.Get(\"X-Owned\") = %v, want %v", got, "true")
+		}
 		return namespaceCoreJSON(req, 200, `{"namespaces":[]}`), nil
 	}))
 	if _, err := api.AllRecords(context.Background(), option); err != nil {

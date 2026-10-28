@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Cloud get_flavor_by_id only forwards its default-false enrichment flag to
@@ -43,9 +43,15 @@ func TestComputeCloudGetFlavorByIDOwnsStrictDefaultsAndNativeEnrichment(t *testi
 			cloud.Provider.SetToken("flavor-cloud-live")
 			var gets, extras, other, callbacks atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "flavor-cloud-live")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "flavor-cloud-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "flavor-cloud-live")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.URL.RawQuery != "" {
 					t.Error(r.URL, string(body), err)

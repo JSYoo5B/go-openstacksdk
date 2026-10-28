@@ -12,7 +12,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth(t *testing.T) {
@@ -20,7 +19,9 @@ func TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth(t *tes
 	cloud := "configured-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	expected, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
@@ -33,25 +34,35 @@ func TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth(t *tes
 		return &http.Response{StatusCode: 203, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(`{"id":null,"name":"passive","location":{"cloud":"foreign"},"namespace_name":"foreign"}`))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	cloud = "caller mutation"
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if service.API.MetadefProperties.RawClient() != versioned.RawClient() || versioned.RawClient().ProviderClient != provider || calls != 0 {
 		t.Fatal("binding lost shared client or made HTTP")
 	}
 	seed := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage(`"seed-id"`), "title": json.RawMessage(`"seed-title"`)}}}
 	for _, api := range []*metadefproperties.API{service.API.MetadefProperties, versioned.MetadefProperties} {
 		scope, err := api.InNamespace(context.Background(), "OS::Nova")
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		record, err := scope.GetRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordGetAttribute("min_length", "03"), func(opts *metadefproperties.RecordGetOpts) error {
 			provider.SetToken("live")
 			opts.Headers = map[string]string{"X-Option": "owned"}
 			return nil
 		})
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if record.Namespace != "OS::Nova" || string(record.Resource.Body["location"]) != string(expected) || string(record.Resource.Body["namespace_name"]) != `"OS::Nova"` || string(record.Resource.Body["id"]) != "null" || string(record.Resource.Body["title"]) != `"seed-title"` || string(record.Resource.Body["min_length"]) != "3" {
 			t.Fatal("Connection facts or property seed projection lost", record)
 		}
@@ -59,5 +70,7 @@ func TestConnectionImageMetadefPropertyRecordUsesOwnedLocationAndLiveAuth(t *tes
 			t.Fatal("receipt ownership or input immutability lost", record, seed)
 		}
 	}
-	th.AssertEquals(t, 2, calls)
+	if calls != 2 {
+		t.Fatalf("calls = %v, want %v", calls, 2)
+	}
 }

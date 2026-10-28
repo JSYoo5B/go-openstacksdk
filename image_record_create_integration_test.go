@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy(t *testing.T) {
@@ -23,10 +22,16 @@ func TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy(t *testing.T)
 		index := calls
 		calls++
 		if index == 0 {
-			th.AssertEquals(t, http.MethodPost, request.Method)
-			th.AssertEquals(t, "https://cloud.test/glance/v2/images", request.URL.String())
+			if request.Method != http.MethodPost {
+				t.Fatalf("request.Method = %v, want %v", request.Method, http.MethodPost)
+			}
+			if got := request.URL.String(); got != "https://cloud.test/glance/v2/images" {
+				t.Fatalf("request.URL.String() = %v, want %v", got, "https://cloud.test/glance/v2/images")
+			}
 			var body map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(request.Body).Decode(&body))
+			if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(body["name"]) != `"image"` || string(body["disk_format"]) != `"raw"` || string(body["container_format"]) != `"bare"` || string(body["vendor"]) != `"False"` || string(body["min_disk"]) != "3" || string(body["owner_specified.openstack.object"]) != `"images/image"` {
 				t.Fatal(body)
 			}
@@ -35,24 +40,40 @@ func TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy(t *testing.T)
 		if index != 1 {
 			t.Fatal("unexpected Swift, wait or metadata request", index, request.Method, request.URL)
 		}
-		th.AssertEquals(t, http.MethodPut, request.Method)
-		th.AssertEquals(t, "https://cloud.test/glance/v2/images/created/file", request.URL.String())
-		th.AssertEquals(t, "", request.Header.Get("X-OpenStack-Image-Size"))
+		if request.Method != http.MethodPut {
+			t.Fatalf("request.Method = %v, want %v", request.Method, http.MethodPut)
+		}
+		if got := request.URL.String(); got != "https://cloud.test/glance/v2/images/created/file" {
+			t.Fatalf("request.URL.String() = %v, want %v", got, "https://cloud.test/glance/v2/images/created/file")
+		}
+		if got := request.Header.Get("X-OpenStack-Image-Size"); got != "" {
+			t.Fatalf("request.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "")
+		}
 		body, err := io.ReadAll(request.Body)
-		th.AssertNoErr(t, err)
-		th.AssertEquals(t, "payload", string(body))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if string(body) != "payload" {
+			t.Fatalf("string(body) = %v, want %v", string(body), "payload")
+		}
 		return &http.Response{Request: request, StatusCode: 299, Header: http.Header{}, Body: io.NopCloser(strings.NewReader("actual upload"))}, nil
 	})
 	connection, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/glance/v2/"), sdk.WithImageCreatePolicy(image.WithImageCreatePolicyFormat("raw"), image.WithImageCreatePolicyVendorAgent(map[string]any{"vendor": false})))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	result, err := connection.CreateImageRecord(context.Background(), image.ImageRecordCreateRequest{Name: "image", Data: image.ImageRecordCreateBytes([]byte("payload")), Attributes: map[string]any{"min_disk": "3"}}, image.WithImageRecordCreateAllowDuplicates(true), image.WithImageRecordCreateWait(true), image.WithImageRecordCreateTimeout("ignored on direct branch"))
 	if err != nil || result == nil || result.Outcome != "uploaded" || result.Record == nil || result.Created == nil || result.Uploaded == nil || result.Created.StatusCode != 203 || result.Uploaded.StatusCode != 299 || calls != 2 {
 		t.Fatal(result, err, calls)
 	}
 	service, err := connection.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := connection.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if service.RawClient() != versioned.RawClient() {
 		t.Fatal("whole create replaced the connection image source")
 	}
@@ -60,7 +81,9 @@ func TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy(t *testing.T)
 
 func TestConnectionOwnedImageCreateRejectsInvalidInvocation(t *testing.T) {
 	connection, err := sdk.FromProvider(&gophercloud.ProviderClient{}, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("whole create canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

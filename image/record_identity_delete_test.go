@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestDeleteImageRecordIdentityRejectsUnpairedPrivateCurrentID(t *testing.T) {
@@ -129,9 +128,15 @@ func TestDeleteImageRecordIdentityPreservesValidUnicodeTargets(t *testing.T) {
 				if got == nil || got.Acknowledgement == nil || err != nil || calls != wantCalls {
 					t.Fatal(got, err, calls)
 				}
-				th.AssertEquals(t, wantImage, got.Acknowledgement.ImageID)
-				th.AssertEquals(t, wantStore, got.Acknowledgement.StoreID)
-				th.AssertEquals(t, "opaque acknowledgement", string(got.Acknowledgement.Body))
+				if got.Acknowledgement.ImageID != wantImage {
+					t.Fatalf("got.Acknowledgement.ImageID = %v, want %v", got.Acknowledgement.ImageID, wantImage)
+				}
+				if got.Acknowledgement.StoreID != wantStore {
+					t.Fatalf("got.Acknowledgement.StoreID = %v, want %v", got.Acknowledgement.StoreID, wantStore)
+				}
+				if string(got.Acknowledgement.Body) != "opaque acknowledgement" {
+					t.Fatalf("string(got.Acknowledgement.Body) = %v, want %v", string(got.Acknowledgement.Body), "opaque acknowledgement")
+				}
 				if store {
 					if got.Record != nil {
 						t.Fatal("store delete returned image projection", got.Record)
@@ -140,7 +145,9 @@ func TestDeleteImageRecordIdentityPreservesValidUnicodeTargets(t *testing.T) {
 					if got.Record == nil {
 						t.Fatal("whole delete lost owned image")
 					}
-					th.AssertEquals(t, test.target, taskCoreText(t, got.Record.Resource.Body["id"]))
+					if actual := taskCoreText(t, got.Record.Resource.Body["id"]); actual != test.target {
+						t.Fatalf("taskCoreText(t, got.Record.Resource.Body[\"id\"]) = %v, want %v", actual, test.target)
+					}
 				}
 			})
 		}

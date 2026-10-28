@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing.T) {
@@ -24,7 +23,9 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 	cloud := "tag-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("tag-0")
@@ -53,18 +54,26 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 		return &http.Response{Request: req, StatusCode: codes[index], Header: header, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source = versioned.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
 	if service.RawClient() != source || source.ProviderClient != provider || calls != 0 {
 		t.Fatal("Connection service did not share source")
 	}
 	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: identity}, image.WithImageRecordHeader("X-Call", "records"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	options := 0
 	mutationOption := func(config *image.ImageMutationOpts) error {
 		options++
@@ -72,12 +81,16 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 		return nil
 	}
 	added, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: seed}, tag, mutationOption)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if added == nil || added.Record == nil || added.Acknowledgement == nil || added.Acknowledgement.StatusCode != 299 || !bytes.Equal(added.Acknowledgement.Body, []byte(bodies[1])) || added.Acknowledgement.ImageID != identity || added.Acknowledgement.Tag != tag || added.Acknowledgement.Header.Get("X-Proof") != "response-1" || string(added.Record.Resource.Body["tags"]) != `["duplicate/标签","keep","duplicate/标签"]` {
 		t.Fatal(added)
 	}
 	removed, err := service.RemoveImageRecordTag(context.Background(), image.ImageRecordTagRequest{Record: added.Record}, tag, mutationOption)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if removed == nil || removed.Record == nil || removed.Acknowledgement == nil || removed.Acknowledgement.StatusCode != 206 || string(removed.Acknowledgement.Body) != bodies[2] || string(removed.Record.Resource.Body["tags"]) != `["keep","duplicate/标签"]` || string(removed.Record.Resource.Body["id"]) != `"fixed/한글"` {
 		t.Fatal(removed)
 	}
@@ -87,7 +100,9 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 		}
 	}
 	literal, err := service.AddImageRecordTag(context.Background(), image.ImageRecordTagRequest{ID: "literal"}, "new", mutationOption)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if literal == nil || literal.Record == nil || literal.Acknowledgement == nil || literal.Acknowledgement.StatusCode != 201 || string(literal.Record.Resource.Body["tags"]) != `["new"]` || string(literal.Record.Resource.Body["location"]) != string(location) || literal.Record.StatusCode != 0 || literal.Record.Wire != nil || literal.Record.Envelope != nil || literal.Record.Header != nil || len(literal.Record.ImportMethods) != 0 || calls != 4 || options != 3 {
 		t.Fatal("literal constructor fetched or invented image evidence", literal, calls, options)
 	}

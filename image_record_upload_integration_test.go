@@ -15,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdateAndStage(t *testing.T) {
@@ -56,20 +55,34 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 		if index >= 2 {
 			header = "later"
 		}
-		th.AssertEquals(t, header, req.Header.Get("X-Source"))
+		if got := req.Header.Get("X-Source"); got != header {
+			t.Fatalf("req.Header.Get(\"X-Source\") = %v, want %v", got, header)
+		}
 		switch index {
 		case 0:
 			var body map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&body))
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(body) != 4 || string(body["container_format"]) != `"bare"` || string(body["disk_format"]) != `"qcow2"` || string(body["name"]) != `"seed"` || string(body["status"]) != `"queued"` {
 				t.Fatal(body)
 			}
-			th.AssertEquals(t, "application/json", req.Header.Get("Content-Type"))
-			th.AssertEquals(t, "application/json", req.Header.Get("Accept"))
+			if got := req.Header.Get("Content-Type"); got != "application/json" {
+				t.Fatalf("req.Header.Get(\"Content-Type\") = %v, want %v", got, "application/json")
+			}
+			if got := req.Header.Get("Accept"); got != "application/json" {
+				t.Fatalf("req.Header.Get(\"Accept\") = %v, want %v", got, "application/json")
+			}
 		case 1:
-			th.AssertEquals(t, "8", req.Header.Get("X-OpenStack-Image-Size"))
-			th.AssertEquals(t, "application/octet-stream", req.Header.Get("Content-Type"))
-			th.AssertEquals(t, "", req.Header.Get("Accept"))
+			if got := req.Header.Get("X-OpenStack-Image-Size"); got != "8" {
+				t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "8")
+			}
+			if got := req.Header.Get("Content-Type"); got != "application/octet-stream" {
+				t.Fatalf("req.Header.Get(\"Content-Type\") = %v, want %v", got, "application/octet-stream")
+			}
+			if got := req.Header.Get("Accept"); got != "" {
+				t.Fatalf("req.Header.Get(\"Accept\") = %v, want %v", got, "")
+			}
 			bytes := make([]byte, 4)
 			n, err := io.ReadFull(req.Body, bytes)
 			if err != nil || n != 4 || string(bytes) != "head" {
@@ -78,7 +91,9 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 			_ = req.Body.Close()
 		case 2:
 			var body map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&body))
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(body) != 1 || string(body["method"]) != `{"name":"glance-direct"}` {
 				t.Fatal(body)
 			}
@@ -87,15 +102,23 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 				Op, Path string
 				Value    json.RawMessage
 			}
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&patches))
+			if err := json.NewDecoder(req.Body).Decode(&patches); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if len(patches) != 1 || patches[0].Op != "replace" || patches[0].Path != "/name" || string(patches[0].Value) != `"after"` {
 				t.Fatal(patches)
 			}
 		case 4:
-			th.AssertEquals(t, "8", req.Header.Get("X-OpenStack-Image-Size"))
+			if got := req.Header.Get("X-OpenStack-Image-Size"); got != "8" {
+				t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "8")
+			}
 			body, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, "tail", string(body))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(body) != "tail" {
+				t.Fatalf("string(body) = %v, want %v", string(body), "tail")
+			}
 			_ = req.Body.Close()
 		case 5:
 			if req.Body != nil {
@@ -126,11 +149,17 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 	})
 	cloud := "connection cloud"
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(resource.CloudLocation{Cloud: &cloud}))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source := versioned.RawClient()
 	source.Microversion = "2.10"
 	source.MoreHeaders = map[string]string{"X-Source": "source"}
@@ -142,22 +171,32 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 		t.Fatal(uploaded, err, calls, reader.Len())
 	}
 	var location resource.CloudLocation
-	th.AssertNoErr(t, json.Unmarshal(uploaded.Record.Resource.Body["location"], &location))
-	th.AssertEquals(t, "connection cloud", *location.Cloud)
+	if err := json.Unmarshal(uploaded.Record.Resource.Body["location"], &location); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *location.Cloud != "connection cloud" {
+		t.Fatalf("*location.Cloud = %v, want %v", *location.Cloud, "connection cloud")
+	}
 	uploaded.Record.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
 	uploaded.Record.Wire.Body["id"] = json.RawMessage(`"wire decoy"`)
 	imported, err := service.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: uploaded.Record})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if imported == nil || imported.Record == nil || imported.Acknowledgement.ImageID != id || reader.Len() != 4 || calls != 3 {
 		t.Fatal(imported, calls, reader.Len())
 	}
 	updated, err := conn.UpdateImageRecord(context.Background(), image.ImageRecordUpdateRequest{Record: imported.Record, Attributes: map[string]any{"name": "after"}})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if updated == nil || calls != 4 || reader.Len() != 4 {
 		t.Fatal(updated, calls, reader.Len())
 	}
 	staged, err := service.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: updated})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if staged == nil || staged.Record == nil || staged.Staged == nil || staged.Metadata == nil || calls != 6 || reader.Len() != 0 || string(staged.Record.Resource.Body["name"]) != `"staged"` || staged.Metadata.StatusCode != 203 {
 		t.Fatal(staged, calls, reader.Len())
 	}
@@ -171,7 +210,9 @@ func TestConnectionOwnedImageUploadSharesSourceAndBorrowedDataThroughImportUpdat
 
 func TestConnectionOwnedImageUploadRejectsInvalidInvocation(t *testing.T) {
 	conn, err := sdk.FromProvider(&gophercloud.ProviderClient{}, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("upload facade canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

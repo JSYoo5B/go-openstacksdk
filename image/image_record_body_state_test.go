@@ -4,9 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"reflect"
 	"testing"
-
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // A sparse wire body and its descriptor view contain different information.
@@ -49,7 +48,9 @@ func TestImageRecordBodySnapshotsKeepSparseRawValuesBeforeProjection(t *testing.
 			if calls != 1 || got == nil || len(got.Resource.Body) != 65 || got.bodyState == nil {
 				t.Fatal(got, calls)
 			}
-			th.CheckDeepEquals(t, map[string]string{"is_protected": "true", "size": "4", "tags": `["scalar"]`, `is_hidden`: "null"}, map[string]string{"is_protected": string(got.Resource.Body["is_protected"]), "size": string(got.Resource.Body["size"]), "tags": string(got.Resource.Body["tags"]), "is_hidden": string(got.Resource.Body["is_hidden"])})
+			if !reflect.DeepEqual(map[string]string{"is_protected": string(got.Resource.Body["is_protected"]), "size": string(got.Resource.Body["size"]), "tags": string(got.Resource.Body["tags"]), "is_hidden": string(got.Resource.Body["is_hidden"])}, map[string]string{"is_protected": "true", "size": "4", "tags": `["scalar"]`, `is_hidden`: "null"}) {
+				t.Errorf("got %#v, want %#v", map[string]string{"is_protected": string(got.Resource.Body["is_protected"]), "size": string(got.Resource.Body["size"]), "tags": string(got.Resource.Body["tags"]), "is_hidden": string(got.Resource.Body["is_hidden"])}, map[string]string{"is_protected": "true", "size": "4", "tags": `["scalar"]`, `is_hidden`: "null"})
+			}
 			for _, fields := range []map[string]json.RawMessage{got.bodyState.current, got.bodyState.original} {
 				if _, present := fields["is_hidden"]; present {
 					t.Fatal("absent raw field became nullable default", fields)
@@ -57,16 +58,28 @@ func TestImageRecordBodySnapshotsKeepSparseRawValuesBeforeProjection(t *testing.
 				if _, present := fields["location"]; present {
 					t.Fatal("computed location became raw body", fields)
 				}
-				th.AssertEquals(t, `"false"`, string(fields["is_protected"]))
-				th.AssertEquals(t, `"04"`, string(fields["size"]))
-				th.AssertEquals(t, `"scalar"`, string(fields["tags"]))
-				th.AssertEquals(t, "null", string(fields["name"]))
+				if string(fields["is_protected"]) != `"false"` {
+					t.Fatalf("string(fields[\"is_protected\"]) = %v, want %v", string(fields["is_protected"]), `"false"`)
+				}
+				if string(fields["size"]) != `"04"` {
+					t.Fatalf("string(fields[\"size\"]) = %v, want %v", string(fields["size"]), `"04"`)
+				}
+				if string(fields["tags"]) != `"scalar"` {
+					t.Fatalf("string(fields[\"tags\"]) = %v, want %v", string(fields["tags"]), `"scalar"`)
+				}
+				if string(fields["name"]) != "null" {
+					t.Fatalf("string(fields[\"name\"]) = %v, want %v", string(fields["name"]), "null")
+				}
 				var props map[string]json.RawMessage
 				if err := json.Unmarshal(fields["properties"], &props); err != nil {
 					t.Fatal(err)
 				}
-				th.AssertEquals(t, "true", string(props["retained"]))
-				th.AssertEquals(t, `{"n":900719925474099312345}`, string(props["vendor"]))
+				if string(props["retained"]) != "true" {
+					t.Fatalf("string(props[\"retained\"]) = %v, want %v", string(props["retained"]), "true")
+				}
+				if string(props["vendor"]) != `{"n":900719925474099312345}` {
+					t.Fatalf("string(props[\"vendor\"]) = %v, want %v", string(props["vendor"]), `{"n":900719925474099312345}`)
+				}
 			}
 			// Editing the exposed projected view or actual receipt cannot change the
 			// private raw original. Current/original and cloned record are also separate.
@@ -75,8 +88,12 @@ func TestImageRecordBodySnapshotsKeepSparseRawValuesBeforeProjection(t *testing.
 			got.Wire.Body["size"][1] = '8'
 			got.bodyState.current["size"][1] = '7'
 			clone.bodyState.original["size"][1] = '6'
-			th.AssertEquals(t, `"04"`, string(got.bodyState.original["size"]))
-			th.AssertEquals(t, `"04"`, string(clone.bodyState.current["size"]))
+			if string(got.bodyState.original["size"]) != `"04"` {
+				t.Fatalf("string(got.bodyState.original[\"size\"]) = %v, want %v", string(got.bodyState.original["size"]), `"04"`)
+			}
+			if string(clone.bodyState.current["size"]) != `"04"` {
+				t.Fatalf("string(clone.bodyState.current[\"size\"]) = %v, want %v", string(clone.bodyState.current["size"]), `"04"`)
+			}
 		})
 	}
 }
@@ -121,14 +138,22 @@ func TestImageRecordBodySnapshotsKeepOriginalAcrossLocalTagUpdates(t *testing.T)
 				if _, present := got.Record.bodyState.original["tags"]; present {
 					t.Fatal("constructor default forged original tags")
 				}
-				th.AssertEquals(t, `["b"]`, string(got.Record.bodyState.current["tags"]))
+				if string(got.Record.bodyState.current["tags"]) != `["b"]` {
+					t.Fatalf("string(got.Record.bodyState.current[\"tags\"]) = %v, want %v", string(got.Record.bodyState.current["tags"]), `["b"]`)
+				}
 			} else {
 				if calls != 2 {
 					t.Fatal(calls)
 				}
-				th.AssertEquals(t, `["a"]`, string(got.Record.bodyState.original["tags"]))
-				th.AssertEquals(t, `["a","b"]`, string(got.Record.bodyState.current["tags"]))
-				th.AssertEquals(t, `["a"]`, string(seed.bodyState.current["tags"]))
+				if string(got.Record.bodyState.original["tags"]) != `["a"]` {
+					t.Fatalf("string(got.Record.bodyState.original[\"tags\"]) = %v, want %v", string(got.Record.bodyState.original["tags"]), `["a"]`)
+				}
+				if string(got.Record.bodyState.current["tags"]) != `["a","b"]` {
+					t.Fatalf("string(got.Record.bodyState.current[\"tags\"]) = %v, want %v", string(got.Record.bodyState.current["tags"]), `["a","b"]`)
+				}
+				if string(seed.bodyState.current["tags"]) != `["a"]` {
+					t.Fatalf("string(seed.bodyState.current[\"tags\"]) = %v, want %v", string(seed.bodyState.current["tags"]), `["a"]`)
+				}
 			}
 			// Local changes do not rewrite the original or manufacture fetch evidence.
 			got.Record.bodyState.current["tags"][1] = 'x'
@@ -137,8 +162,12 @@ func TestImageRecordBodySnapshotsKeepOriginalAcrossLocalTagUpdates(t *testing.T)
 					t.Fatal(got.Record)
 				}
 			} else {
-				th.AssertEquals(t, `["a"]`, string(got.Record.Wire.Body["tags"]))
-				th.AssertEquals(t, `["a"]`, string(got.Record.bodyState.original["tags"]))
+				if string(got.Record.Wire.Body["tags"]) != `["a"]` {
+					t.Fatalf("string(got.Record.Wire.Body[\"tags\"]) = %v, want %v", string(got.Record.Wire.Body["tags"]), `["a"]`)
+				}
+				if string(got.Record.bodyState.original["tags"]) != `["a"]` {
+					t.Fatalf("string(got.Record.bodyState.original[\"tags\"]) = %v, want %v", string(got.Record.bodyState.original["tags"]), `["a"]`)
+				}
 			}
 		})
 	}

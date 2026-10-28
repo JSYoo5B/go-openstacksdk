@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Reuse the established service-info transport/body fixtures. This adapter adds
@@ -74,7 +74,9 @@ func TestImportInfoRecordProjectionAndOwnedReceipts(t *testing.T) {
 	if got == nil || err != nil || calls != 1 || got.Resource == nil || got.Wire == nil {
 		t.Fatal(got, err, calls)
 	}
-	th.CheckDeepEquals(t, want, infoRecordValues(got.Resource))
+	if actual := infoRecordValues(got.Resource); !reflect.DeepEqual(actual, want) {
+		t.Errorf("infoRecordValues(got.Resource) = %#v, want %#v", actual, want)
+	}
 	for _, value := range []*resource.RawResource{got.Resource, got.Wire} {
 		if value.StatusCode != 203 || value.Header.Get("X-Actual") != "owned" {
 			t.Fatal("resource receipt", value)
@@ -118,10 +120,18 @@ func TestImportInfoRecordDictionaryAliasesAndDefaults(t *testing.T) {
 			if got == nil || err != nil || len(got.Resource.Body) != 4 {
 				t.Fatal(got, err)
 			}
-			th.AssertEquals(t, test.want, string(got.Resource.Body["import_methods"]))
-			th.AssertEquals(t, "null", string(got.Resource.Body["id"]))
-			th.AssertEquals(t, "null", string(got.Resource.Body["name"]))
-			th.AssertEquals(t, test.raw, string(got.Envelope))
+			if string(got.Resource.Body["import_methods"]) != test.want {
+				t.Fatalf("string(got.Resource.Body[\"import_methods\"]) = %v, want %v", string(got.Resource.Body["import_methods"]), test.want)
+			}
+			if string(got.Resource.Body["id"]) != "null" {
+				t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), "null")
+			}
+			if string(got.Resource.Body["name"]) != "null" {
+				t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), "null")
+			}
+			if string(got.Envelope) != test.raw {
+				t.Fatalf("string(got.Envelope) = %v, want %v", string(got.Envelope), test.raw)
+			}
 		})
 	}
 }
@@ -155,7 +165,9 @@ func TestImportInfoRecordAcceptedToleranceAndRejectedNative(t *testing.T) {
 					t.Fatal(got, err)
 				}
 				for _, value := range got.Resource.Body {
-					th.AssertEquals(t, "null", string(value))
+					if string(value) != "null" {
+						t.Fatalf("string(value) = %v, want %v", string(value), "null")
+					}
 				}
 			} else {
 				if got != nil || !errors.Is(err, resource.ErrInvalidOption) {
@@ -220,7 +232,9 @@ func TestImportInfoRecordLocationAndConcreteOptionSnapshots(t *testing.T) {
 	if err := json.Unmarshal(got.Resource.Body["location"], &captured); err != nil || captured.Cloud == nil || *captured.Cloud != "captured" || string(captured.Project.ID) != `"token project"` {
 		t.Fatal("location ownership", captured, err)
 	}
-	th.AssertEquals(t, `{"cloud":"wire"}`, string(got.Wire.Body["location"]))
+	if string(got.Wire.Body["location"]) != `{"cloud":"wire"}` {
+		t.Fatalf("string(got.Wire.Body[\"location\"]) = %v, want %v", string(got.Wire.Body["location"]), `{"cloud":"wire"}`)
+	}
 	t.Run("whole option reset and merged factory headers", func(t *testing.T) {
 		headers := map[string]string{"X-Merged": "before"}
 		merged := WithImportRecordHeaders(headers)

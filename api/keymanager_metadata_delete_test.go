@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -22,7 +23,6 @@ import (
 	upcontainers "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 	uporders "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
 	upsecrets "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Reuse the existing leaf/cached-Connection fixtures and accepted-body wrappers.
@@ -39,10 +39,18 @@ func TestKeyManagerOwnedMetadataDeleteFixedTargetsAndPassiveBodies(t *testing.T)
 						path := "/reverse/barbican/v1/" + kind + "/" + id
 						c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 							calls.Add(1)
-							th.TestMethod(t, r, http.MethodDelete)
-							th.TestHeader(t, r, "X-Auth-Token", "owned-delete-token")
-							th.TestHeader(t, r, "X-Source", "source")
-							th.TestHeader(t, r, "OpenStack-API-Version", "key-manager 1.0")
+							if r.Method != http.MethodDelete {
+								t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+							}
+							if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned-delete-token" }) {
+								t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "owned-delete-token")
+							}
+							if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "source" }) {
+								t.Errorf("header %s = %q, want %q", "X-Source", got, "source")
+							}
+							if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "key-manager 1.0" }) {
+								t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "key-manager 1.0")
+							}
 							if r.URL.Path != path || r.URL.EscapedPath() != "/reverse/barbican/v1/"+kind+"/"+url.PathEscape(id) || r.URL.RawQuery != "" {
 								t.Error("owned DELETE resolved another target", r.Method, r.URL)
 							}
@@ -103,7 +111,9 @@ func TestKeyManagerOwnedMetadataDeleteMissingAndNativeFailures(t *testing.T) {
 					var calls atomic.Int32
 					c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 						calls.Add(1)
-						th.TestMethod(t, r, http.MethodDelete)
+						if r.Method != http.MethodDelete {
+							t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+						}
 						if r.URL.Path != path || r.URL.RawQuery != "" {
 							t.Error(r.Method, r.URL)
 						}
@@ -167,7 +177,9 @@ func TestKeyManagerOwnedMetadataDeleteAcceptedFailuresStayTerminal(t *testing.T)
 			var calls, retries atomic.Int32
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodDelete)
+				if r.Method != http.MethodDelete {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+				}
 				if r.URL.Path != path || r.URL.RawQuery != "" {
 					t.Error(r.Method, r.URL)
 				}
@@ -340,7 +352,9 @@ func TestKeyManagerOwnedMetadataDeletePreflightAndNativeRetrySources(t *testing.
 				}
 				c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
-					th.TestMethod(t, r, http.MethodDelete)
+					if r.Method != http.MethodDelete {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+					}
 					if r.URL.Path != path || r.URL.RawQuery != "" {
 						t.Error(r.Method, r.URL)
 					}
@@ -400,7 +414,9 @@ func TestKeyManagerMetadataNativeDeleteCompatibility(t *testing.T) {
 				var calls atomic.Int32
 				c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
-					th.TestMethod(t, r, http.MethodDelete)
+					if r.Method != http.MethodDelete {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodDelete)
+					}
 					if r.URL.Path != path || r.URL.RawQuery != "" {
 						t.Error(r.Method, r.URL)
 					}

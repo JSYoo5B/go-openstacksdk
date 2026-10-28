@@ -11,9 +11,9 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 	"io"
 	"net/http"
+	"slices"
 	"sync/atomic"
 	"testing"
 )
@@ -24,7 +24,9 @@ func groupGetFixture(t *testing.T, reply func(http.ResponseWriter, *http.Request
 	calls := &atomic.Int32{}
 	f.Mux.HandleFunc("/identity/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		testhelper.TestMethod(t, r, http.MethodGet)
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
 		w.Header().Set("X-Request-Id", "group-get")
 		reply(w, r)
 	})
@@ -35,7 +37,10 @@ func TestCloudGetGroupNoneVersusPresentFalseySearch(t *testing.T) {
 		t.Run(raw, func(t *testing.T) {
 			member, list := 0, 0
 			cloud, _, calls := groupGetFixture(t, func(w http.ResponseWriter, r *http.Request) {
-				testhelper.AssertEquals(t, "domain", r.URL.Query().Get("domain_id"))
+				if got := r.URL.Query().Get("domain_id"); got != "domain" {
+					t.Errorf("r.URL.Query().Get(\"domain_id\") = %v, want %v", got, "domain")
+					return
+				}
 				data, err := io.ReadAll(r.Body)
 				if err != nil || len(data) != 0 || r.ContentLength != 0 {
 					t.Error(err, string(data), r.ContentLength)
@@ -45,8 +50,14 @@ func TestCloudGetGroupNoneVersusPresentFalseySearch(t *testing.T) {
 					testcloud.JSON(w, 203, `{"group":{"id":"one","name":"member"}}`)
 				} else {
 					list++
-					testhelper.AssertEquals(t, "/identity/v3/groups", r.URL.Path)
-					testhelper.AssertEquals(t, "", r.URL.Query().Get("name"))
+					if r.URL.Path != "/identity/v3/groups" {
+						t.Errorf("r.URL.Path = %v, want %v", r.URL.Path, "/identity/v3/groups")
+						return
+					}
+					if got := r.URL.Query().Get("name"); got != "" {
+						t.Errorf("r.URL.Query().Get(\"name\") = %v, want %v", got, "")
+						return
+					}
 					testcloud.JSON(w, 200, `{"groups":[{"id":"one","name":"listed"}]}`)
 				}
 			})
@@ -201,7 +212,10 @@ func TestCloudGetGroupPhysicalCloseSourceCancelKeepActualNativeEvidence(t *testi
 
 func TestCloudGetGroupJMESFirstTruthLenAndIndexKeepsActualInventory(t *testing.T) {
 	cloud, _, calls := groupGetFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "False", r.URL.Query().Get("domain_id"))
+		if got := r.URL.Query().Get("domain_id"); got != "False" {
+			t.Errorf("r.URL.Query().Get(\"domain_id\") = %v, want %v", got, "False")
+			return
+		}
 		testcloud.JSON(w, 200, `{"groups":[{"id":"one","name":"ops-one"}]}`)
 	})
 	for _, tc := range []struct {
@@ -232,8 +246,13 @@ func TestCloudGetGroupJMESFirstTruthLenAndIndexKeepsActualInventory(t *testing.T
 }
 func TestCloudGetGroupOwnedRawDomainLocationAndLoadedNestedFilter(t *testing.T) {
 	cloud, _, calls := groupGetFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.TestHeader(t, r, "X-Owned", "before")
-		testhelper.AssertEquals(t, "0", r.URL.Query().Get("domain_id"))
+		if got := r.Header.Values("X-Owned"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "before" }) {
+			t.Errorf("header %s = %q, want %q", "X-Owned", got, "before")
+		}
+		if got := r.URL.Query().Get("domain_id"); got != "0" {
+			t.Errorf("r.URL.Query().Get(\"domain_id\") = %v, want %v", got, "0")
+			return
+		}
 		testcloud.JSON(w, 203, `{"groups":[{"id":"one","name":"ops-one","description":{"n":9007199254740992,"flag":1}},{"id":"skip","description":{}}]}`)
 	})
 	raw := json.RawMessage("0")

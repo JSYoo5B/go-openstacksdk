@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t *testing.T) {
@@ -22,7 +22,9 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 	cloud := "member-mutation-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"project"`)}}
 	location, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("token-0")
@@ -38,12 +40,16 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 		}
 		if index == 0 || index == 2 {
 			var actual map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&actual))
+			if err := json.NewDecoder(req.Body).Decode(&actual); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			want := map[string]json.RawMessage{"member": json.RawMessage(`"submitted"`), "status": json.RawMessage(`"future"`)}
 			if index == 2 {
 				want = map[string]json.RawMessage{"member": json.RawMessage(`"returned-get"`), "status": json.RawMessage(`null`)}
 			}
-			th.CheckDeepEquals(t, want, actual)
+			if !reflect.DeepEqual(actual, want) {
+				t.Errorf("actual = %#v, want %#v", actual, want)
+			}
 		} else if req.Body != nil {
 			t.Fatal("member GET/DELETE has a body", req.Body)
 		}
@@ -52,11 +58,17 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 		return &http.Response{Request: req, StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	upper, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source := versioned.RawClient()
 	source.MoreHeaders, source.Microversion = map[string]string{"X-Source": "shared"}, "2.10"
 	if upper.RawClient() != source || upper.API.RawClient() != source || upper.API.Members.RawClient() != source || source.ProviderClient != provider || calls != 0 {
@@ -64,22 +76,30 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 	}
 	parent := resource.ID("parent")
 	added, err := conn.AddImageMemberRecord(context.Background(), parent, image.WithImageMemberRecordMemberID("submitted"), image.WithImageMemberRecordStatus("future"), image.WithImageMemberRecordWriteHeader("X-Call", "member-family"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if added == nil || string(added.Resource.Body["id"]) != `"returned-add"` || string(added.Resource.Body["status"]) != `"future"` {
 		t.Fatal(added)
 	}
 	fetched, err := conn.GetImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: added}, image.WithImageMemberHeader("X-Call", "member-family"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if fetched == nil || string(fetched.Resource.Body["id"]) != `"returned-get"` || string(fetched.Resource.Body["created_at"]) != `null` || string(fetched.Wire.Body["image_id"]) != `"foreign"` {
 		t.Fatal(fetched)
 	}
 	updated, err := conn.UpdateImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: fetched}, image.WithImageMemberRecordStatus(nil), image.WithImageMemberRecordWriteHeader("X-Call", "member-family"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if updated == nil || updated.Wire != nil || string(updated.Resource.Body["id"]) != `"returned-get"` || string(updated.Resource.Body["status"]) != `null` {
 		t.Fatal(updated)
 	}
 	ack, err := conn.RemoveImageMemberRecord(context.Background(), parent, image.ImageMemberRecordRequest{Record: updated}, image.WithRemoveImageMemberHeader("X-Call", "member-family"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if ack == nil || ack.ImageID != "parent" || ack.MemberID != "returned-get" || ack.StatusCode != 299 || !bytes.Equal(ack.Body, []byte(bodies[3])) || ack.Header.Get("X-Proof") != "response-3" || calls != 4 {
 		t.Fatal(ack, calls)
 	}

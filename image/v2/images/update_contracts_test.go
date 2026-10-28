@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const nativeUpdatePath = "/reverse/glance/v2/images/fixed"
@@ -45,7 +44,9 @@ func nativeUpdateJSONEqual(t *testing.T, got json.RawMessage, want string) {
 	if err := json.Unmarshal([]byte(want), &expected); err != nil {
 		t.Fatal(want, err)
 	}
-	th.CheckDeepEquals(t, expected, actual)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("actual = %#v, want %#v", actual, expected)
+	}
 }
 func nativeUpdateOperation(t *testing.T, err error) {
 	t.Helper()
@@ -210,7 +211,9 @@ func TestNativeImageUpdateStrictHTTPContextAndRetryPolicy(t *testing.T) {
 			if code == 204 {
 				wantBody = ""
 			}
-			th.AssertEquals(t, wantBody, string(native.Body))
+			if string(native.Body) != wantBody {
+				t.Fatalf("string(native.Body) = %v, want %v", string(native.Body), wantBody)
+			}
 			nativeUpdateOperation(t, err)
 		})
 	}
@@ -302,12 +305,22 @@ func TestNativeImageUpdateExtractsRichImageUnknownPropertiesAndLastHeaders(t *te
 	if got == nil || err != nil || got.ID != "response id" || got.Name != "literal name" || got.Status != "future" || got.ContainerFormat != "future" || got.DiskFormat != "future" || got.MinDiskGigabytes != -1 || got.MinRAMMegabytes != 0 || got.Owner != "owner" || got.Protected || !got.Hidden || got.Visibility != "future" || got.SizeBytes != 42 || got.VirtualSize != -1 || got.File != "foreign file" || got.Schema != "foreign schema" {
 		t.Fatal(got, err)
 	}
-	th.CheckDeepEquals(t, []string{"a", "a", ""}, got.Tags)
-	th.CheckDeepEquals(t, map[string]string{"known": "metadata"}, got.Metadata)
-	th.CheckDeepEquals(t, []string{"last", " second"}, got.OpenStackImageImportMethods)
-	th.CheckDeepEquals(t, []string{"store2", "store3"}, got.OpenStackImageStoreIDs)
+	if !reflect.DeepEqual(got.Tags, []string{"a", "a", ""}) {
+		t.Errorf("got.Tags = %#v, want %#v", got.Tags, []string{"a", "a", ""})
+	}
+	if !reflect.DeepEqual(got.Metadata, map[string]string{"known": "metadata"}) {
+		t.Errorf("got.Metadata = %#v, want %#v", got.Metadata, map[string]string{"known": "metadata"})
+	}
+	if !reflect.DeepEqual(got.OpenStackImageImportMethods, []string{"last", " second"}) {
+		t.Errorf("got.OpenStackImageImportMethods = %#v, want %#v", got.OpenStackImageImportMethods, []string{"last", " second"})
+	}
+	if !reflect.DeepEqual(got.OpenStackImageStoreIDs, []string{"store2", "store3"}) {
+		t.Errorf("got.OpenStackImageStoreIDs = %#v, want %#v", got.OpenStackImageStoreIDs, []string{"store2", "store3"})
+	}
 	wantProperties := map[string]any{"properties": "literal properties", "vendor": map[string]any{"n": float64(9007199254740992), "false": false}, "nullable": nil}
-	th.CheckDeepEquals(t, wantProperties, got.Properties)
+	if !reflect.DeepEqual(got.Properties, wantProperties) {
+		t.Errorf("got.Properties = %#v, want %#v", got.Properties, wantProperties)
+	}
 	created, _ := time.Parse(time.RFC3339, "2024-01-02T03:04:05Z")
 	updated, _ := time.Parse(time.RFC3339, "2024-01-03T04:05:06Z")
 	if !got.CreatedAt.Equal(created) || !got.UpdatedAt.Equal(updated) {

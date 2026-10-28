@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordUploadFormats() []ImageRecordUploadOption {
@@ -157,15 +156,23 @@ func TestImageRecordUploadDescriptorViewAndMetadataReceiptsRemainIndependent(t *
 		t.Fatal(got, err, calls, locations)
 	}
 	for key, value := range map[string]string{"id": `"server"`, "size": "4", "is_protected": "true", "is_hw_vif_multiqueue_enabled": "false", "instance_type_rxtx_factor": "1.25", "hw_qemu_guest_agent": `"False"`, "min_ram": "1e9999", "status": "null", "tags": `["a",2]`} {
-		th.CheckEquals(t, value, string(got.Record.Resource.Body[key]))
+		if string(got.Record.Resource.Body[key]) != value {
+			t.Errorf("string(got.Record.Resource.Body[key]) = %v, want %v", string(got.Record.Resource.Body[key]), value)
+		}
 	}
-	th.CheckDeepEquals(t, []string{"direct", " web"}, got.Record.ImportMethods)
+	if !reflect.DeepEqual(got.Record.ImportMethods, []string{"direct", " web"}) {
+		t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"direct", " web"})
+	}
 	if string(got.Record.bodyState.current["size"]) != `"04"` || string(got.Record.bodyState.current["is_protected"]) != `"false"` || got.Record.Wire == nil || string(got.Record.Wire.Body["self"]) != `"https://foreign.test/decoy"` {
 		t.Fatal("projection wrote raw seed", got.Record)
 	}
 	var location resource.CloudLocation
-	th.AssertNoErr(t, json.Unmarshal(got.Record.Resource.Body["location"], &location))
-	th.AssertEquals(t, "captured", *location.Cloud)
+	if err := json.Unmarshal(got.Record.Resource.Body["location"], &location); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *location.Cloud != "captured" {
+		t.Fatalf("*location.Cloud = %v, want %v", *location.Cloud, "captured")
+	}
 	if string(imageRecordProperties(t, got.Record)["location"]) != `{"cloud":"wire"}` {
 		t.Fatal(got.Record.Resource.Body)
 	}
@@ -289,7 +296,9 @@ func TestImageRecordUploadCreationResponseMayReplaceArbitraryInitialIdentity(t *
 				calls++
 				if calls == 1 {
 					body := taskCorePayload(t, req)
-					th.AssertEquals(t, initial, string(body["id"]))
+					if string(body["id"]) != initial {
+						t.Fatalf("string(body[\"id\"]) = %v, want %v", string(body["id"]), initial)
+					}
 					return taskCoreJSON(req, 201, `{"id":`+string(rawID)+`,"file":"https://foreign.test/decoy"}`), nil
 				}
 				if calls != 2 || req.Method != http.MethodPut || req.URL.EscapedPath() != "/reverse/glance/v2/images/"+url.PathEscape(id)+"/file" || req.URL.RawQuery != "" {
@@ -331,7 +340,9 @@ func TestImageRecordUploadInvalidMetadataSyntaxPreservesConstructorDirtyIDAndLat
 			if _, ok := got.Record.bodyState.dirty["id"]; !ok {
 				t.Fatal("metadata constructor id was not dirty")
 			}
-			th.CheckDeepEquals(t, []string{"create"}, got.Record.ImportMethods)
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"create"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"create"})
+			}
 			before := cloneImageRecord(got.Record)
 			handler = func(req *http.Request) (*http.Response, error) {
 				if calls != 3 || req.Method != http.MethodPatch || req.URL.EscapedPath() != "/reverse/glance/v2/images/seed" {
@@ -342,7 +353,9 @@ func TestImageRecordUploadInvalidMetadataSyntaxPreservesConstructorDirtyIDAndLat
 				for _, patch := range patches {
 					paths[patch.Path] = true
 				}
-				th.CheckDeepEquals(t, map[string]bool{"/container_format": true, "/disk_format": true, "/name": true, "/vendor": true}, paths)
+				if !reflect.DeepEqual(paths, map[string]bool{"/container_format": true, "/disk_format": true, "/name": true, "/vendor": true}) {
+					t.Errorf("paths = %#v, want %#v", paths, map[string]bool{"/container_format": true, "/disk_format": true, "/name": true, "/vendor": true})
+				}
 				return taskCoreJSON(req, 200, `{}`), nil
 			}
 			updated, err := service.UpdateImageRecord(context.Background(), ImageRecordUpdateRequest{Record: got.Record})
@@ -437,7 +450,9 @@ func TestImageRecordUploadAcceptedBoundariesKeepOpaquePUTAndNeverFetch(t *testin
 			if err != nil || got == nil || got.Record == nil || got.Uploaded == nil || calls != 2 || redirects != 0 || got.Metadata.StatusCode != code || got.Uploaded.StatusCode != code || string(got.Uploaded.Body) != raw || string(got.Record.Envelope) != `{"id":"created","status":"saving"}` || string(got.Record.Resource.Body["status"]) != `"saving"` || len(got.Record.bodyState.dirty) != 0 {
 				t.Fatal(got, err, calls, redirects)
 			}
-			th.CheckDeepEquals(t, []string{"metadata only"}, got.Record.ImportMethods)
+			if !reflect.DeepEqual(got.Record.ImportMethods, []string{"metadata only"}) {
+				t.Errorf("got.Record.ImportMethods = %#v, want %#v", got.Record.ImportMethods, []string{"metadata only"})
+			}
 			got.Uploaded.Header.Set("X-Task-Proof", "mutated")
 			if len(got.Uploaded.Body) > 0 {
 				got.Uploaded.Body[0] = '!'
@@ -514,8 +529,12 @@ func TestImageRecordUploadInfersTotalSizeAfterPOSTAndRestoresBorrowedCursor(t *t
 				t.Fatal(got, err, calls)
 			}
 			if infer {
-				th.CheckDeepEquals(t, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart}, seeker.whences)
-				th.CheckDeepEquals(t, []int64{0, 0, 6}, seeker.offsets)
+				if !reflect.DeepEqual(seeker.whences, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart}) {
+					t.Errorf("seeker.whences = %#v, want %#v", seeker.whences, []int{io.SeekCurrent, io.SeekEnd, io.SeekStart})
+				}
+				if !reflect.DeepEqual(seeker.offsets, []int64{0, 0, 6}) {
+					t.Errorf("seeker.offsets = %#v, want %#v", seeker.offsets, []int64{0, 0, 6})
+				}
 			} else if len(seeker.whences) != 0 {
 				t.Fatal(seeker.whences)
 			}
@@ -648,8 +667,12 @@ func TestImageRecordUploadCapturesAttributesOptionsLocationAndHeadersOnce(t *tes
 		t.Fatal(got, err, calls, callbacks, locations, reader)
 	}
 	var facts resource.CloudLocation
-	th.AssertNoErr(t, json.Unmarshal(got.Record.Resource.Body["location"], &facts))
-	th.AssertEquals(t, "captured cloud", *facts.Cloud)
+	if err := json.Unmarshal(got.Record.Resource.Body["location"], &facts); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if *facts.Cloud != "captured cloud" {
+		t.Fatalf("*facts.Cloud = %v, want %v", *facts.Cloud, "captured cloud")
+	}
 }
 
 func TestImageRecordUploadOptionMergeReplacementAndStickyCallbackGuards(t *testing.T) {
@@ -678,8 +701,12 @@ func TestImageRecordUploadOptionMergeReplacementAndStickyCallbackGuards(t *testi
 					if mode == "bulk merge" {
 						header = "old"
 					}
-					th.AssertEquals(t, header, req.Header.Get("X-Discarded"))
-					th.AssertEquals(t, "new", req.Header.Get("X-Final"))
+					if got := req.Header.Get("X-Discarded"); got != header {
+						t.Fatalf("req.Header.Get(\"X-Discarded\") = %v, want %v", got, header)
+					}
+					if got := req.Header.Get("X-Final"); got != "new" {
+						t.Fatalf("req.Header.Get(\"X-Final\") = %v, want %v", got, "new")
+					}
 					return taskCoreJSON(req, 201, `{"id":"created"}`), nil
 				}
 				return taskCoreJSON(req, 204, ""), nil
@@ -1109,7 +1136,9 @@ func TestImageRecordUploadFactoryOptionsRemainReusableAfterResultAndConfigEdits(
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
-		th.AssertEquals(t, "yes", req.Header.Get("X-Captured"))
+		if got := req.Header.Get("X-Captured"); got != "yes" {
+			t.Fatalf("req.Header.Get(\"X-Captured\") = %v, want %v", got, "yes")
+		}
 		if req.Method == http.MethodPost {
 			imageRecordImportPayload(t, req, `{"container_format":"bare","disk_format":"qcow2","name":"captured","nested":{"precise":900719925474099312345}}`)
 			return taskCoreJSON(req, 201, `{"id":"created"}`), nil
@@ -1121,7 +1150,9 @@ func TestImageRecordUploadFactoryOptionsRemainReusableAfterResultAndConfigEdits(
 	})
 	service := New(client)
 	first, err := service.UploadImageRecord(context.Background(), ImageRecordUploadRequest{}, option)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	first.Record.Resource.Body["name"][1] = '!'
 	first.Record.bodyState.current["container_format"][1] = '!'
 	first.Metadata.Header.Set("X-Task-Proof", "first changed")
@@ -1134,18 +1165,26 @@ func TestImageRecordUploadFactoryOptionsRemainReusableAfterResultAndConfigEdits(
 
 func TestImageRecordUploadCallerOpenedFilenameRemainsBorrowedAndNeverReopened(t *testing.T) {
 	file, err := os.CreateTemp(t.TempDir(), "owned-upload-borrowed-*")
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	defer file.Close()
 	_, err = file.WriteString("prefixDATA")
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	_, err = file.Seek(6, io.SeekStart)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if calls == 1 {
 			body := taskCorePayload(t, req)
-			th.AssertEquals(t, "/not-the-caller-file", taskCoreText(t, body["filename"]))
+			if got := taskCoreText(t, body["filename"]); got != "/not-the-caller-file" {
+				t.Fatalf("taskCoreText(t, body[\"filename\"]) = %v, want %v", got, "/not-the-caller-file")
+			}
 			if len(body) != 3 {
 				t.Fatal(body)
 			}
@@ -1162,8 +1201,14 @@ func TestImageRecordUploadCallerOpenedFilenameRemainsBorrowedAndNeverReopened(t 
 		t.Fatal(got, err, calls)
 	}
 	_, err = file.Seek(0, io.SeekStart)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	actual, err := io.ReadAll(file)
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, "prefixDATA", string(actual))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(actual) != "prefixDATA" {
+		t.Fatalf("string(actual) = %v, want %v", string(actual), "prefixDATA")
+	}
 }

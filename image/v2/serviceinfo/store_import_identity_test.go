@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestStoreRecordImportIdentityRetainsPrivateIDAndReturnsOwnedCopies(t *testing.T) {
@@ -19,7 +18,9 @@ func TestStoreRecordImportIdentityRetainsPrivateIDAndReturnsOwnedCopies(t *testi
 			})
 			var record *StoreRecord
 			for row, err := range New(client).ListStoreRecords(context.Background()) {
-				th.AssertNoErr(t, err)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				record = row
 				break
 			}
@@ -31,17 +32,29 @@ func TestStoreRecordImportIdentityRetainsPrivateIDAndReturnsOwnedCopies(t *testi
 			record.Envelope = json.RawMessage(`{"id":"envelope decoy"}`)
 			record.Header.Set("Location", "https://foreign.test/store")
 			first, err := record.ImportIdentity()
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, raw, string(first))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(first) != raw {
+				t.Fatalf("string(first) = %v, want %v", string(first), raw)
+			}
 			first[0] = '!'
 			second, err := record.ImportIdentity()
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, raw, string(second))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(second) != raw {
+				t.Fatalf("string(second) = %v, want %v", string(second), raw)
+			}
 			copied := *record
 			copied.Resource = &resource.RawResource{}
 			third, err := copied.ImportIdentity()
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, raw, string(third))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(third) != raw {
+				t.Fatalf("string(third) = %v, want %v", string(third), raw)
+			}
 		})
 	}
 }
@@ -53,13 +66,19 @@ func TestStoreRecordImportIdentityMissingAndForgedInputs(t *testing.T) {
 		})
 		var record *StoreRecord
 		for row, err := range New(client).ListStoreRecords(context.Background()) {
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			record = row
 			break
 		}
 		got, err := record.ImportIdentity()
-		th.AssertNoErr(t, err)
-		th.AssertEquals(t, "null", string(got))
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if string(got) != "null" {
+			t.Fatalf("string(got) = %v, want %v", string(got), "null")
+		}
 	})
 	for _, test := range []struct {
 		name   string
@@ -96,14 +115,24 @@ func TestStoreImportIdentityConstructorValuesAndOwnership(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			input := json.RawMessage(test.attrs)
 			got, err := StoreImportIdentity(input)
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, test.want, string(got))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(got) != test.want {
+				t.Fatalf("string(got) = %v, want %v", string(got), test.want)
+			}
 			input[0] = '!'
-			th.AssertEquals(t, test.want, string(got))
+			if string(got) != test.want {
+				t.Fatalf("string(got) = %v, want %v", string(got), test.want)
+			}
 			got[0] = '!'
 			again, err := StoreImportIdentity(json.RawMessage(test.attrs))
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, test.want, string(again))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(again) != test.want {
+				t.Fatalf("string(again) = %v, want %v", string(again), test.want)
+			}
 		})
 	}
 }

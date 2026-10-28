@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -17,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func endpointCloudFixture(t *testing.T, reply func(http.ResponseWriter, *http.Request)) (*identity.EndpointReadCloud, *testcloud.Cloud, *atomic.Int32) {
@@ -26,7 +26,9 @@ func endpointCloudFixture(t *testing.T, reply func(http.ResponseWriter, *http.Re
 	calls := &atomic.Int32{}
 	fixture.Mux.HandleFunc("/identity/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		testhelper.TestMethod(t, r, http.MethodGet)
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
 		w.Header().Set("X-Request-Id", "cloud-endpoint")
 		reply(w, r)
 	})
@@ -48,8 +50,13 @@ func endpointCloudExpression(expression string) json.RawMessage {
 func TestPythonEndpointCloudSearchGlobLocalFiltersAndActualRecords(t *testing.T) {
 	body := `{"endpoints":[{"id":"a","name":"ops-alpha","interface":"public","enabled":1,"region_id":"RegionOne","service_id":"svc","links":{"flag":1,"n":9007199254740992},"url":"literal","unknown":9007199254740993},{"id":"b","name":"other","interface":"internal","enabled":false},{"id":"a","name":"ops-beta","interface":"public","enabled":"false","region_id":"RegionOne","service_id":"svc","links":{"flag":true,"n":9007199254740992},"url":"literal"}]}`
 	cloud, _, calls := endpointCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
-		testhelper.TestHeader(t, r, "Accept", "application/json")
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
+		if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+			t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+		}
 		raw, err := io.ReadAll(r.Body)
 		if err != nil || len(raw) != 0 || r.ContentLength != 0 {
 			t.Error(string(raw), err, r.ContentLength)
@@ -149,7 +156,10 @@ func TestPythonEndpointCloudNestedEmptyFilterUsesActualTruthiness(t *testing.T) 
 
 func TestPythonEndpointCloudJMESUsesMaterializedListAndKeepsNoInventedReceipt(t *testing.T) {
 	cloud, _, calls := endpointCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
 		testcloud.JSON(w, 200, `{"endpoints":[{"id":"a","name":"same"},{"id":"b","name":"other"}]}`)
 	})
 	for _, tc := range []struct{ id, expression, want string }{{"", "[].id", `["a","b"]`}, {"same", "[0].id", `"a"`}, {"", "length(@)", "2"}, {"absent", "length(@)", "0"}, {"", "`null`", "null"}, {"", "`[false,0]`", "[false,0]"}} {
@@ -171,8 +181,14 @@ func TestPythonEndpointCloudGetNoneBypassesDeprecatedFalseySearch(t *testing.T) 
 					testcloud.JSON(w, 203, `{"endpoint":{"id":"one","name":"direct"}}`)
 				} else {
 					list++
-					testhelper.AssertEquals(t, "/identity/v3/endpoints", r.URL.Path)
-					testhelper.AssertEquals(t, "", r.URL.RawQuery)
+					if r.URL.Path != "/identity/v3/endpoints" {
+						t.Errorf("r.URL.Path = %v, want %v", r.URL.Path, "/identity/v3/endpoints")
+						return
+					}
+					if r.URL.RawQuery != "" {
+						t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+						return
+					}
 					testcloud.JSON(w, 200, `{"endpoints":[{"id":"one","name":"listed"}]}`)
 				}
 			})
@@ -212,7 +228,10 @@ func TestPythonEndpointCloudGetCleanFallbackExactIDNameDuplicatesAndMissing(t *t
 						return
 					}
 					if r.URL.Query().Get("marker") == "" {
-						testhelper.AssertEquals(t, "", r.URL.RawQuery)
+						if r.URL.RawQuery != "" {
+							t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+							return
+						}
 						testcloud.JSON(w, 203, `{"endpoints":[{"id":"first","name":"other"}],"next":"?marker=first"}`)
 						return
 					}
@@ -269,7 +288,10 @@ func TestPythonEndpointCloudGetCleanFallbackExactIDNameDuplicatesAndMissing(t *t
 
 func TestPythonEndpointCloudGetSeedAliasesWireAndExplicitLocation(t *testing.T) {
 	cloud, _, calls := endpointCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "/identity/v3/endpoints/literal%2Fname%20%252F", r.URL.EscapedPath())
+		if got := r.URL.EscapedPath(); got != "/identity/v3/endpoints/literal%2Fname%20%252F" {
+			t.Errorf("r.URL.EscapedPath() = %v, want %v", got, "/identity/v3/endpoints/literal%2Fname%20%252F")
+			return
+		}
 		testcloud.JSON(w, 203, `{"endpoint":{"enabled":true,"is_enabled":false,"links":"literal","location":{"spoof":true},"unknown":9007199254740993}}`)
 	})
 	location := resource.CloudLocation{}
@@ -336,10 +358,19 @@ func TestPythonEndpointCloudGetFilteredArbitraryTruthLenAndIndex(t *testing.T) {
 
 func TestPythonEndpointCloudOwnedHeadersOptionsAndConcurrentReuse(t *testing.T) {
 	cloud, _, calls := endpointCloudFixture(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.TestHeader(t, r, "X-Selected", "before")
-		testhelper.TestHeader(t, r, "X-Trace", "owned")
-		testhelper.TestHeader(t, r, "OpenStack-API-Version", "identity 3.2")
-		testhelper.AssertEquals(t, "", r.Header.Get("X-OpenStack-Nova-API-Version"))
+		if got := r.Header.Values("X-Selected"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "before" }) {
+			t.Errorf("header %s = %q, want %q", "X-Selected", got, "before")
+		}
+		if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+			t.Errorf("header %s = %q, want %q", "X-Trace", got, "owned")
+		}
+		if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "identity 3.2" }) {
+			t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "identity 3.2")
+		}
+		if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != "" {
+			t.Errorf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, "")
+			return
+		}
 		testcloud.JSON(w, 200, `{"endpoints":[{"id":"a"}]}`)
 	})
 	client := cloud.RawAPI().RawClient()

@@ -14,7 +14,6 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordListProjectionPackingAndImportMethods(t *testing.T) {
@@ -59,8 +58,12 @@ func TestImageRecordListProjectionPackingAndImportMethods(t *testing.T) {
 			if test.name == "arbitrary name no alternate id" {
 				want["name"] = "false"
 			}
-			th.CheckDeepEquals(t, want, imageRecordValues(row.Resource))
-			th.CheckDeepEquals(t, test.methods, row.ImportMethods)
+			if got := imageRecordValues(row.Resource); !reflect.DeepEqual(got, want) {
+				t.Errorf("imageRecordValues(row.Resource) = %#v, want %#v", got, want)
+			}
+			if !reflect.DeepEqual(row.ImportMethods, test.methods) {
+				t.Errorf("row.ImportMethods = %#v, want %#v", row.ImportMethods, test.methods)
+			}
 			var location resource.CloudLocation
 			if err := json.Unmarshal(row.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "current" {
 				t.Fatal(location, err)
@@ -72,7 +75,9 @@ func TestImageRecordListProjectionPackingAndImportMethods(t *testing.T) {
 			if err := json.Unmarshal([]byte(test.row), &expectedWire); err != nil {
 				t.Fatal(err)
 			}
-			th.CheckDeepEquals(t, expectedWire, row.Wire.Body)
+			if !reflect.DeepEqual(row.Wire.Body, expectedWire) {
+				t.Errorf("row.Wire.Body = %#v, want %#v", row.Wire.Body, expectedWire)
+			}
 		})
 	}
 	t.Run("row channels do not alias neighbors", func(t *testing.T) {
@@ -253,11 +258,17 @@ func TestImageRecordListPagingRawCapsAndPartials(t *testing.T) {
 				calls++
 				if calls == 1 {
 					if mode == "marker fallback" {
-						th.AssertEquals(t, "3", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "3" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "3")
+						}
 					} else if mode == "raw cap filter" {
-						th.AssertEquals(t, "2", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "2" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+						}
 					} else if mode == "zero limit empty stop" {
-						th.AssertEquals(t, "0", req.URL.Query().Get("limit"))
+						if got := req.URL.Query().Get("limit"); got != "0" {
+							t.Fatalf("req.URL.Query().Get(\"limit\") = %v, want %v", got, "0")
+						}
 					} else if req.URL.RawQuery != "" {
 						t.Fatal(req.URL)
 					}

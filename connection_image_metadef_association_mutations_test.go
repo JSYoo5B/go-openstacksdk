@@ -13,7 +13,6 @@ import (
 	types "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *testing.T) {
@@ -22,7 +21,9 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 	cloud := "configured-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	expected, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
@@ -41,9 +42,13 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 		switch req.Method {
 		case http.MethodPost:
 			payload, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			var decoded map[string]json.RawMessage
-			th.AssertNoErr(t, json.Unmarshal(payload, &decoded))
+			if err := json.Unmarshal(payload, &decoded); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			want := map[string]json.RawMessage{
 				"id": json.RawMessage(`"input-id"`), "name": json.RawMessage(`"OS::Nova::Server"`),
 				"created_at": json.RawMessage(`false`), "updated_at": json.RawMessage(`9007199254740993`),
@@ -66,19 +71,27 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 		return &http.Response{StatusCode: status, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	cloud = "caller mutation"
 	upper, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if upper.API.MetadefResourceTypes.RawClient() != versioned.RawClient() || versioned.RawClient().ProviderClient != provider || calls != 0 {
 		t.Fatal("binding lost shared provider or made HTTP")
 	}
 	for index, api := range []*types.API{upper.API.MetadefResourceTypes, versioned.MetadefResourceTypes} {
 		t.Run([]string{"Image", "ImageV2"}[index], func(t *testing.T) {
 			scope, err := api.InNamespace(context.Background(), "OS::Nova")
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			created, err := scope.CreateRecord(context.Background(), types.WithRecordCreateAttributes(map[string]any{
 				"id": "input-id", "name": "OS::Nova::Server", "created_at": false,
 				"updated_at": json.Number("9007199254740993"), "prefix": "hw_", "properties_target": nil,
@@ -86,7 +99,9 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 				provider.SetToken("live")
 				return nil
 			})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if created.Namespace == nil || *created.Namespace != "OS::Nova" || len(created.Resource.Body) != 8 ||
 				string(created.Resource.Body["location"]) != string(expected) || string(created.Resource.Body["namespace_name"]) != `"OS::Nova"` ||
 				string(created.Resource.Body["id"]) != `"input-id"` || string(created.Resource.Body["name"]) != `"passive/name"` ||
@@ -102,7 +117,9 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 				seed.Body["id"] = json.RawMessage(`"caller changed"`)
 				return nil
 			})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			wantStatus := 202
 			if index == 1 {
 				wantStatus = 404
@@ -114,6 +131,10 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 			}
 		})
 	}
-	th.AssertEquals(t, 4, calls)
-	th.AssertEquals(t, 0, retries)
+	if calls != 4 {
+		t.Fatalf("calls = %v, want %v", calls, 4)
+	}
+	if retries != 0 {
+		t.Fatalf("retries = %v, want %v", retries, 0)
+	}
 }

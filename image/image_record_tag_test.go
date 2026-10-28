@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordTagInvoke(service *Service, remove bool, ctx context.Context, input ImageRecordTagRequest, tag string, options ...ImageMutationOption) (*ImageRecordTagResult, error) {
@@ -81,8 +80,12 @@ func TestImageRecordTagOwnedSeedListSemanticsAndReceipts(t *testing.T) {
 			}
 			want := imageRecordValues(seed.Resource)
 			want["tags"] = test.want
-			th.CheckDeepEquals(t, want, imageRecordValues(got.Record.Resource))
-			th.CheckDeepEquals(t, before, imageRecordValues(seed.Resource))
+			if actual := imageRecordValues(got.Record.Resource); !reflect.DeepEqual(actual, want) {
+				t.Errorf("imageRecordValues(got.Record.Resource) = %#v, want %#v", actual, want)
+			}
+			if got := imageRecordValues(seed.Resource); !reflect.DeepEqual(got, before) {
+				t.Errorf("imageRecordValues(seed.Resource) = %#v, want %#v", got, before)
+			}
 			if got.Record.StatusCode != seed.StatusCode || !reflect.DeepEqual(got.Record.Header, seed.Header) || !reflect.DeepEqual(got.Record.Resource.Header, seed.Resource.Header) || !reflect.DeepEqual(got.Record.Wire, seed.Wire) || string(got.Record.Envelope) != string(seed.Envelope) || !reflect.DeepEqual(got.Record.ImportMethods, seed.ImportMethods) {
 				t.Fatal("mutation replaced fetch receipt", got.Record, seed)
 			}
@@ -139,7 +142,9 @@ func TestImageRecordTagLiteralConstructorBoundsAndCurrentLocation(t *testing.T) 
 					encodedTag, _ := json.Marshal(tag)
 					want["tags"] = "[" + string(encodedTag) + "]"
 				}
-				th.CheckDeepEquals(t, want, imageRecordValues(value.Resource))
+				if got := imageRecordValues(value.Resource); !reflect.DeepEqual(got, want) {
+					t.Errorf("imageRecordValues(value.Resource) = %#v, want %#v", got, want)
+				}
 				if value.Wire != nil || len(value.Envelope) != 0 || len(value.Header) != 0 || value.StatusCode != 0 || value.Resource.StatusCode != 0 || len(value.Resource.Header) != 0 || value.ImportMethods == nil || len(value.ImportMethods) != 0 {
 					t.Fatal("constructor fabricated fetched receipt", value)
 				}
@@ -496,7 +501,9 @@ func TestImageRecordTagRejectedPhysicalFaults(t *testing.T) {
 				if errors.Is(err, resource.ErrNotFound) {
 					t.Fatal("rejected tag converted to logical absence", err)
 				}
-				th.AssertEquals(t, "[]", string(seed.Resource.Body["tags"]))
+				if string(seed.Resource.Body["tags"]) != "[]" {
+					t.Fatalf("string(seed.Resource.Body[\"tags\"]) = %v, want %v", string(seed.Resource.Body["tags"]), "[]")
+				}
 			})
 		}
 	}

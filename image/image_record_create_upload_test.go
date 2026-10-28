@@ -14,7 +14,6 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // The tests use the existing captured-client transport and public Gophercloud
@@ -59,17 +58,29 @@ func TestImageRecordCreateUploadDirectAcceptsOpaqueResponsesWithoutQueuedGateWai
 						t.Fatal(req.Method, req.URL)
 					}
 					body := taskCorePayload(t, req)
-					th.AssertEquals(t, `"formal"`, string(body["name"]))
-					th.AssertEquals(t, `"qcow2"`, string(body["disk_format"]))
+					if string(body["name"]) != `"formal"` {
+						t.Fatalf("string(body[\"name\"]) = %v, want %v", string(body["name"]), `"formal"`)
+					}
+					if string(body["disk_format"]) != `"qcow2"` {
+						t.Fatalf("string(body[\"disk_format\"]) = %v, want %v", string(body["disk_format"]), `"qcow2"`)
+					}
 					return imageCreateUploadSeed(req, ""), nil
 				}
 				if calls != 2 || req.Method != http.MethodPut || req.URL.EscapedPath() != "/reverse/glance/v2/images/created/file" {
 					t.Fatal(calls, req.Method, req.URL)
 				}
-				th.AssertEquals(t, "payload", imageRecordStageRead(t, req))
-				th.AssertEquals(t, "application/octet-stream", req.Header.Get("Content-Type"))
-				th.AssertEquals(t, "", req.Header.Get("Accept"))
-				th.AssertEquals(t, "", req.Header.Get("X-OpenStack-Image-Size"))
+				if got := imageRecordStageRead(t, req); got != "payload" {
+					t.Fatalf("imageRecordStageRead(t, req) = %v, want %v", got, "payload")
+				}
+				if got := req.Header.Get("Content-Type"); got != "application/octet-stream" {
+					t.Fatalf("req.Header.Get(\"Content-Type\") = %v, want %v", got, "application/octet-stream")
+				}
+				if got := req.Header.Get("Accept"); got != "" {
+					t.Fatalf("req.Header.Get(\"Accept\") = %v, want %v", got, "")
+				}
+				if got := req.Header.Get("X-OpenStack-Image-Size"); got != "" {
+					t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "")
+				}
 				return taskCoreJSON(req, test.code, test.body), nil
 			})
 			got, err := imageCreateUploadRun(t, New(client), ImageRecordCreateRequest{Name: "formal", Data: ImageRecordCreateBytes([]byte("payload"))}, WithImageRecordCreateWait(true), WithImageRecordCreateTimeout(0))
@@ -125,7 +136,9 @@ func TestImageRecordCreateUploadStoreImplicationAndEmptyStorePresence(t *testing
 					if req.Method != http.MethodPut || req.URL.EscapedPath() != "/reverse/glance/v2/images/created/stage" {
 						t.Fatal(req.Method, req.URL)
 					}
-					th.AssertEquals(t, "payload", imageRecordStageRead(t, req))
+					if got := imageRecordStageRead(t, req); got != "payload" {
+						t.Fatalf("imageRecordStageRead(t, req) = %v, want %v", got, "payload")
+					}
 					response := taskCoreJSON(req, 399, "opaque stage")
 					response.Header.Set("OpenStack-image-import-methods", "stage decoy")
 					return response, nil
@@ -134,7 +147,9 @@ func TestImageRecordCreateUploadStoreImplicationAndEmptyStorePresence(t *testing
 						t.Fatal(req.Method, req.URL)
 					}
 					imageRecordImportPayload(t, req, test.want)
-					th.AssertEquals(t, "", req.Header.Get("X-Image-Meta-Store"))
+					if got := req.Header.Get("X-Image-Meta-Store"); got != "" {
+						t.Fatalf("req.Header.Get(\"X-Image-Meta-Store\") = %v, want %v", got, "")
+					}
 					return taskCoreJSON(req, 299, "opaque import"), nil
 				default:
 					t.Fatal("unexpected refresh or wait", calls)
@@ -213,7 +228,9 @@ func TestImageRecordCreateUploadSizePreservesPythonIntegersAndRejectsOtherTypesI
 					if calls != 2 || req.Method != http.MethodPut {
 						t.Fatal(calls, req.Method)
 					}
-					th.AssertEquals(t, test.want, req.Header.Get("X-OpenStack-Image-Size"))
+					if got := req.Header.Get("X-OpenStack-Image-Size"); got != test.want {
+						t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, test.want)
+					}
 					return taskCoreJSON(req, 204, ""), nil
 				}
 				if calls != 2 || req.Method != http.MethodDelete || req.URL.EscapedPath() != "/reverse/glance/v2/images/created" {
@@ -250,8 +267,12 @@ func TestImageRecordCreateUploadReaderSizeRestoresCursorAndBorrowedLifetime(t *t
 		if calls != 2 || req.Method != http.MethodPut {
 			t.Fatal(calls, req.Method)
 		}
-		th.AssertEquals(t, "6", req.Header.Get("X-OpenStack-Image-Size"))
-		th.AssertEquals(t, "cdef", imageRecordStageRead(t, req))
+		if got := req.Header.Get("X-OpenStack-Image-Size"); got != "6" {
+			t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "6")
+		}
+		if got := imageRecordStageRead(t, req); got != "cdef" {
+			t.Fatalf("imageRecordStageRead(t, req) = %v, want %v", got, "cdef")
+		}
 		return taskCoreJSON(req, 204, ""), nil
 	})
 	got, err := imageCreateUploadRun(t, New(client), ImageRecordCreateRequest{Name: "formal", Data: ImageRecordCreateReader(reader)})
@@ -274,8 +295,12 @@ func TestImageRecordCreateUploadFilenameOpenedBeforeConversionAndNotRetainedClos
 		if calls != 2 || req.Method != http.MethodPut {
 			t.Fatal(calls, req.Method)
 		}
-		th.AssertEquals(t, "8", req.Header.Get("X-OpenStack-Image-Size"))
-		th.AssertEquals(t, "contents", imageRecordStageRead(t, req))
+		if got := req.Header.Get("X-OpenStack-Image-Size"); got != "8" {
+			t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "8")
+		}
+		if got := imageRecordStageRead(t, req); got != "contents" {
+			t.Fatalf("imageRecordStageRead(t, req) = %v, want %v", got, "contents")
+		}
 		return taskCoreJSON(req, 204, ""), nil
 	})
 	got, err := imageCreateUploadRun(t, New(client), ImageRecordCreateRequest{Name: "formal", Filename: filename}, WithImageRecordCreateMD5("supplied"))
@@ -296,7 +321,9 @@ func TestImageRecordCreateUploadChecksumUsesFlatMetaBeforeConstructorHook(t *tes
 		switch calls {
 		case 1:
 			body := taskCorePayload(t, req)
-			th.AssertEquals(t, `"constructor decoy"`, string(body[imageCreateMD5Key]))
+			if string(body[imageCreateMD5Key]) != `"constructor decoy"` {
+				t.Fatalf("string(body[imageCreateMD5Key]) = %v, want %v", string(body[imageCreateMD5Key]), `"constructor decoy"`)
+			}
 			return imageCreateUploadSeed(req, ""), nil
 		case 2:
 			return taskCoreJSON(req, 204, ""), nil
@@ -451,8 +478,12 @@ func TestImageRecordCreateUploadAcceptedResponseFaultAndCleanupFaultAreJoinedWit
 	if got == nil || got.Uploaded == nil || got.Cleanup == nil || got.Cleanup.Acknowledgement == nil || got.Cleanup.Record != nil || !errors.Is(err, uploadClose) || !errors.Is(err, cleanupClose) || uploadBody.closes != 1 || cleanupBody.closes != 1 || calls != 3 {
 		t.Fatal(got, err, calls)
 	}
-	th.AssertEquals(t, "upload acknowledgement", string(got.Uploaded.Body))
-	th.AssertEquals(t, "cleanup acknowledgement", string(got.Cleanup.Acknowledgement.Body))
+	if string(got.Uploaded.Body) != "upload acknowledgement" {
+		t.Fatalf("string(got.Uploaded.Body) = %v, want %v", string(got.Uploaded.Body), "upload acknowledgement")
+	}
+	if string(got.Cleanup.Acknowledgement.Body) != "cleanup acknowledgement" {
+		t.Fatalf("string(got.Cleanup.Acknowledgement.Body) = %v, want %v", string(got.Cleanup.Acknowledgement.Body), "cleanup acknowledgement")
+	}
 }
 
 func TestImageRecordCreateUploadImportFormatsFailAfterStageAndTriggerImageCleanup(t *testing.T) {
@@ -462,7 +493,9 @@ func TestImageRecordCreateUploadImportFormatsFailAfterStageAndTriggerImageCleanu
 		switch calls {
 		case 1:
 			body := taskCorePayload(t, req)
-			th.AssertEquals(t, "null", string(body["disk_format"]))
+			if string(body["disk_format"]) != "null" {
+				t.Fatalf("string(body[\"disk_format\"]) = %v, want %v", string(body["disk_format"]), "null")
+			}
 			return imageCreateUploadSeed(req, "glance-direct"), nil
 		case 2:
 			if req.Method != http.MethodPut || !strings.HasSuffix(req.URL.Path, "/stage") {

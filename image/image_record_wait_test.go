@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordWaitSeed(status json.RawMessage) *ImageRecord {
@@ -119,7 +118,12 @@ func TestImageRecordWaitStatusFreshSelectionFailureAndPending(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, `{"status":"ACTIVE"}`), nil
 			})
-			options := append([]ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) { callbacks++; th.AssertEquals(t, 0, progress) })}, test.options...)
+			options := append([]ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) {
+				callbacks++
+				if progress != 0 {
+					t.Fatalf("progress = %v, want %v", progress, 0)
+				}
+			})}, test.options...)
 			got, err := New(client).WaitForImageRecordStatus(context.Background(), seed, test.target, options...)
 			if calls != test.wantCalls || callbacks != test.wantCallbacks {
 				t.Fatal(calls, callbacks, test.wantCalls, test.wantCallbacks)
@@ -139,9 +143,13 @@ func TestImageRecordWaitStatusFreshSelectionFailureAndPending(t *testing.T) {
 				if got == nil || err != nil || string(got.Resource.Body["checksum"]) != `"seed checksum"` {
 					t.Fatal(got, err)
 				}
-				th.AssertEquals(t, `{"seeded":true}`, string(seed.Resource.Body["properties"]))
+				if string(seed.Resource.Body["properties"]) != `{"seeded":true}` {
+					t.Fatalf("string(seed.Resource.Body[\"properties\"]) = %v, want %v", string(seed.Resource.Body["properties"]), `{"seeded":true}`)
+				}
 				if test.wantCalls == 2 && test.name == "missing selected field overlays seed" {
-					th.AssertEquals(t, `"fresh"`, string(got.Resource.Body["name"]))
+					if string(got.Resource.Body["name"]) != `"fresh"` {
+						t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `"fresh"`)
+					}
 				}
 			}
 		})
@@ -184,7 +192,12 @@ func TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn(t *testing.T) {
 					return err
 				}
 			}
-			got, err := New(client).WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) { callbacks++; th.AssertEquals(t, 0, progress) }))
+			got, err := New(client).WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) {
+				callbacks++
+				if progress != 0 {
+					t.Fatalf("progress = %v, want %v", progress, 0)
+				}
+			}))
 			wantCalls, wantCallbacks := 1, 0
 			if mode == "later404" {
 				wantCalls, wantCallbacks = 2, 1
@@ -214,11 +227,17 @@ func TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn(t *testing.T) {
 					t.Fatal("latest private overlay lost", got)
 				}
 				if mode == "later404" {
-					th.CheckDeepEquals(t, []string{"fresh", " fresh"}, got.ImportMethods)
-					th.AssertEquals(t, `{"id":"response id","status":"pending","name":"latest"}`, string(got.Envelope))
+					if !reflect.DeepEqual(got.ImportMethods, []string{"fresh", " fresh"}) {
+						t.Errorf("got.ImportMethods = %#v, want %#v", got.ImportMethods, []string{"fresh", " fresh"})
+					}
+					if string(got.Envelope) != `{"id":"response id","status":"pending","name":"latest"}` {
+						t.Fatalf("string(got.Envelope) = %v, want %v", string(got.Envelope), `{"id":"response id","status":"pending","name":"latest"}`)
+					}
 				}
 			}
-			th.AssertEquals(t, `"original"`, string(seed.Resource.Body["id"]))
+			if string(seed.Resource.Body["id"]) != `"original"` {
+				t.Fatalf("string(seed.Resource.Body[\"id\"]) = %v, want %v", string(seed.Resource.Body["id"]), `"original"`)
+			}
 		})
 	}
 }
@@ -279,14 +298,24 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 		client.SetToken("live before")
 		cloud = "option changed"
 		facts.Project.ID[1] = 'X'
-		value.Callback = func(progress int) { callbacks++; th.AssertEquals(t, 0, progress); client.SetToken("live after") }
+		value.Callback = func(progress int) {
+			callbacks++
+			if progress != 0 {
+				t.Fatalf("progress = %v, want %v", progress, 0)
+			}
+			client.SetToken("live after")
+		}
 		return WithImageRecordWaitHeader("X-Final", "yes")(value)
 	})
 	if got == nil || err != nil || calls != 2 || locations != 1 || optionsApplied != 1 || callbacks != 1 || deadline.Sub(started) < 900*time.Millisecond || deadline.Sub(started) > 1100*time.Millisecond {
 		t.Fatal(got, err, calls, locations, optionsApplied, callbacks, deadline.Sub(started))
 	}
-	th.AssertEquals(t, "null", string(got.Resource.Body["id"]))
-	th.AssertEquals(t, `"first name"`, string(got.Resource.Body["name"]))
+	if string(got.Resource.Body["id"]) != "null" {
+		t.Fatalf("string(got.Resource.Body[\"id\"]) = %v, want %v", string(got.Resource.Body["id"]), "null")
+	}
+	if string(got.Resource.Body["name"]) != `"first name"` {
+		t.Fatalf("string(got.Resource.Body[\"name\"]) = %v, want %v", string(got.Resource.Body["name"]), `"first name"`)
+	}
 	var location resource.CloudLocation
 	if err := json.Unmarshal(got.Resource.Body["location"], &location); err != nil || location.Cloud == nil || *location.Cloud != "captured" || string(location.Project.ID) != `"token project"` {
 		t.Fatal(location, err)
@@ -607,7 +636,9 @@ func TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET(t *testing.T) {
 			service := New(client)
 			options := []ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Hour), WithImageRecordWaitCallback(func(progress int) {
 				callbacks++
-				th.AssertEquals(t, 0, progress)
+				if progress != 0 {
+					t.Fatalf("progress = %v, want %v", progress, 0)
+				}
 				switch mode {
 				case "cancel":
 					cancel(marker)
@@ -749,7 +780,12 @@ func TestImageRecordWaitUnicodeStatusComparison(t *testing.T) {
 				}
 				return taskCoreJSON(req, 203, `{"status":`+string(status)+`}`), nil
 			})
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), seed, test.target, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) { callbacks++; th.AssertEquals(t, 0, progress) }))
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), seed, test.target, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) {
+				callbacks++
+				if progress != 0 {
+					t.Fatalf("progress = %v, want %v", progress, 0)
+				}
+			}))
 			if got == nil || err != nil || calls != test.wantCalls || callbacks != 0 {
 				t.Fatal(got, err, calls, callbacks)
 			}
@@ -787,7 +823,12 @@ func TestImageRecordWaitUnicodeStatusComparison(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, `{"status":"active"}`), nil
 			})
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), test.target, WithImageRecordWaitFailureStates(test.failure), WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) { callbacks++; th.AssertEquals(t, 0, progress) }))
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), test.target, WithImageRecordWaitFailureStates(test.failure), WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWaitCallback(func(progress int) {
+				callbacks++
+				if progress != 0 {
+					t.Fatalf("progress = %v, want %v", progress, 0)
+				}
+			}))
 			if got == nil || calls != test.wantCalls || callbacks != test.wantCallbacks || errors.Is(err, resource.ErrFailedState) != test.failed || err != nil && !test.failed {
 				t.Fatal(got, err, calls, callbacks)
 			}

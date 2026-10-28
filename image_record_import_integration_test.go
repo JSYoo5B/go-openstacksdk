@@ -17,7 +17,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testing.T) {
@@ -51,25 +50,41 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 			t.Fatal(index, req.Method, req.URL)
 		}
 		if method == http.MethodPut {
-			th.AssertEquals(t, "6", req.Header.Get("X-OpenStack-Image-Size"))
+			if got := req.Header.Get("X-OpenStack-Image-Size"); got != "6" {
+				t.Fatalf("req.Header.Get(\"X-OpenStack-Image-Size\") = %v, want %v", got, "6")
+			}
 			body, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			expected := "binary"
 			if index == 8 {
 				expected = ""
 			}
-			th.AssertEquals(t, expected, string(body))
+			if string(body) != expected {
+				t.Fatalf("string(body) = %v, want %v", string(body), expected)
+			}
 		} else if method == http.MethodPost {
 			var body map[string]json.RawMessage
-			th.AssertNoErr(t, json.NewDecoder(req.Body).Decode(&body))
+			if err := json.NewDecoder(req.Body).Decode(&body); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			var m map[string]json.RawMessage
-			th.AssertNoErr(t, json.Unmarshal(body["method"], &m))
+			if err := json.Unmarshal(body["method"], &m); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			names := []string{`"glance-direct"`, `"web-download"`, `"glance-download"`, `"copy-image"`}
-			th.AssertEquals(t, names[index-4], string(m["name"]))
+			if string(m["name"]) != names[index-4] {
+				t.Fatalf("string(m[\"name\"]) = %v, want %v", string(m["name"]), names[index-4])
+			}
 			storeHeader := req.Header.Get("X-Image-Meta-Store")
 			if index == 4 {
-				th.AssertEquals(t, `["fast"]`, string(body["stores"]))
-				th.AssertEquals(t, "fast", storeHeader)
+				if string(body["stores"]) != `["fast"]` {
+					t.Fatalf("string(body[\"stores\"]) = %v, want %v", string(body["stores"]), `["fast"]`)
+				}
+				if storeHeader != "fast" {
+					t.Fatalf("storeHeader = %v, want %v", storeHeader, "fast")
+				}
 			} else if storeHeader != "" {
 				t.Fatal("configured store expanded selection", index, req.Header)
 			}
@@ -84,13 +99,17 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 				}
 			}
 			if index == 7 {
-				th.AssertEquals(t, `["cold",null,"cold"]`, string(body["stores"]))
+				if string(body["stores"]) != `["cold",null,"cold"]` {
+					t.Fatalf("string(body[\"stores\"]) = %v, want %v", string(body["stores"]), `["cold",null,"cold"]`)
+				}
 			}
 			expectedHeader := "source"
 			if index >= 5 {
 				expectedHeader = "later"
 			}
-			th.AssertEquals(t, expectedHeader, req.Header.Get("X-Source"))
+			if got := req.Header.Get("X-Source"); got != expectedHeader {
+				t.Fatalf("req.Header.Get(\"X-Source\") = %v, want %v", got, expectedHeader)
+			}
 			if req.Header.Get("X-OpenStack-Image-Size") != "" {
 				t.Fatal("binary size entered import", req.Header)
 			}
@@ -122,11 +141,17 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 		return &http.Response{Request: req, StatusCode: status, Header: header, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	source := versioned.RawClient()
 	source.MoreHeaders = map[string]string{"X-Source": "source", "X-Image-Meta-Store": "configured-decoy"}
 	source.Microversion = "2.10"
@@ -134,34 +159,50 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 		t.Fatal("import replaced shared source")
 	}
 	seed, err := service.GetImageRecord(context.Background(), image.ImageRecordRequest{ID: id})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	staged, err := conn.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: seed, Data: reader})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	stores, err := service.API.ServiceInfo.AllStoreRecords(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if len(stores) != 1 || calls != 4 {
 		t.Fatal(stores, calls)
 	}
 	stores[0].Resource.Body["id"] = json.RawMessage(`"public-store-decoy"`)
 	staged.Record.Resource.Body["id"] = json.RawMessage(`"public-image-decoy"`)
 	first, err := conn.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: staged.Record}, image.WithImageRecordImportStore(image.ImageRecordImportStore{Record: stores[0]}), func(*image.ImageRecordImportOpts) error { source.MoreHeaders["X-Source"] = "later"; return nil })
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if first == nil || first.Record == nil || first.Acknowledgement == nil || first.Acknowledgement.ImageID != id || first.Acknowledgement.StatusCode != 299 || string(first.Acknowledgement.Body) != "opaque import\xff" || first.Record.StatusCode != 203 || first.Record.Header.Get("X-Proof") != "response-2" || len(first.Record.ImportMethods) != 0 || string(first.Record.Resource.Body["id"]) != `"image /한글:%?"` {
 		t.Fatal(first)
 	}
 	second, err := service.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: first.Record}, image.WithImageRecordImportMethod(imageimport.WebDownloadMethod), image.WithImageRecordImportAllStores(false), image.WithImageRecordImportAllStoresMustSucceed(false))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	third, err := conn.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: second.Record}, image.WithImageRecordImportMethod(imageimport.GlanceDownloadMethod), image.WithImageRecordImportRemoteRegion(map[string]any{"region": "r1"}), image.WithImageRecordImportRemoteImageID(42), image.WithImageRecordImportRemoteServiceInterface([]string{"public"}))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	fourth, err := service.ImportImageRecord(context.Background(), image.ImageRecordImportRequest{Record: third.Record}, image.WithImageRecordImportMethod(imageimport.CopyImageMethod), image.WithImageRecordImportStores(image.ImageRecordImportStore{ID: "cold"}, image.ImageRecordImportStore{RawID: json.RawMessage("null")}, image.ImageRecordImportStore{ID: "cold"}))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if calls != 8 || !reflect.DeepEqual(first.Record.Envelope, fourth.Record.Envelope) || fourth.Record.StatusCode != 203 || string(fourth.Record.Resource.Body["status"]) != `"queued"` || source.MoreHeaders["X-Image-Meta-Store"] != "configured-decoy" {
 		t.Fatal(first, fourth, calls, source.MoreHeaders)
 	}
 	// Import performs no binary read and keeps the caller's plain data reference.
 	// After the initial stage its cursor is EOF: nil Data here sends zero bytes.
 	again, err := service.StageImageRecord(context.Background(), image.ImageRecordStageRequest{Record: fourth.Record})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if calls != 10 || again.Record == nil || again.Staged.StatusCode != 204 || again.Metadata.StatusCode != 299 || again.Record.Wire != nil {
 		t.Fatal(again, calls)
 	}
@@ -175,7 +216,9 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 
 func TestConnectionOwnedImageImportRejectsInvalidInvocation(t *testing.T) {
 	conn, err := sdk.FromProvider(&gophercloud.ProviderClient{}, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/v2/"))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	marker := errors.New("import facade canceled")
 	canceled, cancel := context.WithCancelCause(context.Background())
 	cancel(marker)

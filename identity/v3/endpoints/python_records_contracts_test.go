@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -17,7 +18,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func endpointRecordsAPI(t *testing.T, handler func(http.ResponseWriter, *http.Request)) (*endpoints.API, *testcloud.Cloud, *atomic.Int32) {
@@ -26,8 +26,12 @@ func endpointRecordsAPI(t *testing.T, handler func(http.ResponseWriter, *http.Re
 	calls := &atomic.Int32{}
 	cloud.Mux.HandleFunc("/keystone/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		testhelper.TestMethod(t, r, http.MethodGet)
-		testhelper.TestHeader(t, r, "X-Auth-Token", "test-token")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+		}
 		w.Header().Set("X-Request-Id", "endpoint-actual")
 		handler(w, r)
 	})
@@ -52,10 +56,21 @@ func endpointRecordProof(t *testing.T, err error, status int, body string) {
 func TestEndpointRecordsSourceMRODefaultsUntypedLinksAndActualEvidence(t *testing.T) {
 	body := `{"endpoints":[{"id":null,"name":"nova","interface":"public","enabled":"false","links":[null,1,{"unknown":9007199254740993}],"region_id":"RegionOne","service_id":"svc","url":"literal","unknown":"wire","region":"unmodeled","self":"wire-only","location":{"spoof":true}},{}]}`
 	api, _, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "/keystone/v3/endpoints", r.URL.Path)
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
-		testhelper.TestHeader(t, r, "Accept", "application/json")
-		testhelper.AssertEquals(t, "", r.Header.Get("OpenStack-API-Version"))
+		if r.URL.Path != "/keystone/v3/endpoints" {
+			t.Errorf("r.URL.Path = %v, want %v", r.URL.Path, "/keystone/v3/endpoints")
+			return
+		}
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
+		if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+			t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+		}
+		if got := r.Header.Get("OpenStack-API-Version"); got != "" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "")
+			return
+		}
 		w.Header().Set("ETag", "actual")
 		testcloud.JSON(w, 203, body)
 	})
@@ -169,7 +184,10 @@ func TestEndpointRecordsSourceLinkPrecedenceAndMalformedPageReceipt(t *testing.T
 					testcloud.JSON(w, 203, body)
 					return
 				}
-				testhelper.AssertEquals(t, tc.marker, r.URL.Query().Get("marker"))
+				if got := r.URL.Query().Get("marker"); got != tc.marker {
+					t.Errorf("r.URL.Query().Get(\"marker\") = %v, want %v", got, tc.marker)
+					return
+				}
 				testcloud.JSON(w, 200, `{"endpoints":[]}`)
 			})
 			rows, err := api.AllRecords(context.Background())
@@ -193,7 +211,10 @@ func TestEndpointRecordsSourceLinkPrecedenceAndMalformedPageReceipt(t *testing.T
 
 func TestEndpointRecordsRawCapLazyBreakAndCancellation(t *testing.T) {
 	api, _, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "2", r.URL.Query().Get("limit"))
+		if got := r.URL.Query().Get("limit"); got != "2" {
+			t.Errorf("r.URL.Query().Get(\"limit\") = %v, want %v", got, "2")
+			return
+		}
 		testcloud.JSON(w, 203, `{"endpoints":[{"id":"skip"},{"id":"keep"},{"connection":null}],"next":"https://foreign.invalid/unused"}`)
 	})
 	rows, err := api.AllRecords(context.Background(), endpoints.WithRecordListMaxItems(2), endpoints.WithRecordListQuery("id", "keep"))
@@ -308,10 +329,20 @@ func TestEndpointRecordsOpaqueProxyJMESUsesActualGenerator(t *testing.T) {
 
 func TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion(t *testing.T) {
 	api, _, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, r *http.Request) {
-		testhelper.AssertEquals(t, "/keystone/v3/alternate-endpoints", r.URL.Path)
-		testhelper.TestHeader(t, r, "X-Trace", "owned")
-		testhelper.TestHeader(t, r, "OpenStack-API-Version", "identity 3.2")
-		testhelper.AssertEquals(t, "", r.Header.Get("X-OpenStack-Nova-API-Version"))
+		if r.URL.Path != "/keystone/v3/alternate-endpoints" {
+			t.Errorf("r.URL.Path = %v, want %v", r.URL.Path, "/keystone/v3/alternate-endpoints")
+			return
+		}
+		if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+			t.Errorf("header %s = %q, want %q", "X-Trace", got, "owned")
+		}
+		if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "identity 3.2" }) {
+			t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "identity 3.2")
+		}
+		if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != "" {
+			t.Errorf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, "")
+			return
+		}
 		testcloud.JSON(w, 200, `{"endpoints":[{"id":"one"}]}`)
 	})
 	headers := map[string]string{"X-Trace": "owned"}
@@ -470,9 +501,16 @@ func TestEndpointRecordsCleanNativeRetryKeepsScopeQueryAndHeaders(t *testing.T) 
 		t.Run(http.StatusText(status), func(t *testing.T) {
 			attempts := &atomic.Int32{}
 			api, cloud, calls := endpointRecordsAPI(t, func(w http.ResponseWriter, r *http.Request) {
-				testhelper.AssertEquals(t, "public", r.URL.Query().Get("interface"))
-				testhelper.TestHeader(t, r, "X-Trace", "owned")
-				testhelper.TestHeader(t, r, "OpenStack-API-Version", "identity 3.2")
+				if got := r.URL.Query().Get("interface"); got != "public" {
+					t.Errorf("r.URL.Query().Get(\"interface\") = %v, want %v", got, "public")
+					return
+				}
+				if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+					t.Errorf("header %s = %q, want %q", "X-Trace", got, "owned")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "identity 3.2" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "identity 3.2")
+				}
 				if attempts.Add(1) == 1 {
 					testcloud.JSON(w, status, `{}`)
 					return
@@ -502,8 +540,12 @@ func TestEndpointRecordsCleanNativeRetryKeepsScopeQueryAndHeaders(t *testing.T) 
 					if !errors.As(err, &native) || native.Actual != 503 {
 						return err
 					}
-					testhelper.AssertEquals(t, http.MethodGet, method)
-					testhelper.AssertEquals(t, cloud.Server.URL+"/keystone/v3/endpoints?interface=public", target)
+					if method != http.MethodGet {
+						t.Fatalf("method = %v, want %v", method, http.MethodGet)
+					}
+					if target != cloud.Server.URL+"/keystone/v3/endpoints?interface=public" {
+						t.Fatalf("target = %v, want %v", target, cloud.Server.URL+"/keystone/v3/endpoints?interface=public")
+					}
 					return nil
 				}
 			}

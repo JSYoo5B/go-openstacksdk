@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordCreateDataFactoriesPreserveNoneEmptyAndTruthiness(t *testing.T) {
@@ -26,7 +25,9 @@ func TestImageRecordCreateDataFactoriesPreserveNoneEmptyAndTruthiness(t *testing
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := captureImageRecordCreateData(context.Background(), nil, test.data)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if got.present() != test.present || got.truthy() != test.truthy {
 				t.Fatal(got, test)
 			}
@@ -41,8 +42,12 @@ func TestImageRecordCreateDataFactoriesPreserveNoneEmptyAndTruthiness(t *testing
 				t.Fatal("present empty value lost")
 			}
 			body, err := io.ReadAll(reader)
-			th.AssertNoErr(t, err)
-			th.AssertEquals(t, test.body, string(body))
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if string(body) != test.body {
+				t.Fatalf("string(body) = %v, want %v", string(body), test.body)
+			}
 		})
 	}
 }
@@ -52,28 +57,48 @@ func TestImageRecordCreateDataOwnsBytesAndBorrowsReaderWithoutCaptureIO(t *testi
 	factory := ImageRecordCreateBytes(original)
 	original[0] = '!'
 	captured, err := captureImageRecordCreateData(context.Background(), nil, factory)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	captured.data[1] = '!'
 	again, err := captureImageRecordCreateData(context.Background(), nil, factory)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	body, err := io.ReadAll(again.openReader())
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, "before", string(body))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(body) != "before" {
+		t.Fatalf("string(body) = %v, want %v", string(body), "before")
+	}
 	body, err = io.ReadAll(factory.openReader())
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, "before", string(body))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(body) != "before" {
+		t.Fatalf("string(body) = %v, want %v", string(body), "before")
+	}
 	reader := &imageUploadCoreReader{reader: strings.NewReader("skip-body")}
 	_, err = reader.reader.(*strings.Reader).Seek(5, io.SeekStart)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	borrowed := ImageRecordCreateReader(reader)
 	got, err := captureImageRecordCreateData(context.Background(), nil, borrowed)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got.openReader() != reader || got.reader != reader || reader.reads.Load() != 0 || reader.seeks.Load() != 0 || reader.closes.Load() != 0 {
 		t.Fatal(got, reader)
 	}
 	body, err = io.ReadAll(got.openReader())
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, "body", string(body))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(body) != "body" {
+		t.Fatalf("string(body) = %v, want %v", string(body), "body")
+	}
 	if reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 		t.Fatal("borrowed lifetime changed", reader)
 	}
@@ -93,7 +118,9 @@ func TestImageRecordCreateDataCaptureRejectsTypedNilTextAndCanceledSource(t *tes
 				return nil, nil
 			})
 			p, err := New(client).captureImageRecord(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			value := ImageRecordCreateBytes([]byte("data"))
 			switch mode {
 			case "typed nil Reader":

@@ -13,7 +13,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testing.T) {
@@ -22,7 +21,9 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 	cloud := "configured-cloud"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"current-project"`)}}
 	expected, err := facts.ForResource(nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
@@ -33,9 +34,13 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 			t.Fatal("unexpected property write request", req.Method, req.URL, req.Header)
 		}
 		payload, err := io.ReadAll(req.Body)
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		var decoded map[string]json.RawMessage
-		th.AssertNoErr(t, json.Unmarshal(payload, &decoded))
+		if err := json.Unmarshal(payload, &decoded); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		want := map[string]json.RawMessage{"title": json.RawMessage(`null`)}
 		path := endpoint + "metadefs/namespaces/OS::Nova/properties/seed-id"
 		if req.Method == http.MethodPost {
@@ -50,25 +55,37 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 		return &http.Response{StatusCode: 202, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	cloud = "caller mutation"
 	service, err := conn.Image(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	versioned, err := conn.ImageV2(context.Background())
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if service.API.MetadefProperties.RawClient() != versioned.RawClient() || calls != 0 {
 		t.Fatal("shared client lost")
 	}
 	for index, api := range []*metadefproperties.API{service.API.MetadefProperties, versioned.MetadefProperties} {
 		t.Run([]string{"Image", "ImageV2"}[index], func(t *testing.T) {
 			scope, err := api.InNamespace(context.Background(), "OS::Nova")
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			provider.SetToken("live")
 			created, err := scope.CreateRecord(context.Background(), metadefproperties.WithRecordCreateAttributes(map[string]any{"name": "new-property", "min_length": "03"}), metadefproperties.WithRecordCreateHeader("X-Option", "owned"))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			seed := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{"id": json.RawMessage(`"seed-id"`), "title": json.RawMessage(`"discarded old title"`), "minLength": json.RawMessage(`"not an integer"`)}, Header: http.Header{"X-Old": {"seed"}}, StatusCode: 201}}
 			updated, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordUpdateAttribute("title", nil), metadefproperties.WithRecordUpdateHeader("X-Option", "owned"))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			for _, record := range []*metadefproperties.Record{created, updated} {
 				if record.Namespace != "OS::Nova" || record.Key != nil || string(record.Resource.Body["location"]) != string(expected) || string(record.Resource.Body["namespace_name"]) != `"OS::Nova"` || string(record.Resource.Body["name"]) != `"passive/name"` || string(record.Resource.Body["min_items"]) != "4" || record.StatusCode != 202 || record.Header.Get("X-Proof") != "actual" || string(record.Envelope) != body || record.Wire == nil || string(record.Wire.Body["location"]) != `{"cloud":"foreign"}` {
 					t.Fatal("Connection view/receipt lost", record)
@@ -79,11 +96,15 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 			}
 			before := calls
 			noop, err := scope.UpdateRecord(context.Background(), metadefproperties.RecordRequest{Resource: seed}, metadefproperties.WithRecordUpdateHeader("X-Option", "owned"))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if calls != before || noop.StatusCode != 0 || noop.Wire != nil || noop.Envelope != nil || noop.Header != nil || noop.Resource.StatusCode != 0 || noop.Resource.Header != nil || string(noop.Resource.Body["location"]) != string(expected) || string(noop.Resource.Body["id"]) != `"seed-id"` || string(noop.Resource.Body["name"]) != "null" || string(noop.Resource.Body["title"]) != "null" {
 				t.Fatal("no-op fabricated response or reused definition", noop, calls)
 			}
 		})
 	}
-	th.AssertEquals(t, 4, calls)
+	if calls != 4 {
+		t.Fatalf("calls = %v, want %v", calls, 4)
+	}
 }

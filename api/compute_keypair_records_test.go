@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -18,7 +19,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testing.T) {
@@ -40,9 +40,15 @@ func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testi
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.URL.Path != computeKeypairCreatePath || r.URL.RawQuery != "" || r.ContentLength != 0 {
 					t.Error(r.URL, r.ContentLength, string(body), err)
@@ -98,7 +104,9 @@ func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testi
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				expected := url.Values{}
 				if key == "user_id" {
 					expected.Set(key, "owner+team")
@@ -151,8 +159,12 @@ func TestComputeKeypairRecordsProjectionSemanticQueriesAndLazyOwnership(t *testi
 		shared := map[string]string{"X-Trace": "owned"}
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-Trace", "owned")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-Trace"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+				t.Errorf("header %s = %q, want %q", "X-Trace", got, "owned")
+			}
 			if !reflect.DeepEqual(r.URL.Query(), url.Values{"user_id": {"owner+team"}, "vendor": {"last"}}) {
 				t.Error(r.URL)
 			}
@@ -198,7 +210,9 @@ func TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors(t *tes
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				n := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				want := url.Values{"user_id": {"owner"}}
 				if mode == "initial limit fallback" {
 					want.Set("limit", "5")
@@ -211,7 +225,9 @@ func TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors(t *tes
 					if n == 3 {
 						want.Set("marker", "second")
 					}
-					th.TestHeader(t, r, "X-Auth-Token", "next-token")
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "next-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "next-token")
+					}
 				}
 				if !reflect.DeepEqual(r.URL.Query(), want) || r.URL.Path != computeKeypairCreatePath {
 					t.Error(r.URL, want)
@@ -366,9 +382,13 @@ func TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding(t *testing
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path == computeConsoleDiscoveryPath {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
 					testcloud.JSON(w, 200, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"2.1","version":"2.110"}}`)
 					return
 				}
@@ -376,9 +396,13 @@ func TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding(t *testing
 					t.Error(r.URL)
 				}
 				if mode == "explicit empty" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
 				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.10")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.10" }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.10")
+					}
 				}
 				testcloud.JSON(w, 200, `{"keypairs":[]}`)
 			})
@@ -470,7 +494,9 @@ func TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding(t *testing
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				w.Header().Set("X-Page-Proof", mode)
 				testcloud.JSON(w, status, body)
 			})
@@ -531,11 +557,21 @@ func TestComputeKeypairListNativeBindingKeepsTypedSinglePageABI(t *testing.T) {
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "native-live")
-				th.TestHeader(t, r, "X-Native-Source", "selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.55")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.55")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "native-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "native-live")
+				}
+				if got := r.Header.Values("X-Native-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Native-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.55" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.55")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.55" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.55")
+				}
 				body, err := io.ReadAll(r.Body)
 				want := url.Values{"user_id": {"raw+owner"}, "limit": {"25"}}
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.Path != computeKeypairCreatePath || !reflect.DeepEqual(r.URL.Query(), want) || r.URL.RawQuery != want.Encode() {

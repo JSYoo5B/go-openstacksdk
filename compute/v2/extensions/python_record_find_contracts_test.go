@@ -10,7 +10,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func computeExtensionCloud(t *testing.T) (*testcloud.Cloud, *API) {
@@ -30,8 +29,14 @@ func TestComputeExtensionFindMemberOwnsSourceMROWithoutDiscovery(t *testing.T) {
 	body := `{"extension":{"alias":"returned","name":"name","namespace":"uri","updated":"literal","links":[null,1,{"href":"x","extra":1}],"unknown":17,"self":"wire"}}`
 	cloud.Mux.HandleFunc("/v2.1/p/extensions/request", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "", r.Header.Get("OpenStack-API-Version"))
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
+		if got := r.Header.Get("OpenStack-API-Version"); got != "" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "")
+			return
+		}
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
 		w.Header().Set("X-Proof", "actual")
 		testcloud.JSON(w, 203, body)
 	})
@@ -62,8 +67,14 @@ func TestComputeExtensionFindCleanFallbackAliasNameMissingAndAmbiguity(t *testin
 				cloud.Mux.HandleFunc("/v2.1/p/extensions/target", func(w http.ResponseWriter, r *http.Request) { calls++; testcloud.JSON(w, status, `{"error":"member"}`) })
 				cloud.Mux.HandleFunc("/v2.1/p/extensions", func(w http.ResponseWriter, r *http.Request) {
 					calls++
-					testhelper.AssertEquals(t, "", r.URL.RawQuery)
-					testhelper.AssertEquals(t, "application/json", r.Header.Get("Accept"))
+					if r.URL.RawQuery != "" {
+						t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+						return
+					}
+					if got := r.Header.Get("Accept"); got != "application/json" {
+						t.Errorf("r.Header.Get(\"Accept\") = %v, want %v", got, "application/json")
+						return
+					}
 					rows := `[]`
 					switch mode {
 					case "alias":
@@ -111,15 +122,30 @@ func TestComputeExtensionFindOwnedKwargsAndGetOnlyVersion(t *testing.T) {
 	calls := 0
 	cloud.Mux.HandleFunc("/v2.1/p/extensions/target", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "compute 2.9", r.Header.Get("OpenStack-API-Version"))
-		testhelper.AssertEquals(t, "2.9", r.Header.Get("X-OpenStack-Nova-API-Version"))
-		testhelper.AssertEquals(t, "opaque", r.URL.Query().Get("vendor"))
+		if got := r.Header.Get("OpenStack-API-Version"); got != "compute 2.9" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute 2.9")
+			return
+		}
+		if got := r.Header.Get("X-OpenStack-Nova-API-Version"); got != "2.9" {
+			t.Errorf("r.Header.Get(\"X-OpenStack-Nova-API-Version\") = %v, want %v", got, "2.9")
+			return
+		}
+		if got := r.URL.Query().Get("vendor"); got != "opaque" {
+			t.Errorf("r.URL.Query().Get(\"vendor\") = %v, want %v", got, "opaque")
+			return
+		}
 		testcloud.JSON(w, 404, `{"error":"member"}`)
 	})
 	cloud.Mux.HandleFunc("/v2.1/p/alternate-extensions", func(w http.ResponseWriter, r *http.Request) {
 		calls++
-		testhelper.AssertEquals(t, "compute 2.8", r.Header.Get("OpenStack-API-Version"))
-		testhelper.AssertEquals(t, "", r.URL.RawQuery)
+		if got := r.Header.Get("OpenStack-API-Version"); got != "compute 2.8" {
+			t.Errorf("r.Header.Get(\"OpenStack-API-Version\") = %v, want %v", got, "compute 2.8")
+			return
+		}
+		if r.URL.RawQuery != "" {
+			t.Errorf("r.URL.RawQuery = %v, want %v", r.URL.RawQuery, "")
+			return
+		}
 		testcloud.JSON(w, 200, `{"extensions":[{"alias":"target","namespace":"same"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "target", WithRecordFindMicroversion("2.9"), WithRecordFindListBasePath("alternate-extensions"), WithRecordFindQuery("vendor", "opaque"), WithRecordFindQuery("namespace", "same"))
@@ -230,7 +256,10 @@ func TestComputeExtensionFindCleanAuthenticationRenewalKeepsMember(t *testing.T)
 			testcloud.JSON(w, 401, `{}`)
 			return
 		}
-		testhelper.AssertEquals(t, "renewed", r.Header.Get("X-Auth-Token"))
+		if got := r.Header.Get("X-Auth-Token"); got != "renewed" {
+			t.Errorf("r.Header.Get(\"X-Auth-Token\") = %v, want %v", got, "renewed")
+			return
+		}
 		testcloud.JSON(w, 200, `{"extension":{"alias":"target"}}`)
 	})
 	cloud.Provider.ReauthFunc = func(context.Context) error { renew++; cloud.Provider.SetToken("renewed"); return nil }

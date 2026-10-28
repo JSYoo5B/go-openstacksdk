@@ -16,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageRecordImportFetched(t *testing.T, service *Service, handler *taskCoreTransport) *ImageRecord {
@@ -39,7 +38,9 @@ func imageRecordImportPayload(t *testing.T, request *http.Request, want string) 
 	if err != nil {
 		t.Fatal(err)
 	}
-	th.CheckDeepEquals(t, decode([]byte(want)), decode(actual))
+	if expected, got := decode([]byte(want)), decode(actual); !reflect.DeepEqual(got, expected) {
+		t.Errorf("decode(actual) = %#v, want %#v", got, expected)
+	}
 	return got
 }
 func imageRecordImportStoreRecords(t *testing.T, client *gophercloud.ServiceClient, handler *taskCoreTransport, rows string, count int) []*serviceinfo.StoreRecord {
@@ -115,7 +116,9 @@ func TestImageRecordImportOpaqueAcceptedResponsesKeepPreparedRecordAndIndependen
 				t.Fatal("opaque import changed body/status/fetch/data or input", got, seed)
 			}
 			for key, want := range map[string]string{"id": string(rawID), "status": `"queued"`, "size": "4", "is_protected": "true", "container_format": `"bare"`, "disk_format": `"qcow2"`} {
-				th.AssertEquals(t, want, string(record.Resource.Body[key]))
+				if string(record.Resource.Body[key]) != want {
+					t.Fatalf("string(record.Resource.Body[key]) = %v, want %v", string(record.Resource.Body[key]), want)
+				}
 			}
 			if record.Resource.CreatedAt == seed.Resource.CreatedAt || record.Resource.UpdatedAt == seed.Resource.UpdatedAt || *record.Resource.CreatedAt != created || *record.Resource.UpdatedAt != updated || !reflect.DeepEqual(record.Resource.Links, seed.Resource.Links) {
 				t.Fatal("passive metadata not cloned", record.Resource)

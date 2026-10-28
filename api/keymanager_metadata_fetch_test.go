@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -19,7 +20,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // These tests cover the separate owned Fetch lanes. Native Get and
@@ -43,12 +43,24 @@ func TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts(t *testing.T) 
 				}
 				c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
-					th.TestMethod(t, r, http.MethodGet)
-					th.TestHeader(t, r, "X-Auth-Token", "owned-fetch-token")
-					th.TestHeader(t, r, "X-Call", "operation")
-					th.TestHeader(t, r, "X-Source", "source")
-					th.TestHeader(t, r, "Accept", "application/json")
-					th.TestHeader(t, r, "OpenStack-API-Version", "key-manager 1.0")
+					if r.Method != http.MethodGet {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+					}
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned-fetch-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "owned-fetch-token")
+					}
+					if got := r.Header.Values("X-Call"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "operation" }) {
+						t.Errorf("header %s = %q, want %q", "X-Call", got, "operation")
+					}
+					if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "source" }) {
+						t.Errorf("header %s = %q, want %q", "X-Source", got, "source")
+					}
+					if got := r.Header.Values("Accept"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "application/json" }) {
+						t.Errorf("header %s = %q, want %q", "Accept", got, "application/json")
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "key-manager 1.0" }) {
+						t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "key-manager 1.0")
+					}
 					if r.URL.Path != path || r.URL.RawQuery != "" {
 						t.Error(r.Method, r.URL, r.Header)
 					}
@@ -159,7 +171,9 @@ func TestKeyManagerOwnedMetadataFetchNullableDescriptorsAndAliases(t *testing.T)
 			var calls atomic.Int32
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != "/reverse/barbican/v1/"+tc.kind+"/id" || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -220,7 +234,9 @@ func TestKeyManagerOwnedMetadataFetchIDSeedsAndReferenceFormatting(t *testing.T)
 			var calls atomic.Int32
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != "/reverse/barbican/v1/"+tc.kind+"/request-id" || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -293,7 +309,9 @@ func TestKeyManagerOwnedMetadataFetchHTTPAndStrictAcceptedBodies(t *testing.T) {
 			var calls atomic.Int32
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != "/reverse/barbican/v1/"+tc.kind+"/id" || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -364,7 +382,9 @@ func TestKeyManagerOwnedMetadataFetchAcceptedFailuresRetainRawEvidence(t *testin
 			const body = `{"name":"known","meta":{"n":9007199254740993},"vendor":null}`
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != "/reverse/barbican/v1/"+tc.kind+"/id" {
 					t.Error(r.URL)
 				}

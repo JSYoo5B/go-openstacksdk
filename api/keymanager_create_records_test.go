@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -24,7 +25,6 @@ import (
 	upcontainers "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/containers"
 	uporders "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/orders"
 	upsecrets "github.com/gophercloud/gophercloud/v2/openstack/keymanager/v1/secrets"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // Existing leaf/cached-Connection fixtures and body wrappers are reused.
@@ -84,11 +84,21 @@ func TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse(t *testing.T) {
 					}
 					c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 						calls.Add(1)
-						th.TestMethod(t, r, http.MethodPost)
-						th.TestHeader(t, r, "X-Auth-Token", "live-create-token")
-						th.TestHeader(t, r, "X-Source", "shared")
-						th.TestHeader(t, r, "X-Call", "owned")
-						th.TestHeader(t, r, "OpenStack-API-Version", "key-manager 1.0")
+						if r.Method != http.MethodPost {
+							t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+						}
+						if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "live-create-token" }) {
+							t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "live-create-token")
+						}
+						if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "shared" }) {
+							t.Errorf("header %s = %q, want %q", "X-Source", got, "shared")
+						}
+						if got := r.Header.Values("X-Call"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+							t.Errorf("header %s = %q, want %q", "X-Call", got, "owned")
+						}
+						if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "key-manager 1.0" }) {
+							t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "key-manager 1.0")
+						}
 						if r.URL.Path != "/reverse/barbican/v1/"+kind || r.URL.RawQuery != "" {
 							t.Error("lookup/payload/ref follow instead of flat create", r.Method, r.URL)
 						}
@@ -205,8 +215,12 @@ func TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof(t *testing
 	want := `{"container_ref":"https://input.invalid/valid","created":null,"name":"","secret_refs":[{"name":"original","secret_ref":"https://passive.invalid/s","vendor":9007199254740993}],"type":null,"updated":"last","vendor":{"n":9007199254740993}}`
 	c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		th.TestMethod(t, r, http.MethodPost)
-		th.TestHeader(t, r, "X-Call", "owned")
+		if r.Method != http.MethodPost {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+		}
+		if got := r.Header.Values("X-Call"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "owned" }) {
+			t.Errorf("header %s = %q, want %q", "X-Call", got, "owned")
+		}
 		if r.URL.Path != containerListPath || r.URL.RawQuery != "" {
 			t.Error(r.URL)
 		}
@@ -288,7 +302,9 @@ func TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate(t *
 			}
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != "/reverse/barbican/v1/"+kind || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -334,7 +350,9 @@ func TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate(t *
 		var calls atomic.Int32
 		c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
 			if r.URL.Path != orderListPath || r.URL.RawQuery != "" {
 				t.Error(r.URL)
 			}
@@ -374,7 +392,9 @@ func TestKeyManagerCreateRecordAcceptedReceiptsAndNativeFailures(t *testing.T) {
 			var calls, retries atomic.Int32
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != containerListPath || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -517,7 +537,9 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 			const body = `{"container_ref":"https://foreign.invalid/containers/created"}`
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				w.Header().Set("X-Create-Proof", mode)
 				testcloud.JSON(w, 201, body)
 			})
@@ -568,7 +590,9 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 			const accepted = `{"container_ref":"https://foreign.invalid/containers/created"}`
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				n := calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != containerListPath || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -580,9 +604,13 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 					token := "test-token"
 					if n > 1 {
 						token = "refreshed-token"
-						th.TestHeader(t, r, "X-Native-Retry", "kept")
+						if got := r.Header.Values("X-Native-Retry"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "kept" }) {
+							t.Errorf("header %s = %q, want %q", "X-Native-Retry", got, "kept")
+						}
 					}
-					th.TestHeader(t, r, "X-Auth-Token", token)
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != token }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, token)
+					}
 				}
 				w.Header().Set("X-Create-Proof", mode)
 				if mode == "expanded404" {
@@ -661,7 +689,9 @@ func TestKeyManagerNativeCreateAliasesBodiesAndStatusRemainUnchanged(t *testing.
 				body := fmt.Sprintf(`{%q:%q}`, refKey, "https://foreign.invalid/"+kind+"/native")
 				c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 					calls.Add(1)
-					th.TestMethod(t, r, http.MethodPost)
+					if r.Method != http.MethodPost {
+						t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+					}
 					if r.URL.Path != "/reverse/barbican/v1/"+kind || r.URL.RawQuery != "" {
 						t.Error(r.URL)
 					}

@@ -17,7 +17,6 @@ import (
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func imageCreateTaskServices(t *testing.T, transport taskCoreTransport) (*Service, *objectapi.Service, *int) {
@@ -76,7 +75,9 @@ func TestImageRecordCreateTaskWholeNoWaitKeepsRawTaskAndAllSourceSuccessCodes(t 
 				return nil, nil
 			})
 			got, err := service.CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "task image", Data: ImageRecordCreateText("binary payload")}, imageCreateTaskOptions(WithImageRecordCreateSwiftHeader("X-Trace", "captured"), WithImageRecordCreateMD5(7), WithImageRecordCreateSHA256([]any{1}))...)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if got == nil || got.Outcome != "task" || got.Record != nil || got.Task == nil || got.TaskWait != nil || got.Swift == nil || got.Swift.Cleanup != nil || got.Swift.ContainerCreated != nil || got.Swift.ContainerFetched != nil || got.Created.StatusCode != code || got.Swift.ContainerDiscovery.StatusCode != code || got.Swift.Object.Uploaded.Acknowledgement.StatusCode != code || len(routes) != 3 || *resolutions != 1 {
 				t.Fatal(got, routes, *resolutions)
 			}
@@ -150,7 +151,9 @@ func TestImageRecordCreateTaskWholeAvailabilityIsLazyAndRawConfigIsBool(t *testi
 		})
 		service.dependencies.CreatePolicy.RawObjectStoreEnabled = json.RawMessage(`"invalid only in Task branch"`)
 		got, err := service.CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "no such local file"}, imageCreateTaskOptions()...)
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if got == nil || got.Outcome != "metadata-only" || got.Task != nil || got.Swift != nil || *resolutions != 0 || calls != 1 {
 			t.Fatal(got, *resolutions, calls)
 		}
@@ -188,13 +191,19 @@ func TestImageRecordCreateTaskWholeSuccessMergesUnconvertedPropertiesAndFinallyD
 				t.Fatal(req.Method, req.URL, req.Header)
 			}
 			body, err := io.ReadAll(req.Body)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			var patches []map[string]json.RawMessage
-			th.AssertNoErr(t, json.Unmarshal(body, &patches))
+			if err := json.Unmarshal(body, &patches); err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			values := map[string]string{}
 			for _, patch := range patches {
 				var path string
-				th.AssertNoErr(t, json.Unmarshal(patch["path"], &path))
+				if err := json.Unmarshal(patch["path"], &path); err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				values[path] = string(patch["value"])
 			}
 			if values["/raw_prop"] != `{"n":900719925474099312345}` || values["/nullable"] != "null" || values["/tags"] != `["task-tag"]` || values["/visibility"] != `"public"` {
@@ -223,12 +232,16 @@ func TestImageRecordCreateTaskWholeSuccessMergesUnconvertedPropertiesAndFinallyD
 	})
 	input := ImageRecordCreateRequest{Name: "input", Data: ImageRecordCreateBytes([]byte("bytes")), Attributes: map[string]any{"raw_prop": json.RawMessage(`{"n":900719925474099312345}`), "nullable": nil, "is_public": true}}
 	got, err := service.CreateImageRecord(context.Background(), input, imageCreateTaskOptions(WithImageRecordCreateWait(true), WithImageRecordCreateTimeout("ignored for seeded success"), WithImageRecordCreateTags([]string{"task-tag"}), WithImageRecordCreateMeta(map[string]any{"meta_only": "ignored"}), WithImageRecordCreateSize(-7))...)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got == nil || got.Outcome != "task-completed" || got.Record == nil || got.Updated != got.Record || got.TaskWait.Fetches != 0 || got.TaskWait.Recreations != 0 || got.TaskImageFetched == nil || got.TaskImageFetched.StatusCode != 200 || !bytes.Contains(got.TaskImageFetched.Body, []byte(`"existing_property":"keep"`)) || len(got.Warnings) != 1 || got.Swift.Cleanup.Deletion.StatusCode != 204 || len(routes) != 7 {
 		t.Fatal(got, routes)
 	}
 	var props map[string]json.RawMessage
-	th.AssertNoErr(t, json.Unmarshal(got.Record.Resource.Body["properties"], &props))
+	if err := json.Unmarshal(got.Record.Resource.Body["properties"], &props); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	// A valid sparse PATCH response resets properties to the Source empty map;
 	// the request assertion above independently proves preservation on submission.
 	if len(props) != 0 || string(got.Record.Resource.Body["disk_format"]) != `"qcow2"` || string(got.Record.Resource.Body["container_format"]) != `"bare"` {
@@ -465,7 +478,9 @@ func TestImageRecordCreateTaskWholeSLOCleanupUsesExistingBulkDeleteEvidence(t *t
 
 func TestImageRecordCreateTaskWholeFilenameReusesSwiftCapabilityStaleAndArbitraryHashProfile(t *testing.T) {
 	filename := filepath.Join(t.TempDir(), "task.img")
-	th.AssertNoErr(t, os.WriteFile(filename, []byte("file data"), 0600))
+	if err := os.WriteFile(filename, []byte("file data"), 0600); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	for _, stale := range []bool{true, false} {
 		t.Run(fmt.Sprint(stale), func(t *testing.T) {
 			var routes []string
@@ -499,7 +514,9 @@ func TestImageRecordCreateTaskWholeFilenameReusesSwiftCapabilityStaleAndArbitrar
 				return nil, nil
 			})
 			got, err := service.CreateImageRecord(context.Background(), ImageRecordCreateRequest{Name: "input", Filename: filename}, imageCreateTaskOptions(WithImageRecordCreateMD5("arbitrary MD5"), WithImageRecordCreateSHA256("arbitrary SHA256"))...)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if got == nil || got.Outcome != "task" || got.Swift == nil || got.Swift.Object == nil || got.Swift.Object.Created == nil || got.Swift.Object.Uploaded != nil || got.Swift.Object.Created.Skipped == stale || got.Swift.Object.Created.Capabilities == nil || got.Swift.Object.Created.Discovery == nil || got.Task == nil || got.Swift.Cleanup != nil {
 				t.Fatal(got, routes)
 			}

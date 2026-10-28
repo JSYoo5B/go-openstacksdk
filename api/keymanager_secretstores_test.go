@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -19,7 +20,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // openstacksdk ef55d7d _proxy.py:361–392, SecretStore:17–58 and
@@ -625,8 +625,12 @@ func TestKeyManagerSecretStoresSemanticBodyAttributesUseOriginalFields(t *testin
 		`{"name":"Different","status":"ACTIVE","label":"F"}`,
 	}, ",")
 	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
-		th.TestMethod(t, r, http.MethodGet)
-		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+		}
 		calls.Add(1)
 		if r.URL.RawQuery != "" {
 			t.Error("local Body attributes leaked to the wire", r.URL)
@@ -681,8 +685,12 @@ func TestKeyManagerSecretStoresSemanticBodyAttributesUseOriginalFields(t *testin
 		var requests atomic.Int32
 		cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
 			requests.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-Auth-Token", "test-token")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+			}
 			testcloud.JSON(w, 200, secretStorePage(secretStoreRow(t, "", map[string]any{"id": "literal"}), ""))
 		})
 		api := secretstores.New(secretStoresClient(cloud))
@@ -701,8 +709,12 @@ func TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation(t *testin
 	var calls atomic.Int32
 	want := url.Values{"limit": {"7"}, "marker": {"start"}, "name": {"server-pattern"}, "status": {"READY"}, "global_default": {"false"}, "crypto_plugin": {"alpha", "beta"}, "secret_store_plugin": {""}, "created": {"wire-created-a", "wire-created-b"}, "updated": {"wire-updated"}, "created_at": {"raw-wire-extension"}, "vendor": {"kept"}}
 	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
-		th.TestMethod(t, r, http.MethodGet)
-		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+		}
 		calls.Add(1)
 		if !reflect.DeepEqual(r.URL.Query(), want) {
 			t.Error("query attributes, original captured values or Body separation changed", r.URL.Query(), want)
@@ -755,8 +767,12 @@ func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing
 	cloud := testcloud.New(t)
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
-		th.TestMethod(t, r, http.MethodGet)
-		th.TestHeader(t, r, "X-Auth-Token", "test-token")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+		}
 		calls.Add(1)
 		want := url.Values{"vendor": {"wire"}}
 		if r.URL.Query().Has("name") {
@@ -853,8 +869,12 @@ func TestKeyManagerSecretStoresSemanticRawCapAndContinuation(t *testing.T) {
 			var calls atomic.Int32
 			firstRef := "https://foreign.invalid/first%2fraw?query=kept#fragment"
 			cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				page := calls.Add(1)
 				want := url.Values{"vendor": {"kept"}}
 				switch mode {

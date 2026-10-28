@@ -11,7 +11,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	"github.com/gophercloud/gophercloud/v2/testhelper"
 	"io"
 	"net/http"
 	"sync/atomic"
@@ -24,7 +23,9 @@ func projectGetFixture(t *testing.T, reply func(http.ResponseWriter, *http.Reque
 	calls := &atomic.Int32{}
 	f.Mux.HandleFunc("/identity/", func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		testhelper.TestMethod(t, r, http.MethodGet)
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
 		w.Header().Set("X-Request-Id", "project-get")
 		reply(w, r)
 	})
@@ -35,7 +36,10 @@ func TestCloudGetProjectNoneVersusPresentFalseySearch(t *testing.T) {
 		t.Run(raw, func(t *testing.T) {
 			member, list := 0, 0
 			cloud, _, calls := projectGetFixture(t, func(w http.ResponseWriter, r *http.Request) {
-				testhelper.AssertEquals(t, "domain", r.URL.Query().Get("domain_id"))
+				if got := r.URL.Query().Get("domain_id"); got != "domain" {
+					t.Errorf("r.URL.Query().Get(\"domain_id\") = %v, want %v", got, "domain")
+					return
+				}
 				data, err := io.ReadAll(r.Body)
 				if err != nil || len(data) != 0 || r.ContentLength != 0 {
 					t.Error(err, string(data), r.ContentLength)
@@ -45,8 +49,14 @@ func TestCloudGetProjectNoneVersusPresentFalseySearch(t *testing.T) {
 					testcloud.JSON(w, 203, `{"project":{"id":"one","name":"member"}}`)
 				} else {
 					list++
-					testhelper.AssertEquals(t, "/identity/v3/projects", r.URL.Path)
-					testhelper.AssertEquals(t, "", r.URL.Query().Get("name"))
+					if r.URL.Path != "/identity/v3/projects" {
+						t.Errorf("r.URL.Path = %v, want %v", r.URL.Path, "/identity/v3/projects")
+						return
+					}
+					if got := r.URL.Query().Get("name"); got != "" {
+						t.Errorf("r.URL.Query().Get(\"name\") = %v, want %v", got, "")
+						return
+					}
 					testcloud.JSON(w, 200, `{"projects":[{"id":"one","name":"listed"}]}`)
 				}
 			})
@@ -233,7 +243,10 @@ func TestCloudGetProjectRawDomainTruthyOverrideKeepsOriginalLocalFilters(t *test
 				if domain == "1" {
 					want = "1"
 				}
-				testhelper.AssertEquals(t, want, r.URL.Query().Get("domain_id"))
+				if got := r.URL.Query().Get("domain_id"); got != want {
+					t.Errorf("r.URL.Query().Get(\"domain_id\") = %v, want %v", got, want)
+					return
+				}
 				testcloud.JSON(w, 203, `{"projects":[{"id":"one","name":"ops-one","domain_id":"filter-domain","options":{"flag":1}}]}`)
 			})
 			result, err := cloud.GetProject(context.Background(), "ops-*", identity.WithProjectGetRawDomainID(json.RawMessage(domain)), identity.WithProjectGetFilters(json.RawMessage(`{"domain_id":"filter-domain","options":{"flag":true}}`)))

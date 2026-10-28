@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // openstacksdk ef55d7d: _proxy.py:2935–2944 -> ConsoleAuthToken.fetch.
@@ -44,9 +44,15 @@ func TestComputeConsoleAuthTokenFixedLookupAndOwnedVersionSelection(t *testing.T
 			cloud.Provider.SetToken("provider-live-auth")
 			var discoveries, lookups atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "provider-live-auth")
-				th.TestHeader(t, r, "X-Token-Source", "selected")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "provider-live-auth" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "provider-live-auth")
+				}
+				if got := r.Header.Values("X-Token-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Token-Source", got, "selected")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" {
 					t.Error("lookup/discovery gained a body or query", r.URL, string(body), r.ContentLength, err)
@@ -56,8 +62,12 @@ func TestComputeConsoleAuthTokenFixedLookupAndOwnedVersionSelection(t *testing.T
 					if !tc.discover {
 						t.Error("selected default triggered discovery")
 					}
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
 					testcloud.JSON(w, 201, `{"version":{"id":"v2.1","status":"CURRENT","links":[{"rel":"self","href":"/reverse/nova/v2.1/"}],"min_version":"`+tc.minimum+`","version":"`+tc.maximum+`"}}`)
 					return
 				}
@@ -66,11 +76,19 @@ func TestComputeConsoleAuthTokenFixedLookupAndOwnedVersionSelection(t *testing.T
 					t.Error("token fetch performed another resource request", r.URL)
 				}
 				if tc.version == "" {
-					th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
-					th.TestHeaderUnset(t, r, "OpenStack-API-Version")
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) > 0 {
+						t.Errorf("header %s = %q, want unset", "OpenStack-API-Version", got)
+					}
 				} else {
-					th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", tc.version)
-					th.TestHeader(t, r, "OpenStack-API-Version", "compute "+tc.version)
+					if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != tc.version }) {
+						t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, tc.version)
+					}
+					if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute "+tc.version }) {
+						t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute "+tc.version)
+					}
 				}
 				w.Header().Set("X-Token-Proof", tc.name)
 				testcloud.JSON(w, 203, `{"console":{}}`)
@@ -94,8 +112,12 @@ func TestComputeConsoleAuthTokenFixedLookupAndOwnedVersionSelection(t *testing.T
 		var calls atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-Auth-Token", "provider-auth-only")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "provider-auth-only" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "provider-auth-only")
+			}
 			body, err := io.ReadAll(r.Body)
 			if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || r.URL.Path != "/reverse/nova/v2.1/project/os-console-auth-tokens/token+한글" || r.RequestURI != "/reverse/nova/v2.1/project/os-console-auth-tokens/token+%ED%95%9C%EA%B8%80" {
 				t.Error("opaque token was normalized or parsed", r.URL, r.RequestURI, string(body), err)
@@ -136,7 +158,9 @@ func TestComputeConsoleAuthTokenSeededResourceActualWireAndResponseEvidence(t *t
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != computeConsoleTokenPath || r.URL.RawQuery != "" {
 					t.Error(r.URL)
 				}
@@ -219,7 +243,9 @@ func TestComputeConsoleAuthTokenSeededResourceActualWireAndResponseEvidence(t *t
 		project := json.RawMessage(`"scope"`)
 		var locations, discoveries, lookups atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			th.TestMethod(t, r, http.MethodGet)
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
 			if locations.Load() != 1 {
 				t.Error("location was not owned before discovery/lookup", locations.Load())
 			}
@@ -360,7 +386,9 @@ func TestComputeConsoleAuthTokenPreflightAcceptedFaultsAndLiveNativePolicy(t *te
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != path {
 					t.Error("accepted fault performed fallback/followup", r.URL, path)
 				}
@@ -408,7 +436,9 @@ func TestComputeConsoleAuthTokenPreflightAcceptedFaultsAndLiveNativePolicy(t *te
 			const body = "original token503"
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.URL.Path != computeConsoleTokenPath {
 					t.Error(r.URL)
 				}
@@ -452,18 +482,26 @@ func TestComputeConsoleAuthTokenPreflightAcceptedFaultsAndLiveNativePolicy(t *te
 		}
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			index := calls.Add(1)
-			th.TestMethod(t, r, http.MethodGet)
-			th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.100")
+			if r.Method != http.MethodGet {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.100" }) {
+				t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.100")
+			}
 			body, err := io.ReadAll(r.Body)
 			if err != nil || len(body) != 0 || r.ContentLength != 0 || r.URL.RawQuery != "" || r.URL.Path != computeConsoleTokenPath {
 				t.Error("reauth changed console token request", r.URL, string(body), err)
 			}
 			if index == 1 {
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				testcloud.JSON(w, 401, `{"error":"expired auth"}`)
 				return
 			}
-			th.TestHeader(t, r, "X-Auth-Token", "refreshed-provider-auth")
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "refreshed-provider-auth" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "refreshed-provider-auth")
+			}
 			w.Header().Set("X-Token-Proof", "live reauth")
 			testcloud.JSON(w, 200, `{"console":{"host":"actual"}}`)
 		})

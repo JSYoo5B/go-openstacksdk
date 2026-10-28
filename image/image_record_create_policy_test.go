@@ -8,12 +8,13 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageCreatePolicyDefaultsRetainExplicitRawAndServicePresence(t *testing.T) {
 	got, err := PrepareImageCreatePolicy()
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if string(got.ImageFormat) != `"qcow2"` || string(got.UseTasks) != "false" || got.DisableVendorAgent == nil || len(got.DisableVendorAgent) != 0 || got.ObjectStoreEnabled != nil {
 		t.Fatal(got)
 	}
@@ -25,7 +26,9 @@ func TestImageCreatePolicyDefaultsRetainExplicitRawAndServicePresence(t *testing
 	}{{"null", nil, nil, false, "null", "null"}, {"falsey", 0, []any{}, false, "0", "[]"}, {"raw truthy", map[string]any{"future": true}, "yes", true, `{"future":true}`, `"yes"`}} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := PrepareImageCreatePolicy(WithImageCreatePolicyFormat(test.format), WithImageCreatePolicyTasks(test.tasks), WithImageCreatePolicyObjectStoreEnabled(test.enabled))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(got.ImageFormat) != test.expectedFormat || string(got.UseTasks) != test.expectedTasks || got.ObjectStoreEnabled == nil || *got.ObjectStoreEnabled != test.enabled {
 				t.Fatal(got)
 			}
@@ -40,8 +43,12 @@ func TestImageCreatePolicyFactoriesCaptureReplaceAndReuseWithoutAliases(t *testi
 		return nil
 	}, WithImageCreatePolicyFormat("vhd")}
 	fromSlice, err := PrepareImageCreatePolicy(options...)
-	th.AssertNoErr(t, err)
-	th.AssertEquals(t, `"vhd"`, string(fromSlice.ImageFormat))
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if string(fromSlice.ImageFormat) != `"vhd"` {
+		t.Fatalf("string(fromSlice.ImageFormat) = %v, want %v", string(fromSlice.ImageFormat), `"vhd"`)
+	}
 	format := json.RawMessage(`"vhd"`)
 	enabled := false
 	vendor := map[string]any{"nested": []any{json.RawMessage(`900719925474099312345`)}}
@@ -50,7 +57,9 @@ func TestImageCreatePolicyFactoriesCaptureReplaceAndReuseWithoutAliases(t *testi
 	enabled = true
 	vendor["nested"].([]any)[0] = false
 	got, err := PrepareImageCreatePolicy(WithImageCreatePolicyTasks(true), WithImageCreatePolicyVendorAgent(map[string]any{"discarded": true}), option)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if string(got.ImageFormat) != `"vhd"` || string(got.UseTasks) != "false" || *got.ObjectStoreEnabled || got.CloudName != "captured" || len(got.DisableVendorAgent) != 1 || string(got.DisableVendorAgent["nested"].(json.RawMessage)) != `[900719925474099312345]` {
 		t.Fatal(got)
 	}
@@ -58,7 +67,9 @@ func TestImageCreatePolicyFactoriesCaptureReplaceAndReuseWithoutAliases(t *testi
 	*got.ObjectStoreEnabled = true
 	got.DisableVendorAgent["nested"].(json.RawMessage)[0] = '!'
 	again, err := PrepareImageCreatePolicy(option, WithImageCreatePolicyVendorAgent(map[string]any{"replacement": nil}))
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if string(again.ImageFormat) != `"vhd"` || *again.ObjectStoreEnabled || len(again.DisableVendorAgent) != 1 || string(again.DisableVendorAgent["replacement"].(json.RawMessage)) != "null" {
 		t.Fatal(again)
 	}
@@ -73,7 +84,9 @@ func TestImageCreatePolicyGuardedCopyStopsMarshalersAndKeepsCausalChain(t *testi
 			defer cancel(nil)
 			client := taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; t.Fatal("policy dispatched"); return nil, nil })
 			p, err := New(client).captureImageRecord(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			policy := ImageCreatePolicy{DisableVendorAgent: map[string]any{"a": imageRecordMarshalCallback(func() ([]byte, error) {
 				marshaled++
 				switch mode {
@@ -122,18 +135,24 @@ func TestImageCreatePolicyRawVendorOverrideDefersShapeChecksAndTypedHelperClears
 			option := WithImageCreatePolicyOpts(ImageCreatePolicy{RawVendorAgent: value})
 			value[0] = '!'
 			got, err := PrepareImageCreatePolicy(option)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(got.RawVendorAgent) != raw || got.DisableVendorAgent == nil {
 				t.Fatal(got)
 			}
 			got.RawVendorAgent[0] = '!'
 			again, err := PrepareImageCreatePolicy(option)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(again.RawVendorAgent) != raw {
 				t.Fatal("raw vendor snapshot aliases", again)
 			}
 			typed, err := PrepareImageCreatePolicy(option, WithImageCreatePolicyVendorAgent(map[string]any{"vendor": nil}))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if typed.RawVendorAgent != nil || string(typed.DisableVendorAgent["vendor"].(json.RawMessage)) != "null" {
 				t.Fatal(typed)
 			}
@@ -148,18 +167,24 @@ func TestImageCreatePolicyRawObjectStoreOverrideDefersAvailabilityChecksAndTyped
 			option := WithImageCreatePolicyOpts(ImageCreatePolicy{RawObjectStoreEnabled: value})
 			value[0] = '!'
 			got, err := PrepareImageCreatePolicy(option)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(got.RawObjectStoreEnabled) != raw || got.ObjectStoreEnabled != nil {
 				t.Fatal(got)
 			}
 			got.RawObjectStoreEnabled[0] = '!'
 			again, err := PrepareImageCreatePolicy(option)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(again.RawObjectStoreEnabled) != raw {
 				t.Fatal("raw availability snapshot aliases", again)
 			}
 			typed, err := PrepareImageCreatePolicy(option, WithImageCreatePolicyObjectStoreEnabled(false))
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if typed.RawObjectStoreEnabled != nil || typed.ObjectStoreEnabled == nil || *typed.ObjectStoreEnabled {
 				t.Fatal(typed)
 			}

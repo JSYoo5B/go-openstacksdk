@@ -10,12 +10,13 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordCreateOptionsKeepOmittedValuesForSourceOrderedDefaults(t *testing.T) {
 	got, err := prepareImageRecordCreateOptions(context.Background(), nil, nil)
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got.Container != nil || got.MD5 != nil || got.SHA256 != nil || got.DiskFormat != nil || got.ContainerFormat != nil || got.Tags != nil || got.DisableVendorAgent != nil || got.AllowDuplicates != nil || got.Wait != nil || got.Timeout != nil || got.ValidateChecksum != nil || got.UseImport != nil || got.Size != nil || got.Meta != nil || got.Attributes != nil || got.Import.Method != nil || got.Import.Stores != nil || got.optionContext != nil || got.optionCheck != nil {
 		t.Fatal("preface/default decisions moved into capture", got)
 	}
@@ -43,7 +44,9 @@ func TestImageRecordCreateRawHelpersPreserveSourceValuesWithoutEagerEnumOrRangeC
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			got, err := prepareImageRecordCreateOptions(context.Background(), nil, []ImageRecordCreateOption{test.option})
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if string(test.raw(got)) != test.expected || got.Import.Method != nil {
 				t.Fatal(got, test.expected)
 			}
@@ -69,7 +72,9 @@ func TestImageRecordCreateWholeOptionsCaptureNestedRawMapsStoresAndReuseIndepend
 	stores[0].RawID[0] = '!'
 	stores[1].Attributes["id"] = "changed"
 	got, err := prepareImageRecordCreateOptions(context.Background(), nil, []ImageRecordCreateOption{option})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if got.Container == nil || *got.Container != "" || string(got.Size) != `-900719925474099312345` || string(got.Attributes["vendor"].(json.RawMessage)) != `{"precise":900719925474099312345}` || string(got.Meta["size"].(json.RawMessage)) != `"do not convert"` || got.Headers["X-Note"] != "captured" || got.SwiftHeaders["X-Note"] != "swift" || got.Import.Method != nil || len(got.Import.Stores) != 2 || string(got.Import.Stores[0].identity) != "null" || string(got.Import.Stores[1].identity) != "null" {
 		t.Fatal(got)
 	}
@@ -80,7 +85,9 @@ func TestImageRecordCreateWholeOptionsCaptureNestedRawMapsStoresAndReuseIndepend
 	got.Import.Stores[0].identity[0] = '!'
 	got.Headers["X-Note"] = "changed"
 	again, err := prepareImageRecordCreateOptions(context.Background(), nil, []ImageRecordCreateOption{option})
-	th.AssertNoErr(t, err)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	if *again.Container != "" || string(again.Size) != `-900719925474099312345` || string(again.Import.Stores[0].identity) != "null" || again.Headers["X-Note"] != "captured" {
 		t.Fatal("helper reuse shared mutable bytes", again)
 	}
@@ -103,7 +110,9 @@ func TestImageRecordCreateOptionsMergeReplaceAndEmptyStorePresenceRemainDistinct
 				options = append(options, WithImageRecordCreateOpts(ImageRecordCreateOpts{}))
 			}
 			got, err := prepareImageRecordCreateOptions(context.Background(), nil, options)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			switch mode {
 			case "merge":
 				if len(got.Attributes) != 2 || string(got.Attributes["b"].(json.RawMessage)) != "null" || got.Headers["X-Note"] != "last" || got.SwiftHeaders["X-Note"] != "last" {
@@ -139,7 +148,9 @@ func TestImageRecordCreateJSONFactoriesMarshalOnceAndKeepEncodingCauses(t *testi
 	}
 	for index := 0; index < 2; index++ {
 		got, err := prepareImageRecordCreateOptions(context.Background(), nil, []ImageRecordCreateOption{option})
-		th.AssertNoErr(t, err)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
 		if calls != 1 || string(got.Tags) != `{"precise":900719925474099312345}` {
 			t.Fatal(got, calls)
 		}
@@ -188,7 +199,9 @@ func TestImageRecordCreateNestedImportCallbacksRunOnceAndStopAfterEachGuard(t *t
 				return nil, nil
 			})
 			p, err := New(client).captureImageRecord(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			var retained *ImageRecordImportOpts
 			options := []ImageRecordImportOption{func(c *ImageRecordImportOpts) error {
 				first++
@@ -220,7 +233,9 @@ func TestImageRecordCreateNestedImportCallbacksRunOnceAndStopAfterEachGuard(t *t
 				t.Fatal(got, err, calls, first)
 			}
 			if mode == "captured callbacks" {
-				th.AssertNoErr(t, err)
+				if err != nil {
+					t.Fatalf("unexpected error: %v", err)
+				}
 				if later != 1 || got.Import.Method != nil || string(got.Import.URI) != `"without method"` {
 					t.Fatal(got, later)
 				}
@@ -265,7 +280,9 @@ func TestImageRecordCreateOptionAndMarshalerGuardsStopLaterCallbacks(t *testing.
 			})
 			service := New(client)
 			p, err := service.captureImageRecord(ctx)
-			th.AssertNoErr(t, err)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			change := func() {
 				switch mode {
 				case "source", "marshaler source":

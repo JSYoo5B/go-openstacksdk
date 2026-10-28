@@ -9,7 +9,6 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 func TestImageRecordIdentityRejectsUnpairedSurrogatesBeforeHTTP(t *testing.T) {
@@ -67,8 +66,12 @@ func TestImageRecordIdentityPreservesValidUnicodeRoutes(t *testing.T) {
 			if got == nil || err != nil || calls != 1 {
 				t.Fatal(got, err, calls)
 			}
-			th.AssertEquals(t, test.target, taskCoreText(t, got.Resource.Body["id"]))
-			th.AssertEquals(t, test.raw, string(seed.Body["id"]))
+			if actual := taskCoreText(t, got.Resource.Body["id"]); actual != test.target {
+				t.Fatalf("taskCoreText(t, got.Resource.Body[\"id\"]) = %v, want %v", actual, test.target)
+			}
+			if string(seed.Body["id"]) != test.raw {
+				t.Fatalf("string(seed.Body[\"id\"]) = %v, want %v", string(seed.Body["id"]), test.raw)
+			}
 		})
 	}
 }
@@ -285,13 +288,17 @@ func TestImageRecordFindStrictPassiveIdentity(t *testing.T) {
 					got, failure := service.FindImageRecord(context.Background(), "�")
 					err, matched = failure, got != nil
 					if got != nil {
-						th.AssertEquals(t, test.raw, string(got.Resource.Body[test.field]))
+						if string(got.Resource.Body[test.field]) != test.raw {
+							t.Fatalf("string(got.Resource.Body[test.field]) = %v, want %v", string(got.Resource.Body[test.field]), test.raw)
+						}
 					}
 				} else {
 					got, failure := service.FindImageMemberRecord(context.Background(), resource.ID(memberRecordParent), "�")
 					err, matched = failure, got != nil
 					if got != nil {
-						th.AssertEquals(t, test.raw, string(got.Resource.Body[test.field]))
+						if string(got.Resource.Body[test.field]) != test.raw {
+							t.Fatalf("string(got.Resource.Body[test.field]) = %v, want %v", string(got.Resource.Body[test.field]), test.raw)
+						}
 					}
 				}
 				wantCalls := 2
@@ -330,14 +337,20 @@ func TestImageRecordPagingStrictRawMarker(t *testing.T) {
 					t.Fatal(req.Method, req.URL)
 				}
 				if calls == 1 {
-					th.AssertEquals(t, "limit=1", req.URL.RawQuery)
+					if req.URL.RawQuery != "limit=1" {
+						t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, "limit=1")
+					}
 					return taskCoreJSON(req, 203, first), nil
 				}
 				if test.invalid || calls != 2 {
 					t.Fatal("invalid wire marker selected a continuation target", calls, req.URL)
 				}
-				th.AssertEquals(t, test.target, req.URL.Query().Get("marker"))
-				th.AssertEquals(t, url.Values{"limit": {"1"}, "marker": {test.target}}.Encode(), req.URL.RawQuery)
+				if got := req.URL.Query().Get("marker"); got != test.target {
+					t.Fatalf("req.URL.Query().Get(\"marker\") = %v, want %v", got, test.target)
+				}
+				if want := (url.Values{"limit": {"1"}, "marker": {test.target}}.Encode()); req.URL.RawQuery != want {
+					t.Fatalf("req.URL.RawQuery = %v, want %v", req.URL.RawQuery, want)
+				}
 				return taskCoreJSON(req, 203, `{"`+key+`":[]}`), nil
 			})
 			service := New(client)

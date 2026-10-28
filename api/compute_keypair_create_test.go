@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"slices"
 	"sync/atomic"
 	"testing"
 
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 // openstacksdk ef55d7d: _proxy.py:831–840 and keypair.py:24–76.
@@ -45,11 +45,21 @@ func TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility(t *testing.T
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
-				th.TestHeader(t, r, "X-Auth-Token", "create-live")
-				th.TestHeader(t, r, "X-Source", "selected")
-				th.TestHeader(t, r, "X-OpenStack-Nova-API-Version", "2.1")
-				th.TestHeader(t, r, "OpenStack-API-Version", "compute 2.1")
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "create-live" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "create-live")
+				}
+				if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "selected" }) {
+					t.Errorf("header %s = %q, want %q", "X-Source", got, "selected")
+				}
+				if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "2.1" }) {
+					t.Errorf("header %s = %q, want %q", "X-OpenStack-Nova-API-Version", got, "2.1")
+				}
+				if got := r.Header.Values("OpenStack-API-Version"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "compute 2.1" }) {
+					t.Errorf("header %s = %q, want %q", "OpenStack-API-Version", got, "compute 2.1")
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || string(body) != tc.body || r.URL.Path != computeKeypairCreatePath || r.URL.RawQuery != "" {
 					t.Error("dirty attrs, collection route or no-lookup policy changed", string(body), err, r.URL)
@@ -86,8 +96,12 @@ func TestComputeKeypairCreateDirtyBodyAliasesAndNativeCompatibility(t *testing.T
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
-				th.TestHeader(t, r, "X-Auth-Token", cloud.Provider.TokenID)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != cloud.Provider.TokenID }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, cloud.Provider.TokenID)
+				}
 				body, err := io.ReadAll(r.Body)
 				if err != nil || string(body) != `{"keypair":{"name":"native-name","public_key":"import-public","type":"x509","user_id":"owner+team","vendor":{"enabled":true}}}` || r.URL.Path != computeKeypairCreatePath || r.URL.RawQuery != "" {
 					t.Error("native Create ABI changed", string(body), err, r.URL)
@@ -151,7 +165,9 @@ func TestComputeKeypairCreateResponseSeedWireAndPassiveErrors(t *testing.T) {
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				if r.URL.Path != computeKeypairCreatePath || r.URL.RawQuery != "" {
 					t.Error("create performed lookup/followup", r.URL)
 				}
@@ -244,9 +260,15 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 		var calls, callbacks atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
-			th.TestHeader(t, r, "X-Create-Extension", "kept")
-			th.TestHeaderUnset(t, r, "X-OpenStack-Nova-API-Version")
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
+			if got := r.Header.Values("X-Create-Extension"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "kept" }) {
+				t.Errorf("header %s = %q, want %q", "X-Create-Extension", got, "kept")
+			}
+			if got := r.Header.Values("X-OpenStack-Nova-API-Version"); len(got) > 0 {
+				t.Errorf("header %s = %q, want unset", "X-OpenStack-Nova-API-Version", got)
+			}
 			body, err := io.ReadAll(r.Body)
 			if err != nil || string(body) != `{"keypair":{"created_at":{"kept":true},"deleted":false,"name":"last","public_key":{"n":9007199254740993},"trace":{"kept":true},"type":"x509","user_id":"owner","vendor":{"enabled":true}}}` || r.URL.Path != computeKeypairCreatePath || r.URL.RawQuery != "" {
 				t.Error("snapshot/bulk/individual ownership changed", string(body), err, r.URL)
@@ -349,7 +371,9 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 			var calls, retries atomic.Int32
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
-				th.TestMethod(t, r, http.MethodPost)
+				if r.Method != http.MethodPost {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+				}
 				w.Header().Set("X-Keypair-Proof", mode)
 				testcloud.JSON(w, 201, body)
 			})
@@ -385,7 +409,9 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 		const body = "original create503"
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
 			w.Header().Set("X-Keypair-Proof", "retry")
 			testcloud.JSON(w, 503, body)
 		})
@@ -406,8 +432,12 @@ func TestComputeKeypairCreateOwnedOptionsSourceAndAcceptedFailures(t *testing.T)
 		var calls, callbacks atomic.Int32
 		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
-			th.TestMethod(t, r, http.MethodPost)
-			th.TestHeader(t, r, "X-Auth-Token", "refreshed-create-token")
+			if r.Method != http.MethodPost {
+				t.Errorf("method = %s, want %s", r.Method, http.MethodPost)
+			}
+			if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "refreshed-create-token" }) {
+				t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "refreshed-create-token")
+			}
 			testcloud.JSON(w, 201, `{"keypair":{"name":"actual"}}`)
 		})
 		value, err := keypairs.New(client).CreateKeypair(context.Background(), keypairs.WithKeypairCreateName("key"), func(_ *request.Config[keypairs.KeypairCreateOpts]) error {

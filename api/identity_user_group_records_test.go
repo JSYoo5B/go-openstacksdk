@@ -6,6 +6,7 @@ import (
 	"iter"
 	"net/http"
 	"reflect"
+	"slices"
 	"strconv"
 	"sync/atomic"
 	"testing"
@@ -15,7 +16,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
-	th "github.com/gophercloud/gophercloud/v2/testhelper"
 )
 
 const userGroupRecordsPath = "/reverse/identity/v3/users/user-id/groups"
@@ -55,9 +55,15 @@ func TestIdentityUserGroupRecordsOwnedViewAndCachedConnection(t *testing.T) {
 	var calls atomic.Int32
 	cloud.Mux.HandleFunc(userGroupRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
-		th.TestMethod(t, r, http.MethodGet)
-		th.TestHeader(t, r, "X-Auth-Token", "group-live")
-		th.TestHeader(t, r, "X-Source", "cached")
+		if r.Method != http.MethodGet {
+			t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+		}
+		if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "group-live" }) {
+			t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "group-live")
+		}
+		if got := r.Header.Values("X-Source"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "cached" }) {
+			t.Errorf("header %s = %q, want %q", "X-Source", got, "cached")
+		}
 		if r.URL.RawQuery != "" || r.ContentLength != 0 {
 			t.Error("public user_groups has no query or body", r.URL, r.ContentLength)
 		}
@@ -106,17 +112,23 @@ func TestIdentityUserGroupRecordsContinuationFormsAndConsumerStop(t *testing.T) 
 			var calls atomic.Int32
 			cloud.Mux.HandleFunc(userGroupRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 				call := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
 				if r.ContentLength != 0 || r.URL.Path != userGroupRecordsPath {
 					t.Error(r.URL, r.ContentLength)
 				}
 				if call == 1 {
-					th.TestHeader(t, r, "X-Auth-Token", "test-token")
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+					}
 					if r.URL.RawQuery != "" {
 						t.Error("initial group query", r.URL)
 					}
 				} else {
-					th.TestHeader(t, r, "X-Auth-Token", "group-next")
+					if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "group-next" }) {
+						t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "group-next")
+					}
 					wantQuery := "marker=next"
 					if mode == "server limit" {
 						wantQuery = "limit=25&marker=next"
@@ -198,8 +210,12 @@ func TestIdentityUserGroupRecordsPreflightFaultsAndPartialResults(t *testing.T) 
 			bad := `{"groups":[false]}`
 			cloud.Mux.HandleFunc(userGroupRecordsPath, func(w http.ResponseWriter, r *http.Request) {
 				call := calls.Add(1)
-				th.TestMethod(t, r, http.MethodGet)
-				th.TestHeader(t, r, "X-Auth-Token", "test-token")
+				if r.Method != http.MethodGet {
+					t.Errorf("method = %s, want %s", r.Method, http.MethodGet)
+				}
+				if got := r.Header.Values("X-Auth-Token"); len(got) == 0 || slices.ContainsFunc(got, func(value string) bool { return value != "test-token" }) {
+					t.Errorf("header %s = %q, want %q", "X-Auth-Token", got, "test-token")
+				}
 				if r.ContentLength != 0 || call == 1 && r.URL.RawQuery != "" || call == 2 && r.URL.RawQuery != "marker=next" || call > 2 {
 					t.Error(r.URL, call, r.ContentLength)
 				}
