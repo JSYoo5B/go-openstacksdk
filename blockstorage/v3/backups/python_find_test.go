@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -18,7 +17,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func backupFindAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *[]pythonBackupCall) {
+func backupFindAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *testcloud.Recorder) {
 	t.Helper()
 	api, calls := pythonBackupAPI(t, reply)
 	api.RawClient().Microversion = "3.64"
@@ -35,8 +34,8 @@ func TestPythonBackupFindRecordGetFirstOwnsSourceViewAndRawEvidence(t *testing.T
 	body := `{"backup":{"id":9007199254740993,"name":"nightly","size":"١٢","object_count":true,"force":"False","has_dependent_backups":{},"is_incremental":[],"links":"self","metadata":false,"project_id":"first","os-backup-project-attr:project_id":"last","created_at":"2026-10-11T01:02:03+09:00","unknown":[null,false]}}`
 	api, calls := backupFindAPI(t, func(*http.Request) *http.Response { return pythonBackupWire(200, body) })
 	value, err := api.FindRecord(context.Background(), "9007199254740993")
-	if err != nil || len(*calls) != 1 || (*calls)[0].path != pythonBackupBase+"/9007199254740993" || (*calls)[0].query != "" || (*calls)[0].body != "" || (*calls)[0].version != "volume 3.64" {
-		t.Fatal(value, err, *calls)
+	if err != nil || calls.Len() != 1 || pythonBackupCalls(calls)[0].path != pythonBackupBase+"/9007199254740993" || pythonBackupCalls(calls)[0].query != "" || pythonBackupCalls(calls)[0].body != "" || pythonBackupCalls(calls)[0].version != "volume 3.64" {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 	for key, want := range map[string]string{"id": "9007199254740993", "size": "12", "object_count": "true", "force": "true", "has_dependent_backups": "false", "is_incremental": "false", "links": `["self"]`, "metadata": "{}", "project_id": `"last"`, "created_at": `"2026-10-11T01:02:03+09:00"`, "snapshot_id": "null", "location": "null"} {
 		backupFindField(t, value, key, want)
@@ -70,8 +69,8 @@ func TestPythonBackupFindRecordFallbackCodesAndDetailsDefaults(t *testing.T) {
 				if details {
 					want += "/detail"
 				}
-				if err != nil || len(*calls) != 2 || (*calls)[0].path != pythonBackupBase+"/nightly" || (*calls)[0].query != "" || (*calls)[1].path != want || (*calls)[1].query != "name=nightly" {
-					t.Fatal(value, err, *calls)
+				if err != nil || calls.Len() != 2 || pythonBackupCalls(calls)[0].path != pythonBackupBase+"/nightly" || pythonBackupCalls(calls)[0].query != "" || pythonBackupCalls(calls)[1].path != want || pythonBackupCalls(calls)[1].query != "name=nightly" {
+					t.Fatal(value, err, pythonBackupCalls(calls))
 				}
 				backupFindField(t, value, "id", `"b1"`)
 			})
@@ -124,8 +123,8 @@ func TestPythonBackupFindRecordExactIdentityAndLateDuplicateOrError(t *testing.T
 			if mode == "numeric ID is distinct" {
 				wantCalls = 2
 			}
-			if len(*calls) != wantCalls {
-				t.Fatal(*calls)
+			if calls.Len() != wantCalls {
+				t.Fatal(pythonBackupCalls(calls))
 			}
 		})
 	}
@@ -149,8 +148,8 @@ func TestPythonBackupFindRecordMissingAndAcceptedTranslation(t *testing.T) {
 		return pythonBackupWire(200, `{"backups":[]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "absent")
-	if value != nil || err != nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if value != nil || err != nil || calls.Len() != 2 {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 	value, err = api.FindRecord(context.Background(), "absent", backups.WithRecordFindIgnoreMissing(false))
 	if value != nil || !errors.Is(err, resource.ErrNotFound) {
@@ -163,12 +162,12 @@ func TestPythonBackupFindRecordMissingAndAcceptedTranslation(t *testing.T) {
 			invalid := body == `{"backup":null}` || body == `[]` || strings.Contains(body, "²")
 			if invalid {
 				var proof *resource.ResponseError
-				if value != nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || len(*calls) != 1 {
-					t.Fatal(value, err, proof, *calls)
+				if value != nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || calls.Len() != 1 {
+					t.Fatal(value, err, proof, pythonBackupCalls(calls))
 				}
 			} else {
-				if err != nil || value == nil || value.StatusCode != 200 || string(value.Envelope) != body || len(*calls) != 1 {
-					t.Fatal(value, err, *calls)
+				if err != nil || value == nil || value.StatusCode != 200 || string(value.Envelope) != body || calls.Len() != 1 {
+					t.Fatal(value, err, pythonBackupCalls(calls))
 				}
 				backupFindField(t, value, "id", `"literal"`)
 			}
@@ -187,24 +186,24 @@ func TestPythonBackupFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 	option := backups.WithRecordFindOpts(backups.RecordFindOpts{Query: query})
 	query["container"] = json.RawMessage(`"changed"`)
 	value, err := api.FindRecord(context.Background(), "nightly", option)
-	if err != nil || value == nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 	backupFindField(t, value, "id", `"b1"`)
-	get, _ := url.ParseQuery((*calls)[0].query)
-	list, _ := url.ParseQuery((*calls)[1].query)
+	get, _ := url.ParseQuery(pythonBackupCalls(calls)[0].query)
+	list, _ := url.ParseQuery(pythonBackupCalls(calls)[1].query)
 	if get.Get("container") != "one" || get.Get("metadata") != "count" || get.Get("unknown") != "value" || get.Has("all_projects") || !reflect.DeepEqual(get["project_id"], []string{"p1", "p2"}) || !reflect.DeepEqual(list, url.Values{"name": {"nightly"}, "project_id": {"p1", "p2"}, "all_tenants": {"True"}}) {
 		t.Fatal(get, list)
 	}
-	*calls = nil
+	calls.Reset()
 	value, err = api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("container", "two"), backups.WithRecordFindMaxItems(1))
-	if err != nil || value != nil || len(*calls) != 2 || (*calls)[1].query != "limit=1&name=nightly" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value != nil || calls.Len() != 2 || pythonBackupCalls(calls)[1].query != "limit=1&name=nightly" {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
-	*calls = nil
+	calls.Reset()
 	value, err = api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("name", nil), backups.WithRecordFindQuery("container", "one"))
-	if err != nil || value == nil || (*calls)[1].query != "" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || pythonBackupCalls(calls)[1].query != "" {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 }
 
@@ -228,20 +227,20 @@ func TestPythonBackupFindRecordPagingShortMarkersAndOffset(t *testing.T) {
 				options = append(options, backups.WithRecordFindQuery("offset", 0))
 			}
 			value, err := api.FindRecord(context.Background(), "nightly", options...)
-			if err != nil || value == nil || len(*calls) != 3 {
-				t.Fatal(value, err, *calls)
+			if err != nil || value == nil || calls.Len() != 3 {
+				t.Fatal(value, err, pythonBackupCalls(calls))
 			}
 			want := "limit=2&marker=b1&name=nightly"
 			if offset {
 				want = "limit=2&name=nightly&offset=1"
 			}
-			if (*calls)[2].query != want {
-				t.Fatal(*calls)
+			if pythonBackupCalls(calls)[2].query != want {
+				t.Fatal(pythonBackupCalls(calls))
 			}
-			*calls = nil
+			calls.Reset()
 			value, err = api.FindRecord(context.Background(), "nightly", append(options, backups.WithRecordFindPaginated(false))...)
-			if err != nil || value == nil || len(*calls) != 2 {
-				t.Fatal(value, err, *calls)
+			if err != nil || value == nil || calls.Len() != 2 {
+				t.Fatal(value, err, pythonBackupCalls(calls))
 			}
 		})
 	}
@@ -258,8 +257,8 @@ func TestPythonBackupFindRecordMarkerUsesRetainedUntypedWireID(t *testing.T) {
 		return pythonBackupWire(200, `{"backups":[{"id":9007199254740993,"name":"nightly"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "nightly", backups.WithRecordFindQuery("limit", 2))
-	if err != nil || value == nil || len(*calls) != 3 || (*calls)[2].query != "limit=2&marker=9007199254740993&name=nightly" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 3 || pythonBackupCalls(calls)[2].query != "limit=2&marker=9007199254740993&name=nightly" {
+		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
 	backupFindField(t, value, "id", "9007199254740993")
 	if string(value.Wire.Body["id"]) != "9007199254740993" {
@@ -267,32 +266,11 @@ func TestPythonBackupFindRecordMarkerUsesRetainedUntypedWireID(t *testing.T) {
 	}
 }
 
-type backupFindFaultBody struct {
-	io.Reader
-	read, close error
-	closes      int
-	afterClose  func()
-}
-
-func (b *backupFindFaultBody) Read(p []byte) (int, error) {
-	n, err := b.Reader.Read(p)
-	if err == io.EOF && b.read != nil {
-		return n, b.read
-	}
-	return n, err
-}
-func (b *backupFindFaultBody) Close() error {
-	b.closes++
-	if b.afterClose != nil {
-		b.afterClose()
-	}
-	return b.close
-}
 func TestPythonBackupFindRecordRejectedAndAcceptedPhysicalCauses(t *testing.T) {
 	for _, phase := range []string{"member404", "member500", "list500", "accepted list"} {
 		t.Run(phase, func(t *testing.T) {
 			readCause, closeCause := errors.New("backup read"), errors.New("backup close")
-			var body *backupFindFaultBody
+			var body *testcloud.Body
 			api, calls := backupFindAPI(t, func(req *http.Request) *http.Response {
 				if (phase == "list500" || phase == "accepted list") && strings.HasSuffix(req.URL.Path, "/nightly") {
 					return pythonBackupWire(404, `{}`)
@@ -305,7 +283,7 @@ func TestPythonBackupFindRecordRejectedAndAcceptedPhysicalCauses(t *testing.T) {
 					status = 200
 					raw = `{"backups":[{"id":"b1","name":"nightly"}]}`
 				}
-				body = &backupFindFaultBody{Reader: strings.NewReader(raw), read: readCause, close: closeCause}
+				body = &testcloud.Body{Data: raw, ReadErr: readCause, CloseErr: closeCause}
 				response := pythonBackupWire(status, "")
 				response.Header.Set("X-Request-Id", "backup-find-proof")
 				response.Body = body
@@ -315,15 +293,15 @@ func TestPythonBackupFindRecordRejectedAndAcceptedPhysicalCauses(t *testing.T) {
 				return original
 			}
 			value, err := api.FindRecord(context.Background(), "nightly")
-			if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || body == nil || body.closes != 1 {
+			if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || body == nil || body.Closes() != 1 {
 				t.Fatal(value, err, body)
 			}
 			want := 1
 			if phase == "list500" || phase == "accepted list" {
 				want = 2
 			}
-			if len(*calls) != want {
-				t.Fatal("faulty observation resent or allowed fallback", *calls)
+			if calls.Len() != want {
+				t.Fatal("faulty observation resent or allowed fallback", pythonBackupCalls(calls))
 			}
 			if phase == "accepted list" {
 				var proof *resource.ResponseError
@@ -359,18 +337,18 @@ func TestPythonBackupFindRecordSelectionAndOptionFailures(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(pythonBackupCalls(calls))
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("user cancelled lookup")
 	_, err := api.FindRecord(ctx, "nightly", func(*backups.RecordFindOpts) error { cancel(cause); return nil })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
+		t.Fatal(err, pythonBackupCalls(calls))
 	}
 	_, err = api.FindRecord(context.Background(), "nightly", func(*backups.RecordFindOpts) error { api.RawClient().Microversion = "3.43"; return nil })
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonBackupCalls(calls))
 	}
 }
 
@@ -379,14 +357,14 @@ func TestPythonBackupFindRecordDiscoveryDefaultAndExplicitVersion(t *testing.T) 
 		t.Run(item.selected+item.maximum, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var paths, versions []string
-			cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				paths = append(paths, req.URL.Path)
 				versions = append(versions, req.Header.Get("X-OpenStack-Volume-API-Version"))
 				if req.URL.Path == "/cinder/v3/" {
 					return pythonBackupWire(200, `{"version":{"id":"v3.0","max_version":"`+item.maximum+`","min_version":"3.0"}}`), nil
 				}
 				return pythonBackupWire(200, `{"backup":{"id":"b1"}}`), nil
-			})
+			}))
 			client := cloud.Client("volumev3", "/cinder/v3/project/")
 			client.Microversion = item.selected
 			value, err := backups.New(client).FindRecord(context.Background(), "b1")
@@ -408,17 +386,17 @@ func TestPythonBackupFindRecordDiscoveryRejectionPreservesPhysicalCauses(t *test
 	cloud := testcloud.New(t)
 	calls := 0
 	readCause, closeCause := errors.New("discovery read"), errors.New("discovery close")
-	body := &backupFindFaultBody{Reader: strings.NewReader(`{"error":"discovery unavailable"}`), read: readCause, close: closeCause}
-	cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(*http.Request) (*http.Response, error) {
+	body := &testcloud.Body{Data: `{"error":"discovery unavailable"}`, ReadErr: readCause, CloseErr: closeCause}
+	cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 		calls++
 		r := pythonBackupWire(500, "")
 		r.Body = body
 		r.Header.Set("X-Request-Id", "discovery-proof")
 		return r, nil
-	})
+	}))
 	value, err := backups.New(cloud.Client("volumev3", "/cinder/v3/project/")).FindRecord(context.Background(), "b1")
 	var proof gophercloud.ErrUnexpectedResponseCode
-	if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.Actual != 500 || proof.ResponseHeader.Get("X-Request-Id") != "discovery-proof" || string(proof.Body) != `{"error":"discovery unavailable"}` || calls != 1 || body.closes != 1 {
+	if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.Actual != 500 || proof.ResponseHeader.Get("X-Request-Id") != "discovery-proof" || string(proof.Body) != `{"error":"discovery unavailable"}` || calls != 1 || body.Closes() != 1 {
 		t.Fatal(value, err, proof, calls, body)
 	}
 }

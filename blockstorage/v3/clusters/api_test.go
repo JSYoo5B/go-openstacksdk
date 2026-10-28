@@ -3,7 +3,6 @@ package clusters_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -13,16 +12,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type clTransport func(*http.Request) (*http.Response, error)
-
-func (f clTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 
 type clCall struct {
 	method, path, query, body string
@@ -34,27 +23,30 @@ const (
 	clRow  = `{"name":"c1@lvm","binary":"cinder-volume","state":"up","status":"enabled","frozen":false,"num_hosts":2,"num_down_hosts":0,"disabled_reason":null,"replication_status":"disabled","active_backend_id":null,"last_heartbeat":"t1","created_at":"t0","updated_at":"t2"}`
 )
 
-func clAPI(t *testing.T, version string, reply func(*http.Request) (int, string)) (*clusters.API, *[]clCall) {
+func clAPI(t *testing.T, version string, reply func(*http.Request) (int, string)) (*clusters.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]clCall{}
-	cloud.Provider.HTTPClient.Transport = clTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, clCall{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) {
 		code, text := 200, `{"version":{"id":"v3.0","status":"CURRENT","version":"3.70","min_version":"3.0"}}`
 		if r.URL.Path != "/cinder/v3/" {
 			code, text = reply(r)
 		}
-		return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(text))}, nil
+		return testcloud.Response(code, text, http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
 	return clusters.New(client), calls
+}
+
+// clCalls projects recorded calls onto the local call fields.
+func clCalls(rec *testcloud.Recorder) []clCall {
+	calls := []clCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, clCall{call.Method, call.EscapedPath, call.RawQuery, call.Body, call.Header})
+	}
+	return calls
 }
 
 func clOperation(t *testing.T, err error, operation string, code int) {
@@ -97,10 +89,10 @@ func clCheck(t *testing.T, v *clusters.Cluster) {
 func TestClusterGetNegotiatesMicroversion326(t *testing.T) {
 	api, calls := clAPI(t, "", func(*http.Request) (int, string) { return 200, `{"cluster":` + clRow + `}` })
 	v, err := api.Get(context.Background(), "c1@lvm")
-	if err != nil || len(*calls) != 2 || (*calls)[1].method != http.MethodGet || (*calls)[1].path != clBase+"/c1@lvm" {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 2 || clCalls(calls)[1].method != http.MethodGet || clCalls(calls)[1].path != clBase+"/c1@lvm" {
+		t.Fatal(err, clCalls(calls))
 	}
-	clVersion(t, (*calls)[1], "3.26")
+	clVersion(t, clCalls(calls)[1], "3.26")
 	clCheck(t, v)
 	if string(v.Body["id"]) != `"c1@lvm"` {
 		t.Fatalf("Python seeds the requested value as id: %s", v.Body["id"])
@@ -123,10 +115,10 @@ func TestClusterListDetailsQueryAndLocalFilters(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 1 || (*calls)[0].path != clBase+"/detail" || (*calls)[0].query != "binary=cinder-volume&is_up=True" {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || clCalls(calls)[0].path != clBase+"/detail" || clCalls(calls)[0].query != "binary=cinder-volume&is_up=True" {
+		t.Fatal(clCalls(calls))
 	}
-	clVersion(t, (*calls)[0], "3.26")
+	clVersion(t, clCalls(calls)[0], "3.26")
 	if len(values) != 1 {
 		t.Fatalf("local state filter: %#v", values)
 	}
@@ -134,8 +126,8 @@ func TestClusterListDetailsQueryAndLocalFilters(t *testing.T) {
 
 	api, calls = clAPI(t, "3.26", func(*http.Request) (int, string) { return 200, `{"clusters":[{"name":"c2"}]}` })
 	values, err = api.All(context.Background(), clusters.WithListDetails(false))
-	if err != nil || len(values) != 1 || (*calls)[0].path != clBase || values[0].Name != "c2" {
-		t.Fatal(err, *calls)
+	if err != nil || len(values) != 1 || clCalls(calls)[0].path != clBase || values[0].Name != "c2" {
+		t.Fatal(err, clCalls(calls))
 	}
 
 	api, _ = clAPI(t, "3.26", func(*http.Request) (int, string) { return 403, `{}` })
@@ -154,8 +146,8 @@ func TestClusterFindFallsBackToDetailListByName(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 || (*calls)[0].query != "" || (*calls)[1].path != clBase+"/detail" || (*calls)[1].query != "name=c1%40lvm" {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || clCalls(calls)[0].query != "" || clCalls(calls)[1].path != clBase+"/detail" || clCalls(calls)[1].query != "name=c1%40lvm" {
+		t.Fatal(clCalls(calls))
 	}
 	clCheck(t, v)
 
@@ -178,20 +170,20 @@ func TestClusterFindFallsBackToDetailListByName(t *testing.T) {
 func TestClusterEnableDisableUseConfiguredMicroversion(t *testing.T) {
 	api, calls := clAPI(t, "", func(*http.Request) (int, string) { return 200, `{"cluster":` + clRow + `}` })
 	v, err := api.Enable(context.Background(), clusters.NewTarget("c1@lvm", "cinder-volume"))
-	if err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPut || (*calls)[0].path != clBase+"/enable" || (*calls)[0].body != `{"binary":"cinder-volume","name":"c1@lvm"}` {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 || clCalls(calls)[0].method != http.MethodPut || clCalls(calls)[0].path != clBase+"/enable" || clCalls(calls)[0].body != `{"binary":"cinder-volume","name":"c1@lvm"}` {
+		t.Fatal(err, clCalls(calls))
 	}
-	clVersion(t, (*calls)[0], "")
+	clVersion(t, clCalls(calls)[0], "")
 	clCheck(t, v)
 
 	api, calls = clAPI(t, "3.7", func(*http.Request) (int, string) {
 		return 200, `{"cluster":{"name":"c1","status":"disabled","disabled_reason":"maint"}}`
 	})
 	v, err = api.Disable(context.Background(), clusters.NewTarget("c1", ""), clusters.WithDisableReason("maint"))
-	if err != nil || (*calls)[0].path != clBase+"/disable" || (*calls)[0].body != `{"disabled_reason":"maint","name":"c1"}` {
-		t.Fatal(err, *calls)
+	if err != nil || clCalls(calls)[0].path != clBase+"/disable" || clCalls(calls)[0].body != `{"disabled_reason":"maint","name":"c1"}` {
+		t.Fatal(err, clCalls(calls))
 	}
-	clVersion(t, (*calls)[0], "3.7")
+	clVersion(t, clCalls(calls)[0], "3.7")
 	if *v.Status != "disabled" || *v.DisabledReason != "maint" {
 		t.Fatalf("disable result: %#v", v)
 	}
@@ -199,8 +191,8 @@ func TestClusterEnableDisableUseConfiguredMicroversion(t *testing.T) {
 	// A plain Python string becomes the id, so the name is sent as null.
 	api, calls = clAPI(t, "3.7", func(*http.Request) (int, string) { return 400, `{"badRequest":{}}` })
 	_, err = api.Disable(context.Background(), clusters.Target{}, clusters.WithDisableReason(""))
-	if (*calls)[0].body != `{"name":null}` {
-		t.Fatal(*calls)
+	if clCalls(calls)[0].body != `{"name":null}` {
+		t.Fatal(clCalls(calls))
 	}
 	clOperation(t, err, "Disable", 400)
 

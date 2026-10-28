@@ -3,11 +3,9 @@ package volumes_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
@@ -19,36 +17,27 @@ import (
 // pythonVolumeCall records the wire request openstacksdk would also send.
 type pythonVolumeCall struct{ method, path, query, body string }
 
-type pythonVolumeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonVolumeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonVolumeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonVolumeAPI(t *testing.T, reply func(*http.Request) *http.Response) (*volumes.API, *[]pythonVolumeCall) {
+func pythonVolumeAPI(t *testing.T, reply func(*http.Request) *http.Response) (*volumes.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonVolumeCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonVolumeTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonVolumeCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return volumes.New(client), calls
+}
+
+// pythonVolumeCalls projects recorded calls onto the local call fields.
+func pythonVolumeCalls(rec *testcloud.Recorder) []pythonVolumeCall {
+	calls := []pythonVolumeCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonVolumeCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonVolumeBase = "/cinder/v3/project/volumes"
@@ -86,8 +75,8 @@ func TestPythonVolumeGetCreateUpdateMatchProxyRequests(t *testing.T) {
 		{http.MethodPost, pythonVolumeBase, "", `{"OS-SCH-HNT:scheduler_hints":{"same_host":["0b3c1a3e-5f4d-4c8e-9a51-1f2e3d4c5b6a"]},"volume":{"imageRef":"img","multiattach":true,"name":"data","size":1,"volume_type":"fast"}}`},
 		{http.MethodPut, pythonVolumeBase + "/vol-1", "", `{"volume":{"description":"d2","name":"data2"}}`},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonVolumeCalls(calls), want) {
+		t.Fatalf("%+v", pythonVolumeCalls(calls))
 	}
 }
 
@@ -121,18 +110,18 @@ func TestPythonVolumeDeleteDefaultsCascadeForceAndMissing(t *testing.T) {
 	if err := api.ForceDelete(ctx, "vol-1"); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 5 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 5 {
+		t.Fatalf("%+v", pythonVolumeCalls(calls))
 	}
 	queries := []url.Values{{}, {}, {"cascade": {"False"}, "force": {"False"}}, {"cascade": {"True"}, "force": {"True"}}}
 	for i, want := range queries {
-		got, _ := url.ParseQuery((*calls)[i].query)
-		if (*calls)[i].method != http.MethodDelete || (*calls)[i].path != pythonVolumeBase+"/vol-1" || !reflect.DeepEqual(got, want) {
-			t.Fatalf("%d %+v", i, (*calls)[i])
+		got, _ := url.ParseQuery(pythonVolumeCalls(calls)[i].query)
+		if pythonVolumeCalls(calls)[i].method != http.MethodDelete || pythonVolumeCalls(calls)[i].path != pythonVolumeBase+"/vol-1" || !reflect.DeepEqual(got, want) {
+			t.Fatalf("%d %+v", i, pythonVolumeCalls(calls)[i])
 		}
 	}
-	if (*calls)[4] != (pythonVolumeCall{http.MethodPost, pythonVolumeBase + "/vol-1/action", "", `{"os-force_delete":""}`}) {
-		t.Fatalf("%+v", (*calls)[4])
+	if pythonVolumeCalls(calls)[4] != (pythonVolumeCall{http.MethodPost, pythonVolumeBase + "/vol-1/action", "", `{"os-force_delete":""}`}) {
+		t.Fatalf("%+v", pythonVolumeCalls(calls)[4])
 	}
 }
 
@@ -152,13 +141,13 @@ func TestPythonVolumeListDefaultUsesDetailRouteOnly(t *testing.T) {
 		}
 		ids = append(ids, value.ID)
 	}
-	if !reflect.DeepEqual(ids, []string{"vol-1", "vol-2"}) || len(*calls) != 2 {
-		t.Fatalf("%v %+v", ids, *calls)
+	if !reflect.DeepEqual(ids, []string{"vol-1", "vol-2"}) || calls.Len() != 2 {
+		t.Fatalf("%v %+v", ids, pythonVolumeCalls(calls))
 	}
-	first, _ := url.ParseQuery((*calls)[0].query)
+	first, _ := url.ParseQuery(pythonVolumeCalls(calls)[0].query)
 	// Existing List retains the detail default; ListSummary handles details=False.
-	if (*calls)[0].path != pythonVolumeBase+"/detail" || !reflect.DeepEqual(first, url.Values{"all_tenants": {"True"}, "name": {"data"}, "status": {"available"}}) || (*calls)[1].query != "marker=vol-1" {
-		t.Fatalf("%+v", *calls)
+	if pythonVolumeCalls(calls)[0].path != pythonVolumeBase+"/detail" || !reflect.DeepEqual(first, url.Values{"all_tenants": {"True"}, "name": {"data"}, "status": {"available"}}) || pythonVolumeCalls(calls)[1].query != "marker=vol-1" {
+		t.Fatalf("%+v", pythonVolumeCalls(calls))
 	}
 }
 
@@ -198,7 +187,7 @@ func TestPythonVolumeConnectionActionsOnlyTypedConnectorKeys(t *testing.T) {
 		{http.MethodPost, action, "", `{"os-terminate_connection":{"connector":` + typed + `}}`},
 		{http.MethodPost, action, "", `{"os-initialize_connection":{"connector":` + typed + `,"nqn":"nqn.x"}}`},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonVolumeCalls(calls), want) {
+		t.Fatalf("%+v", pythonVolumeCalls(calls))
 	}
 }

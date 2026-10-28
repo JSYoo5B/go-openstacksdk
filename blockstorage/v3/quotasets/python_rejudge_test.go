@@ -14,16 +14,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type pythonRejudgeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRejudgeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonRejudgeCall struct {
 	method, path, query string
 	body                any
@@ -32,7 +22,7 @@ type pythonRejudgeCall struct {
 func pythonRejudgeScope(t *testing.T, calls *[]pythonRejudgeCall, replies map[string]string) *quotasets.ProjectQuotaScope {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRejudgeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		var body any
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -49,8 +39,8 @@ func pythonRejudgeScope(t *testing.T, calls *[]pythonRejudgeCall, replies map[st
 		if !ok {
 			code, reply = 404, `{"itemNotFound":{"code":404,"message":"not found"}}`
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(reply)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, reply, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("volumev3", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/"
 	scope, err := quotasets.New(client).InProject(context.Background(), resource.ID("proj"))

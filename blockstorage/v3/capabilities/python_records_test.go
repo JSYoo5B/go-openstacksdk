@@ -91,9 +91,9 @@ func TestPythonCinderCapabilitiesPhysical404KeepsReadCloseWithoutReplay(t *testi
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	readCause, closeCause := errors.New("capabilities read"), errors.New("capabilities close")
 	calls, closed, retries := 0, 0, 0
-	client.ProviderClient.HTTPClient.Transport = capabilityTransport(func(r *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		calls++
-		return &http.Response{StatusCode: 404, Header: http.Header{"X-Request-Id": {"physical-capability"}}, Body: &capabilityFaultBody{readCause: readCause, closeCause: closeCause, closed: &closed}}, nil
+		return testcloud.StreamResponse(404, &testcloud.Body{Data: "partial capability", ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closed++ }}, http.Header{"X-Request-Id": {"physical-capability"}}), nil
 	})
 	client.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 		retries++
@@ -105,28 +105,3 @@ func TestPythonCinderCapabilitiesPhysical404KeepsReadCloseWithoutReplay(t *testi
 		t.Fatal(row, err, native, calls, closed, retries)
 	}
 }
-
-type capabilityTransport func(*http.Request) (*http.Response, error)
-
-func (f capabilityTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil {
-		response.Request = r
-	}
-	return response, err
-}
-
-type capabilityFaultBody struct {
-	readCause, closeCause error
-	closed                *int
-	read                  bool
-}
-
-func (b *capabilityFaultBody) Read(p []byte) (int, error) {
-	if b.read {
-		return 0, b.readCause
-	}
-	b.read = true
-	return copy(p, "partial capability"), b.readCause
-}
-func (b *capabilityFaultBody) Close() error { *b.closed++; return b.closeCause }

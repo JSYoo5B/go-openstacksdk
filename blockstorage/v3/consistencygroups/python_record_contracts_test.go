@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -20,38 +19,31 @@ type cgCall struct {
 	method, path, escaped, query, body string
 	headers                            http.Header
 }
-type cgTransport func(*http.Request) (*http.Response, error)
 
-func (f cgTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 func cgWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}})
 }
 
 const cgBase = "/cinder/v3/project/consistencygroups"
 
-func cgAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*consistencygroups.API, *[]cgCall) {
+func cgAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*consistencygroups.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]cgCall{}
-	cloud.Provider.HTTPClient.Transport = cgTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, cgCall{r.Method, r.URL.Path, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
-		return reply(r), nil
-	})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
 	return consistencygroups.New(client), calls
+}
+
+// cgCalls projects recorded calls onto the local call fields.
+func cgCalls(rec *testcloud.Recorder) []cgCall {
+	calls := []cgCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, cgCall{call.Method, call.Path, call.EscapedPath, call.RawQuery, call.Body, call.Header})
+	}
+	return calls
 }
 func cgField(t *testing.T, v *consistencygroups.ConsistencyGroupRecord, key, want string) {
 	t.Helper()
@@ -77,36 +69,6 @@ func collectCG(seq func(func(*consistencygroups.ConsistencyGroupRecord, error) b
 	return values, nil
 }
 
-type cgFaultBody struct {
-	text                  string
-	readErr, closeErr     error
-	afterRead, afterClose func()
-	closed                int
-	read                  bool
-}
-
-func (b *cgFaultBody) Read(p []byte) (int, error) {
-	if b.read {
-		return 0, io.EOF
-	}
-	b.read = true
-	n := copy(p, b.text)
-	if b.afterRead != nil {
-		b.afterRead()
-	}
-	if b.readErr != nil {
-		return n, b.readErr
-	}
-	return n, io.EOF
-}
-func (b *cgFaultBody) Close() error {
-	b.closed++
-	if b.afterClose != nil {
-		b.afterClose()
-	}
-	return b.closeErr
-}
-
 func TestPythonCinderConsistencyGroupGetLiteralProjectionDefaultVersionAndNoCache(t *testing.T) {
 	body := `{"consistencygroup":{"id":null,"name":false,"volume_types":"type-a,type-b","status":9007199254740993,"cls":false,"unknown":9007199254740995}}`
 	for _, version := range []string{"", "3.90"} {
@@ -114,7 +76,7 @@ func TestPythonCinderConsistencyGroupGetLiteralProjectionDefaultVersionAndNoCach
 		for range 2 {
 			value, err := api.GetRecord(context.Background(), "literal/id %2F")
 			if err != nil || value == nil || value.StatusCode != 200 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "actual" || len(value.Resource.Body) != 10 || value.Resource.Body["unknown"] != nil || string(value.Wire.Body["unknown"]) != "9007199254740995" || string(value.Wire.Body["cls"]) != "false" {
-				t.Fatal(value, err, *calls)
+				t.Fatal(value, err, cgCalls(calls))
 			}
 			for key, want := range map[string]string{"id": "null", "name": "false", "volume_types": `["type-a,type-b"]`, "status": "9007199254740993", "availability_zone": "null", "location": "null"} {
 				cgField(t, value, key, want)
@@ -125,10 +87,10 @@ func TestPythonCinderConsistencyGroupGetLiteralProjectionDefaultVersionAndNoCach
 				t.Fatal("aliased record", value)
 			}
 		}
-		if len(*calls) != 2 || api.RawClient().Microversion != version {
-			t.Fatal(*calls, api.RawClient())
+		if calls.Len() != 2 || api.RawClient().Microversion != version {
+			t.Fatal(cgCalls(calls), api.RawClient())
 		}
-		for _, call := range *calls {
+		for _, call := range cgCalls(calls) {
 			expected := ""
 			if version != "" {
 				expected = "volume " + version
@@ -147,8 +109,8 @@ func TestPythonCinderConsistencyGroupAcceptedDecoderKeepsActualEnvelopeAndSeeds(
 	}{{`{"consistencygroup":{}}`, true}, {`{"name":0,"unknown":false}`, true}, {"", true}, {"{bad", true}, {`null`, false}, {`[]`, false}, {`{"consistencygroup":null}`, false}, {`{"consistencygroup":[]}`, false}, {string([]byte{0xff, '{'}), false}} {
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(202, example.body) })
 		value, err := api.GetRecord(context.Background(), "seed")
-		if value == nil || (err == nil) != example.valid || len(*calls) != 1 || value.StatusCode != 202 || string(value.Envelope) != example.body || value.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(example, value, err, *calls)
+		if value == nil || (err == nil) != example.valid || calls.Len() != 1 || value.StatusCode != 202 || string(value.Envelope) != example.body || value.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(example, value, err, cgCalls(calls))
 		}
 		if !example.valid {
 			var proof *resource.ResponseError
@@ -181,13 +143,13 @@ func TestPythonCinderConsistencyGroupCreateRawPartialNullAndSnapshotOwnership(t 
 	for range 2 {
 		value, err := api.CreateRecord(context.Background(), option, func(c *consistencygroups.RecordCreateOpts) error { held = c; return nil })
 		if err != nil || value == nil || value.StatusCode != 202 || api.RawClient().Microversion != "" {
-			t.Fatal(value, err, *calls)
+			t.Fatal(value, err, cgCalls(calls))
 		}
 		cgField(t, value, "volume_types", `["type-a,type-b"]`)
 		cgField(t, value, "description", `false`)
 		cgField(t, value, "name", `"wire"`)
 	}
-	for _, call := range *calls {
+	for _, call := range cgCalls(calls) {
 		if call.method != http.MethodPost || call.path != cgBase || call.headers.Get("X-Option") != "owned" || call.headers.Get("OpenStack-API-Version") != "volume 3.90" {
 			t.Fatal(call)
 		}
@@ -220,10 +182,10 @@ func TestPythonCinderConsistencyGroupCreateFromSourceNullDefaultsAndLiteralRefer
 			return cgWire(400, `{"stock":"exactly one source is required"}`)
 		})
 		value, err := api.CreateFromSourceRecord(context.Background(), options...)
-		if value == nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPost || (*calls)[0].path != cgBase+"/create_from_src" || (*calls)[0].query != "" || (err == nil) != accepted {
-			t.Fatal(variant, value, err, *calls)
+		if value == nil || calls.Len() != 1 || cgCalls(calls)[0].method != http.MethodPost || cgCalls(calls)[0].path != cgBase+"/create_from_src" || cgCalls(calls)[0].query != "" || (err == nil) != accepted {
+			t.Fatal(variant, value, err, cgCalls(calls))
 		}
-		cgJSON(t, (*calls)[0].body, want)
+		cgJSON(t, cgCalls(calls)[0].body, want)
 		if accepted {
 			cgField(t, value, "name", `null`)
 			cgField(t, value, "description", `null`)
@@ -240,8 +202,8 @@ func TestPythonCinderConsistencyGroupUpdateDirtyNoopBlankVersionAndResponseMerge
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("no-op HTTP"); return nil })
 	for _, options := range [][]consistencygroups.RecordUpdateOption{nil, {consistencygroups.WithRecordUpdateField("unknown", make(chan int))}, {consistencygroups.WithRecordUpdateField("id", "ignored")}} {
 		value, err := api.UpdateRecord(context.Background(), "literal", options...)
-		if err != nil || value == nil || value.StatusCode != 0 || value.Envelope != nil || value.Header != nil || value.Wire != nil || len(*calls) != 0 {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || value.StatusCode != 0 || value.Envelope != nil || value.Header != nil || value.Wire != nil || calls.Len() != 0 {
+			t.Fatal(value, err, cgCalls(calls))
 		}
 		cgField(t, value, "id", `"literal"`)
 	}
@@ -254,10 +216,10 @@ func TestPythonCinderConsistencyGroupUpdateDirtyNoopBlankVersionAndResponseMerge
 			return cgWire(400, `{"stock":"blank update requires3.6"}`)
 		})
 		value, err := api.UpdateRecord(context.Background(), "id", consistencygroups.WithRecordUpdateField("name", ""), consistencygroups.WithRecordUpdateField("id", "other"))
-		if value == nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPut || (*calls)[0].path != cgBase+"/id" || (err == nil) != accepted {
-			t.Fatal(version, value, err, *calls)
+		if value == nil || calls.Len() != 1 || cgCalls(calls)[0].method != http.MethodPut || cgCalls(calls)[0].path != cgBase+"/id" || (err == nil) != accepted {
+			t.Fatal(version, value, err, cgCalls(calls))
 		}
-		cgJSON(t, (*calls)[0].body, `{"consistencygroup":{"name":""}}`)
+		cgJSON(t, cgCalls(calls)[0].body, `{"consistencygroup":{"name":""}}`)
 		if accepted {
 			cgField(t, value, "id", `"id"`)
 			cgField(t, value, "name", `""`)
@@ -292,10 +254,10 @@ func TestPythonCinderConsistencyGroupDeleteCorrectedBodyReplayAndStrictMissing(t
 			want = `{"consistency_group":{"force":false}}`
 		}
 		err := api.DeleteRecord(context.Background(), "literal/id %2F", options...)
-		if len(*calls) != 1 || (*calls)[0].method != http.MethodPost || (*calls)[0].escaped != cgBase+"/literal%2Fid%20%252F/delete" || (*calls)[0].headers.Get("OpenStack-API-Version") != "" || (err == nil) != (choice == "default" || choice == "force") {
-			t.Fatal(choice, err, *calls)
+		if calls.Len() != 1 || cgCalls(calls)[0].method != http.MethodPost || cgCalls(calls)[0].escaped != cgBase+"/literal%2Fid%20%252F/delete" || cgCalls(calls)[0].headers.Get("OpenStack-API-Version") != "" || (err == nil) != (choice == "default" || choice == "force") {
+			t.Fatal(choice, err, cgCalls(calls))
 		}
-		cgJSON(t, (*calls)[0].body, want)
+		cgJSON(t, cgCalls(calls)[0].body, want)
 		if choice == "source" || choice == "missing" {
 			var native gophercloud.ErrUnexpectedResponseCode
 			code := 400
@@ -313,15 +275,15 @@ func TestPythonCinderConsistencyGroupListDeclaredQueryLocalFiltersAndRawCap(t *t
 	body := `{"consistencygroups":[{"id":"first","name":"other"},{"id":"second","name":"target","volume_types":"type"}],"next":"?marker=next"}`
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
 	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("name", "target"), consistencygroups.WithRecordListQuery("sort", []string{"name:asc", "id:desc"}), consistencygroups.WithRecordListQuery("all_tenants", make(chan int)), consistencygroups.WithRecordListQuery("unknown", make(chan int)), consistencygroups.WithRecordListMaxItems(2)))
-	if err != nil || len(values) != 1 || len(*calls) != 1 || (*calls)[0].path != cgBase+"/detail" || (*calls)[0].query != "limit=2&sort=name%3Aasc&sort=id%3Adesc" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].path != cgBase+"/detail" || cgCalls(calls)[0].query != "limit=2&sort=name%3Aasc&sort=id%3Adesc" {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 	cgField(t, values[0], "id", `"second"`)
 	cgField(t, values[0], "volume_types", `["type"]`)
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
 	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("name", "target"), consistencygroups.WithRecordListMaxItems(1)))
-	if err != nil || len(values) != 0 || len(*calls) != 1 || (*calls)[0].query != "limit=1" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 0 || calls.Len() != 1 || cgCalls(calls)[0].query != "limit=1" {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 }
 
@@ -336,10 +298,10 @@ func TestPythonCinderConsistencyGroupListStockSingularLinksOffsetsMarkersAndBrea
 		return cgWire(200, `{"consistencygroups":[{"id":"first","name":"target"}],"consistencygroup_links":[{"rel":"next","href":"?offset=2&limit=2"}]}`)
 	})
 	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), consistencygroups.WithRecordListLimit(2), consistencygroups.WithRecordListQuery("sort", "name:asc"), consistencygroups.WithRecordListQuery("name", "target")))
-	if err != nil || len(values) != 2 || len(*calls) != 3 || (*calls)[0].path != cgBase || (*calls)[1].query != "limit=2&offset=2&sort=name%3Aasc" || (*calls)[2].query != "limit=2&marker=second&sort=name%3Aasc" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 2 || calls.Len() != 3 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[1].query != "limit=2&offset=2&sort=name%3Aasc" || cgCalls(calls)[2].query != "limit=2&marker=second&sort=name%3Aasc" {
+		t.Fatal(values, err, cgCalls(calls))
 	}
-	for _, call := range *calls {
+	for _, call := range cgCalls(calls) {
 		if call.headers.Get("OpenStack-API-Version") != "volume 3.90" || call.headers.Get("Accept") != "application/json" || call.path != cgBase {
 			t.Fatal(call)
 		}
@@ -353,8 +315,8 @@ func TestPythonCinderConsistencyGroupListStockSingularLinksOffsetsMarkersAndBrea
 		}
 		break
 	}
-	if len(*calls) != 1 {
-		t.Fatal("consumer stop must not read next", *calls)
+	if calls.Len() != 1 {
+		t.Fatal("consumer stop must not read next", cgCalls(calls))
 	}
 }
 
@@ -364,8 +326,8 @@ func TestPythonCinderConsistencyGroupListContinuationRejectsChangedScopeAndCurso
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, body) })
 		values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListLimit(2), consistencygroups.WithRecordListQuery("sort", "name:asc")))
 		var proof *resource.ResponseError
-		if err == nil || len(values) > 1 || len(*calls) != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(next, values, err, *calls, proof)
+		if err == nil || len(values) > 1 || calls.Len() != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(next, values, err, cgCalls(calls), proof)
 		}
 	}
 }
@@ -379,8 +341,8 @@ func TestPythonCinderConsistencyGroupListDictionaryFiltersDefaultsAndShallowEqua
 		body := `{"consistencygroups":[{"id":"id","description":` + example.value + `}]}`
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(202, body) })
 		values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListOpts(consistencygroups.RecordListOpts{Query: map[string]json.RawMessage{"description": json.RawMessage(example.filter)}})))
-		if len(*calls) != 1 || (err != nil) != example.fail || (len(values) == 1) != example.matches {
-			t.Fatal(example, values, err, *calls)
+		if calls.Len() != 1 || (err != nil) != example.fail || (len(values) == 1) != example.matches {
+			t.Fatal(example, values, err, cgCalls(calls))
 		}
 		if example.fail {
 			var proof *resource.ResponseError
@@ -393,13 +355,13 @@ func TestPythonCinderConsistencyGroupListDictionaryFiltersDefaultsAndShallowEqua
 		return cgWire(200, `{"consistencygroups":[{"id":"id","add_volumes":"actual","description":"scalar"}]}`)
 	})
 	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("add_volumes", "different"), consistencygroups.WithRecordListQuery("description", map[string]any{"key": true})))
-	if err != nil || len(values) != 0 || len(*calls) != 1 {
-		t.Fatal("first false must short circuit", values, err, *calls)
+	if err != nil || len(values) != 0 || calls.Len() != 1 {
+		t.Fatal("first false must short circuit", values, err, cgCalls(calls))
 	}
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, `{"consistencygroups":[{"id":"id"}]}`) })
 	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("description", nil)))
-	if err != nil || len(values) != 1 || len(*calls) != 1 {
-		t.Fatal("absent known descriptor defaults null", values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 {
+		t.Fatal("absent known descriptor defaults null", values, err, cgCalls(calls))
 	}
 }
 
@@ -408,15 +370,15 @@ func TestPythonCinderConsistencyGroupListExactDecimalPolicyIsExplicit(t *testing
 		return cgWire(200, `{"consistencygroups":[{"id":"id","description":9007199254740992}]}`)
 	})
 	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListOpts(consistencygroups.RecordListOpts{Query: map[string]json.RawMessage{"description": json.RawMessage(`9007199254740993.0`)}})))
-	if err != nil || len(values) != 0 || len(*calls) != 1 {
-		t.Fatal("Go exact decimals do not round to binary64", values, err, *calls)
+	if err != nil || len(values) != 0 || calls.Len() != 1 {
+		t.Fatal("Go exact decimals do not round to binary64", values, err, cgCalls(calls))
 	}
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id","description":1e-400}]}`)
 	})
 	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("description", map[string]any{})))
-	if err != nil || len(values) != 1 || len(*calls) != 1 {
-		t.Fatal("nonzero exact decimal remains truthy", values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 {
+		t.Fatal("nonzero exact decimal remains truthy", values, err, cgCalls(calls))
 	}
 }
 
@@ -425,16 +387,16 @@ func TestPythonCinderConsistencyGroupListConstructorAndShapesKeepActualPage(t *t
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(202, body) })
 		values, err := collectCG(api.ListRecords(context.Background()))
 		var proof *resource.ResponseError
-		if len(values) != 0 || len(*calls) != 1 || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(body, values, err, proof, *calls)
+		if len(values) != 0 || calls.Len() != 1 || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(body, values, err, proof, cgCalls(calls))
 		}
 	}
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":{"id":"singleton","volume_types":false,"unknown":0}}`)
 	})
 	values, err := collectCG(api.ListRecords(context.Background()))
-	if err != nil || len(values) != 1 || len(*calls) != 1 || string(values[0].Wire.Body["unknown"]) != "0" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 || string(values[0].Wire.Body["unknown"]) != "0" {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 	cgField(t, values[0], "volume_types", `[false]`)
 }
@@ -454,12 +416,12 @@ func TestPythonCinderConsistencyGroupOptionsMapsLazyProfilesAndSourceOwnership(t
 	options := []consistencygroups.RecordListOption{option}
 	sequence := api.ListRecords(context.Background(), options...)
 	options[0] = nil
-	if len(*calls) != 0 {
-		t.Fatal("list is lazy", *calls)
+	if calls.Len() != 0 {
+		t.Fatal("list is lazy", cgCalls(calls))
 	}
 	values, err := collectCG(sequence)
-	if err != nil || len(values) != 1 || len(*calls) != 1 || (*calls)[0].headers.Get("Accept") != "custom" || (*calls)[0].headers.Get("X-Policy") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].headers.Get("Accept") != "custom" || cgCalls(calls)[0].headers.Get("X-Policy") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 	values, err = collectCG(api.ListRecords(context.Background(), func(c *consistencygroups.RecordListOpts) error {
 		if c.Query == nil || c.Headers == nil {
@@ -468,8 +430,8 @@ func TestPythonCinderConsistencyGroupOptionsMapsLazyProfilesAndSourceOwnership(t
 		c.Headers["X-First"] = "owned"
 		return nil
 	}))
-	if err != nil || len(values) != 1 || len(*calls) != 2 || (*calls)[1].headers.Get("Accept") != "application/json" || (*calls)[1].headers.Get("X-First") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 2 || cgCalls(calls)[1].headers.Get("Accept") != "application/json" || cgCalls(calls)[1].headers.Get("X-First") != "owned" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 }
 
@@ -510,8 +472,8 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 	} {
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
 		err := invoke(api)
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, cgCalls(calls))
 		}
 	}
 	optionCause, cancelCause := errors.New("option cause"), errors.New("custom cancel")
@@ -531,8 +493,8 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 			t.Fatal(cause, err)
 		}
 	}
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(cgCalls(calls))
 	}
 }
 
@@ -577,10 +539,10 @@ func TestPythonCinderConsistencyGroupEveryOptionFamilyStartsWithOwnedHeaders(t *
 	if _, err := api.FindRecord(context.Background(), "id", func(c *consistencygroups.RecordFindOpts) error { require(c.Headers); return nil }); err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 7 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
-		t.Fatal(*calls, api.RawClient().MoreHeaders)
+	if calls.Len() != 7 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
+		t.Fatal(cgCalls(calls), api.RawClient().MoreHeaders)
 	}
-	for _, call := range *calls {
+	for _, call := range cgCalls(calls) {
 		if call.headers.Get("X-First") != "owned" || call.headers.Get("X-Source") != "original" {
 			t.Fatal(call)
 		}
@@ -592,15 +554,15 @@ func TestPythonCinderConsistencyGroupPhysicalReceiptsStopHooksAndRetainAllCauses
 		for _, code := range []int{202, 400, 401, 403, 404, 503} {
 			readCause, closeCause, cancelCause := errors.New("actual read"), errors.New("actual close"), errors.New("custom cancel")
 			ctx, cancel := context.WithCancelCause(context.Background())
-			faulty := &cgFaultBody{text: `{"partial":`, readErr: readCause, closeErr: closeCause}
+			faulty := &testcloud.Body{Data: `{"partial":`, ReadErr: readCause, CloseErr: closeCause}
 			api, calls := cgAPI(t, "", func(*http.Request) *http.Response {
 				response := cgWire(code, "")
 				response.Body = faulty
 				return response
 			})
 			original := api.RawClient().ResourceBase
-			faulty.afterRead = func() { api.RawClient().ResourceBase = original + "changed/" }
-			faulty.afterClose = func() { api.RawClient().ResourceBase = original; cancel(cancelCause) }
+			faulty.OnRead = func() { api.RawClient().ResourceBase = original + "changed/" }
+			faulty.OnClose = func() { api.RawClient().ResourceBase = original; cancel(cancelCause) }
 			retry, reauth := 0, 0
 			api.RawClient().RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retry++
@@ -623,20 +585,20 @@ func TestPythonCinderConsistencyGroupPhysicalReceiptsStopHooksAndRetainAllCauses
 			case "list":
 				_, err = collectCG(api.ListRecords(ctx))
 			}
-			if len(*calls) != 1 || faulty.closed != 1 || retry != 0 || reauth != 0 {
-				t.Fatal(operation, code, value, err, *calls, faulty.closed, retry, reauth)
+			if calls.Len() != 1 || faulty.Closes() != 1 || retry != 0 || reauth != 0 {
+				t.Fatal(operation, code, value, err, cgCalls(calls), faulty.Closes(), retry, reauth)
 			}
 			for _, cause := range []error{readCause, closeCause, cancelCause, context.Canceled, resource.ErrInvalidOption} {
 				if !errors.Is(err, cause) {
 					t.Fatal(operation, code, cause, err)
 				}
 			}
-			if operation != "delete" && operation != "list" && (value == nil || value.StatusCode != code || string(value.Envelope) != faulty.text || value.Header.Get("X-Request-Id") != "actual" || value.Resource != nil) {
+			if operation != "delete" && operation != "list" && (value == nil || value.StatusCode != code || string(value.Envelope) != faulty.Data || value.Header.Get("X-Request-Id") != "actual" || value.Resource != nil) {
 				t.Fatal(operation, code, value, err)
 			}
 			if code < 400 {
 				var proof *resource.ResponseError
-				if !errors.As(err, &proof) || proof.StatusCode != code || string(proof.Body) != faulty.text || proof.Header.Get("X-Request-Id") != "actual" {
+				if !errors.As(err, &proof) || proof.StatusCode != code || string(proof.Body) != faulty.Data || proof.Header.Get("X-Request-Id") != "actual" {
 					t.Fatal(operation, code, err, proof)
 				}
 			} else {
@@ -649,7 +611,7 @@ func TestPythonCinderConsistencyGroupPhysicalReceiptsStopHooksAndRetainAllCauses
 					}
 					original = authentication.ErrOriginal
 				}
-				if !errors.As(original, &native) || native.Actual != code || string(native.Body) != faulty.text || native.ResponseHeader.Get("X-Request-Id") != "actual" {
+				if !errors.As(original, &native) || native.Actual != code || string(native.Body) != faulty.Data || native.ResponseHeader.Get("X-Request-Id") != "actual" {
 					t.Fatal(operation, code, err, native)
 				}
 			}
@@ -688,10 +650,10 @@ func TestPythonCinderConsistencyGroupNativeRetryOwnsPayloadVersionAndFraming(t *
 			}
 			value, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateField("name", "owned"))
 			var native gophercloud.ErrUnexpectedResponseCode
-			if value == nil || value.StatusCode != 503 || string(value.Envelope) != `{"retry":"actual"}` || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 {
-				t.Fatal(selected, mode, value, err, *calls)
+			if value == nil || value.StatusCode != 503 || string(value.Envelope) != `{"retry":"actual"}` || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 {
+				t.Fatal(selected, mode, value, err, cgCalls(calls))
 			}
-			cgJSON(t, (*calls)[0].body, `{"consistencygroup":{"name":"owned"}}`)
+			cgJSON(t, cgCalls(calls)[0].body, `{"consistencygroup":{"name":"owned"}}`)
 		}
 	}
 }
@@ -718,10 +680,10 @@ func TestPythonCinderConsistencyGroupClean401AndOrdinary503RetainOwnedPOST(t *te
 			}
 		}
 		value, err := api.CreateRecord(context.Background(), consistencygroups.WithRecordCreateField("volume_types", "type-a,type-b"))
-		if err != nil || value == nil || len(*calls) != 2 || callbacks != 1 || (*calls)[1].headers.Get("X-Auth-Token") != "live" || code == 503 && (*calls)[1].headers.Get("X-Retry") != "ordinary" {
-			t.Fatal(code, value, err, *calls, callbacks)
+		if err != nil || value == nil || calls.Len() != 2 || callbacks != 1 || cgCalls(calls)[1].headers.Get("X-Auth-Token") != "live" || code == 503 && cgCalls(calls)[1].headers.Get("X-Retry") != "ordinary" {
+			t.Fatal(code, value, err, cgCalls(calls), callbacks)
 		}
-		for _, call := range *calls {
+		for _, call := range cgCalls(calls) {
 			if call.method != http.MethodPost || call.headers.Get("OpenStack-API-Version") != "volume 3.90" {
 				t.Fatal(call)
 			}
@@ -737,11 +699,11 @@ func TestPythonCinderConsistencyGroupSourceAdmissionAndSelectedAliasesRemainUnca
 		expected := map[string]string{"OpenStack-API-Version": "volume 3.90", "X-OpenStack-Volume-API-Version": "3.90"}
 		api.RawClient().MoreHeaders = source
 		value, err := api.GetRecord(context.Background(), "id", consistencygroups.WithRecordGetMicroversion("3.99"))
-		if err != nil || value == nil || value.StatusCode != code || len(*calls) != 1 || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.99" || api.RawClient().Microversion != "3.90" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
-			t.Fatal(code, value, err, *calls)
+		if err != nil || value == nil || value.StatusCode != code || calls.Len() != 1 || cgCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.99" || api.RawClient().Microversion != "3.90" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) {
+			t.Fatal(code, value, err, cgCalls(calls))
 		}
-		if err := api.DeleteRecord(context.Background(), "id"); err != nil || len(*calls) != 2 || (*calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.90" {
-			t.Fatal(code, err, *calls)
+		if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 2 || cgCalls(calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.90" {
+			t.Fatal(code, err, cgCalls(calls))
 		}
 	}
 }
@@ -763,8 +725,8 @@ func TestPythonCinderConsistencyGroupListNextUsesPythonBinary64TruthinessAndActu
 				return cgWire(203, body)
 			})
 			values, err := collectCG(api.ListRecords(context.Background()))
-			if len(values) != 1 || len(*calls) != 1 || (err != nil) != test.truthy {
-				t.Fatal(test, values, err, *calls)
+			if len(values) != 1 || calls.Len() != 1 || (err != nil) != test.truthy {
+				t.Fatal(test, values, err, cgCalls(calls))
 			}
 			cgField(t, values[0], "id", `"first"`)
 			if values[0].StatusCode != 203 || string(values[0].Envelope) != body || values[0].Header.Get("X-Request-Id") != "actual" {
@@ -789,12 +751,12 @@ func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTT
 		for _, input := range []any{nil, false, 0, cgReservedMarshal(func() ([]byte, error) { t.Fatal("reserved control invoked Marshaler", key); return nil, nil })} {
 			api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("reserved control reached HTTP", key); return nil })
 			option := consistencygroups.WithRecordListQuery(key, input)
-			if len(*calls) != 0 {
+			if calls.Len() != 0 {
 				t.Fatal("option factory executed HTTP", key)
 			}
 			values, err := collectCG(api.ListRecords(context.Background(), option))
-			if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-				t.Fatal(key, input, values, err, *calls)
+			if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+				t.Fatal(key, input, values, err, cgCalls(calls))
 			}
 		}
 		for _, raw := range []json.RawMessage{json.RawMessage(`null`), json.RawMessage(`false`), json.RawMessage(`0`), json.RawMessage(`not JSON`)} {
@@ -807,22 +769,22 @@ func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeMarshalAndHTT
 					option = consistencygroups.WithRecordListOpts(consistencygroups.RecordListOpts{Query: map[string]json.RawMessage{key: raw}})
 				}
 				values, err := collectCG(api.ListRecords(context.Background(), option))
-				if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-					t.Fatal(key, string(raw), callback, values, err, *calls)
+				if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+					t.Fatal(key, string(raw), callback, values, err, cgCalls(calls))
 				}
 			}
 		}
 	}
 	api, calls := cgAPI(t, "", func(*http.Request) *http.Response { return cgWire(200, `{"consistencygroups":[]}`) })
 	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListQuery("SESSION", cgReservedMarshal(func() ([]byte, error) { t.Fatal("ordinary unknown parameter invoked Marshaler"); return nil, nil }))))
-	if err != nil || len(values) != 0 || len(*calls) != 1 || (*calls)[0].query != "" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 0 || calls.Len() != 1 || cgCalls(calls)[0].query != "" {
+		t.Fatal(values, err, cgCalls(calls))
 	}
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id"}],"next":"?marker=second"}`)
 	})
 	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), consistencygroups.WithRecordListPaginated(false), consistencygroups.WithRecordListMaxItems(1)))
-	if err != nil || len(values) != 1 || len(*calls) != 1 || (*calls)[0].path != cgBase || (*calls)[0].query != "limit=1" {
-		t.Fatal("typed controls remain owned functional options", values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[0].query != "limit=1" {
+		t.Fatal("typed controls remain owned functional options", values, err, cgCalls(calls))
 	}
 }

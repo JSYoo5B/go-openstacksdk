@@ -5,7 +5,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	v3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
@@ -16,22 +15,12 @@ import (
 // pythonCinderExtensionCall records the wire request openstacksdk would also send.
 type pythonCinderExtensionCall struct{ method, path, query, body string }
 
-type pythonCinderExtensionTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonCinderExtensionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 // extensions() lists the Extension resource from the Cinder endpoint; Go reuses the service client with common/extensions.
 func TestPythonCinderExtensionsList(t *testing.T) {
 	ctx := context.Background()
 	var calls []pythonCinderExtensionCall
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCinderExtensionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -39,8 +28,8 @@ func TestPythonCinderExtensionsList(t *testing.T) {
 		}
 		calls = append(calls, pythonCinderExtensionCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		body := `{"extensions":[{"alias":"os-hosts","name":"Hosts","description":"Admin-only host administration.","namespace":"","updated":"2011-06-29T00:00:00+00:00","links":[]},{"alias":"backups","name":"Backups","description":"Backups support.","updated":"2012-12-12T00:00:00+00:00","links":[{"rel":"describedby","href":"https://example.invalid"}]}]}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	api := extensions.New(v3.New(client).RawClient())

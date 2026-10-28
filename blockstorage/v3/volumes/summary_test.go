@@ -40,13 +40,13 @@ func TestPythonVolumeSummarySelectsDetailsAndPreservesQuery(t *testing.T) {
 			if details {
 				path += "/detail"
 			}
-			if !reflect.DeepEqual(ids, []string{"vol-1", "vol-2"}) || len(*calls) != 2 {
-				t.Fatal(ids, *calls)
+			if !reflect.DeepEqual(ids, []string{"vol-1", "vol-2"}) || calls.Len() != 2 {
+				t.Fatal(ids, pythonVolumeCalls(calls))
 			}
-			first, _ := url.ParseQuery((*calls)[0].query)
+			first, _ := url.ParseQuery(pythonVolumeCalls(calls)[0].query)
 			expected := url.Values{"name": {"data"}, "status": {"available"}, "limit": {"4"}, "all_tenants": {"True"}}
-			if (*calls)[0].path != path || (*calls)[1].path != path || (*calls)[0].method != "GET" || (*calls)[0].body != "" || !reflect.DeepEqual(first, expected) || (*calls)[1].query != "marker=vol-1" {
-				t.Fatal(*calls)
+			if pythonVolumeCalls(calls)[0].path != path || pythonVolumeCalls(calls)[1].path != path || pythonVolumeCalls(calls)[0].method != "GET" || pythonVolumeCalls(calls)[0].body != "" || !reflect.DeepEqual(first, expected) || pythonVolumeCalls(calls)[1].query != "marker=vol-1" {
+				t.Fatal(pythonVolumeCalls(calls))
 			}
 		})
 	}
@@ -77,8 +77,8 @@ func TestPythonVolumeSummaryLocalControlsAndConsumerBreak(t *testing.T) {
 					break
 				}
 			}
-			if !reflect.DeepEqual(ids, check.want) || len(*calls) != 1 || (*calls)[0].path != pythonVolumeBase || (*calls)[0].query != "limit=9" {
-				t.Fatal(ids, *calls)
+			if !reflect.DeepEqual(ids, check.want) || calls.Len() != 1 || pythonVolumeCalls(calls)[0].path != pythonVolumeBase || pythonVolumeCalls(calls)[0].query != "limit=9" {
+				t.Fatal(ids, pythonVolumeCalls(calls))
 			}
 		})
 	}
@@ -95,8 +95,8 @@ func TestPythonVolumeSummaryLocalControlsAndConsumerBreak(t *testing.T) {
 				rows++
 			}
 		}
-		if failure == nil || rows != 0 || len(*calls) != 1 {
-			t.Fatal(rows, failure, *calls)
+		if failure == nil || rows != 0 || calls.Len() != 1 {
+			t.Fatal(rows, failure, pythonVolumeCalls(calls))
 		}
 	})
 }
@@ -127,8 +127,8 @@ func TestPythonVolumeSummaryPreflightAndPartialFailures(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if len(*calls) != 0 {
-			t.Fatal(*calls)
+		if calls.Len() != 0 {
+			t.Fatal(pythonVolumeCalls(calls))
 		}
 	})
 	t.Run("option failure retains callback and cancellation cause", func(t *testing.T) {
@@ -146,8 +146,8 @@ func TestPythonVolumeSummaryPreflightAndPartialFailures(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
-		if len(*calls) != 0 {
-			t.Fatal(*calls)
+		if calls.Len() != 0 {
+			t.Fatal(pythonVolumeCalls(calls))
 		}
 	})
 	t.Run("later page HTTP error follows earlier rows", func(t *testing.T) {
@@ -168,8 +168,8 @@ func TestPythonVolumeSummaryPreflightAndPartialFailures(t *testing.T) {
 		}
 		var native gophercloud.ErrUnexpectedResponseCode
 		var operation *resource.OperationError
-		if !reflect.DeepEqual(ids, []string{"vol-1"}) || len(*calls) != 2 || !errors.As(failure, &native) || native.Actual != 403 || !errors.As(failure, &operation) || operation.Operation != "ListSummary" || operation.Resource != "volumes" {
-			t.Fatal(ids, failure, native, operation, *calls)
+		if !reflect.DeepEqual(ids, []string{"vol-1"}) || calls.Len() != 2 || !errors.As(failure, &native) || native.Actual != 403 || !errors.As(failure, &operation) || operation.Operation != "ListSummary" || operation.Resource != "volumes" {
+			t.Fatal(ids, failure, native, operation, pythonVolumeCalls(calls))
 		}
 	})
 	t.Run("cancel after response retains context cause", func(t *testing.T) {
@@ -189,8 +189,8 @@ func TestPythonVolumeSummaryPreflightAndPartialFailures(t *testing.T) {
 				rows++
 			}
 		}
-		if rows != 0 || len(*calls) != 1 || !errors.Is(failure, cause) || !errors.Is(failure, context.Canceled) {
-			t.Fatal(rows, failure, *calls)
+		if rows != 0 || calls.Len() != 1 || !errors.Is(failure, cause) || !errors.Is(failure, context.Canceled) {
+			t.Fatal(rows, failure, pythonVolumeCalls(calls))
 		}
 	})
 }

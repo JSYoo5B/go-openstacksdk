@@ -3,7 +3,6 @@ package qos_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -19,36 +18,27 @@ import (
 // pythonQoSCall records the wire request openstacksdk would also send.
 type pythonQoSCall struct{ method, path, query, body string }
 
-type pythonQoSTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonQoSTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonQoSWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonQoSAPI(t *testing.T, reply func(*http.Request) *http.Response) (*qos.API, *[]pythonQoSCall) {
+func pythonQoSAPI(t *testing.T, reply func(*http.Request) *http.Response) (*qos.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonQoSCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonQoSTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonQoSCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return qos.New(client), calls
+}
+
+// pythonQoSCalls projects recorded calls onto the local call fields.
+func pythonQoSCalls(rec *testcloud.Recorder) []pythonQoSCall {
+	calls := []pythonQoSCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonQoSCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonQoSBase = "/cinder/v3/project/qos-specs"
@@ -95,8 +85,8 @@ func TestPythonQoSCrudMatchesProxyRequests(t *testing.T) {
 		{http.MethodDelete, pythonQoSBase + "/qos-1", "force=False", ""},
 		{http.MethodDelete, pythonQoSBase + "/qos-1", "force=True", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonQoSCalls(calls), want) {
+		t.Fatalf("%+v", pythonQoSCalls(calls))
 	}
 }
 
@@ -115,8 +105,8 @@ func TestPythonQoSDeleteMissingPolicies(t *testing.T) {
 	if err := api.Delete(ctx, "qos-1", qos.WithDeleteQuery("force", "True")); !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(err)
 	}
-	if len(*calls) != 3 || (*calls)[0].query != "" || (*calls)[2].query != "force=True" {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 3 || pythonQoSCalls(calls)[0].query != "" || pythonQoSCalls(calls)[2].query != "force=True" {
+		t.Fatalf("%+v", pythonQoSCalls(calls))
 	}
 }
 
@@ -172,8 +162,8 @@ func TestPythonQoSAssociationsKeysAndList(t *testing.T) {
 		{http.MethodGet, pythonQoSBase, "limit=1", ""},
 		{http.MethodGet, pythonQoSBase, "marker=qos-1", ""},
 	}
-	if !reflect.DeepEqual(associations, []string{"volume_type/vt-1/fast"}) || !reflect.DeepEqual(ids, []string{"qos-1", "qos-2"}) || !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%v %v %+v", associations, ids, *calls)
+	if !reflect.DeepEqual(associations, []string{"volume_type/vt-1/fast"}) || !reflect.DeepEqual(ids, []string{"qos-1", "qos-2"}) || !reflect.DeepEqual(pythonQoSCalls(calls), want) {
+		t.Fatalf("%v %v %+v", associations, ids, pythonQoSCalls(calls))
 	}
 }
 
@@ -194,8 +184,8 @@ func TestPythonQoSFindHasNoIDThenNameFallback(t *testing.T) {
 	if err != nil || byName.ID != "qos-1" {
 		t.Fatal(byName, err)
 	}
-	query, _ := url.ParseQuery((*calls)[1].query)
-	if len(*calls) != 2 || (*calls)[0].path != pythonQoSBase+"/gold" || (*calls)[1].path != pythonQoSBase || len(query) != 0 {
-		t.Fatalf("%+v", *calls)
+	query, _ := url.ParseQuery(pythonQoSCalls(calls)[1].query)
+	if calls.Len() != 2 || pythonQoSCalls(calls)[0].path != pythonQoSBase+"/gold" || pythonQoSCalls(calls)[1].path != pythonQoSBase || len(query) != 0 {
+		t.Fatalf("%+v", pythonQoSCalls(calls))
 	}
 }

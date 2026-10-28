@@ -3,9 +3,7 @@ package defaulttypes_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/defaulttypes"
@@ -13,16 +11,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type dtTransport func(*http.Request) (*http.Response, error)
-
-func (f dtTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 
 type dtCall struct {
 	method, path, query, body string
@@ -35,27 +23,30 @@ func dtDiscovery(maximum string) string {
 	return `{"version":{"id":"v3.0","status":"CURRENT","version":"` + maximum + `","min_version":"3.0"}}`
 }
 
-func dtAPI(t *testing.T, version, maximum string, reply func(*http.Request) (int, string)) (*defaulttypes.API, *[]dtCall) {
+func dtAPI(t *testing.T, version, maximum string, reply func(*http.Request) (int, string)) (*defaulttypes.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]dtCall{}
-	cloud.Provider.HTTPClient.Transport = dtTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, dtCall{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) {
 		code, text := 200, dtDiscovery(maximum)
 		if r.URL.Path != "/cinder/v3/" {
 			code, text = reply(r)
 		}
-		return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(text))}, nil
+		return testcloud.Response(code, text, http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
 	return defaulttypes.New(client), calls
+}
+
+// dtCalls projects recorded calls onto the local call fields.
+func dtCalls(rec *testcloud.Recorder) []dtCall {
+	calls := []dtCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, dtCall{call.Method, call.EscapedPath, call.RawQuery, call.Body, call.Header})
+	}
+	return calls
 }
 
 func dtOperation(t *testing.T, err error, operation string, code int) {
@@ -87,10 +78,10 @@ func TestDefaultTypeListRequiresMicroversion367(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 || (*calls)[0].path != "/cinder/v3/" || (*calls)[1].method != http.MethodGet || (*calls)[1].path != dtBase || (*calls)[1].query != "" {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || dtCalls(calls)[0].path != "/cinder/v3/" || dtCalls(calls)[1].method != http.MethodGet || dtCalls(calls)[1].path != dtBase || dtCalls(calls)[1].query != "" {
+		t.Fatal(dtCalls(calls))
 	}
-	dtVersion(t, (*calls)[1], "3.67")
+	dtVersion(t, dtCalls(calls)[1], "3.67")
 	if len(values) != 2 || *values[0].ProjectID != "p1" || *values[0].VolumeTypeID != "vt1" || values[0].ID != "" || len(values[1].Discovery) != 1 {
 		t.Fatalf("rows: %#v", values)
 	}
@@ -101,42 +92,42 @@ func TestDefaultTypeListRequiresMicroversion367(t *testing.T) {
 			return 0, ""
 		})
 		_, err = api.All(context.Background())
-		if !errors.Is(err, resource.ErrUnsupported) || len(*calls) != 1 {
-			t.Fatal(item, err, *calls)
+		if !errors.Is(err, resource.ErrUnsupported) || calls.Len() != 1 {
+			t.Fatal(item, err, dtCalls(calls))
 		}
 		dtOperation(t, err, "List", 0)
 	}
 
 	api, calls = dtAPI(t, "3.70", "3.70", func(*http.Request) (int, string) { return 200, `{"default_types":[]}` })
-	if _, err = api.All(context.Background()); err != nil || len(*calls) != 2 {
-		t.Fatal(err, *calls)
+	if _, err = api.All(context.Background()); err != nil || calls.Len() != 2 {
+		t.Fatal(err, dtCalls(calls))
 	}
-	dtVersion(t, (*calls)[1], "3.70")
+	dtVersion(t, dtCalls(calls)[1], "3.70")
 }
 
 func TestDefaultTypeGetSetUnset(t *testing.T) {
 	api, calls := dtAPI(t, "", "3.70", func(*http.Request) (int, string) { return 200, `{"default_type":` + dtRow + `}` })
 	v, err := api.Get(context.Background(), "p1")
-	if err != nil || (*calls)[1].method != http.MethodGet || (*calls)[1].path != dtBase+"/p1" {
-		t.Fatal(err, *calls)
+	if err != nil || dtCalls(calls)[1].method != http.MethodGet || dtCalls(calls)[1].path != dtBase+"/p1" {
+		t.Fatal(err, dtCalls(calls))
 	}
-	dtVersion(t, (*calls)[1], "3.67")
+	dtVersion(t, dtCalls(calls)[1], "3.67")
 	if v.ID != "p1" || *v.ProjectID != "p1" || *v.VolumeTypeID != "vt1" || v.StatusCode != 200 {
 		t.Fatalf("get: %#v", v)
 	}
 
 	api, calls = dtAPI(t, "", "3.70", func(*http.Request) (int, string) { return 200, `{"default_type":` + dtRow + `}` })
 	v, err = api.Set(context.Background(), "p1", "vt1")
-	if err != nil || (*calls)[1].method != http.MethodPut || (*calls)[1].path != dtBase+"/p1" || (*calls)[1].body != `{"default_type":{"volume_type":"vt1"}}` {
-		t.Fatal(err, *calls)
+	if err != nil || dtCalls(calls)[1].method != http.MethodPut || dtCalls(calls)[1].path != dtBase+"/p1" || dtCalls(calls)[1].body != `{"default_type":{"volume_type":"vt1"}}` {
+		t.Fatal(err, dtCalls(calls))
 	}
 	if v.ID != "p1" || *v.VolumeTypeID != "vt1" || *v.ProjectID != "p1" {
 		t.Fatalf("set: %#v", v)
 	}
 	api, calls = dtAPI(t, "3.67", "3.70", func(*http.Request) (int, string) { return 200, `` })
 	v, err = api.Set(context.Background(), "p1", "")
-	if err != nil || (*calls)[1].body != `{"default_type":{"volume_type_id":""}}` || v.ID != "p1" || *v.VolumeTypeID != "" {
-		t.Fatal(err, *calls, v)
+	if err != nil || dtCalls(calls)[1].body != `{"default_type":{"volume_type_id":""}}` || v.ID != "p1" || *v.VolumeTypeID != "" {
+		t.Fatal(err, dtCalls(calls), v)
 	}
 	api, _ = dtAPI(t, "", "3.70", func(*http.Request) (int, string) { return 404, `{}` })
 	_, err = api.Set(context.Background(), "p1", "vt1")
@@ -149,10 +140,10 @@ func TestDefaultTypeGetSetUnset(t *testing.T) {
 	}{{204, nil, false}, {404, nil, false}, {404, []defaulttypes.DeleteOption{defaulttypes.WithDeleteIgnoreMissing(false)}, true}, {403, nil, true}} {
 		api, calls = dtAPI(t, "", "3.70", func(*http.Request) (int, string) { return item.code, `` })
 		err = api.Unset(context.Background(), "p1", item.options...)
-		if (*calls)[1].method != http.MethodDelete || (*calls)[1].path != dtBase+"/p1" {
-			t.Fatal(*calls)
+		if dtCalls(calls)[1].method != http.MethodDelete || dtCalls(calls)[1].path != dtBase+"/p1" {
+			t.Fatal(dtCalls(calls))
 		}
-		dtVersion(t, (*calls)[1], "3.67")
+		dtVersion(t, dtCalls(calls)[1], "3.67")
 		if item.fail {
 			dtOperation(t, err, "Unset", item.code)
 		} else if err != nil {

@@ -2,10 +2,8 @@ package services_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,37 +14,28 @@ import (
 // pythonServiceCall records the wire request openstacksdk would also send.
 type pythonServiceCall struct{ method, path, query, body, version string }
 
-type pythonServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonServiceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonServiceAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*services.API, *[]pythonServiceCall) {
+func pythonServiceAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*services.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonServiceCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonServiceTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonServiceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = microversion
 	return services.New(client), calls
+}
+
+// pythonServiceCalls projects recorded calls onto the local call fields.
+func pythonServiceCalls(rec *testcloud.Recorder) []pythonServiceCall {
+	calls := []pythonServiceCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonServiceCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("OpenStack-API-Version")})
+	}
+	return calls
 }
 
 const pythonServicePath = "/cinder/v3/project/os-services"
@@ -85,8 +74,8 @@ func TestPythonServicesListMatchesProxyQuery(t *testing.T) {
 			api, calls := pythonServiceAPI(t, "3.32", func(*http.Request) *http.Response { return pythonServiceWire(200, pythonServiceRows) })
 			rows := pythonServiceCollect(t, api.List(ctx, tc.options...))
 			want := []pythonServiceCall{{http.MethodGet, pythonServicePath, tc.query, "", "volume 3.32"}}
-			if !reflect.DeepEqual(*calls, want) {
-				t.Fatalf("%+v", *calls)
+			if !reflect.DeepEqual(pythonServiceCalls(calls), want) {
+				t.Fatalf("%+v", pythonServiceCalls(calls))
 			}
 			if len(rows) != 2 {
 				t.Fatal(rows)
@@ -118,8 +107,8 @@ func TestPythonServicesListLocalFilterIsCallerSide(t *testing.T) {
 	if !reflect.DeepEqual(enabled, []string{"cinder-volume"}) {
 		t.Fatal(enabled)
 	}
-	if want := []pythonServiceCall{{http.MethodGet, pythonServicePath, "", "", ""}}; !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if want := []pythonServiceCall{{http.MethodGet, pythonServicePath, "", "", ""}}; !reflect.DeepEqual(pythonServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonServiceCalls(calls))
 	}
 }
 
@@ -128,8 +117,8 @@ func TestPythonServiceFindListPhase(t *testing.T) {
 	ctx := context.Background()
 	api, calls := pythonServiceAPI(t, "", func(*http.Request) *http.Response { return pythonServiceWire(200, pythonServiceRows) })
 	rows := pythonServiceCollect(t, api.List(ctx, services.WithListOptions(services.ListOpts{Host: "node@lvm"})))
-	if want := []pythonServiceCall{{http.MethodGet, pythonServicePath, "host=node%40lvm", "", ""}}; !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if want := []pythonServiceCall{{http.MethodGet, pythonServicePath, "host=node%40lvm", "", ""}}; !reflect.DeepEqual(pythonServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonServiceCalls(calls))
 	}
 	var matched []services.Service
 	for _, row := range rows {

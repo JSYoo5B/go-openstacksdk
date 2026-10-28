@@ -22,8 +22,8 @@ func TestPythonCinderFindServiceListsOnlyAndMatchesAliasIDHost(t *testing.T) {
 				return 203, `{"services":[{"id":7,"binary":"cinder-volume","host":"wrong"},{"id":7,"binary":"cinder-volume","host":"wanted","zone":"az1","x_unknown":false}]}`
 			})
 			row, err := api.FindRecord(context.Background(), identity, services.WithFindRecordQuery("host", "wanted"), services.WithFindRecordQuery("availability_zone", "az1"))
-			if err != nil || row == nil || len(*calls) != 1 || string(row.Body["name"]) != `"cinder-volume"` || string(row.Body["host"]) != `"wanted"` || row.StatusCode != 203 || string(row.Wire["x_unknown"]) != "false" {
-				t.Fatal(row, err, *calls)
+			if err != nil || row == nil || calls.Len() != 1 || string(row.Body["name"]) != `"cinder-volume"` || string(row.Body["host"]) != `"wanted"` || row.StatusCode != 203 || string(row.Wire["x_unknown"]) != "false" {
+				t.Fatal(row, err, svcActionCalls(calls))
 			}
 		})
 	}
@@ -79,10 +79,10 @@ func TestPythonCinderFindServiceDiscoveryAndOwnedOptions(t *testing.T) {
 		return 200, `{"services":[{"id":"1","binary":"match","host":"original"}]}`
 	})
 	row, err := api.FindRecord(context.Background(), "match", option)
-	if err != nil || row == nil || len(*calls) != 2 || len(row.Discovery) != 1 {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || calls.Len() != 2 || len(row.Discovery) != 1 {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
-	svcActionVersion(t, (*calls)[1], "3.32")
+	svcActionVersion(t, svcActionCalls(calls)[1], "3.32")
 }
 func TestPythonCinderCleanupWorkersExactDefaultsAndRawResult(t *testing.T) {
 	const body = `{"binary":null,"cluster_name":null,"disabled":null,"host":null,"is_up":false,"resource_id":null,"resource_type":null,"service_id":null}`
@@ -93,8 +93,8 @@ func TestPythonCinderCleanupWorkersExactDefaultsAndRawResult(t *testing.T) {
 		return 203, `{"cleaning":[{"id":7,"host":"host"}],"unavailable":[],"x_extension":9007199254740993}`
 	})
 	row, err := api.CleanupServiceWorkers(context.Background())
-	if err != nil || row == nil || len(*calls) != 1 || (*calls)[0].body != body || row.StatusCode != 203 || !strings.Contains(string(row.JSON), "9007199254740993") {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || calls.Len() != 1 || svcActionCalls(calls)[0].body != body || row.StatusCode != 203 || !strings.Contains(string(row.JSON), "9007199254740993") {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
 }
 func TestPythonCinderCleanupWorkersVersionAndOwnedFilters(t *testing.T) {
@@ -103,25 +103,25 @@ func TestPythonCinderCleanupWorkersVersionAndOwnedFilters(t *testing.T) {
 	filters["host"][1] = 'X'
 	api, calls := svcActionAPI(t, "", "3.70", func(*http.Request) (int, string) { return 200, `{"cleaning":[],"unavailable":[]}` })
 	row, err := api.CleanupServiceWorkers(context.Background(), option)
-	if err != nil || row == nil || len(*calls) != 2 || len(row.Discovery) != 1 || !strings.Contains((*calls)[1].body, `"host":"owned"`) || !strings.Contains((*calls)[1].body, `"is_up":null`) {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || calls.Len() != 2 || len(row.Discovery) != 1 || !strings.Contains(svcActionCalls(calls)[1].body, `"host":"owned"`) || !strings.Contains(svcActionCalls(calls)[1].body, `"is_up":null`) {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
-	svcActionVersion(t, (*calls)[1], "3.32")
+	svcActionVersion(t, svcActionCalls(calls)[1], "3.32")
 	low, lowCalls := svcActionAPI(t, "3.23", "3.70", func(*http.Request) (int, string) { t.Fatal("unsupported worker request"); return 0, "" })
-	if _, err := low.CleanupServiceWorkers(context.Background()); !errors.Is(err, resource.ErrUnsupported) || len(*lowCalls) != 0 {
-		t.Fatal(err, *lowCalls)
+	if _, err := low.CleanupServiceWorkers(context.Background()); !errors.Is(err, resource.ErrUnsupported) || lowCalls.Len() != 0 {
+		t.Fatal(err, svcActionCalls(lowCalls))
 	}
 }
 func TestPythonCinderCleanupWorkersPreflightAndFailureProof(t *testing.T) {
 	api, calls := svcActionAPI(t, "3.24", "3.70", func(*http.Request) (int, string) { return 404, `{"error":"cleanup actual"}` })
 	for _, options := range [][]services.CleanupWorkersOption{{nil}, {services.WithCleanupWorkerFilter("unknown", true)}} {
-		if _, err := api.CleanupServiceWorkers(context.Background(), options...); err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if _, err := api.CleanupServiceWorkers(context.Background(), options...); err == nil || calls.Len() != 0 {
+			t.Fatal(err, svcActionCalls(calls))
 		}
 	}
 	row, err := api.CleanupServiceWorkers(context.Background())
-	if row == nil || row.JSON != nil || len(*calls) != 1 {
-		t.Fatal(row, err, *calls)
+	if row == nil || row.JSON != nil || calls.Len() != 1 {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
 	svcActionOperation(t, err, "CleanupServiceWorkers", 404)
 }
@@ -134,8 +134,8 @@ func TestPythonCinderFindServiceNamePresenceAndListRouteControls(t *testing.T) {
 		return 200, `{"services":[{"id":"one","binary":"match","name":null},{"id":"two","binary":"match"}]}`
 	})
 	row, err := api.FindRecord(context.Background(), "match", services.WithFindRecordQuery("list_base_path", "/alternate-services"), services.WithFindRecordQuery("limit", 2), services.WithFindRecordQuery("paginated", false))
-	if err != nil || row == nil || string(row.Body["id"]) != `"two"` || len(*calls) != 1 {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || string(row.Body["id"]) != `"two"` || calls.Len() != 1 {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
 }
 
@@ -155,8 +155,8 @@ func TestPythonCinderFindServiceUsesOwnedResourceListControls(t *testing.T) {
 		services.WithFindRecordQuery("jmespath_filters", "[?"),
 		services.WithFindRecordQuery("all_projects", true),
 		services.WithFindRecordQuery("host", "host"), services.WithFindRecordQuery("limit", 2), services.WithFindRecordQuery("paginated", false))
-	if err != nil || row == nil || len(*calls) != 1 {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || calls.Len() != 1 {
+		t.Fatal(row, err, svcActionCalls(calls))
 	}
 }
 
@@ -171,11 +171,11 @@ func TestPythonCinderFindServiceRawHeadersValidateAndFalseyControls(t *testing.T
 			})
 			row, err := api.FindRecord(context.Background(), "match", services.WithFindRecordOpts(services.FindRecordOpts{Query: map[string]json.RawMessage{"headers": raw, "list_base_path": json.RawMessage("false")}}))
 			if string(raw) == `{"X-Raw":3}` {
-				if err == nil || row != nil || len(*calls) != 0 {
-					t.Fatal(row, err, *calls)
+				if err == nil || row != nil || calls.Len() != 0 {
+					t.Fatal(row, err, svcActionCalls(calls))
 				}
-			} else if err != nil || row == nil || len(*calls) != 1 {
-				t.Fatal(row, err, *calls)
+			} else if err != nil || row == nil || calls.Len() != 1 {
+				t.Fatal(row, err, svcActionCalls(calls))
 			}
 		})
 	}

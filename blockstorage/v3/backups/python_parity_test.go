@@ -3,11 +3,9 @@ package backups_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
@@ -19,36 +17,27 @@ import (
 // pythonBackupCall records the wire request openstacksdk would also send.
 type pythonBackupCall struct{ method, path, query, body, version string }
 
-type pythonBackupTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonBackupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonBackupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonBackupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *[]pythonBackupCall) {
+func pythonBackupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*backups.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonBackupCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonBackupCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return backups.New(client), calls
+}
+
+// pythonBackupCalls projects recorded calls onto the local call fields.
+func pythonBackupCalls(rec *testcloud.Recorder) []pythonBackupCall {
+	calls := []pythonBackupCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonBackupCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("OpenStack-API-Version")})
+	}
+	return calls
 }
 
 const pythonBackupBase = "/cinder/v3/project/backups"
@@ -83,8 +72,8 @@ func TestPythonBackupGetCreateUpdateMatchProxyRequests(t *testing.T) {
 		{http.MethodPost, pythonBackupBase, "", `{"backup":{"availability_zone":"az1","container":"c","description":"d","force":true,"incremental":true,"metadata":{"k":"v"},"name":"nightly","snapshot_id":"snap-1","volume_id":"vol-1"}}`, ""},
 		{http.MethodPut, pythonBackupBase + "/bk-1", "", `{"backup":{"description":"d2","name":"weekly"}}`, ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonBackupCalls(calls), want) {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }
 
@@ -130,12 +119,12 @@ func TestPythonBackupListDetailsAndQuery(t *testing.T) {
 				}
 				ids = append(ids, value.ID)
 			}
-			if !reflect.DeepEqual(ids, []string{"bk-1", "bk-2"}) || len(*calls) != 2 {
-				t.Fatalf("%v %+v", ids, *calls)
+			if !reflect.DeepEqual(ids, []string{"bk-1", "bk-2"}) || calls.Len() != 2 {
+				t.Fatalf("%v %+v", ids, pythonBackupCalls(calls))
 			}
-			first, _ := url.ParseQuery((*calls)[0].query)
-			if (*calls)[0].path != tc.path || !reflect.DeepEqual(first, tc.query) || (*calls)[1].query != "marker=bk-1" {
-				t.Fatalf("%+v", *calls)
+			first, _ := url.ParseQuery(pythonBackupCalls(calls)[0].query)
+			if pythonBackupCalls(calls)[0].path != tc.path || !reflect.DeepEqual(first, tc.query) || pythonBackupCalls(calls)[1].query != "marker=bk-1" {
+				t.Fatalf("%+v", pythonBackupCalls(calls))
 			}
 		})
 	}
@@ -178,8 +167,8 @@ func TestPythonBackupDeleteForceAndResetAlias(t *testing.T) {
 		{http.MethodPost, pythonBackupBase + "/bk-1/action", "", `{"os-force_delete":{}}`, ""},
 		{http.MethodPost, pythonBackupBase + "/bk-1/action", "", `{"os-reset_status":{"status":"error"}}`, "volume 3.64"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonBackupCalls(calls), want) {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }
 
@@ -194,14 +183,14 @@ func TestPythonBackupFindHasNoIDThenNameFallback(t *testing.T) {
 	// find_backup("nightly") would GET /backups/nightly and then list /backups/detail?name=nightly.
 	// Go's Find(Name) lists without a name query and matches names locally.
 	byID, err := api.Find(ctx, resource.ID("nightly"), resource.WithIgnoreMissing())
-	if err != nil || byID != nil || len(*calls) != 1 {
-		t.Fatal(byID, err, *calls)
+	if err != nil || byID != nil || calls.Len() != 1 {
+		t.Fatal(byID, err, pythonBackupCalls(calls))
 	}
 	byName, err := api.Find(ctx, resource.Name("nightly"))
 	if err != nil || byName.ID != "bk-1" {
 		t.Fatal(byName, err)
 	}
-	if (*calls)[1].path != pythonBackupBase+"/detail" || (*calls)[1].query != "" {
-		t.Fatalf("%+v", *calls)
+	if pythonBackupCalls(calls)[1].path != pythonBackupBase+"/detail" || pythonBackupCalls(calls)[1].query != "" {
+		t.Fatalf("%+v", pythonBackupCalls(calls))
 	}
 }

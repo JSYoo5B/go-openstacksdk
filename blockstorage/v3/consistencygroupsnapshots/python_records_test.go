@@ -23,17 +23,9 @@ type snapshotCall struct {
 	method, path, escaped, query, body string
 	headers                            http.Header
 }
-type snapshotTransport func(*http.Request) (*http.Response, error)
 
-func (f snapshotTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil {
-		response.Request = r
-	}
-	return response, err
-}
 func snapshotWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-consistency-group-snapshot"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-consistency-group-snapshot"}})
 }
 
 const snapshotBase = "/cinder/v3/project/cgsnapshots"
@@ -42,7 +34,7 @@ func snapshotAPI(t *testing.T, version string, reply func(*http.Request) *http.R
 	t.Helper()
 	fake := testcloud.New(t)
 	calls := &[]snapshotCall{}
-	fake.Provider.HTTPClient.Transport = snapshotTransport(func(r *http.Request) (*http.Response, error) {
+	fake.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		body := ""
 		if r.Body != nil {
 			raw, err := io.ReadAll(r.Body)
@@ -53,7 +45,7 @@ func snapshotAPI(t *testing.T, version string, reply func(*http.Request) *http.R
 		}
 		*calls = append(*calls, snapshotCall{r.Method, r.URL.Path, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
 		return reply(r), nil
-	})
+	}))
 	client := fake.Client("block-storage", "/cinder/v3/")
 	client.ResourceBase = fake.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
@@ -358,37 +350,6 @@ func TestPythonConsistencyGroupSnapshotDeleteDefaultMissingStrictAndOpaqueACK(t 
 }
 
 // Failure injection only: shared REST owns all body reading, closing and retries.
-type snapshotFaultBody struct {
-	data            []byte
-	read, close     error
-	onRead, onClose func()
-	closes          *atomic.Int32
-}
-
-func (b *snapshotFaultBody) Read(p []byte) (int, error) {
-	if len(b.data) > 0 {
-		n := copy(p, b.data)
-		b.data = b.data[n:]
-		if b.onRead != nil {
-			b.onRead()
-			b.onRead = nil
-		}
-		return n, nil
-	}
-	if b.read != nil {
-		return 0, b.read
-	}
-	return 0, io.EOF
-}
-func (b *snapshotFaultBody) Close() error {
-	if b.closes != nil {
-		b.closes.Add(1)
-	}
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.close
-}
 func TestPythonConsistencyGroupSnapshotPhysicalFaultsNeverReplayIgnoreOrInventSuccess(t *testing.T) {
 	for _, operation := range []string{"get", "list", "create", "delete"} {
 		for _, status := range []int{203, 404, 503} {
@@ -404,7 +365,7 @@ func TestPythonConsistencyGroupSnapshotPhysicalFaultsNeverReplayIgnoreOrInventSu
 				}
 				api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 					response := snapshotWire(status, body)
-					response.Body = &snapshotFaultBody{data: []byte(body), read: readCause, close: closeCause, closes: &closes, onRead: func() { client.ResourceBase = original + "changed/" }, onClose: func() { client.ResourceBase = original; cancel(cancelCause) }}
+					response.Body = &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause, OnRead: func() { client.ResourceBase = original + "changed/" }, OnClose: func() { closes.Add(1); client.ResourceBase = original; cancel(cancelCause) }}
 					return response
 				})
 				client = api.RawClient()

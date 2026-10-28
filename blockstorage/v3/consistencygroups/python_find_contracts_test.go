@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -18,8 +19,8 @@ func TestPythonCinderConsistencyGroupFindRecordDirectUntypedProjectionAndLiteral
 	for _, body := range []string{`{"consistencygroup":{"id":null,"name":false,"volume_types":"one","cls":false,"unknown":9007199254740993}}`, `{"consistencygroup":{"id":9007199254740993}}`, `{"consistencygroup":{}}`, `{bad`} {
 		api, calls := cgAPI(t, "3.90", func(*http.Request) *http.Response { return cgWire(200, body) })
 		value, err := api.FindRecord(context.Background(), "literal/id %2F")
-		if err != nil || value == nil || value.Resource == nil || len(*calls) != 1 || (*calls)[0].escaped != cgBase+"/literal%2Fid%20%252F" || (*calls)[0].query != "" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.90" || string(value.Envelope) != body || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || value.Resource == nil || calls.Len() != 1 || cgCalls(calls)[0].escaped != cgBase+"/literal%2Fid%20%252F" || cgCalls(calls)[0].query != "" || cgCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.90" || string(value.Envelope) != body || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, cgCalls(calls))
 		}
 		if body == `{bad` || body == `{"consistencygroup":{}}` {
 			cgField(t, value, "id", `"literal/id %2F"`)
@@ -60,8 +61,8 @@ func TestPythonCinderConsistencyGroupFindRecordCleanFallbackHasNoServerNameQuery
 					options = append(options, consistencygroups.WithRecordFindDetails(false))
 				}
 				value, err := api.FindRecord(context.Background(), "target", options...)
-				if err != nil || value == nil || len(*calls) != 3 || value.StatusCode != 202 || (*calls)[0].query != "" || (*calls)[1].query != "" || (*calls)[2].query != "offset=2" {
-					t.Fatal(value, err, *calls)
+				if err != nil || value == nil || calls.Len() != 3 || value.StatusCode != 202 || cgCalls(calls)[0].query != "" || cgCalls(calls)[1].query != "" || cgCalls(calls)[2].query != "offset=2" {
+					t.Fatal(value, err, cgCalls(calls))
 				}
 				cgField(t, value, "id", `"found"`)
 			})
@@ -74,8 +75,8 @@ func TestPythonCinderConsistencyGroupFindRecordCleanFallbackHasNoServerNameQuery
 		return cgWire(200, `{"consistencygroups":[{"id":"target","name":"different"},{"id":false,"name":false},{"id":null,"name":"other"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || len(*calls) != 2 || value == nil {
-		t.Fatal(value, err, *calls)
+	if err != nil || calls.Len() != 2 || value == nil {
+		t.Fatal(value, err, cgCalls(calls))
 	}
 	cgField(t, value, "name", `"different"`)
 }
@@ -93,8 +94,8 @@ func TestPythonCinderConsistencyGroupFindRecordMissingRequiresSuccessfulList(t *
 			options = append(options, consistencygroups.WithRecordFindIgnoreMissing(false))
 		}
 		value, err := api.FindRecord(context.Background(), "missing", options...)
-		if value != nil || len(*calls) != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
+			t.Fatal(value, err, cgCalls(calls))
 		}
 	}
 	for _, code := range []int{403, 404, 503} {
@@ -106,8 +107,8 @@ func TestPythonCinderConsistencyGroupFindRecordMissingRequiresSuccessfulList(t *
 		})
 		value, err := api.FindRecord(context.Background(), "missing")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if value != nil || len(*calls) != 2 || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"list":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 2 || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"list":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, cgCalls(calls))
 		}
 	}
 }
@@ -127,8 +128,8 @@ func TestPythonCinderConsistencyGroupFindRecordLateDuplicatesKeepAcceptedPage(t 
 		value, err := api.FindRecord(context.Background(), "target")
 		var ambiguous *resource.AmbiguousError
 		var proof *resource.ResponseError
-		if value != nil || len(*calls) != 3 || !errors.As(err, &ambiguous) || !reflect.DeepEqual(ambiguous.IDs, []string{"first", secondID}) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, ambiguous, proof, *calls)
+		if value != nil || calls.Len() != 3 || !errors.As(err, &ambiguous) || !reflect.DeepEqual(ambiguous.IDs, []string{"first", secondID}) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, ambiguous, proof, cgCalls(calls))
 		}
 	}
 }
@@ -136,7 +137,7 @@ func TestPythonCinderConsistencyGroupFindRecordLateDuplicatesKeepAcceptedPage(t 
 func TestPythonCinderConsistencyGroupFindRecordLateFailureDoesNotReturnFirstMatch(t *testing.T) {
 	for _, physical := range []bool{false, true} {
 		readCause, closeCause := errors.New("late read"), errors.New("late close")
-		faulty := &cgFaultBody{text: `{"late":"partial"}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"late":"partial"}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := cgAPI(t, "3.38", func(r *http.Request) *http.Response {
 			if r.URL.Path == cgBase+"/target" {
 				return cgWire(404, `{"member":false}`)
@@ -154,10 +155,10 @@ func TestPythonCinderConsistencyGroupFindRecordLateFailureDoesNotReturnFirstMatc
 		var native gophercloud.ErrUnexpectedResponseCode
 		want := `{"late":"actual"}`
 		if physical {
-			want = faulty.text
+			want = faulty.Data
 		}
-		if value != nil || len(*calls) != 3 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != want || native.ResponseHeader.Get("X-Request-Id") != "actual" || physical && (!errors.Is(err, readCause) || !errors.Is(err, closeCause) || faulty.closed != 1) {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 3 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != want || native.ResponseHeader.Get("X-Request-Id") != "actual" || physical && (!errors.Is(err, readCause) || !errors.Is(err, closeCause) || faulty.Closes() != 1) {
+			t.Fatal(value, err, cgCalls(calls))
 		}
 	}
 }
@@ -180,8 +181,8 @@ func TestPythonCinderConsistencyGroupFindRecordAcceptedErrorsAndListConstructorA
 		if stage == "list" {
 			wantCalls = 2
 		}
-		if value != nil || len(*calls) != wantCalls || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, proof, *calls)
+		if value != nil || calls.Len() != wantCalls || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, proof, cgCalls(calls))
 		}
 	}
 }
@@ -189,7 +190,7 @@ func TestPythonCinderConsistencyGroupFindRecordAcceptedErrorsAndListConstructorA
 func TestPythonCinderConsistencyGroupFindRecordRejectedReadCloseNeverFallsBack(t *testing.T) {
 	for _, code := range []int{400, 403, 404} {
 		readCause, closeCause := errors.New("member read"), errors.New("member close")
-		faulty := &cgFaultBody{text: `{"member":"partial"}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"member":"partial"}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := cgAPI(t, "3.38", func(*http.Request) *http.Response { reply := cgWire(code, ""); reply.Body = faulty; return reply })
 		hooks := 0
 		api.RawClient().ProviderClient.RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
@@ -198,8 +199,8 @@ func TestPythonCinderConsistencyGroupFindRecordRejectedReadCloseNeverFallsBack(t
 		}
 		value, err := api.FindRecord(context.Background(), "target")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != faulty.text || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 || hooks != 0 {
-			t.Fatal(value, err, *calls, faulty.closed, hooks)
+		if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != faulty.Data || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 || hooks != 0 {
+			t.Fatal(value, err, cgCalls(calls), faulty.Closes(), hooks)
 		}
 	}
 }
@@ -222,10 +223,10 @@ func TestPythonCinderConsistencyGroupFindRecordOptionsOwnBothPhaseSnapshots(t *t
 		return cgWire(200, `{"consistencygroups":[{"id":"found","name":"target"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "target", option, func(v *consistencygroups.RecordFindOpts) error { held = v; return nil })
-	if err != nil || value == nil || len(*calls) != 2 || (*calls)[1].path != cgBase {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 || cgCalls(calls)[1].path != cgBase {
+		t.Fatal(value, err, cgCalls(calls))
 	}
-	for _, call := range *calls {
+	for _, call := range cgCalls(calls) {
 		if call.headers.Get("X-Policy") != "snapshot" {
 			t.Fatal(call)
 		}
@@ -261,8 +262,8 @@ func TestPythonCinderConsistencyGroupFindRecordPreflightAndStickyOriginalSource(
 		},
 	} {
 		api, calls := cgAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
-		if err := invoke(api); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err := invoke(api); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, cgCalls(calls))
 		}
 	}
 	api, calls := cgAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source HTTP"); return nil })
@@ -273,8 +274,8 @@ func TestPythonCinderConsistencyGroupFindRecordPreflightAndStickyOriginalSource(
 		cancel(cause)
 		return cause
 	})
-	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
+		t.Fatal(err, cgCalls(calls))
 	}
 }
 
@@ -297,10 +298,10 @@ func TestPythonCinderConsistencyGroupFindRecordGetOverrideFallbackOriginalVersio
 		if wantGet == "" {
 			wantGet = "3.13"
 		}
-		if err != nil || value == nil || len(*calls) != 2 || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume "+wantGet || (*calls)[0].headers.Get("X-OpenStack-Volume-API-Version") != wantGet || (*calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.13" || (*calls)[1].headers.Get("X-OpenStack-Volume-API-Version") != "3.13" || (*calls)[0].headers.Get("Accept") != "application/source-custom" || (*calls)[1].headers.Get("Accept") != "application/json" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.13" {
-			t.Fatal(value, err, *calls, api.RawClient())
+		if err != nil || value == nil || calls.Len() != 2 || cgCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume "+wantGet || cgCalls(calls)[0].headers.Get("X-OpenStack-Volume-API-Version") != wantGet || cgCalls(calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.13" || cgCalls(calls)[1].headers.Get("X-OpenStack-Volume-API-Version") != "3.13" || cgCalls(calls)[0].headers.Get("Accept") != "application/source-custom" || cgCalls(calls)[1].headers.Get("Accept") != "application/json" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.13" {
+			t.Fatal(value, err, cgCalls(calls), api.RawClient())
 		}
-		for _, call := range *calls {
+		for _, call := range cgCalls(calls) {
 			if call.headers.Get("X-Original") != "kept" {
 				t.Fatal(call)
 			}
@@ -314,10 +315,10 @@ func TestPythonCinderConsistencyGroupFindRecordGetOverrideFallbackOriginalVersio
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "source"}
 	value, err := api.FindRecord(context.Background(), "target", consistencygroups.WithRecordFindHeaders(map[string]string{"accept": "per-call"}))
-	if err != nil || value == nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 {
+		t.Fatal(value, err, cgCalls(calls))
 	}
-	for _, call := range *calls {
+	for _, call := range cgCalls(calls) {
 		if call.headers.Get("Accept") != "per-call" {
 			t.Fatal(call)
 		}
@@ -326,15 +327,15 @@ func TestPythonCinderConsistencyGroupFindRecordGetOverrideFallbackOriginalVersio
 
 func TestPythonCinderConsistencyGroupFindRecordAcceptedTransientSourceMutationKeepsReceipt(t *testing.T) {
 	var api *consistencygroups.API
-	faulty := &cgFaultBody{text: `{"consistencygroup":{"id":"actual"}}`}
+	faulty := &testcloud.Body{Data: `{"consistencygroup":{"id":"actual"}}`}
 	api, calls := cgAPI(t, "3.38", func(*http.Request) *http.Response { reply := cgWire(200, ""); reply.Body = faulty; return reply })
 	original := api.RawClient().ResourceBase
-	faulty.afterRead = func() { api.RawClient().ResourceBase = "https://other.example/v3/project/" }
-	faulty.afterClose = func() { api.RawClient().ResourceBase = original }
+	faulty.OnRead = func() { api.RawClient().ResourceBase = "https://other.example/v3/project/" }
+	faulty.OnClose = func() { api.RawClient().ResourceBase = original }
 	value, err := api.FindRecord(context.Background(), "target")
 	var proof *resource.ResponseError
-	if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != faulty.text || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 {
-		t.Fatal(value, err, proof, *calls)
+	if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != faulty.Data || proof.Header.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 {
+		t.Fatal(value, err, proof, cgCalls(calls))
 	}
 }
 
@@ -357,8 +358,8 @@ func TestPythonCinderConsistencyGroupFindRecordNativeRetryOwnsVersionAndPreserve
 			}
 			value, err := api.FindRecord(context.Background(), "target")
 			var native gophercloud.ErrUnexpectedResponseCode
-			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"retry":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 {
-				t.Fatal(value, err, *calls)
+			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"retry":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 {
+				t.Fatal(value, err, cgCalls(calls))
 			}
 		})
 	}
@@ -376,8 +377,8 @@ func TestPythonCinderConsistencyGroupFindRecordNativeRetryOwnsVersionAndPreserve
 		return nil
 	}
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || value == nil || len(*calls) != 2 || (*calls)[1].headers.Get("X-Retry") != "allowed" || (*calls)[1].headers.Get("X-Auth-Token") != "live-refreshed" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 || cgCalls(calls)[1].headers.Get("X-Retry") != "allowed" || cgCalls(calls)[1].headers.Get("X-Auth-Token") != "live-refreshed" {
+		t.Fatal(value, err, cgCalls(calls))
 	}
 }
 
@@ -392,10 +393,10 @@ func TestPythonCinderConsistencyGroupFindRecordCleanRetryOriginalKeepsFallback(t
 		return err
 	}
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || value == nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 {
+		t.Fatal(value, err, cgCalls(calls))
 	}
-	query, _ := url.ParseQuery((*calls)[1].query)
+	query, _ := url.ParseQuery(cgCalls(calls)[1].query)
 	if len(query) != 0 {
 		t.Fatal("Group name match remains local", query)
 	}
@@ -406,7 +407,7 @@ func TestPythonCinderConsistencyGroupFindRecordAcceptedPhysicalCausesCannotBecom
 	for _, code := range []int{400, 403, 404} {
 		readCause := gophercloud.ErrUnexpectedResponseCode{Actual: code, Body: []byte(`{"nested":"not-physical-status"}`)}
 		closeCause := errors.New("accepted close")
-		faulty := &cgFaultBody{text: `{"consistencygroup":{"id":"partial"}}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"consistencygroup":{"id":"partial"}}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := cgAPI(t, "3.38", func(*http.Request) *http.Response { reply := cgWire(202, ""); reply.Body = faulty; return reply })
 		hooks := 0
 		api.RawClient().ProviderClient.RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
@@ -415,8 +416,8 @@ func TestPythonCinderConsistencyGroupFindRecordAcceptedPhysicalCausesCannotBecom
 		}
 		value, err := api.FindRecord(context.Background(), "target")
 		var proof *resource.ResponseError
-		if value != nil || !errors.Is(err, closeCause) || !gophercloud.ResponseCodeIs(err, code) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != faulty.text || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 || hooks != 0 {
-			t.Fatal(value, err, proof, *calls, faulty.closed, hooks)
+		if value != nil || !errors.Is(err, closeCause) || !gophercloud.ResponseCodeIs(err, code) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != faulty.Data || proof.Header.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 || hooks != 0 {
+			t.Fatal(value, err, proof, cgCalls(calls), faulty.Closes(), hooks)
 		}
 	}
 }
@@ -453,18 +454,18 @@ func TestPythonCinderConsistencyGroupFindRecordFirstCustomHeaderOptionOwnsDefaul
 					held = cfg
 					return nil
 				})
-				start := len(*calls)
+				start := calls.Len()
 				result, err := api.FindRecord(context.Background(), "target", options...)
-				if err != nil || result == nil || len(*calls) != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
-					t.Fatal(result, err, *calls, api.RawClient().MoreHeaders)
+				if err != nil || result == nil || calls.Len() != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
+					t.Fatal(result, err, cgCalls(calls), api.RawClient().MoreHeaders)
 				}
-				for _, call := range (*calls)[start:] {
+				for _, call := range cgCalls(calls)[start:] {
 					if call.headers.Get("X-Custom") != value || call.headers.Get("X-Original") != "source" {
 						t.Fatal(call, value)
 					}
 				}
-				if (*calls)[start].headers.Get("Accept") != "application/source" || (*calls)[start+1].headers.Get("Accept") != "application/json" {
-					t.Fatal((*calls)[start:])
+				if cgCalls(calls)[start].headers.Get("Accept") != "application/source" || cgCalls(calls)[start+1].headers.Get("Accept") != "application/json" {
+					t.Fatal(cgCalls(calls)[start:])
 				}
 			}
 		})
@@ -491,8 +492,8 @@ func TestPythonCinderConsistencyGroupFindNextUsesPythonBinary64TruthinessAndActu
 				return cgWire(203, body)
 			})
 			value, err := api.FindRecord(context.Background(), "data")
-			if len(*calls) != 2 || (err != nil) != test.truthy {
-				t.Fatal(test, value, err, *calls)
+			if calls.Len() != 2 || (err != nil) != test.truthy {
+				t.Fatal(test, value, err, cgCalls(calls))
 			}
 			if test.truthy {
 				var proof *resource.ResponseError

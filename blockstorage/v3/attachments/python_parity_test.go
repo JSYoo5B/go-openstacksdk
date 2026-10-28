@@ -3,7 +3,6 @@ package attachments_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -18,37 +17,28 @@ import (
 // pythonAttachmentCall records the wire request openstacksdk would also send.
 type pythonAttachmentCall struct{ method, path, query, body string }
 
-type pythonAttachmentTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonAttachmentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonAttachmentWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonAttachmentAPI(t *testing.T, reply func(*http.Request) *http.Response) (*attachments.API, *[]pythonAttachmentCall) {
+func pythonAttachmentAPI(t *testing.T, reply func(*http.Request) *http.Response) (*attachments.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonAttachmentCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonAttachmentTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonAttachmentCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = "3.54"
 	return attachments.New(client), calls
+}
+
+// pythonAttachmentCalls projects recorded calls onto the local call fields.
+func pythonAttachmentCalls(rec *testcloud.Recorder) []pythonAttachmentCall {
+	calls := []pythonAttachmentCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonAttachmentCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonAttachmentBase = "/cinder/v3/project/attachments"
@@ -103,8 +93,8 @@ func TestPythonAttachmentCrudAndCompleteMatchProxyRequests(t *testing.T) {
 		{http.MethodPost, pythonAttachmentBase + "/att-1/action", "", `{"os-complete":null}`},
 		{http.MethodDelete, pythonAttachmentBase + "/att-1", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonAttachmentCalls(calls), want) {
+		t.Fatalf("%+v", pythonAttachmentCalls(calls))
 	}
 }
 
@@ -120,8 +110,8 @@ func TestPythonAttachmentDeleteIgnoresMissing(t *testing.T) {
 	if err := api.Remove(ctx, resource.ID("att-1"), resource.WithMissingError()); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 2 {
+		t.Fatalf("%+v", pythonAttachmentCalls(calls))
 	}
 }
 
@@ -138,8 +128,8 @@ func TestPythonAttachmentListUsesDetailFirstPage(t *testing.T) {
 		}
 		ids = append(ids, value.ID)
 	}
-	query, _ := url.ParseQuery((*calls)[0].query)
-	if !reflect.DeepEqual(ids, []string{"att-1"}) || len(*calls) != 1 || (*calls)[0].path != pythonAttachmentBase+"/detail" || !reflect.DeepEqual(query, url.Values{"volume_id": {"vol-1"}, "all_tenants": {"True"}}) {
-		t.Fatalf("%v %+v", ids, *calls)
+	query, _ := url.ParseQuery(pythonAttachmentCalls(calls)[0].query)
+	if !reflect.DeepEqual(ids, []string{"att-1"}) || calls.Len() != 1 || pythonAttachmentCalls(calls)[0].path != pythonAttachmentBase+"/detail" || !reflect.DeepEqual(query, url.Values{"volume_id": {"vol-1"}, "all_tenants": {"True"}}) {
+		t.Fatalf("%v %+v", ids, pythonAttachmentCalls(calls))
 	}
 }

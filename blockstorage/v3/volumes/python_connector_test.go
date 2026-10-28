@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"io"
 	"net/http"
 	"reflect"
@@ -19,7 +20,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func connectorFixture(t *testing.T, reply func(*http.Request) *http.Response) (*volumes.API, *[]pythonVolumeCall) {
+func connectorFixture(t *testing.T, reply func(*http.Request) *http.Response) (*volumes.API, *testcloud.Recorder) {
 	api, calls := pythonVolumeAPI(t, reply)
 	api.RawClient().Microversion = "3.71"
 	return api, calls
@@ -71,8 +72,8 @@ func TestPythonVolumeConnectorNestedInputAndOptionSnapshots(t *testing.T) {
 				return nil
 			}, func(*request.Config[volumes.ConnectorOpts]) error { retained["X-Snapshot"] = "changed"; return nil })
 			expected, _ := json.Marshal(map[string]any{operation.action: map[string]any{"connector": json.RawMessage(original)}})
-			if err != nil || result == nil || result.Response == nil || result.Response.StatusCode != 203 || result.Response.Header.Get("X-Request-Id") != "actual-action" || result.Microversion != "3.71" || len(result.Discovery) != 0 || len(*calls) != 1 || (*calls)[0].method != "POST" || (*calls)[0].path != pythonVolumeBase+"/vol-1/action" || (*calls)[0].query != "" || (*calls)[0].body != string(expected) {
-				t.Fatalf("result=%+v err=%v calls=%+v", result, err, *calls)
+			if err != nil || result == nil || result.Response == nil || result.Response.StatusCode != 203 || result.Response.Header.Get("X-Request-Id") != "actual-action" || result.Microversion != "3.71" || len(result.Discovery) != 0 || calls.Len() != 1 || pythonVolumeCalls(calls)[0].method != "POST" || pythonVolumeCalls(calls)[0].path != pythonVolumeBase+"/vol-1/action" || pythonVolumeCalls(calls)[0].query != "" || pythonVolumeCalls(calls)[0].body != string(expected) {
+				t.Fatalf("result=%+v err=%v calls=%+v", result, err, pythonVolumeCalls(calls))
 			}
 			if physical.Get("X-Connector") != "before" || physical.Get("X-Snapshot") != "owned" || physical.Get("Openstack-Api-Version") != "volume 3.71" || physical.Get("X-Openstack-Volume-Api-Version") != "3.71" || physical.Get("X-Auth-Token") != "test-token" {
 				t.Fatal(physical)
@@ -102,8 +103,8 @@ func TestPythonVolumeConnectorNullEmptyAndRawConnectionInfo(t *testing.T) {
 				api, calls := connectorFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(200, `{"connection_info":`+info+`}`) })
 				result, err := operation.call(context.Background(), api, connector)
 				raw, _ := json.Marshal(map[string]any{operation.action: map[string]any{"connector": connector}})
-				if err != nil || result == nil || result.Response == nil || len(*calls) != 1 || (*calls)[0].body != string(raw) {
-					t.Fatalf("result=%+v err=%v calls=%v", result, err, *calls)
+				if err != nil || result == nil || result.Response == nil || calls.Len() != 1 || pythonVolumeCalls(calls)[0].body != string(raw) {
+					t.Fatalf("result=%+v err=%v calls=%v", result, err, pythonVolumeCalls(calls))
 				}
 				if operation.name == "InitializeWithConnector" && string(result.ConnectionInfo) != info {
 					t.Fatal(string(result.ConnectionInfo), info)
@@ -122,8 +123,8 @@ func TestPythonVolumeConnectorResponseShapeAndSourceStatuses(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/status%d", operation.name, status), func(t *testing.T) {
 				api, calls := connectorFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(status, `{"connection_info":null}`) })
 				result, err := operation.call(context.Background(), api, map[string]any{})
-				if len(*calls) != 1 {
-					t.Fatal(*calls)
+				if calls.Len() != 1 {
+					t.Fatal(pythonVolumeCalls(calls))
 				}
 				if status < 400 {
 					if err != nil || result == nil || result.Response.StatusCode != status {
@@ -143,12 +144,12 @@ func TestPythonVolumeConnectorResponseShapeAndSourceStatuses(t *testing.T) {
 		api, calls := connectorFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(202, body) })
 		result, err := api.InitializeWithConnector(context.Background(), "vol-1", map[string]any{})
 		var proof *resource.ResponseError
-		if result == nil || result.ConnectionInfo != nil || result.Response == nil || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || len(*calls) != 1 {
-			t.Fatalf("result=%+v err=%v proof=%+v calls=%v", result, err, proof, *calls)
+		if result == nil || result.ConnectionInfo != nil || result.Response == nil || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || calls.Len() != 1 {
+			t.Fatalf("result=%+v err=%v proof=%+v calls=%v", result, err, proof, pythonVolumeCalls(calls))
 		}
 		api, calls = connectorFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(202, body) })
 		result, err = api.TerminateWithConnector(context.Background(), "vol-1", map[string]any{})
-		if err != nil || result == nil || string(result.Response.Body) != body || len(*calls) != 1 {
+		if err != nil || result == nil || string(result.Response.Body) != body || calls.Len() != 1 {
 			t.Fatalf("opaque result=%+v err=%v", result, err)
 		}
 	}
@@ -195,8 +196,8 @@ func TestPythonVolumeConnectorCapturesSourceBeforeMarshalAndOptions(t *testing.T
 					options = []volumes.ConnectorOption{request.WithField[volumes.ConnectorOpts]("x", true)}
 				}
 				_, err := operation.call(ctx, api, connector, options...)
-				if err == nil || len(*calls) != 0 {
-					t.Fatalf("err=%v calls=%v", err, *calls)
+				if err == nil || calls.Len() != 0 {
+					t.Fatalf("err=%v calls=%v", err, pythonVolumeCalls(calls))
 				}
 				connectorWrapped(t, err, operation.name)
 				if strings.Contains(mode, "cancel") && (!errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause) || !errors.Is(err, marshalCause)) {
@@ -214,8 +215,8 @@ func TestPythonVolumeConnectorCapturesSourceBeforeMarshalAndOptions(t *testing.T
 	for _, id := range []string{"", ".", "..", "a/b", "a?b", "a b"} {
 		api, calls := connectorFixture(t, func(*http.Request) *http.Response { return pythonVolumeWire(200, `{"connection_info":null}`) })
 		_, err := api.InitializeWithConnector(context.Background(), id, nil)
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatalf("id=%q err=%v calls=%v", id, err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatalf("id=%q err=%v calls=%v", id, err, pythonVolumeCalls(calls))
 		}
 	}
 	var nilAPI *volumes.API
@@ -285,8 +286,8 @@ func TestPythonVolumeConnectorPhysicalFaultsKeepReceiptsAndCauses(t *testing.T) 
 						return nil
 					}
 					result, err := operation.call(ctx, api, map[string]any{"null": nil})
-					if err == nil || len(*calls) != 1 || closes.Load() != 1 || hooks > 1 || (status < 400 && hooks != 0) {
-						t.Fatalf("result=%+v err=%v calls=%v closes=%d hooks=%d", result, err, *calls, closes.Load(), hooks)
+					if err == nil || calls.Len() != 1 || closes.Load() != 1 || hooks > 1 || (status < 400 && hooks != 0) {
+						t.Fatalf("result=%+v err=%v calls=%v closes=%d hooks=%d", result, err, pythonVolumeCalls(calls), closes.Load(), hooks)
 					}
 					connectorWrapped(t, err, operation.name)
 					if mode == "read close" && (!errors.Is(err, readCause) || !errors.Is(err, closeCause)) {
@@ -340,13 +341,13 @@ func TestPythonVolumeConnectorNativeRetryOwnsBodyAndVersion(t *testing.T) {
 				}
 				result, err := operation.call(context.Background(), api, map[string]any{"nqn": "owned"})
 				if mode == "clean" {
-					if err != nil || result == nil || result.Response.StatusCode != 201 || len(*calls) != 2 || hooks != 1 || (*calls)[0].body != (*calls)[1].body {
-						t.Fatalf("result=%+v err=%v calls=%v hooks=%d", result, err, *calls, hooks)
+					if err != nil || result == nil || result.Response.StatusCode != 201 || calls.Len() != 2 || hooks != 1 || pythonVolumeCalls(calls)[0].body != pythonVolumeCalls(calls)[1].body {
+						t.Fatalf("result=%+v err=%v calls=%v hooks=%d", result, err, pythonVolumeCalls(calls), hooks)
 					}
 				} else {
 					var native gophercloud.ErrUnexpectedResponseCode
-					if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || len(*calls) != 1 || hooks != 1 {
-						t.Fatalf("result=%+v err=%v calls=%v hooks=%d", result, err, *calls, hooks)
+					if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || calls.Len() != 1 || hooks != 1 {
+						t.Fatalf("result=%+v err=%v calls=%v hooks=%d", result, err, pythonVolumeCalls(calls), hooks)
 					}
 				}
 			})
@@ -364,8 +365,8 @@ func TestPythonVolumeConnectorNegotiationPreservesActualDiscovery(t *testing.T) 
 		return pythonVolumeWire(202, `{"connection_info":null}`)
 	})
 	result, err := api.InitializeWithConnector(context.Background(), "vol-1", nil)
-	if err != nil || result == nil || result.Microversion != "3.71" || len(result.Discovery) != 1 || result.Discovery[0].StatusCode != 200 || len(*calls) != 2 || (*calls)[0].method != "GET" || (*calls)[1].method != "POST" || !reflect.DeepEqual([]string{headers[0].Get("Openstack-Api-Version"), headers[1].Get("Openstack-Api-Version")}, []string{"", "volume 3.71"}) {
-		t.Fatalf("result=%+v err=%v calls=%v headers=%v", result, err, *calls, headers)
+	if err != nil || result == nil || result.Microversion != "3.71" || len(result.Discovery) != 1 || result.Discovery[0].StatusCode != 200 || calls.Len() != 2 || pythonVolumeCalls(calls)[0].method != "GET" || pythonVolumeCalls(calls)[1].method != "POST" || !reflect.DeepEqual([]string{headers[0].Get("Openstack-Api-Version"), headers[1].Get("Openstack-Api-Version")}, []string{"", "volume 3.71"}) {
+		t.Fatalf("result=%+v err=%v calls=%v headers=%v", result, err, pythonVolumeCalls(calls), headers)
 	}
 	if api.RawClient().Microversion != "" {
 		t.Fatal("negotiation mutated shared client")

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -23,38 +22,31 @@ type messageCall struct {
 	method, path, escaped, query, body string
 	headers                            http.Header
 }
-type messageTransport func(*http.Request) (*http.Response, error)
 
-func (f messageTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 func messageWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}})
 }
 
 const messageBase = "/cinder/v3/project/messages"
 
-func messageAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*messages.API, *[]messageCall) {
+func messageAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*messages.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]messageCall{}
-	cloud.Provider.HTTPClient.Transport = messageTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, messageCall{r.Method, r.URL.Path, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
-		return reply(r), nil
-	})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
 	return messages.New(client), calls
+}
+
+// messageCalls projects recorded calls onto the local call fields.
+func messageCalls(rec *testcloud.Recorder) []messageCall {
+	calls := []messageCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, messageCall{call.Method, call.Path, call.EscapedPath, call.RawQuery, call.Body, call.Header})
+	}
+	return calls
 }
 func messageField(t *testing.T, v *messages.MessageRecord, key, want string) {
 	t.Helper()
@@ -72,8 +64,8 @@ func TestPythonCinderMessageGetSourceStockEnvelopesAndStringDescriptors(t *testi
 			}
 			api, calls := messageAPI(t, "3.80", func(*http.Request) *http.Response { return messageWire(200, body) })
 			v, err := api.GetRecord(context.Background(), "selected")
-			if err != nil || len(*calls) != 1 || (*calls)[0].path != messageBase+"/selected" || (*calls)[0].query != "" || (*calls)[0].body != "" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.80" {
-				t.Fatal(v, err, *calls)
+			if err != nil || calls.Len() != 1 || messageCalls(calls)[0].path != messageBase+"/selected" || messageCalls(calls)[0].query != "" || messageCalls(calls)[0].body != "" || messageCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.80" {
+				t.Fatal(v, err, messageCalls(calls))
 			}
 			for key, want := range map[string]string{"id": `null`, "name": `false`, "created_at": `"False"`, "event_id": `"9007199254740993"`, "guaranteed_until": `"['a', None]"`, "request_id": `"{'k': True}"`, "resource_type": `"[]"`, "resource_uuid": `null`, "location": `null`} {
 				messageField(t, v, key, want)
@@ -96,8 +88,8 @@ func TestPythonCinderMessageGetStrictSourceEnvelopeAndSeedShapes(t *testing.T) {
 	}{{`{"message":{"id":"wire","user_message":"text"}}`, true, true}, {`{"messages":{}}`, true, false}, {"", true, false}, {"{bad", true, false}, {`null`, false, false}, {`[]`, false, false}, {`{"messages":null,"message":{"id":"wire"}}`, false, false}, {string([]byte{'{', '"', 'k', '"', ':', '"', 0xff, '"', '}'}), false, false}} {
 		api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(200, item.body) })
 		v, err := api.GetRecord(context.Background(), "seed", messages.WithRecordGetSourceEnvelope(item.strict))
-		if v == nil || (err == nil) != item.valid || len(*calls) != 1 || v.StatusCode != 200 || string(v.Envelope) != item.body {
-			t.Fatal(item, v, err, *calls)
+		if v == nil || (err == nil) != item.valid || calls.Len() != 1 || v.StatusCode != 200 || string(v.Envelope) != item.body {
+			t.Fatal(item, v, err, messageCalls(calls))
 		}
 		if item.valid {
 			messageField(t, v, "id", `"seed"`)
@@ -114,28 +106,28 @@ func TestPythonCinderMessageGetStrictSourceEnvelopeAndSeedShapes(t *testing.T) {
 	}
 	api, calls := messageAPI(t, "", func(*http.Request) *http.Response { return messageWire(404, `{"missing":true}`) })
 	v, err := api.GetRecord(context.Background(), "literal/id %2F")
-	if v != nil || !gophercloud.ResponseCodeIs(err, 404) || len(*calls) != 1 || (*calls)[0].escaped != messageBase+"/literal%2Fid%20%252F" || (*calls)[0].headers.Get("OpenStack-API-Version") != "" || (*calls)[0].headers.Get("X-OpenStack-Volume-API-Version") != "" {
-		t.Fatal(v, err, *calls)
+	if v != nil || !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 1 || messageCalls(calls)[0].escaped != messageBase+"/literal%2Fid%20%252F" || messageCalls(calls)[0].headers.Get("OpenStack-API-Version") != "" || messageCalls(calls)[0].headers.Get("X-OpenStack-Volume-API-Version") != "" {
+		t.Fatal(v, err, messageCalls(calls))
 	}
 }
 func TestPythonCinderMessageDeleteDefaultStrictAndOriginalStatusPolicy(t *testing.T) {
 	for _, code := range []int{200, 201, 202, 204, 299, 300, 304, 399} {
 		api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(code, `not JSON`) })
 		err := api.DeleteRecord(context.Background(), "id")
-		if err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodDelete || (*calls)[0].path != messageBase+"/id" || (*calls)[0].body != "" {
-			t.Fatal(code, err, *calls)
+		if err != nil || calls.Len() != 1 || messageCalls(calls)[0].method != http.MethodDelete || messageCalls(calls)[0].path != messageBase+"/id" || messageCalls(calls)[0].body != "" {
+			t.Fatal(code, err, messageCalls(calls))
 		}
 	}
 	api, calls := messageAPI(t, "3.0", func(*http.Request) *http.Response { return messageWire(404, `{"missing":true}`) })
-	if err := api.DeleteRecord(context.Background(), "id"); err != nil || len(*calls) != 1 || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.0" {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 || messageCalls(calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.0" {
+		t.Fatal(err, messageCalls(calls))
 	}
-	if err := api.DeleteRecord(context.Background(), "id", messages.WithRecordDeleteIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) || len(*calls) != 2 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id", messages.WithRecordDeleteIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
+		t.Fatal(err, messageCalls(calls))
 	}
 	api, calls = messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(403, `{"policy":false}`) })
-	if err := api.DeleteRecord(context.Background(), "id"); !gophercloud.ResponseCodeIs(err, 403) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id"); !gophercloud.ResponseCodeIs(err, 403) || calls.Len() != 1 {
+		t.Fatal(err, messageCalls(calls))
 	}
 }
 func collectMessages(seq func(func(*messages.MessageRecord, error) bool)) ([]*messages.MessageRecord, error) {
@@ -159,15 +151,15 @@ func TestPythonCinderMessageListQueryClassificationOwnedLocalFiltersAndRawCap(t 
 		return messageWire(200, `{"messages":[{"id":"a","message_level":"WARN"},{"id":"b","message_level":"ERROR","unknown":null},{"id":"c","message_level":"ERROR"}],"next":"https://wrong.example/messages"}`)
 	})
 	seq := api.ListRecords(context.Background(), option, messages.WithRecordListLimit(0), messages.WithRecordListMaxItems(2))
-	if len(*calls) != 0 {
-		t.Fatal("eager list", *calls)
+	if calls.Len() != 0 {
+		t.Fatal("eager list", messageCalls(calls))
 	}
 	values, err := collectMessages(seq)
-	if err != nil || len(values) != 1 || len(*calls) != 1 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 {
+		t.Fatal(values, err, messageCalls(calls))
 	}
 	messageField(t, values[0], "id", `"b"`)
-	q, _ := url.ParseQuery((*calls)[0].query)
+	q, _ := url.ParseQuery(messageCalls(calls)[0].query)
 	if !reflect.DeepEqual(q, url.Values{"project_id": {"p1", "p2"}, "sort": {"created_at:desc"}, "limit": {"2"}}) || values[0].Resource.Body["unknown"] != nil || string(values[0].Wire.Body["unknown"]) != "null" {
 		t.Fatal(q, values)
 	}
@@ -175,8 +167,8 @@ func TestPythonCinderMessageListQueryClassificationOwnedLocalFiltersAndRawCap(t 
 		return messageWire(200, `{"messages":[{"id":1,"request_id":false},{"id":2,"request_id":"False"}]}`)
 	})
 	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("id", true), messages.WithRecordListQuery("request_id", "False")))
-	if err != nil || len(values) != 1 || len(*calls) != 1 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 {
+		t.Fatal(values, err, messageCalls(calls))
 	}
 	messageField(t, values[0], "id", `1`)
 }
@@ -219,10 +211,10 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 				return reply
 			})
 			values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("project_id", "p")))
-			if err != nil || len(values) != 2 || len(*calls) != 2 {
-				t.Fatal(values, err, *calls)
+			if err != nil || len(values) != 2 || calls.Len() != 2 {
+				t.Fatal(values, err, messageCalls(calls))
 			}
-			for _, call := range *calls {
+			for _, call := range messageCalls(calls) {
 				q, _ := url.ParseQuery(call.query)
 				if q.Get("project_id") != "p" {
 					t.Fatal(q)
@@ -237,13 +229,13 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 		return messageWire(200, `{"messages":{"id":9007199254740993}}`)
 	})
 	values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListLimit(5)))
-	if err != nil || len(values) != 1 || len(*calls) != 2 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 2 {
+		t.Fatal(values, err, messageCalls(calls))
 	}
-	*calls = nil
+	calls.Reset()
 	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListLimit(5), messages.WithRecordListPaginated(false)))
-	if err != nil || len(values) != 1 || len(*calls) != 1 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 {
+		t.Fatal(values, err, messageCalls(calls))
 	}
 	api, calls = messageAPI(t, "3.37", func(r *http.Request) *http.Response {
 		if r.URL.Query().Get("offset") == "2" {
@@ -252,8 +244,8 @@ func TestPythonCinderMessageListLinkedMarkerOffsetAndSinglePage(t *testing.T) {
 		return messageWire(200, `{"messages":[{"id":"a"}],"next":"?offset=2&limit=2"}`)
 	})
 	values, err = collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("offset", 0)))
-	if err != nil || len(values) != 2 || len(*calls) != 2 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 2 || calls.Len() != 2 {
+		t.Fatal(values, err, messageCalls(calls))
 	}
 }
 func TestPythonCinderMessageListEnvelopeConstructorAndContinuationErrors(t *testing.T) {
@@ -261,44 +253,16 @@ func TestPythonCinderMessageListEnvelopeConstructorAndContinuationErrors(t *test
 		api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(200, body) })
 		values, err := collectMessages(api.ListRecords(context.Background(), messages.WithRecordListQuery("project_id", "p")))
 		var proof *resource.ResponseError
-		if err == nil || len(values) > 1 || len(*calls) != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body {
-			t.Fatal(body, values, err, proof, *calls)
+		if err == nil || len(values) > 1 || calls.Len() != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body {
+			t.Fatal(body, values, err, proof, messageCalls(calls))
 		}
 	}
 	api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(204, "") })
 	_, err := collectMessages(api.ListRecords(context.Background()))
 	var proof *resource.ResponseError
-	if !errors.As(err, &proof) || proof.StatusCode != 204 || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if !errors.As(err, &proof) || proof.StatusCode != 204 || calls.Len() != 1 {
+		t.Fatal(err, messageCalls(calls))
 	}
-}
-
-type messageFaultBody struct {
-	data            []byte
-	read, close     error
-	onRead, onClose func()
-}
-
-func (b *messageFaultBody) Read(p []byte) (int, error) {
-	n := copy(p, b.data)
-	b.data = b.data[n:]
-	if b.onRead != nil {
-		b.onRead()
-		b.onRead = nil
-	}
-	if len(b.data) == 0 {
-		if b.read != nil {
-			return n, b.read
-		}
-		return n, io.EOF
-	}
-	return n, nil
-}
-func (b *messageFaultBody) Close() error {
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.close
 }
 func TestPythonCinderMessageRejectedStatusFamiliesPreservePhysicalCauses(t *testing.T) {
 	for _, method := range []string{"GET", "LIST", "DELETE"} {
@@ -308,7 +272,7 @@ func TestPythonCinderMessageRejectedStatusFamiliesPreservePhysicalCauses(t *test
 				closes := 0
 				body := `{"failure":true}`
 				api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response {
-					return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"rejected"}}, Body: &messageFaultBody{data: []byte(body), read: readCause, close: closeCause, onClose: func() { closes++ }}}
+					return testcloud.StreamResponse(code, &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes++ }}, http.Header{"X-Request-Id": {"rejected"}})
 				})
 				var err error
 				switch method {
@@ -320,8 +284,8 @@ func TestPythonCinderMessageRejectedStatusFamiliesPreservePhysicalCauses(t *test
 					err = api.DeleteRecord(context.Background(), "id")
 				}
 				var native gophercloud.ErrUnexpectedResponseCode
-				if !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "rejected" || len(*calls) != 1 || closes != 1 {
-					t.Fatal(err, native, *calls, closes)
+				if !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "rejected" || calls.Len() != 1 || closes != 1 {
+					t.Fatal(err, native, messageCalls(calls), closes)
 				}
 			})
 		}
@@ -337,17 +301,18 @@ func TestPythonCinderMessageAcceptedPhysicalFaultsAndStickySource(t *testing.T) 
 				if method == "LIST" {
 					body = `{"messages":[{"id":"a"}]}`
 				}
-				api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return nil })
-				api.RawClient().HTTPClient.Transport = messageTransport(func(r *http.Request) (*http.Response, error) {
-					*calls = append(*calls, messageCall{method: r.Method})
-					fault := &messageFaultBody{data: []byte(body), read: readCause, close: closeCause, onClose: func() { closes++ }}
+				api, _ := messageAPI(t, "3.3", func(*http.Request) *http.Response { return nil })
+				calls := []messageCall{}
+				api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
+					calls = append(calls, messageCall{method: r.Method})
+					fault := &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes++ }}
 					if sticky {
-						fault.read = nil
-						fault.close = nil
-						fault.onRead = func() { api.RawClient().Microversion = "3.80" }
-						fault.onClose = func() { closes++; api.RawClient().Microversion = "3.3" }
+						fault.ReadErr = nil
+						fault.CloseErr = nil
+						fault.OnRead = func() { api.RawClient().Microversion = "3.80" }
+						fault.OnClose = func() { closes++; api.RawClient().Microversion = "3.3" }
 					}
-					return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"accepted"}}, Body: fault}, nil
+					return testcloud.StreamResponse(200, fault, http.Header{"X-Request-Id": {"accepted"}}), nil
 				})
 				var err error
 				var value *messages.MessageRecord
@@ -360,8 +325,8 @@ func TestPythonCinderMessageAcceptedPhysicalFaultsAndStickySource(t *testing.T) 
 					err = api.DeleteRecord(context.Background(), "id")
 				}
 				var proof *resource.ResponseError
-				if err == nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || closes != 1 || len(*calls) != 1 {
-					t.Fatal(value, err, proof, *calls, closes)
+				if err == nil || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || closes != 1 || len(calls) != 1 {
+					t.Fatal(value, err, proof, calls, closes)
 				}
 				if method == "GET" && (value == nil || value.StatusCode != 200 || value.Resource != nil || string(value.Envelope) != body) {
 					t.Fatal(value)
@@ -384,8 +349,8 @@ func TestPythonCinderMessageRetryPreservesCleanMissingAndFixedVersionHeaders(t *
 	api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, original error, _ uint) error {
 		return original
 	}
-	if err := api.DeleteRecord(context.Background(), "id"); err != nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 {
+		t.Fatal(err, messageCalls(calls))
 	}
 	for _, method := range []string{"GET", "LIST", "DELETE"} {
 		for _, version := range []string{"", "3.3"} {
@@ -403,8 +368,8 @@ func TestPythonCinderMessageRetryPreservesCleanMissingAndFixedVersionHeaders(t *
 			case "DELETE":
 				err = api.DeleteRecord(context.Background(), "id")
 			}
-			if !errors.Is(err, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(err, 409) || len(*calls) != 1 {
-				t.Fatal(method, version, err, *calls)
+			if !errors.Is(err, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(err, 409) || calls.Len() != 1 {
+				t.Fatal(method, version, err, messageCalls(calls))
 			}
 		}
 	}
@@ -413,27 +378,27 @@ func TestPythonCinderMessagePreflightCancellationAndRetainedOptionOwnership(t *t
 	api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(200, `{"messages":{}}`) })
 	for _, id := range []string{"", "..", "bad\n"} {
 		_, err := api.GetRecord(context.Background(), id)
-		if err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err == nil || calls.Len() != 0 {
+			t.Fatal(err, messageCalls(calls))
 		}
 	}
 	for _, opts := range [][]messages.RecordGetOption{{nil}, {messages.WithRecordGetHeaders(map[string]string{"X-Auth-Token": "bad"})}, {messages.WithRecordGetMicroversion("3.3\n")}} {
 		_, err := api.GetRecord(context.Background(), "id", opts...)
-		if err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err == nil || calls.Len() != 0 {
+			t.Fatal(err, messageCalls(calls))
 		}
 	}
 	for _, opts := range [][]messages.RecordListOption{{nil}, {messages.WithRecordListLimit(-1)}, {messages.WithRecordListMaxItems(-1)}, {messages.WithRecordListQuery("limit", []int{1, 2})}, {messages.WithRecordListOpts(messages.RecordListOpts{Query: map[string]json.RawMessage{"event_id": json.RawMessage(`{bad`)}})}} {
 		_, err := collectMessages(api.ListRecords(context.Background(), opts...))
-		if err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err == nil || calls.Len() != 0 {
+			t.Fatal(err, messageCalls(calls))
 		}
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("caller cause"), errors.New("callback cause")
 	_, err := api.GetRecord(ctx, "id", func(*messages.RecordGetOpts) error { cancel(cause); return callback })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 0 {
+		t.Fatal(err, messageCalls(calls))
 	}
 	var retained *messages.RecordGetOpts
 	_, err = api.GetRecord(context.Background(), "id", func(v *messages.RecordGetOpts) error {
@@ -444,13 +409,13 @@ func TestPythonCinderMessagePreflightCancellationAndRetainedOptionOwnership(t *t
 		retained.Headers["X-Auth-Token"] = "retained mutation"
 		return nil
 	})
-	if err != nil || len(*calls) != 1 || (*calls)[0].headers.Get("X-Custom") != "owned" || api.RawClient().MoreHeaders != nil {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 || messageCalls(calls)[0].headers.Get("X-Custom") != "owned" || api.RawClient().MoreHeaders != nil {
+		t.Fatal(err, messageCalls(calls))
 	}
 }
 func TestPythonCinderMessageConcurrentOwnedOptionsAndLiveReauthentication(t *testing.T) {
 	api, _ := messageAPI(t, "3.3", func(*http.Request) *http.Response { return nil })
-	api.RawClient().HTTPClient.Transport = messageTransport(func(r *http.Request) (*http.Response, error) {
+	api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		if r.Header.Get("X-Custom") != "owned" {
 			t.Error(r.Header)
 		}
@@ -481,8 +446,8 @@ func TestPythonCinderMessageConcurrentOwnedOptionsAndLiveReauthentication(t *tes
 	reauths := 0
 	api.RawClient().ReauthFunc = func(context.Context) error { reauths++; api.RawClient().SetToken("fresh"); return nil }
 	v, err := api.GetRecord(context.Background(), "a")
-	if err != nil || v == nil || reauths != 1 || len(*calls) != 2 || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) {
-		t.Fatal(v, err, reauths, *calls, tokens)
+	if err != nil || v == nil || reauths != 1 || calls.Len() != 2 || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) {
+		t.Fatal(v, err, reauths, messageCalls(calls), tokens)
 	}
 }
 
@@ -512,8 +477,8 @@ func TestPythonCinderMessageTransportExposedInterimStatus(t *testing.T) {
 			case "DELETE":
 				err = api.DeleteRecord(context.Background(), "requested")
 			}
-			if err != nil || len(*calls) != 1 {
-				t.Fatal(operation, err, *calls)
+			if err != nil || calls.Len() != 1 {
+				t.Fatal(operation, err, messageCalls(calls))
 			}
 		})
 	}
@@ -550,7 +515,7 @@ func TestPythonCinderMessageRetryReservedHeaderAbsenceAndSelectedOmission(t *tes
 					callbackCause := errors.New("retry callback cause")
 					api, calls := messageAPI(t, version, func(*http.Request) *http.Response {
 						response := messageWire(503, body)
-						response.Body = &messageFaultBody{data: []byte(body), onClose: func() { closes++ }}
+						response.Body = &testcloud.Body{Data: body, OnClose: func() { closes++ }}
 						return response
 					})
 					api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
@@ -580,8 +545,8 @@ func TestPythonCinderMessageRetryReservedHeaderAbsenceAndSelectedOmission(t *tes
 						err = api.DeleteRecord(context.Background(), "requested")
 					}
 					var native gophercloud.ErrUnexpectedResponseCode
-					if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callbackCause) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 || closes != 1 || callbacks != 1 {
-						t.Fatal(err, native, *calls, closes, callbacks)
+					if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, callbackCause) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != body || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 || closes != 1 || callbacks != 1 {
+						t.Fatal(err, native, messageCalls(calls), closes, callbacks)
 					}
 					wantMethod := http.MethodGet
 					wantPath := messageBase + "/requested"
@@ -590,8 +555,8 @@ func TestPythonCinderMessageRetryReservedHeaderAbsenceAndSelectedOmission(t *tes
 					} else if operation == "LIST" {
 						wantPath = messageBase
 					}
-					if native.Method != wantMethod || !strings.HasSuffix(native.URL, wantPath) || (*calls)[0].headers.Get("X-Auth-Token") != "test-token" || (*calls)[0].body != "" || api.RawClient().Microversion != version || len(api.RawClient().MoreHeaders) != 0 {
-						t.Fatal("lost actual method/route or mutated caller", native, *calls, api.RawClient())
+					if native.Method != wantMethod || !strings.HasSuffix(native.URL, wantPath) || messageCalls(calls)[0].headers.Get("X-Auth-Token") != "test-token" || messageCalls(calls)[0].body != "" || api.RawClient().Microversion != version || len(api.RawClient().MoreHeaders) != 0 {
+						t.Fatal("lost actual method/route or mutated caller", native, messageCalls(calls), api.RawClient())
 					}
 				})
 			}
@@ -635,8 +600,8 @@ func TestPythonCinderMessageRetryOrdinaryHeadersAndLiveTokenRemainAvailable(t *t
 			case "DELETE":
 				err = api.DeleteRecord(context.Background(), "requested")
 			}
-			if err != nil || len(*calls) != 2 || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) || len(api.RawClient().MoreHeaders) != 0 {
-				t.Fatal(err, *calls, tokens, api.RawClient().MoreHeaders)
+			if err != nil || calls.Len() != 2 || !reflect.DeepEqual(tokens, []string{"test-token", "fresh"}) || len(api.RawClient().MoreHeaders) != 0 {
+				t.Fatal(err, messageCalls(calls), tokens, api.RawClient().MoreHeaders)
 			}
 		})
 	}

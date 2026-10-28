@@ -22,10 +22,10 @@ func TestPythonSnapshotManageRouteCapabilityAndFixedVersion(t *testing.T) {
 				return pythonSnapshotWire(202, `{"snapshot":{"id":"managed","size":"١٢","metadata":42,"extra":true}}`)
 			})
 			row, err := api.ManageRecord(context.Background(), "volume", json.RawMessage(`{"source-name":"backend"}`))
-			if err != nil || row == nil || len(*calls) != 2 || len(row.Discovery) != 1 {
-				t.Fatal(row, err, *calls)
+			if err != nil || row == nil || calls.Len() != 2 || len(row.Discovery) != 1 {
+				t.Fatal(row, err, pythonSnapshotCalls(calls))
 			}
-			last := (*calls)[1]
+			last := pythonSnapshotCalls(calls)[1]
 			path := "/manageable_snapshots"
 			if version == "3.7" {
 				path = "/os-snapshot-manage"
@@ -65,25 +65,25 @@ func TestPythonSnapshotManageResponseMissingIDAndOptionsOwned(t *testing.T) {
 	metadata[5] = '9'
 	headers["X-Test"] = "changed"
 	row, err := api.ManageRecord(context.Background(), "", json.RawMessage(`null`), option, snapshots.WithManageRecordName(""))
-	if err != nil || row == nil || len(*calls) != 2 {
-		t.Fatal(row, err, *calls)
+	if err != nil || row == nil || calls.Len() != 2 {
+		t.Fatal(row, err, pythonSnapshotCalls(calls))
 	}
 	snapshotFindField(t, row, "id", "null")
-	if !strings.Contains((*calls)[1].body, `"metadata":{"x":1}`) || !strings.Contains((*calls)[1].body, `"name":""`) {
-		t.Fatal(*calls)
+	if !strings.Contains(pythonSnapshotCalls(calls)[1].body, `"metadata":{"x":1}`) || !strings.Contains(pythonSnapshotCalls(calls)[1].body, `"name":""`) {
+		t.Fatal(pythonSnapshotCalls(calls))
 	}
-	before := len(*calls)
+	before := calls.Len()
 	_, err = api.ManageRecord(context.Background(), "v", json.RawMessage(`{bad`))
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != before {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != before {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 }
 func TestPythonSnapshotUnmanageOpaqueAckFixedHeaderAndMissing(t *testing.T) {
 	for _, status := range []int{202, 299, 404} {
 		api, calls := pythonSnapshotAPI(t, "3.1", func(*http.Request) *http.Response { return pythonSnapshotWire(status, "opaque acknowledgement") })
 		receipt, err := api.UnmanageRecord(context.Background(), "snap/id")
-		if len(*calls) != 1 || (*calls)[0].body != `{"os-unmanage":null}` || (*calls)[0].version != "volume 3.65" {
-			t.Fatal(*calls)
+		if calls.Len() != 1 || pythonSnapshotCalls(calls)[0].body != `{"os-unmanage":null}` || pythonSnapshotCalls(calls)[0].version != "volume 3.65" {
+			t.Fatal(pythonSnapshotCalls(calls))
 		}
 		if status == 404 {
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -107,15 +107,15 @@ func TestPythonSnapshotManagementGuardsAndAcceptedProjectionError(t *testing.T) 
 	if row == nil || row.Resource != nil || !errors.As(err, &proof) || proof.StatusCode != 202 {
 		t.Fatal(row, err)
 	}
-	before := len(*calls)
+	before := calls.Len()
 	_, err = api.UnmanageRecord(context.Background(), "s", nil)
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != before {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != before {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err = api.UnmanageRecord(ctx, "s")
-	if !errors.Is(err, context.Canceled) || len(*calls) != before {
+	if !errors.Is(err, context.Canceled) || calls.Len() != before {
 		t.Fatal(err)
 	}
 }
@@ -166,13 +166,13 @@ func TestPythonSnapshotManagementRetriesOwnFixedVersionAndHeaders(t *testing.T) 
 				}
 				if mode == "clean" {
 					if err != nil || actions != 2 {
-						t.Fatal(err, actions, *calls)
+						t.Fatal(err, actions, pythonSnapshotCalls(calls))
 					}
 					return
 				}
 				var native gophercloud.ErrUnexpectedResponseCode
 				if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "first503" || actions != 1 {
-					t.Fatal("retry mutation lost native rejection or transmitted changed headers", err, actions, *calls)
+					t.Fatal("retry mutation lost native rejection or transmitted changed headers", err, actions, pythonSnapshotCalls(calls))
 				}
 			})
 		}

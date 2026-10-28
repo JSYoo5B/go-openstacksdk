@@ -18,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeBackupTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeBackupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeBackupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeBackupCall struct{ method, path, query, body string }
@@ -37,7 +27,7 @@ type nativeBackupCall struct{ method, path, query, body string }
 func nativeBackupAPI(t *testing.T, calls *[]nativeBackupCall, reply func(*http.Request) *http.Response) (*backups.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeBackupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +35,7 @@ func nativeBackupAPI(t *testing.T, calls *[]nativeBackupCall, reply func(*http.R
 		}
 		*calls = append(*calls, nativeBackupCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return backups.New(client), cloud

@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -113,12 +114,12 @@ func TestPythonConsistencyGroupSnapshotPhysical401StopsRetryAndReauthWithNativeF
 				body := `{"expired":"actual401"}`
 				readCause, closeCause := errors.New("physical401 read"), errors.New("physical401 close")
 				var closes atomic.Int32
-				faulty := &snapshotFaultBody{data: []byte(body), closes: &closes}
+				faulty := &testcloud.Body{Data: body, OnClose: func() { closes.Add(1) }}
 				if mode != "close" {
-					faulty.read = readCause
+					faulty.ReadErr = readCause
 				}
 				if mode != "read" {
-					faulty.close = closeCause
+					faulty.CloseErr = closeCause
 				}
 				api, calls := snapshotAPI(t, "", func(*http.Request) *http.Response {
 					response := snapshotWire(401, body)

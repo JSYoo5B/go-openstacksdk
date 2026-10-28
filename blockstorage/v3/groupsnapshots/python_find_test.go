@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -331,7 +332,7 @@ func TestPythonGroupSnapshotFindPhysicalRejectionsCannotFallbackReplayOrIgnore(t
 		body := `{"group_snapshot":{"id":"data"}}`
 		api, calls := snapshotAPI(t, "3.29", func(*http.Request) *http.Response {
 			response := snapshotWire(code, body)
-			response.Body = &snapshotFaultBody{data: []byte(body), read: readCause, close: closeCause, closes: &closes, onRead: func() { client.ResourceBase = original + "changed/" }, onClose: func() { client.ResourceBase = original; cancel(cancelCause) }}
+			response.Body = &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause, OnRead: func() { client.ResourceBase = original + "changed/" }, OnClose: func() { closes.Add(1); client.ResourceBase = original; cancel(cancelCause) }}
 			return response
 		})
 		client = api.RawClient()
@@ -364,7 +365,7 @@ func TestPythonGroupSnapshotFindLatePhysicalListFailureKeepsActualPage(t *testin
 			return snapshotWire(200, `{"group_snapshots":[{"id":"first","name":"data"}],"next":"?marker=first"}`)
 		}
 		rsp := snapshotWire(404, "partial LIST")
-		rsp.Body = &snapshotFaultBody{data: []byte("partial LIST"), read: readCause, close: closeCause, closes: &closes}
+		rsp.Body = &testcloud.Body{Data: "partial LIST", ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes.Add(1) }}
 		return rsp
 	})
 	// The initial clean404 could invoke retry policy; leave clean4xx terminal

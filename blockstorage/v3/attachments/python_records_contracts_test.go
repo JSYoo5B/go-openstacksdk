@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"io"
 	"net/http"
 	"net/url"
@@ -54,8 +55,8 @@ func TestPythonAttachmentRecordCreateReservationAndOwnedPartialEvidence(t *testi
 		t.Fatal(err)
 	}
 	want := `{"attachment":{"connector":{"host":"compute"},"detach_time":null,"name":"","volume_uuid":"vol1"}}`
-	if len(*calls) != 1 || (*calls)[0].path != pythonAttachmentBase || (*calls)[0].method != http.MethodPost || (*calls)[0].body != want {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || pythonAttachmentCalls(calls)[0].path != pythonAttachmentBase || pythonAttachmentCalls(calls)[0].method != http.MethodPost || pythonAttachmentCalls(calls)[0].body != want {
+		t.Fatal(pythonAttachmentCalls(calls))
 	}
 	for key, raw := range map[string]string{"id": `"att1"`, "volume_id": `"vol1"`, "instance": `null`, "attach_mode": `"ro"`, "attached_at": `"literal"`, "detached_at": `null`, "name": `""`, "location": `null`, "connector": `{"host":"compute"}`, "connection_info": `{"large":9007199254740993}`} {
 		attachmentRecordField(t, v, key, raw)
@@ -68,9 +69,9 @@ func TestPythonAttachmentRecordCreateReservationAndOwnedPartialEvidence(t *testi
 	if !strings.Contains(string(v.Wire.Body["connection_info"]), "large") || v.Wire.Header.Get("X-Request-Id") != "proof" || v.Resource.Header.Get("X-Request-Id") != "proof" || !strings.Contains(string(v.Envelope), "9007199254740993") {
 		t.Fatal("evidence aliases view")
 	}
-	*calls = nil
-	if _, err := api.CreateRecord(context.Background(), "vol1"); err != nil || len(*calls) != 1 || (*calls)[0].body != `{"attachment":{"volume_uuid":"vol1"}}` {
-		t.Fatal(err, *calls)
+	calls.Reset()
+	if _, err := api.CreateRecord(context.Background(), "vol1"); err != nil || calls.Len() != 1 || pythonAttachmentCalls(calls)[0].body != `{"attachment":{"volume_uuid":"vol1"}}` {
+		t.Fatal(err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -89,9 +90,9 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 				key = "instance_uuid"
 			}
 			var envelope map[string]map[string]json.RawMessage
-			_ = json.Unmarshal([]byte((*calls)[0].body), &envelope)
+			_ = json.Unmarshal([]byte(pythonAttachmentCalls(calls)[0].body), &envelope)
 			if string(envelope["attachment"][key]) != string(raw) || string(envelope["attachment"]["connector"]) != "false" {
-				t.Fatal(*calls)
+				t.Fatal(pythonAttachmentCalls(calls))
 			}
 			attachmentRecordField(t, v, "instance", string(raw))
 		})
@@ -105,18 +106,18 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 					t.Fatal(err)
 				}
 				var envelope map[string]map[string]json.RawMessage
-				_ = json.Unmarshal([]byte((*calls)[len(*calls)-1].body), &envelope)
+				_ = json.Unmarshal([]byte(pythonAttachmentCalls(calls)[calls.Len()-1].body), &envelope)
 				expectedCalls := 2
 				if value == "rw" {
 					expectedCalls = 1
 				}
-				if len(*calls) != expectedCalls || len(v.Discovery) != expectedCalls-1 {
-					t.Fatal("mode capability request/proof", v, *calls)
+				if calls.Len() != expectedCalls || len(v.Discovery) != expectedCalls-1 {
+					t.Fatal("mode capability request/proof", v, pythonAttachmentCalls(calls))
 				}
 				present := version == "3.0" || version == "3.27" || version == "3.53" || value == "rw"
 				_, got := envelope["attachment"]["mode"]
 				if got != present {
-					t.Fatal(version, value, *calls)
+					t.Fatal(version, value, pythonAttachmentCalls(calls))
 				}
 				raw, _ := json.Marshal(value)
 				attachmentRecordField(t, v, "attach_mode", string(raw))
@@ -126,20 +127,20 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 	for _, version := range []string{"", "latest"} {
 		api, calls, _ := attachmentModeFixture(t, version, "3.90", "3.0", func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{}`) })
 		value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
-		if err != nil || len(*calls) != 2 || len(value.Discovery) != 1 {
-			t.Fatal(value, err, *calls)
+		if err != nil || calls.Len() != 2 || len(value.Discovery) != 1 {
+			t.Fatal(value, err, pythonAttachmentCalls(calls))
 		}
-		present := strings.Contains((*calls)[1].body, `"mode":false`)
+		present := strings.Contains(pythonAttachmentCalls(calls)[1].body, `"mode":false`)
 		if present != (version == "latest") {
-			t.Fatal("Source selected-default support", version, *calls)
+			t.Fatal("Source selected-default support", version, pythonAttachmentCalls(calls))
 		}
-		*calls = nil
-		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(true)); err != nil || len(*calls) != 1 || strings.Contains((*calls)[0].body, `"mode"`) || len(value.Discovery) != 0 {
-			t.Fatal(value, err, *calls)
+		calls.Reset()
+		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(true)); err != nil || calls.Len() != 1 || strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode"`) || len(value.Discovery) != 0 {
+			t.Fatal(value, err, pythonAttachmentCalls(calls))
 		}
-		*calls = nil
-		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(false)); err != nil || len(*calls) != 1 || !strings.Contains((*calls)[0].body, `"mode":false`) || len(value.Discovery) != 0 {
-			t.Fatal(value, err, *calls)
+		calls.Reset()
+		if value, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false), attachments.WithRecordCreateModeSupported(false)); err != nil || calls.Len() != 1 || !strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode":false`) || len(value.Discovery) != 0 {
+			t.Fatal(value, err, pythonAttachmentCalls(calls))
 		}
 	}
 
@@ -150,8 +151,8 @@ func TestPythonAttachmentRecordCreateAliasOrderAndPreparation(t *testing.T) {
 		return pythonAttachmentWire(200, `{"attachment":{"mode":"wire","attach_mode":"attribute","attach_time":"wiretime","attached_at":"attributetime","connection_info":42}}`)
 	})
 	v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", "ro"), attachments.WithRecordCreateField("attach_mode", "rw"), attachments.WithRecordCreateField("instance_id", "ignored"))
-	if err != nil || (*calls)[0].body != `{"attachment":{"mode":"rw","volume_uuid":"vol"}}` {
-		t.Fatal(err, *calls)
+	if err != nil || pythonAttachmentCalls(calls)[0].body != `{"attachment":{"mode":"rw","volume_uuid":"vol"}}` {
+		t.Fatal(err, pythonAttachmentCalls(calls))
 	}
 	attachmentRecordField(t, v, "attach_mode", `"attribute"`)
 	attachmentRecordField(t, v, "attached_at", `"attributetime"`)
@@ -159,14 +160,14 @@ func TestPythonAttachmentRecordCreateAliasOrderAndPreparation(t *testing.T) {
 	for _, options := range [][]attachments.RecordCreateOption{
 		{nil}, {attachments.WithRecordCreateField("volume_id", "other")}, {attachments.WithRecordCreateOpts(attachments.RecordCreateOpts{Fields: map[string]json.RawMessage{"mode": json.RawMessage(`"ro"`), "attach_mode": json.RawMessage(`"rw"`)}})}, {attachments.WithRecordCreateOpts(attachments.RecordCreateOpts{Fields: map[string]json.RawMessage{"connector": json.RawMessage(`{bad`)}})},
 	} {
-		*calls = nil
-		if _, err := api.CreateRecord(context.Background(), "vol", options...); err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		calls.Reset()
+		if _, err := api.CreateRecord(context.Background(), "vol", options...); err == nil || calls.Len() != 0 {
+			t.Fatal(err, pythonAttachmentCalls(calls))
 		}
 	}
-	*calls = nil
-	if _, err := api.CreateRecord(context.Background(), " "); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	calls.Reset()
+	if _, err := api.CreateRecord(context.Background(), " "); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -180,8 +181,8 @@ func TestPythonAttachmentRecordCreateResponseTranslationAndStatusPolicy(t *testi
 		t.Run(item.name, func(t *testing.T) {
 			api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, item.body) })
 			v, err := api.CreateRecord(context.Background(), "vol")
-			if (err == nil) != item.valid || len(*calls) != 1 || v == nil || string(v.Envelope) != item.body || v.StatusCode != 200 {
-				t.Fatal(v, err, *calls)
+			if (err == nil) != item.valid || calls.Len() != 1 || v == nil || string(v.Envelope) != item.body || v.StatusCode != 200 {
+				t.Fatal(v, err, pythonAttachmentCalls(calls))
 			}
 			if !item.valid {
 				var proof *resource.ResponseError
@@ -195,8 +196,8 @@ func TestPythonAttachmentRecordCreateResponseTranslationAndStatusPolicy(t *testi
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(code, `{}`) })
 			v, err := api.CreateRecord(context.Background(), "vol")
-			if len(*calls) != 1 {
-				t.Fatal(*calls)
+			if calls.Len() != 1 {
+				t.Fatal(pythonAttachmentCalls(calls))
 			}
 			if code < 400 {
 				if err != nil || v == nil || v.StatusCode != code {
@@ -225,7 +226,7 @@ func TestPythonAttachmentRecordListSummaryQueriesAndLinkedPages(t *testing.T) {
 	query["volume_id"][1] = 'X'
 	headers["x-custom"] = "changed"
 	seq := api.ListRecords(context.Background(), option)
-	if len(*calls) != 0 {
+	if calls.Len() != 0 {
 		t.Fatal("eager HTTP")
 	}
 	var values []*attachments.AttachmentRecord
@@ -235,10 +236,10 @@ func TestPythonAttachmentRecordListSummaryQueriesAndLinkedPages(t *testing.T) {
 		}
 		values = append(values, v)
 	}
-	if len(values) != 2 || len(*calls) != 2 {
-		t.Fatal(values, *calls)
+	if len(values) != 2 || calls.Len() != 2 {
+		t.Fatal(values, pythonAttachmentCalls(calls))
 	}
-	for _, call := range *calls {
+	for _, call := range pythonAttachmentCalls(calls) {
 		q, _ := url.ParseQuery(call.query)
 		if call.path != pythonAttachmentBase || call.method != http.MethodGet || call.body != "" || q.Get("volume_id") != "vol" || q.Get("all_tenants") != "True" || !reflect.DeepEqual(q["instance_id"], []string{"a", "b"}) || q.Has("unknown") {
 			t.Fatal(call)
@@ -250,9 +251,9 @@ func TestPythonAttachmentRecordListSummaryQueriesAndLinkedPages(t *testing.T) {
 	if string(values[0].Wire.Body["unknown"]) != `9007199254740993` || values[0].Wire.Body["location"] != nil {
 		t.Fatal(values[0])
 	}
-	*calls = nil
-	if ids, err := attachmentRecordIDs(t, context.Background(), api, option, attachments.WithRecordListPaginated(false)); err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(*calls) != 1 {
-		t.Fatal(ids, err, *calls)
+	calls.Reset()
+	if ids, err := attachmentRecordIDs(t, context.Background(), api, option, attachments.WithRecordListPaginated(false)); err != nil || !reflect.DeepEqual(ids, []string{"a"}) || calls.Len() != 1 {
+		t.Fatal(ids, err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -263,15 +264,15 @@ func TestPythonAttachmentRecordListServerAliasPrecedence(t *testing.T) {
 	}{{true, "True"}, {false, "False"}, {nil, ""}} {
 		api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{"attachments":[]}`) })
 		_, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListQuery("all_tenants", false), attachments.WithRecordListQuery("all_projects", item.client))
-		q, _ := url.ParseQuery((*calls)[0].query)
+		q, _ := url.ParseQuery(pythonAttachmentCalls(calls)[0].query)
 		if err != nil || q.Get("all_tenants") != item.expected || q.Has("all_projects") {
 			t.Fatal(err, q)
 		}
 	}
 	api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{"attachments":[]}`) })
 	_, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListQuery("all_tenants", true))
-	if err != nil || !strings.Contains((*calls)[0].query, "all_tenants=True") {
-		t.Fatal(err, *calls)
+	if err != nil || !strings.Contains(pythonAttachmentCalls(calls)[0].query, "all_tenants=True") {
+		t.Fatal(err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -280,22 +281,22 @@ func TestPythonAttachmentRecordListLocalFilteringAndRawRowCap(t *testing.T) {
 		return pythonAttachmentWire(200, `{"attachments":[{"id":"a","connector":{"host":"wrong"}},{"id":"b","connector":{"host":"right","extra":9007199254740993}},{"id":"c","connector":{"host":"right"}}],"attachments_links":[{"rel":"next","href":"https://evil.example/attachments"}]}`)
 	})
 	ids, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListQuery("connector", map[string]any{"host": "right"}), attachments.WithRecordListMaxItems(2), attachments.WithRecordListLimit(0), attachments.WithRecordListQuery("mode", make(chan int)), attachments.WithRecordListQuery("sort_key", make(chan int)))
-	if err != nil || !reflect.DeepEqual(ids, []string{"b"}) || len(*calls) != 1 {
-		t.Fatal(ids, err, *calls)
+	if err != nil || !reflect.DeepEqual(ids, []string{"b"}) || calls.Len() != 1 {
+		t.Fatal(ids, err, pythonAttachmentCalls(calls))
 	}
-	q, _ := url.ParseQuery((*calls)[0].query)
+	q, _ := url.ParseQuery(pythonAttachmentCalls(calls)[0].query)
 	if q.Get("limit") != "2" || q.Has("connector") || q.Has("mode") || q.Has("sort_key") {
 		t.Fatal(q)
 	}
-	*calls = nil
+	calls.Reset()
 	for _, err := range api.ListRecords(context.Background()) {
 		if err != nil {
 			t.Fatal(err)
 		}
 		break
 	}
-	if len(*calls) != 1 {
-		t.Fatal(*calls)
+	if calls.Len() != 1 {
+		t.Fatal(pythonAttachmentCalls(calls))
 	}
 }
 
@@ -307,13 +308,13 @@ func TestPythonAttachmentRecordListMarkerFallbackAndSingleton(t *testing.T) {
 		return pythonAttachmentWire(200, `{"attachments":{"id":"last","connector":null}}`)
 	})
 	ids, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListLimit(5))
-	if err != nil || !reflect.DeepEqual(ids, []string{"last"}) || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "marker=last") {
-		t.Fatal(ids, err, *calls)
+	if err != nil || !reflect.DeepEqual(ids, []string{"last"}) || calls.Len() != 2 || !strings.Contains(pythonAttachmentCalls(calls)[1].query, "marker=last") {
+		t.Fatal(ids, err, pythonAttachmentCalls(calls))
 	}
-	*calls = nil
+	calls.Reset()
 	ids, err = attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListLimit(0))
-	if err != nil || !reflect.DeepEqual(ids, []string{"last"}) || len(*calls) != 1 {
-		t.Fatal(ids, err, *calls)
+	if err != nil || !reflect.DeepEqual(ids, []string{"last"}) || calls.Len() != 1 {
+		t.Fatal(ids, err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -322,14 +323,14 @@ func TestPythonAttachmentRecordListContinuationAndEnvelopeFailures(t *testing.T)
 		api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, body) })
 		_, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListQuery("volume_id", "vol"))
 		var proof *resource.ResponseError
-		if err == nil || !errors.As(err, &proof) || string(proof.Body) != body || len(*calls) != 1 {
-			t.Fatal(err, proof, *calls)
+		if err == nil || !errors.As(err, &proof) || string(proof.Body) != body || calls.Len() != 1 {
+			t.Fatal(err, proof, pythonAttachmentCalls(calls))
 		}
 	}
 	api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{"attachments":[{"id":"a"}]}`) })
 	_, err := attachmentRecordIDs(t, context.Background(), api, attachments.WithRecordListLimit(1), attachments.WithRecordListMarker("a"))
-	if err == nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err == nil || calls.Len() != 1 {
+		t.Fatal(err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -347,37 +348,15 @@ func TestPythonAttachmentRecordListVersionHeaderOwnershipAndPreflight(t *testing
 	if api.RawClient().Microversion != "3.54" || api.RawClient().MoreHeaders["x-selected"] != "original" {
 		t.Fatal("source mutated")
 	}
-	*calls = nil
+	calls.Reset()
 	for _, options := range [][]attachments.RecordListOption{{nil}, {attachments.WithRecordListLimit(-1)}, {attachments.WithRecordListMaxItems(-1)}, {attachments.WithRecordListHeaders(map[string]string{"X-Auth-Token": "bad"})}, {attachments.WithRecordListQuery("marker", []string{"a", "b"})}, {attachments.WithRecordListOpts(attachments.RecordListOpts{Query: map[string]json.RawMessage{"instance": json.RawMessage(`{bad`)}})}} {
 		_, err := attachmentRecordIDs(t, context.Background(), api, options...)
-		if err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err == nil || calls.Len() != 0 {
+			t.Fatal(err, pythonAttachmentCalls(calls))
 		}
 	}
 }
 
-type attachmentRecordFaultBody struct {
-	data        []byte
-	read, close error
-	afterRead   func()
-}
-
-func (b *attachmentRecordFaultBody) Read(p []byte) (int, error) {
-	n := copy(p, b.data)
-	b.data = b.data[n:]
-	if b.afterRead != nil {
-		b.afterRead()
-		b.afterRead = nil
-	}
-	if len(b.data) == 0 {
-		if b.read != nil {
-			return n, b.read
-		}
-		return n, io.EOF
-	}
-	return n, nil
-}
-func (b *attachmentRecordFaultBody) Close() error { return b.close }
 func TestPythonAttachmentRecordPhysicalErrorsPreserveStatusBodyAndCauses(t *testing.T) {
 	for _, status := range []int{201, 409, 500} {
 		for _, list := range []bool{false, true} {
@@ -385,9 +364,9 @@ func TestPythonAttachmentRecordPhysicalErrorsPreserveStatusBodyAndCauses(t *test
 				readCause, closeCause := errors.New("read failed"), errors.New("close failed")
 				api, _ := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return nil })
 				calls := 0
-				api.RawClient().HTTPClient.Transport = pythonAttachmentTransport(func(*http.Request) (*http.Response, error) {
+				api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 					calls++
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"fault"}}, Body: &attachmentRecordFaultBody{data: []byte(`{"partial":`), read: readCause, close: closeCause}}, nil
+					return testcloud.StreamResponse(status, &testcloud.Body{Data: `{"partial":`, ReadErr: readCause, CloseErr: closeCause}, http.Header{"X-Request-Id": {"fault"}}), nil
 				})
 				var err error
 				var value *attachments.AttachmentRecord
@@ -422,8 +401,8 @@ func TestPythonAttachmentRecordSourceChangesCancellationAndRetryOwnership(t *tes
 	t.Run("option_source_change", func(t *testing.T) {
 		api, calls := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return pythonAttachmentWire(200, `{}`) })
 		_, err := api.CreateRecord(context.Background(), "vol", func(*attachments.RecordCreateOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, pythonAttachmentCalls(calls))
 		}
 	})
 	t.Run("option_cancel", func(t *testing.T) {
@@ -431,14 +410,14 @@ func TestPythonAttachmentRecordSourceChangesCancellationAndRetryOwnership(t *tes
 		ctx, cancel := context.WithCancelCause(context.Background())
 		cause := errors.New("cancel cause")
 		_, err := api.CreateRecord(ctx, "vol", func(*attachments.RecordCreateOpts) error { cancel(cause); return nil })
-		if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
+			t.Fatal(err, pythonAttachmentCalls(calls))
 		}
 	})
 	t.Run("response_source_change", func(t *testing.T) {
 		api, _ := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return nil })
-		api.RawClient().HTTPClient.Transport = pythonAttachmentTransport(func(*http.Request) (*http.Response, error) {
-			return &http.Response{StatusCode: 201, Header: http.Header{}, Body: &attachmentRecordFaultBody{data: []byte(`{"attachment":{"id":"a"}}`), afterRead: func() { api.RawClient().Microversion = "3.55" }}}, nil
+		api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
+			return testcloud.StreamResponse(201, &testcloud.Body{Data: `{"attachment":{"id":"a"}}`, OnRead: func() { api.RawClient().Microversion = "3.55" }}, http.Header{}), nil
 		})
 		v, err := api.CreateRecord(context.Background(), "vol")
 		var proof *resource.ResponseError
@@ -454,15 +433,15 @@ func TestPythonAttachmentRecordSourceChangesCancellationAndRetryOwnership(t *tes
 		}
 		_, err := api.CreateRecord(context.Background(), "vol")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 409 || len(*calls) != 1 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 409 || calls.Len() != 1 {
+			t.Fatal(err, pythonAttachmentCalls(calls))
 		}
 	})
 }
 
 func TestPythonAttachmentRecordConcurrentOptionReuse(t *testing.T) {
 	api, _ := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return nil })
-	api.RawClient().HTTPClient.Transport = pythonAttachmentTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Method == http.MethodPost {
 			data, _ := io.ReadAll(req.Body)
 			if string(data) != `{"attachment":{"connector":{"host":"owned"},"volume_uuid":"vol"}}` {

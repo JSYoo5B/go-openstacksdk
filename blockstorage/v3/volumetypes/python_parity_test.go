@@ -3,7 +3,6 @@ package volumetypes_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -19,36 +18,27 @@ import (
 // pythonTypeCall records the wire request openstacksdk would also send.
 type pythonTypeCall struct{ method, path, query, body string }
 
-type pythonTypeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonTypeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonTypeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonTypeAPI(t *testing.T, reply func(*http.Request) *http.Response) (*volumetypes.API, *[]pythonTypeCall) {
+func pythonTypeAPI(t *testing.T, reply func(*http.Request) *http.Response) (*volumetypes.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonTypeCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonTypeTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonTypeCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return volumetypes.New(client), calls
+}
+
+// pythonTypeCalls projects recorded calls onto the local call fields.
+func pythonTypeCalls(rec *testcloud.Recorder) []pythonTypeCall {
+	calls := []pythonTypeCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonTypeCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonTypeBase = "/cinder/v3/project/types"
@@ -105,8 +95,8 @@ func TestPythonTypeCrudAndExtraSpecsMatchProxyRequests(t *testing.T) {
 		{http.MethodDelete, pythonTypeBase + "/vt-1/extra_specs/c", "", ""},
 		{http.MethodDelete, pythonTypeBase + "/vt-1", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTypeCalls(calls), want) {
+		t.Fatalf("%+v", pythonTypeCalls(calls))
 	}
 }
 
@@ -148,9 +138,9 @@ func TestPythonTypeListVisibilityAndQuery(t *testing.T) {
 				}
 				ids = append(ids, value.ID)
 			}
-			query, _ := url.ParseQuery((*calls)[0].query)
-			if !reflect.DeepEqual(ids, []string{"vt-1"}) || len(*calls) != 1 || (*calls)[0].path != pythonTypeBase || !reflect.DeepEqual(query, tc.query) {
-				t.Fatalf("%v %+v", ids, *calls)
+			query, _ := url.ParseQuery(pythonTypeCalls(calls)[0].query)
+			if !reflect.DeepEqual(ids, []string{"vt-1"}) || calls.Len() != 1 || pythonTypeCalls(calls)[0].path != pythonTypeBase || !reflect.DeepEqual(query, tc.query) {
+				t.Fatalf("%v %+v", ids, pythonTypeCalls(calls))
 			}
 		})
 	}
@@ -184,8 +174,8 @@ func TestPythonTypeAccessActions(t *testing.T) {
 		{http.MethodPost, pythonTypeBase + "/vt-1/action", "", `{"addProjectAccess":{"project":"p2"}}`},
 		{http.MethodPost, pythonTypeBase + "/vt-1/action", "", `{"removeProjectAccess":{"project":"p2"}}`},
 	}
-	if !reflect.DeepEqual(projects, []string{"vt-1/p1"}) || !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%v %+v", projects, *calls)
+	if !reflect.DeepEqual(projects, []string{"vt-1/p1"}) || !reflect.DeepEqual(pythonTypeCalls(calls), want) {
+		t.Fatalf("%v %+v", projects, pythonTypeCalls(calls))
 	}
 }
 
@@ -232,8 +222,8 @@ func TestPythonTypeEncryptionGetDeleteAndFullBodies(t *testing.T) {
 		{http.MethodPost, pythonTypeBase + "/vt-1/encryption", "", `{"encryption":{"cipher":"","control_location":"front-end","key_size":0,"provider":"luks"}}`},
 		{http.MethodPut, pythonTypeBase + "/vt-1/encryption/enc-1", "", `{"encryption":{"cipher":"","control_location":"","key_size":512,"provider":""}}`},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTypeCalls(calls), want) {
+		t.Fatalf("%+v", pythonTypeCalls(calls))
 	}
 }
 
@@ -254,8 +244,8 @@ func TestPythonTypeFindHasNoIsPublicNoneFallback(t *testing.T) {
 	if err != nil || byName.ID != "vt-1" {
 		t.Fatal(byName, err)
 	}
-	query, _ := url.ParseQuery((*calls)[1].query)
-	if (*calls)[0].query != "" || (*calls)[1].path != pythonTypeBase || !reflect.DeepEqual(query, url.Values{"is_public": {"None"}, "name": {"fast"}}) {
-		t.Fatalf("%+v", *calls)
+	query, _ := url.ParseQuery(pythonTypeCalls(calls)[1].query)
+	if pythonTypeCalls(calls)[0].query != "" || pythonTypeCalls(calls)[1].path != pythonTypeBase || !reflect.DeepEqual(query, url.Values{"is_public": {"None"}, "name": {"fast"}}) {
+		t.Fatalf("%+v", pythonTypeCalls(calls))
 	}
 }

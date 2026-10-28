@@ -3,10 +3,8 @@ package availabilityzones_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/availabilityzones"
@@ -14,23 +12,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeZoneTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeZoneTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeZoneAPI(t *testing.T, paths *[]string, code int, body string) *availabilityzones.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeZoneTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*paths = append(*paths, req.Method+" "+req.URL.Path+"?"+req.URL.RawQuery)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return availabilityzones.New(client)

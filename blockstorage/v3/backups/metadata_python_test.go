@@ -47,10 +47,10 @@ func TestPythonBackupMetadataProfileFetchAndLegacyAliasKeepObservedJSON(t *testi
 		}
 		result.Response.Header.Set("X-Request-Id", "caller")
 	}
-	if len(*calls) != 2 {
-		t.Fatal(*calls)
+	if calls.Len() != 2 {
+		t.Fatal(pythonBackupCalls(calls))
 	}
-	for _, call := range *calls {
+	for _, call := range pythonBackupCalls(calls) {
 		if call.method != "GET" || call.path != pythonBackupMetadataPath || call.query != "" || call.body != "" || call.version != "volume 3.42" {
 			t.Fatal(call)
 		}
@@ -75,8 +75,8 @@ func TestPythonBackupMetadataProfileFetchOmissionNullAndDecodeFailures(t *testin
 				return response
 			})
 			result, err := api.PythonMetadata().FetchMetadata(context.Background(), "bk-1")
-			if result == nil || result.Response == nil || result.Response.StatusCode != 200 || string(result.Response.Body) != check.body || result.Response.Header.Get("X-Proof") != "decode" || len(*calls) != 1 {
-				t.Fatal(result, err, *calls)
+			if result == nil || result.Response == nil || result.Response.StatusCode != 200 || string(result.Response.Body) != check.body || result.Response.Header.Get("X-Proof") != "decode" || calls.Len() != 1 {
+				t.Fatal(result, err, pythonBackupCalls(calls))
 			}
 			if check.valid {
 				if err != nil || string(result.Metadata) != check.value || (check.value == "" && result.Metadata != nil) {
@@ -109,10 +109,10 @@ func TestPythonBackupMetadataProfileSetOwnsInputAndOpaqueAcknowledgement(t *test
 				return nil
 			}
 			result, err := api.PythonMetadata().SetMetadata(context.Background(), "bk-1", values, mutate)
-			if err != nil || result.BackupID != "bk-1" || result.Metadata != nil || result.Response.StatusCode != 299 || string(result.Response.Body) != ack || len(*calls) != 1 {
-				t.Fatal(result, err, *calls)
+			if err != nil || result.BackupID != "bk-1" || result.Metadata != nil || result.Response.StatusCode != 299 || string(result.Response.Body) != ack || calls.Len() != 1 {
+				t.Fatal(result, err, pythonBackupCalls(calls))
 			}
-			call := (*calls)[0]
+			call := pythonBackupCalls(calls)[0]
 			if call.method != "POST" || call.path != pythonBackupMetadataPath || call.query != "" || call.body != expected {
 				t.Fatal(call)
 			}
@@ -124,15 +124,15 @@ func TestPythonBackupMetadataProfileDeleteNilEmptyLiteralKeysAndPartialFailure(t
 	t.Run("nil clears with opaque PUT", func(t *testing.T) {
 		api, calls := pythonBackupAPI(t, func(*http.Request) *http.Response { return pythonBackupWire(202, "clear ack") })
 		result, err := api.PythonMetadata().DeleteMetadata(context.Background(), "bk-1", nil)
-		if err != nil || result.Cleared == nil || result.Cleared.StatusCode != 202 || string(result.Cleared.Body) != "clear ack" || result.Cleared.Metadata != nil || len(result.Deleted) != 0 || !reflect.DeepEqual(*calls, []pythonBackupCall{{"PUT", pythonBackupMetadataPath, "", `{"metadata":{}}`, ""}}) {
-			t.Fatal(result, err, *calls)
+		if err != nil || result.Cleared == nil || result.Cleared.StatusCode != 202 || string(result.Cleared.Body) != "clear ack" || result.Cleared.Metadata != nil || len(result.Deleted) != 0 || !reflect.DeepEqual(pythonBackupCalls(calls), []pythonBackupCall{{"PUT", pythonBackupMetadataPath, "", `{"metadata":{}}`, ""}}) {
+			t.Fatal(result, err, pythonBackupCalls(calls))
 		}
 	})
 	t.Run("explicit empty never sends HTTP", func(t *testing.T) {
 		api, calls := pythonBackupAPI(t, func(*http.Request) *http.Response { t.Error("unexpected request"); return pythonBackupWire(200, "") })
 		result, err := api.PythonMetadata().DeleteMetadata(context.Background(), "bk-1", []string{})
-		if err != nil || result.Cleared != nil || result.Deleted == nil || len(result.Deleted) != 0 || len(*calls) != 0 {
-			t.Fatal(result, err, *calls)
+		if err != nil || result.Cleared != nil || result.Deleted == nil || len(result.Deleted) != 0 || calls.Len() != 0 {
+			t.Fatal(result, err, pythonBackupCalls(calls))
 		}
 	})
 	t.Run("literal keys duplicated and partial proof", func(t *testing.T) {
@@ -151,16 +151,16 @@ func TestPythonBackupMetadataProfileDeleteNilEmptyLiteralKeysAndPartialFailure(t
 		mutate := func(*request.Config[metadata.Opts]) error { keys[0] = "mutated"; keys[1] = "caller"; return nil }
 		result, err := api.PythonMetadata().DeleteMetadata(context.Background(), "bk-1", keys, mutate)
 		var native gophercloud.ErrUnexpectedResponseCode
-		if result == nil || result.Cleared != nil || len(result.Deleted) != 2 || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "physical-ack-3" || native.ResponseHeader.Get("X-Ack") != "3" || len(*calls) != 3 {
-			t.Fatal(result, err, native, *calls)
+		if result == nil || result.Cleared != nil || len(result.Deleted) != 2 || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "physical-ack-3" || native.ResponseHeader.Get("X-Ack") != "3" || calls.Len() != 3 {
+			t.Fatal(result, err, native, pythonBackupCalls(calls))
 		}
 		expected := []string{pythonBackupMetadataPath + "/" + url.PathEscape("literal/ %é?fragment#"), pythonBackupMetadataPath + "/duplicate", pythonBackupMetadataPath + "/duplicate"}
 		if !reflect.DeepEqual(paths, expected) || result.Deleted[0].Key != "literal/ %é?fragment#" || result.Deleted[1].Key != "duplicate" {
 			t.Fatal(paths, result)
 		}
 		for i, ack := range result.Deleted {
-			if ack.StatusCode != 200 || string(ack.Body) != fmt.Sprintf("physical-ack-%d", i+1) || ack.Header.Get("X-Ack") != fmt.Sprint(i+1) || (*calls)[i].method != "DELETE" || (*calls)[i].body != "" || (*calls)[i].query != "" {
-				t.Fatal(ack, (*calls)[i])
+			if ack.StatusCode != 200 || string(ack.Body) != fmt.Sprintf("physical-ack-%d", i+1) || ack.Header.Get("X-Ack") != fmt.Sprint(i+1) || pythonBackupCalls(calls)[i].method != "DELETE" || pythonBackupCalls(calls)[i].body != "" || pythonBackupCalls(calls)[i].query != "" {
+				t.Fatal(ack, pythonBackupCalls(calls)[i])
 			}
 		}
 	})
@@ -229,8 +229,8 @@ func TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallbac
 					return response
 				})
 				err := operation.call(context.Background(), api.PythonMetadata())
-				if len(*calls) != 1 {
-					t.Fatal("child route fallback or replay", *calls)
+				if calls.Len() != 1 {
+					t.Fatal("child route fallback or replay", pythonBackupCalls(calls))
 				}
 				if status < 400 {
 					if err != nil {
@@ -243,8 +243,8 @@ func TestPythonBackupMetadataProfileKeepsSourceStatusesAndStock404WithoutFallbac
 				if !errors.As(err, &native) || native.Actual != status || string(native.Body) != `{"metadata":{"actual":"value"}}` || native.ResponseHeader.Get("X-Proof") != "physical-status" || !errors.As(err, &wrapped) || wrapped.Operation != operation.name || wrapped.Resource != "backups.metadata" {
 					t.Fatal(err, native, wrapped)
 				}
-				if !strings.Contains(native.URL, "/backups/bk-1/metadata") || (*calls)[0].query != "" {
-					t.Fatal(native, *calls)
+				if !strings.Contains(native.URL, "/backups/bk-1/metadata") || pythonBackupCalls(calls)[0].query != "" {
+					t.Fatal(native, pythonBackupCalls(calls))
 				}
 			})
 		}
@@ -278,8 +278,8 @@ func TestPythonBackupMetadataProfileAcceptedAndRejectedBodyFaultsKeepPhysicalCau
 						return response
 					})
 					err := operation.call(ctx, api.PythonMetadata())
-					if err == nil || closes.Load() != 1 || len(*calls) != 1 {
-						t.Fatal(err, closes.Load(), *calls)
+					if err == nil || closes.Load() != 1 || calls.Len() != 1 {
+						t.Fatal(err, closes.Load(), pythonBackupCalls(calls))
 					}
 					if (mode == "read" || mode == "both") && !errors.Is(err, readFailure) {
 						t.Fatal("lost Read cause", err)
@@ -315,8 +315,8 @@ func TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses(t
 			ctx, cancel := context.WithCancelCause(context.Background())
 			cancel(cause)
 			err := operation.call(ctx, api.PythonMetadata())
-			if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
+				t.Fatal(err, pythonBackupCalls(calls))
 			}
 			var nilProfile *backups.PythonMetadataProfile
 			if err := operation.call(context.Background(), nilProfile); !errors.Is(err, resource.ErrInvalidOption) {
@@ -347,11 +347,11 @@ func TestPythonBackupMetadataProfilePreflightOwnsOptionsAndPreservesWireCauses(t
 			t.Fatal(key, err)
 		}
 	}
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(pythonBackupCalls(calls))
 	}
 	wireCause := errors.New("physical metadata transport failure")
-	api.RawClient().ProviderClient.HTTPClient.Transport = pythonBackupTransport(func(*http.Request) (*http.Response, error) { return nil, wireCause })
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return nil, wireCause })
 	for _, operation := range backupMetadataOperations() {
 		if err := operation.call(context.Background(), profile); !errors.Is(err, wireCause) {
 			t.Fatal(err)
@@ -399,21 +399,21 @@ func TestPythonBackupMetadataProfileSnapshotsHeadersConcurrentReuseAndSourceChan
 		return nil
 	}
 	transport := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		kept.Headers = map[string]string{"X-Probe": "late mutation"}
 		return transport.RoundTrip(req)
-	})
+	}))
 	if _, err := profile.FetchMetadata(context.Background(), "bk-1", keep); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 9 {
 		t.Fatal(calls.Load())
 	}
-	cloud.Provider.HTTPClient.Transport = pythonBackupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		response, err := transport.RoundTrip(req)
 		client.ResourceBase = cloud.Server.URL + "/changed/"
 		return response, err
-	})
+	}))
 	result, err := profile.FetchMetadata(context.Background(), "bk-1", option)
 	var proof *resource.ResponseError
 	if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || result.Metadata != nil || calls.Load() != 10 {

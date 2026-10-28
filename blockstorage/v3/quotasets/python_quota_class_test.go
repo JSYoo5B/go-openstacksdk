@@ -20,13 +20,13 @@ func quotaClassFixture(t *testing.T, reply func(*http.Request) *http.Response) (
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := new(int)
-	cloud.Provider.HTTPClient.Transport = pythonRejudgeTransport(func(req *http.Request) (*http.Response, error) { *calls++; return reply(req), nil })
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) { *calls++; return reply(req), nil }))
 	client := cloud.Client("volumev3", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/"
 	return quotasets.New(client), client, calls
 }
 func quotaClassWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"quota-class-actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"quota-class-actual"}})
 }
 func quotaClassBody(t *testing.T, r *http.Request) string {
 	t.Helper()

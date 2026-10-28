@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -12,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/qos"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -21,8 +21,8 @@ func TestPythonQoSFindRecordGetFirstConvertsIDAndKeepsUnknownFields(t *testing.T
 		return pythonQoSWire(200, `{"qos_specs":{"id":9007199254740993,"name":"gold","consumer":false,"specs":{"n":9007199254740993},"vendor":[null,0]}}`)
 	})
 	value, err := api.FindRecord(context.Background(), "9007199254740993")
-	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"9007199254740993"` || string(value.Wire.Body["id"]) != "9007199254740993" || string(value.Resource.Body["consumer"]) != "false" || string(value.Resource.Body["vendor"]) != `[null,0]` || len(*calls) != 1 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"9007199254740993"` || string(value.Wire.Body["id"]) != "9007199254740993" || string(value.Resource.Body["consumer"]) != "false" || string(value.Resource.Body["vendor"]) != `[null,0]` || calls.Len() != 1 {
+		t.Fatal(value, err, pythonQoSCalls(calls))
 	}
 	if value.StatusCode != 200 || value.Header.Get("Content-Type") == "" || len(value.Envelope) == 0 {
 		t.Fatal(value)
@@ -36,11 +36,11 @@ func TestPythonQoSFindRecordSplitsGETKwargsAndListServerBodyFilters(t *testing.T
 		return pythonQoSWire(200, `{"qos_specs":[{"id":"q-1","name":"gold","consumer":"back-end","specs":{"n":true,"extra":"ok"}},{"id":"q-2","name":"gold","consumer":"front-end","specs":{"n":true}}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "gold", qos.WithRecordFindQuery("project_id", []any{"p1", nil, "p2"}), qos.WithRecordFindQuery("consumer", "back-end"), qos.WithRecordFindQuery("specs", map[string]any{"n": 1}), qos.WithRecordFindQuery("host", "controller"), qos.WithRecordFindQuery("unknown", nil))
-	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"q-1"` || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || string(value.Resource.Body["id"]) != `"q-1"` || calls.Len() != 2 {
+		t.Fatal(value, err, pythonQoSCalls(calls))
 	}
-	getQuery, _ := url.ParseQuery((*calls)[0].query)
-	listQuery, _ := url.ParseQuery((*calls)[1].query)
+	getQuery, _ := url.ParseQuery(pythonQoSCalls(calls)[0].query)
+	listQuery, _ := url.ParseQuery(pythonQoSCalls(calls)[1].query)
 	if getQuery.Get("host") != "controller" || getQuery.Get("consumer") != "back-end" || getQuery.Get("specs") != "n" || getQuery.Has("unknown") || !reflect.DeepEqual(getQuery["project_id"], []string{"p1", "p2"}) || !reflect.DeepEqual(listQuery, url.Values{"project_id": {"p1", "p2"}}) {
 		t.Fatal(getQuery, listQuery)
 	}
@@ -59,15 +59,15 @@ func TestPythonQoSFindRecordDefaultsMissingAndFallbackCodes(t *testing.T) {
 				t.Fatal(value, err)
 			}
 			_, err = api.FindRecord(context.Background(), "none", qos.WithRecordFindIgnoreMissing(false))
-			if !errors.Is(err, resource.ErrNotFound) || len(*calls) != 4 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
+				t.Fatal(err, pythonQoSCalls(calls))
 			}
 		})
 	}
 	api, calls := pythonQoSAPI(t, func(*http.Request) *http.Response { return pythonQoSWire(500, `{"error":"unavailable"}`) })
 	_, err := api.FindRecord(context.Background(), "gold")
-	if !gophercloud.ResponseCodeIs(err, 500) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if !gophercloud.ResponseCodeIs(err, 500) || calls.Len() != 1 {
+		t.Fatal(err, pythonQoSCalls(calls))
 	}
 }
 func TestPythonQoSFindRecordFindsIDAndRejectsLateDuplicate(t *testing.T) {
@@ -93,8 +93,8 @@ func TestPythonQoSFindRecordFindsIDAndRejectsLateDuplicate(t *testing.T) {
 			} else if err != nil || value == nil || string(value.Resource.Body["id"]) != `"gold"` {
 				t.Fatal(value, err)
 			}
-			if len(*calls) != 3 {
-				t.Fatal(*calls)
+			if calls.Len() != 3 {
+				t.Fatal(pythonQoSCalls(calls))
 			}
 		})
 	}
@@ -110,11 +110,11 @@ func TestPythonQoSFindRecordOwnsOptionsAndCapsBeforeBodyFilter(t *testing.T) {
 		return pythonQoSWire(200, `{"qos_specs":[{"id":"q-1","name":"gold","consumer":"back-end"},{"id":"q-2","name":"gold","consumer":"front-end"}],"qos_specs_links":[{"rel":"next","href":"?marker=q-2&limit=1"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "gold", option)
-	if err != nil || value != nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value != nil || calls.Len() != 2 {
+		t.Fatal(value, err, pythonQoSCalls(calls))
 	}
-	getQuery, _ := url.ParseQuery((*calls)[0].query)
-	listQuery, _ := url.ParseQuery((*calls)[1].query)
+	getQuery, _ := url.ParseQuery(pythonQoSCalls(calls)[0].query)
+	listQuery, _ := url.ParseQuery(pythonQoSCalls(calls)[1].query)
 	if getQuery.Get("max_items") != "1" || getQuery.Get("consumer") != "front-end" || listQuery.Get("limit") != "1" || listQuery.Has("consumer") {
 		t.Fatal(getQuery, listQuery)
 	}
@@ -123,32 +123,19 @@ func TestPythonQoSFindRecordGuardAndQueryFailuresBeforeHTTP(t *testing.T) {
 	for _, options := range [][]qos.RecordFindOption{{nil}, {qos.WithRecordFindOpts(qos.RecordFindOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"unterminated`)}})}, {qos.WithRecordFindQuery("id", "collision")}} {
 		api, calls := pythonQoSAPI(t, func(*http.Request) *http.Response { t.Fatal("preflight reached HTTP"); return nil })
 		_, err := api.FindRecord(context.Background(), "gold", options...)
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, pythonQoSCalls(calls))
 		}
 	}
 	api, calls := pythonQoSAPI(t, func(*http.Request) *http.Response { t.Fatal("cancelled reached HTTP"); return nil })
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("find cancelled by user")
 	_, err := api.FindRecord(ctx, "gold", func(*qos.RecordFindOpts) error { cancel(cause); return nil })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
+		t.Fatal(err, pythonQoSCalls(calls))
 	}
 }
 
-type qosFindBrokenBody struct {
-	io.Reader
-	read, close error
-}
-
-func (b qosFindBrokenBody) Read(p []byte) (int, error) {
-	n, err := b.Reader.Read(p)
-	if err == io.EOF {
-		return n, b.read
-	}
-	return n, err
-}
-func (b qosFindBrokenBody) Close() error { return b.close }
 func TestPythonQoSFindRecordPhysicalRejectedBodyAndLateAcceptedCloseKeepEvidence(t *testing.T) {
 	for _, rejected := range []bool{true, false} {
 		t.Run(map[bool]string{true: "rejected member", false: "accepted list"}[rejected], func(t *testing.T) {
@@ -163,7 +150,7 @@ func TestPythonQoSFindRecordPhysicalRejectedBodyAndLateAcceptedCloseKeepEvidence
 				}
 				response := pythonQoSWire(status, "")
 				response.Header.Set("X-Request-Id", "qos-proof")
-				response.Body = qosFindBrokenBody{Reader: strings.NewReader(body), read: readFailure, close: closeFailure}
+				response.Body = &testcloud.Body{Data: body, ReadErr: readFailure, CloseErr: closeFailure}
 				return response
 			})
 			value, err := api.FindRecord(context.Background(), "gold")
@@ -171,8 +158,8 @@ func TestPythonQoSFindRecordPhysicalRejectedBodyAndLateAcceptedCloseKeepEvidence
 			if rejected {
 				wantCalls = 1
 			}
-			if value != nil || !errors.Is(err, readFailure) || !errors.Is(err, closeFailure) || len(*calls) != wantCalls {
-				t.Fatal(value, err, *calls)
+			if value != nil || !errors.Is(err, readFailure) || !errors.Is(err, closeFailure) || calls.Len() != wantCalls {
+				t.Fatal(value, err, pythonQoSCalls(calls))
 			}
 			if rejected {
 				var proof gophercloud.ErrUnexpectedResponseCode

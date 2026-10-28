@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -29,8 +29,8 @@ func TestPythonSnapshotFindRecordDirectGetAndOwnedDescriptors(t *testing.T) {
 		return pythonSnapshotWire(200, `{"snapshot":{"name":false,"size":"١٢","force":"TrUe","is_forced":"FALSE","project_id":"first","os-extended-snapshot-attributes:project_id":"last","metadata":42,"created_at":"literal","unknown":9007199254740993}}`)
 	})
 	v, err := api.FindRecord(context.Background(), "selected", snapshots.WithRecordFindDetails(false), snapshots.WithRecordFindAllProjects(true))
-	if err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodGet || (*calls)[0].path != pythonSnapshotBase+"/selected" || (*calls)[0].query != "" || (*calls)[0].body != "" || (*calls)[0].version != "volume 3.80" {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || pythonSnapshotCalls(calls)[0].method != http.MethodGet || pythonSnapshotCalls(calls)[0].path != pythonSnapshotBase+"/selected" || pythonSnapshotCalls(calls)[0].query != "" || pythonSnapshotCalls(calls)[0].body != "" || pythonSnapshotCalls(calls)[0].version != "volume 3.80" {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	for key, want := range map[string]string{"id": `"selected"`, "name": `false`, "size": `12`, "is_forced": `false`, "project_id": `"last"`, "metadata": `{}`, "created_at": `"literal"`, "location": `null`, "updated_at": `null`, "consumes_quota": `null`} {
 		snapshotFindField(t, v, key, want)
@@ -65,10 +65,10 @@ func TestPythonSnapshotFindRecordDefaultFallbackRoutesAndAllProjects(t *testing.
 						opts = append(opts, snapshots.WithRecordFindDetails(false))
 					}
 					v, err := api.FindRecord(context.Background(), "daily", opts...)
-					if err != nil || v == nil || len(*calls) != 2 || (*calls)[0].path != pythonSnapshotBase+"/daily" || (*calls)[0].query != "" || (*calls)[1].path != path {
-						t.Fatal(v, err, *calls)
+					if err != nil || v == nil || calls.Len() != 2 || pythonSnapshotCalls(calls)[0].path != pythonSnapshotBase+"/daily" || pythonSnapshotCalls(calls)[0].query != "" || pythonSnapshotCalls(calls)[1].path != path {
+						t.Fatal(v, err, pythonSnapshotCalls(calls))
 					}
-					query, _ := url.ParseQuery((*calls)[1].query)
+					query, _ := url.ParseQuery(pythonSnapshotCalls(calls)[1].query)
 					if query.Get("name") != "daily" || query.Has("all_tenants") != all || all && query.Get("all_tenants") != "True" {
 						t.Fatal(query)
 					}
@@ -100,8 +100,8 @@ func TestPythonSnapshotFindRecordFallbackMatchesIDAndDetectsLateDuplicateOrFailu
 			return pythonSnapshotWire(200, `{"snapshots":[{"id":"wanted","name":"other"}],"snapshots_links":[{"rel":"next","href":"?marker=next"}]}`)
 		})
 		v, err := api.FindRecord(context.Background(), "wanted")
-		if len(*calls) != 3 {
-			t.Fatal(*calls)
+		if calls.Len() != 3 {
+			t.Fatal(pythonSnapshotCalls(calls))
 		}
 		if last == "success" {
 			if err != nil || v == nil {
@@ -127,16 +127,16 @@ func TestPythonSnapshotFindRecordMissingAndCleanNativeRetry(t *testing.T) {
 		return original
 	}
 	v, err := api.FindRecord(context.Background(), "missing")
-	if err != nil || v != nil || len(*calls) != 2 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v != nil || calls.Len() != 2 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	_, err = api.FindRecord(context.Background(), "missing", snapshots.WithRecordFindIgnoreMissing(false))
-	if !errors.Is(err, resource.ErrNotFound) || len(*calls) != 4 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 	api, calls = pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return pythonSnapshotWire(401, `{"unauthorized":true}`) })
-	if v, err = api.FindRecord(context.Background(), "daily"); v != nil || !gophercloud.ResponseCodeIs(err, 401) || len(*calls) != 1 {
-		t.Fatal(v, err, *calls)
+	if v, err = api.FindRecord(context.Background(), "daily"); v != nil || !gophercloud.ResponseCodeIs(err, 401) || calls.Len() != 1 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 }
 
@@ -151,20 +151,20 @@ func TestPythonSnapshotFindRecordQueryAliasesFiltersAndRawRowCap(t *testing.T) {
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"a","name":"daily","metadata":{"enabled":false}},{"id":"b","name":"daily","metadata":{"enabled":1,"extra":false}},{"id":"c","name":"daily","metadata":{"enabled":true}}],"next":"https://bad.example/snapshots"}`)
 	})
 	v, err := api.FindRecord(context.Background(), "daily", opts, snapshots.WithRecordFindMaxItems(2), snapshots.WithRecordFindLimit(0))
-	if err != nil || v == nil || len(*calls) != 2 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 2 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	snapshotFindField(t, v, "id", `"b"`)
-	q, _ := url.ParseQuery((*calls)[1].query)
-	if q.Get("all_tenants") != "True" || q.Get("limit") != "2" || q.Get("name") != "daily" || !reflect.DeepEqual(q["volume_id"], []string{"a", "b"}) || q.Has("metadata") || q.Has("unknown") || (*calls)[0].query != "" {
-		t.Fatal(q, *calls)
+	q, _ := url.ParseQuery(pythonSnapshotCalls(calls)[1].query)
+	if q.Get("all_tenants") != "True" || q.Get("limit") != "2" || q.Get("name") != "daily" || !reflect.DeepEqual(q["volume_id"], []string{"a", "b"}) || q.Has("metadata") || q.Has("unknown") || pythonSnapshotCalls(calls)[0].query != "" {
+		t.Fatal(q, pythonSnapshotCalls(calls))
 	}
-	*calls = nil
+	calls.Reset()
 	v, err = api.FindRecord(context.Background(), "daily", opts, snapshots.WithRecordFindAllProjects(false), snapshots.WithRecordFindMaxItems(2))
 	if err != nil || v == nil {
 		t.Fatal(v, err)
 	}
-	q, _ = url.ParseQuery((*calls)[1].query)
+	q, _ = url.ParseQuery(pythonSnapshotCalls(calls)[1].query)
 	if q.Has("all_tenants") {
 		t.Fatal(q)
 	}
@@ -193,7 +193,7 @@ func TestPythonSnapshotFindRecordFilterDictionaryAndExplicitNullName(t *testing.
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"daily","name":"other"}]}`)
 	})
 	v, err := api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindQuery("name", nil))
-	q, _ := url.ParseQuery((*calls)[1].query)
+	q, _ := url.ParseQuery(pythonSnapshotCalls(calls)[1].query)
 	if err != nil || v == nil || q.Has("name") {
 		t.Fatal(v, err, q)
 	}
@@ -210,13 +210,13 @@ func TestPythonSnapshotFindRecordSinglePageMarkerFallbackAndOffsetPaging(t *test
 		return pythonSnapshotWire(200, `{"snapshots":{"id":"a","name":"daily"}}`)
 	})
 	v, err := api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindLimit(5))
-	if err != nil || v == nil || len(*calls) != 3 || !strings.Contains((*calls)[2].query, "marker=a") {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 3 || !strings.Contains(pythonSnapshotCalls(calls)[2].query, "marker=a") {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
-	*calls = nil
+	calls.Reset()
 	v, err = api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindLimit(5), snapshots.WithRecordFindPaginated(false))
-	if err != nil || v == nil || len(*calls) != 2 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 2 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	api, calls = pythonSnapshotAPI(t, "3.65", func(req *http.Request) *http.Response {
 		if req.URL.Path != pythonSnapshotBase+"/detail" {
@@ -228,8 +228,8 @@ func TestPythonSnapshotFindRecordSinglePageMarkerFallbackAndOffsetPaging(t *test
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"a","name":"other"}],"next":"?offset=2&limit=2"}`)
 	})
 	v, err = api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindQuery("offset", 0))
-	if err != nil || v == nil || len(*calls) != 3 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 3 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	snapshotFindField(t, v, "id", `"b"`)
 }
@@ -241,8 +241,8 @@ func TestPythonSnapshotFindRecordResponseShapeAndNullableIdentity(t *testing.T) 
 	}{{`{"snapshot":{"id":null,"size":false,"metadata":[]}}`, true}, {`{"snapshot":{"id":42,"force":null}}`, true}, {`{}`, true}, {"", true}, {"{bad", true}, {`[]`, false}, {`null`, false}, {`{"snapshot":null}`, false}, {`{"snapshot":{"force":1}}`, false}} {
 		api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return pythonSnapshotWire(200, item.body) })
 		v, err := api.FindRecord(context.Background(), "seed")
-		if (err == nil) != item.valid || v == nil || v.StatusCode != 200 || string(v.Envelope) != item.body || len(*calls) != 1 {
-			t.Fatal(item, v, err, *calls)
+		if (err == nil) != item.valid || v == nil || v.StatusCode != 200 || string(v.Envelope) != item.body || calls.Len() != 1 {
+			t.Fatal(item, v, err, pythonSnapshotCalls(calls))
 		}
 		if !item.valid {
 			var proof *resource.ResponseError
@@ -265,67 +265,40 @@ func TestPythonSnapshotFindRecordResponseShapeAndNullableIdentity(t *testing.T) 
 		}
 	}
 }
-
-type snapshotFindFaultBody struct {
-	data            []byte
-	read, close     error
-	onRead, onClose func()
-}
-
-func (b *snapshotFindFaultBody) Read(p []byte) (int, error) {
-	n := copy(p, b.data)
-	b.data = b.data[n:]
-	if b.onRead != nil {
-		b.onRead()
-		b.onRead = nil
-	}
-	if len(b.data) == 0 {
-		if b.read != nil {
-			return n, b.read
-		}
-		return n, io.EOF
-	}
-	return n, nil
-}
-func (b *snapshotFindFaultBody) Close() error {
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.close
-}
 func TestPythonSnapshotFindRecordRejectedPhysicalFailuresNeverFallback(t *testing.T) {
 	for _, code := range []int{400, 403, 404} {
 		readCause, closeCause := errors.New("member read"), errors.New("member close")
 		closes := 0
 		api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response {
-			return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"rejected"}}, Body: &snapshotFindFaultBody{data: []byte(`{"missing":true}`), read: readCause, close: closeCause, onClose: func() { closes++ }}}
+			return testcloud.StreamResponse(code, &testcloud.Body{Data: `{"missing":true}`, ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes++ }}, http.Header{"X-Request-Id": {"rejected"}})
 		})
 		v, err := api.FindRecord(context.Background(), "daily")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if v != nil || len(*calls) != 1 || closes != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"missing":true}` || native.ResponseHeader.Get("X-Request-Id") != "rejected" {
-			t.Fatal(v, err, native, *calls)
+		if v != nil || calls.Len() != 1 || closes != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"missing":true}` || native.ResponseHeader.Get("X-Request-Id") != "rejected" {
+			t.Fatal(v, err, native, pythonSnapshotCalls(calls))
 		}
 	}
 }
 func TestPythonSnapshotFindRecordAcceptedFaultAndStickySourceProof(t *testing.T) {
 	for _, sticky := range []bool{false, true} {
 		readCause, closeCause := errors.New("accepted read"), errors.New("accepted close")
-		api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return nil })
-		api.RawClient().HTTPClient.Transport = pythonSnapshotTransport(func(*http.Request) (*http.Response, error) {
-			*calls = append(*calls, pythonSnapshotCall{method: http.MethodGet})
-			body := &snapshotFindFaultBody{data: []byte(`{"snapshot":{"id":"a"}}`), read: readCause, close: closeCause}
+		api, _ := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return nil })
+		calls := []pythonSnapshotCall{}
+		api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
+			calls = append(calls, pythonSnapshotCall{method: http.MethodGet})
+			body := &testcloud.Body{Data: `{"snapshot":{"id":"a"}}`, ReadErr: readCause, CloseErr: closeCause}
 			if sticky {
-				body.read = nil
-				body.close = nil
-				body.onRead = func() { api.RawClient().Microversion = "3.80" }
-				body.onClose = func() { api.RawClient().Microversion = "3.65" }
+				body.ReadErr = nil
+				body.CloseErr = nil
+				body.OnRead = func() { api.RawClient().Microversion = "3.80" }
+				body.OnClose = func() { api.RawClient().Microversion = "3.65" }
 			}
-			return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"accepted"}}, Body: body}, nil
+			return testcloud.StreamResponse(200, body, http.Header{"X-Request-Id": {"accepted"}}), nil
 		})
 		v, err := api.FindRecord(context.Background(), "daily")
 		var proof *resource.ResponseError
-		if v == nil || err == nil || len(*calls) != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || v.StatusCode != 200 || v.Resource != nil || v.Header.Get("X-Request-Id") != "accepted" {
-			t.Fatal(v, err, proof, *calls)
+		if v == nil || err == nil || len(calls) != 1 || !errors.As(err, &proof) || proof.StatusCode != 200 || v.StatusCode != 200 || v.Resource != nil || v.Header.Get("X-Request-Id") != "accepted" {
+			t.Fatal(v, err, proof, calls)
 		}
 		if sticky {
 			if !errors.Is(err, resource.ErrInvalidOption) || api.RawClient().Microversion != "3.65" {
@@ -351,8 +324,8 @@ func TestPythonSnapshotFindRecordDiscoveryAndProtocolHeaderProtection(t *testing
 	})
 	api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
 	v, err := api.FindRecord(context.Background(), "snap")
-	if err != nil || v == nil || len(*calls) != 2 || (*calls)[0].path != "/cinder/v3/" || (*calls)[1].version != "volume 3.65" || api.RawClient().Microversion != "" || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || v.StatusCode != 200 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 2 || pythonSnapshotCalls(calls)[0].path != "/cinder/v3/" || pythonSnapshotCalls(calls)[1].version != "volume 3.65" || api.RawClient().Microversion != "" || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || v.StatusCode != 200 {
+		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	api, calls = pythonSnapshotAPI(t, "3.80", func(*http.Request) *http.Response { return pythonSnapshotWire(409, `{"conflict":true}`) })
 	api.RawClient().RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
@@ -360,8 +333,8 @@ func TestPythonSnapshotFindRecordDiscoveryAndProtocolHeaderProtection(t *testing
 		return nil
 	}
 	_, err = api.FindRecord(context.Background(), "daily")
-	if !errors.Is(err, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(err, 409) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || !gophercloud.ResponseCodeIs(err, 409) || calls.Len() != 1 {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 }
 
@@ -369,15 +342,15 @@ func TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions(t *test
 	api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return pythonSnapshotWire(200, `{"snapshot":{"id":"a"}}`) })
 	for _, opts := range [][]snapshots.RecordFindOption{{nil}, {snapshots.WithRecordFindLimit(-1)}, {snapshots.WithRecordFindMaxItems(-1)}, {snapshots.WithRecordFindQuery("id", "different")}, {snapshots.WithRecordFindHeaders(map[string]string{"X-Auth-Token": "bad"})}, {snapshots.WithRecordFindOpts(snapshots.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}} {
 		_, err := api.FindRecord(context.Background(), "daily", opts...)
-		if err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err == nil || calls.Len() != 0 {
+			t.Fatal(err, pythonSnapshotCalls(calls))
 		}
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("custom cancel"), errors.New("callback failure")
 	_, err := api.FindRecord(ctx, "daily", func(*snapshots.RecordFindOpts) error { cancel(cause); return callback })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 0 {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 	var retained *snapshots.RecordFindOpts
 	_, err = api.FindRecord(context.Background(), "a", func(c *snapshots.RecordFindOpts) error {
@@ -385,14 +358,14 @@ func TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions(t *test
 		c.Headers = map[string]string{"X-Custom": "original"}
 		return nil
 	}, func(*snapshots.RecordFindOpts) error { retained.Headers["X-Auth-Token"] = "later mutation"; return nil })
-	if err != nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 {
+		t.Fatal(err, pythonSnapshotCalls(calls))
 	}
 }
 
 func TestPythonSnapshotFindRecordConcurrentOptionReuse(t *testing.T) {
 	api, _ := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return nil })
-	api.RawClient().HTTPClient.Transport = pythonSnapshotTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Header.Get("X-Custom") != "owned" {
 			t.Error(req.Header)
 		}
@@ -420,12 +393,12 @@ func TestPythonSnapshotFindRecordListPhysicalFailureAndDiscoveryOnlyProof(t *tes
 			if req.URL.Path != pythonSnapshotBase+"/detail" {
 				return pythonSnapshotWire(404, `{}`)
 			}
-			return &http.Response{StatusCode: 403, Header: http.Header{"X-Request-Id": {"list-denied"}}, Body: &snapshotFindFaultBody{data: []byte(`{"policy":false}`), read: readCause, close: closeCause, onClose: func() { closes++ }}}
+			return testcloud.StreamResponse(403, &testcloud.Body{Data: `{"policy":false}`, ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes++ }}, http.Header{"X-Request-Id": {"list-denied"}})
 		})
 		v, err := api.FindRecord(context.Background(), "daily")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if v != nil || len(*calls) != 2 || closes != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"policy":false}` || native.ResponseHeader.Get("X-Request-Id") != "list-denied" {
-			t.Fatal(v, err, native, *calls, closes)
+		if v != nil || calls.Len() != 2 || closes != 1 || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"policy":false}` || native.ResponseHeader.Get("X-Request-Id") != "list-denied" {
+			t.Fatal(v, err, native, pythonSnapshotCalls(calls), closes)
 		}
 	})
 	t.Run("accepted discovery fault", func(t *testing.T) {
@@ -433,13 +406,13 @@ func TestPythonSnapshotFindRecordListPhysicalFailureAndDiscoveryOnlyProof(t *tes
 		closes := 0
 		body := `{"version":{"id":"v3.0","version":"3.80","min_version":"3.0"}}`
 		api, calls := pythonSnapshotAPI(t, "", func(*http.Request) *http.Response {
-			return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"discovery"}}, Body: &snapshotFindFaultBody{data: []byte(body), read: readCause, close: closeCause, onClose: func() { closes++ }}}
+			return testcloud.StreamResponse(200, &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause, OnClose: func() { closes++ }}, http.Header{"X-Request-Id": {"discovery"}})
 		})
 		api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
 		v, err := api.FindRecord(context.Background(), "daily")
 		var proof *resource.ResponseError
-		if v == nil || err == nil || len(*calls) != 1 || closes != 1 || v.StatusCode != 0 || v.Envelope != nil || v.Resource != nil || v.Wire != nil || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || string(v.Discovery[0].Envelope) != body || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 200 {
-			t.Fatal(v, err, proof, *calls, closes)
+		if v == nil || err == nil || calls.Len() != 1 || closes != 1 || v.StatusCode != 0 || v.Envelope != nil || v.Resource != nil || v.Wire != nil || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || string(v.Discovery[0].Envelope) != body || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 200 {
+			t.Fatal(v, err, proof, pythonSnapshotCalls(calls), closes)
 		}
 		v.Discovery[0].Envelope[0] = 'X'
 		v.Discovery[0].Header.Set("X-Request-Id", "changed")

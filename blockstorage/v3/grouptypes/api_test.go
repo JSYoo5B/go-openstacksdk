@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -16,16 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type gtTransport func(*http.Request) (*http.Response, error)
-
-func (f gtTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 
 type gtCall struct {
 	method, path, query, body string
@@ -40,27 +29,30 @@ const (
 
 // gtAPI answers version discovery at /cinder/v3/ and every other request
 // through reply.
-func gtAPI(t *testing.T, version string, reply func(*http.Request) (int, string)) (*grouptypes.API, *[]gtCall) {
+func gtAPI(t *testing.T, version string, reply func(*http.Request) (int, string)) (*grouptypes.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]gtCall{}
-	cloud.Provider.HTTPClient.Transport = gtTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, gtCall{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) {
 		code, text := 200, gtDiscovery
 		if r.URL.Path != "/cinder/v3/" {
 			code, text = reply(r)
 		}
-		return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(text))}, nil
+		return testcloud.Response(code, text, http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
 	return grouptypes.New(client), calls
+}
+
+// gtCalls projects recorded calls onto the local call fields.
+func gtCalls(rec *testcloud.Recorder) []gtCall {
+	calls := []gtCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, gtCall{call.Method, call.EscapedPath, call.RawQuery, call.Body, call.Header})
+	}
+	return calls
 }
 
 func gtOperation(t *testing.T, err error, operation string, code int) {
@@ -105,11 +97,11 @@ func TestGroupTypeGetNegotiatesMicroversion311(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 || (*calls)[0].path != "/cinder/v3/" || (*calls)[1].method != http.MethodGet || (*calls)[1].path != gtBase+"/gt1" {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || gtCalls(calls)[0].path != "/cinder/v3/" || gtCalls(calls)[1].method != http.MethodGet || gtCalls(calls)[1].path != gtBase+"/gt1" {
+		t.Fatal(gtCalls(calls))
 	}
-	gtVersion(t, (*calls)[0], "")
-	gtVersion(t, (*calls)[1], "3.11")
+	gtVersion(t, gtCalls(calls)[0], "")
+	gtVersion(t, gtCalls(calls)[1], "3.11")
 	gtCheck(t, v)
 	if v.StatusCode != 200 || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 {
 		t.Fatalf("evidence: %#v", v)
@@ -118,10 +110,10 @@ func TestGroupTypeGetNegotiatesMicroversion311(t *testing.T) {
 	// A configured microversion is sent as is, without discovery.
 	api, calls = gtAPI(t, "3.5", func(*http.Request) (int, string) { return 200, gtRow })
 	v, err = api.Get(context.Background(), "a/b")
-	if err != nil || len(*calls) != 1 || (*calls)[0].path != gtBase+"/a%2Fb" {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 || gtCalls(calls)[0].path != gtBase+"/a%2Fb" {
+		t.Fatal(err, gtCalls(calls))
 	}
-	gtVersion(t, (*calls)[0], "3.5")
+	gtVersion(t, gtCalls(calls)[0], "3.5")
 	if v.ID != "gt1" {
 		t.Fatalf("root object decode: %#v", v)
 	}
@@ -178,7 +170,7 @@ func TestGroupTypeCreatePostsEnvelope(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	call := (*calls)[1]
+	call := gtCalls(calls)[1]
 	if call.method != http.MethodPost || call.path != gtBase || call.header.Get("Content-Type") != "application/json" {
 		t.Fatal(call)
 	}
@@ -202,7 +194,7 @@ func TestGroupTypeUpdateSendsDirtyAttributesOnly(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	call := (*calls)[1]
+	call := gtCalls(calls)[1]
 	if call.method != http.MethodPut || call.path != gtBase+"/gt1" || call.body != `{"group_type":{"description":"d"}}` {
 		t.Fatal(call)
 	}
@@ -212,8 +204,8 @@ func TestGroupTypeUpdateSendsDirtyAttributesOnly(t *testing.T) {
 	// Nothing dirty: no discovery and no update request.
 	api, calls = gtAPI(t, "", func(*http.Request) (int, string) { t.Fatal("unexpected request"); return 0, "" })
 	v, err = api.Update(context.Background(), "gt1", grouptypes.WithUpdateField("id", "x"), grouptypes.WithUpdateField("unknown", 1))
-	if err != nil || len(*calls) != 0 || v.ID != "gt1" || v.StatusCode != 0 {
-		t.Fatal(err, *calls, v)
+	if err != nil || calls.Len() != 0 || v.ID != "gt1" || v.StatusCode != 0 {
+		t.Fatal(err, gtCalls(calls), v)
 	}
 }
 
@@ -225,8 +217,8 @@ func TestGroupTypeDeleteIgnoresMissingByDefault(t *testing.T) {
 	}{{202, nil, false}, {204, nil, false}, {404, nil, false}, {404, []grouptypes.DeleteOption{grouptypes.WithDeleteIgnoreMissing(false)}, true}, {409, nil, true}} {
 		api, calls := gtAPI(t, "3.11", func(*http.Request) (int, string) { return item.code, `{}` })
 		err := api.Delete(context.Background(), "gt1", item.options...)
-		if (*calls)[0].method != http.MethodDelete || (*calls)[0].path != gtBase+"/gt1" {
-			t.Fatal(*calls)
+		if gtCalls(calls)[0].method != http.MethodDelete || gtCalls(calls)[0].path != gtBase+"/gt1" {
+			t.Fatal(gtCalls(calls))
 		}
 		if item.fail {
 			gtOperation(t, err, "Delete", item.code)
@@ -254,18 +246,18 @@ func TestGroupTypeListQueryFiltersAndPaging(t *testing.T) {
 	if len(values) != 2 || values[0].ID != "gt1" || values[1].ID != "gt3" {
 		t.Fatalf("filtered rows: %#v", values)
 	}
-	if (*calls)[0].query != "all_tenants=True&is_public=True" || (*calls)[0].header.Get("Accept") != "application/json" {
-		t.Fatal((*calls)[0])
+	if gtCalls(calls)[0].query != "all_tenants=True&is_public=True" || gtCalls(calls)[0].header.Get("Accept") != "application/json" {
+		t.Fatal(gtCalls(calls)[0])
 	}
-	if len(*calls) != 2 || (*calls)[1].path != gtBase {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || gtCalls(calls)[1].path != gtBase {
+		t.Fatal(gtCalls(calls))
 	}
-	gtVersion(t, (*calls)[1], "3.11")
+	gtVersion(t, gtCalls(calls)[1], "3.11")
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"group_types":[` + gtRow + `]}` })
 	values, err = api.All(context.Background(), grouptypes.WithListLimit(1), grouptypes.WithListMarker("m"), grouptypes.WithListPaginated(false))
-	if err != nil || len(values) != 1 || (*calls)[0].query != "limit=1&marker=m" || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err != nil || len(values) != 1 || gtCalls(calls)[0].query != "limit=1&marker=m" || calls.Len() != 1 {
+		t.Fatal(err, gtCalls(calls))
 	}
 
 	api, _ = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 500, `{}` })
@@ -285,15 +277,15 @@ func TestGroupTypeFindUsesIsPublicNone(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(*calls) != 2 || (*calls)[0].path != gtBase+"/gold" || (*calls)[0].query != "is_public=none" || (*calls)[1].path != gtBase || (*calls)[1].query != "is_public=none" {
-		t.Fatal(*calls)
+	if calls.Len() != 2 || gtCalls(calls)[0].path != gtBase+"/gold" || gtCalls(calls)[0].query != "is_public=none" || gtCalls(calls)[1].path != gtBase || gtCalls(calls)[1].query != "is_public=none" {
+		t.Fatal(gtCalls(calls))
 	}
 	gtCheck(t, v)
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"group_type":` + gtRow + `}` })
 	v, err = api.Find(context.Background(), "gt1")
-	if err != nil || len(*calls) != 1 || v.ID != "gt1" {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 || v.ID != "gt1" {
+		t.Fatal(err, gtCalls(calls))
 	}
 
 	api, _ = gtAPI(t, "3.11", func(r *http.Request) (int, string) {
@@ -330,18 +322,18 @@ func TestGroupTypeGroupSpecs(t *testing.T) {
 		return 200, `{"group_specs":{"a":"1"}}`
 	})
 	v, err := api.FetchGroupSpecs(context.Background(), "gt1")
-	if err != nil || (*calls)[1].method != http.MethodGet || (*calls)[1].path != gtBase+"/gt1/group_specs" {
-		t.Fatal(err, *calls)
+	if err != nil || gtCalls(calls)[1].method != http.MethodGet || gtCalls(calls)[1].path != gtBase+"/gt1/group_specs" {
+		t.Fatal(err, gtCalls(calls))
 	}
-	gtVersion(t, (*calls)[1], "3.11")
+	gtVersion(t, gtCalls(calls)[1], "3.11")
 	if v.ID != "gt1" || !reflect.DeepEqual(v.GroupSpecs, map[string]string{"a": "1"}) || v.Wire != nil || v.StatusCode != 200 {
 		t.Fatalf("fetched specs: %#v", v)
 	}
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{}` })
 	v, err = api.CreateGroupSpecs(context.Background(), "gt1", map[string]any{"a": "1"})
-	if err != nil || (*calls)[0].method != http.MethodPost || (*calls)[0].path != gtBase+"/gt1/group_specs" || (*calls)[0].body != `{"group_specs":{"a":"1"}}` {
-		t.Fatal(err, *calls)
+	if err != nil || gtCalls(calls)[0].method != http.MethodPost || gtCalls(calls)[0].path != gtBase+"/gt1/group_specs" || gtCalls(calls)[0].body != `{"group_specs":{"a":"1"}}` {
+		t.Fatal(err, gtCalls(calls))
 	}
 	if string(v.Body["group_specs"]) != "{}" {
 		t.Fatalf("absent group_specs must default to {}: %#v", v)
@@ -358,8 +350,8 @@ func TestGroupTypeGroupSpecs(t *testing.T) {
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"a":"1"}` })
 	p, err := api.GetGroupSpecsProperty(context.Background(), "gt1", "a")
-	if err != nil || (*calls)[0].path != gtBase+"/gt1/group_specs/a" || string(p.Value) != `"1"` || p.Key != "a" || p.GroupTypeID != "gt1" {
-		t.Fatal(err, *calls, p)
+	if err != nil || gtCalls(calls)[0].path != gtBase+"/gt1/group_specs/a" || string(p.Value) != `"1"` || p.Key != "a" || p.GroupTypeID != "gt1" {
+		t.Fatal(err, gtCalls(calls), p)
 	}
 	api, _ = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"b":"1"}` })
 	p, err = api.GetGroupSpecsProperty(context.Background(), "gt1", "a")
@@ -369,8 +361,8 @@ func TestGroupTypeGroupSpecs(t *testing.T) {
 
 	api, calls = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"a":"2"}` })
 	p, err = api.UpdateGroupSpecsProperty(context.Background(), "gt1", "a", "2")
-	if err != nil || (*calls)[0].method != http.MethodPut || (*calls)[0].body != `{"a":"2"}` || string(p.Value) != `"2"` {
-		t.Fatal(err, *calls, p)
+	if err != nil || gtCalls(calls)[0].method != http.MethodPut || gtCalls(calls)[0].body != `{"a":"2"}` || string(p.Value) != `"2"` {
+		t.Fatal(err, gtCalls(calls), p)
 	}
 	api, _ = gtAPI(t, "3.11", func(*http.Request) (int, string) { return 200, `{"b":"2"}` })
 	_, err = api.UpdateGroupSpecsProperty(context.Background(), "gt1", "a", "2")
@@ -387,8 +379,8 @@ func TestGroupTypeGroupSpecs(t *testing.T) {
 			options = append(options, grouptypes.WithDeleteIgnoreMissing(false))
 		}
 		err = api.DeleteGroupSpecsProperty(context.Background(), "gt1", "a", options...)
-		if (*calls)[0].method != http.MethodDelete || (*calls)[0].path != gtBase+"/gt1/group_specs/a" {
-			t.Fatal(*calls)
+		if gtCalls(calls)[0].method != http.MethodDelete || gtCalls(calls)[0].path != gtBase+"/gt1/group_specs/a" {
+			t.Fatal(gtCalls(calls))
 		}
 		if item.fail {
 			gtOperation(t, err, "DeleteGroupSpecsProperty", item.code)

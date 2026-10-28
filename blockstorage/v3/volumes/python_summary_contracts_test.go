@@ -10,11 +10,12 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func summaryFixture(t *testing.T, version string, reply func(*http.Request) *http.Response) (*volumes.API, *[]pythonVolumeCall) {
+func summaryFixture(t *testing.T, version string, reply func(*http.Request) *http.Response) (*volumes.API, *testcloud.Recorder) {
 	t.Helper()
 	a, calls := pythonVolumeAPI(t, reply)
 	a.RawClient().Microversion = version
@@ -49,8 +50,8 @@ func TestPythonVolumeSummaryDefaultTwoFetchesAndAllProjects(t *testing.T) {
 		if all {
 			query = "all_tenants=True"
 		}
-		if err != nil || len(*calls) != 2 || (*calls)[0].path != pythonVolumeBase+"/summary" || (*calls)[0].query != "" || (*calls)[1].query != query || (*calls)[1].body != "" || v.StatusCode != 203 || len(v.Requests) != 2 || len(v.Discovery) != 0 || v.Microversion != "3.36" || string(v.Envelope) != body {
-			t.Fatal(v, err, *calls)
+		if err != nil || calls.Len() != 2 || pythonVolumeCalls(calls)[0].path != pythonVolumeBase+"/summary" || pythonVolumeCalls(calls)[0].query != "" || pythonVolumeCalls(calls)[1].query != query || pythonVolumeCalls(calls)[1].body != "" || v.StatusCode != 203 || len(v.Requests) != 2 || len(v.Discovery) != 0 || v.Microversion != "3.36" || string(v.Envelope) != body {
+			t.Fatal(v, err, pythonVolumeCalls(calls))
 		}
 		for key, want := range map[string]string{"total_size": "900719925474099312345", "total_count": "false", "metadata": "[null,false,0]", "id": "null", "name": "null", "location": "null"} {
 			summaryField(t, v, key, want)
@@ -76,8 +77,8 @@ func TestPythonVolumeSummaryRetainsFirstFetchDeclaredSeedOnly(t *testing.T) {
 		return pythonVolumeWire(200, `{"volume-summary":{"total_count":null,"metadata":null}}`)
 	})
 	v, err := api.SummaryRecord(context.Background())
-	if err != nil || len(*calls) != 2 || v.Wire.Body["id"] != nil || len(v.Wire.Body) != 2 {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 2 || v.Wire.Body["id"] != nil || len(v.Wire.Body) != 2 {
+		t.Fatal(v, err, pythonVolumeCalls(calls))
 	}
 	summaryField(t, v, "id", `"seed"`)
 	summaryField(t, v, "total_size", "4")
@@ -97,8 +98,8 @@ func TestPythonVolumeSummarySingleFetchAndFetchSpecificVersion(t *testing.T) {
 			if single {
 				n = 1
 			}
-			if err != nil || len(*calls) != n || v.Microversion != version || api.RawClient().Microversion != "3.36" || len(v.Discovery) != 0 {
-				t.Fatal(v, err, *calls)
+			if err != nil || calls.Len() != n || v.Microversion != version || api.RawClient().Microversion != "3.36" || len(v.Discovery) != 0 {
+				t.Fatal(v, err, pythonVolumeCalls(calls))
 			}
 			if !single && headers[0].Get("OpenStack-API-Version") != "volume 3.36" {
 				t.Fatal(headers)
@@ -133,8 +134,8 @@ func TestPythonVolumeSummaryDiscoveryCeilingAndSelectedVersionNotClamped(t *test
 			n = 3
 			d = 1
 		}
-		if err != nil || v.Microversion != expected || len(*calls) != n || len(v.Discovery) != d || len(v.Requests) != 2 || v.StatusCode != 200 {
-			t.Fatal(v, err, *calls)
+		if err != nil || v.Microversion != expected || calls.Len() != n || len(v.Discovery) != d || len(v.Requests) != 2 || v.StatusCode != 200 {
+			t.Fatal(v, err, pythonVolumeCalls(calls))
 		}
 		if d != 0 && string(v.Discovery[0].Envelope) != `{"version":{"id":"v3.0","min_version":"3.0","version":"3.71"}}` {
 			t.Fatal(v.Discovery)
@@ -142,16 +143,16 @@ func TestPythonVolumeSummaryDiscoveryCeilingAndSelectedVersionNotClamped(t *test
 	}
 	api, calls := summaryFixture(t, "3.11", func(*http.Request) *http.Response { return pythonVolumeWire(404, `{"version":"summary unavailable"}`) })
 	v, err := api.SummaryRecord(context.Background())
-	if v == nil || v.StatusCode != 404 || len(v.Requests) != 1 || len(*calls) != 1 || !gophercloud.ResponseCodeIs(err, 404) || errors.Is(err, resource.ErrUnsupported) {
-		t.Fatal(v, err, *calls)
+	if v == nil || v.StatusCode != 404 || len(v.Requests) != 1 || calls.Len() != 1 || !gophercloud.ResponseCodeIs(err, 404) || errors.Is(err, resource.ErrUnsupported) {
+		t.Fatal(v, err, pythonVolumeCalls(calls))
 	}
 }
 func TestPythonVolumeSummaryAcceptedNonJSONAndFlatEnvelopeFallback(t *testing.T) {
 	for _, body := range []string{"", "not-json", `{"total_size":null,"metadata":false}`, `{"other":{"total_size":4}}`} {
 		api, calls := summaryFixture(t, "3.36", func(*http.Request) *http.Response { return pythonVolumeWire(203, body) })
 		v, err := api.SummaryRecord(context.Background(), volumes.WithSummarySingleFetch(true))
-		if err != nil || v == nil || v.Resource == nil || v.StatusCode != 203 || len(*calls) != 1 || string(v.Envelope) != body {
-			t.Fatal(v, err, *calls)
+		if err != nil || v == nil || v.Resource == nil || v.StatusCode != 203 || calls.Len() != 1 || string(v.Envelope) != body {
+			t.Fatal(v, err, pythonVolumeCalls(calls))
 		}
 		if body == `{"total_size":null,"metadata":false}` {
 			summaryField(t, v, "metadata", "false")
@@ -163,8 +164,8 @@ func TestPythonVolumeSummaryAcceptedNonJSONAndFlatEnvelopeFallback(t *testing.T)
 		api, calls := summaryFixture(t, "3.36", func(*http.Request) *http.Response { return pythonVolumeWire(203, body) })
 		v, err := api.SummaryRecord(context.Background(), volumes.WithSummarySingleFetch(true))
 		var proof *resource.ResponseError
-		if err == nil || v == nil || v.Resource != nil || v.StatusCode != 203 || string(v.Envelope) != body || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || len(*calls) != 1 {
-			t.Fatal(v, err, proof, *calls)
+		if err == nil || v == nil || v.Resource != nil || v.StatusCode != 203 || string(v.Envelope) != body || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || calls.Len() != 1 {
+			t.Fatal(v, err, proof, pythonVolumeCalls(calls))
 		}
 	}
 }
@@ -180,27 +181,27 @@ func TestPythonVolumeSummaryInvalidControlsBeforeMarshalerOrHTTP(t *testing.T) {
 		calls := 0
 		api, wire := summaryFixture(t, "3.36", func(*http.Request) *http.Response { t.Fatal("unexpected HTTP"); return nil })
 		_, err := api.SummaryRecord(context.Background(), volumes.WithSummaryQuery(map[string]any{key: summaryMarshaler{&calls, `true`}, "other": summaryMarshaler{&calls, `true`}}))
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*wire) != 0 || calls != 0 {
-			t.Fatal(key, err, *wire, calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || wire.Len() != 0 || calls != 0 {
+			t.Fatal(key, err, pythonVolumeCalls(wire), calls)
 		}
 		summaryWrapper(t, err)
 	}
 	for _, option := range []volumes.SummaryOption{nil, volumes.WithSummaryMicroversion("garbage"), volumes.WithSummaryHeaders(map[string]string{"Authorization": "forged"}), volumes.WithSummaryHeaders(map[string]string{"OpenStack-API-Version": "volume 3.12"})} {
 		api, calls := summaryFixture(t, "3.36", func(*http.Request) *http.Response { t.Fatal("HTTP"); return nil })
 		_, err := api.SummaryRecord(context.Background(), option)
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, pythonVolumeCalls(calls))
 		}
 	}
 	api, calls := summaryFixture(t, "3.36", func(*http.Request) *http.Response { t.Fatal("HTTP"); return nil })
 	_, err := api.SummaryRecord(nil)
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonVolumeCalls(calls))
 	}
 	api.RawClient().Type = "compute"
 	_, err = api.SummaryRecord(context.Background())
-	if !errors.Is(err, resource.ErrUnsupported) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrUnsupported) || calls.Len() != 0 {
+		t.Fatal(err, pythonVolumeCalls(calls))
 	}
 }
 func TestPythonVolumeSummaryQuerySnapshotsRequestsExpansionAndOptionReset(t *testing.T) {
@@ -224,12 +225,12 @@ func TestPythonVolumeSummaryQuerySnapshotsRequestsExpansionAndOptionReset(t *tes
 		c.Headers["X-Owned"] = "yes"
 		return nil
 	}, volumes.WithSummarySingleFetch(true))
-	if err != nil || v == nil || len(*calls) != 1 || (*calls)[0].query != "all_tenants=False&dict=original&false=False&keys=a&keys=False&order=key&zero=0" || physical.Get("X-Owned") != "yes" || api.RawClient().MoreHeaders != nil {
-		t.Fatal(v, err, *calls, physical)
+	if err != nil || v == nil || calls.Len() != 1 || pythonVolumeCalls(calls)[0].query != "all_tenants=False&dict=original&false=False&keys=a&keys=False&order=key&zero=0" || physical.Get("X-Owned") != "yes" || api.RawClient().MoreHeaders != nil {
+		t.Fatal(v, err, pythonVolumeCalls(calls), physical)
 	}
 	_, err = api.SummaryRecord(context.Background(), volumes.WithSummaryAllProjects(true), volumes.WithSummaryOptions(volumes.SummaryOpts{SingleFetch: true}))
-	if err != nil || (*calls)[1].query != "all_tenants=False" {
-		t.Fatal(err, *calls)
+	if err != nil || pythonVolumeCalls(calls)[1].query != "all_tenants=False" {
+		t.Fatal(err, pythonVolumeCalls(calls))
 	}
 }
 func TestPythonVolumeSummaryPhysicalFaultsKeepNative401PublicFieldsAndNoHooks(t *testing.T) {
@@ -270,8 +271,8 @@ func TestPythonVolumeSummaryPhysicalFaultsKeepNative401PublicFieldsAndNoHooks(t 
 					}
 					cause = errors.Join(auth.ErrOriginal, auth.ErrReauth)
 				}
-				if err == nil || v == nil || v.Resource != nil || v.StatusCode != status || string(v.Envelope) != `{"volume-summary":{"total_count":2}}` || v.Header.Get("X-Proof") != "physical" || len(*calls) != 1 || closes.Load() != 1 || retries != 0 || backoffs != 0 || reauth != 0 {
-					t.Fatal(v, err, *calls, closes.Load(), retries, backoffs, reauth)
+				if err == nil || v == nil || v.Resource != nil || v.StatusCode != status || string(v.Envelope) != `{"volume-summary":{"total_count":2}}` || v.Header.Get("X-Proof") != "physical" || calls.Len() != 1 || closes.Load() != 1 || retries != 0 || backoffs != 0 || reauth != 0 {
+					t.Fatal(v, err, pythonVolumeCalls(calls), closes.Load(), retries, backoffs, reauth)
 				}
 				if mode != "close" && !errors.Is(cause, readCause) || mode != "read" && !errors.Is(cause, closeCause) {
 					t.Fatal(err, cause)
@@ -320,8 +321,8 @@ func TestPythonVolumeSummaryCleanReauthenticationAndRetryKeepOwnedRequest(t *tes
 			}
 		}
 		v, err := api.SummaryRecord(context.Background(), volumes.WithSummaryAllProjects(true), volumes.WithSummarySingleFetch(true))
-		if err != nil || v == nil || len(*calls) != 2 || hooks != 1 || (*calls)[0].query != "all_tenants=True" || (*calls)[1].query != (*calls)[0].query || headers[1].Get("OpenStack-API-Version") != "volume 3.36" {
-			t.Fatal(v, err, *calls, headers, hooks)
+		if err != nil || v == nil || calls.Len() != 2 || hooks != 1 || pythonVolumeCalls(calls)[0].query != "all_tenants=True" || pythonVolumeCalls(calls)[1].query != pythonVolumeCalls(calls)[0].query || headers[1].Get("OpenStack-API-Version") != "volume 3.36" {
+			t.Fatal(v, err, pythonVolumeCalls(calls), headers, hooks)
 		}
 		if status == 401 && headers[1].Get("X-Auth-Token") != "renewed" {
 			t.Fatal(headers)
@@ -335,7 +336,7 @@ func TestPythonVolumeSummaryReadBoundaryGuardAndCancellationCannotResend(t *test
 		cause := errors.New("accepted cancellation")
 		var closes atomic.Int32
 		var api *volumes.API
-		var calls *[]pythonVolumeCall
+		var calls *testcloud.Recorder
 		api, calls = summaryFixture(t, "3.36", func(*http.Request) *http.Response {
 			r := pythonVolumeWire(203, `{"volume-summary":{"total_count":1}}`)
 			r.Body = &connectorFaultBody{ReadCloser: r.Body, closes: &closes, afterRead: func() {
@@ -349,8 +350,8 @@ func TestPythonVolumeSummaryReadBoundaryGuardAndCancellationCannotResend(t *test
 		})
 		v, err := api.SummaryRecord(ctx, volumes.WithSummarySingleFetch(true))
 		var proof *resource.ResponseError
-		if v == nil || v.Resource != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || len(*calls) != 1 || closes.Load() != 1 {
-			t.Fatal(v, err, proof, *calls)
+		if v == nil || v.Resource != nil || !errors.As(err, &proof) || proof.StatusCode != 203 || calls.Len() != 1 || closes.Load() != 1 {
+			t.Fatal(v, err, proof, pythonVolumeCalls(calls))
 		}
 		if mode == "source" && !errors.Is(err, resource.ErrInvalidOption) || mode == "cancel" && (!errors.Is(err, context.Canceled) || !errors.Is(err, cause)) {
 			t.Fatal(err)
@@ -374,8 +375,8 @@ func TestPythonVolumeSummaryRetryCannotInjectBodyOrSelectedHeaders(t *testing.T)
 			return nil
 		}
 		_, err := api.SummaryRecord(context.Background(), volumes.WithSummarySingleFetch(true))
-		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 1 || !gophercloud.ResponseCodeIs(err, 503) {
-			t.Fatal(mode, err, *calls)
+		if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 1 || !gophercloud.ResponseCodeIs(err, 503) {
+			t.Fatal(mode, err, pythonVolumeCalls(calls))
 		}
 	}
 }
@@ -392,8 +393,8 @@ func TestPythonVolumeSummaryHeadersKwargIsQueryAndTypedHeadersArePhysical(t *tes
 		if raw != nil {
 			query += "&headers=X-Query"
 		}
-		if err != nil || value == nil || len(*calls) != 2 || (*calls)[0].query != "" || (*calls)[1].query != query {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || calls.Len() != 2 || pythonVolumeCalls(calls)[0].query != "" || pythonVolumeCalls(calls)[1].query != query {
+			t.Fatal(value, err, pythonVolumeCalls(calls))
 		}
 		for _, header := range physical {
 			if header.Get("X-Typed") != "actual-http" || header.Get("X-Query") != "" {

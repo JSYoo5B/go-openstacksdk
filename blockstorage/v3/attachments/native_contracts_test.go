@@ -19,18 +19,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeAttachmentTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeAttachmentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeAttachmentWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeAttachmentCall struct{ method, path, query, body, version string }
@@ -38,7 +28,7 @@ type nativeAttachmentCall struct{ method, path, query, body, version string }
 func nativeAttachmentAPI(t *testing.T, calls *[]nativeAttachmentCall, reply func(*http.Request) *http.Response) (*attachments.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeAttachmentTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -46,7 +36,7 @@ func nativeAttachmentAPI(t *testing.T, calls *[]nativeAttachmentCall, reply func
 		}
 		*calls = append(*calls, nativeAttachmentCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	// The attachment API needs a caller-selected microversion; the native call does not choose one.

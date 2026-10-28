@@ -2,10 +2,8 @@ package schedulerstats_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/schedulerstats"
@@ -15,36 +13,27 @@ import (
 // pythonPoolCall records the wire request openstacksdk would also send.
 type pythonPoolCall struct{ method, path, query, body, version string }
 
-type pythonPoolTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonPoolTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonPoolWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonPoolAPI(t *testing.T, reply func(*http.Request) *http.Response) (*schedulerstats.API, *[]pythonPoolCall) {
+func pythonPoolAPI(t *testing.T, reply func(*http.Request) *http.Response) (*schedulerstats.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonPoolCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonPoolTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonPoolCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	return schedulerstats.New(client), calls
+}
+
+// pythonPoolCalls projects recorded calls onto the local call fields.
+func pythonPoolCalls(rec *testcloud.Recorder) []pythonPoolCall {
+	calls := []pythonPoolCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonPoolCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("OpenStack-API-Version")})
+	}
+	return calls
 }
 
 const pythonPoolPath = "/cinder/v3/project/scheduler-stats/get_pools"
@@ -76,8 +65,8 @@ func TestPythonBackendPoolsDetailQuery(t *testing.T) {
 				}
 				rows = append(rows, *value)
 			}
-			if want := []pythonPoolCall{{http.MethodGet, pythonPoolPath, tc.query, "", ""}}; !reflect.DeepEqual(*calls, want) {
-				t.Fatalf("%+v", *calls)
+			if want := []pythonPoolCall{{http.MethodGet, pythonPoolPath, tc.query, "", ""}}; !reflect.DeepEqual(pythonPoolCalls(calls), want) {
+				t.Fatalf("%+v", pythonPoolCalls(calls))
 			}
 			if len(rows) != 1 {
 				t.Fatal(rows)

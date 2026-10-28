@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumetypes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -35,8 +34,8 @@ func TestPythonEncryptionAttributesPreservePresenceAndResponseTypes(t *testing.T
 			if _, exists := value.Resource.Body["unknown"]; exists {
 				t.Fatal("unknown projected to Source view")
 			}
-			if len(*calls) != 1 || (*calls)[0].body != tc.body || (*calls)[0].path != pythonTypeBase+"/vt-1/encryption" {
-				t.Fatal(*calls)
+			if calls.Len() != 1 || pythonTypeCalls(calls)[0].body != tc.body || pythonTypeCalls(calls)[0].path != pythonTypeBase+"/vt-1/encryption" {
+				t.Fatal(pythonTypeCalls(calls))
 			}
 			if value.StatusCode != 200 || string(value.Envelope) == "" || value.Header.Get("Content-Type") == "" {
 				t.Fatal(value)
@@ -62,8 +61,8 @@ func TestPythonEncryptionOptionsSnapshotInputsAndIgnoreUnknown(t *testing.T) {
 	if err != nil || value == nil || string(value.Resource.Body["provider"]) != `{"nested":[0,null]}` || value.StatusCode != 204 {
 		t.Fatal(value, err)
 	}
-	if len(*calls) != 1 || (*calls)[0].body != `{"encryption":{"provider":{"nested":[0,null]}}}` {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || pythonTypeCalls(calls)[0].body != `{"encryption":{"provider":{"nested":[0,null]}}}` {
+		t.Fatal(pythonTypeCalls(calls))
 	}
 }
 func TestPythonEncryptionUpdateFetchesAndSendsOnlyDirtyFields(t *testing.T) {
@@ -78,16 +77,16 @@ func TestPythonEncryptionUpdateFetchesAndSendsOnlyDirtyFields(t *testing.T) {
 		t.Fatal(value, err)
 	}
 	want := []pythonTypeCall{{http.MethodGet, pythonTypeBase + "/vt-1/encryption", "", ""}, {http.MethodPut, pythonTypeBase + "/vt-1/encryption/enc-1", "", `{"encryption":{"cipher":null,"key_size":512}}`}}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatal(*calls)
+	if !reflect.DeepEqual(pythonTypeCalls(calls), want) {
+		t.Fatal(pythonTypeCalls(calls))
 	}
 }
 func TestPythonEncryptionUpdateEqualEmptyAndIDOnlySkipPut(t *testing.T) {
 	for _, options := range [][]volumetypes.EncryptionAttributeOption{nil, {volumetypes.WithEncryptionAttribute("key_size", 256), volumetypes.WithEncryptionAttribute("deleted", 0)}, {volumetypes.WithEncryptionAttribute("id", "other")}} {
 		api, calls := pythonTypeAPI(t, func(req *http.Request) *http.Response { return pythonTypeWire(200, pythonTypeEncryption) })
 		value, err := api.UpdateEncryptionFromType(context.Background(), "vt-1", options...)
-		if err != nil || value == nil || len(*calls) != 1 || (*calls)[0].method != http.MethodGet {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || calls.Len() != 1 || pythonTypeCalls(calls)[0].method != http.MethodGet {
+			t.Fatal(value, err, pythonTypeCalls(calls))
 		}
 	}
 }
@@ -103,8 +102,8 @@ func TestPythonEncryptionRecordUpdateSnapshotsCallerAndBody(t *testing.T) {
 		t.Fatal(err)
 	}
 	updated, err := api.UpdateEncryptionRecord(context.Background(), value, volumetypes.WithEncryptionAttribute("key_size", 0))
-	if err != nil || updated == nil || string(updated.Resource.Body["key_size"]) != "0" || string(value.Resource.Body["key_size"]) != "256" || len(*calls) != 2 || (*calls)[1].body != `{"encryption":{"key_size":0}}` {
-		t.Fatal(updated, value, err, *calls)
+	if err != nil || updated == nil || string(updated.Resource.Body["key_size"]) != "0" || string(value.Resource.Body["key_size"]) != "256" || calls.Len() != 2 || pythonTypeCalls(calls)[1].body != `{"encryption":{"key_size":0}}` {
+		t.Fatal(updated, value, err, pythonTypeCalls(calls))
 	}
 	updated.Resource.Body["provider"][0] = '['
 	if string(value.Resource.Body["provider"]) != `"luks"` {
@@ -122,8 +121,8 @@ func TestPythonEncryptionPreflightGuardsOptionsAndMalformedJSON(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			api, calls := pythonTypeAPI(t, func(*http.Request) *http.Response { t.Fatal("HTTP before preflight"); return nil })
 			_, err := api.CreateEncryptionWithAttributes(context.Background(), "vt-1", tc.options...)
-			if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+				t.Fatal(err, pythonTypeCalls(calls))
 			}
 		})
 	}
@@ -132,35 +131,22 @@ func TestPythonEncryptionPreflightGuardsOptionsAndMalformedJSON(t *testing.T) {
 		api.RawClient().Microversion = "3.50"
 		return errors.New("option failed")
 	})
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonTypeCalls(calls))
 	}
 }
 
-type encryptionBrokenBody struct {
-	io.Reader
-	read, close error
-}
-
-func (b encryptionBrokenBody) Read(p []byte) (int, error) {
-	n, err := b.Reader.Read(p)
-	if err == io.EOF {
-		return n, b.read
-	}
-	return n, err
-}
-func (b encryptionBrokenBody) Close() error { return b.close }
 func TestPythonEncryptionAcceptedPhysicalFailuresKeepEvidence(t *testing.T) {
 	readFailure, closeFailure := errors.New("encryption read"), errors.New("encryption close")
 	api, calls := pythonTypeAPI(t, func(*http.Request) *http.Response {
 		response := pythonTypeWire(200, "")
 		response.Header.Set("X-Request-Id", "encryption-proof")
-		response.Body = encryptionBrokenBody{Reader: strings.NewReader(`{"encryption":{"encryption_id":"e-1"}}`), read: readFailure, close: closeFailure}
+		response.Body = &testcloud.Body{Data: `{"encryption":{"encryption_id":"e-1"}}`, ReadErr: readFailure, CloseErr: closeFailure}
 		return response
 	})
 	value, err := api.CreateEncryptionWithAttributes(context.Background(), "vt-1", volumetypes.WithEncryptionAttribute("provider", "luks"))
 	var proof *resource.ResponseError
-	if !errors.Is(err, readFailure) || !errors.Is(err, closeFailure) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Request-Id") != "encryption-proof" || len(proof.Body) == 0 || value == nil || len(*calls) != 1 {
-		t.Fatal(value, err, proof, *calls)
+	if !errors.Is(err, readFailure) || !errors.Is(err, closeFailure) || !errors.As(err, &proof) || proof.StatusCode != 200 || proof.Header.Get("X-Request-Id") != "encryption-proof" || len(proof.Body) == 0 || value == nil || calls.Len() != 1 {
+		t.Fatal(value, err, proof, pythonTypeCalls(calls))
 	}
 }

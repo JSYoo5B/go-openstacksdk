@@ -3,11 +3,9 @@ package snapshots_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
@@ -19,37 +17,28 @@ import (
 // pythonSnapshotCall records the wire request openstacksdk would also send.
 type pythonSnapshotCall struct{ method, path, query, body, version string }
 
-type pythonSnapshotTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSnapshotTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonSnapshotWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonSnapshotAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*snapshots.API, *[]pythonSnapshotCall) {
+func pythonSnapshotAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*snapshots.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonSnapshotCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonSnapshotTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonSnapshotCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("block-storage", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = microversion
 	return snapshots.New(client), calls
+}
+
+// pythonSnapshotCalls projects recorded calls onto the local call fields.
+func pythonSnapshotCalls(rec *testcloud.Recorder) []pythonSnapshotCall {
+	calls := []pythonSnapshotCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonSnapshotCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("OpenStack-API-Version")})
+	}
+	return calls
 }
 
 const pythonSnapshotBase = "/cinder/v3/project/snapshots"
@@ -84,8 +73,8 @@ func TestPythonSnapshotGetCreateUpdateMatchProxyRequests(t *testing.T) {
 		{http.MethodPost, pythonSnapshotBase, "", `{"snapshot":{"description":"d","force":true,"metadata":{"k":"v"},"name":"daily","volume_id":"vol-1"}}`, ""},
 		{http.MethodPut, pythonSnapshotBase + "/snap-1", "", `{"snapshot":{"description":"d2","name":"weekly"}}`, ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonSnapshotCalls(calls), want) {
+		t.Fatalf("%+v", pythonSnapshotCalls(calls))
 	}
 }
 
@@ -133,12 +122,12 @@ func TestPythonSnapshotListDetailsAllProjectsAndQuery(t *testing.T) {
 				}
 				ids = append(ids, value.ID)
 			}
-			if !reflect.DeepEqual(ids, []string{"snap-1", "snap-2"}) || len(*calls) != 2 {
-				t.Fatalf("%v %+v", ids, *calls)
+			if !reflect.DeepEqual(ids, []string{"snap-1", "snap-2"}) || calls.Len() != 2 {
+				t.Fatalf("%v %+v", ids, pythonSnapshotCalls(calls))
 			}
-			first, _ := url.ParseQuery((*calls)[0].query)
-			if (*calls)[0].path != tc.path || !reflect.DeepEqual(first, tc.query) || (*calls)[1].path != tc.path || (*calls)[1].query != "marker=snap-1" {
-				t.Fatalf("%+v", *calls)
+			first, _ := url.ParseQuery(pythonSnapshotCalls(calls)[0].query)
+			if pythonSnapshotCalls(calls)[0].path != tc.path || !reflect.DeepEqual(first, tc.query) || pythonSnapshotCalls(calls)[1].path != tc.path || pythonSnapshotCalls(calls)[1].query != "marker=snap-1" {
+				t.Fatalf("%+v", pythonSnapshotCalls(calls))
 			}
 		})
 	}
@@ -180,8 +169,8 @@ func TestPythonSnapshotDeleteIgnoresMissingAndForceUsesAction(t *testing.T) {
 		{http.MethodDelete, pythonSnapshotBase + "/snap-1", "", "", ""},
 		{http.MethodPost, pythonSnapshotBase + "/snap-1/action", "", `{"os-force_delete":{}}`, ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonSnapshotCalls(calls), want) {
+		t.Fatalf("%+v", pythonSnapshotCalls(calls))
 	}
 }
 
@@ -207,8 +196,8 @@ func TestPythonSnapshotStatusActionsWithPinnedMicroversion(t *testing.T) {
 		{http.MethodPost, action, "", `{"os-update_snapshot_status":{"progress":"50%","status":"creating"}}`, "volume 3.65"},
 		{http.MethodPost, action, "", `{"os-update_snapshot_status":{"status":"available"}}`, "volume 3.65"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonSnapshotCalls(calls), want) {
+		t.Fatalf("%+v", pythonSnapshotCalls(calls))
 	}
 }
 
@@ -222,8 +211,8 @@ func TestPythonSnapshotFindHasNoIDThenNameFallback(t *testing.T) {
 	})
 	// find_snapshot("daily") would GET /snapshots/daily and then list /snapshots/detail?name=daily.
 	byID, err := api.Find(ctx, resource.ID("daily"), resource.WithIgnoreMissing())
-	if err != nil || byID != nil || len(*calls) != 1 {
-		t.Fatal(byID, err, *calls)
+	if err != nil || byID != nil || calls.Len() != 1 {
+		t.Fatal(byID, err, pythonSnapshotCalls(calls))
 	}
 	byName, err := api.Find(ctx, resource.Name("daily"))
 	if err != nil || byName.ID != "snap-1" {
@@ -233,7 +222,7 @@ func TestPythonSnapshotFindHasNoIDThenNameFallback(t *testing.T) {
 		{http.MethodGet, pythonSnapshotBase + "/daily", "", "", ""},
 		{http.MethodGet, pythonSnapshotBase + "/detail", "name=daily", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonSnapshotCalls(calls), want) {
+		t.Fatalf("%+v", pythonSnapshotCalls(calls))
 	}
 }

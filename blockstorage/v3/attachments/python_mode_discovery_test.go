@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -21,7 +22,7 @@ func attachmentModeDocument(maximum, minimum string) string {
 
 // Reuse the existing public testhelper fixture and recorded transport; real
 // discovery uses the catalog v3 endpoint, independently of ResourceBase.
-func attachmentModeFixture(t *testing.T, selected, maximum, minimum string, reply func(*http.Request) *http.Response) (*attachments.API, *[]pythonAttachmentCall, *[]http.Header) {
+func attachmentModeFixture(t *testing.T, selected, maximum, minimum string, reply func(*http.Request) *http.Response) (*attachments.API, *testcloud.Recorder, *[]http.Header) {
 	t.Helper()
 	headers := &[]http.Header{}
 	api, calls := pythonAttachmentAPI(t, func(req *http.Request) *http.Response {
@@ -65,11 +66,11 @@ func TestPythonAttachmentRecordModeRequiresAdvertisedRangeAndSelectedDefault(t *
 			})
 			api.RawClient().MoreHeaders = map[string]string{"X-Custom": "owned"}
 			v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
-			if err != nil || len(*calls) != 2 || (*calls)[0].method != http.MethodGet || (*calls)[0].path != "/cinder/v3/" || (*calls)[0].body != "" || (*calls)[1].method != http.MethodPost || (*calls)[1].path != pythonAttachmentBase {
-				t.Fatal(v, err, *calls)
+			if err != nil || calls.Len() != 2 || pythonAttachmentCalls(calls)[0].method != http.MethodGet || pythonAttachmentCalls(calls)[0].path != "/cinder/v3/" || pythonAttachmentCalls(calls)[0].body != "" || pythonAttachmentCalls(calls)[1].method != http.MethodPost || pythonAttachmentCalls(calls)[1].path != pythonAttachmentBase {
+				t.Fatal(v, err, pythonAttachmentCalls(calls))
 			}
-			if strings.Contains((*calls)[1].body, `"mode":false`) != item.keepMode {
-				t.Fatal("default version is insufficient without advertised bounds", item, *calls)
+			if strings.Contains(pythonAttachmentCalls(calls)[1].body, `"mode":false`) != item.keepMode {
+				t.Fatal("default version is insufficient without advertised bounds", item, pythonAttachmentCalls(calls))
 			}
 			if (*headers)[0].Get("OpenStack-API-Version") != "" || (*headers)[0].Get("X-OpenStack-Volume-API-Version") != "" || (*headers)[0].Get("X-Custom") != "owned" {
 				t.Fatal("discovery headers", *headers)
@@ -110,8 +111,8 @@ func TestPythonAttachmentRecordModeFiniteDiscoveryFallbackKeepsUnknownSupport(t 
 		api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
 		api.RawClient().Microversion = "3.80"
 		v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
-		if err != nil || len(*calls) != 3 || (*calls)[0].path != "/cinder/v3/" || (*calls)[1].path != "/cinder/" || (*calls)[2].method != http.MethodPost || !strings.Contains((*calls)[2].body, `"mode":false`) || len(v.Discovery) != 0 || v.StatusCode != 201 {
-			t.Fatal(v, err, *calls)
+		if err != nil || calls.Len() != 3 || pythonAttachmentCalls(calls)[0].path != "/cinder/v3/" || pythonAttachmentCalls(calls)[1].path != "/cinder/" || pythonAttachmentCalls(calls)[2].method != http.MethodPost || !strings.Contains(pythonAttachmentCalls(calls)[2].body, `"mode":false`) || len(v.Discovery) != 0 || v.StatusCode != 201 {
+			t.Fatal(v, err, pythonAttachmentCalls(calls))
 		}
 	}
 	api, calls := pythonAttachmentAPI(t, func(req *http.Request) *http.Response {
@@ -125,8 +126,8 @@ func TestPythonAttachmentRecordModeFiniteDiscoveryFallbackKeepsUnknownSupport(t 
 	})
 	api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
 	v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
-	if err != nil || len(*calls) != 3 || !strings.Contains((*calls)[2].body, `"mode":false`) || len(v.Discovery) != 2 || v.StatusCode != 201 {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 3 || !strings.Contains(pythonAttachmentCalls(calls)[2].body, `"mode":false`) || len(v.Discovery) != 2 || v.StatusCode != 201 {
+		t.Fatal(v, err, pythonAttachmentCalls(calls))
 	}
 }
 
@@ -144,12 +145,12 @@ func TestPythonAttachmentRecordModeDiscoveryFailureRetainsOnlyDiscoveryProof(t *
 			api, _ := pythonAttachmentAPI(t, func(*http.Request) *http.Response { return nil })
 			calls := 0
 			api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
-			api.RawClient().HTTPClient.Transport = pythonAttachmentTransport(func(req *http.Request) (*http.Response, error) {
+			api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method != http.MethodGet {
 					t.Fatal("POST after broken discovery")
 				}
-				return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"discovery-fault"}}, Body: &attachmentRecordFaultBody{data: []byte(item.body), read: item.read, close: item.close}}, nil
+				return testcloud.StreamResponse(200, &testcloud.Body{Data: item.body, ReadErr: item.read, CloseErr: item.close}, http.Header{"X-Request-Id": {"discovery-fault"}}), nil
 			})
 			v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
 			var proof *resource.ResponseError
@@ -164,12 +165,12 @@ func TestPythonAttachmentRecordModeDiscoveryFailureRetainsOnlyDiscoveryProof(t *
 }
 
 type attachmentModeRestoringBody struct {
-	*attachmentRecordFaultBody
+	*testcloud.Body
 	restore func()
 }
 
 func (b *attachmentModeRestoringBody) Close() error {
-	err := b.attachmentRecordFaultBody.Close()
+	err := b.Body.Close()
 	b.restore()
 	return err
 }
@@ -182,12 +183,12 @@ func TestPythonAttachmentRecordModeDiscoverySourceAndCancellationStopBeforePost(
 		cause := errors.New("capability cancelled")
 		defer cancel(nil)
 		api.RawClient().Endpoint = strings.TrimSuffix(api.RawClient().ResourceBase, "project/")
-		api.RawClient().HTTPClient.Transport = pythonAttachmentTransport(func(req *http.Request) (*http.Response, error) {
+		api.RawClient().HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			calls++
 			if req.Method != http.MethodGet {
 				t.Fatal("POST after invalid source")
 			}
-			body := &attachmentRecordFaultBody{data: []byte(attachmentModeDocument("3.80", "3.0")), afterRead: func() {
+			body := &testcloud.Body{Data: attachmentModeDocument("3.80", "3.0"), OnRead: func() {
 				if cancelled {
 					cancel(cause)
 				} else {
@@ -199,9 +200,9 @@ func TestPythonAttachmentRecordModeDiscoverySourceAndCancellationStopBeforePost(
 				Close() error
 			} = body
 			if !cancelled {
-				responseBody = &attachmentModeRestoringBody{attachmentRecordFaultBody: body, restore: func() { api.RawClient().Microversion = "3.54" }}
+				responseBody = &attachmentModeRestoringBody{Body: body, restore: func() { api.RawClient().Microversion = "3.54" }}
 			}
-			return &http.Response{StatusCode: 200, Header: http.Header{}, Body: responseBody}, nil
+			return testcloud.StreamResponse(200, responseBody, http.Header{}), nil
 		})
 		v, err := api.CreateRecord(ctx, "vol", attachments.WithRecordCreateField("mode", false))
 		var proof *resource.ResponseError
@@ -232,19 +233,19 @@ func TestPythonAttachmentRecordModeProtectsNegotiatedHeadersAndPostAcknowledgeme
 		}
 		v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
 		var native gophercloud.ErrUnexpectedResponseCode
-		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 409 || len(*calls) != 2 || (*headers)[1].Get("X-OpenStack-Volume-API-Version") != "3.71" || v == nil || len(v.Discovery) != 1 || v.StatusCode != 0 || v.Resource != nil || api.RawClient().Microversion != "" {
-			t.Fatal(v, err, native, *calls, *headers)
+		if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 409 || calls.Len() != 2 || (*headers)[1].Get("X-OpenStack-Volume-API-Version") != "3.71" || v == nil || len(v.Discovery) != 1 || v.StatusCode != 0 || v.Resource != nil || api.RawClient().Microversion != "" {
+			t.Fatal(v, err, native, pythonAttachmentCalls(calls), *headers)
 		}
 	})
 	t.Run("accepted_post_body_fault", func(t *testing.T) {
 		readCause, closeCause := errors.New("POST read"), errors.New("POST close")
 		api, calls, _ := attachmentModeFixture(t, "3.80", "3.80", "3.0", func(*http.Request) *http.Response {
-			return &http.Response{StatusCode: 201, Header: http.Header{"X-Request-Id": {"post-fault"}}, Body: &attachmentRecordFaultBody{data: []byte(`{"attachment":`), read: readCause, close: closeCause}}
+			return testcloud.StreamResponse(201, &testcloud.Body{Data: `{"attachment":`, ReadErr: readCause, CloseErr: closeCause}, http.Header{"X-Request-Id": {"post-fault"}})
 		})
 		v, err := api.CreateRecord(context.Background(), "vol", attachments.WithRecordCreateField("mode", false))
 		var proof *resource.ResponseError
-		if !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 201 || v == nil || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || v.StatusCode != 201 || string(v.Envelope) != `{"attachment":` || v.Header.Get("X-Request-Id") != "post-fault" || v.Resource != nil || len(*calls) != 2 {
-			t.Fatal(v, err, proof, *calls)
+		if !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 201 || v == nil || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 || v.StatusCode != 201 || string(v.Envelope) != `{"attachment":` || v.Header.Get("X-Request-Id") != "post-fault" || v.Resource != nil || calls.Len() != 2 {
+			t.Fatal(v, err, proof, pythonAttachmentCalls(calls))
 		}
 	})
 }

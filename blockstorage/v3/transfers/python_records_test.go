@@ -26,7 +26,7 @@ func recordTransferFixture(t *testing.T, selected, maximum, minimum string, repl
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := &[]recordTransferCall{}
-	cloud.Provider.HTTPClient.Transport = pythonTransferTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, err := io.ReadAll(req.Body)
@@ -41,7 +41,7 @@ func recordTransferFixture(t *testing.T, selected, maximum, minimum string, repl
 			return pythonTransferWire(200, string(body)), nil
 		}
 		return reply(req)
-	})
+	}))
 	client := cloud.Client("volumev3", "/cinder/v3/project/")
 	client.Microversion = selected
 	return transfers.New(client), client, calls
@@ -301,20 +301,6 @@ func TestPythonTransferFindGetFallbackSummaryAndMissingDefaults(t *testing.T) {
 	})
 }
 
-type recordTransferFaultBody struct {
-	reader            io.Reader
-	readErr, closeErr error
-	closes            int
-}
-
-func (b *recordTransferFaultBody) Read(p []byte) (int, error) {
-	n, err := b.reader.Read(p)
-	if err == io.EOF && b.readErr != nil {
-		return n, b.readErr
-	}
-	return n, err
-}
-func (b *recordTransferFaultBody) Close() error { b.closes++; return b.closeErr }
 func TestPythonTransferFindDeleteRejectedReadCloseAndCancellation(t *testing.T) {
 	for _, failure := range []string{"read", "close", "cancel", "source"} {
 		for _, operation := range []string{"find", "delete"} {
@@ -325,12 +311,12 @@ func TestPythonTransferFindDeleteRejectedReadCloseAndCancellation(t *testing.T) 
 				var client *gophercloud.ServiceClient
 				api, selected, calls := recordTransferFixture(t, "3.55", "3.71", "3.0", func(*http.Request) (*http.Response, error) {
 					r := pythonTransferWire(404, `{"error":"missing"}`)
-					b := &recordTransferFaultBody{reader: strings.NewReader(`{"error":"missing"}`)}
+					b := &testcloud.Body{Data: `{"error":"missing"}`}
 					if failure == "read" {
-						b.readErr = cause
+						b.ReadErr = cause
 					}
 					if failure == "close" {
-						b.closeErr = cause
+						b.CloseErr = cause
 					}
 					if failure == "cancel" {
 						cancel(cause)
@@ -440,14 +426,14 @@ func TestPythonTransferAllOperationsRetainRejectedHTTPFaults(t *testing.T) {
 				t.Run(fmt.Sprint(status)+"_"+operation+"_"+failure, func(t *testing.T) {
 					readCause := errors.New("transfer rejected physical Read")
 					closeCause := errors.New("transfer rejected physical Close")
-					var body *recordTransferFaultBody
+					var body *testcloud.Body
 					api, _, calls := recordTransferFixture(t, "3.55", "3.71", "3.0", func(*http.Request) (*http.Response, error) {
-						body = &recordTransferFaultBody{reader: strings.NewReader(`{"error":"actual transfer rejection"}`)}
+						body = &testcloud.Body{Data: `{"error":"actual transfer rejection"}`}
 						if failure == "read" || failure == "read and close" {
-							body.readErr = readCause
+							body.ReadErr = readCause
 						}
 						if failure == "close" || failure == "read and close" {
-							body.closeErr = closeCause
+							body.CloseErr = closeCause
 						}
 						response := pythonTransferWire(status, "")
 						response.Body = body
@@ -478,7 +464,7 @@ func TestPythonTransferAllOperationsRetainRejectedHTTPFaults(t *testing.T) {
 					if err == nil || !errors.As(err, &native) || native.Actual != status || string(native.Body) != `{"error":"actual transfer rejection"}` || native.ResponseHeader.Get("X-Request-Id") != "rejected-transfer-proof" {
 						t.Fatal("native rejection proof lost", err, native)
 					}
-					if body == nil || body.closes != 1 || len(*calls) != 2 {
+					if body == nil || body.Closes() != 1 || len(*calls) != 2 {
 						t.Fatal("faulty observation must not resend or refetch", err, body, *calls)
 					}
 					if (failure == "read" || failure == "read and close") && !errors.Is(err, readCause) {
