@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -18,8 +19,8 @@ func TestPythonCinderGroupFindRecordDirectUntypedProjectionAndLiteralIdentity(t 
 	for _, body := range []string{`{"group":{"id":null,"name":false,"volumes":"one","cls":false,"unknown":9007199254740993}}`, `{"group":{"id":9007199254740993}}`, `{"group":{}}`, `{bad`} {
 		api, calls := groupAPI(t, "3.90", func(*http.Request) *http.Response { return groupWire(200, body) })
 		value, err := api.FindRecord(context.Background(), "literal/id %2F")
-		if err != nil || value == nil || value.Resource == nil || len(*calls) != 1 || (*calls)[0].escaped != groupBase+"/literal%2Fid%20%252F" || (*calls)[0].query != "" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.90" || string(value.Envelope) != body || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || value.Resource == nil || calls.Len() != 1 || calls.Calls()[0].EscapedPath != groupBase+"/literal%2Fid%20%252F" || calls.Calls()[0].RawQuery != "" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.90" || string(value.Envelope) != body || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, calls.Calls())
 		}
 		if body == `{bad` || body == `{"group":{}}` {
 			groupField(t, value, "id", `"literal/id %2F"`)
@@ -60,8 +61,8 @@ func TestPythonCinderGroupFindRecordCleanFallbackHasNoServerNameQuery(t *testing
 					options = append(options, groups.WithRecordFindDetails(false))
 				}
 				value, err := api.FindRecord(context.Background(), "target", options...)
-				if err != nil || value == nil || len(*calls) != 3 || value.StatusCode != 202 || (*calls)[0].query != "" || (*calls)[1].query != "" || (*calls)[2].query != "offset=2" {
-					t.Fatal(value, err, *calls)
+				if err != nil || value == nil || calls.Len() != 3 || value.StatusCode != 202 || calls.Calls()[0].RawQuery != "" || calls.Calls()[1].RawQuery != "" || calls.Calls()[2].RawQuery != "offset=2" {
+					t.Fatal(value, err, calls.Calls())
 				}
 				groupField(t, value, "id", `"found"`)
 			})
@@ -74,8 +75,8 @@ func TestPythonCinderGroupFindRecordCleanFallbackHasNoServerNameQuery(t *testing
 		return groupWire(200, `{"groups":[{"id":"target","name":"different"},{"id":false,"name":false},{"id":null,"name":"other"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || len(*calls) != 2 || value == nil {
-		t.Fatal(value, err, *calls)
+	if err != nil || calls.Len() != 2 || value == nil {
+		t.Fatal(value, err, calls.Calls())
 	}
 	groupField(t, value, "name", `"different"`)
 }
@@ -93,8 +94,8 @@ func TestPythonCinderGroupFindRecordMissingRequiresSuccessfulList(t *testing.T) 
 			options = append(options, groups.WithRecordFindIgnoreMissing(false))
 		}
 		value, err := api.FindRecord(context.Background(), "missing", options...)
-		if value != nil || len(*calls) != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 2 || (err == nil) != ignore || !ignore && !errors.Is(err, resource.ErrNotFound) || gophercloud.ResponseCodeIs(err, 403) {
+			t.Fatal(value, err, calls.Calls())
 		}
 	}
 	for _, code := range []int{403, 404, 503} {
@@ -106,8 +107,8 @@ func TestPythonCinderGroupFindRecordMissingRequiresSuccessfulList(t *testing.T) 
 		})
 		value, err := api.FindRecord(context.Background(), "missing")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if value != nil || len(*calls) != 2 || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"list":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 2 || !errors.As(err, &native) || native.Actual != code || string(native.Body) != `{"list":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, calls.Calls())
 		}
 	}
 }
@@ -127,8 +128,8 @@ func TestPythonCinderGroupFindRecordLateDuplicatesKeepAcceptedPage(t *testing.T)
 		value, err := api.FindRecord(context.Background(), "target")
 		var ambiguous *resource.AmbiguousError
 		var proof *resource.ResponseError
-		if value != nil || len(*calls) != 3 || !errors.As(err, &ambiguous) || !reflect.DeepEqual(ambiguous.IDs, []string{"first", secondID}) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, ambiguous, proof, *calls)
+		if value != nil || calls.Len() != 3 || !errors.As(err, &ambiguous) || !reflect.DeepEqual(ambiguous.IDs, []string{"first", secondID}) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, ambiguous, proof, calls.Calls())
 		}
 	}
 }
@@ -136,7 +137,7 @@ func TestPythonCinderGroupFindRecordLateDuplicatesKeepAcceptedPage(t *testing.T)
 func TestPythonCinderGroupFindRecordLateFailureDoesNotReturnFirstMatch(t *testing.T) {
 	for _, physical := range []bool{false, true} {
 		readCause, closeCause := errors.New("late read"), errors.New("late close")
-		faulty := &groupFaultBody{text: `{"late":"partial"}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"late":"partial"}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
 			if r.URL.Path == groupBase+"/target" {
 				return groupWire(404, `{"member":false}`)
@@ -154,10 +155,10 @@ func TestPythonCinderGroupFindRecordLateFailureDoesNotReturnFirstMatch(t *testin
 		var native gophercloud.ErrUnexpectedResponseCode
 		want := `{"late":"actual"}`
 		if physical {
-			want = faulty.text
+			want = faulty.Data
 		}
-		if value != nil || len(*calls) != 3 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != want || native.ResponseHeader.Get("X-Request-Id") != "actual" || physical && (!errors.Is(err, readCause) || !errors.Is(err, closeCause) || faulty.closed != 1) {
-			t.Fatal(value, err, *calls)
+		if value != nil || calls.Len() != 3 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != want || native.ResponseHeader.Get("X-Request-Id") != "actual" || physical && (!errors.Is(err, readCause) || !errors.Is(err, closeCause) || faulty.Closes() != 1) {
+			t.Fatal(value, err, calls.Calls())
 		}
 	}
 }
@@ -180,8 +181,8 @@ func TestPythonCinderGroupFindRecordAcceptedErrorsAndListConstructorAreTerminal(
 		if stage == "list" {
 			wantCalls = 2
 		}
-		if value != nil || len(*calls) != wantCalls || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
-			t.Fatal(value, err, proof, *calls)
+		if value != nil || calls.Len() != wantCalls || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "actual" {
+			t.Fatal(value, err, proof, calls.Calls())
 		}
 	}
 }
@@ -189,7 +190,7 @@ func TestPythonCinderGroupFindRecordAcceptedErrorsAndListConstructorAreTerminal(
 func TestPythonCinderGroupFindRecordRejectedReadCloseNeverFallsBack(t *testing.T) {
 	for _, code := range []int{400, 403, 404} {
 		readCause, closeCause := errors.New("member read"), errors.New("member close")
-		faulty := &groupFaultBody{text: `{"member":"partial"}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"member":"partial"}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { reply := groupWire(code, ""); reply.Body = faulty; return reply })
 		hooks := 0
 		api.RawClient().ProviderClient.RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
@@ -198,8 +199,8 @@ func TestPythonCinderGroupFindRecordRejectedReadCloseNeverFallsBack(t *testing.T
 		}
 		value, err := api.FindRecord(context.Background(), "target")
 		var native gophercloud.ErrUnexpectedResponseCode
-		if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != faulty.text || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 || hooks != 0 {
-			t.Fatal(value, err, *calls, faulty.closed, hooks)
+		if value != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &native) || native.Actual != code || string(native.Body) != faulty.Data || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 || hooks != 0 {
+			t.Fatal(value, err, calls.Calls(), faulty.Closes(), hooks)
 		}
 	}
 }
@@ -222,11 +223,11 @@ func TestPythonCinderGroupFindRecordOptionsOwnBothPhaseSnapshots(t *testing.T) {
 		return groupWire(200, `{"groups":[{"id":"found","name":"target"}]}`)
 	})
 	value, err := api.FindRecord(context.Background(), "target", option, func(v *groups.RecordFindOpts) error { held = v; return nil })
-	if err != nil || value == nil || len(*calls) != 2 || (*calls)[1].path != groupBase {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 || calls.Calls()[1].Path != groupBase {
+		t.Fatal(value, err, calls.Calls())
 	}
-	for _, call := range *calls {
-		if call.headers.Get("X-Policy") != "snapshot" {
+	for _, call := range calls.Calls() {
+		if call.Header.Get("X-Policy") != "snapshot" {
 			t.Fatal(call)
 		}
 	}
@@ -255,8 +256,8 @@ func TestPythonCinderGroupFindRecordPreflightAndStickyOriginalSource(t *testing.
 		},
 	} {
 		api, calls := groupAPI(t, "", func(*http.Request) *http.Response { t.Fatal("preflight HTTP"); return nil })
-		if err := invoke(api); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err := invoke(api); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, calls.Calls())
 		}
 	}
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source HTTP"); return nil })
@@ -267,8 +268,8 @@ func TestPythonCinderGroupFindRecordPreflightAndStickyOriginalSource(t *testing.
 		cancel(cause)
 		return cause
 	})
-	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
+		t.Fatal(err, calls.Calls())
 	}
 }
 
@@ -291,11 +292,11 @@ func TestPythonCinderGroupFindRecordGetOverrideFallbackOriginalVersionAndHeaders
 		if wantGet == "" {
 			wantGet = "3.13"
 		}
-		if err != nil || value == nil || len(*calls) != 2 || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume "+wantGet || (*calls)[0].headers.Get("X-OpenStack-Volume-API-Version") != wantGet || (*calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.13" || (*calls)[1].headers.Get("X-OpenStack-Volume-API-Version") != "3.13" || (*calls)[0].headers.Get("Accept") != "application/source-custom" || (*calls)[1].headers.Get("Accept") != "application/json" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.13" || len(value.Discovery) != 0 {
-			t.Fatal(value, err, *calls, api.RawClient())
+		if err != nil || value == nil || calls.Len() != 2 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume "+wantGet || calls.Calls()[0].Header.Get("X-OpenStack-Volume-API-Version") != wantGet || calls.Calls()[1].Header.Get("OpenStack-API-Version") != "volume 3.13" || calls.Calls()[1].Header.Get("X-OpenStack-Volume-API-Version") != "3.13" || calls.Calls()[0].Header.Get("Accept") != "application/source-custom" || calls.Calls()[1].Header.Get("Accept") != "application/json" || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.13" || len(value.Discovery) != 0 {
+			t.Fatal(value, err, calls.Calls(), api.RawClient())
 		}
-		for _, call := range *calls {
-			if call.headers.Get("X-Original") != "kept" {
+		for _, call := range calls.Calls() {
+			if call.Header.Get("X-Original") != "kept" {
 				t.Fatal(call)
 			}
 		}
@@ -308,11 +309,11 @@ func TestPythonCinderGroupFindRecordGetOverrideFallbackOriginalVersionAndHeaders
 	})
 	api.RawClient().MoreHeaders = map[string]string{"Accept": "source"}
 	value, err := api.FindRecord(context.Background(), "target", groups.WithRecordFindHeaders(map[string]string{"accept": "per-call"}))
-	if err != nil || value == nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 {
+		t.Fatal(value, err, calls.Calls())
 	}
-	for _, call := range *calls {
-		if call.headers.Get("Accept") != "per-call" {
+	for _, call := range calls.Calls() {
+		if call.Header.Get("Accept") != "per-call" {
 			t.Fatal(call)
 		}
 	}
@@ -334,15 +335,15 @@ func TestPythonCinderGroupFindRecordDiscoveryEvidenceFollowsEachVersionPhase(t *
 			options = append(options, groups.WithRecordFindMicroversion("3.99"))
 		}
 		value, err := api.FindRecord(context.Background(), "target", options...)
-		if err != nil || value == nil || len(*calls) != 3 || len(value.Discovery) != 1 || value.Discovery[0].StatusCode != 200 || value.StatusCode != 202 || (*calls)[2].headers.Get("OpenStack-API-Version") != "volume 3.38" || api.RawClient().Microversion != "" {
-			t.Fatal(value, err, *calls)
+		if err != nil || value == nil || calls.Len() != 3 || len(value.Discovery) != 1 || value.Discovery[0].StatusCode != 200 || value.StatusCode != 202 || calls.Calls()[2].Header.Get("OpenStack-API-Version") != "volume 3.38" || api.RawClient().Microversion != "" {
+			t.Fatal(value, err, calls.Calls())
 		}
 		if override {
-			if (*calls)[0].path != groupBase+"/target" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.99" || (*calls)[1].path != "/cinder/v3/" {
-				t.Fatal(*calls)
+			if calls.Calls()[0].Path != groupBase+"/target" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.99" || calls.Calls()[1].Path != "/cinder/v3/" {
+				t.Fatal(calls.Calls())
 			}
-		} else if (*calls)[0].path != "/cinder/v3/" || (*calls)[1].path != groupBase+"/target" || (*calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.38" {
-			t.Fatal(*calls)
+		} else if calls.Calls()[0].Path != "/cinder/v3/" || calls.Calls()[1].Path != groupBase+"/target" || calls.Calls()[1].Header.Get("OpenStack-API-Version") != "volume 3.38" {
+			t.Fatal(calls.Calls())
 		}
 		value.Discovery[0].Envelope[0] = 'X'
 		if string(value.Envelope) != `{"groups":[{"id":"found","name":"target"}]}` || value.Wire.Header.Get("X-Request-Id") != "actual" {
@@ -355,22 +356,22 @@ func TestPythonCinderGroupFindRecordDiscoveryDenialCannotBecomeMemberFallback(t 
 	api, calls := groupAPI(t, "", func(*http.Request) *http.Response { return groupWire(403, `{"discovery":"denied"}`) })
 	value, err := api.FindRecord(context.Background(), "target")
 	var native gophercloud.ErrUnexpectedResponseCode
-	if value != nil || len(*calls) != 1 || (*calls)[0].path != "/cinder/v3/" || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"discovery":"denied"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
-		t.Fatal(value, err, *calls)
+	if value != nil || calls.Len() != 1 || calls.Calls()[0].Path != "/cinder/v3/" || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"discovery":"denied"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
+		t.Fatal(value, err, calls.Calls())
 	}
 }
 
 func TestPythonCinderGroupFindRecordAcceptedTransientSourceMutationKeepsReceipt(t *testing.T) {
 	var api *groups.API
-	faulty := &groupFaultBody{text: `{"group":{"id":"actual"}}`}
+	faulty := &testcloud.Body{Data: `{"group":{"id":"actual"}}`}
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { reply := groupWire(200, ""); reply.Body = faulty; return reply })
 	original := api.RawClient().ResourceBase
-	faulty.afterRead = func() { api.RawClient().ResourceBase = "https://other.example/v3/project/" }
-	faulty.afterClose = func() { api.RawClient().ResourceBase = original }
+	faulty.OnRead = func() { api.RawClient().ResourceBase = "https://other.example/v3/project/" }
+	faulty.OnClose = func() { api.RawClient().ResourceBase = original }
 	value, err := api.FindRecord(context.Background(), "target")
 	var proof *resource.ResponseError
-	if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != faulty.text || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 {
-		t.Fatal(value, err, proof, *calls)
+	if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != faulty.Data || proof.Header.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 {
+		t.Fatal(value, err, proof, calls.Calls())
 	}
 }
 
@@ -393,8 +394,8 @@ func TestPythonCinderGroupFindRecordNativeRetryOwnsVersionAndPreservesOrdinaryHe
 			}
 			value, err := api.FindRecord(context.Background(), "target")
 			var native gophercloud.ErrUnexpectedResponseCode
-			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"retry":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" || len(*calls) != 1 {
-				t.Fatal(value, err, *calls)
+			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"retry":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" || calls.Len() != 1 {
+				t.Fatal(value, err, calls.Calls())
 			}
 		})
 	}
@@ -412,8 +413,8 @@ func TestPythonCinderGroupFindRecordNativeRetryOwnsVersionAndPreservesOrdinaryHe
 		return nil
 	}
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || value == nil || len(*calls) != 2 || (*calls)[1].headers.Get("X-Retry") != "allowed" || (*calls)[1].headers.Get("X-Auth-Token") != "live-refreshed" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 || calls.Calls()[1].Header.Get("X-Retry") != "allowed" || calls.Calls()[1].Header.Get("X-Auth-Token") != "live-refreshed" {
+		t.Fatal(value, err, calls.Calls())
 	}
 }
 
@@ -428,10 +429,10 @@ func TestPythonCinderGroupFindRecordCleanRetryOriginalKeepsFallback(t *testing.T
 		return err
 	}
 	value, err := api.FindRecord(context.Background(), "target")
-	if err != nil || value == nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || calls.Len() != 2 {
+		t.Fatal(value, err, calls.Calls())
 	}
-	query, _ := url.ParseQuery((*calls)[1].query)
+	query, _ := url.ParseQuery(calls.Calls()[1].RawQuery)
 	if len(query) != 0 {
 		t.Fatal("Group name match remains local", query)
 	}
@@ -442,7 +443,7 @@ func TestPythonCinderGroupFindRecordAcceptedPhysicalCausesCannotBecomeFallback(t
 	for _, code := range []int{400, 403, 404} {
 		readCause := gophercloud.ErrUnexpectedResponseCode{Actual: code, Body: []byte(`{"nested":"not-physical-status"}`)}
 		closeCause := errors.New("accepted close")
-		faulty := &groupFaultBody{text: `{"group":{"id":"partial"}}`, readErr: readCause, closeErr: closeCause}
+		faulty := &testcloud.Body{Data: `{"group":{"id":"partial"}}`, ReadErr: readCause, CloseErr: closeCause}
 		api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { reply := groupWire(202, ""); reply.Body = faulty; return reply })
 		hooks := 0
 		api.RawClient().ProviderClient.RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, err error, _ uint) error {
@@ -451,8 +452,8 @@ func TestPythonCinderGroupFindRecordAcceptedPhysicalCausesCannotBecomeFallback(t
 		}
 		value, err := api.FindRecord(context.Background(), "target")
 		var proof *resource.ResponseError
-		if value != nil || !errors.Is(err, closeCause) || !gophercloud.ResponseCodeIs(err, code) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != faulty.text || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 || faulty.closed != 1 || hooks != 0 {
-			t.Fatal(value, err, proof, *calls, faulty.closed, hooks)
+		if value != nil || !errors.Is(err, closeCause) || !gophercloud.ResponseCodeIs(err, code) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != faulty.Data || proof.Header.Get("X-Request-Id") != "actual" || calls.Len() != 1 || faulty.Closes() != 1 || hooks != 0 {
+			t.Fatal(value, err, proof, calls.Calls(), faulty.Closes(), hooks)
 		}
 	}
 }
@@ -489,18 +490,18 @@ func TestPythonCinderGroupFindRecordFirstCustomHeaderOptionOwnsDefaultAndNilMaps
 					held = cfg
 					return nil
 				})
-				start := len(*calls)
+				start := calls.Len()
 				result, err := api.FindRecord(context.Background(), "target", options...)
-				if err != nil || result == nil || len(*calls) != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
-					t.Fatal(result, err, *calls, api.RawClient().MoreHeaders)
+				if err != nil || result == nil || calls.Len() != start+2 || !reflect.DeepEqual(api.RawClient().MoreHeaders, expected) || api.RawClient().Microversion != "3.38" {
+					t.Fatal(result, err, calls.Calls(), api.RawClient().MoreHeaders)
 				}
-				for _, call := range (*calls)[start:] {
-					if call.headers.Get("X-Custom") != value || call.headers.Get("X-Original") != "source" {
+				for _, call := range calls.Calls()[start:] {
+					if call.Header.Get("X-Custom") != value || call.Header.Get("X-Original") != "source" {
 						t.Fatal(call, value)
 					}
 				}
-				if (*calls)[start].headers.Get("Accept") != "application/source" || (*calls)[start+1].headers.Get("Accept") != "application/json" {
-					t.Fatal((*calls)[start:])
+				if calls.Calls()[start].Header.Get("Accept") != "application/source" || calls.Calls()[start+1].Header.Get("Accept") != "application/json" {
+					t.Fatal(calls.Calls()[start:])
 				}
 			}
 		})

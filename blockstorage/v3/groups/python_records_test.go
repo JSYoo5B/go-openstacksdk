@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -17,38 +16,17 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type groupCall struct {
-	method, path, escaped, query, body string
-	headers                            http.Header
-}
-type groupTransport func(*http.Request) (*http.Response, error)
-
-func (f groupTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
 func groupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual"}})
 }
 
 const groupBase = "/cinder/v3/project/groups"
 
-func groupAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*groups.API, *[]groupCall) {
+func groupAPI(t *testing.T, version string, reply func(*http.Request) *http.Response) (*groups.API, *testcloud.Recorder) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	calls := &[]groupCall{}
-	cloud.Provider.HTTPClient.Transport = groupTransport(func(r *http.Request) (*http.Response, error) {
-		body := ""
-		if r.Body != nil {
-			raw, _ := io.ReadAll(r.Body)
-			body = string(raw)
-		}
-		*calls = append(*calls, groupCall{r.Method, r.URL.Path, r.URL.EscapedPath(), r.URL.RawQuery, body, r.Header.Clone()})
-		return reply(r), nil
-	})
+	calls := testcloud.NewRecorder(func(r *http.Request) (*http.Response, error) { return reply(r), nil })
+	cloud.SetTransport(calls)
 	client := cloud.Client("volumev3", "/cinder/v3/")
 	client.ResourceBase = cloud.Server.URL + "/cinder/v3/project/"
 	client.Microversion = version
@@ -88,8 +66,8 @@ func TestPythonCinderGroupGetProjectionListVolumeAndOwnedProof(t *testing.T) {
 				options = append(options, groups.WithRecordGetListVolume(choice == "true"))
 			}
 			v, err := api.GetRecord(context.Background(), "literal/id %2F", options...)
-			if err != nil || len(*calls) != 1 || (*calls)[0].escaped != groupBase+"/literal%2Fid%20%252F" || (*calls)[0].body != "" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.90" || len(v.Discovery) != 0 {
-				t.Fatal(v, err, *calls)
+			if err != nil || calls.Len() != 1 || calls.Calls()[0].EscapedPath != groupBase+"/literal%2Fid%20%252F" || calls.Calls()[0].Body != "" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.90" || len(v.Discovery) != 0 {
+				t.Fatal(v, err, calls.Calls())
 			}
 			want := ""
 			if choice == "false" {
@@ -98,8 +76,8 @@ func TestPythonCinderGroupGetProjectionListVolumeAndOwnedProof(t *testing.T) {
 			if choice == "true" {
 				want = "list_volume=True"
 			}
-			if (*calls)[0].query != want {
-				t.Fatal(*calls)
+			if calls.Calls()[0].RawQuery != want {
+				t.Fatal(calls.Calls())
 			}
 			for key, want := range map[string]string{"id": `null`, "name": `false`, "group_type": `9007199254740993`, "volumes": `["one"]`, "volume_types": `[false]`, "replication_targets": `[{"target":true}]`, "description": `null`, "location": `null`} {
 				groupField(t, v, key, want)
@@ -112,8 +90,8 @@ func TestPythonCinderGroupGetProjectionListVolumeAndOwnedProof(t *testing.T) {
 			if string(v.Wire.Body["project_id"]) != `"project"` || v.Wire.Header.Get("X-Request-Id") != "actual" || v.Resource.Header.Get("X-Request-Id") != "actual" {
 				t.Fatal("aliased proof", v)
 			}
-			if _, err := api.GetRecord(context.Background(), "literal/id %2F", options...); err != nil || len(*calls) != 2 {
-				t.Fatal("leaf must not invent a shared response cache", err, *calls)
+			if _, err := api.GetRecord(context.Background(), "literal/id %2F", options...); err != nil || calls.Len() != 2 {
+				t.Fatal("leaf must not invent a shared response cache", err, calls.Calls())
 			}
 		})
 	}
@@ -125,8 +103,8 @@ func TestPythonCinderGroupGetEnvelopeSeedsAndActualDecodeErrors(t *testing.T) {
 	}{{`{"group":{}}`, true}, {`{"name":0,"unknown":false}`, true}, {"", true}, {"{bad", true}, {`null`, false}, {`[]`, false}, {`{"group":null}`, false}, {`{"group":[]}`, false}, {string([]byte{'{', '"', 'x', '"', ':', '"', 0xff, '"', '}'}), false}} {
 		api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(202, item.body) })
 		v, err := api.GetRecord(context.Background(), "seed")
-		if v == nil || (err == nil) != item.valid || len(*calls) != 1 || v.StatusCode != 202 || string(v.Envelope) != item.body {
-			t.Fatal(item, v, err, *calls)
+		if v == nil || (err == nil) != item.valid || calls.Len() != 1 || v.StatusCode != 202 || string(v.Envelope) != item.body {
+			t.Fatal(item, v, err, calls.Calls())
 		}
 		if item.valid {
 			groupField(t, v, "id", `"seed"`)
@@ -139,8 +117,8 @@ func TestPythonCinderGroupGetEnvelopeSeedsAndActualDecodeErrors(t *testing.T) {
 	}
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(404, `{"missing":true}`) })
 	v, err := api.GetRecord(context.Background(), "id")
-	if v != nil || !gophercloud.ResponseCodeIs(err, 404) || len(*calls) != 1 {
-		t.Fatal(v, err, *calls)
+	if v != nil || !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 1 {
+		t.Fatal(v, err, calls.Calls())
 	}
 }
 func TestPythonCinderGroupCreatePartialNullUnknownAndOptionSnapshots(t *testing.T) {
@@ -155,10 +133,10 @@ func TestPythonCinderGroupCreatePartialNullUnknownAndOptionSnapshots(t *testing.
 		return groupWire(202, `{"group":{"id":"created","name":"server","unknown":false}}`)
 	})
 	v, err := api.CreateRecord(context.Background(), option)
-	if err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPost || (*calls)[0].path != groupBase || (*calls)[0].headers.Get("X-Trace") != "original" || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.38" {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || calls.Calls()[0].Method != http.MethodPost || calls.Calls()[0].Path != groupBase || calls.Calls()[0].Header.Get("X-Trace") != "original" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.38" {
+		t.Fatal(v, err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[0].body, `{"group":{"group_type":"type","volume_types":false,"description":null,"name":"","availability_zone":0}}`)
+	groupJSON(t, calls.Calls()[0].Body, `{"group":{"group_type":"type","volume_types":false,"description":null,"name":"","availability_zone":0}}`)
 	groupField(t, v, "id", `"created"`)
 	groupField(t, v, "name", `"server"`)
 	groupField(t, v, "volume_types", `[false]`)
@@ -169,17 +147,17 @@ func TestPythonCinderGroupCreatePartialNullUnknownAndOptionSnapshots(t *testing.
 }
 func TestPythonCinderGroupCreateFromSourceRequiredNullableIDsAndFreshResponse(t *testing.T) {
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(202, "") })
-	if v, err := api.CreateFromSourceRecord(context.Background()); v != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(v, err, *calls)
+	if v, err := api.CreateFromSourceRecord(context.Background()); v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(v, err, calls.Calls())
 	}
-	if v, err := api.CreateFromSourceRecord(context.Background(), groups.WithRecordSourceSourceGroupID("parent")); v != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(v, err, *calls)
+	if v, err := api.CreateFromSourceRecord(context.Background(), groups.WithRecordSourceSourceGroupID("parent")); v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(v, err, calls.Calls())
 	}
 	v, err := api.CreateFromSourceRecord(context.Background(), groups.WithRecordSourceGroupSnapshotID(nil), groups.WithRecordSourceSourceGroupID("parent"))
-	if err != nil || len(*calls) != 1 || (*calls)[0].path != groupBase+"/action" || (*calls)[0].method != http.MethodPost {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || calls.Calls()[0].Path != groupBase+"/action" || calls.Calls()[0].Method != http.MethodPost {
+		t.Fatal(v, err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[0].body, `{"create-from-src":{"group_snapshot_id":null,"source_group_id":"parent","name":null,"description":null}}`)
+	groupJSON(t, calls.Calls()[0].Body, `{"create-from-src":{"group_snapshot_id":null,"source_group_id":"parent","name":null,"description":null}}`)
 	for _, key := range []string{"id", "source_group_id", "name"} {
 		groupField(t, v, key, `null`)
 	}
@@ -190,10 +168,10 @@ func TestPythonCinderGroupCreateFromSourceRequiredNullableIDsAndFreshResponse(t 
 	option := groups.WithRecordSourceOpts(groups.RecordSourceOpts{GroupSnapshotID: json.RawMessage(`"snapshot"`), SourceGroupID: json.RawMessage(`null`), Name: raw, Description: json.RawMessage(`0`)})
 	raw[0] = 'X'
 	v, err = api.CreateFromSourceRecord(context.Background(), option)
-	if err != nil || len(*calls) != 1 {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 {
+		t.Fatal(v, err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[0].body, `{"create-from-src":{"group_snapshot_id":"snapshot","source_group_id":null,"name":false,"description":0}}`)
+	groupJSON(t, calls.Calls()[0].Body, `{"create-from-src":{"group_snapshot_id":"snapshot","source_group_id":null,"name":false,"description":0}}`)
 	groupField(t, v, "id", `"new"`)
 	groupField(t, v, "group_snapshot_id", `"wire"`)
 	groupField(t, v, "name", `null`)
@@ -202,8 +180,8 @@ func TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge(t *testing.T) {
 	for _, options := range [][]groups.RecordUpdateOption{nil, {groups.WithRecordUpdateOpts(groups.RecordUpdateOpts{Fields: map[string]json.RawMessage{"unknown": json.RawMessage(`{bad`)}})}, {groups.WithRecordUpdateField("id", "ignored")}} {
 		api, calls := groupAPI(t, "", func(*http.Request) *http.Response { t.Fatal("no-op sent HTTP"); return nil })
 		v, err := api.UpdateRecord(context.Background(), "seed", options...)
-		if err != nil || len(*calls) != 0 || v.StatusCode != 0 || v.Wire != nil || v.Envelope != nil || len(v.Discovery) != 0 {
-			t.Fatal(v, err, *calls)
+		if err != nil || calls.Len() != 0 || v.StatusCode != 0 || v.Wire != nil || v.Envelope != nil || len(v.Discovery) != 0 {
+			t.Fatal(v, err, calls.Calls())
 		}
 		groupField(t, v, "id", `"seed"`)
 		groupField(t, v, "name", `null`)
@@ -212,10 +190,10 @@ func TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge(t *testing.T) {
 		return groupWire(202, `{"group":{"description":"server","unknown":0}}`)
 	})
 	v, err := api.UpdateRecord(context.Background(), "id", groups.WithRecordUpdateField("name", nil), groups.WithRecordUpdateField("description", false), groups.WithRecordUpdateField("add_volumes", "a,b"), groups.WithRecordUpdateField("remove_volumes", ""))
-	if err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPut || (*calls)[0].path != groupBase+"/id" {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || calls.Calls()[0].Method != http.MethodPut || calls.Calls()[0].Path != groupBase+"/id" {
+		t.Fatal(v, err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[0].body, `{"group":{"name":null,"description":false,"add_volumes":"a,b","remove_volumes":""}}`)
+	groupJSON(t, calls.Calls()[0].Body, `{"group":{"name":null,"description":false,"add_volumes":"a,b","remove_volumes":""}}`)
 	groupField(t, v, "id", `"id"`)
 	groupField(t, v, "name", `null`)
 	groupField(t, v, "description", `"server"`)
@@ -224,22 +202,22 @@ func TestPythonCinderGroupUpdateDirtyNoopAndResponseMerge(t *testing.T) {
 func TestPythonCinderGroupDeleteActionDefaultsStrictMissingAndStatuses(t *testing.T) {
 	for _, code := range []int{200, 202, 204, 299, 300, 304, 399} {
 		api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(code, "not JSON") })
-		if err := api.DeleteRecord(context.Background(), "id"); err != nil || len(*calls) != 1 || (*calls)[0].method != http.MethodPost || (*calls)[0].path != groupBase+"/id/action" {
-			t.Fatal(code, err, *calls)
+		if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 || calls.Calls()[0].Method != http.MethodPost || calls.Calls()[0].Path != groupBase+"/id/action" {
+			t.Fatal(code, err, calls.Calls())
 		}
-		groupJSON(t, (*calls)[0].body, `{"delete":{"delete-volumes":false}}`)
+		groupJSON(t, calls.Calls()[0].Body, `{"delete":{"delete-volumes":false}}`)
 	}
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(404, `{"missing":true}`) })
-	if err := api.DeleteRecord(context.Background(), "id"); err != nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 {
+		t.Fatal(err, calls.Calls())
 	}
-	if err := api.DeleteRecord(context.Background(), "id", groups.WithRecordDeleteIgnoreMissing(false), groups.WithRecordDeleteVolumes(true)); !gophercloud.ResponseCodeIs(err, 404) || len(*calls) != 2 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id", groups.WithRecordDeleteIgnoreMissing(false), groups.WithRecordDeleteVolumes(true)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
+		t.Fatal(err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[1].body, `{"delete":{"delete-volumes":true}}`)
+	groupJSON(t, calls.Calls()[1].Body, `{"delete":{"delete-volumes":true}}`)
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(403, `{"policy":false}`) })
-	if err := api.DeleteRecord(context.Background(), "id"); !gophercloud.ResponseCodeIs(err, 403) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err := api.DeleteRecord(context.Background(), "id"); !gophercloud.ResponseCodeIs(err, 403) || calls.Len() != 1 {
+		t.Fatal(err, calls.Calls())
 	}
 }
 func TestPythonCinderGroupListDeclaredAliasesLocalFiltersAndRawCap(t *testing.T) {
@@ -253,15 +231,15 @@ func TestPythonCinderGroupListDeclaredAliasesLocalFiltersAndRawCap(t *testing.T)
 		return groupWire(200, `{"groups":[{"id":"a","name":"other"},{"id":"b","name":"target","unknown":9007199254740993},null],"next":"https://wrong.example/groups"}`)
 	})
 	seq := api.ListRecords(context.Background(), option, groups.WithRecordListLimit(0), groups.WithRecordListMaxItems(2))
-	if len(*calls) != 0 {
-		t.Fatal("eager list", *calls)
+	if calls.Len() != 0 {
+		t.Fatal("eager list", calls.Calls())
 	}
 	values, err := collectGroups(seq)
-	if err != nil || len(values) != 1 || len(*calls) != 1 || (*calls)[0].path != groupBase+"/detail" {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 1 || calls.Calls()[0].Path != groupBase+"/detail" {
+		t.Fatal(values, err, calls.Calls())
 	}
 	groupField(t, values[0], "id", `"b"`)
-	q, _ := url.ParseQuery((*calls)[0].query)
+	q, _ := url.ParseQuery(calls.Calls()[0].RawQuery)
 	if !reflect.DeepEqual(q, url.Values{"all_tenants": {"False"}, "sort": {"created_at:desc"}, "limit": {"2"}}) || string(values[0].Wire.Body["unknown"]) != "9007199254740993" || values[0].Resource.Body["unknown"] != nil {
 		t.Fatal(q, values)
 	}
@@ -315,11 +293,11 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 				return reply
 			})
 			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListDetails(false), groups.WithRecordListQuery("sort", "id:asc")))
-			if err != nil || len(values) != 2 || len(*calls) != 2 || (*calls)[0].path != groupBase || (*calls)[1].path != groupBase {
-				t.Fatal(values, err, *calls)
+			if err != nil || len(values) != 2 || calls.Len() != 2 || calls.Calls()[0].Path != groupBase || calls.Calls()[1].Path != groupBase {
+				t.Fatal(values, err, calls.Calls())
 			}
-			for _, call := range *calls {
-				q, _ := url.ParseQuery(call.query)
+			for _, call := range calls.Calls() {
+				q, _ := url.ParseQuery(call.RawQuery)
 				if q.Get("sort") != "id:asc" {
 					t.Fatal(q)
 				}
@@ -333,8 +311,8 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 		return groupWire(200, `{"groups":{"id":9007199254740993}}`)
 	})
 	values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListLimit(5)))
-	if err != nil || len(values) != 1 || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "marker=9007199254740993") {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 2 || !strings.Contains(calls.Calls()[1].RawQuery, "marker=9007199254740993") {
+		t.Fatal(values, err, calls.Calls())
 	}
 	api, calls = groupAPI(t, "3.38", func(r *http.Request) *http.Response {
 		if r.URL.Query().Get("offset") == "2" {
@@ -343,8 +321,8 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 		return groupWire(200, `{"groups":[{"id":"a"}],"next":"?offset=2&limit=2"}`)
 	})
 	values, err = collectGroups(api.ListRecords(context.Background(), groups.WithRecordListQuery("offset", 0), groups.WithRecordListLimit(2)))
-	if err != nil || len(values) != 1 || len(*calls) != 2 {
-		t.Fatal(values, err, *calls)
+	if err != nil || len(values) != 1 || calls.Len() != 2 {
+		t.Fatal(values, err, calls.Calls())
 	}
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response {
 		return groupWire(200, `{"groups":[{"id":"a"},null],"next":"https://wrong.example/groups"}`)
@@ -356,8 +334,8 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 		groupField(t, v, "id", `"a"`)
 		break
 	}
-	if len(*calls) != 1 {
-		t.Fatal(*calls)
+	if calls.Len() != 1 {
+		t.Fatal(calls.Calls())
 	}
 }
 func TestPythonCinderGroupListShapesConstructorCollisionsAndActualLateError(t *testing.T) {
@@ -365,8 +343,8 @@ func TestPythonCinderGroupListShapesConstructorCollisionsAndActualLateError(t *t
 		api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(200, body) })
 		_, err := collectGroups(api.ListRecords(context.Background()))
 		var proof *resource.ResponseError
-		if !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || len(*calls) != 1 {
-			t.Fatal(body, err, proof, *calls)
+		if !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != body || calls.Len() != 1 {
+			t.Fatal(body, err, proof, calls.Calls())
 		}
 	}
 	api, calls := groupAPI(t, "3.38", func(r *http.Request) *http.Response {
@@ -377,8 +355,8 @@ func TestPythonCinderGroupListShapesConstructorCollisionsAndActualLateError(t *t
 	})
 	values, err := collectGroups(api.ListRecords(context.Background()))
 	var native gophercloud.ErrUnexpectedResponseCode
-	if len(values) != 1 || len(*calls) != 2 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"second":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
-		t.Fatal(values, err, *calls)
+	if len(values) != 1 || calls.Len() != 2 || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"second":"actual"}` || native.ResponseHeader.Get("X-Request-Id") != "actual" {
+		t.Fatal(values, err, calls.Calls())
 	}
 }
 func TestPythonCinderGroupDiscoveryCeilingSelectedOverridesAndOwnedEvidence(t *testing.T) {
@@ -389,8 +367,8 @@ func TestPythonCinderGroupDiscoveryCeilingSelectedOverridesAndOwnedEvidence(t *t
 		return groupWire(200, `{"group":{"id":"actual"}}`)
 	})
 	v, err := api.GetRecord(context.Background(), "id")
-	if err != nil || len(*calls) != 2 || (*calls)[0].path != "/cinder/v3/" || (*calls)[0].headers.Get("OpenStack-API-Version") != "" || (*calls)[1].headers.Get("OpenStack-API-Version") != "volume 3.38" || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 2 || calls.Calls()[0].Path != "/cinder/v3/" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "" || calls.Calls()[1].Header.Get("OpenStack-API-Version") != "volume 3.38" || len(v.Discovery) != 1 || v.Discovery[0].StatusCode != 200 {
+		t.Fatal(v, err, calls.Calls())
 	}
 	v.Discovery[0].Envelope[0] = 'X'
 	if string(v.Envelope) != `{"group":{"id":"actual"}}` || v.StatusCode != 200 {
@@ -398,14 +376,14 @@ func TestPythonCinderGroupDiscoveryCeilingSelectedOverridesAndOwnedEvidence(t *t
 	}
 	api, calls = groupAPI(t, "3.80", func(*http.Request) *http.Response { return groupWire(200, `{"group":{}}`) })
 	v, err = api.GetRecord(context.Background(), "id", groups.WithRecordGetMicroversion("3.13"))
-	if err != nil || len(*calls) != 1 || (*calls)[0].headers.Get("OpenStack-API-Version") != "volume 3.13" || api.RawClient().Microversion != "3.80" || len(v.Discovery) != 0 {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.13" || api.RawClient().Microversion != "3.80" || len(v.Discovery) != 0 {
+		t.Fatal(v, err, calls.Calls())
 	}
 	api, calls = groupAPI(t, "", func(*http.Request) *http.Response { return groupWire(403, `{"discovery":"denied"}`) })
 	v, err = api.GetRecord(context.Background(), "id")
 	var native gophercloud.ErrUnexpectedResponseCode
-	if v != nil || len(*calls) != 1 || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"discovery":"denied"}` {
-		t.Fatal(v, err, *calls)
+	if v != nil || calls.Len() != 1 || !errors.As(err, &native) || native.Actual != 403 || string(native.Body) != `{"discovery":"denied"}` {
+		t.Fatal(v, err, calls.Calls())
 	}
 }
 func TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource(t *testing.T) {
@@ -443,29 +421,29 @@ func TestPythonCinderGroupOptionsPreflightUnknownDiscardAndStickySource(t *testi
 			return api.DeleteRecord(context.Background(), "id", groups.WithRecordDeleteHeaders(map[string]string{"Authorization": "forged"}))
 		},
 	} {
-		if err := invoke(); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err := invoke(); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(err, calls.Calls())
 		}
 	}
 	cause := errors.New("option failed")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	_, err := api.CreateRecord(ctx, func(*groups.RecordCreateOpts) error { cancel(cause); return cause })
-	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || calls.Len() != 0 {
+		t.Fatal(err, calls.Calls())
 	}
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(202, `{"group":{}}`) })
 	_, err = api.CreateRecord(context.Background(), groups.WithRecordCreateField("unknown", make(chan int)))
-	if err != nil || len(*calls) != 1 {
-		t.Fatal("Source discards unknown before JSON encoding", err, *calls)
+	if err != nil || calls.Len() != 1 {
+		t.Fatal("Source discards unknown before JSON encoding", err, calls.Calls())
 	}
-	groupJSON(t, (*calls)[0].body, `{"group":{}}`)
+	groupJSON(t, calls.Calls()[0].Body, `{"group":{}}`)
 	api, calls = groupAPI(t, "3.38", func(*http.Request) *http.Response { t.Fatal("mutated source sent HTTP"); return nil })
 	_, err = api.GetRecord(context.Background(), "id", func(*groups.RecordGetOpts) error {
 		api.RawClient().ResourceBase = "https://different.example/v3/project/"
 		return nil
 	})
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, calls.Calls())
 	}
 }
 
@@ -475,15 +453,15 @@ func TestPythonCinderGroupGetDeclaredDeprecatedAttrsSeedWithoutWireQuery(t *test
 	fields["description"][0] = 'X'
 	api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(200, `{"group":{"name":"wire"}}`) })
 	v, err := api.GetRecord(context.Background(), "id", option, groups.WithRecordGetField("group_type", 9007199254740993))
-	if err != nil || len(*calls) != 1 || (*calls)[0].query != "" || (*calls)[0].body != "" {
-		t.Fatal(v, err, *calls)
+	if err != nil || calls.Len() != 1 || calls.Calls()[0].RawQuery != "" || calls.Calls()[0].Body != "" {
+		t.Fatal(v, err, calls.Calls())
 	}
 	groupField(t, v, "description", `false`)
 	groupField(t, v, "volumes", `["one"]`)
 	groupField(t, v, "name", `"wire"`)
 	groupField(t, v, "group_type", `9007199254740993`)
-	if _, err := api.GetRecord(context.Background(), "id", groups.WithRecordGetField("id", "forged")); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if _, err := api.GetRecord(context.Background(), "id", groups.WithRecordGetField("id", "forged")); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 1 {
+		t.Fatal(err, calls.Calls())
 	}
 }
 
@@ -500,12 +478,12 @@ func TestPythonCinderGroupListClassCollisionKeepsAcceptedPageAndDirectUnknown(t 
 			})
 			values, err := collectGroups(api.ListRecords(context.Background()))
 			var proof *resource.ResponseError
-			if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" || len(*calls) != 1 {
-				t.Fatal(values, err, proof, *calls)
+			if len(values) != 0 || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &proof) || proof.StatusCode != 202 || string(proof.Body) != page || proof.Header.Get("X-Request-Id") != "actual" || calls.Len() != 1 {
+				t.Fatal(values, err, proof, calls.Calls())
 			}
 			value, err := api.GetRecord(context.Background(), "wire")
-			if err != nil || value == nil || value.Wire == nil || string(value.Wire.Body["cls"]) != raw || value.Resource.Body["cls"] != nil || string(value.Envelope) != member || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" || len(*calls) != 2 {
-				t.Fatal(value, err, *calls)
+			if err != nil || value == nil || value.Wire == nil || string(value.Wire.Body["cls"]) != raw || value.Resource.Body["cls"] != nil || string(value.Envelope) != member || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual" || calls.Len() != 2 {
+				t.Fatal(value, err, calls.Calls())
 			}
 		})
 	}
@@ -563,8 +541,8 @@ func TestPythonCinderGroupClassInputsAreBoundControlsBeforeDiscovery(t *testing.
 					})
 					err := item.invoke(api)
 					var proof *resource.ResponseError
-					if !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || len(*calls) != 0 {
-						t.Fatal(err, proof, *calls)
+					if !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &proof) || calls.Len() != 0 {
+						t.Fatal(err, proof, calls.Calls())
 					}
 				})
 			}
@@ -599,11 +577,11 @@ func TestPythonCinderGroupListAdvertisedOffsetTransitionsKeepScopeAndFallback(t 
 				options = append(options, groups.WithRecordListQuery("offset", 0))
 			}
 			values, err := collectGroups(api.ListRecords(context.Background(), options...))
-			if err != nil || len(values) != 1 || len(*calls) != 3 {
-				t.Fatal(values, err, *calls)
+			if err != nil || len(values) != 1 || calls.Len() != 3 {
+				t.Fatal(values, err, calls.Calls())
 			}
 			groupField(t, values[0], "id", `"a"`)
-			first, _ := url.ParseQuery((*calls)[0].query)
+			first, _ := url.ParseQuery(calls.Calls()[0].RawQuery)
 			switch initial {
 			case "absent":
 				if first.Has("offset") || first.Has("marker") {
@@ -618,8 +596,8 @@ func TestPythonCinderGroupListAdvertisedOffsetTransitionsKeepScopeAndFallback(t 
 					t.Fatal(first)
 				}
 			}
-			second, _ := url.ParseQuery((*calls)[1].query)
-			third, _ := url.ParseQuery((*calls)[2].query)
+			second, _ := url.ParseQuery(calls.Calls()[1].RawQuery)
+			third, _ := url.ParseQuery(calls.Calls()[2].RawQuery)
 			if second.Get("offset") != "2" || second.Has("marker") || third.Get("marker") != "b" || third.Has("offset") {
 				t.Fatal("advertised offset then raw last-row marker", second, third)
 			}
@@ -660,12 +638,12 @@ func TestPythonCinderGroupListOffsetContinuationRejectsScopeAndCursorRegressions
 			}
 			var proof *resource.ResponseError
 			var cycle *resource.PaginationCycleError
-			if len(*calls) != wantCalls || len(values) != wantCalls || !errors.As(err, &proof) || proof.StatusCode != actualStatus || string(proof.Body) != actualBody || proof.Header.Get("X-Request-Id") != "actual" || errors.As(err, &cycle) != item.cycle || !item.cycle && !errors.Is(err, resource.ErrInvalidOption) {
-				t.Fatal(values, err, proof, *calls)
+			if calls.Len() != wantCalls || len(values) != wantCalls || !errors.As(err, &proof) || proof.StatusCode != actualStatus || string(proof.Body) != actualBody || proof.Header.Get("X-Request-Id") != "actual" || errors.As(err, &cycle) != item.cycle || !item.cycle && !errors.Is(err, resource.ErrInvalidOption) {
+				t.Fatal(values, err, proof, calls.Calls())
 			}
-			for _, call := range *calls {
-				query, _ := url.ParseQuery(call.query)
-				if call.path != groupBase+"/detail" || query.Get("sort") != "id:asc" || query.Get("all_tenants") != "False" || call.headers.Get("OpenStack-API-Version") != "volume 3.38" {
+			for _, call := range calls.Calls() {
+				query, _ := url.ParseQuery(call.RawQuery)
+				if call.Path != groupBase+"/detail" || query.Get("sort") != "id:asc" || query.Get("all_tenants") != "False" || call.Header.Get("OpenStack-API-Version") != "volume 3.38" {
 					t.Fatal("scope or request policy escaped before rejection", call)
 				}
 			}
@@ -686,8 +664,8 @@ func TestPythonCinderGroupListDeclaredNumericFiltersUseExactDecimalPolicy(t *tes
 			body := `{"groups":[{"id":` + item.actual + `,"name":"wire"}]}`
 			api, calls := groupAPI(t, "3.38", func(*http.Request) *http.Response { return groupWire(200, body) })
 			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListOpts(groups.RecordListOpts{Query: map[string]json.RawMessage{"id": json.RawMessage(item.filter)}})))
-			if err != nil || (len(values) == 1) != item.match || len(*calls) != 1 || (*calls)[0].query != "" {
-				t.Fatal(item, values, err, *calls)
+			if err != nil || (len(values) == 1) != item.match || calls.Len() != 1 || calls.Calls()[0].RawQuery != "" {
+				t.Fatal(item, values, err, calls.Calls())
 			}
 			if item.match {
 				groupField(t, values[0], "id", item.actual)

@@ -3,11 +3,9 @@ package services_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -19,36 +17,27 @@ import (
 // pythonVPNServiceCall records the wire request openstacksdk would also send.
 type pythonVPNServiceCall struct{ method, path, query, body string }
 
-type pythonVPNServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonVPNServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonVPNServiceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonVPNServiceAPI(t *testing.T, reply func(*http.Request) *http.Response) (*services.API, *[]pythonVPNServiceCall, *testcloud.Cloud) {
+func pythonVPNServiceAPI(t *testing.T, reply func(*http.Request) *http.Response) (*services.API, *testcloud.Recorder, *testcloud.Cloud) {
 	t.Helper()
-	calls := &[]pythonVPNServiceCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonVPNServiceTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonVPNServiceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return services.New(client), calls, cloud
+}
+
+// pythonVPNServiceCalls projects recorded calls onto the compared fields.
+func pythonVPNServiceCalls(rec *testcloud.Recorder) []pythonVPNServiceCall {
+	var calls []pythonVPNServiceCall
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonVPNServiceCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const (
@@ -108,8 +97,8 @@ func TestPythonVPNServiceProxyRequests(t *testing.T) {
 	for range 5 {
 		want = append(want, pythonVPNServiceCall{http.MethodDelete, pythonVPNServiceBase + "/vs-1", "", ""})
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonVPNServiceCalls(calls), want) {
+		t.Fatalf("%+v", calls.Calls())
 	}
 }
 
@@ -130,11 +119,11 @@ func TestPythonVPNServiceListQueryAndLinks(t *testing.T) {
 		}
 		ids = append(ids, value.ID+"/"+value.Status)
 	}
-	if !reflect.DeepEqual(ids, []string{"vs-1/ACTIVE"}) || len(*calls) != 2 {
-		t.Fatal(ids, *calls)
+	if !reflect.DeepEqual(ids, []string{"vs-1/ACTIVE"}) || calls.Len() != 2 {
+		t.Fatal(ids, calls.Calls())
 	}
-	first, _ := url.ParseQuery((*calls)[0].query)
-	next, _ := url.ParseQuery((*calls)[1].query)
+	first, _ := url.ParseQuery(calls.Calls()[0].RawQuery)
+	next, _ := url.ParseQuery(calls.Calls()[1].RawQuery)
 	if !reflect.DeepEqual(first, url.Values{"router_id": {"r1"}, "admin_state_up": {"true"}, "limit": {"1"}}) ||
 		!reflect.DeepEqual(next, url.Values{"router_id": {"r1"}, "admin_state_up": {"true"}, "limit": {"1"}, "marker": {"vs-1"}}) {
 		t.Fatal(first, next)
@@ -188,7 +177,7 @@ func TestPythonVPNServiceFindChainAndGetWithoutFields(t *testing.T) {
 		{http.MethodGet, pythonVPNServiceBase, "name=none", ""},
 		{http.MethodGet, pythonVPNServiceBase + "/vs-1", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonVPNServiceCalls(calls), want) {
+		t.Fatalf("%+v", calls.Calls())
 	}
 }

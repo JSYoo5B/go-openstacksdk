@@ -20,16 +20,16 @@ func TestVPNServiceRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) {
 	})
 	base = cloud.Server.URL + pythonVPNServiceBase
 	rows, err := api.AllRecords(context.Background(), services.WithRecordListQuery("status", json.RawMessage(`"ACTIVE"`)), services.WithRecordListQuery("is_admin_state_up", json.RawMessage(`false`)), services.WithRecordListQuery("tenant_id", "tenant"))
-	if err != nil || len(rows) != 2 || len(*calls) != 2 || string(rows[0].Resource.Body["id"]) != `"first"` || string(rows[1].Resource.Body["id"]) != `"last"` {
-		t.Fatal(rows, err, *calls)
+	if err != nil || len(rows) != 2 || calls.Len() != 2 || string(rows[0].Resource.Body["id"]) != `"first"` || string(rows[1].Resource.Body["id"]) != `"last"` {
+		t.Fatal(rows, err, calls.Calls())
 	}
-	for _, call := range *calls {
-		if call.method != "GET" || call.path != pythonVPNServiceBase {
-			t.Fatal(*calls)
+	for _, call := range calls.Calls() {
+		if call.Method != "GET" || call.Path != pythonVPNServiceBase {
+			t.Fatal(calls.Calls())
 		}
 	}
-	if (*calls)[0].query == "" {
-		t.Fatal(*calls)
+	if calls.Calls()[0].RawQuery == "" {
+		t.Fatal(calls.Calls())
 	}
 	// Declared aliases are server-side; the local Body field must stay out of query.
 	api, calls, _ = pythonVPNServiceAPI(t, func(r *http.Request) *http.Response {
@@ -39,8 +39,8 @@ func TestVPNServiceRecordsAllPagesServerQueryAndLocalFilter(t *testing.T) {
 		return pythonVPNServiceWire(200, `{"vpnservices":[]}`)
 	})
 	_, err = api.AllRecords(context.Background(), services.WithRecordListQuery("status", json.RawMessage(`"ACTIVE"`)), services.WithRecordListQuery("is_admin_state_up", json.RawMessage(`false`)), services.WithRecordListQuery("tenant_id", "tenant"))
-	if err != nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 {
+		t.Fatal(err, calls.Calls())
 	}
 }
 func TestVPNServiceRecordsProjectionDefaultsAndUnknownFields(t *testing.T) {
@@ -67,13 +67,13 @@ func TestVPNServiceProxyJMESReturnsOpaqueGeneratorWithoutHTTP(t *testing.T) {
 	api, calls, _ := pythonVPNServiceAPI(t, func(*http.Request) *http.Response { return pythonVPNServiceWire(200, `{"vpnservices":[]}`) })
 	for _, tc := range []struct{ expression, json string }{{"[*].id", "null"}, {"type(@)", "null"}} {
 		value, err := api.ProxyListRecords(context.Background(), services.WithRecordListJMESPath(tc.expression))
-		if err != nil || string(value.JSON) != tc.json || len(*calls) != 0 {
-			t.Fatal(value, err, *calls)
+		if err != nil || string(value.JSON) != tc.json || calls.Len() != 0 {
+			t.Fatal(value, err, calls.Calls())
 		}
 	}
 	value, err := api.ProxyListRecords(context.Background(), services.WithRecordListJMESPath("@"))
-	if err != nil || len(*calls) != 0 {
-		t.Fatal(value, err, *calls)
+	if err != nil || calls.Len() != 0 {
+		t.Fatal(value, err, calls.Calls())
 	}
 	generator, ok := value.Value.(*services.RecordListGenerator)
 	if !ok {
@@ -84,8 +84,8 @@ func TestVPNServiceProxyJMESReturnsOpaqueGeneratorWithoutHTTP(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(*calls) != 1 {
-		t.Fatal(*calls)
+	if calls.Len() != 1 {
+		t.Fatal(calls.Calls())
 	}
 }
 func TestVPNServiceRecordsOptionsCancellationAndFailures(t *testing.T) {
@@ -103,14 +103,14 @@ func TestVPNServiceRecordsOptionsCancellationAndFailures(t *testing.T) {
 	}
 	for _, options := range [][]services.RecordListOption{{nil}, {services.WithRecordListQuery("session", make(chan int))}, {services.WithRecordListMicroversion("2.1\r\nbad")}} {
 		rows, err = api.AllRecords(context.Background(), options...)
-		if err == nil || rows != nil || len(*calls) != 1 {
-			t.Fatal(rows, err, *calls)
+		if err == nil || rows != nil || calls.Len() != 1 {
+			t.Fatal(rows, err, calls.Calls())
 		}
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	rows, err = api.AllRecords(ctx, func(*services.RecordListOpts) error { cancel(); return nil })
-	if !errors.Is(err, context.Canceled) || rows != nil || len(*calls) != 1 {
-		t.Fatal(rows, err, *calls)
+	if !errors.Is(err, context.Canceled) || rows != nil || calls.Len() != 1 {
+		t.Fatal(rows, err, calls.Calls())
 	}
 	api, _, _ = pythonVPNServiceAPI(t, func(*http.Request) *http.Response { return pythonVPNServiceWire(500, `{"error":"failed"}`) })
 	rows, err = api.AllRecords(context.Background())
