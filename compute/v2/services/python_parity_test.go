@@ -3,7 +3,6 @@ package services_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -18,37 +17,28 @@ import (
 // pythonComputeServiceCall records the wire request openstacksdk would also send.
 type pythonComputeServiceCall struct{ method, path, query, body, version string }
 
-type pythonComputeServiceTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonComputeServiceTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonComputeServiceWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonComputeServiceAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*services.API, *[]pythonComputeServiceCall) {
+func pythonComputeServiceAPI(t *testing.T, microversion string, reply func(*http.Request) *http.Response) (*services.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonComputeServiceCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonComputeServiceTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonComputeServiceCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = microversion
 	return services.New(client), calls
+}
+
+// pythonComputeServiceCalls projects the recorded calls onto the local call fields.
+func pythonComputeServiceCalls(rec *testcloud.Recorder) []pythonComputeServiceCall {
+	calls := []pythonComputeServiceCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonComputeServiceCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 const pythonComputeServiceBase = "/nova/v2.1/os-services"
@@ -80,8 +70,8 @@ func TestPythonComputeServiceListMapsNameToBinary(t *testing.T) {
 		{http.MethodGet, pythonComputeServiceBase, "", "", "2.69"},
 		{http.MethodGet, pythonComputeServiceBase, "binary=nova-compute&host=cmp1", "", "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -113,8 +103,8 @@ func TestPythonComputeServiceUpdateByIDCannotClearForcedDown(t *testing.T) {
 		{http.MethodPut, pythonComputeServiceBase + "/svc-uuid", "", `{"disabled_reason":"maint","status":"disabled"}`, "2.69"},
 		{http.MethodPut, pythonComputeServiceBase + "/svc-uuid", "", `{"forced_down":true}`, "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -132,8 +122,8 @@ func TestPythonComputeServiceLegacyActionsSendBodyButFailDecode(t *testing.T) {
 	want := []pythonComputeServiceCall{
 		{http.MethodPut, pythonComputeServiceBase + "/disable", "", `{"binary":"nova-compute","host":"cmp1"}`, "2.11"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -155,7 +145,7 @@ func TestPythonComputeServiceDeleteReturnsMissingError(t *testing.T) {
 		{http.MethodDelete, pythonComputeServiceBase + "/svc-uuid", "", "", "2.69"},
 		{http.MethodDelete, pythonComputeServiceBase + "/svc-uuid", "", "", "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }

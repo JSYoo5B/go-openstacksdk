@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -18,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeGroupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeGroupClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -53,7 +42,7 @@ const nativeGroupRow = `{"id":"g1","name":"web","policies":["anti-affinity"],"me
 func TestNativeServerGroupsRoutesBodiesAndDecode(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls []nativeGroupCall
-	cloud.Provider.HTTPClient.Transport = nativeGroupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -68,7 +57,7 @@ func TestNativeServerGroupsRoutesBodiesAndDecode(t *testing.T) {
 			return nativeGroupWire(200, `{"server_groups":[`+nativeGroupRow+`,{"id":"g2","policy":null}],"server_groups_links":[{"rel":"next","href":"http://other/next"}]}`), nil
 		}
 		return nativeGroupWire(200, `{"server_group":`+nativeGroupRow+`}`), nil
-	})
+	}))
 	api := servergroups.New(nativeGroupClient(cloud))
 	ctx := context.Background()
 	two := 2
@@ -132,10 +121,10 @@ func TestNativeServerGroupsStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeGroupTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeGroupWire(code, `{"server_group":{"id":"g1"}}`), nil
-				})
+				}))
 				err := call.call(servergroups.New(nativeGroupClient(cloud)))
 				nativeGroupOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -159,9 +148,9 @@ func TestNativeServerGroupsStrictStatusesAndPreflight(t *testing.T) {
 			{204, "", func(errs []error) bool { return len(errs) == 1 && errors.Is(errs[0], io.EOF) }},
 		} {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = nativeGroupTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				return nativeGroupWire(tc.code, tc.body), nil
-			})
+			}))
 			var errs []error
 			for value, err := range servergroups.New(nativeGroupClient(cloud)).List(ctx) {
 				if value != nil {
@@ -177,10 +166,10 @@ func TestNativeServerGroupsStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("preflight", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeGroupTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeGroupWire(200, `{}`), nil
-		})
+		}))
 		api := servergroups.New(nativeGroupClient(cloud))
 		for name, check := range map[string]func() error{
 			"missing name": func() error { _, err := api.Create(ctx, servergroups.CreateOpts{Policy: "affinity"}); return err },

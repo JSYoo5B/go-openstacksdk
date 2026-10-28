@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -24,8 +25,8 @@ func TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects(t *testing.
 				return pythonServerGroupWire(200, `{"server_groups":[{"id":"unrelated","name":"other"},{"id":"web","name":"different","members":["s"],"member_ids":["last"],"rules":"not a mapping","policy":false,"opaque":9999999999999999999999999}]}`)
 			})
 			value, err := api.FindRecord(context.Background(), "web", servergroups.WithGroupFindAllProjects(true))
-			if err != nil || value == nil || string(value.Resource.Body["id"]) != `"web"` || string(value.Resource.Body["name"]) != `"different"` || string(value.Resource.Body["member_ids"]) != `["last"]` || string(value.Resource.Body["rules"]) != `{}` || string(value.Resource.Body["policy"]) != "false" || string(value.Resource.Body["metadata"]) != "null" || string(value.Wire.Body["opaque"]) != "9999999999999999999999999" || len(*calls) != 2 || (*calls)[0].path != pythonServerGroupBase+"/web" || (*calls)[0].query != "" || (*calls)[1].query != "all_projects=True" {
-				t.Fatal(value, err, *calls)
+			if err != nil || value == nil || string(value.Resource.Body["id"]) != `"web"` || string(value.Resource.Body["name"]) != `"different"` || string(value.Resource.Body["member_ids"]) != `["last"]` || string(value.Resource.Body["rules"]) != `{}` || string(value.Resource.Body["policy"]) != "false" || string(value.Resource.Body["metadata"]) != "null" || string(value.Wire.Body["opaque"]) != "9999999999999999999999999" || calls.Len() != 2 || calls.Calls()[0].Path != pythonServerGroupBase+"/web" || calls.Calls()[0].RawQuery != "" || calls.Calls()[1].RawQuery != "all_projects=True" {
+				t.Fatal(value, err, pythonServerGroupCalls(calls))
 			}
 		})
 	}
@@ -33,8 +34,8 @@ func TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects(t *testing.
 		return pythonServerGroupWire(200, `{"server_group":{"id":"g","name":"other","rules":null}}`)
 	})
 	value, err := api.FindRecord(context.Background(), "web", servergroups.WithGroupFindAllProjects(true))
-	if err != nil || value == nil || string(value.Resource.Body["rules"]) != "null" || len(*calls) != 1 || (*calls)[0].query != "" {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || string(value.Resource.Body["rules"]) != "null" || calls.Len() != 1 || calls.Calls()[0].RawQuery != "" {
+		t.Fatal(value, err, pythonServerGroupCalls(calls))
 	}
 }
 func TestPythonGroupFindRecordMissingDefaultStrictAndDuplicate(t *testing.T) {
@@ -46,18 +47,18 @@ func TestPythonGroupFindRecordMissingDefaultStrictAndDuplicate(t *testing.T) {
 		return pythonServerGroupWire(200, body)
 	})
 	value, err := api.FindRecord(context.Background(), "missing")
-	if err != nil || value != nil || len(*calls) != 2 {
-		t.Fatal(value, err, *calls)
+	if err != nil || value != nil || calls.Len() != 2 {
+		t.Fatal(value, err, pythonServerGroupCalls(calls))
 	}
 	_, err = api.FindRecord(context.Background(), "missing", servergroups.WithGroupFindIgnoreMissing(false))
-	if !errors.Is(err, resource.ErrNotFound) || len(*calls) != 4 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrNotFound) || calls.Len() != 4 {
+		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
 	body = `{"server_groups":[{"id":"g1","name":"web"},{"id":"web","name":"other"}]}`
 	_, err = api.FindRecord(context.Background(), "web")
 	var duplicate *resource.AmbiguousError
-	if !errors.As(err, &duplicate) || !reflect.DeepEqual(duplicate.IDs, []string{"g1", "web"}) || len(*calls) != 6 {
-		t.Fatal(err, duplicate, *calls)
+	if !errors.As(err, &duplicate) || !reflect.DeepEqual(duplicate.IDs, []string{"g1", "web"}) || calls.Len() != 6 {
+		t.Fatal(err, duplicate, pythonServerGroupCalls(calls))
 	}
 }
 func TestPythonGroupFindRecordReadsLaterPagesBeforeReturningCandidate(t *testing.T) {
@@ -76,14 +77,14 @@ func TestPythonGroupFindRecordReadsLaterPagesBeforeReturningCandidate(t *testing
 	})
 	_, err := api.FindRecord(context.Background(), "web")
 	var duplicate *resource.AmbiguousError
-	if !errors.As(err, &duplicate) || len(*calls) != 3 {
-		t.Fatal(err, *calls)
+	if !errors.As(err, &duplicate) || calls.Len() != 3 {
+		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
 	lateFailure = true
 	_, err = api.FindRecord(context.Background(), "web")
 	var native gophercloud.ErrUnexpectedResponseCode
-	if !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"error":"late failure"}` || len(*calls) != 6 {
-		t.Fatal(err, native, *calls)
+	if !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != `{"error":"late failure"}` || calls.Len() != 6 {
+		t.Fatal(err, native, pythonServerGroupCalls(calls))
 	}
 }
 func TestPythonGroupFindRecordRejectedPhysicalErrorsPreventFallback(t *testing.T) {
@@ -110,9 +111,9 @@ func TestPythonGroupFindRecordRejectedPhysicalErrorsPreventFallback(t *testing.T
 					body.onRead = func() { client.Microversion = "2.100" }
 					body.onClose = func() { client.Microversion = original }
 				}
-				client.ProviderClient.HTTPClient.Transport = pythonServerGroupTransport(func(*http.Request) (*http.Response, error) {
+				client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 					attempts++
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"rejected"}}, Body: body}, nil
+					return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"rejected"}}), nil
 				})
 				_, err := api.FindRecord(ctx, "web")
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -154,8 +155,8 @@ func TestPythonGroupFindRecordCleanRetryErrorAllowsFallback(t *testing.T) {
 		return original
 	}
 	value, err := api.FindRecord(context.Background(), "web")
-	if err != nil || value == nil || retries != 1 || len(*calls) != 2 {
-		t.Fatal(value, err, retries, *calls)
+	if err != nil || value == nil || retries != 1 || calls.Len() != 2 {
+		t.Fatal(value, err, retries, pythonServerGroupCalls(calls))
 	}
 }
 func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T) {
@@ -165,8 +166,8 @@ func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T)
 	option := servergroups.WithGroupFindHeaders(headers)
 	headers["X-Owned"] = "bad"
 	_, err := api.FindRecord(context.Background(), "web", option, func(v *servergroups.GroupFindOpts) error { retained = v; return nil }, func(*servergroups.GroupFindOpts) error { retained.Headers["Authorization"] = "bad"; return nil })
-	if err != nil || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 1 {
+		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
 	for _, test := range []struct {
 		name string
@@ -180,25 +181,25 @@ func TestPythonGroupFindRecordSnapshotsOptionsAndRejectsBeforeHTTP(t *testing.T)
 		}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if err := test.call(); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 1 {
-				t.Fatal(err, *calls)
+			if err := test.call(); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 1 {
+				t.Fatal(err, pythonServerGroupCalls(calls))
 			}
 		})
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, callback := errors.New("caller cause"), errors.New("callback")
 	_, err = api.FindRecord(ctx, "web", func(*servergroups.GroupFindOpts) error { cancel(cause); return callback })
-	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || len(*calls) != 1 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || !errors.Is(err, callback) || calls.Len() != 1 {
+		t.Fatal(err, pythonServerGroupCalls(calls))
 	}
 }
 func TestPythonGroupFindRecordSuccessfulReadClosePreservesProof(t *testing.T) {
 	api, _ := pythonServerGroupAPI(t, func(*http.Request) *http.Response { return pythonServerGroupWire(200, `{}`) })
 	readErr, closeErr := errors.New("accepted read"), errors.New("accepted close")
 	attempts := 0
-	api.RawClient().ProviderClient.HTTPClient.Transport = pythonServerGroupTransport(func(*http.Request) (*http.Response, error) {
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 		attempts++
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &groupFindFaultBody{data: []byte(`{"server_group":`), read: readErr, close: closeErr}}, nil
+		return testcloud.StreamResponse(200, &groupFindFaultBody{data: []byte(`{"server_group":`), read: readErr, close: closeErr}, http.Header{"X-Request-Id": {"partial"}}), nil
 	})
 	value, err := api.FindRecord(context.Background(), "web")
 	var receipt *resource.ResponseError
@@ -212,7 +213,7 @@ func TestPythonGroupFindRecordDiscoversResourceCeilingAndHonorsSelectedVersion(t
 	client.Endpoint = client.ResourceBase
 	client.Microversion = ""
 	versions := []string{}
-	client.ProviderClient.HTTPClient.Transport = pythonServerGroupTransport(func(req *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		versions = append(versions, req.Header.Get("X-OpenStack-Nova-API-Version"))
 		if req.URL.Path == "/nova/v2.1" || req.URL.Path == "/nova/v2.1/" {
 			return pythonServerGroupWire(200, `{"version":{"id":"v2.1","status":"CURRENT","min_version":"2.1","version":"2.100","links":[{"rel":"self","href":"`+client.ResourceBase+`"}]}}`), nil

@@ -69,8 +69,8 @@ func TestPythonUserActionsRoutesDefaultsAndOptionalValues(t *testing.T) {
 			want.method = http.MethodDelete
 			want.path = pythonServerBase + "/os-server-password"
 		}
-		if len(*calls) != i+1 || (*calls)[i] != want {
-			t.Fatalf("step %d: %+v", i, *calls)
+		if calls.Len() != i+1 || (pythonServerCalls(calls))[i] != want {
+			t.Fatalf("step %d: %+v", i, pythonServerCalls(calls))
 		}
 	}
 }
@@ -109,8 +109,8 @@ func TestPythonUserActionsDirectIPsNeedNoInventory(t *testing.T) {
 			t.Fatal(step.body, err)
 		}
 		want := pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", step.body, "2.43"}
-		if len(*calls) != i+1 || (*calls)[i] != want {
-			t.Fatal(i, *calls)
+		if calls.Len() != i+1 || (pythonServerCalls(calls))[i] != want {
+			t.Fatal(i, pythonServerCalls(calls))
 		}
 	}
 }
@@ -159,11 +159,11 @@ func TestPythonUserActionsVersionBoundaries(t *testing.T) {
 			client.Microversion = tc.version
 			err := tc.call(servers.New(client))
 			if tc.unsupported {
-				if !errors.Is(err, resource.ErrUnsupported) || len(*calls) != 0 {
-					t.Fatal(err, *calls)
+				if !errors.Is(err, resource.ErrUnsupported) || calls.Len() != 0 {
+					t.Fatal(err, pythonServerCalls(calls))
 				}
-			} else if err != nil || len(*calls) != 1 {
-				t.Fatal(err, *calls)
+			} else if err != nil || calls.Len() != 1 {
+				t.Fatal(err, pythonServerCalls(calls))
 			}
 			if client.Microversion != tc.version {
 				t.Fatal("operation changed selected version", client.Microversion)
@@ -188,10 +188,10 @@ func TestPythonUserActionsExtensionsSnapshotAndPreflight(t *testing.T) {
 		t.Fatal(err)
 	}
 	want := `{"addFloatingIp":{"address":"203.0.113.1","x_extension":{"empty":[],"false":false,"null":null,"zero":0}}}`
-	if len(*calls) != 1 || (*calls)[0].body != want {
-		t.Fatal(*calls)
+	if calls.Len() != 1 || calls.Calls()[0].Body != want {
+		t.Fatal(pythonServerCalls(calls))
 	}
-	before := len(*calls)
+	before := calls.Len()
 	cases := []func() error{
 		func() error {
 			return api.ClearPassword(context.Background(), "s1", servers.WithUserActionField("x", 1))
@@ -232,8 +232,8 @@ func TestPythonUserActionsExtensionsSnapshotAndPreflight(t *testing.T) {
 			t.Fatal(i, err)
 		}
 	}
-	if len(*calls) != before {
-		t.Fatal(*calls)
+	if calls.Len() != before {
+		t.Fatal(pythonServerCalls(calls))
 	}
 }
 
@@ -244,8 +244,8 @@ func TestPythonUserActionsOptionsCaptureSourceBeforeCallbacks(t *testing.T) {
 		client.ResourceBase = "https://elsewhere.invalid/v2.1/"
 		return nil
 	})
-	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(err, pythonServerCalls(calls))
 	}
 	// Nil APIs and cancelled contexts fail before user option invocation.
 	var nilAPI *servers.API
@@ -282,8 +282,8 @@ func TestPythonUserActionsFinalStatusesAndMissingErrors(t *testing.T) {
 				client, _, calls := pythonServerCloud(t, func(*http.Request) *http.Response { return nativeServerWire(status, `not JSON`) })
 				client.Microversion = "2.43"
 				err := call(servers.New(client))
-				if len(*calls) != 1 {
-					t.Fatal(*calls)
+				if calls.Len() != 1 {
+					t.Fatal(pythonServerCalls(calls))
 				}
 				if status < 400 {
 					if err != nil {
@@ -338,12 +338,12 @@ func TestPythonUserActionsPhysicalReadCloseCancellationAndSourceFaults(t *testin
 			ctx, cancel := context.WithCancelCause(context.Background())
 			count := 0
 			original := client.ResourceBase
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				count++
 				response := nativeServerWire(status, "")
 				response.Body = &userActionFaultBody{reader: strings.NewReader(`partial-wire`), readErr: readErr, closeErr: closeErr, afterRead: func() { client.ResourceBase = "https://bad.invalid/"; cancel(cause) }, afterClose: func() { client.ResourceBase = original }}
 				return response, nil
-			})
+			}))
 			err := api.Restore(ctx, "s1")
 			for _, target := range []error{readErr, closeErr, context.Canceled, cause, resource.ErrInvalidOption} {
 				if !errors.Is(err, target) {
@@ -374,13 +374,13 @@ func TestPythonUserActionsRetryOwnershipAndCleanRetry(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := nativeServerClient(cloud)
 			count := 0
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				count++
 				if count == 1 {
 					return nativeServerWire(503, "first-attempt"), nil
 				}
 				return nativeServerWire(202, ""), nil
-			})
+			}))
 			cloud.Provider.RetryFunc = func(ctx context.Context, method, url string, opts *gophercloud.RequestOpts, original error, count uint) error {
 				if tamper {
 					opts.JSONBody = map[string]any{"unlock": nil}
@@ -400,7 +400,7 @@ func TestPythonUserActionsRetryOwnershipAndCleanRetry(t *testing.T) {
 	}
 	cloud := testcloud.New(t)
 	client := nativeServerClient(cloud)
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(*http.Request) (*http.Response, error) { return nativeServerWire(404, "gone"), nil })
+	cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return nativeServerWire(404, "gone"), nil }))
 	retryErr := errors.New("retry denied")
 	cloud.Provider.RetryFunc = func(ctx context.Context, method, url string, opts *gophercloud.RequestOpts, original error, count uint) error {
 		return retryErr
@@ -421,8 +421,8 @@ func TestPythonUserActionsLiteralEscapedServerID(t *testing.T) {
 	if err := servers.New(client).Restore(context.Background(), "a/b%2Fz"); err != nil {
 		t.Fatal(err)
 	}
-	if escaped != "/nova/v2.1/servers/a%2Fb%252Fz/action" || len(*calls) != 1 {
-		t.Fatal(escaped, *calls)
+	if escaped != "/nova/v2.1/servers/a%2Fb%252Fz/action" || calls.Len() != 1 {
+		t.Fatal(escaped, pythonServerCalls(calls))
 	}
 	if !reflect.DeepEqual(client.MoreHeaders, map[string]string(nil)) {
 		t.Fatal(client.MoreHeaders)

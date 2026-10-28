@@ -63,8 +63,8 @@ func TestPythonComputeServiceStatusRecordsFromMicroversion253(t *testing.T) {
 		{http.MethodPut, pythonComputeServiceBase + "/svc-uuid", "", `{"disabled_reason":"new"}`, "2.69"},
 		{http.MethodGet, pythonComputeServiceBase, query, "", "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -90,15 +90,15 @@ func TestPythonComputeServiceStatusRecordsLookupFailures(t *testing.T) {
 			t.Fatal(partial, err)
 		}
 	}
-	if len(*calls) != 2 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 2 {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 	var nilAPI *services.API
 	if _, err := nilAPI.EnableRecord(ctx, target); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	bad, badCalls := pythonComputeServiceAPI(t, "two", nil)
-	if _, err := bad.DisableRecord(ctx, target, ""); !errors.Is(err, resource.ErrInvalidOption) || len(*badCalls) != 0 {
+	if _, err := bad.DisableRecord(ctx, target, ""); !errors.Is(err, resource.ErrInvalidOption) || badCalls.Len() != 0 {
 		t.Fatal(err)
 	}
 }
@@ -149,10 +149,10 @@ func TestPythonComputeServiceStatusRecordsBelowMicroversion253(t *testing.T) {
 		{http.MethodPut, pythonComputeServiceBase + "/disable-log-reason", "", `{"binary":"nova-compute","disabled_reason":"maint","host":"cmp1"}`, "2.11"},
 		{http.MethodPut, pythonComputeServiceBase + "/enable", "", host, "2.11"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
-	if wantOld := []pythonComputeServiceCall{{http.MethodPut, pythonComputeServiceBase + "/disable", "", host, ""}}; !reflect.DeepEqual(*oldCalls, wantOld) {
-		t.Fatalf("%+v", *oldCalls)
+	if wantOld := []pythonComputeServiceCall{{http.MethodPut, pythonComputeServiceBase + "/disable", "", host, ""}}; !reflect.DeepEqual(pythonComputeServiceCalls(oldCalls), wantOld) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(oldCalls))
 	}
 }

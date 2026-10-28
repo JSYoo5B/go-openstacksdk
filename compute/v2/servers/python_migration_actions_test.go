@@ -7,11 +7,12 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func pythonMigrationAPI(t *testing.T, version string, status int) (*servers.API, *[]pythonServerCall) {
+func pythonMigrationAPI(t *testing.T, version string, status int) (*servers.API, *testcloud.Recorder) {
 	t.Helper()
 	client, _, calls := pythonServerCloud(t, func(req *http.Request) *http.Response {
 		if values, exists := req.Header["Accept"]; !exists || len(values) != 1 || values[0] != "" {
@@ -55,8 +56,8 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 			t.Fatal(step.body, err)
 		}
 		want := pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", step.body, "2.96"}
-		if len(*calls) != i+1 || (*calls)[i] != want {
-			t.Fatalf("step %d: %+v", i, *calls)
+		if calls.Len() != i+1 || (pythonServerCalls(calls))[i] != want {
+			t.Fatalf("step %d: %+v", i, pythonServerCalls(calls))
 		}
 	}
 
@@ -67,8 +68,8 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 	if err := old.MigrateWithOptions(ctx, "s1"); err != nil {
 		t.Fatal(err)
 	}
-	if want := (pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", `{"migrate":null}`, "2.55"}); len(*oldCalls) != 1 || (*oldCalls)[0] != want {
-		t.Fatalf("%+v", *oldCalls)
+	if want := (pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", `{"migrate":null}`, "2.55"}); oldCalls.Len() != 1 || (pythonServerCalls(oldCalls))[0] != want {
+		t.Fatalf("%+v", pythonServerCalls(oldCalls))
 	}
 }
 
@@ -107,8 +108,8 @@ func TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape(t *testing.T
 				t.Fatal(err)
 			}
 			want := pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", tc.body, tc.version}
-			if len(*calls) != 1 || (*calls)[0] != want {
-				t.Fatalf("%+v", *calls)
+			if calls.Len() != 1 || (pythonServerCalls(calls))[0] != want {
+				t.Fatalf("%+v", pythonServerCalls(calls))
 			}
 		})
 	}
@@ -132,8 +133,8 @@ func TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape(t *testing.T
 			if err := api.LiveMigrateWithOptions(ctx, "s1", tc.options...); !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "LiveMigrateWithOptions" {
 				t.Fatal(err)
 			}
-			if len(*calls) != 0 {
-				t.Fatalf("%+v", *calls)
+			if calls.Len() != 0 {
+				t.Fatalf("%+v", pythonServerCalls(calls))
 			}
 		})
 	}
@@ -181,8 +182,8 @@ func TestPythonMigrationActionsStatusesAndPreflight(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if len(*recorded) != 0 {
-		t.Fatalf("%+v", *recorded)
+	if recorded.Len() != 0 {
+		t.Fatalf("%+v", pythonServerCalls(recorded))
 	}
 }
 

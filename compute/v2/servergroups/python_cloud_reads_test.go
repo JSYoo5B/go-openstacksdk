@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -34,8 +35,8 @@ func TestSourceCloudGroupReadsListDescriptorsAliasesUnknownStatusAndVersion(t *t
 			}
 			rows++
 		}
-		if rows != 1 || len(*calls) != 1 {
-			t.Fatal(rows, *calls)
+		if rows != 1 || calls.Len() != 1 {
+			t.Fatal(rows, pythonServerGroupCalls(calls))
 		}
 	}
 }
@@ -59,11 +60,11 @@ func TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure(t *t
 			t.Fatal(result, e)
 		}
 		if duplicate {
-			if !errors.Is(e, resource.ErrAmbiguous) || len(*calls) != 2 || len(result.Inventory) != 2 {
-				t.Fatal(result, e, *calls)
+			if !errors.Is(e, resource.ErrAmbiguous) || calls.Len() != 2 || len(result.Inventory) != 2 {
+				t.Fatal(result, e, pythonServerGroupCalls(calls))
 			}
-		} else if !gophercloud.ResponseCodeIs(e, 503) || len(*calls) != 3 || len(result.Inventory) != 1 {
-			t.Fatal(result, e, *calls)
+		} else if !gophercloud.ResponseCodeIs(e, 503) || calls.Len() != 3 || len(result.Inventory) != 1 {
+			t.Fatal(result, e, pythonServerGroupCalls(calls))
 		}
 	}
 	api, calls := pythonServerGroupAPI(t, func(r *http.Request) *http.Response {
@@ -74,8 +75,8 @@ func TestSourceCloudGroupReadsFindEarlyDuplicateEmptyTrailingAndLateFailure(t *t
 		return pythonServerGroupWire(500, `{}`)
 	})
 	result, e := api.FindCloudRecord(context.Background(), "")
-	if e != nil || result == nil || result.Group == nil || string(result.Group.Resource.Body["id"]) != `""` || len(*calls) != 1 || (*calls)[0].path != pythonServerGroupBase+"/" {
-		t.Fatal(result, e, *calls)
+	if e != nil || result == nil || result.Group == nil || string(result.Group.Resource.Body["id"]) != `""` || calls.Len() != 1 || calls.Calls()[0].Path != pythonServerGroupBase+"/" {
+		t.Fatal(result, e, pythonServerGroupCalls(calls))
 	}
 }
 func TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments(t *testing.T) {
@@ -84,7 +85,7 @@ func TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments(
 	client.Endpoint = client.ResourceBase
 	client.Microversion = ""
 	versions := []string{}
-	client.HTTPClient.Transport = pythonServerGroupTransport(func(r *http.Request) (*http.Response, error) {
+	client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		versions = append(versions, r.Header.Get("X-OpenStack-Nova-API-Version"))
 		if r.URL.Path == "/nova/v2.1" || r.URL.Path == "/nova/v2.1/" {
 			return pythonServerGroupWire(200, `{"version":{"id":"v2.1","status":"CURRENT","min_version":"2.1","version":"2.100","links":[{"rel":"self","href":"`+client.ResourceBase+`"}]}}`), nil
@@ -105,8 +106,8 @@ func TestSourceCloudGroupReadsDiscoveryCeilingSelectedSessionAndLiteralSegments(
 	}
 	for _, identity := range []string{"..", ".", " ", "bad\nvalue"} {
 		before := len(versions)
-		if r, e := api.FindCloudRecord(context.Background(), identity); r != nil || !errors.Is(e, resource.ErrInvalidOption) || len(versions) != before || len(*calls) != 0 {
-			t.Fatal(r, e, versions, *calls)
+		if r, e := api.FindCloudRecord(context.Background(), identity); r != nil || !errors.Is(e, resource.ErrInvalidOption) || len(versions) != before || calls.Len() != 0 {
+			t.Fatal(r, e, versions, pythonServerGroupCalls(calls))
 		}
 	}
 }
@@ -120,8 +121,8 @@ func TestSourceCloudGroupReadsExpandedRejected404AndPhysicalFailureDoNotFallback
 	}
 	result, e := api.FindCloudRecord(context.Background(), "g1")
 	var native gophercloud.ErrUnexpectedResponseCode
-	if result == nil || result.Group != nil || result.Observed == nil || !errors.As(e, &native) || native.Actual != 404 || len(*calls) != 2 || callbacks != 1 {
-		t.Fatal(result, e, native, *calls, callbacks)
+	if result == nil || result.Group != nil || result.Observed == nil || !errors.As(e, &native) || native.Actual != 404 || calls.Len() != 2 || callbacks != 1 {
+		t.Fatal(result, e, native, pythonServerGroupCalls(calls), callbacks)
 	}
 }
 
@@ -135,8 +136,8 @@ func TestSourceCloudGroupReadsEmptyExactFallbackNeverMatchesNullAsEmptyString(t 
 		})
 		result, e := api.FindCloudRecord(context.Background(), "")
 		match := raw == `{"id":"actual-empty","name":""}`
-		if e != nil || result == nil || (result.Group != nil) != match || len(*calls) != 2 || len(result.Inventory) != 1 {
-			t.Fatal(raw, result, e, *calls)
+		if e != nil || result == nil || (result.Group != nil) != match || calls.Len() != 2 || len(result.Inventory) != 1 {
+			t.Fatal(raw, result, e, pythonServerGroupCalls(calls))
 		}
 	}
 }

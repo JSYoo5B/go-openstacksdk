@@ -171,7 +171,7 @@ func TestPythonCloudConsoleRecordDiscoveryUsesServerCeilingAndSelectedShortcut(t
 			client.Microversion = tc.selected
 			var calls []string
 			var post http.Header
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls = append(calls, req.Method+" "+req.URL.Path)
 				if req.Method == "GET" {
 					// Reuse the Source-vetted CURRENT+self-link advertisement.
@@ -179,7 +179,7 @@ func TestPythonCloudConsoleRecordDiscoveryUsesServerCeilingAndSelectedShortcut(t
 				}
 				post = req.Header.Clone()
 				return nativeServerWire(200, `{"output":"ok"}`), nil
-			})
+			}))
 			got, err := servers.New(client).ConsoleOutputRecord(context.Background(), "vm")
 			if err != nil || got.Microversion != tc.want || len(calls) != tc.calls || post.Get("OpenStack-API-Version") != "compute "+tc.want || client.Microversion != tc.selected || len(got.Discovery) != tc.calls-1 {
 				t.Fatal(got, err, calls, post)
@@ -199,20 +199,20 @@ func TestPythonCloudConsoleRecordPhysicalFaultsRetainActualProofAndStopActionRet
 				readErr, closeErr, cancelErr := errors.New("read"), errors.New("close"), errors.New("cause")
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				body := &serverFindFaultBody{data: []byte(`{"output":"physical"}`)}
+				body := &testcloud.Body{Data: `{"output":"physical"}`}
 				switch lane {
 				case "read":
-					body.readErr = readErr
+					body.ReadErr = readErr
 				case "close":
-					body.closeErr = closeErr
+					body.CloseErr = closeErr
 				case "both":
-					body.readErr = readErr
-					body.closeErr = closeErr
+					body.ReadErr = readErr
+					body.CloseErr = closeErr
 				case "cancel":
-					body.onRead = func() { cancel(cancelErr) }
+					body.OnRead = func() { cancel(cancelErr) }
 				case "source":
-					body.onRead = func() { client.ResourceBase += "wrong/" }
-					body.onClose = func() { client.ResourceBase = base }
+					body.OnRead = func() { client.ResourceBase += "wrong/" }
+					body.OnClose = func() { client.ResourceBase = base }
 				}
 				attempts, retries, reauth, backoff := 0, 0, 0, 0
 				sentinel := errors.New("unexpected reauth")
@@ -225,13 +225,13 @@ func TestPythonCloudConsoleRecordPhysicalFaultsRetainActualProofAndStopActionRet
 					backoff++
 					return sentinel
 				}
-				cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(*http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 					attempts++
-					return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"physical"}}, Body: body}, nil
-				})
+					return testcloud.StreamResponse(status, body, http.Header{"X-Actual": {"physical"}}), nil
+				}))
 				got, err := api.ConsoleOutputRecord(ctx, "vm")
-				if err == nil || attempts != 1 || body.closed != 1 || retries != 0 || backoff != 0 || reauth != 0 || got == nil || got.StatusCode != status || got.Header.Get("X-Actual") != "physical" || string(got.Envelope) != `{"output":"physical"}` {
-					t.Fatal(got, err, attempts, body.closed, retries, backoff, reauth)
+				if err == nil || attempts != 1 || body.Closes() != 1 || retries != 0 || backoff != 0 || reauth != 0 || got == nil || got.StatusCode != status || got.Header.Get("X-Actual") != "physical" || string(got.Envelope) != `{"output":"physical"}` {
+					t.Fatal(got, err, attempts, body.Closes(), retries, backoff, reauth)
 				}
 				if status < 400 {
 					var actual *resource.ResponseError
@@ -319,10 +319,10 @@ func TestPythonCloudConsoleRecordOwnedSourceHeadersAndIndependentReceipt(t *test
 	api.RawClient().MoreHeaders["Accept"] = "source-default"
 	opt := func(*servers.CloudConsoleOpts) error { api.RawClient().MoreHeaders["X-Source"] = "changed"; return nil }
 	var header http.Header
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		header = req.Header.Clone()
 		return nativeServerWire(200, `{"output":"ok"}`), nil
-	})
+	}))
 	got, err := api.ConsoleOutputRecord(context.Background(), "vm", opt)
 	if err != nil || header.Get("Accept") != "" || header.Get("X-Source") != "direct" {
 		t.Fatal(got, err, header)
@@ -436,7 +436,7 @@ func TestPythonCloudConsoleRecordDiscoveryFaultOptInStopsCallbacksBeforeAction(t
 	cloud := testcloud.New(t)
 	client := cloud.Client("compute", "/nova/v2.1/")
 	readCause, closeCause := errors.New("discovery read"), errors.New("discovery close")
-	body := &serverFindFaultBody{data: []byte(`{"discovery":"actual"}`), readErr: readCause, closeErr: closeCause}
+	body := &testcloud.Body{Data: `{"discovery":"actual"}`, ReadErr: readCause, CloseErr: closeCause}
 	attempts, retries, reauth, backoff := 0, 0, 0, 0
 	sentinel := errors.New("unexpected callback")
 	cloud.Provider.ReauthFunc = func(context.Context) error { reauth++; return sentinel }
@@ -448,16 +448,16 @@ func TestPythonCloudConsoleRecordDiscoveryFaultOptInStopsCallbacksBeforeAction(t
 		backoff++
 		return sentinel
 	}
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		attempts++
 		if req.Method != "GET" || req.URL.Path != "/nova/v2.1/" {
 			t.Error(req.Method, req.URL)
 		}
-		return &http.Response{StatusCode: 503, Header: http.Header{"X-Actual": {"discovery"}}, Body: body}, nil
-	})
+		return testcloud.StreamResponse(503, body, http.Header{"X-Actual": {"discovery"}}), nil
+	}))
 	got, err := servers.New(client).ConsoleOutputRecord(context.Background(), "vm")
 	var actual gophercloud.ErrUnexpectedResponseCode
-	if got == nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &actual) || actual.Actual != 503 || string(actual.Body) != `{"discovery":"actual"}` || actual.ResponseHeader.Get("X-Actual") != "discovery" || attempts != 1 || body.closed != 1 || retries != 0 || reauth != 0 || backoff != 0 || got.StatusCode != 0 {
-		t.Fatal(got, err, actual, attempts, body.closed, retries, reauth, backoff)
+	if got == nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &actual) || actual.Actual != 503 || string(actual.Body) != `{"discovery":"actual"}` || actual.ResponseHeader.Get("X-Actual") != "discovery" || attempts != 1 || body.Closes() != 1 || retries != 0 || reauth != 0 || backoff != 0 || got.StatusCode != 0 {
+		t.Fatal(got, err, actual, attempts, body.Closes(), retries, reauth, backoff)
 	}
 }

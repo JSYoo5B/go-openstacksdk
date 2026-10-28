@@ -19,18 +19,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeServerTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeServerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeServerWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Server-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Server-Proof": {"actual"}})
 }
 
 func nativeServerClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -58,7 +48,7 @@ type nativeServerCall struct{ method, path, query, body string }
 
 func nativeServerRecorder(t *testing.T, cloud *testcloud.Cloud, calls *[]nativeServerCall, reply func(*http.Request) *http.Response) {
 	t.Helper()
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -69,7 +59,7 @@ func nativeServerRecorder(t *testing.T, cloud *testcloud.Cloud, calls *[]nativeS
 		}
 		*calls = append(*calls, nativeServerCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 func TestNativeServerCRUDRoutesBodiesAndDecode(t *testing.T) {
@@ -147,10 +137,10 @@ func TestNativeServerCRUDStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeServerWire(code, `{"server":`+nativeServerRow+`}`), nil
-				})
+				}))
 				err := call.call(servers.New(nativeServerClient(cloud)))
 				nativeServerOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -163,10 +153,10 @@ func TestNativeServerCRUDStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("required name, invalid networks, collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeServerWire(202, `{"server":{}}`), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		checks := map[string]func() error{
 			"missing name": func() error { _, err := api.Create(ctx, servers.CreateOpts{FlavorRef: "f"}); return err },
@@ -269,12 +259,12 @@ func TestNativeServerCreateFullOptionsAndMicroversion(t *testing.T) {
 	client.Microversion = "2.90"
 	var calls []nativeServerCall
 	var version string
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw, _ := io.ReadAll(req.Body)
 		calls = append(calls, nativeServerCall{req.Method, req.URL.Path, req.URL.RawQuery, string(raw)})
 		version = req.Header.Get("X-OpenStack-Nova-API-Version")
 		return nativeServerWire(200, `{"server":{"id":"s2"}}`), nil
-	})
+	}))
 	opts := servers.CreateOpts{
 		Name: "vm", FlavorRef: "f1", AvailabilityZone: "az", Metadata: map[string]string{"k": "v"},
 		Personality: servers.Personality{&servers.File{Path: "/etc/motd", Contents: []byte("hi")}},

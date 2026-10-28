@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeVolumeTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeVolumeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeVolumeWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeVolumeClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -52,7 +42,7 @@ const nativeVolumeRow = `{"id":"v1","device":"/dev/vdb","volumeId":"v1","serverI
 func TestNativeVolumeAttachRoutesBodiesAndDecode(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls []nativeVolumeCall
-	cloud.Provider.HTTPClient.Transport = nativeVolumeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -67,7 +57,7 @@ func TestNativeVolumeAttachRoutesBodiesAndDecode(t *testing.T) {
 			return nativeVolumeWire(200, `{"volumeAttachments":[`+nativeVolumeRow+`,{"id":"v2","volumeId":"v2"}],"volumeAttachments_links":[{"rel":"next","href":"http://other/next"}]}`), nil
 		}
 		return nativeVolumeWire(200, `{"volumeAttachment":`+nativeVolumeRow+`}`), nil
-	})
+	}))
 	api := volumeattach.New(nativeVolumeClient(cloud))
 	ctx := context.Background()
 	created, err := api.Create(ctx, "s1", volumeattach.CreateOpts{VolumeID: "v1", Device: "/dev/vdb", Tag: "data", DeleteOnTermination: true}, volumeattach.WithCreateField("x_extension", 1))
@@ -128,10 +118,10 @@ func TestNativeVolumeAttachStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeVolumeTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeVolumeWire(code, `{"volumeAttachment":{"id":"v1"}}`), nil
-				})
+				}))
 				err := call.call(volumeattach.New(nativeVolumeClient(cloud)))
 				nativeVolumeOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -155,9 +145,9 @@ func TestNativeVolumeAttachStrictStatusesAndPreflight(t *testing.T) {
 			{204, "", func(errs []error) bool { return len(errs) == 1 && errors.Is(errs[0], io.EOF) }},
 		} {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = nativeVolumeTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				return nativeVolumeWire(tc.code, tc.body), nil
-			})
+			}))
 			var errs []error
 			for value, err := range volumeattach.New(nativeVolumeClient(cloud)).List(ctx, "s1") {
 				if value != nil {
@@ -173,10 +163,10 @@ func TestNativeVolumeAttachStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("preflight", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeVolumeTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeVolumeWire(200, `{}`), nil
-		})
+		}))
 		api := volumeattach.New(nativeVolumeClient(cloud))
 		for name, check := range map[string]func() error{
 			"missing volume": func() error { _, err := api.Create(ctx, "s1", volumeattach.CreateOpts{}); return err },

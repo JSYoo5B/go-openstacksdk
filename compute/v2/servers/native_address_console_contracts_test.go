@@ -60,13 +60,13 @@ func TestNativeServerAddressesSinglePageStreams(t *testing.T) {
 	t.Run("empty objects yield nothing", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			if req.URL.Path == "/nova/v2.1/servers/s1/ips" {
 				return nativeServerWire(200, `{"addresses":{}}`), nil
 			}
 			return nativeServerWire(200, `{"net-a":[]}`), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		for value, err := range api.ListAddresses(ctx, "s1") {
 			t.Fatal(value, err)
@@ -81,10 +81,10 @@ func TestNativeServerAddressesSinglePageStreams(t *testing.T) {
 	t.Run("bodyless 204 surfaces the native EOF", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeServerWire(204, ""), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		// The pager decodes JSON before IsEmpty sees the 204 status.
 		var errs []error
@@ -101,10 +101,10 @@ func TestNativeServerAddressesSinglePageStreams(t *testing.T) {
 	t.Run("native pager status", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeServerWire(404, `{}`), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		for _, seq := range []func(func(any, error) bool){
 			func(yield func(any, error) bool) {
@@ -164,10 +164,10 @@ func TestNativeServerConsoleOutput(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var requests atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				return nativeServerWire(code, `{"output":"x"}`), nil
-			})
+			}))
 			_, err := servers.New(nativeServerClient(cloud)).ShowConsoleOutput(ctx, "s1", servers.ShowConsoleOutputOpts{})
 			nativeServerOperation(t, err, "ShowConsoleOutput")
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -179,10 +179,10 @@ func TestNativeServerConsoleOutput(t *testing.T) {
 	t.Run("preflight", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeServerWire(200, `{}`), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		for name, err := range map[string]error{
 			"length collision": func() error {
@@ -209,13 +209,13 @@ func TestNativeServerWaitForStatus(t *testing.T) {
 	waitAPI := func(t *testing.T, reply func(n int32) *http.Response) (*servers.API, *atomic.Int32) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			n := requests.Add(1)
 			if req.Method != http.MethodGet || req.URL.Path != "/nova/v2.1/servers/s1" {
 				t.Error(req.Method, req.URL.Path)
 			}
 			return reply(n), nil
-		})
+		}))
 		return servers.New(nativeServerClient(cloud)), &requests
 	}
 	t.Run("first GET matches without a tick", func(t *testing.T) {

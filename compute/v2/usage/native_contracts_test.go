@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,18 +15,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeUsageTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeUsageTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeUsageWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeUsageOperation(t *testing.T, err error, operation string) {
@@ -41,10 +30,10 @@ func nativeUsageOperation(t *testing.T, err error, operation string) {
 type nativeUsageCall struct{ method, path, query string }
 
 func nativeUsageRecorder(cloud *testcloud.Cloud, calls *[]nativeUsageCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeUsageTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, nativeUsageCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		return reply(req), nil
-	})
+	}))
 }
 
 func nativeUsageStatus(t *testing.T, err error, operation string, code int, expected []int) {

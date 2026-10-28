@@ -30,10 +30,10 @@ func TestPythonTriggerServerCrashDumpOwnsPayloadRouteAndSelectedVersion(t *testi
 			client.Microversion = version
 			client.MoreHeaders = map[string]string{"Accept": "application/foreign"}
 			err := servers.New(client).TriggerServerCrashDump(context.Background(), "folder/name%", servers.WithUserActionHeader("X-Owned", "captured"), servers.WithUserActionHeader("Accept", "caller"))
-			if err != nil || len(*calls) != 1 {
-				t.Fatal(err, *calls)
+			if err != nil || calls.Len() != 1 {
+				t.Fatal(err, pythonServerCalls(calls))
 			}
-			call := (*calls)[0]
+			call := (pythonServerCalls(calls))[0]
 			if call.method != http.MethodPost || !strings.HasSuffix(call.path, "/servers/folder/name%/action") || call.query != "" || call.body != `{"trigger_crash_dump":null}` {
 				t.Fatal(call)
 			}
@@ -47,13 +47,13 @@ func TestPythonTriggerServerCrashDumpOwnsPayloadRouteAndSelectedVersion(t *testi
 		cloud := testcloud.New(t)
 		client := nativeServerClient(cloud)
 		calls := 0
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			calls++
 			if req.URL.EscapedPath() != "/nova/v2.1/servers/folder%2Fname%25/action" {
 				t.Fatal(req.URL)
 			}
 			return nativeServerWire(202, ""), nil
-		})
+		}))
 		if err := servers.New(client).TriggerServerCrashDump(context.Background(), "folder/name%"); err != nil || calls != 1 {
 			t.Fatal(err, calls)
 		}
@@ -67,13 +67,13 @@ func TestPythonTriggerServerCrashDumpOptionsAndSourceGuardsPrecedeHTTP(t *testin
 		{nil}, {servers.WithUserActionField("x", true)}, {servers.WithUserActionHeader("X-Auth-Token", "foreign")},
 		{func(c *request.Config[servers.UserActionOpts]) error { c.Query.Set("name", "forbidden"); return nil }},
 	} {
-		if err := api.TriggerServerCrashDump(context.Background(), "s1", opts...); err == nil || len(*calls) != 0 {
-			t.Fatal(err, *calls)
+		if err := api.TriggerServerCrashDump(context.Background(), "s1", opts...); err == nil || calls.Len() != 0 {
+			t.Fatal(err, pythonServerCalls(calls))
 		}
 	}
 	for _, id := range []string{"", " ", ".", "..", "bad\n", "\xff"} {
-		if err := api.TriggerServerCrashDump(context.Background(), id); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(id, err, *calls)
+		if err := api.TriggerServerCrashDump(context.Background(), id); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(id, err, pythonServerCalls(calls))
 		}
 	}
 	if err := api.TriggerServerCrashDump(nil, "s1"); !errors.Is(err, resource.ErrInvalidOption) {
@@ -91,14 +91,14 @@ func TestPythonTriggerServerCrashDumpOptionsAndSourceGuardsPrecedeHTTP(t *testin
 		return nil
 	})
 	client.ResourceBase = original
-	if !errors.Is(err, resource.ErrInvalidOption) || later != 0 || len(*calls) != 0 {
-		t.Fatal(err, later, *calls)
+	if !errors.Is(err, resource.ErrInvalidOption) || later != 0 || calls.Len() != 0 {
+		t.Fatal(err, later, pythonServerCalls(calls))
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("crash dump canceled")
 	cancel(cause)
-	if err := api.TriggerServerCrashDump(ctx, "s1"); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
+	if err := api.TriggerServerCrashDump(ctx, "s1"); !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Len() != 0 {
+		t.Fatal(err, pythonServerCalls(calls))
 	}
 }
 
@@ -108,8 +108,8 @@ func TestPythonTriggerServerCrashDumpStatusesKeepNativeOperationProof(t *testing
 			const raw = `actual action receipt, not JSON`
 			client, _, calls := pythonServerCloud(t, func(*http.Request) *http.Response { return nativeServerWire(status, raw) })
 			err := servers.New(client).TriggerServerCrashDump(context.Background(), "s1")
-			if len(*calls) != 1 {
-				t.Fatal(*calls)
+			if calls.Len() != 1 {
+				t.Fatal(pythonServerCalls(calls))
 			}
 			if status < 400 {
 				if err != nil {
@@ -137,7 +137,7 @@ func TestPythonTriggerServerCrashDumpPhysicalFaultNeverReplays(t *testing.T) {
 			defer cancel(nil)
 			original := client.ResourceBase
 			calls, retries, reauths, closed := 0, 0, 0, 0
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method != http.MethodPost {
 					t.Fatal(req.Method)
@@ -145,7 +145,7 @@ func TestPythonTriggerServerCrashDumpPhysicalFaultNeverReplays(t *testing.T) {
 				response := nativeServerWire(status, "")
 				response.Body = &userActionFaultBody{reader: strings.NewReader("physical crash dump receipt"), readErr: readCause, closeErr: closeCause, afterRead: func() { client.ResourceBase = "https://foreign.invalid/"; cancel(cancelCause) }, afterClose: func() { closed++; client.ResourceBase = original }}
 				return response, nil
-			})
+			}))
 			cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retries++
 				return nil

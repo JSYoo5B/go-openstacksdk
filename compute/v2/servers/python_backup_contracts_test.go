@@ -19,7 +19,7 @@ import (
 
 // This fixture reuses the shared Gophercloud testhelper-backed cloud. Its Nova
 // endpoint is eligible for version-row matching; the action keeps ResourceBase.
-func pythonBackupCloud(t *testing.T, selected, maximum, minimum string, reply func(*http.Request) *http.Response) (*gophercloud.ServiceClient, *[]pythonServerCall) {
+func pythonBackupCloud(t *testing.T, selected, maximum, minimum string, reply func(*http.Request) *http.Response) (*gophercloud.ServiceClient, *testcloud.Recorder) {
 	t.Helper()
 	client, _, calls := pythonServerCloud(t, func(req *http.Request) *http.Response {
 		if req.Method == http.MethodGet {
@@ -74,8 +74,8 @@ func TestPythonBackupActionMicroversionSelectionAndSourceOwnership(t *testing.T)
 				{http.MethodGet, "/nova/v2.1/", "", "", ""},
 				{http.MethodPost, pythonServerBase + "/action", "", `{"createBackup":{"backup_type":"daily","name":"backup","rotation":3}}`, tc.want},
 			}
-			if err != nil || got == nil || got.ImageID != "img" || got.Microversion != tc.want || got.StatusCode != 202 || got.Header.Get("X-Server-Proof") != "actual" || string(got.Body) != `{"image_id":"img"}` || !got.Discovery.Found || got.Discovery.Maximum != tc.maximum || got.Discovery.Minimum != tc.minimum || len(got.Discovery.Responses) != 1 || !reflect.DeepEqual(*calls, wantCalls) {
-				t.Fatalf("result=%+v err=%v calls=%+v want=%+v", got, err, *calls, wantCalls)
+			if err != nil || got == nil || got.ImageID != "img" || got.Microversion != tc.want || got.StatusCode != 202 || got.Header.Get("X-Server-Proof") != "actual" || string(got.Body) != `{"image_id":"img"}` || !got.Discovery.Found || got.Discovery.Maximum != tc.maximum || got.Discovery.Minimum != tc.minimum || len(got.Discovery.Responses) != 1 || !reflect.DeepEqual(pythonServerCalls(calls), wantCalls) {
+				t.Fatalf("result=%+v err=%v calls=%+v want=%+v", got, err, pythonServerCalls(calls), wantCalls)
 			}
 			if client.Microversion != before.Microversion || client.Endpoint != before.Endpoint || client.ResourceBase != before.ResourceBase || client.ProviderClient != before.ProviderClient || !reflect.DeepEqual(client.MoreHeaders, before.MoreHeaders) {
 				t.Fatal("action changed selected client", client, before)
@@ -91,7 +91,7 @@ func TestPythonBackupActionDiscoveryFallbackKeepsOwnedRoutes(t *testing.T) {
 			client := nativeServerClient(cloud)
 			client.Endpoint = client.ResourceBase
 			var calls []pythonServerCall
-			cloud.Provider.HTTPClient.Transport = pythonServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				body := ""
 				if req.Body != nil {
 					raw, err := io.ReadAll(req.Body)
@@ -114,7 +114,7 @@ func TestPythonBackupActionDiscoveryFallbackKeepsOwnedRoutes(t *testing.T) {
 					return nativeServerWire(200, `{"versions":[]}`), nil
 				}
 				return nativeServerWire(200, pythonBackupAdvertisement("2.100", "2.1")), nil
-			})
+			}))
 			got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
 			if err != nil || got == nil || got.ImageID != "img" || len(calls) != 3 || calls[2].path != pythonServerBase+"/action" || got.Discovery.Found == missing || len(got.Discovery.Responses) != 1 {
 				t.Fatal(got, err, calls)
@@ -159,8 +159,8 @@ func TestPythonBackupActionValuesExtensionsAndResponseEvidence(t *testing.T) {
 	got, err := servers.New(client).CreateBackupAction(context.Background(), "a/b%2Fz", pythonBackupRequest(), snapshot,
 		servers.WithBackupActionHeader("X-Test", "caller"), servers.WithBackupActionOptions(servers.BackupActionRequest{Rotation: -1}))
 	wantBody := `{"createBackup":{"backup_type":"","future":{"empty":[],"false":false,"null":null,"zero":0},"name":"","rotation":-1}}`
-	if err != nil || got == nil || got.ImageID != "body-id" || len(*calls) != 2 || (*calls)[1].body != wantBody || action.URL.EscapedPath() != "/nova/v2.1/servers/a%2Fb%252Fz/action" || got.StatusCode != 203 || string(got.Body) != `{"image_id":"body-id","future":false}` {
-		t.Fatal(got, err, *calls)
+	if err != nil || got == nil || got.ImageID != "body-id" || calls.Len() != 2 || calls.Calls()[1].Body != wantBody || action.URL.EscapedPath() != "/nova/v2.1/servers/a%2Fb%252Fz/action" || got.StatusCode != 203 || string(got.Body) != `{"image_id":"body-id","future":false}` {
+		t.Fatal(got, err, pythonServerCalls(calls))
 	}
 	// The record owns actual response evidence; later response mutation cannot
 	// replace its proof or turn the foreign Location into a follow-up request.
@@ -169,8 +169,8 @@ func TestPythonBackupActionValuesExtensionsAndResponseEvidence(t *testing.T) {
 		t.Fatal(got.Header, client.MoreHeaders)
 	}
 	got, err = servers.New(client).CreateBackupAction(context.Background(), "s1", servers.BackupActionRequest{})
-	if err != nil || got == nil || len(*calls) != 4 || (*calls)[3].body != `{"createBackup":{"backup_type":"","name":"","rotation":0}}` {
-		t.Fatal("zero values were omitted or prevalidated", got, err, *calls)
+	if err != nil || got == nil || calls.Len() != 4 || calls.Calls()[3].Body != `{"createBackup":{"backup_type":"","name":"","rotation":0}}` {
+		t.Fatal("zero values were omitted or prevalidated", got, err, pythonServerCalls(calls))
 	}
 }
 
@@ -211,8 +211,8 @@ func TestPythonBackupActionImageIDDecodeOrderAndSafety(t *testing.T) {
 				return response
 			})
 			got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
-			if got == nil || len(*calls) != 2 || got.StatusCode != 202 || got.Header.Get("X-Server-Proof") != "actual" || string(got.Body) != tc.body || got.Microversion != "2.44" {
-				t.Fatal(got, err, *calls)
+			if got == nil || calls.Len() != 2 || got.StatusCode != 202 || got.Header.Get("X-Server-Proof") != "actual" || string(got.Body) != tc.body || got.Microversion != "2.44" {
+				t.Fatal(got, err, pythonServerCalls(calls))
 			}
 			if tc.failure {
 				var receipt *resource.ResponseError
@@ -235,8 +235,8 @@ func TestPythonBackupActionOriginalStatusPolicy(t *testing.T) {
 				return nativeServerWire(status, `{"image_id":"img"}`)
 			})
 			got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
-			if got == nil || len(*calls) != 2 || len(got.Discovery.Responses) != 1 {
-				t.Fatal(got, err, *calls)
+			if got == nil || calls.Len() != 2 || len(got.Discovery.Responses) != 1 {
+				t.Fatal(got, err, pythonServerCalls(calls))
 			}
 			if status >= 200 && status < 400 {
 				if err != nil || got.ImageID != "img" || got.StatusCode != status || string(got.Body) != `{"image_id":"img"}` {
@@ -274,8 +274,8 @@ func TestPythonBackupActionOptionPreflightAndCapturedSource(t *testing.T) {
 	}
 	for i, option := range options {
 		got, err := api.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), option)
-		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-			t.Fatal(i, got, err, *calls)
+		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+			t.Fatal(i, got, err, pythonServerCalls(calls))
 		}
 	}
 	optionCalls := 0
@@ -299,15 +299,15 @@ func TestPythonBackupActionOptionPreflightAndCapturedSource(t *testing.T) {
 			t.Fatal(id, got, err)
 		}
 	}
-	if optionCalls != 0 || len(*calls) != 0 {
-		t.Fatal(optionCalls, *calls)
+	if optionCalls != 0 || calls.Len() != 0 {
+		t.Fatal(optionCalls, pythonServerCalls(calls))
 	}
 	got, err := api.CreateBackupAction(context.Background(), "s1", pythonBackupRequest(), func(c *request.Config[servers.BackupActionRequest]) error {
 		client.ResourceBase = "https://changed.invalid/v2.1/"
 		return nil
 	})
-	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(got, err, *calls)
+	if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+		t.Fatal(got, err, pythonServerCalls(calls))
 	}
 }
 
@@ -334,7 +334,7 @@ func TestPythonBackupActionPhysicalFaultsPreserveAllCauses(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			original := client.ResourceBase
 			calls, actions := 0, 0
-			cloud.Provider.HTTPClient.Transport = pythonServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method == http.MethodPost {
 					actions++
@@ -347,7 +347,7 @@ func TestPythonBackupActionPhysicalFaultsPreserveAllCauses(t *testing.T) {
 					afterRead:  func() { client.ResourceBase = "https://changed.invalid/v2.1/"; cancel(cause) },
 					afterClose: func() { client.ResourceBase = original }}
 				return response, nil
-			})
+			}))
 			got, err := servers.New(client).CreateBackupAction(ctx, "s1", pythonBackupRequest())
 			for _, target := range []error{readErr, closeErr, context.Canceled, cause, resource.ErrInvalidOption} {
 				if !errors.Is(err, target) {
@@ -415,20 +415,20 @@ func TestPythonBackupActionRetriesProtectBodyAndVersion(t *testing.T) {
 				t.Fatal(got, err, callbacks)
 			}
 			if change == "clean" {
-				if err != nil || got.ImageID != "img" || attempts != 2 || len(*calls) != 3 {
-					t.Fatal(got, err, attempts, *calls)
+				if err != nil || got.ImageID != "img" || attempts != 2 || calls.Len() != 3 {
+					t.Fatal(got, err, attempts, pythonServerCalls(calls))
 				}
 			} else if change == "status policy" {
 				// A native callback may expand OkCodes, but the SDK still checks
 				// the actual final response against its original 200..399 policy.
 				// Here the retry receives a real 202, so expansion alone is harmless.
-				if err != nil || got.ImageID != "img" || attempts != 2 || len(*calls) != 3 {
-					t.Fatal(got, err, attempts, *calls)
+				if err != nil || got.ImageID != "img" || attempts != 2 || calls.Len() != 3 {
+					t.Fatal(got, err, attempts, pythonServerCalls(calls))
 				}
 			} else {
 				var native gophercloud.ErrUnexpectedResponseCode
-				if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "original-rejection" || attempts != 1 || len(*calls) != 2 || got.ImageID != "" || got.StatusCode != 0 {
-					t.Fatal(got, err, native, attempts, *calls)
+				if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "original-rejection" || attempts != 1 || calls.Len() != 2 || got.ImageID != "" || got.StatusCode != 0 {
+					t.Fatal(got, err, native, attempts, pythonServerCalls(calls))
 				}
 			}
 		})
@@ -438,8 +438,8 @@ func TestPythonBackupActionRetriesProtectBodyAndVersion(t *testing.T) {
 	client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error { return retryErr }
 	got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
 	var native gophercloud.ErrUnexpectedResponseCode
-	if got == nil || !errors.Is(err, retryErr) || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "gone" || len(*calls) != 2 || got.StatusCode != 0 {
-		t.Fatal(got, err, native, *calls)
+	if got == nil || !errors.Is(err, retryErr) || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "gone" || calls.Len() != 2 || got.StatusCode != 0 {
+		t.Fatal(got, err, native, pythonServerCalls(calls))
 	}
 }
 
@@ -450,13 +450,13 @@ func TestPythonBackupActionDiscoveryDecodeFailureDoesNotPOST(t *testing.T) {
 			client := nativeServerClient(cloud)
 			client.Endpoint = client.ResourceBase
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = pythonServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method != http.MethodGet || req.URL.Path != "/nova/v2.1/" {
 					t.Error(req.Method, req.URL)
 				}
 				return nativeServerWire(200, body), nil
-			})
+			}))
 			got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
 			var receipt *resource.ResponseError
 			if got == nil || err == nil || !errors.As(err, &receipt) || receipt.StatusCode != 200 || string(receipt.Body) != body || receipt.Header.Get("X-Server-Proof") != "actual" || calls != 1 || len(got.Discovery.Responses) != 1 || got.StatusCode != 0 || got.ImageID != "" {
@@ -474,8 +474,8 @@ func TestPythonBackupActionAdvertisedVersionErrorsRetainDiscoveryProof(t *testin
 				return nativeServerWire(202, `{"image_id":"img"}`)
 			})
 			got, err := servers.New(client).CreateBackupAction(context.Background(), "s1", pythonBackupRequest())
-			if got == nil || err == nil || len(*calls) != 1 || len(got.Discovery.Responses) != 1 || got.StatusCode != 0 || got.ImageID != "" || !got.Discovery.Found || got.Discovery.Maximum != tc.maximum || got.Discovery.Minimum != tc.minimum {
-				t.Fatal(got, err, *calls)
+			if got == nil || err == nil || calls.Len() != 1 || len(got.Discovery.Responses) != 1 || got.StatusCode != 0 || got.ImageID != "" || !got.Discovery.Found || got.Discovery.Maximum != tc.maximum || got.Discovery.Minimum != tc.minimum {
+				t.Fatal(got, err, pythonServerCalls(calls))
 			}
 			wire := got.Discovery.Responses[0]
 			if wire.StatusCode != 200 || wire.Header.Get("X-Server-Proof") != "actual" || string(wire.Body) != pythonBackupAdvertisement(tc.maximum, tc.minimum) || client.Microversion != tc.selected {

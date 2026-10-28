@@ -147,12 +147,12 @@ func TestNativeServerActionsStrictStatuses(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					response := nativeServerWire(code, `{"server":{"id":"s1"},"adminPass":"x","image_id":"img"}`)
 					response.Header.Set("X-OpenStack-Nova-API-Version", "2.45")
 					return response, nil
-				})
+				}))
 				err := call.call(servers.New(nativeServerClient(cloud)))
 				if requests.Load() != 1 {
 					t.Fatal(requests.Load())
@@ -193,7 +193,7 @@ func TestNativeServerCreateImageIDByMicroversion(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var requests atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				response := nativeServerWire(202, tc.body)
 				response.Header = http.Header{"Content-Type": {tc.contentType}}
@@ -204,7 +204,7 @@ func TestNativeServerCreateImageIDByMicroversion(t *testing.T) {
 					response.Header.Set("Location", tc.location)
 				}
 				return response, nil
-			})
+			}))
 			id, err := servers.New(nativeServerClient(cloud)).CreateImage(ctx, "s1", servers.CreateImageOpts{Name: "snap"})
 			if requests.Load() != 1 {
 				t.Fatal(requests.Load())
@@ -227,10 +227,10 @@ func TestNativeServerActionsPreflight(t *testing.T) {
 	ctx := context.Background()
 	cloud := testcloud.New(t)
 	var requests atomic.Int32
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		requests.Add(1)
 		return nativeServerWire(202, `{}`), nil
-	})
+	}))
 	api := servers.New(nativeServerClient(cloud))
 	checks := map[string]func() error{
 		"reboot without type": func() error { return api.Reboot(ctx, "s1", servers.RebootOpts{}) },

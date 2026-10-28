@@ -95,10 +95,10 @@ func TestNativeServerMetadataStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeServerWire(code, `{"metadata":{},"meta":{}}`), nil
-				})
+				}))
 				err := call.call(servers.New(nativeServerClient(cloud)))
 				nativeServerOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -111,10 +111,10 @@ func TestNativeServerMetadataStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("one metadatum pair, collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeServerWire(200, `{}`), nil
-		})
+		}))
 		api := servers.New(nativeServerClient(cloud))
 		checks := map[string]func() error{
 			"empty metadatum": func() error { _, err := api.CreateMetadatum(ctx, "s1", servers.MetadatumOpts{}); return err },

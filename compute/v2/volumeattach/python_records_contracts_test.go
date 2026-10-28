@@ -4,12 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -41,8 +41,8 @@ func TestPythonAttachmentRecordsListIsLazyAndPagesLimitOffset(t *testing.T) {
 		}
 	})
 	sequence := api.ListRecords(context.Background(), "s1", volumeattach.WithAttachmentLimit(3), volumeattach.WithAttachmentOffset(2))
-	if len(*calls) != 0 {
-		t.Fatal(*calls)
+	if calls.Len() != 0 {
+		t.Fatal(pythonVolumeAttachCalls(calls))
 	}
 	var ids []string
 	for v, err := range sequence {
@@ -60,8 +60,8 @@ func TestPythonAttachmentRecordsListIsLazyAndPagesLimitOffset(t *testing.T) {
 			v.Wire.Body["volumeId"] = json.RawMessage(`"consumer-mutated"`)
 		}
 	}
-	if !reflect.DeepEqual(ids, []string{"v1", "v2"}) || len(*calls) != 3 || (*calls)[0].query != "limit=3&offset=2" || (*calls)[1].query != "limit=3&marker=v1&offset=2" || (*calls)[2].query != "limit=3&marker=v2&offset=2" {
-		t.Fatal(ids, *calls)
+	if !reflect.DeepEqual(ids, []string{"v1", "v2"}) || calls.Len() != 3 || calls.Calls()[0].RawQuery != "limit=3&offset=2" || calls.Calls()[1].RawQuery != "limit=3&marker=v1&offset=2" || calls.Calls()[2].RawQuery != "limit=3&marker=v2&offset=2" {
+		t.Fatal(ids, pythonVolumeAttachCalls(calls))
 	}
 }
 func TestPythonAttachmentRecordsControlCountsRawRowsBeforeFilters(t *testing.T) {
@@ -69,12 +69,12 @@ func TestPythonAttachmentRecordsControlCountsRawRowsBeforeFilters(t *testing.T) 
 		return pythonVolumeAttachWire(200, `{"volumeAttachments":[{"id":"v1","tag":"skip"},{"id":"v2","tag":"wanted"}],"next":"/nova/v2.1/servers/s1/os-volume_attachments?marker=v2&limit=2"}`)
 	})
 	ids, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentMaxItems(1), volumeattach.WithAttachmentQuery("tag", "wanted"), volumeattach.WithAttachmentQuery("not_a_field", make(chan int)))
-	if err != nil || len(ids) != 0 || len(*calls) != 1 || (*calls)[0].query != "limit=1" {
-		t.Fatal(ids, err, *calls)
+	if err != nil || len(ids) != 0 || calls.Len() != 1 || calls.Calls()[0].RawQuery != "limit=1" {
+		t.Fatal(ids, err, pythonVolumeAttachCalls(calls))
 	}
 	ids, err = attachmentRecordIDs(t, api, volumeattach.WithAttachmentPaginated(false), volumeattach.WithAttachmentQuery("tag", "wanted"), volumeattach.WithAttachmentQuery("device", nil), volumeattach.WithAttachmentQuery("offset", nil), volumeattach.WithAttachmentLimit(0))
-	if err != nil || !reflect.DeepEqual(ids, []string{"v2"}) || len(*calls) != 2 || (*calls)[1].query != "limit=0" {
-		t.Fatal(ids, err, *calls)
+	if err != nil || !reflect.DeepEqual(ids, []string{"v2"}) || calls.Len() != 2 || calls.Calls()[1].RawQuery != "limit=0" {
+		t.Fatal(ids, err, pythonVolumeAttachCalls(calls))
 	}
 	// Early break never follows a server next link.
 	for _, err := range api.ListRecords(context.Background(), "s1") {
@@ -83,8 +83,8 @@ func TestPythonAttachmentRecordsControlCountsRawRowsBeforeFilters(t *testing.T) 
 		}
 		break
 	}
-	if len(*calls) != 3 {
-		t.Fatal(*calls)
+	if calls.Len() != 3 {
+		t.Fatal(pythonVolumeAttachCalls(calls))
 	}
 }
 func TestPythonAttachmentRecordsLinksAndLocalAliasProjection(t *testing.T) {
@@ -101,8 +101,8 @@ func TestPythonAttachmentRecordsLinksAndLocalAliasProjection(t *testing.T) {
 		}
 		records = append(records, v)
 	}
-	if len(records) != 1 || len(*calls) != 2 || string(records[0].Resource.Body["bdm_id"]) != `"last"` {
-		t.Fatal(records, *calls)
+	if len(records) != 1 || calls.Len() != 2 || string(records[0].Resource.Body["bdm_id"]) != `"last"` {
+		t.Fatal(records, pythonVolumeAttachCalls(calls))
 	}
 }
 func TestPythonAttachmentRecordUpdateDefaultsSwapAndExplicitValues(t *testing.T) {
@@ -116,16 +116,16 @@ func TestPythonAttachmentRecordUpdateDefaultsSwapAndExplicitValues(t *testing.T)
 		t.Fatal(value, err)
 	}
 	_, err = api.UpdateRecord(context.Background(), "s1", "old", volumeattach.WithAttachmentSwapTo("new"), volumeattach.WithAttachmentAttribute("delete_on_termination", false), volumeattach.WithAttachmentAttribute("device", nil), volumeattach.WithAttachmentAttribute("tag", ""), volumeattach.WithAttachmentAttribute("bdm_id", 0), volumeattach.WithAttachmentAttribute("unknown", make(chan int)))
-	if err != nil || len(*calls) != 2 || (*calls)[0].method != "PUT" || (*calls)[0].path != pythonVolumeAttachBase+"/old" || (*calls)[0].body != `{"volumeAttachment":{"volumeId":"old"}}` || (*calls)[1].body != `{"volumeAttachment":{"bdm_uuid":0,"delete_on_termination":false,"device":null,"tag":"","volumeId":"new"}}` {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Len() != 2 || calls.Calls()[0].Method != "PUT" || calls.Calls()[0].Path != pythonVolumeAttachBase+"/old" || calls.Calls()[0].Body != `{"volumeAttachment":{"volumeId":"old"}}` || calls.Calls()[1].Body != `{"volumeAttachment":{"bdm_uuid":0,"delete_on_termination":false,"device":null,"tag":"","volumeId":"new"}}` {
+		t.Fatal(err, pythonVolumeAttachCalls(calls))
 	}
 	_, err = api.UpdateRecord(context.Background(), "s1", "old", volumeattach.WithAttachmentAttribute("volumeId", nil))
-	if err != nil || (*calls)[2].body != `{"volumeAttachment":{"volumeId":null}}` {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Calls()[2].Body != `{"volumeAttachment":{"volumeId":null}}` {
+		t.Fatal(err, pythonVolumeAttachCalls(calls))
 	}
 	_, err = api.UpdateRecord(context.Background(), "s1", "old", volumeattach.WithAttachmentAttribute("volume_id", nil))
-	if err != nil || (*calls)[3].body != `{"volumeAttachment":{"volumeId":"old"}}` {
-		t.Fatal(err, *calls)
+	if err != nil || calls.Calls()[3].Body != `{"volumeAttachment":{"volumeId":"old"}}` {
+		t.Fatal(err, pythonVolumeAttachCalls(calls))
 	}
 }
 func TestPythonAttachmentRecordUpdateSnapshotsAndScope(t *testing.T) {
@@ -146,8 +146,8 @@ func TestPythonAttachmentRecordUpdateSnapshotsAndScope(t *testing.T) {
 		retained.Fields["tag"] = json.RawMessage(`"changed"`)
 		return nil
 	})
-	if err != nil || value == nil || value.Wire != nil || value.StatusCode != 204 || string(value.Resource.Body["volume_id"]) != `"old"` || (*calls)[0].body != `{"volumeAttachment":{"tag":{"enabled":false},"volumeId":"old"}}` {
-		t.Fatal(value, err, *calls)
+	if err != nil || value == nil || value.Wire != nil || value.StatusCode != 204 || string(value.Resource.Body["volume_id"]) != `"old"` || calls.Calls()[0].Body != `{"volumeAttachment":{"tag":{"enabled":false},"volumeId":"old"}}` {
+		t.Fatal(value, err, pythonVolumeAttachCalls(calls))
 	}
 	ids, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentPaginated(false))
 	var receipt *resource.ResponseError
@@ -180,8 +180,8 @@ func TestPythonAttachmentRecordsRejectInvalidInputsBeforeHTTP(t *testing.T) {
 		}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			if err := test.call(); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-				t.Fatal(err, *calls)
+			if err := test.call(); !errors.Is(err, resource.ErrInvalidOption) || calls.Len() != 0 {
+				t.Fatal(err, pythonVolumeAttachCalls(calls))
 			}
 		})
 	}
@@ -190,9 +190,9 @@ func TestPythonAttachmentRecordsPreservePhysicalErrorsAndCanceledOptions(t *test
 	api, _ := pythonVolumeAttachAPI(t, func(*http.Request) *http.Response { return pythonVolumeAttachWire(200, `{}`) })
 	readErr, closeErr := errors.New("accepted read"), errors.New("accepted close")
 	attempts := 0
-	api.RawClient().ProviderClient.HTTPClient.Transport = pythonVolumeAttachTransport(func(*http.Request) (*http.Response, error) {
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 		attempts++
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"partial"}}, Body: &attachmentFaultBody{data: []byte(`{"volumeAttachment":`), read: readErr, close: closeErr}}, nil
+		return testcloud.StreamResponse(200, &testcloud.Body{Data: `{"volumeAttachment":`, ReadErr: readErr, CloseErr: closeErr}, http.Header{"X-Request-Id": {"partial"}}), nil
 	})
 	value, err := api.UpdateRecord(context.Background(), "s1", "v1")
 	var receipt *resource.ResponseError
@@ -218,7 +218,7 @@ func TestPythonAttachmentRecordsDiscoverCeilingWithoutChangingClient(t *testing.
 	client.Endpoint = client.ResourceBase
 	client.Microversion = ""
 	versions := []string{}
-	client.ProviderClient.HTTPClient.Transport = pythonVolumeAttachTransport(func(req *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		versions = append(versions, req.Header.Get("X-OpenStack-Nova-API-Version"))
 		if req.URL.Path == "/nova/v2.1" || req.URL.Path == "/nova/v2.1/" {
 			return pythonVolumeAttachWire(200, `{"version":{"id":"v2.1","status":"CURRENT","min_version":"2.1","version":"2.100","links":[{"rel":"self","href":"`+client.ResourceBase+`"}]}}`), nil
@@ -226,7 +226,7 @@ func TestPythonAttachmentRecordsDiscoverCeilingWithoutChangingClient(t *testing.
 		return pythonVolumeAttachWire(200, `{"volumeAttachment":{"volumeId":"v1"}}`), nil
 	})
 	_, err := api.UpdateRecord(context.Background(), "s1", "v1")
-	if err != nil || client.Microversion != "" || !reflect.DeepEqual(versions, []string{"", "2.89"}) || len(*calls) != 0 {
+	if err != nil || client.Microversion != "" || !reflect.DeepEqual(versions, []string{"", "2.89"}) || calls.Len() != 0 {
 		t.Fatal(err, versions, client.Microversion)
 	}
 	// An explicitly selected lower version is respected; no discovery or silent promotion.
@@ -237,20 +237,3 @@ func TestPythonAttachmentRecordsDiscoverCeilingWithoutChangingClient(t *testing.
 		t.Fatal(err, versions)
 	}
 }
-
-type attachmentFaultBody struct {
-	data        []byte
-	read, close error
-}
-
-func (b *attachmentFaultBody) Read(p []byte) (int, error) {
-	if len(b.data) > 0 {
-		n := copy(p, b.data)
-		b.data = b.data[n:]
-		return n, nil
-	}
-	return 0, b.read
-}
-func (b *attachmentFaultBody) Close() error { return b.close }
-
-var _ io.ReadCloser = (*attachmentFaultBody)(nil)

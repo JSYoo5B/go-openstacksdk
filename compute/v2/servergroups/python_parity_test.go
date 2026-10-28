@@ -3,10 +3,8 @@ package servergroups_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
@@ -17,37 +15,28 @@ import (
 // pythonServerGroupCall records the wire request openstacksdk would also send.
 type pythonServerGroupCall struct{ method, path, query, body string }
 
-type pythonServerGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonServerGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonServerGroupWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
-func pythonServerGroupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*servergroups.API, *[]pythonServerGroupCall) {
+func pythonServerGroupAPI(t *testing.T, reply func(*http.Request) *http.Response) (*servergroups.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonServerGroupCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonServerGroupTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonServerGroupCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.64"
 	return servergroups.New(client), calls
+}
+
+// pythonServerGroupCalls projects the recorded calls onto the local call fields.
+func pythonServerGroupCalls(rec *testcloud.Recorder) []pythonServerGroupCall {
+	calls := []pythonServerGroupCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonServerGroupCall{call.Method, call.Path, call.RawQuery, call.Body})
+	}
+	return calls
 }
 
 const pythonServerGroupBase = "/nova/v2.1/os-server-groups"
@@ -97,8 +86,8 @@ func TestPythonServerGroupCreateGetDeleteMatchProxyRequests(t *testing.T) {
 		{http.MethodDelete, pythonServerGroupBase + "/g1", "", ""},
 		{http.MethodDelete, pythonServerGroupBase + "/g1", "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerGroupCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerGroupCalls(calls))
 	}
 }
 
@@ -129,8 +118,8 @@ func TestPythonServerGroupListAllProjectsAndQuery(t *testing.T) {
 		{http.MethodGet, pythonServerGroupBase, "", ""},
 		{http.MethodGet, pythonServerGroupBase, "all_projects=True&limit=1&marker=g0", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerGroupCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerGroupCalls(calls))
 	}
 }
 
@@ -159,7 +148,7 @@ func TestPythonServerGroupFindHasNoIDThenNameFallback(t *testing.T) {
 		{http.MethodGet, pythonServerGroupBase, "", ""},
 		{http.MethodGet, pythonServerGroupBase, "", ""},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerGroupCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerGroupCalls(calls))
 	}
 }

@@ -42,8 +42,8 @@ func TestPythonComputeServiceUpdateRecordSendsFalseAndEmptyValues(t *testing.T) 
 		{http.MethodPut, pythonComputeServiceBase + "/svc-uuid", "", `{"disabled_reason":"","forced_down":false,"status":""}`, "2.69"},
 		{http.MethodPut, pythonComputeServiceBase + "/svc-uuid", "", `{"disabled_reason":null,"status":"disabled","zone":"az2"}`, "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -69,12 +69,12 @@ func TestPythonComputeServiceUpdateRecordRejectsInputsVersionsAndErrorStatuses(t
 	// Python raises SDKException without a request below 2.53.
 	for _, version := range []string{"2.52", "", "latest"} {
 		old, oldCalls := pythonComputeServiceAPI(t, version, reply)
-		if _, err := old.UpdateRecord(ctx, "svc-uuid", services.WithUpdateRecordStatus(request.Present("enabled"))); !errors.Is(err, resource.ErrUnsupported) || len(*oldCalls) != 0 {
+		if _, err := old.UpdateRecord(ctx, "svc-uuid", services.WithUpdateRecordStatus(request.Present("enabled"))); !errors.Is(err, resource.ErrUnsupported) || oldCalls.Len() != 0 {
 			t.Fatal(version, err)
 		}
 	}
-	if len(*calls) != 0 {
-		t.Fatalf("%+v", *calls)
+	if calls.Len() != 0 {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 	var operation *resource.OperationError
 	if _, err := api.UpdateRecord(ctx, "svc-uuid", services.WithUpdateRecordStatus(request.Present("enabled"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "services" {
@@ -127,8 +127,8 @@ func TestPythonComputeServiceUpdateForcedDownRecordFromMicroversion253(t *testin
 		{http.MethodGet, pythonComputeServiceBase, query, "", "2.69"},
 		{http.MethodGet, pythonComputeServiceBase, query, "", "2.69"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 }
 
@@ -166,14 +166,14 @@ func TestPythonComputeServiceUpdateForcedDownRecordBelowMicroversion253(t *testi
 		{http.MethodPut, pythonComputeServiceBase + "/force-down", "", `{"binary":"nova-compute","forced_down":false,"host":"cmp1"}`, "2.11"},
 		{http.MethodPut, pythonComputeServiceBase + "/force-down", "", `{"binary":"nova-compute","forced_down":true,"host":"cmp1"}`, "2.11"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(calls), want) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 	wantOld := []pythonComputeServiceCall{
 		{http.MethodPut, pythonComputeServiceBase + "/force-down", "", `{"binary":"nova-compute","host":"cmp1"}`, "2.10"},
 	}
-	if !reflect.DeepEqual(*oldCalls, wantOld) {
-		t.Fatalf("%+v", *oldCalls)
+	if !reflect.DeepEqual(pythonComputeServiceCalls(oldCalls), wantOld) {
+		t.Fatalf("%+v", pythonComputeServiceCalls(oldCalls))
 	}
 	var nilAPI *services.API
 	if _, err := nilAPI.UpdateForcedDownRecord(ctx, services.ForcedDownRecordTarget{Host: "cmp1", Binary: "nova-compute"}, true); !errors.Is(err, resource.ErrInvalidOption) {

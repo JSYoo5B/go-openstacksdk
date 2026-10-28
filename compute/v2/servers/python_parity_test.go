@@ -20,42 +20,32 @@ import (
 // pythonServerCall records the wire request openstacksdk would also send.
 type pythonServerCall struct{ method, path, query, body, version string }
 
-type pythonServerTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonServerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonServerWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 // pythonServerCloud returns a Nova client (microversion 2.96) and a Glance
 // client that share one recording transport.
-func pythonServerCloud(t *testing.T, reply func(*http.Request) *http.Response) (*gophercloud.ServiceClient, *gophercloud.ServiceClient, *[]pythonServerCall) {
+func pythonServerCloud(t *testing.T, reply func(*http.Request) *http.Response) (*gophercloud.ServiceClient, *gophercloud.ServiceClient, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonServerCall{}
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) { return reply(req), nil })
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonServerTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-			req.Body = io.NopCloser(strings.NewReader(raw))
-		}
-		*calls = append(*calls, pythonServerCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
-		return reply(req), nil
-	})
+	cloud.SetTransport(calls)
 	compute := cloud.Client("compute", "/catalog/unused/")
 	compute.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	compute.Microversion = "2.96"
 	glance := cloud.Client("image", "/catalog/glance/")
 	glance.ResourceBase = cloud.Server.URL + "/glance/v2/"
 	return compute, glance, calls
+}
+
+// pythonServerCalls projects the recorded calls onto the local call fields.
+func pythonServerCalls(rec *testcloud.Recorder) []pythonServerCall {
+	calls := []pythonServerCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonServerCall{call.Method, call.Path, call.RawQuery, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 const pythonServerBase = "/nova/v2.1/servers/s1"
@@ -111,8 +101,8 @@ func TestPythonServerGetUpdateDeleteMatchProxyRequests(t *testing.T) {
 		{http.MethodDelete, pythonServerBase, "", "", "2.96"},
 		{http.MethodPost, pythonServerBase + "/action", "", `{"forceDelete":""}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 }
 
@@ -160,14 +150,14 @@ func TestPythonServerActionsMatchProxyBodies(t *testing.T) {
 		{"shelve_offload_server(server)", `{"shelveOffload":null}`, func() error { return api.ShelveOffload(ctx, "s1") }},
 	}
 	for _, step := range steps {
-		before := len(*calls)
+		before := calls.Len()
 		if err := step.call(); err != nil {
 			t.Fatal(step.python, err)
 		}
-		if len(*calls) != before+1 {
-			t.Fatalf("%s sent %d requests", step.python, len(*calls)-before)
+		if calls.Len() != before+1 {
+			t.Fatalf("%s sent %d requests", step.python, calls.Len()-before)
 		}
-		got := (*calls)[before]
+		got := (pythonServerCalls(calls))[before]
 		if got != (pythonServerCall{http.MethodPost, pythonServerBase + "/action", "", step.body, "2.96"}) {
 			t.Fatalf("%s: %+v", step.python, got)
 		}
@@ -203,8 +193,8 @@ func TestPythonServerRebuildSendsPassedKeysAndReturnsServer(t *testing.T) {
 		{http.MethodPost, pythonServerBase + "/action", "", `{"rebuild":{"adminPass":"p","description":null,"hostname":"host2","imageRef":"img","key_name":null,"metadata":{"k":"v"},"name":"vm2","preserve_ephemeral":true,"user_data":"dXNlcg=="}}`, "2.96"},
 		{http.MethodPost, pythonServerBase + "/action", "", `{"rebuild":{"imageRef":"img"}}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 }
 
@@ -238,8 +228,8 @@ func TestPythonServerLockAndUnshelveArgumentGaps(t *testing.T) {
 		{http.MethodPost, action, "", `{"unshelve":{"availability_zone":"az","host":"h"}}`, "2.96"},
 		{http.MethodPost, action, "", `{"host":"h","unshelve":null}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 }
 
@@ -293,8 +283,8 @@ func TestPythonServerCreateImageFetchesAndWaitsForGlanceImage(t *testing.T) {
 		{http.MethodGet, "/glance/v2/images/img1", "", "", ""},
 		{http.MethodPost, pythonServerBase + "/action", "", `{"createImage":{"name":"snap"}}`, "2.1"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 
 	statuses = []string{"error"}
@@ -334,8 +324,8 @@ func TestPythonServerMetadataSetAndDeleteMatchMixinRequests(t *testing.T) {
 		{http.MethodDelete, pythonServerBase + "/metadata/old", "", "", "2.96"},
 		{http.MethodPut, pythonServerBase + "/metadata", "", `{"metadata":{}}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 }
 
@@ -374,7 +364,7 @@ func TestPythonServerIPsListAllAndByNetworkLabel(t *testing.T) {
 		{http.MethodGet, pythonServerBase + "/ips", "", "", "2.96"},
 		{http.MethodGet, pythonServerBase + "/ips/private", "", "", "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonServerCalls(calls))
 	}
 }

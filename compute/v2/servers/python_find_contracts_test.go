@@ -28,7 +28,7 @@ func serverFindAPI(t *testing.T, calls *[]nativeServerCall, reply func(*http.Req
 	cloud := testcloud.New(t)
 	client := nativeServerClient(cloud)
 	client.Microversion = "2.96"
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		body := ""
 		if req.Body != nil {
 			raw, _ := io.ReadAll(req.Body)
@@ -36,7 +36,7 @@ func serverFindAPI(t *testing.T, calls *[]nativeServerCall, reply func(*http.Req
 		}
 		*calls = append(*calls, nativeServerCall{req.Method, req.URL.Path, req.URL.RawQuery, body})
 		return reply(req), nil
-	})
+	}))
 	return servers.New(client), cloud
 }
 func serverFindValue(t *testing.T, v *servers.ServerFindRecord, key, want string) {
@@ -298,8 +298,8 @@ func TestPythonServerFindRecordDiscoveryCeilingAndSelectedVersions(t *testing.T)
 				wantCount = 3
 				observations = 1
 			}
-			if err != nil || v == nil || len(*calls) != wantCount || v.Microversion != item.want || len(v.Discovery) != observations || client.Microversion != item.selected {
-				t.Fatal(item, v, err, *calls)
+			if err != nil || v == nil || calls.Len() != wantCount || v.Microversion != item.want || len(v.Discovery) != observations || client.Microversion != item.selected {
+				t.Fatal(item, v, err, pythonServerCalls(calls))
 			}
 			for i, h := range headers {
 				want := item.want
@@ -354,8 +354,8 @@ func TestPythonServerFindRecordExplicitVersionIsGETOnly(t *testing.T) {
 	client.Endpoint = client.ResourceBase
 	client.Microversion = ""
 	v, err := servers.New(client).FindRecord(context.Background(), "wanted", servers.WithRecordFindMicroversion("2.50"))
-	if err != nil || v == nil || len(*calls) != 3 || (*calls)[0].version != "2.50" || (*calls)[1].path != "/nova/v2.1/" || (*calls)[2].version != "2.90" || len(v.Discovery) != 1 {
-		t.Fatal(v, err, *calls)
+	if err != nil || v == nil || calls.Len() != 3 || calls.Calls()[0].Header.Get("X-OpenStack-Nova-API-Version") != "2.50" || calls.Calls()[1].Path != "/nova/v2.1/" || calls.Calls()[2].Header.Get("X-OpenStack-Nova-API-Version") != "2.90" || len(v.Discovery) != 1 {
+		t.Fatal(v, err, pythonServerCalls(calls))
 	}
 }
 func TestPythonServerFindRecordDiscoveryTerminalProofAndSourceGuard(t *testing.T) {
@@ -376,8 +376,8 @@ func TestPythonServerFindRecordDiscoveryTerminalProofAndSourceGuard(t *testing.T
 		original := client.ResourceBase
 		v, err := servers.New(client).FindRecord(context.Background(), "wanted")
 		client.ResourceBase = original
-		if v != nil || err == nil || len(*calls) != 1 {
-			t.Fatal(lane, v, err, *calls)
+		if v != nil || err == nil || calls.Len() != 1 {
+			t.Fatal(lane, v, err, pythonServerCalls(calls))
 		}
 		if lane == "forbidden" {
 			if !gophercloud.ResponseCodeIs(err, 403) {
@@ -457,13 +457,13 @@ func TestPythonServerFindRecordConcurrentOwnedOptions(t *testing.T) {
 	var calls []nativeServerCall
 	api, cloud := serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(200, `{}`) })
 	var attempts atomic.Int64
-	cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		attempts.Add(1)
 		if req.Header.Get("X-Trace") != "owned" {
 			t.Error(req.Header)
 		}
 		return nativeServerWire(200, `{"server":{"id":"wanted","metadata":{"x":false}}}`), nil
-	})
+	}))
 	option := servers.WithRecordFindOpts(servers.RecordFindOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"seed"`)}, Headers: map[string]string{"X-Trace": "owned"}})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
@@ -487,36 +487,6 @@ func TestPythonServerFindRecordConcurrentOwnedOptions(t *testing.T) {
 	}
 }
 
-type serverFindFaultBody struct {
-	data              []byte
-	readErr, closeErr error
-	onRead, onClose   func()
-	closed            int
-}
-
-func (b *serverFindFaultBody) Read(p []byte) (int, error) {
-	if len(b.data) > 0 {
-		n := copy(p, b.data)
-		b.data = b.data[n:]
-		if b.onRead != nil {
-			b.onRead()
-			b.onRead = nil
-		}
-		return n, nil
-	}
-	if b.readErr != nil {
-		return 0, b.readErr
-	}
-	return 0, io.EOF
-}
-func (b *serverFindFaultBody) Close() error {
-	b.closed++
-	if b.onClose != nil {
-		b.onClose()
-	}
-	return b.closeErr
-}
-
 func TestPythonServerFindRecordPhysicalAcceptedRejectedAndListErrors(t *testing.T) {
 	for _, phase := range []string{"member", "list"} {
 		for _, status := range []int{200, 400, 403, 404, 409, 503} {
@@ -530,36 +500,36 @@ func TestPythonServerFindRecordPhysicalAcceptedRejectedAndListErrors(t *testing.
 					client := api.RawClient()
 					original := client.ResourceBase
 					defer func() { client.ResourceBase = original }()
-					physical := &serverFindFaultBody{data: []byte(`{"actual":"physical"}`)}
+					physical := &testcloud.Body{Data: `{"actual":"physical"}`}
 					switch lane {
 					case "read":
-						physical.readErr = readCause
+						physical.ReadErr = readCause
 					case "close":
-						physical.closeErr = closeCause
+						physical.CloseErr = closeCause
 					case "read+close":
-						physical.readErr = readCause
-						physical.closeErr = closeCause
+						physical.ReadErr = readCause
+						physical.CloseErr = closeCause
 					case "cancel":
-						physical.onRead = func() { cancel(cancelCause) }
+						physical.OnRead = func() { cancel(cancelCause) }
 					case "source":
-						physical.onRead = func() { client.ResourceBase += "changed/" }
-						physical.onClose = func() { client.ResourceBase = original }
+						physical.OnRead = func() { client.ResourceBase += "changed/" }
+						physical.OnClose = func() { client.ResourceBase = original }
 					}
 					attempts := 0
-					cloud.Provider.HTTPClient.Transport = nativeServerTransport(func(req *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 						attempts++
 						if phase == "list" && req.URL.Path != serverFindDetail {
 							return nativeServerWire(404, `{}`), nil
 						}
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"physical"}}, Body: physical}, nil
-					})
+						return testcloud.StreamResponse(status, physical, http.Header{"X-Request-Id": {"physical"}}), nil
+					}))
 					record, err := api.FindRecord(ctx, "wanted")
 					want := 1
 					if phase == "list" {
 						want = 2
 					}
-					if err == nil || attempts != want || physical.closed != 1 {
-						t.Fatal(record, err, attempts, physical.closed)
+					if err == nil || attempts != want || physical.Closes() != 1 {
+						t.Fatal(record, err, attempts, physical.Closes())
 					}
 					if status < 400 {
 						var receipt *resource.ResponseError
@@ -1041,17 +1011,17 @@ func TestPythonServerFindRecordNextBinary64TruthinessAndWholePageProof(t *testin
 	var calls []nativeServerCall
 	body := `{"servers":[{"id":"wanted"}],"next":1e-400}`
 	readCause, closeCause := errors.New("next page read"), errors.New("next page close")
-	physical := &serverFindFaultBody{data: []byte(body), readErr: readCause, closeErr: closeCause}
+	physical := &testcloud.Body{Data: body, ReadErr: readCause, CloseErr: closeCause}
 	api, _ := serverFindAPI(t, &calls, func(req *http.Request) *http.Response {
 		if req.URL.Path != serverFindDetail {
 			return nativeServerWire(404, `{}`)
 		}
-		return &http.Response{StatusCode: 203, Header: http.Header{"X-Request-Id": {"next-physical"}}, Body: physical}
+		return testcloud.StreamResponse(203, physical, http.Header{"X-Request-Id": {"next-physical"}})
 	})
 	record, err := api.FindRecord(context.Background(), "wanted")
 	var proof *resource.ResponseError
-	if record != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "next-physical" || physical.closed != 1 || len(calls) != 2 {
-		t.Fatal(record, err, proof, physical.closed, calls)
+	if record != nil || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.As(err, &proof) || proof.StatusCode != 203 || string(proof.Body) != body || proof.Header.Get("X-Request-Id") != "next-physical" || physical.Closes() != 1 || len(calls) != 2 {
+		t.Fatal(record, err, proof, physical.Closes(), calls)
 	}
 }
 func TestPythonServerFindRecordInformationalStatusIsBoundedGoDifference(t *testing.T) {

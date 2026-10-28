@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeTagTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTagTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeTagWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeTagClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -50,7 +40,7 @@ type nativeTagCall struct{ method, path, body string }
 func TestNativeTagsRoutesBodiesAndDecode(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls []nativeTagCall
-	cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -66,7 +56,7 @@ func TestNativeTagsRoutesBodiesAndDecode(t *testing.T) {
 			return nativeTagWire(201, ""), nil
 		}
 		return nativeTagWire(204, ""), nil
-	})
+	}))
 	api := tags.New(nativeTagClient(cloud))
 	ctx := context.Background()
 	if err := api.Add(ctx, "s1", "managed"); err != nil {
@@ -131,10 +121,10 @@ func TestNativeTagsStrictStatusesCheckAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return nativeTagWire(code, `{"tags":[]}`), nil
-				})
+				}))
 				err := call.call(tags.New(nativeTagClient(cloud)))
 				nativeTagOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -147,9 +137,9 @@ func TestNativeTagsStrictStatusesCheckAndPreflight(t *testing.T) {
 	t.Run("Check reports 404 as absent and other errors as not present", func(t *testing.T) {
 		for _, code := range []int{404, 500} {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				return nativeTagWire(code, `{}`), nil
-			})
+			}))
 			present, err := tags.New(nativeTagClient(cloud)).Check(ctx, "s1", "t")
 			if present || (code == 404) != (err == nil) {
 				t.Fatal(code, present, err)
@@ -159,10 +149,10 @@ func TestNativeTagsStrictStatusesCheckAndPreflight(t *testing.T) {
 	t.Run("ReplaceAll nil tags, collisions and nil options", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return nativeTagWire(200, `{"tags":[]}`), nil
-		})
+		}))
 		api := tags.New(nativeTagClient(cloud))
 		for name, opts := range map[string][]tags.ReplaceAllOption{
 			"nil tags":      nil,

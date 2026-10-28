@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents"
@@ -145,25 +144,15 @@ func TestPythonExternalEventsSourceGuardAndCanceledIteration(t *testing.T) {
 	}
 }
 
-type eventTransport func(*http.Request) (*http.Response, error)
-
-func (f eventTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
-type eventBrokenBody struct {
-	io.Reader
-	cause error
-}
-
-func (b eventBrokenBody) Close() error { return b.cause }
 func TestPythonExternalEventsHTTPAndAcceptedCloseAreTerminal(t *testing.T) {
 	for _, status := range []int{403, 202} {
 		t.Run(http.StatusText(status), func(t *testing.T) {
 			api, client, _ := eventAPI(t, `{"events":[]}`, 200)
 			cause := errors.New("close")
 			attempts := 0
-			client.ProviderClient.HTTPClient.Transport = eventTransport(func(r *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				attempts++
-				return &http.Response{StatusCode: status, Header: http.Header{"X-Proof": {"yes"}}, Request: r, Body: eventBrokenBody{Reader: strings.NewReader(`{"events":[]}`), cause: cause}}, nil
+				return &http.Response{StatusCode: status, Header: http.Header{"X-Proof": {"yes"}}, Request: r, Body: &testcloud.Body{Data: `{"events":[]}`, CloseErr: cause}}, nil
 			})
 			_, err := api.CreateRecords(context.Background(), []serverexternalevents.Event{{}})
 			if attempts != 1 || !errors.Is(err, cause) {

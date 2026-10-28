@@ -2,10 +2,8 @@ package usage_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 	"time"
 
@@ -16,28 +14,18 @@ import (
 // pythonUsageCall records the wire request openstacksdk would also send.
 type pythonUsageCall struct{ method, path, query, version string }
 
-type pythonUsageTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonUsageTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonUsageWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 const pythonUsageRow = `{"tenant_id":"p1","total_hours":1.5,"total_local_gb_usage":15,"total_memory_mb_usage":768,"total_vcpus_usage":3,"start":"2026-10-01T00:00:00.000000","stop":"2026-10-10T00:00:00","server_usages":[{"instance_id":"s1","name":"vm","flavor":"m1","vcpus":2,"memory_mb":512,"local_gb":10,"hours":1.5,"state":"active","uptime":5400,"tenant_id":"p1","started_at":"2026-10-01T01:00:00.000000","ended_at":null}]}`
 
 func pythonUsageAPI(t *testing.T, calls *[]pythonUsageCall, cloud *testcloud.Cloud, reply func(*http.Request) *http.Response) *usage.API {
 	t.Helper()
-	cloud.Provider.HTTPClient.Transport = pythonUsageTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonUsageCall{req.Method, req.URL.Path, req.URL.RawQuery, req.Header.Get("X-OpenStack-Nova-API-Version")})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.75"

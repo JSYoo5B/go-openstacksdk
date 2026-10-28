@@ -17,37 +17,35 @@ import (
 // pythonAdminServerCall records the wire request openstacksdk would also send.
 type pythonAdminServerCall struct{ method, path, body, version string }
 
-type pythonAdminServerTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonAdminServerTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
-func pythonAdminServerAPI(t *testing.T) (*servers.API, *[]pythonAdminServerCall) {
+func pythonAdminServerAPI(t *testing.T) (*servers.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonAdminServerCall{}
-	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonAdminServerTransport(func(req *http.Request) (*http.Response, error) {
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
 			raw = string(data)
 		}
-		*calls = append(*calls, pythonAdminServerCall{req.Method, req.URL.Path, raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
 		code := http.StatusAccepted
 		if strings.HasPrefix(raw, `{"evacuate"`) {
 			code = http.StatusOK
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader("")), Header: http.Header{"Content-Type": {"application/json"}}}, nil
+		return testcloud.Response(code, "", http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud := testcloud.New(t)
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.96"
 	return servers.New(client), calls
+}
+
+// pythonAdminServerCalls projects the recorded calls onto the local call fields.
+func pythonAdminServerCalls(rec *testcloud.Recorder) []pythonAdminServerCall {
+	calls := []pythonAdminServerCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonAdminServerCall{call.Method, call.Path, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 func TestPythonAdminServerResetStateMatchesProxyBody(t *testing.T) {
@@ -64,8 +62,8 @@ func TestPythonAdminServerResetStateMatchesProxyBody(t *testing.T) {
 		{http.MethodPost, action, `{"os-resetState":{"state":"active"}}`, "2.96"},
 		{http.MethodPost, action, `{"os-resetState":{"state":"error"}}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonAdminServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonAdminServerCalls(calls))
 	}
 }
 
@@ -97,7 +95,7 @@ func TestPythonAdminServerMigrationActionArgumentGaps(t *testing.T) {
 		{http.MethodPost, action, `{"migrate":null}`, "2.96"},
 		{http.MethodPost, action, `{"os-migrateLive":{"block_migration":true,"force":true,"host":"cmp2"}}`, "2.96"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonAdminServerCalls(calls), want) {
+		t.Fatalf("%+v", pythonAdminServerCalls(calls))
 	}
 }

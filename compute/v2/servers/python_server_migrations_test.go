@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -312,15 +313,15 @@ func TestPythonServerMigrationPhysicalFaultsAreTerminalAndNeverReplay(t *testing
 				cause := errors.New("migration physical " + mode)
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				fault := &serverFindFaultBody{data: []byte(`{"error":"physical"}`)}
+				fault := &testcloud.Body{Data: `{"error":"physical"}`}
 				if mode == "read" {
-					fault.readErr = cause
+					fault.ReadErr = cause
 				}
 				if mode == "close" {
-					fault.closeErr = cause
+					fault.CloseErr = cause
 				}
 				if mode == "cancel" {
-					fault.onClose = func() { cancel(cause) }
+					fault.OnClose = func() { cancel(cause) }
 				}
 				api, _ := serverFindAPI(t, &calls, func(r *http.Request) *http.Response {
 					response := nativeServerWire(404, `{}`)
@@ -336,8 +337,8 @@ func TestPythonServerMigrationPhysicalFaultsAreTerminalAndNeverReplay(t *testing
 				case "force":
 					_, err = api.ForceCompleteServerMigration(ctx, "server", "migration", migrationVersion())
 				}
-				if !errors.Is(err, cause) || len(calls) != 1 || fault.closed != 1 {
-					t.Fatal(err, calls, fault.closed)
+				if !errors.Is(err, cause) || len(calls) != 1 || fault.Closes() != 1 {
+					t.Fatal(err, calls, fault.Closes())
 				}
 			})
 		}

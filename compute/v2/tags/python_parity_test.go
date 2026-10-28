@@ -3,10 +3,8 @@ package tags_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/tags"
@@ -18,38 +16,32 @@ import (
 // pythonTagCall records the wire request openstacksdk would also send.
 type pythonTagCall struct{ method, path, body, version string }
 
-type pythonTagTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonTagTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
-func pythonTagClient(t *testing.T, reply func(*http.Request) int) (*gophercloud.ServiceClient, *[]pythonTagCall) {
+func pythonTagClient(t *testing.T, reply func(*http.Request) int) (*gophercloud.ServiceClient, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonTagCall{}
-	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonTagTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonTagCall{req.Method, req.URL.EscapedPath(), raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) {
 		code := reply(req)
 		body := ""
 		if code == http.StatusNotFound {
 			body = `{"itemNotFound":{"message":"gone"}}`
 		}
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud := testcloud.New(t)
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.26"
 	return client, calls
+}
+
+// pythonTagCalls projects the recorded calls onto the local call fields; the
+// path is the escaped path.
+func pythonTagCalls(rec *testcloud.Recorder) []pythonTagCall {
+	calls := []pythonTagCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonTagCall{call.Method, call.EscapedPath, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 func TestPythonServerTagAddRemoveAndRemoveAllMatchTagMixin(t *testing.T) {
@@ -96,8 +88,8 @@ func TestPythonServerTagAddRemoveAndRemoveAllMatchTagMixin(t *testing.T) {
 		{http.MethodDelete, base, "", "2.26"},
 		{http.MethodDelete, base + "/blue", "", "2.26"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTagCalls(calls), want) {
+		t.Fatalf("%+v", pythonTagCalls(calls))
 	}
 }
 
@@ -121,7 +113,7 @@ func TestPythonServerTagNeedsConfiguredMicroversion(t *testing.T) {
 	if err := scope.Add(ctx, "a b"); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(*calls, []pythonTagCall{{http.MethodPut, "/nova/v2.1/servers/s1/tags/a%20b", "", "2.90"}}) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonTagCalls(calls), []pythonTagCall{{http.MethodPut, "/nova/v2.1/servers/s1/tags/a%20b", "", "2.90"}}) {
+		t.Fatalf("%+v", pythonTagCalls(calls))
 	}
 }

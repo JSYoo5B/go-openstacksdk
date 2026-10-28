@@ -2,10 +2,8 @@ package secgroups_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/secgroups"
@@ -15,34 +13,27 @@ import (
 // pythonSecGroupCall records the wire request openstacksdk would also send.
 type pythonSecGroupCall struct{ method, path, body, version string }
 
-type pythonSecGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSecGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
-func pythonSecGroupAPI(t *testing.T, reply func(*http.Request) (int, string)) (*secgroups.API, *[]pythonSecGroupCall) {
+func pythonSecGroupAPI(t *testing.T, reply func(*http.Request) (int, string)) (*secgroups.API, *testcloud.Recorder) {
 	t.Helper()
-	calls := &[]pythonSecGroupCall{}
-	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonSecGroupTransport(func(req *http.Request) (*http.Response, error) {
-		raw := ""
-		if req.Body != nil {
-			data, _ := io.ReadAll(req.Body)
-			raw = string(data)
-		}
-		*calls = append(*calls, pythonSecGroupCall{req.Method, req.URL.Path, raw, req.Header.Get("X-OpenStack-Nova-API-Version")})
+	calls := testcloud.NewRecorder(func(req *http.Request) (*http.Response, error) {
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
 	})
+	cloud := testcloud.New(t)
+	cloud.SetTransport(calls)
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	client.Microversion = "2.1"
 	return secgroups.New(client), calls
+}
+
+// pythonSecGroupCalls projects the recorded calls onto the local call fields.
+func pythonSecGroupCalls(rec *testcloud.Recorder) []pythonSecGroupCall {
+	calls := []pythonSecGroupCall{}
+	for _, call := range rec.Calls() {
+		calls = append(calls, pythonSecGroupCall{call.Method, call.Path, call.Body, call.Header.Get("X-OpenStack-Nova-API-Version")})
+	}
+	return calls
 }
 
 func TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests(t *testing.T) {
@@ -80,7 +71,7 @@ func TestPythonSecGroupServerFetchAddRemoveMatchProxyRequests(t *testing.T) {
 		{http.MethodPost, "/nova/v2.1/servers/s1/action", `{"addSecurityGroup":{"name":"web"}}`, "2.1"},
 		{http.MethodPost, "/nova/v2.1/servers/s1/action", `{"removeSecurityGroup":{"name":"web"}}`, "2.1"},
 	}
-	if !reflect.DeepEqual(*calls, want) {
-		t.Fatalf("%+v", *calls)
+	if !reflect.DeepEqual(pythonSecGroupCalls(calls), want) {
+		t.Fatalf("%+v", pythonSecGroupCalls(calls))
 	}
 }

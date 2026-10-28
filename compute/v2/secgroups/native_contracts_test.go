@@ -17,22 +17,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeSecGroupTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeSecGroupTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeSecGroupCall struct{ method, path, body string }
 
 func nativeSecGroupAPI(t *testing.T, calls *[]nativeSecGroupCall, reply func(*http.Request) (int, string)) *secgroups.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeSecGroupTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -40,8 +30,8 @@ func nativeSecGroupAPI(t *testing.T, calls *[]nativeSecGroupCall, reply func(*ht
 		}
 		*calls = append(*calls, nativeSecGroupCall{req.Method, req.URL.Path, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("compute", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/nova/v2.1/"
 	return secgroups.New(client)

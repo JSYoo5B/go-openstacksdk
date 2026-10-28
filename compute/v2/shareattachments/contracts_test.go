@@ -506,10 +506,6 @@ func (v countMarshal) MarshalJSON() ([]byte, error) {
 	return nil, errors.New("must not marshal")
 }
 
-type faultTransport func(*http.Request) (*http.Response, error)
-
-func (f faultTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type faultBody struct {
 	io.ReadCloser
 	readErr, closeErr error
@@ -549,13 +545,13 @@ func TestSharePhysicalFaultsKeepEvidenceAndStopAllHooks(t *testing.T) {
 						close = closeErr
 					}
 					base := cloud.Provider.HTTPClient.Transport
-					cloud.Provider.HTTPClient.Transport = faultTransport(func(r *http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 						response, err := base.RoundTrip(r)
 						if response != nil {
 							response.Body = &faultBody{ReadCloser: response.Body, readErr: read, closeErr: close, closeCount: &closes}
 						}
 						return response, err
-					})
+					}))
 					cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 						retry++
 						return nil
