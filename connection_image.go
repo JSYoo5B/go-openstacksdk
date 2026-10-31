@@ -6,6 +6,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudimage"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudvolume"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 
 	"github.com/gophercloud/gophercloud/v2"
@@ -71,7 +72,7 @@ type CloudImageCreateResult struct {
 // a found status is neither queued nor saving. On timeout it runs Cloud
 // delete_image(id, wait=True) and returns the timeout with that cleanup.
 func (c *Connection) CreateCloudImageRecord(ctx context.Context, input CloudImageCreateRequest, options ...image.ImageRecordCreateOption) (*CloudImageCreateResult, error) {
-	createVolume := func(ctx context.Context, input cloudimage.VolumeRequest) (*VolumeImageCreateResult, *image.ImageRecord, error) {
+	createVolume := func(ctx context.Context, input cloudvolume.ImageCreateRequest) (*VolumeImageCreateResult, *image.ImageRecord, error) {
 		result, err := c.CreateVolumeImageRecord(ctx, VolumeImageCreateRequest(input))
 		if result == nil {
 			return nil, nil, err

@@ -18,6 +18,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudvolume"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -37,15 +38,6 @@ type Dependencies struct {
 	Provider func() *gophercloud.ProviderClient
 }
 
-// VolumeRequest mirrors the root VolumeImageCreateRequest field for field.
-type VolumeRequest struct {
-	Name            string
-	VolumeID        string
-	AllowDuplicates bool
-	ContainerFormat string
-	DiskFormat      string
-}
-
 // CreateRequest mirrors the root CloudImageCreateRequest field for field.
 type CreateRequest struct {
 	Image        image.ImageRecordCreateRequest
@@ -54,7 +46,9 @@ type CreateRequest struct {
 }
 
 // CreateResult mirrors the root CloudImageCreateResult field for field; V is
-// the root volume image create result type.
+// the root volume image create result type, which stays generic because the
+// root result's Volume field must keep the root pointer type for a direct
+// conversion.
 type CreateResult[V any] struct {
 	Image       *image.ImageRecord
 	Created     *image.ImageRecordCreateResult
@@ -65,8 +59,9 @@ type CreateResult[V any] struct {
 }
 
 // CreateVolume runs the Cinder Proxy create_image and returns its result
-// together with the image record it carries (nil when it carries none).
-type CreateVolume[V any] func(context.Context, VolumeRequest) (V, *image.ImageRecord, error)
+// together with the image record it carries (nil when it carries none). The
+// request is the cloudvolume mirror of the root VolumeImageCreateRequest.
+type CreateVolume[V any] func(context.Context, cloudvolume.ImageCreateRequest) (V, *image.ImageRecord, error)
 
 func invalid(message string) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, message)
@@ -204,7 +199,7 @@ func Create[V any](ctx context.Context, deps Dependencies, createVolume CreateVo
 			result.Image = result.Created.Record
 		}
 	} else {
-		request := VolumeRequest{Name: input.Image.Name, VolumeID: input.VolumeID}
+		request := cloudvolume.ImageCreateRequest{Name: input.Image.Name, VolumeID: input.VolumeID}
 		request.AllowDuplicates, err = createTruthy(policy.AllowDuplicates)
 		if err == nil {
 			request.ContainerFormat, err = createFormat(policy.ContainerFormat, "container format")
