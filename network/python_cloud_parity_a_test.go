@@ -29,10 +29,6 @@ import (
 
 type pythonCloudACall struct{ method, path, query, body string }
 
-type pythonCloudATransport func(*http.Request) (*http.Response, error)
-
-func (f pythonCloudATransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
-
 type pythonCloudAReply struct {
 	code int
 	body string
@@ -45,7 +41,7 @@ func pythonCloudAWire(code int, body string) pythonCloudAReply { return pythonCl
 func pythonCloudAClient(t *testing.T, calls *[]pythonCloudACall, route map[string]pythonCloudAReply) *gophercloud.ServiceClient {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCloudATransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -62,7 +58,7 @@ func pythonCloudAClient(t *testing.T, calls *[]pythonCloudACall, route map[strin
 			reply = pythonCloudAWire(404, `{"NeutronError":{"type":"NotFound","message":"`+key+`"}}`)
 		}
 		return &http.Response{StatusCode: reply.code, Body: io.NopCloser(strings.NewReader(reply.body)), Header: http.Header{"Content-Type": {"application/json"}}, Request: req}, nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return client

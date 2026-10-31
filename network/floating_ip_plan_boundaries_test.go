@@ -84,7 +84,7 @@ func TestFloatingIPPlanColdRoleReadGuardsAcceptedCloseBeforeNextHTTP(t *testing.
 			client := cloud.Client("network", "/v2.0")
 			service := network.New(client)
 			var attempts atomic.Int32
-			client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				attempts.Add(1)
 				if r.URL.Path != "/v2.0/networks" {
 					t.Error("unexpected follow-up", r.URL)
@@ -98,7 +98,7 @@ func TestFloatingIPPlanColdRoleReadGuardsAcceptedCloseBeforeNextHTTP(t *testing.
 					return nil
 				}}
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Request-Id": {"role-close"}}, Body: body, Request: r}, nil
-			})
+			}))
 			_, err := service.FloatingIPs.PrepareEnsure(context.Background(), network.EnsureFloatingIPRequest{Server: resource.ID("server")})
 			var accepted *resource.ResponseError
 			if !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &accepted) || accepted.StatusCode != 200 || accepted.Header.Get("X-Request-Id") != "role-close" || attempts.Load() != 1 {

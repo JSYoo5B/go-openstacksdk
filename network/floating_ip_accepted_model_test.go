@@ -52,7 +52,7 @@ func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *tes
 					body = strings.Replace(body, `"project_id":"owner"`, `"project_id":"foreign"`, 1)
 				}
 				base := client.ProviderClient.HTTPClient.Transport
-				client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.Method != "POST" {
 						return base.RoundTrip(r)
 					}
@@ -73,7 +73,7 @@ func TestFloatingIPAcceptedAllocationKeepsDecodedModelAndProcessingCauses(t *tes
 						return nil
 					}}
 					return &http.Response{StatusCode: code, Header: http.Header{"X-Allocation-Proof": {"accepted"}}, Body: closer, Request: r}, nil
-				})
+				}))
 				retries := 0
 				client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 					retries++
@@ -123,7 +123,7 @@ func TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError(t *tes
 			cause := errors.New("association Close failed")
 			var writes atomic.Int32
 			base := client.ProviderClient.HTTPClient.Transport
-			client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method != "PUT" {
 					return base.RoundTrip(r)
 				}
@@ -140,7 +140,7 @@ func TestFloatingIPAcceptedAssociationAdoptsOnlyMatchingModelOnCloseError(t *tes
 				}
 				body := fmt.Sprintf(`{"floatingip":{"id":%q,"project_id":"owner","floating_network_id":"external","floating_ip_address":"198.51.100.10","port_id":"port","fixed_ip_address":%q,"status":"DOWN"}}`, id, fixed)
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Association-Proof": {"accepted"}}, Body: planCloseBody{Reader: strings.NewReader(body), close: func() error { return cause }}, Request: r}, nil
-			})
+			}))
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				t.Error("unexpected allocation/wait/cleanup", r.Method, r.URL)
 				http.Error(w, "unexpected", 500)
@@ -177,13 +177,13 @@ func TestFloatingIPAcceptedReadAndDecodeErrorsRemainJoined(t *testing.T) {
 	readCause, closeCause := errors.New("truncated read"), errors.New("failed Close")
 	var writes atomic.Int32
 	base := client.ProviderClient.HTTPClient.Transport
-	client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method != "POST" {
 			return base.RoundTrip(r)
 		}
 		writes.Add(1)
 		return &http.Response{StatusCode: 202, Header: http.Header{"X-Allocation-Proof": {"partial"}}, Body: planCloseBody{Reader: &acceptedIPReader{data: []byte(`{"floatingip":`), cause: readCause}, close: func() error { return closeCause }}, Request: r}, nil
-	})
+	}))
 	cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		t.Error("unexpected", r.Method, r.URL)
 		http.Error(w, "unexpected", 500)

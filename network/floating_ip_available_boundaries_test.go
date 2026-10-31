@@ -22,10 +22,10 @@ func TestFloatingIPAvailableOptionsCannotReplaceCapturedClient(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("network", "/v2.0/")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nil, errors.New("must stop before HTTP")
-			})
+			}))
 			service := network.New(client)
 			option := beforeAvailableOption(func() {
 				switch scenario {

@@ -267,10 +267,6 @@ func TestFloatingIPPlanReusesAfterAllPagesAndWaitsForActualACTIVE(t *testing.T) 
 	}
 }
 
-type planTransport func(*http.Request) (*http.Response, error)
-
-func (f planTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type planCloseBody struct {
 	io.Reader
 	close func() error
@@ -295,7 +291,7 @@ func TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry(t *testi
 			defer cancel(nil)
 			var posts atomic.Int32
 			original := http.DefaultTransport
-			client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method != "POST" {
 					return original.RoundTrip(r)
 				}
@@ -316,7 +312,7 @@ func TestFloatingIPPlanAcceptedAllocationFailuresKeepEvidenceAndNoRetry(t *testi
 					return nil
 				}}
 				return &http.Response{StatusCode: 201, Header: http.Header{"X-Plan-Evidence": {"accepted"}}, Body: body, Request: r}, nil
-			})
+			}))
 			client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				t.Error("accepted failure retried")
 				return nil

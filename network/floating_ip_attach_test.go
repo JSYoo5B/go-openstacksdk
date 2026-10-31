@@ -245,7 +245,7 @@ func TestFloatingIPAttachAcceptedPUTRetainsOnlyExactValidatedModel(t *testing.T)
 				body = `{"floatingip":`
 			}
 			base := client.ProviderClient.HTTPClient.Transport
-			client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method != "PUT" {
 					return base.RoundTrip(r)
 				}
@@ -262,7 +262,7 @@ func TestFloatingIPAttachAcceptedPUTRetainsOnlyExactValidatedModel(t *testing.T)
 					responseBody.Reader = &acceptedIPReader{data: []byte(body), cause: cause}
 				}
 				return &http.Response{StatusCode: 200, Header: http.Header{"X-Attach-Proof": {"accepted"}}, Body: responseBody, Request: r}, nil
-			})
+			}))
 			retries := 0
 			client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retries++

@@ -133,10 +133,6 @@ func TestNetworkMutationAcceptedDecodeAndIdentityErrorsResetWithoutResend(t *tes
 	}
 }
 
-type mutationTransport func(*http.Request) (*http.Response, error)
-
-func (f mutationTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type mutationErrorReader struct {
 	payload string
 	cause   error
@@ -178,7 +174,7 @@ func TestNetworkMutationAcceptedIOCancellationAndSourceErrorsKeepEvidenceAndOwne
 					code, payload = 204, ""
 				}
 				originalTransport := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = mutationTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.Method == http.MethodGet {
 						return originalTransport.RoundTrip(r)
 					}
@@ -202,8 +198,8 @@ func TestNetworkMutationAcceptedIOCancellationAndSourceErrorsKeepEvidenceAndOwne
 						}
 						return nil
 					}}
-					return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"actual-mutation"}}, Body: body}, nil
-				})
+					return testcloud.StreamResponse(code, body, http.Header{"X-Request-Id": {"actual-mutation"}}), nil
+				}))
 				cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, original error, _ uint) error {
 					callbacks.Add(1)
 					return original

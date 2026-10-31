@@ -172,14 +172,14 @@ func TestFloatingIPAttachGuardsSourceCloseAndPhysicalRetries(t *testing.T) {
 			})
 			if scenario == "selection close" {
 				base := client.ProviderClient.HTTPClient.Transport
-				client.ProviderClient.HTTPClient.Transport = planTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.URL.Path == "/v2.0/floatingips/fip" {
 						original := response.Body
 						response.Body = planCloseBody{Reader: original, close: func() error { service.API = nil; return original.Close() }}
 					}
 					return response, err
-				})
+				}))
 			}
 			plan, err := service.FloatingIPs.PrepareAttach(ctx, attachRequest())
 			if scenario == "selection close" {

@@ -23,18 +23,18 @@ import (
 func cloudRuleTypes(t *testing.T, calls *[]string, reply func(*http.Request, int) *http.Response) *network.Service {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonCloudATransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, req.Method+" "+strings.TrimPrefix(req.URL.EscapedPath(), "/neutron/v2.0")+"?"+req.URL.RawQuery)
 		response := reply(req, len(*calls))
 		response.Request = req
 		return response, nil
-	})
+	}))
 	client := cloud.Client("network", "/neutron/v2.0/")
 	client.ResourceBase = client.Endpoint
 	return network.New(client)
 }
 func cloudRuleTypeWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"qos-type-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"X-Request-Id": {"qos-type-proof"}})
 }
 func cloudRuleTypeReply(req *http.Request, _ int) *http.Response {
 	if strings.HasSuffix(req.URL.Path, "/extensions") {
