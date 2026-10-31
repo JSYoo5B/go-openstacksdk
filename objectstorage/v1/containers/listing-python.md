@@ -19,16 +19,16 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListFormat`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxPages`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListSinglePage`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The container Collection preserves native Swift marker pagination, prefix/explicit-limit query and typed count/byte fields while applying controls before local exact-name filtering.
   Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`.
@@ -36,7 +36,7 @@ Go API:
   Tests: `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListDefaultProjectionAndIndependentReceipts`, `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListQueryClassificationAndOptionOwnership`, `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListPublicFixtureWireAndSourceCapture`.
 - Owned ContainerRecord retains inherited id/name/count/bytes, sixteen Header descriptors and nullable location as 21 declared fields, preserving exact big integers, Source integer/bool conversion (int descriptor preserves bool; ordinary nonnumeric string/container becomes0; nondecimal digit-only string errors) and alias presence vs explicitnull/false/zero/empty. Row Header attrs alone populate descriptors: account response Header/metadata never becomes per-container observations. Wire has all row fields, whole Envelope/Header/status retain actual page, row metadata is independently owned with original types retained in Wire.
   Tests: `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListDefaultProjectionAndIndependentReceipts`.
-- Shared Python scalar/number/bool equality and recursive _dict_filter preserve truthy-scalar empty predicate, missing nested None and meaningful mapping-get faults. WithRecordListQuery preserves top-level option order and raw nested JSON preserves ordered short-circuit; no swallowed scalar AttributeError is turned into absence.
+- Shared Python scalar/number/bool equality and recursive _dict_filter preserve truthy-scalar empty predicate, missing nested None and meaningful mapping-get faults. request.Query preserves top-level option order and raw nested JSON preserves ordered short-circuit; no swallowed scalar AttributeError is turned into absence.
   Tests: `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListLocalEqualityAndDictionaryShortCircuit`, `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListOrderedLocalPredicatesAvoidLaterMappingFault`.
 - Account count pagination uses total raw consumed rows before local filters and immutable retained last raw id/name, including Python integer string/Unicode/count bounds. Initial raw limit truthiness controls nonempty short-page fallback; 0/false differ from strings 0/False. Empty array stops before malformed count/Link. Neither ignored full_listing=False nor end_marker disables or truncates pinned named pagination.
   Tests: `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListCountPagingUsesRawRowsAndRetainedMarker`, `objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListLimitTruthinessAndIgnoredFullListing`.
@@ -109,6 +109,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -123,8 +124,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     options := []containers.RecordListOption{
         containers.WithRecordListPrefix(*prefix),
-        containers.WithRecordListLimit(*pageSize),
-        containers.WithRecordListMaxItems(*maxItems),
+        request.Limit(*pageSize),
+        request.MaxItems(*maxItems),
     }
     for record, err := range swift.Containers.ListRecords(ctx, options...) {
         if err != nil {

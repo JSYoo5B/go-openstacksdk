@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureDigest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureTimestamp`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateFormSignatureNewest`
@@ -55,7 +55,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLDigest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLTimestamp`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateTempURLNewest`

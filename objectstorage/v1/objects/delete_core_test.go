@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -133,7 +134,7 @@ func TestObjectDeleteCoreMissingAndPhaseProofs(t *testing.T) {
 				}
 				return objectMetadataWire(r, code, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(r.Method))), nil
 			})
-			result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectIgnoreMissing(ignore))
+			result, err := New(c).DeleteObject(context.Background(), "box", "key", request.IgnoreMissing(ignore))
 			if ignore {
 				if err != nil || result == nil || !result.IgnoredMissing || result.Discovery == nil || (result.StaticLargeObject == nil) != headMissing || (result.Deletion == nil) != headMissing {
 					t.Fatal("missing proof lost", result, err)

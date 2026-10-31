@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
-	"slices"
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -143,7 +143,7 @@ func (a *API) CreateRecord(ctx context.Context, name string, attrs map[string]an
 	if err = errors.Join(descriptorErr, p.check(ctx)); err != nil {
 		return nil, wrap(err)
 	}
-	cfg, err := applyRecordOptions(ctx, p, RecordCreateOpts{Headers: make(map[string]string)}, copyRecordCreate, slices.Clone(options))
+	cfg, err := applyRecordOptions(ctx, p, RecordCreateOpts{Headers: make(map[string]string)}, copyRecordCreate, calls.Translate(options, recordCreateCalls))
 	if err = p.finish(ctx, cfg.Headers, err); err != nil {
 		return nil, wrap(err)
 	}
@@ -177,7 +177,7 @@ func (a *API) DeleteRecord(ctx context.Context, name string, options ...RecordDe
 	if err != nil {
 		return nil, wrap(err)
 	}
-	cfg, err := applyRecordOptions(ctx, p, RecordDeleteOpts{Headers: make(map[string]string)}, copyRecordDelete, slices.Clone(options))
+	cfg, err := applyRecordOptions(ctx, p, RecordDeleteOpts{Headers: make(map[string]string)}, copyRecordDelete, calls.Translate(options, recordDeleteCalls))
 	if err = p.finish(ctx, cfg.Headers, err); err != nil {
 		return nil, wrap(err)
 	}

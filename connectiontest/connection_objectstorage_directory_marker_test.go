@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -62,7 +63,7 @@ func TestConnectionSwiftDirectoryMarkerOwnsMediaAndFreshCapture(t *testing.T) {
 	factory := objects.WithDirectoryMarkerOpts(objects.DirectoryMarkerOpts{Headers: headers, Metadata: metadata})
 	headers["X-Call"], metadata["Owner"] = "mutated", "outside"
 	callbacks := 0
-	first, err := service.Objects.CreateDirectoryMarkerObject(ctx, container, name, factory, func(*objects.DirectoryMarkerOpts) error { callbacks++; return nil })
+	first, err := service.Objects.CreateDirectoryMarkerObject(ctx, container, name, factory, request.Custom(func(*objects.DirectoryMarkerOpts) error { callbacks++; return nil }))
 	if err != nil || first == nil || first.Source != "bytes" || first.Mode != "ordinary" || first.Size != 0 || first.MD5 != "" || first.SHA256 != "" || first.Skipped || first.Ordinary == nil || first.Ordinary.Acknowledgement == nil || first.Ordinary.Acknowledgement.StatusCode != 201 || len(first.Ordinary.Attempts) != 1 || callbacks != 1 || calls != 1 {
 		t.Fatal(first, err, calls, callbacks)
 	}

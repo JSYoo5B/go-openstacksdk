@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -85,7 +86,7 @@ func TestFormSignatureCoreDiscoveryAndPhaseProof(t *testing.T) {
 				}
 				return tempURLKeyTestWire(r, 204, h, body), nil
 			})
-			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), WithGenerateFormSignatureHeader("X-Trace", "owned"), WithGenerateFormSignatureNewest(false))
+			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), request.Header("X-Trace", "owned"), WithGenerateFormSignatureNewest(false))
 			want, callsWant := "088f8af8829bd0f68cdfeb13eabb3a2a8609039b", 1
 			if fallback {
 				want, callsWant = "03b9a415c089df6c06c47768a2c1114f1c837470", 2
@@ -149,7 +150,7 @@ func TestFormSignatureCorePreflightAndAcceptedFailures(t *testing.T) {
 				}
 				calls, callbacks := 0, 0
 				c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
-				result, err := New(c).GenerateFormSignature(context.Background(), tc.container, tc.input, func(*GenerateFormSignatureOpts) error { callbacks++; return nil })
+				result, err := New(c).GenerateFormSignature(context.Background(), tc.container, tc.input, request.Custom(func(*GenerateFormSignatureOpts) error { callbacks++; return nil }))
 				if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 					t.Fatal(result, err, calls, callbacks)
 				}
@@ -162,7 +163,7 @@ func TestFormSignatureCorePreflightAndAcceptedFailures(t *testing.T) {
 		cause, optionErr := errors.New("cancel cause"), errors.New("option cause")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
-		result, err := s.GenerateFormSignature(ctx, "box", signingTestInput(), func(*GenerateFormSignatureOpts) error { s.Objects = nil; cancel(cause); return optionErr })
+		result, err := s.GenerateFormSignature(ctx, "box", signingTestInput(), request.Custom(func(*GenerateFormSignatureOpts) error { s.Objects = nil; cancel(cause); return optionErr }))
 		if result != nil {
 			t.Fatal("fabricated discovery", result)
 		}

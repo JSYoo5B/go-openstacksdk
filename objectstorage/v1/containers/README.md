@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.GetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithoutGetMetadataNewest`
@@ -50,12 +50,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeader`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders`
 
 - Set is one bodyless POST with exactly one X-Container-Meta prefix and strict actual204, returning opaque acknowledgement without automatic HEAD, submitted-state projection, container creation or clear-all. Nil/empty maps still POST and empty values remove only the specified keys.
@@ -91,7 +90,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadataKeys`
 
@@ -123,7 +122,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeaders`
 
 - One bodyless literal-route PUT accepts only actual201/202, returns opaque ContainerResponse, and performs no lookup/HEAD/implicit refresh.
@@ -158,9 +157,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - One bodyless DELETE uses the literal container route without lookup, accountHEAD, emptiness probe, objectpurge, wait or cleanup; actual204 returns owned opaque response.
   Tests: `objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreWireIdentity`, `objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity`, `connectiontest/connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative`.
@@ -236,6 +235,7 @@ import (
     "fmt"
 
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func changeContainerMetadata(ctx context.Context, api *containers.API, name string) error {
@@ -244,7 +244,7 @@ func changeContainerMetadata(ctx context.Context, api *containers.API, name stri
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         containers.WithGetMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        containers.WithGetMetadataHeader("X-Request-Label", "container-metadata"),
+        request.Header("X-Request-Label", "container-metadata"),
         containers.WithGetMetadataNewest(false),
     }
     before, err := api.GetMetadata(ctx, name, getOptions...)
@@ -257,7 +257,7 @@ func changeContainerMetadata(ctx context.Context, api *containers.API, name stri
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         containers.WithMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        containers.WithMetadataHeader("X-Request-Label", "metadata-mutation"),
+        request.Header("X-Request-Label", "metadata-mutation"),
     }
     acknowledgement, err := api.SetMetadata(ctx, name, map[string]string{
         "book": "Moby Dick", "note": "literal %2F 雪",
@@ -295,6 +295,7 @@ import (
     "fmt"
 
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func containerLifecycle(ctx context.Context, api *containers.API, name string) error {
@@ -304,7 +305,7 @@ func containerLifecycle(ctx context.Context, api *containers.API, name string) e
             Metadata: map[string]string{"owner": "initial"},
         }),
         containers.WithCreateContainerHeaders(map[string]string{"X-Trace-Label": "container-create"}),
-        containers.WithCreateContainerHeader("X-Request-Label", "create"),
+        request.Header("X-Request-Label", "create"),
         containers.WithCreateContainerMetadata(map[string]string{
             "owner": "ops", "note": "literal %2F 雪",
         }),
@@ -318,15 +319,15 @@ func containerLifecycle(ctx context.Context, api *containers.API, name string) e
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         containers.WithDeleteContainerHeaders(map[string]string{"X-Trace-Label": "container-delete"}),
-        containers.WithDeleteContainerHeader("X-Request-Label", "delete"),
-        containers.WithDeleteContainerIgnoreMissing(false),
+        request.Header("X-Request-Label", "delete"),
+        request.IgnoreMissing(false),
     }
     deleted, err := api.DeleteContainer(ctx, name, deleteOptions...)
     if deleted != nil { fmt.Println(deleted.StatusCode, deleted.IgnoredMissing) }
     if err != nil { return err }
 
     quietOptions := append([]containers.DeleteContainerOption(nil), deleteOptions...)
-    quietOptions = append(quietOptions, containers.WithDeleteContainerIgnoreMissing(true))
+    quietOptions = append(quietOptions, request.IgnoreMissing(true))
     missing, err := api.DeleteContainer(ctx, name, quietOptions...)
     if missing != nil { fmt.Println(missing.StatusCode, missing.IgnoredMissing) }
     return err

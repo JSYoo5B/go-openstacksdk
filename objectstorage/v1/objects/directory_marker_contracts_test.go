@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -66,7 +67,7 @@ func TestDirectoryMarkerContractsLiteralWireAndRawAcknowledgements(t *testing.T)
 	provider.SetToken("marker-token")
 	client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "object-store", Endpoint: server.URL + "/catalogue/v1/AUTH_other/", ResourceBase: server.URL + "/reverse/a%20b/v1/AUTH_marker/", MoreHeaders: map[string]string{"Content-Type": "source/type", "X-Source": "source"}}
 	for index, name := range []string{objectMetadataKey, "/leading//trailing/"} {
-		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), objectMetadataContainer, name, objects.WithDirectoryMarkerHeader("content-type", "caller/type"), objects.WithDirectoryMarkerMetadataValue("Book", "literal %2F"))
+		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), objectMetadataContainer, name, request.Header("content-type", "caller/type"), objects.WithDirectoryMarkerMetadataValue("Book", "literal %2F"))
 		directoryMarkerExternalResult(t, result, 201+index, "marker acknowledgement")
 		if err != nil || len(result.Ordinary.Attempts) != 1 || result.Ordinary.Attempts[0].PhysicalAttempt != 1 || result.Ordinary.Acknowledgement.Header.Get("X-Trans-Id") != "wire-marker" {
 			t.Fatalf("result=%+v err=%v", result, err)
@@ -93,18 +94,18 @@ func TestDirectoryMarkerContractsPreflightAndSnapshots(t *testing.T) {
 			return objectMetadataResponse(201, "snapshot proof"), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "Content-Type": "source/type"}
-		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", factory, func(cfg *objects.DirectoryMarkerOpts) error {
+		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", factory, request.Custom(func(cfg *objects.DirectoryMarkerOpts) error {
 			callbacks++
 			retained = cfg
 			client.MoreHeaders["X-Source"] = "valid drift"
 			client.MoreHeaders["Content-Type"] = "valid source drift"
 			return nil
-		}, func(*objects.DirectoryMarkerOpts) error {
+		}), request.Custom(func(*objects.DirectoryMarkerOpts) error {
 			callbacks++
 			retained.Headers["X-Call"] = "poisoned retained option"
 			retained.Metadata["Book"] = "poisoned retained option"
 			return nil
-		})
+		}))
 		directoryMarkerExternalResult(t, result, 201, "snapshot proof")
 		if err != nil || calls != 1 || callbacks != 2 {
 			t.Fatalf("result=%+v err=%v HTTP=%d callbacks=%d", result, err, calls, callbacks)
@@ -117,9 +118,9 @@ func TestDirectoryMarkerContractsPreflightAndSnapshots(t *testing.T) {
 	})
 	t.Run("reserved or invalid input never reaches transport", func(t *testing.T) {
 		for _, option := range []objects.DirectoryMarkerOption{
-			objects.WithDirectoryMarkerHeader("X-Detect-Content-Type", "false"),
-			objects.WithDirectoryMarkerHeader("Content-Length", "1"),
-			objects.WithDirectoryMarkerHeader("Content-Type", "bad\x7f"),
+			request.Header("X-Detect-Content-Type", "false"),
+			request.Header("Content-Length", "1"),
+			request.Header("Content-Type", "bad\x7f"),
 			objects.WithDirectoryMarkerHeaders(map[string]string{"Content-Type": "a", "content-type": "a"}),
 			nil,
 		} {
@@ -142,7 +143,7 @@ func TestDirectoryMarkerContractsPreflightAndSnapshots(t *testing.T) {
 				return objectMetadataResponse(201, "unexpected"), nil
 			})
 			client.MoreHeaders = source
-			result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", func(*objects.DirectoryMarkerOpts) error { callbacks++; return nil })
+			result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", request.Custom(func(*objects.DirectoryMarkerOpts) error { callbacks++; return nil }))
 			if !errors.Is(err, resource.ErrInvalidOption) || result != nil || calls != 0 || callbacks != 0 {
 				t.Fatalf("source=%v result=%+v err=%v HTTP=%d callback=%d", source, result, err, calls, callbacks)
 			}
@@ -155,10 +156,10 @@ func TestDirectoryMarkerContractsPreflightAndSnapshots(t *testing.T) {
 			calls++
 			return objectMetadataResponse(201, "unexpected"), nil
 		})
-		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", func(*objects.DirectoryMarkerOpts) error {
+		result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", request.Custom(func(*objects.DirectoryMarkerOpts) error {
 			client.Endpoint = "https://changed.invalid/v1/AUTH_other/"
 			return cause
-		})
+		}))
 		if !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || result != nil || calls != 0 {
 			t.Fatalf("result=%+v err=%v HTTP=%d", result, err, calls)
 		}
@@ -208,11 +209,11 @@ func TestDirectoryMarkerContractsNativeReplayAndPhysicalEvidence(t *testing.T) {
 					return nil
 				}
 			}
-			result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", objects.WithDirectoryMarkerMetadataValue("Book", "owned"), func(*objects.DirectoryMarkerOpts) error {
+			result, err := objects.New(client).CreateDirectoryMarkerObject(context.Background(), "c", "o", objects.WithDirectoryMarkerMetadataValue("Book", "owned"), request.Custom(func(*objects.DirectoryMarkerOpts) error {
 				callbacks++
 				client.MoreHeaders["X-Source"] = "valid drift"
 				return nil
-			})
+			}))
 			directoryMarkerExternalResult(t, result, 202, "native marker acknowledgement")
 			if err != nil || calls != 2 || hooks != 1 || callbacks != 1 || len(result.Ordinary.Attempts) != 2 || result.Ordinary.Attempts[0].Response.StatusCode != status || string(result.Ordinary.Attempts[0].Response.Body) != "native rejected proof" || result.Ordinary.Attempts[0].Response.Header.Get("X-Trans-Id") != "actual-object" || result.Ordinary.Attempts[0].Error == nil || result.Ordinary.Attempts[1].PhysicalAttempt != 2 {
 				t.Fatalf("result=%+v err=%v HTTP=%d hooks=%d callback=%d", result, err, calls, hooks, callbacks)

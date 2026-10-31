@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -254,7 +255,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				v, err := api.GetObject(context.Background(), "c", "o", factory, objects.WithObjectReadHeader("X-Call", "final"))
+				v, err := api.GetObject(context.Background(), "c", "o", factory, request.Header("X-Call", "final"))
 				if err != nil || v == nil || string(v.Body) != "ok" {
 					t.Errorf("parallel result=%+v err=%v", v, err)
 				}
@@ -273,17 +274,17 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			}
 			return objectReadWire(r, 200, nil, objectReadBytes(nil)), nil
 		})
-		v, err := api.GetObject(context.Background(), "c", "o", func(o *objects.ObjectReadOpts) error {
+		v, err := api.GetObject(context.Background(), "c", "o", request.Custom(func(o *objects.ObjectReadOpts) error {
 			callbacks++
 			o.Headers["X-Call"] = "before-copy"
 			held = o
 			client.MoreHeaders["X-Source"] = "later-valid-source"
 			return nil
-		}, func(*objects.ObjectReadOpts) error {
+		}), request.Custom(func(*objects.ObjectReadOpts) error {
 			callbacks++
 			held.Headers["X-Call"] = "stale-handle"
 			return nil
-		})
+		}))
 		if err != nil || v == nil || callbacks != 2 {
 			t.Fatalf("callbacks=%d value=%+v err=%v", callbacks, v, err)
 		}
@@ -332,9 +333,9 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 					if source {
 						client.MoreHeaders = map[string]string{key: "x"}
 					} else {
-						options = append(options, objects.WithObjectReadHeader(key, "x"))
+						options = append(options, request.Header(key, "x"))
 					}
-					options = append(options, func(*objects.ObjectReadOpts) error { callbacks++; return nil })
+					options = append(options, request.Custom(func(*objects.ObjectReadOpts) error { callbacks++; return nil }))
 					v, err := objects.New(client).GetObject(context.Background(), "c", "o", options...)
 					if v != nil || !errors.Is(err, resource.ErrInvalidOption) || requests != 0 || (source && callbacks != 0) {
 						t.Fatalf("value=%+v err=%v requests=%d callbacks=%d", v, err, requests, callbacks)
@@ -348,7 +349,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			}
 			return objectReadWire(r, 200, nil, objectReadBytes(nil)), nil
 		}))
-		if _, err := api.GetObject(context.Background(), "c", "o", objects.WithObjectReadHeader("X-Literal", " 雪\tvalue "), objects.WithObjectReadIfMatch(" quoted literal ")); err != nil {
+		if _, err := api.GetObject(context.Background(), "c", "o", request.Header("X-Literal", " 雪\tvalue "), objects.WithObjectReadIfMatch(" quoted literal ")); err != nil {
 			t.Fatal(err)
 		}
 	})

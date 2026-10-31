@@ -18,6 +18,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -273,7 +274,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				factoryHeaders["x-call"] = "mutated"
 				extra["X-Second"] = "mutated"
 				var retained *accounts.SetTempURLKeyOpts
-				result, err := accounts.New(client).SetTempURLKey(context.Background(), "key", accounts.WithSetTempURLKeySecondary(true), accounts.WithSetTempURLKeyHeader("X-Discarded", "yes"), full, headers, accounts.WithSetTempURLKeyHeader("X-Call", "final"), func(cfg *accounts.SetTempURLKeyOpts) error { retained = cfg; return nil }, func(cfg *accounts.SetTempURLKeyOpts) error { retained.Headers["X-Call"] = "late mutation"; return nil })
+				result, err := accounts.New(client).SetTempURLKey(context.Background(), "key", accounts.WithSetTempURLKeySecondary(true), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained.Headers["X-Call"] = "late mutation"; return nil }))
 				if err != nil || result == nil {
 					t.Fatalf("result=%+v err=%v", result, err)
 				}
@@ -284,10 +285,10 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				factoryHeaders["x-call"] = "mutated"
 				extra["X-Second"] = "mutated"
 				var retained *containers.SetTempURLKeyOpts
-				result, err := containers.New(client).SetTempURLKey(context.Background(), "c", "key", containers.WithSetTempURLKeySecondary(true), containers.WithSetTempURLKeyHeader("X-Discarded", "yes"), full, headers, containers.WithSetTempURLKeyHeader("X-Call", "final"), func(cfg *containers.SetTempURLKeyOpts) error { retained = cfg; return nil }, func(cfg *containers.SetTempURLKeyOpts) error {
+				result, err := containers.New(client).SetTempURLKey(context.Background(), "c", "key", containers.WithSetTempURLKeySecondary(true), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error {
 					retained.Headers["X-Call"] = "late mutation"
 					return nil
-				})
+				}))
 				if err != nil || result == nil {
 					t.Fatalf("result=%+v err=%v", result, err)
 				}
@@ -328,15 +329,15 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				}
 				return tempKeyWire(204, "", http.Header{http.CanonicalHeaderKey(prefix): {value}}), nil
 			})
-			opts := []v1.GetTempURLKeyOption{v1.WithGetTempURLKeyNewest(true), full, overlay, v1.WithGetTempURLKeyHeader("X-Call", "final")}
+			opts := []v1.GetTempURLKeyOption{v1.WithGetTempURLKeyNewest(true), full, overlay, request.Header("X-Call", "final")}
 			var retained *v1.GetTempURLKeyOpts
-			opts = append(opts, func(cfg *v1.GetTempURLKeyOpts) error { retained = cfg; return nil }, func(cfg *v1.GetTempURLKeyOpts) error {
+			opts = append(opts, request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *v1.GetTempURLKeyOpts) error {
 				retained.Headers["X-Call"] = "late mutation"
 				if retained.Newest != nil {
 					*retained.Newest = !*retained.Newest
 				}
 				return nil
-			})
+			}))
 			if tc.clear {
 				opts = append(opts, v1.WithoutGetTempURLKeyNewest())
 			}
@@ -394,7 +395,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 	t.Run("context source and literal identity before callback or HTTP", func(t *testing.T) {
 		for _, service := range []*v1.Service{nil, {}, v1.New(nil)} {
 			callbacks := 0
-			result, err := service.GetTempURLKey(context.Background(), func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil })
+			result, err := service.GetTempURLKey(context.Background(), request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 				t.Fatalf("nil source result=%+v err=%v callbacks=%d", result, err, callbacks)
 			}
@@ -406,11 +407,11 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 		for _, ctx := range []context.Context{nil, cancelled} {
 			calls, callbacks := 0, 0
 			client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
-			result, err := v1.New(client).GetTempURLKey(ctx, func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil })
+			result, err := v1.New(client).GetTempURLKey(ctx, request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil }))
 			if result != nil || err == nil || calls != 0 || callbacks != 0 || (ctx != nil && (!errors.Is(err, context.Canceled) || !errors.Is(err, cause))) {
 				t.Fatalf("result=%+v err=%v callbacks=%d calls=%d", result, err, callbacks, calls)
 			}
-			ack, err := accounts.New(client).SetTempURLKey(ctx, "key", func(cfg *accounts.SetTempURLKeyOpts) error { callbacks++; return nil })
+			ack, err := accounts.New(client).SetTempURLKey(ctx, "key", request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { callbacks++; return nil }))
 			if ack != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatalf("setter preflight ack=%+v err=%v", ack, err)
 			}
@@ -419,7 +420,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
 			mutate(client)
-			result, err := v1.New(client).GetTempURLKey(context.Background(), func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil })
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; return nil }))
 			if result != nil || err == nil || calls != 0 || callbacks != 0 {
 				t.Fatalf("source preflight result=%+v err=%v calls=%d callbacks=%d", result, err, calls, callbacks)
 			}
@@ -436,7 +437,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 		for _, bad := range []string{"\r", "\n", "\x00", "\x7f", string([]byte{0xff})} {
 			calls, callbacks := 0, 0
 			client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
-			ack, err := containers.New(client).SetTempURLKey(context.Background(), "c", bad, func(cfg *containers.SetTempURLKeyOpts) error { callbacks++; return nil })
+			ack, err := containers.New(client).SetTempURLKey(context.Background(), "c", bad, request.Custom(func(cfg *containers.SetTempURLKeyOpts) error { callbacks++; return nil }))
 			if ack != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("key=%q ack=%+v err=%v calls=%d callbacks=%d", bad, ack, err, calls, callbacks)
 			}
@@ -450,13 +451,13 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			for _, source := range []bool{false, true} {
 				calls, callbacks := 0, 0
 				client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
-				opts := []v1.GetTempURLKeyOption{func(cfg *v1.GetTempURLKeyOpts) error {
+				opts := []v1.GetTempURLKeyOption{request.Custom(func(cfg *v1.GetTempURLKeyOpts) error {
 					callbacks++
 					if cfg.Headers == nil {
 						t.Error("uninitialized headers")
 					}
 					return nil
-				}}
+				})}
 				if source {
 					client.MoreHeaders = headers
 				} else {
@@ -473,7 +474,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			t.Error("HTTP after callback error")
 			return tempKeyWire(204, "", nil), nil
 		})
-		for _, option := range []v1.GetTempURLKeyOption{nil, func(cfg *v1.GetTempURLKeyOpts) error { return custom }} {
+		for _, option := range []v1.GetTempURLKeyOption{nil, request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { return custom })} {
 			result, err := v1.New(client).GetTempURLKey(context.Background(), option)
 			if result != nil || err == nil || (option != nil && !errors.Is(err, custom)) {
 				t.Fatalf("result=%+v err=%v", result, err)
@@ -495,7 +496,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
 			service := v1.New(client)
-			result, err := service.GetTempURLKey(context.Background(), func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; mutate(service, client); return nil })
+			result, err := service.GetTempURLKey(context.Background(), request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { callbacks++; mutate(service, client); return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 1 {
 				t.Fatalf("result=%+v err=%v callbacks=%d calls=%d", result, err, callbacks, calls)
 			}
@@ -507,7 +508,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			t.Error("HTTP after cancelled option")
 			return tempKeyWire(204, "", nil), nil
 		})
-		result, err := v1.New(client).GetTempURLKey(ctx, func(cfg *v1.GetTempURLKeyOpts) error { cancel(cause); return nil })
+		result, err := v1.New(client).GetTempURLKey(ctx, request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { cancel(cause); return nil }))
 		if result != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 			t.Fatalf("result=%+v err=%v", result, err)
 		}

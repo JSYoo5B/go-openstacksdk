@@ -15,6 +15,7 @@ import (
 	"sync"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -205,7 +206,7 @@ func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter
 			return
 		}
 		cfg := copyListRecordOpts(RecordListOpts{})
-		for _, option := range owned {
+		for _, option := range calls.Translate(owned, recordListCalls) {
 			if err := p.check(ctx); err != nil {
 				fail(nil, err)
 				return

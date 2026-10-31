@@ -16,6 +16,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -118,7 +119,7 @@ func TestSwiftPythonObjectMetadataSetterFreshMergeFalseyAliasesAndNoFinalHEAD(t 
 		w.WriteHeader(202)
 	})
 	values := map[string]any{"Owner": "requested", "false": false, "nil": nil, "zero": json.Number("0e900"), "empty": "", "list": []any{}, "dict": map[string]any{}, "large": json.Number("900719925474099312345"), "enabled": true, "nested": map[string]any{"active": true}, "X-Object-Meta-External": "prefixed"}
-	result, err := objects.New(client).SetMetadataFromFresh(context.Background(), "assets", "file", values, objects.WithMetadataHeader("X-Probe", "ordinary"))
+	result, err := objects.New(client).SetMetadataFromFresh(context.Background(), "assets", "file", values, request.Header("X-Probe", "ordinary"))
 	if err != nil || result.Before.Metadata.Values["owner"] != "observed owner" || result.Acknowledgement.StatusCode != 202 || result.Acknowledgement.Header.Get("X-Proof") != "write ack" || result.Refreshed != nil || result.NoOp || !reflect.DeepEqual(methods, []string{"HEAD", "POST"}) {
 		t.Fatal(result, err, methods)
 	}
@@ -613,13 +614,13 @@ func TestSwiftPythonObjectMetadataPhysicalFailuresKeepEachCompletedPhase(t *test
 func TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPreflight(t *testing.T) {
 	values := map[string]any{"owner": "original", "nested": []any{"before"}}
 	var kept *objects.MetadataOpts
-	option := func(cfg *objects.MetadataOpts) error {
+	option := request.Custom(func(cfg *objects.MetadataOpts) error {
 		values["owner"] = "caller"
 		values["nested"].([]any)[0] = "changed"
 		cfg.Headers["X-Probe"] = "snapshot"
 		kept = cfg
 		return nil
-	}
+	})
 	var calls int
 	client := objectMetadataClient(func(r *http.Request) (*http.Response, error) {
 		calls++
@@ -650,7 +651,7 @@ func TestSwiftPythonObjectMetadataOwnedInputsCallbacksConcurrentReuseAndPrefligh
 		}
 		return response, nil
 	})
-	if _, err := objects.New(client).DeleteMetadataAndRefresh(context.Background(), objectMetadataContainer, objectMetadataKey, keys, func(*objects.MetadataOpts) error { keys[0] = "missing"; return nil }); err != nil || calls != 3 {
+	if _, err := objects.New(client).DeleteMetadataAndRefresh(context.Background(), objectMetadataContainer, objectMetadataKey, keys, request.Custom(func(*objects.MetadataOpts) error { keys[0] = "missing"; return nil })); err != nil || calls != 3 {
 		t.Fatal(err, calls)
 	}
 	cloud := testcloud.New(t)

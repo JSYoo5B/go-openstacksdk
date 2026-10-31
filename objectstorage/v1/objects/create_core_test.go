@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -154,7 +155,7 @@ func TestObjectCreateCoreChecksumDecisions(t *testing.T) {
 				}
 				return nil, errors.New("unexpected method")
 			})
-			opts := append([]CreateObjectOption{WithCreateObjectHeader("Content-Type", "image/test"), WithCreateObjectMetadata(map[string]string{"Tag": "literal", "x-sdk-md5": "caller"})}, tc.opts...)
+			opts := append([]CreateObjectOption{request.Header("Content-Type", "image/test"), WithCreateObjectMetadata(map[string]string{"Tag": "literal", "x-sdk-md5": "caller"})}, tc.opts...)
 			result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Filename: createCoreFile(t, "owned contents")}, opts...)
 			wantCalls := 3
 			if tc.skip {

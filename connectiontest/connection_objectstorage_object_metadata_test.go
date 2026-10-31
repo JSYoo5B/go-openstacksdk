@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -117,10 +118,10 @@ func TestConnectionObjectMetadataSharesClientAndOwnsPhases(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://cloud.test/other%25/v1/AUTH_account%25/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0", "Content-Type": "source/type"}
-	get, err := service.Objects.GetMetadata(ctx, container, object, objects.WithGetMetadataNewest(false), func(o *objects.GetMetadataOpts) error {
+	get, err := service.Objects.GetMetadata(ctx, container, object, objects.WithGetMetadataNewest(false), request.Custom(func(o *objects.GetMetadataOpts) error {
 		provider.SetToken("swift-1")
 		return nil
-	})
+	}))
 	if err != nil || get == nil || get.Metadata == nil || get.Metadata.ContentLength == nil || *get.Metadata.ContentLength != 9007199254740995 || get.Metadata.Timestamp == nil || *get.Metadata.Timestamp != "" || get.Metadata.LastModified == nil || *get.Metadata.LastModified != "literal PUT date" || get.Metadata.Values["owner"] != "observed" || get.StatusCode != 200 || calls != 1 {
 		t.Fatal(get, err, calls)
 	}
@@ -128,10 +129,10 @@ func TestConnectionObjectMetadataSharesClientAndOwnsPhases(t *testing.T) {
 	headers := map[string]string{"X-Call": "owned", "Content-Disposition": "attachment"}
 	option := objects.WithMetadataHeaders(headers)
 	headers["X-Call"] = "late"
-	set, err := service.Objects.SetMetadata(ctx, container, object, values, option, func(o *objects.MetadataOpts) error {
+	set, err := service.Objects.SetMetadata(ctx, container, object, values, option, request.Custom(func(o *objects.MetadataOpts) error {
 		values["Owner"] = "late"
 		return nil
-	})
+	}))
 	if err != nil || set == nil || set.Before == nil || set.Before.Metadata == nil || set.Before.Metadata.Values["owner"] != "observed" || set.Acknowledgement == nil || set.Acknowledgement.StatusCode != 202 || string(set.Acknowledgement.Body) != "opaque" || calls != 3 {
 		t.Fatal(set, err, calls)
 	}

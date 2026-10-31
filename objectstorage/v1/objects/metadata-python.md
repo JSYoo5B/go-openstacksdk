@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutGetMetadataNewest`
@@ -54,7 +54,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadataFromFresh`
 
@@ -101,7 +101,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadataAndRefresh`
 

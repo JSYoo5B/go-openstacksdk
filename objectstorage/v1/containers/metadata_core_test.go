@@ -182,7 +182,7 @@ func TestContainerMetadataCoreCompletePreflight(t *testing.T) {
 	a := New(c)
 	for _, value := range []string{"", "/", ".", "..", "bad\\name", "line\n", "\t", "\x7f", string([]byte{255})} {
 		invoked := 0
-		result, err := a.GetMetadata(context.Background(), value, func(*GetMetadataOpts) error { invoked++; return nil })
+		result, err := a.GetMetadata(context.Background(), value, request.Custom(func(*GetMetadataOpts) error { invoked++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || invoked != 0 {
 			t.Fatalf("name %q accepted %+v %v callback%d", value, result, err, invoked)
 		}
@@ -201,7 +201,7 @@ func TestContainerMetadataCoreCompletePreflight(t *testing.T) {
 	}
 	for _, input := range []map[string]string{{"": "x"}, {"bad key": "x"}, {"x-CONTAINER-meta-Key": "x"}, {"Key": "x", "key": "x"}, {"Key": "a\r\nb"}, {"Key": string([]byte{255})}, {"Key": "a\x00b"}} {
 		invoked := 0
-		got, err := a.SetMetadata(context.Background(), containerMetadataName, input, func(*MetadataOpts) error { invoked++; return nil })
+		got, err := a.SetMetadata(context.Background(), containerMetadataName, input, request.Custom(func(*MetadataOpts) error { invoked++; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || invoked != 0 {
 			t.Fatalf("bad input accepted %v %v %d", input, err, invoked)
 		}
@@ -297,7 +297,7 @@ func TestContainerMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	containerMetadataProof(t, err, 204, "ack")
 	c.Endpoint = "http://account.invalid/v1/AUTH_x/"
 	optionErr := errors.New("callback")
-	_, err = a.GetMetadata(context.Background(), containerMetadataName, func(*GetMetadataOpts) error { c.ResourceBase = c.Endpoint; return optionErr })
+	_, err = a.GetMetadata(context.Background(), containerMetadataName, request.Custom(func(*GetMetadataOpts) error { c.ResourceBase = c.Endpoint; return optionErr }))
 	if !errors.Is(err, optionErr) || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 		t.Fatalf("callback/source %v", err)
 	}
@@ -305,7 +305,7 @@ func TestContainerMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	for _, base := range []string{"http://other.invalid/v1/", "http://account.invalid/v1?", "http://account.invalid/v1/?x=1", "http://user@account.invalid/v1/", "http://account.invalid/v1/#x", "http://account.invalid/v1", "file:///v1/"} {
 		c.ResourceBase = base
 		invoked := false
-		got, err := a.GetMetadata(context.Background(), containerMetadataName, func(*GetMetadataOpts) error { invoked = true; return nil })
+		got, err := a.GetMetadata(context.Background(), containerMetadataName, request.Custom(func(*GetMetadataOpts) error { invoked = true; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || invoked || calls.Load() != 1 {
 			t.Fatalf("base %q accepted %+v %v", base, got, err)
 		}
@@ -313,7 +313,7 @@ func TestContainerMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	c.ResourceBase = c.Endpoint
 	for _, mutate := range []func(){func() { c.Endpoint = "http://account.invalid/v1/AUTH_x" }, func() { c.Microversion = "new" }, func() { c.ProviderClient = &gophercloud.ProviderClient{} }} {
 		beforeEndpoint, beforeVersion, beforeProvider := c.Endpoint, c.Microversion, c.ProviderClient
-		got, err := a.GetMetadata(context.Background(), containerMetadataName, func(*GetMetadataOpts) error { mutate(); return nil })
+		got, err := a.GetMetadata(context.Background(), containerMetadataName, request.Custom(func(*GetMetadataOpts) error { mutate(); return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 			t.Fatalf("source retarget %+v %v", got, err)
 		}

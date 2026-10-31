@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.GetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithoutGetMetadataNewest`
@@ -50,7 +50,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadataAndRefresh`
 
@@ -85,7 +85,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadataKeys`
 
@@ -129,6 +129,7 @@ import (
     "fmt"
 
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func changeAccountMetadata(ctx context.Context, api *accounts.API) error {
@@ -137,7 +138,7 @@ func changeAccountMetadata(ctx context.Context, api *accounts.API) error {
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         accounts.WithGetMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        accounts.WithGetMetadataHeader("X-Request-Label", "account-metadata"),
+        request.Header("X-Request-Label", "account-metadata"),
         accounts.WithGetMetadataNewest(false),
     }
     before, err := api.GetMetadata(ctx, getOptions...)
@@ -149,7 +150,7 @@ func changeAccountMetadata(ctx context.Context, api *accounts.API) error {
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         accounts.WithMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        accounts.WithMetadataHeader("X-Request-Label", "metadata-mutation"),
+        request.Header("X-Request-Label", "metadata-mutation"),
     }
     acknowledgement, err := api.SetMetadata(ctx, map[string]string{
         "book": "Moby Dick", "note": "literal %2F 雪",

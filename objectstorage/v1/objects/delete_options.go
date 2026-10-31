@@ -1,6 +1,11 @@
 package objects
 
-import "context"
+import (
+	"context"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // DeleteObjectOpts owns both phases' preferences. A nil StaticLargeObject
 // probes fresh HEAD; a known flag skips discovery. IgnoreMissing defaults true.
@@ -10,18 +15,27 @@ type DeleteObjectOpts struct {
 	StaticLargeObject, IgnoreMissing, Newest *bool
 	VersionID                                string
 }
-type DeleteObjectOption func(*DeleteObjectOpts) error
+
+// DeleteObjectOption is one option of DeleteObject: the WithDeleteObject*
+// options, request.Header (validated and merged like a one-entry
+// WithDeleteObjectHeaders), request.IgnoreMissing or request.Custom over
+// *DeleteObjectOpts. Other shared calls, including request.Headers (the
+// WithDeleteObjectHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteObjectOption = request.DeleteCall
+
+var deleteObjectCalls = calls.Spec[DeleteObjectOpts]{
+	Header:        calls.MergeHeader[DeleteObjectOpts](WithDeleteObjectHeaders),
+	IgnoreMissing: calls.Pointer(func(cfg *DeleteObjectOpts) **bool { return &cfg.IgnoreMissing }),
+}
 
 func WithDeleteObjectOpts(value DeleteObjectOpts) DeleteObjectOption {
 	snapshot := cloneDeleteObjectOpts(value)
-	return func(cfg *DeleteObjectOpts) error { *cfg = cloneDeleteObjectOpts(snapshot); return nil }
-}
-func WithDeleteObjectHeader(key, value string) DeleteObjectOption {
-	return WithDeleteObjectHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *DeleteObjectOpts) error { *cfg = cloneDeleteObjectOpts(snapshot); return nil })
 }
 func WithDeleteObjectHeaders(values map[string]string) DeleteObjectOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *DeleteObjectOpts) error {
+	return request.Custom(func(cfg *DeleteObjectOpts) error {
 		if cfg.Headers == nil {
 			cfg.Headers = make(map[string]string)
 		}
@@ -29,28 +43,25 @@ func WithDeleteObjectHeaders(values map[string]string) DeleteObjectOption {
 			return err
 		}
 		return mergeMetadataHeaders(cfg.Headers, snapshot)
-	}
+	})
 }
 func WithDeleteObjectStaticLargeObject(value bool) DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = cloneDeleteObjectBool(&value); return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = cloneDeleteObjectBool(&value); return nil })
 }
 func WithoutDeleteObjectStaticLargeObject() DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = nil; return nil }
-}
-func WithDeleteObjectIgnoreMissing(value bool) DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.IgnoreMissing = cloneDeleteObjectBool(&value); return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = nil; return nil })
 }
 func WithoutDeleteObjectIgnoreMissing() DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.IgnoreMissing = nil; return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.IgnoreMissing = nil; return nil })
 }
 func WithDeleteObjectVersionID(value string) DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.VersionID = value; return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.VersionID = value; return nil })
 }
 func WithDeleteObjectNewest(value bool) DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.Newest = cloneDeleteObjectBool(&value); return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.Newest = cloneDeleteObjectBool(&value); return nil })
 }
 func WithoutDeleteObjectNewest() DeleteObjectOption {
-	return func(cfg *DeleteObjectOpts) error { cfg.Newest = nil; return nil }
+	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.Newest = nil; return nil })
 }
 
 func cloneDeleteObjectBool(value *bool) *bool {
@@ -69,7 +80,7 @@ func cloneDeleteObjectOpts(value DeleteObjectOpts) DeleteObjectOpts {
 }
 func (p *preparedDeleteObject) applyOptions(ctx context.Context, options []DeleteObjectOption) (DeleteObjectOpts, error) {
 	cfg := cloneDeleteObjectOpts(DeleteObjectOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, deleteObjectCalls) {
 		if err := p.guard(ctx); err != nil {
 			return cfg, err
 		}

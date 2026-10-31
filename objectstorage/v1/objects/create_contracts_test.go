@@ -22,6 +22,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -120,12 +121,12 @@ func TestCreateObjectContractsBytesWireAndSnapshots(t *testing.T) {
 			return objectMetadataResponse(202, "raw-ack"), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "original"}
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Data: data}, factory, func(o *objects.CreateObjectOpts) error {
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Data: data}, factory, request.Custom(func(o *objects.CreateObjectOpts) error {
 			callbacks++
 			data[0] = 'X'
 			client.MoreHeaders["X-Source"] = "valid-drift"
 			return nil
-		})
+		}))
 		if err != nil || callbacks != 1 || calls != 1 || result == nil || result.Ordinary.Acknowledgement.StatusCode != 202 {
 			t.Fatalf("result=%+v err=%v calls=%d callbacks=%d", result, err, calls, callbacks)
 		}
@@ -168,7 +169,7 @@ func TestCreateObjectContractsFileReaderAndHashes(t *testing.T) {
 				return objectMetadataResponse(500, "unexpected"), nil
 			}
 		})
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: reader}, objects.WithCreateObjectHeader("X-Upload", "only-write"), objects.WithCreateObjectMetadataValue("Book", "literal"), objects.WithCreateObjectMD5(strings.Repeat("0", 32)))
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: reader}, request.Header("X-Upload", "only-write"), objects.WithCreateObjectMetadataValue("Book", "literal"), objects.WithCreateObjectMD5(strings.Repeat("0", 32)))
 		if err != nil || result == nil || result.Source != "reader" || result.Mode != "ordinary" || result.MD5 != md || result.SHA256 != sha || !reflect.DeepEqual(methods, []string{"GET", "HEAD", "PUT"}) || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 			t.Fatalf("result=%+v err=%v methods=%v Close=%d Seek=%d", result, err, methods, reader.closes.Load(), reader.seeks.Load())
 		}
@@ -302,7 +303,7 @@ func TestCreateObjectContractsSLOAndDLOWire(t *testing.T) {
 				response.Header.Set("ETag", `"opaque-etag"`)
 				return response, nil
 			})
-			result, err := objects.New(client).CreateObject(context.Background(), container, key, objects.CreateObjectInput{Reader: bytes.NewReader(data)}, objects.WithCreateObjectSegmentSize(2), objects.WithCreateObjectUseSLO(useSLO), objects.WithCreateObjectHeader("Content-Type", "logical/type"))
+			result, err := objects.New(client).CreateObject(context.Background(), container, key, objects.CreateObjectInput{Reader: bytes.NewReader(data)}, objects.WithCreateObjectSegmentSize(2), objects.WithCreateObjectUseSLO(useSLO), request.Header("Content-Type", "logical/type"))
 			mode := "slo"
 			if !useSLO {
 				mode = "dlo"
@@ -393,7 +394,7 @@ func TestCreateObjectContractsSLOAndDLOWire(t *testing.T) {
 			next.Header["aCcEpT"] = []string{"foreign"}
 			return nil
 		}
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, objects.WithCreateObjectSegmentSize(2), objects.WithCreateObjectHeader("Content-Type", "logical/type"))
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, objects.WithCreateObjectSegmentSize(2), request.Header("Content-Type", "logical/type"))
 		if err != nil || result == nil || result.Manifest == nil || manifestCalls != 2 || redirects != 1 || len(result.Manifest.Attempts) != 2 || result.Manifest.Acknowledgement.StatusCode != 201 {
 			t.Fatalf("result=%+v err=%v manifest=%d redirect=%d", result, err, manifestCalls, redirects)
 		}

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutGetMetadataNewest`
@@ -54,7 +54,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadataFromFresh`
 
@@ -101,7 +101,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadataAndRefresh`
 
@@ -235,6 +235,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func ChangeObjectMetadata(ctx context.Context, conn *sdk.Connection, newest bool) error {
@@ -247,7 +248,7 @@ func ChangeObjectMetadata(ctx context.Context, conn *sdk.Connection, newest bool
 		objects.WithGetMetadataOpts(objects.GetMetadataOpts{
 			Headers: map[string]string{"X-Trans-Id-Extra": "sdk-read"},
 		}),
-		objects.WithGetMetadataHeader("X-Example", "read"),
+		request.Header("X-Example", "read"),
 		objects.WithGetMetadataHeaders(map[string]string{"X-Example-Trace": "metadata"}),
 	}
 	if newest {
@@ -269,7 +270,7 @@ func ChangeObjectMetadata(ctx context.Context, conn *sdk.Connection, newest bool
 		objects.WithMetadataOpts(objects.MetadataOpts{
 			Headers: map[string]string{"X-Trans-Id-Extra": "sdk-write"},
 		}),
-		objects.WithMetadataHeader("Content-Disposition", "attachment"),
+		request.Header("Content-Disposition", "attachment"),
 		objects.WithMetadataHeaders(map[string]string{"Cache-Control": "private"}),
 	}
 	change, err := service.Objects.SetMetadata(ctx, container, key,

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -25,7 +26,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 	headers["x-trace"], size = "outside", 90
 	callbacks, calls := 0, 0
 	var retained *ObjectSegmentSizeOpts
-	option := func(cfg *ObjectSegmentSizeOpts) error {
+	option := request.Custom(func(cfg *ObjectSegmentSizeOpts) error {
 		callbacks++
 		if cfg.Headers["x-trace"] != "factory" || cfg.Size == nil || *cfg.Size != 0 {
 			t.Fatal("factory aliases", cfg)
@@ -33,7 +34,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		retained = cfg
 		c.MoreHeaders["X-Source"] = "valid change"
 		return nil
-	}
+	})
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Header.Get("X-Trace") != "owned" || len(r.Header.Values("X-Trace")) != 1 || r.Header.Get("X-Source") != "captured" {
@@ -42,12 +43,12 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		body := &tempURLKeyTestBody{Reader: strings.NewReader(`{"swift":{"max_file_size":100}}`), onClose: func() { retained.Headers["x-trace"] = "retained"; *retained.Size = 99 }}
 		return tempURLKeyTestWire(r, 200, http.Header{}, body), nil
 	})
-	first, err := New(c).GetObjectSegmentSize(context.Background(), full, option, WithObjectSegmentSizeHeader("X-Trace", "owned"))
+	first, err := New(c).GetObjectSegmentSize(context.Background(), full, option, request.Header("X-Trace", "owned"))
 	if err != nil || first == nil || first.RequestedSize != 0 || first.Size != 0 {
 		t.Fatal(first, err)
 	}
 	c.MoreHeaders["X-Source"] = "captured"
-	second, err := New(c).GetObjectSegmentSize(context.Background(), full, option, WithObjectSegmentSizeHeader("X-Trace", "owned"))
+	second, err := New(c).GetObjectSegmentSize(context.Background(), full, option, request.Header("X-Trace", "owned"))
 	if err != nil || second == nil || second.RequestedSize != 0 || second.Size != 0 || callbacks != 2 || calls != 2 {
 		t.Fatal(second, err, callbacks, calls)
 	}
@@ -96,7 +97,7 @@ func TestInfoOptionsHeaderValidationAndPreflight(t *testing.T) {
 		}
 		c.MoreHeaders = headers
 		callbacks := 0
-		if result, err := New(c).GetInfo(context.Background(), func(*GetInfoOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+		if result, err := New(c).GetInfo(context.Background(), request.Custom(func(*GetInfoOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("source validation ran after callbacks", result, err, callbacks)
 		}
 		c.MoreHeaders = nil
@@ -111,7 +112,7 @@ func TestInfoOptionsHeaderValidationAndPreflight(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	callbacks := 0
-	if result, err := New(c).GetInfo(nil, func(*GetInfoOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+	if result, err := New(c).GetInfo(nil, request.Custom(func(*GetInfoOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 		t.Fatal(result, err, callbacks)
 	}
 	if calls != 0 {
@@ -185,7 +186,7 @@ func TestInfoOptionsNativeRetrySnapshots(t *testing.T) {
 		}
 		return tempURLKeyTestWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(`{}`))), nil
 	})
-	result, err := New(c).GetInfo(context.Background(), WithGetInfoHeader("X-Trace", "owned"), func(*GetInfoOpts) error { callbacks++; return nil })
+	result, err := New(c).GetInfo(context.Background(), request.Header("X-Trace", "owned"), request.Custom(func(*GetInfoOpts) error { callbacks++; return nil }))
 	if result == nil || err != nil || calls != 2 || retries != 1 || callbacks != 1 {
 		t.Fatal(result, err, calls, retries, callbacks)
 	}

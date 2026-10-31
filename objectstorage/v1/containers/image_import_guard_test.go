@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -18,7 +19,7 @@ func TestImageImportContainerOuterGuardChecksBeforeOptionsAndHTTP(t *testing.T) 
 	calls, options := 0, 0
 	api, _ := lifecycleAPI(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") }))
 	ctx := rest.WithOperationGuard(context.Background(), func(context.Context) error { return outer })
-	result, err := api.CreateContainer(ctx, "images", func(*CreateContainerOpts) error { options++; return nil })
+	result, err := api.CreateContainer(ctx, "images", request.Custom(func(*CreateContainerOpts) error { options++; return nil }))
 	if result != nil || !errors.Is(err, outer) || calls != 0 || options != 0 {
 		t.Fatal(result, err, calls, options)
 	}

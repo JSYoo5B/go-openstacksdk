@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -74,7 +75,7 @@ func TestPythonContainerRecordSeedDescriptorsFailBeforeOptionsAndHTTP(t *testing
 				return nil, errors.New("unexpected HTTP")
 			})
 			result, err := containers.New(client).CreateRecord(context.Background(), containerMetadataName,
-				map[string]any{key: "²"}, func(*containers.RecordCreateOpts) error { options++; return nil })
+				map[string]any{key: "²"}, request.Custom(func(*containers.RecordCreateOpts) error { options++; return nil }))
 			var physical *resource.ResponseError
 			if result != nil || err == nil || calls != 0 || options != 0 || errors.As(err, &physical) {
 				t.Fatalf("result=%+v err=%v calls=%d options=%d physical=%+v", result, err, calls, options, physical)
@@ -169,7 +170,7 @@ func TestPythonContainerRecordGenericStatusesAndCleanMissingPolicy(t *testing.T)
 		}
 	}
 	client := containerMetadataClient(func(*http.Request) (*http.Response, error) { return containerMetadataResponse(404, "missing"), nil })
-	result, err := containers.New(client).DeleteRecord(context.Background(), containerMetadataName, containers.WithRecordDeleteIgnoreMissing(false))
+	result, err := containers.New(client).DeleteRecord(context.Background(), containerMetadataName, request.IgnoreMissing(false))
 	if result != nil || err == nil {
 		t.Fatal(result, err)
 	}
@@ -193,11 +194,11 @@ func TestPythonContainerRecordSourceCaptureSnapshotAndOptions(t *testing.T) {
 		}
 		return containerMetadataResponse(201, ""), nil
 	})
-	_, err := containers.New(client).CreateRecord(context.Background(), containerMetadataName, attrs, option, func(cfg *containers.RecordCreateOpts) error {
+	_, err := containers.New(client).CreateRecord(context.Background(), containerMetadataName, attrs, option, request.Custom(func(cfg *containers.RecordCreateOpts) error {
 		attrs["metadata"].(map[string]any)["Book"] = "changed"
 		attrs["read_ACL"].([]string)[0] = "changed"
 		return nil
-	})
+	}))
 	if err != nil || calls != 1 {
 		t.Fatal(err, calls)
 	}
@@ -214,13 +215,13 @@ func TestPythonContainerRecordSourceCaptureSnapshotAndOptions(t *testing.T) {
 		case "marshal cancel":
 			input["read_ACL"] = containerRecordMarshal(func() ([]byte, error) { cancel(cause); return nil, cause })
 		case "option source":
-			options = []containers.RecordCreateOption{func(*containers.RecordCreateOpts) error { client.Microversion = "changed"; return cause }}
+			options = []containers.RecordCreateOption{request.Custom(func(*containers.RecordCreateOpts) error { client.Microversion = "changed"; return cause })}
 		case "option cancel":
-			options = []containers.RecordCreateOption{func(*containers.RecordCreateOpts) error { cancel(cause); return cause }}
+			options = []containers.RecordCreateOption{request.Custom(func(*containers.RecordCreateOpts) error { cancel(cause); return cause })}
 		case "nil option":
 			options = []containers.RecordCreateOption{nil}
 		case "bad header":
-			options = []containers.RecordCreateOption{containers.WithRecordCreateHeader("X-Auth-Token", "caller")}
+			options = []containers.RecordCreateOption{request.Header("X-Auth-Token", "caller")}
 		}
 		_, err := containers.New(client).CreateRecord(ctx, containerMetadataName, input, options...)
 		cancel(nil)

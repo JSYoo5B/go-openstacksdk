@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -36,7 +37,7 @@ func TestDirectoryMarkerCoreWireAndMetadata(t *testing.T) {
 			}
 			return objectMetadataWire(r, code, http.Header{"X-Proof": {"kept"}, "Last-Modified": {"unparsed"}}, io.NopCloser(strings.NewReader("raw"))), nil
 		})
-		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), objectMetadataContainer, objectMetadataName, WithDirectoryMarkerHeader("Content-Type", "caller/type"), WithDirectoryMarkerMetadata(map[string]string{"Tag": "literal", "Empty": ""}))
+		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), objectMetadataContainer, objectMetadataName, request.Header("Content-Type", "caller/type"), WithDirectoryMarkerMetadata(map[string]string{"Tag": "literal", "Empty": ""}))
 		if result == nil || calls != 1 || result.Source != "bytes" || result.Mode != "ordinary" || result.Size != 0 || result.MD5 != "" || result.SHA256 != "" || result.Capabilities != nil || result.Discovery != nil || result.Manifest != nil || len(result.Segments) != 0 || len(result.Cleanup) != 0 || result.SegmentPrefix != "" || result.Skipped || result.Ordinary == nil || len(result.Ordinary.Attempts) != 1 {
 			t.Fatal("marker performed another workflow", result, err, calls)
 		}
@@ -249,11 +250,11 @@ func TestDirectoryMarkerCoreOrdinaryPolicyIsolation(t *testing.T) {
 		return objectMetadataOK(r, 201, http.Header{}), nil
 	})
 	api := New(c)
-	marker, err := api.CreateDirectoryMarkerObject(context.Background(), "box", "key", func(*DirectoryMarkerOpts) error { callbacks++; return nil })
+	marker, err := api.CreateDirectoryMarkerObject(context.Background(), "box", "key", request.Custom(func(*DirectoryMarkerOpts) error { callbacks++; return nil }))
 	if marker != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 		t.Fatal("source detect reached marker callback or wire", marker, err, calls, callbacks)
 	}
-	ordinary, err := api.CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: []byte{}}, WithCreateObjectHeader("Content-Type", "ordinary/type"), WithCreateObjectMetadataValue("Tag", "ordinary"))
+	ordinary, err := api.CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: []byte{}}, request.Header("Content-Type", "ordinary/type"), WithCreateObjectMetadataValue("Tag", "ordinary"))
 	if err != nil || ordinary == nil || ordinary.Ordinary.Acknowledgement == nil || calls != 1 {
 		t.Fatal("ordinary create inherited marker restriction", ordinary, err, calls)
 	}

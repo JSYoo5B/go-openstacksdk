@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout`
@@ -62,7 +62,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForStatus`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout`
@@ -121,6 +121,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -170,7 +171,7 @@ func waitExamples(ctx context.Context, conn *sdk.Connection) {
             Headers: map[string]string{"X-Client": "object-wait"},
             Interval: &interval,
         }),
-        objects.WithObjectWaitHeader("X-Trace", "initial"),
+        request.Header("X-Trace", "initial"),
         objects.WithObjectWaitHeaders(map[string]string{"x-trace": "last"}),
         objects.WithObjectWaitPollInterval(2 * time.Second),
         objects.WithObjectWaitTimeout(time.Minute),

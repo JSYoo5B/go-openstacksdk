@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -28,7 +29,7 @@ func TestObjectCreateOptionsFactorySnapshots(t *testing.T) {
 	for n := 0; n < 2; n++ {
 		var retained *CreateObjectOpts
 		callbacks := 0
-		cfg, err := p.applyCreateOptions(context.Background(), []CreateObjectOption{full, func(value *CreateObjectOpts) error { callbacks++; retained = value; return nil }, WithCreateObjectHeader("X-Call", "overlay"), WithCreateObjectMetadataValue("tag", "overlay")})
+		cfg, err := p.applyCreateOptions(context.Background(), []CreateObjectOption{full, request.Custom(func(value *CreateObjectOpts) error { callbacks++; retained = value; return nil }), request.Header("X-Call", "overlay"), WithCreateObjectMetadataValue("tag", "overlay")})
 		if err != nil || cfg.SegmentSize == nil || *cfg.SegmentSize != 7 || cfg.UseSLO == nil || *cfg.UseSLO || cfg.GenerateChecksums == nil || *cfg.GenerateChecksums || cfg.Headers["X-Call"] != "overlay" || cfg.Metadata["tag"] != "overlay" || callbacks != 1 {
 			t.Fatal(cfg, err, callbacks)
 		}
@@ -52,7 +53,7 @@ func TestObjectCreateOptionsFactorySnapshots(t *testing.T) {
 		}
 		return objectMetadataOK(r, 201, http.Header{}), nil
 	})
-	result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: data}, func(*CreateObjectOpts) error { copy(data, "after!"); return nil })
+	result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: data}, request.Custom(func(*CreateObjectOpts) error { copy(data, "after!"); return nil }))
 	if err != nil || result == nil || result.Size != 6 {
 		t.Fatal(result, err)
 	}
@@ -70,7 +71,7 @@ func TestObjectCreateOptionsDefaultsAndReplacement(t *testing.T) {
 	}
 	for _, options := range [][]CreateObjectOption{
 		{WithCreateObjectSegmentSize(3), WithoutCreateObjectSegmentSize(), WithCreateObjectUseSLO(false), WithoutCreateObjectUseSLO(), WithCreateObjectGenerateChecksums(false), WithoutCreateObjectGenerateChecksums(), WithCreateObjectMD5(""), WithCreateObjectSHA256("")},
-		{WithCreateObjectHeader("X-Call", "discard"), WithCreateObjectMetadataValue("tag", "discard"), WithCreateObjectSegmentSize(3), WithCreateObjectOpts(CreateObjectOpts{})},
+		{request.Header("X-Call", "discard"), WithCreateObjectMetadataValue("tag", "discard"), WithCreateObjectSegmentSize(3), WithCreateObjectOpts(CreateObjectOpts{})},
 	} {
 		cfg, err = p.applyCreateOptions(context.Background(), options)
 		if err != nil || cfg.SegmentSize != nil || cfg.UseSLO != nil || cfg.GenerateChecksums != nil || cfg.MD5 != "" || cfg.SHA256 != "" || len(cfg.Headers) != 0 || len(cfg.Metadata) != 0 {
@@ -91,12 +92,12 @@ func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 	var nilReader *bytes.Reader
 	for _, input := range []CreateObjectInput{{}, {Data: []byte{}, Reader: strings.NewReader("other")}, {Reader: nilReader}, {Filename: "bad\x00file"}} {
 		callbacks := 0
-		result, err := New(c).CreateObject(context.Background(), "box", "key", input, func(*CreateObjectOpts) error { callbacks++; return nil })
+		result, err := New(c).CreateObject(context.Background(), "box", "key", input, request.Custom(func(*CreateObjectOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("invalid input reached callback", result, err, callbacks)
 		}
 	}
-	for _, option := range []CreateObjectOption{nil, WithCreateObjectSegmentSize(-1), WithCreateObjectMD5("short"), WithCreateObjectSHA256(strings.Repeat("g", 64)), WithCreateObjectHeader("ETag", "owned"), WithCreateObjectHeader("Cookie", "auth"), WithCreateObjectHeader("X-Service-Token", "auth"), WithCreateObjectHeader("X-Copy-From", "/other/key"), WithCreateObjectMetadataValue("x-object-meta-tag", "bad"), WithCreateObjectMetadataValue("tag", "bad\nvalue")} {
+	for _, option := range []CreateObjectOption{nil, WithCreateObjectSegmentSize(-1), WithCreateObjectMD5("short"), WithCreateObjectSHA256(strings.Repeat("g", 64)), request.Header("ETag", "owned"), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("X-Copy-From", "/other/key"), WithCreateObjectMetadataValue("x-object-meta-tag", "bad"), WithCreateObjectMetadataValue("tag", "bad\nvalue")} {
 		reader := &createCoreBorrowed{reader: strings.NewReader("unread")}
 		result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Reader: reader}, option)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || reader.reads != 0 {
@@ -108,7 +109,7 @@ func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 	}
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		callbacks := 0
-		result, err := New(c).CreateObject(ctx, "box", "key", CreateObjectInput{Data: []byte{}}, func(*CreateObjectOpts) error { callbacks++; return nil })
+		result, err := New(c).CreateObject(ctx, "box", "key", CreateObjectInput{Data: []byte{}}, request.Custom(func(*CreateObjectOpts) error { callbacks++; return nil }))
 		if result != nil || err == nil || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
@@ -116,11 +117,11 @@ func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 	cause := errors.New("option cause")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cancelCause := errors.New("callback cancellation")
-	result, err := New(c).CreateObject(ctx, "box", "key", CreateObjectInput{Reader: strings.NewReader("unread")}, func(*CreateObjectOpts) error {
+	result, err := New(c).CreateObject(ctx, "box", "key", CreateObjectInput{Reader: strings.NewReader("unread")}, request.Custom(func(*CreateObjectOpts) error {
 		c.Endpoint = "http://changed.invalid/v1/a/"
 		cancel(cancelCause)
 		return cause
-	})
+	}))
 	if result != nil || !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || calls != 0 {
 		t.Fatal("callback causes lost", result, err, calls)
 	}

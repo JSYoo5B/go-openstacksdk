@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -116,21 +117,21 @@ func TestConnectionObjectCreateSharesClientAndOwnsSources(t *testing.T) {
 	option := objects.WithCreateObjectHeaders(headers)
 	headers["X-Call"] = "caller mutation"
 	callbacks := 0
-	created, err := service.Objects.CreateObject(ctx, container, object, objects.CreateObjectInput{Data: input}, option, func(o *objects.CreateObjectOpts) error {
+	created, err := service.Objects.CreateObject(ctx, container, object, objects.CreateObjectInput{Data: input}, option, request.Custom(func(o *objects.CreateObjectOpts) error {
 		callbacks++
 		input[0] = '!'
 		provider.SetToken("swift-1")
 		return nil
-	})
+	}))
 	if err != nil || created == nil || created.Source != "bytes" || created.Mode != "ordinary" || created.Size != int64(len(data)) || created.Capabilities != nil || created.Discovery != nil || created.Ordinary == nil || created.Ordinary.Acknowledgement == nil || created.Ordinary.Acknowledgement.StatusCode != 201 || string(created.Ordinary.Acknowledgement.Body) != "bytes-ack" || created.Skipped || callbacks != 1 || calls != 1 {
 		t.Fatal(created, err, callbacks, calls)
 	}
-	stale, err := service.Objects.IsObjectStale(ctx, container, object, "/explicit/path/which/does/not/exist", objects.WithIsObjectStaleMD5(md5Digest), objects.WithIsObjectStaleHeader("X-Call", "stale-owned"))
+	stale, err := service.Objects.IsObjectStale(ctx, container, object, "/explicit/path/which/does/not/exist", objects.WithIsObjectStaleMD5(md5Digest), request.Header("X-Call", "stale-owned"))
 	if err != nil || stale == nil || stale.Stale == nil || *stale.Stale || stale.Discovery == nil || stale.Discovery.StatusCode != 200 || stale.MD5 != md5Digest || stale.RemoteMD5 == nil || *stale.RemoteMD5 != md5Digest || calls != 2 {
 		t.Fatal(stale, err, calls)
 	}
 	reader := &connectionCreateReader{Reader: strings.NewReader(stream)}
-	skipped, err := service.Objects.CreateObject(ctx, container, object, objects.CreateObjectInput{Reader: reader}, objects.WithCreateObjectHeader("Content-Type", "text/plain"), objects.WithCreateObjectHeader("X-Call", "upload-only"), objects.WithCreateObjectMetadataValue("changed", "must-not-trigger-write"))
+	skipped, err := service.Objects.CreateObject(ctx, container, object, objects.CreateObjectInput{Reader: reader}, request.Header("Content-Type", "text/plain"), request.Header("X-Call", "upload-only"), objects.WithCreateObjectMetadataValue("changed", "must-not-trigger-write"))
 	if err != nil || skipped == nil || skipped.Source != "reader" || !skipped.Skipped || skipped.Mode != "" || skipped.Capabilities == nil || skipped.Capabilities.Response == nil || skipped.Capabilities.Response.StatusCode != 200 || skipped.Discovery == nil || skipped.Discovery.StatusCode != 200 || skipped.Ordinary != nil || skipped.Manifest != nil || skipped.MD5 != md5Digest || skipped.SHA256 != shaDigest || calls != 4 || reader.Len() != 0 || reader.closed != 0 || reader.sought != 0 {
 		t.Fatal(skipped, err, calls, reader)
 	}

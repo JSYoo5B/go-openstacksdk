@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -147,13 +148,13 @@ func TestSwiftPythonAccountMetadataRefreshFailuresKeepAcknowledgementWithoutRepl
 func TestSwiftPythonAccountMetadataInputsCallbacksAndConcurrentReuseAreOwned(t *testing.T) {
 	values := map[string]any{"owner": "original", "nested": []any{"before"}}
 	var kept *accounts.MetadataOpts
-	option := func(cfg *accounts.MetadataOpts) error {
+	option := request.Custom(func(cfg *accounts.MetadataOpts) error {
 		values["owner"] = "caller"
 		values["nested"].([]any)[0] = "changed"
 		cfg.Headers["X-Probe"] = "snapshot"
 		kept = cfg
 		return nil
-	}
+	})
 	var calls int
 	client := accountMetadataClient(func(r *http.Request) (*http.Response, error) {
 		calls++

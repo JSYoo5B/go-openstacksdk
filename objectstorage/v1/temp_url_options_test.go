@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -26,14 +27,14 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 		newest = false
 		headers["x-trace"] = "outside"
 		var retained *GenerateTempURLOpts
-		inspect := func(cfg *GenerateTempURLOpts) error {
+		inspect := request.Custom(func(cfg *GenerateTempURLOpts) error {
 			if string(cfg.Key) != "\xffsecret" || cfg.Timestamp.Unix() != 1700000000 || cfg.Newest == nil || !*cfg.Newest || cfg.Headers["x-trace"] != "factory" {
 				t.Fatal("factory aliases", cfg)
 			}
 			retained = cfg
 			return nil
-		}
-		mutate := func(cfg *GenerateTempURLOpts) error {
+		})
+		mutate := request.Custom(func(cfg *GenerateTempURLOpts) error {
 			retained.Key[0] = '!'
 			*retained.Timestamp = stamp
 			retained.Prefix = false
@@ -43,7 +44,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 				t.Fatal("callback config aliases", cfg)
 			}
 			return nil
-		}
+		})
 		for i := 0; i < 2; i++ {
 			result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/", 60, "put", full, inspect, mutate)
 			if err != nil || result == nil || result.Signature != "5caa6c493122e21b63ad7beb4eacf3f88e173002f8427736f9302ffc54fd7bcb" || result.Expires != 1700000060 {
@@ -79,7 +80,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Account-Meta-Temp-URL-Key-2": {"account-secondary"}}, body), nil
 		})
 		full := WithGenerateTempURLOpts(GenerateTempURLOpts{Headers: map[string]string{"x-trace": "old"}})
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLNewest(true), WithoutGenerateTempURLNewest(), WithGenerateTempURLNewest(false), func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }, plural, WithGenerateTempURLHeader("X-Trace", "last"))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLNewest(true), WithoutGenerateTempURLNewest(), WithGenerateTempURLNewest(false), request.Custom(func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }), plural, request.Header("X-Trace", "last"))
 		if err != nil || result == nil || result.Signature != "98649f6963fef8b113423393b6c77b9fda62b2ad" || calls != 1 || result.Discovery == nil || result.Discovery.Account == nil || result.Discovery.Account.Metadata == nil {
 			t.Fatal(result, err, calls)
 		}
@@ -122,7 +123,7 @@ func TestTempURLOptionsParallelReuseAndCallbackCauses(t *testing.T) {
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
 		callbacks := 0
-		result, err := s.GenerateTempURL(ctx, "/v1/a/c/o", 1, "GET", func(cfg *GenerateTempURLOpts) error {
+		result, err := s.GenerateTempURL(ctx, "/v1/a/c/o", 1, "GET", request.Custom(func(cfg *GenerateTempURLOpts) error {
 			callbacks++
 			if cfg.Headers == nil {
 				t.Fatal("nil callback Headers")
@@ -130,7 +131,7 @@ func TestTempURLOptionsParallelReuseAndCallbackCauses(t *testing.T) {
 			s.Accounts = nil
 			cancel(cause)
 			return optionErr
-		})
+		}))
 		if result != nil || callbacks != 1 {
 			t.Fatal(result, err, callbacks)
 		}

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -30,7 +31,7 @@ func TestContainerLifecycleOptionsSnapshotsAndOverwrite(t *testing.T) {
 	}))
 	var retained *CreateContainerOpts
 	callbacks := 0
-	first := func(c *CreateContainerOpts) error {
+	first := request.Custom(func(c *CreateContainerOpts) error {
 		callbacks++
 		if c.Headers == nil || c.Metadata == nil {
 			t.Fatal("maps not initialized")
@@ -38,14 +39,14 @@ func TestContainerLifecycleOptionsSnapshotsAndOverwrite(t *testing.T) {
 		retained = c
 		c.Headers["X-Stage"] = "kept"
 		return nil
-	}
-	second := func(c *CreateContainerOpts) error {
+	})
+	second := request.Custom(func(c *CreateContainerOpts) error {
 		callbacks++
 		retained.Headers["X-Stage"] = "outside"
 		retained.Metadata["Final"] = "outside"
 		return nil
-	}
-	_, err := a.CreateContainer(context.Background(), "name", full, WithCreateContainerHeader("X-Call", "last"), replace, first, second)
+	})
+	_, err := a.CreateContainer(context.Background(), "name", full, request.Header("X-Call", "last"), replace, first, second)
 	if err != nil || callbacks != 2 || calls.Load() != 1 {
 		t.Fatalf("snapshot err%v callbacks%d", err, callbacks)
 	}
@@ -57,20 +58,20 @@ func TestContainerLifecycleOptionsReplacementAndDefaults(t *testing.T) {
 	value := false
 	factory := WithDeleteContainerOpts(DeleteContainerOpts{Headers: map[string]string{"x-call": "old"}, IgnoreMissing: &value})
 	value = true
-	r, err := a.DeleteContainer(context.Background(), "name", factory, WithDeleteContainerHeader("X-Call", "new"))
+	r, err := a.DeleteContainer(context.Background(), "name", factory, request.Header("X-Call", "new"))
 	if r != nil || err == nil {
 		t.Fatalf("factory pointer not owned %+v %v", r, err)
 	}
-	r, err = a.DeleteContainer(context.Background(), "name", factory, WithDeleteContainerIgnoreMissing(true))
+	r, err = a.DeleteContainer(context.Background(), "name", factory, request.IgnoreMissing(true))
 	if err != nil || r == nil || !r.IgnoredMissing {
 		t.Fatalf("last pointer %+v %v", r, err)
 	}
-	r, err = a.DeleteContainer(context.Background(), "name", WithDeleteContainerIgnoreMissing(false), WithDeleteContainerOpts(DeleteContainerOpts{}))
+	r, err = a.DeleteContainer(context.Background(), "name", request.IgnoreMissing(false), WithDeleteContainerOpts(DeleteContainerOpts{}))
 	if err != nil || r == nil || !r.IgnoredMissing {
 		t.Fatalf("full reset %+v %v", r, err)
 	}
 	var retained *DeleteContainerOpts
-	_, err = a.DeleteContainer(context.Background(), "name", WithDeleteContainerIgnoreMissing(false), func(c *DeleteContainerOpts) error { retained = c; return nil }, func(c *DeleteContainerOpts) error { *retained.IgnoreMissing = true; return nil })
+	_, err = a.DeleteContainer(context.Background(), "name", request.IgnoreMissing(false), request.Custom(func(c *DeleteContainerOpts) error { retained = c; return nil }), request.Custom(func(c *DeleteContainerOpts) error { *retained.IgnoreMissing = true; return nil }))
 	if err == nil {
 		t.Fatal("retained pointer changed current config")
 	}
@@ -111,7 +112,7 @@ func TestContainerLifecycleOptionsInvalidInputs(t *testing.T) {
 	}
 	cause := errors.New("callback failed")
 	callbacks := 0
-	_, err = a.DeleteContainer(context.Background(), "name", func(c *DeleteContainerOpts) error { callbacks++; c.Headers["X-Call"] = "safe"; return cause }, func(*DeleteContainerOpts) error { callbacks++; return nil })
+	_, err = a.DeleteContainer(context.Background(), "name", request.Custom(func(c *DeleteContainerOpts) error { callbacks++; c.Headers["X-Call"] = "safe"; return cause }), request.Custom(func(*DeleteContainerOpts) error { callbacks++; return nil }))
 	if !errors.Is(err, cause) || callbacks != 1 || calls.Load() != 0 {
 		t.Fatalf("error once%v callbacks%d calls%d", err, callbacks, calls.Load())
 	}

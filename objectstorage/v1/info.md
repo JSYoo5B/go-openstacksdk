@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetInfo`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Info.UnmarshalJSON`
 
@@ -50,7 +50,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetObjectSegmentSize`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSize`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutObjectSegmentSize`
@@ -94,6 +94,7 @@ import (
     "fmt"
 
     objectstorage "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -118,7 +119,7 @@ func capabilities(ctx context.Context, service *objectstorage.Service) error {
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         objectstorage.WithGetInfoHeaders(map[string]string{"X-Trace-Label": "capabilities"}),
-        objectstorage.WithGetInfoHeader("X-Request-Label", "info"),
+        request.Header("X-Request-Label", "info"),
     )
     if err != nil {
         reportResponseError(err)
@@ -142,7 +143,7 @@ func capabilities(ctx context.Context, service *objectstorage.Service) error {
             Size: &large,
         }),
         objectstorage.WithObjectSegmentSizeHeaders(map[string]string{"X-Trace-Label": "segment"}),
-        objectstorage.WithObjectSegmentSizeHeader("X-Request-Label", "default"),
+        request.Header("X-Request-Label", "default"),
         objectstorage.WithObjectSegmentSize(2 * 1024 * 1024 * 1024),
         objectstorage.WithoutObjectSegmentSize(),
     }

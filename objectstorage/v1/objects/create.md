@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadataValue`
@@ -83,7 +83,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.IsObjectStale`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleMD5`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleSHA256`
@@ -130,6 +130,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -197,7 +198,7 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
         objects.WithCreateObjectOpts(objects.CreateObjectOpts{
             Headers: map[string]string{"Content-Type": "application/octet-stream"},
         }),
-        objects.WithCreateObjectHeader("X-Trans-Id-Extra", "sdk-upload"),
+        request.Header("X-Trans-Id-Extra", "sdk-upload"),
         objects.WithCreateObjectHeaders(map[string]string{"Cache-Control": "private"}),
         objects.WithCreateObjectMetadata(map[string]string{"owner": "sdk"}),
         objects.WithCreateObjectMetadataValue("empty", ""),
@@ -216,7 +217,7 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
     }
     stale, err := service.Objects.IsObjectStale(ctx, "backups", "archive ?.tar", filename,
         objects.WithIsObjectStaleOpts(objects.IsObjectStaleOpts{}),
-        objects.WithIsObjectStaleHeader("X-Trace", "stale"),
+        request.Header("X-Trace", "stale"),
         objects.WithIsObjectStaleHeaders(map[string]string{"X-Trans-Id-Extra": "sdk-stale"}),
         objects.WithIsObjectStaleMD5(knownMD5),
         objects.WithIsObjectStaleSHA256(knownSHA256))

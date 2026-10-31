@@ -1,43 +1,60 @@
 package accounts
 
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
+
 // GetMetadataOpts owns optional headers and an explicit X-Newest preference.
 type GetMetadataOpts struct {
 	Headers map[string]string
 	Newest  *bool
 }
-type GetMetadataOption func(*GetMetadataOpts) error
+
+// GetMetadataOption is one option of GetMetadata: the WithGetMetadata*
+// options, request.Header (validated and merged like a one-entry
+// WithGetMetadataHeaders) or request.Custom over *GetMetadataOpts. Other
+// shared calls, including request.Headers (the WithGetMetadataHeaders map
+// merges instead of replacing), fail with resource.ErrInvalidOption before
+// HTTP.
+type GetMetadataOption = request.GetCall
+
+var getMetadataCalls = calls.Spec[GetMetadataOpts]{Header: calls.MergeHeader[GetMetadataOpts](WithGetMetadataHeaders)}
 
 // MetadataOpts owns ordinary headers for metadata mutations.
 type MetadataOpts struct{ Headers map[string]string }
-type MetadataOption func(*MetadataOpts) error
+
+// MetadataOption is one option of the metadata mutations (SetMetadata,
+// DeleteMetadata and their refresh forms): the WithMetadata* options,
+// request.Header (validated and merged like a one-entry WithMetadataHeaders)
+// or request.Custom over *MetadataOpts. Other shared calls, including
+// request.Headers (the WithMetadataHeaders map merges instead of replacing),
+// fail with resource.ErrInvalidOption before HTTP.
+type MetadataOption = request.WriteCall
+
+var metadataCalls = calls.Spec[MetadataOpts]{Header: calls.MergeHeader[MetadataOpts](WithMetadataHeaders)}
 
 func WithGetMetadataOpts(value GetMetadataOpts) GetMetadataOption {
 	snapshot := cloneGetMetadataOpts(value)
-	return func(cfg *GetMetadataOpts) error { *cfg = cloneGetMetadataOpts(snapshot); return nil }
-}
-func WithGetMetadataHeader(key, value string) GetMetadataOption {
-	return WithGetMetadataHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *GetMetadataOpts) error { *cfg = cloneGetMetadataOpts(snapshot); return nil })
 }
 func WithGetMetadataHeaders(values map[string]string) GetMetadataOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *GetMetadataOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) }
+	return request.Custom(func(cfg *GetMetadataOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) })
 }
 func WithGetMetadataNewest(value bool) GetMetadataOption {
-	return func(cfg *GetMetadataOpts) error { owned := value; cfg.Newest = &owned; return nil }
+	return request.Custom(func(cfg *GetMetadataOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
 func WithoutGetMetadataNewest() GetMetadataOption {
-	return func(cfg *GetMetadataOpts) error { cfg.Newest = nil; return nil }
+	return request.Custom(func(cfg *GetMetadataOpts) error { cfg.Newest = nil; return nil })
 }
 func WithMetadataOpts(value MetadataOpts) MetadataOption {
 	snapshot := cloneMetadataOpts(value)
-	return func(cfg *MetadataOpts) error { *cfg = cloneMetadataOpts(snapshot); return nil }
-}
-func WithMetadataHeader(key, value string) MetadataOption {
-	return WithMetadataHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *MetadataOpts) error { *cfg = cloneMetadataOpts(snapshot); return nil })
 }
 func WithMetadataHeaders(values map[string]string) MetadataOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *MetadataOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) }
+	return request.Custom(func(cfg *MetadataOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) })
 }
 
 func cloneMetadataHeaders(value map[string]string) map[string]string {
@@ -61,7 +78,7 @@ func cloneMetadataOpts(value MetadataOpts) MetadataOpts {
 }
 func applyGetMetadataOptions(options []GetMetadataOption) (GetMetadataOpts, error) {
 	cfg := cloneGetMetadataOpts(GetMetadataOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, getMetadataCalls) {
 		if option == nil {
 			return cfg, metadataInvalid("nil metadata option")
 		}
@@ -76,7 +93,7 @@ func applyGetMetadataOptions(options []GetMetadataOption) (GetMetadataOpts, erro
 }
 func applyMetadataOptions(options []MetadataOption) (MetadataOpts, error) {
 	cfg := cloneMetadataOpts(MetadataOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, metadataCalls) {
 		if option == nil {
 			return cfg, metadataInvalid("nil metadata option")
 		}

@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -78,7 +79,7 @@ func TestObjectReadOptionsHeaderAndDateInputs(t *testing.T) {
 	})
 	result, err := api.GetObject(context.Background(), "c", "o",
 		WithObjectReadOpts(ObjectReadOpts{Headers: map[string]string{"x-call": "old"}}),
-		WithObjectReadHeader("X-Call", "new"), WithObjectReadNewest(true), WithoutObjectReadNewest(), WithObjectReadNewest(false),
+		request.Header("X-Call", "new"), WithObjectReadNewest(true), WithoutObjectReadNewest(), WithObjectReadNewest(false),
 		WithObjectReadIfMatch("opaque\tmatch"), WithObjectReadIfNoneMatch("none"),
 		WithObjectReadIfModifiedSince(date), WithoutObjectReadIfModifiedSince(),
 		WithObjectReadIfUnmodifiedSince(time.Now()), WithoutObjectReadIfUnmodifiedSince(), WithObjectReadIfUnmodifiedSince(date),
@@ -115,7 +116,7 @@ func TestObjectReadOptionsPreflight(t *testing.T) {
 			calls, callbacks := 0, 0
 			api, source := readTestAPI(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			source.MoreHeaders = map[string]string{header: "value"}
-			option := func(*ObjectReadOpts) error { callbacks++; return nil }
+			option := request.Custom(func(*ObjectReadOpts) error { callbacks++; return nil })
 			result, err := api.GetObject(context.Background(), "c", "o", option)
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("source preflight: %+v %v HTTP=%d callbacks=%d", result, err, calls, callbacks)
@@ -125,7 +126,7 @@ func TestObjectReadOptionsPreflight(t *testing.T) {
 	t.Run("literal-name-and-typed-nil-writer", func(t *testing.T) {
 		calls, callbacks := 0, 0
 		api, _ := readTestAPI(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-		option := func(*ObjectReadOpts) error { callbacks++; return nil }
+		option := request.Custom(func(*ObjectReadOpts) error { callbacks++; return nil })
 		for _, object := range []string{"", "../name", "name/..", "name\\bad", "bad\x7f", "bad\xff"} {
 			result, err := api.GetObject(context.Background(), "c", object, option)
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) {
@@ -153,7 +154,7 @@ func TestObjectReadOptionsCallbacksAndDefaults(t *testing.T) {
 			return readTestResponse(200, http.Header{}, body), nil
 		})
 		source.MoreHeaders = map[string]string{"X-Source": "initial"}
-		first := func(cfg *ObjectReadOpts) error {
+		first := request.Custom(func(cfg *ObjectReadOpts) error {
 			callbacks++
 			if cfg.Headers == nil {
 				return errors.New("Headers not initialized")
@@ -161,19 +162,19 @@ func TestObjectReadOptionsCallbacksAndDefaults(t *testing.T) {
 			cfg.Headers["X-Call"] = "old"
 			cfg.IfMatch = "discarded"
 			return nil
-		}
-		last := func(cfg *ObjectReadOpts) error {
+		})
+		last := request.Custom(func(cfg *ObjectReadOpts) error {
 			callbacks++
 			retained = cfg
 			cfg.Headers["X-Call"] = "owned"
 			source.MoreHeaders["X-Source"] = "later"
 			return nil
-		}
-		tail := func(cfg *ObjectReadOpts) error {
+		})
+		tail := request.Custom(func(cfg *ObjectReadOpts) error {
 			callbacks++
 			retained.Headers["X-Call"] = "retained caller"
 			return nil
-		}
+		})
 		result, err := api.GetObject(context.Background(), "c", "o", first, WithObjectReadOpts(ObjectReadOpts{}), last, tail)
 		if err != nil || result == nil || string(result.Body) != "ok" || calls != 1 || callbacks != 3 || len(body.buffers) != 1 || body.buffers[0] != 32*1024 {
 			t.Fatalf("callbacks: %+v %v", result, err)
@@ -187,11 +188,11 @@ func TestObjectReadOptionsCallbacksAndDefaults(t *testing.T) {
 		cause := errors.New("callback-fault")
 		calls, callbacks := 0, 0
 		api, source := readTestAPI(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-		option := func(cfg *ObjectReadOpts) error {
+		option := request.Custom(func(cfg *ObjectReadOpts) error {
 			callbacks++
 			source.MoreHeaders = map[string]string{"Range": "injected"}
 			return cause
-		}
+		})
 		result, err := api.GetObject(context.Background(), "c", "o", option)
 		if result != nil || !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 1 || calls != 0 {
 			t.Fatalf("callback/guard: %+v %v callbacks=%d HTTP=%d", result, err, callbacks, calls)

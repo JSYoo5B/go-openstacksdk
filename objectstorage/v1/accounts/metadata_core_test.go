@@ -167,7 +167,7 @@ func TestAccountMetadataCoreCompletePreflight(t *testing.T) {
 	a := New(c)
 	for _, input := range []map[string]string{{"": "x"}, {"bad key": "x"}, {"x-ACCOUNT-meta-Key": "x"}, {"Key": "x", "key": "x"}, {"Key": "a\r\nb"}, {"Key": string([]byte{255})}, {"Key": "a\x00b"}} {
 		invoked := 0
-		got, err := a.SetMetadata(context.Background(), input, func(*MetadataOpts) error { invoked++; return nil })
+		got, err := a.SetMetadata(context.Background(), input, request.Custom(func(*MetadataOpts) error { invoked++; return nil }))
 		if got != nil || !errors.Is(err, resource.ErrInvalidOption) || invoked != 0 {
 			t.Fatalf("bad input accepted %v %v %d", input, err, invoked)
 		}
@@ -263,7 +263,7 @@ func TestAccountMetadataCoreSourceAndTargetBoundaries(t *testing.T) {
 	accountMetadataProof(t, err, 204, "ack")
 	c.Endpoint = "http://account.invalid/v1/AUTH_x/"
 	optionErr := errors.New("callback")
-	_, err = a.GetMetadata(context.Background(), func(*GetMetadataOpts) error { c.Endpoint = "http://else.invalid/"; return optionErr })
+	_, err = a.GetMetadata(context.Background(), request.Custom(func(*GetMetadataOpts) error { c.Endpoint = "http://else.invalid/"; return optionErr }))
 	if !errors.Is(err, optionErr) || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 {
 		t.Fatalf("callback/source %v", err)
 	}

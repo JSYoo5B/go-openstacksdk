@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +29,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 	headers["x-call"], newest, ignore = "outside", true, false
 	var retained *DeleteObjectOpts
 	callbacks, calls := 0, 0
-	option := func(cfg *DeleteObjectOpts) error {
+	option := request.Custom(func(cfg *DeleteObjectOpts) error {
 		callbacks++
 		retained = cfg
 		c.MoreHeaders["X-Source"] = "valid later source"
@@ -36,7 +37,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 			t.Fatal("factory aliases", cfg)
 		}
 		return nil
-	}
+	})
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.URL.EscapedPath() != "/reverse%2Fprefix/v1/a/"+url.PathEscape(objectMetadataContainer)+"/"+url.PathEscape(objectMetadataName) || r.URL.Query().Get("version-id") != version || r.URL.Query().Get("multipart-manifest") != "" || r.Header.Get("X-Newest") != "false" || r.Header.Get("X-Call") != "final" || r.Header.Get("X-Source") != "captured" {
@@ -56,7 +57,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 	})
 	for n := 0; n < 2; n++ {
 		c.MoreHeaders["X-Source"] = "captured"
-		result, err := New(c).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataName, full, option, WithDeleteObjectHeader("X-Call", "final"))
+		result, err := New(c).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataName, full, option, request.Header("X-Call", "final"))
 		if result == nil || err != nil || result.StaticLargeObject == nil || *result.StaticLargeObject || !result.IgnoredMissing || result.Discovery == nil || result.Deletion == nil || result.Deletion.StatusCode != 404 {
 			t.Fatal(result, err)
 		}
@@ -65,8 +66,8 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 		t.Fatal("callbacks replayed or options changed", callbacks, calls)
 	}
 	for _, options := range [][]DeleteObjectOption{
-		{WithDeleteObjectStaticLargeObject(true), WithoutDeleteObjectStaticLargeObject(), WithDeleteObjectNewest(true), WithoutDeleteObjectNewest(), WithDeleteObjectIgnoreMissing(false), WithoutDeleteObjectIgnoreMissing()},
-		{WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("discard"), WithDeleteObjectHeader("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
+		{WithDeleteObjectStaticLargeObject(true), WithoutDeleteObjectStaticLargeObject(), WithDeleteObjectNewest(true), WithoutDeleteObjectNewest(), request.IgnoreMissing(false), WithoutDeleteObjectIgnoreMissing()},
+		{WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("discard"), request.Header("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
 	} {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Method != "HEAD" || r.URL.RawQuery != "" || r.Header.Get("X-Newest") != "" || r.Header.Get("X-Call") != "" {
@@ -90,7 +91,7 @@ func TestObjectDeleteOptionsPreflight(t *testing.T) {
 		}
 		c.MoreHeaders = headers
 		callbacks := 0
-		if result, err := New(c).DeleteObject(context.Background(), "box", "key", func(*DeleteObjectOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+		if result, err := New(c).DeleteObject(context.Background(), "box", "key", request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("source preflight after callback", result, err, callbacks)
 		}
 		c.MoreHeaders = nil
@@ -101,11 +102,11 @@ func TestObjectDeleteOptionsPreflight(t *testing.T) {
 		}
 	}
 	callbacks := 0
-	if result, err := New(c).DeleteObject(nil, "box", "key", func(*DeleteObjectOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+	if result, err := New(c).DeleteObject(nil, "box", "key", request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 		t.Fatal(result, err, callbacks)
 	}
 	for _, names := range [][2]string{{"bad/box", "key"}, {"box", "../key"}, {"box", "bad\\key"}} {
-		if result, err := New(c).DeleteObject(context.Background(), names[0], names[1], func(*DeleteObjectOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+		if result, err := New(c).DeleteObject(context.Background(), names[0], names[1], request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
 	}
@@ -191,7 +192,7 @@ func TestObjectDeleteOptionsNativeRetrySnapshots(t *testing.T) {
 		}
 		return objectMetadataWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(deleteCoreBulkOK))), nil
 	})
-	result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("v% ?#"), WithDeleteObjectHeader("X-Call", "owned"), func(*DeleteObjectOpts) error { callbacks++; return nil })
+	result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("v% ?#"), request.Header("X-Call", "owned"), request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil }))
 	if result == nil || result.Bulk == nil || err != nil || calls != 2 || retries != 1 || callbacks != 1 {
 		t.Fatal(result, err, calls, retries, callbacks)
 	}

@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -306,7 +307,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 		calls, callbacks := 0, 0
 		client := objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 		api := objects.New(client)
-		result, err := api.GetMetadata(nil, objectMetadataContainer, objectMetadataKey, func(*objects.GetMetadataOpts) error { callbacks++; return nil })
+		result, err := api.GetMetadata(nil, objectMetadataContainer, objectMetadataKey, request.Custom(func(*objects.GetMetadataOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatalf("nil context result=%+v err=%v HTTP=%d callback=%d", result, err, calls, callbacks)
 		}
@@ -325,7 +326,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			{"", objectMetadataKey}, {"with/slash", objectMetadataKey}, {".", objectMetadataKey}, {"..", objectMetadataKey}, {"bad\\container", objectMetadataKey}, {"bad\x7f", objectMetadataKey}, {string([]byte{0xff}), objectMetadataKey},
 			{objectMetadataContainer, ""}, {objectMetadataContainer, "."}, {objectMetadataContainer, "../key"}, {objectMetadataContainer, "key/./leaf"}, {objectMetadataContainer, "key/.."}, {objectMetadataContainer, "bad\\key"}, {objectMetadataContainer, "bad\nkey"}, {objectMetadataContainer, string([]byte{0xff})},
 		} {
-			result, err = api.GetMetadata(context.Background(), tc.container, tc.key, func(*objects.GetMetadataOpts) error { callbacks++; return nil })
+			result, err = api.GetMetadata(context.Background(), tc.container, tc.key, request.Custom(func(*objects.GetMetadataOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("identity=%+v result=%+v err=%v HTTP=%d", tc, result, err, calls)
 			}
@@ -355,7 +356,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			local := objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			local.Endpoint, local.ResourceBase = tc.endpoint, tc.base
 			callbacks = 0
-			result, err = objects.New(local).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, func(*objects.GetMetadataOpts) error { callbacks++; return nil })
+			result, err = objects.New(local).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, request.Custom(func(*objects.GetMetadataOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("source=%+v result=%+v err=%v HTTP=%d callback=%d", tc, result, err, calls, callbacks)
 			}
@@ -382,10 +383,10 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 		reserved := []string{"Authorization", "X-Auth-Token", "Host", "Content-Length", "Transfer-Encoding", "Connection", "Proxy-Connection", "Proxy-Authorization", "Upgrade", "Trailer", "TE", "X-Newest", "X-Object-Meta-Book", "X-Remove-Object-Meta-Book", "X-Symlink-Target", "X-Object-Sysmeta-Private", "X-Object-Transient-Sysmeta-Private"}
 		for _, key := range reserved {
 			client.MoreHeaders = nil
-			if result, err := api.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithGetMetadataHeader(strings.ToLower(key), "owned")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+			if result, err := api.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, request.Header(strings.ToLower(key), "owned")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("get reserved=%s result=%+v err=%v", key, result, err)
 			}
-			if result, err := api.SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, objects.WithMetadataHeader(strings.ToLower(key), "owned")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+			if result, err := api.SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, request.Header(strings.ToLower(key), "owned")); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("write reserved=%s result=%+v err=%v", key, result, err)
 			}
 			client.MoreHeaders = map[string]string{strings.ToLower(key): "owned"}
@@ -421,11 +422,11 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return objectMetadataResponse(200, ""), nil
 		})
-		options := []objects.GetMetadataOption{objects.WithGetMetadataHeader("X-Discarded", "discarded"), full, plural, objects.WithGetMetadataHeader("X-Call", "new"), func(o *objects.GetMetadataOpts) error { retained = o; return nil }, func(*objects.GetMetadataOpts) error {
+		options := []objects.GetMetadataOption{request.Header("X-Discarded", "discarded"), full, plural, request.Header("X-Call", "new"), request.Custom(func(o *objects.GetMetadataOpts) error { retained = o; return nil }), request.Custom(func(*objects.GetMetadataOpts) error {
 			retained.Headers["X-Call"] = "retained"
 			*retained.Newest = true
 			return nil
-		}}
+		})}
 		for i := 0; i < 2; i++ {
 			if _, err := objects.New(client).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, options...); err != nil {
 				t.Fatal(err)
@@ -468,7 +469,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return objectMetadataResponse(202, ""), nil
 		})
-		if _, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, objects.WithMetadataHeader("X-Discarded", "discarded"), mutation, objects.WithMetadataHeader("X-Call", "new")); err != nil {
+		if _, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, request.Header("X-Discarded", "discarded"), mutation, request.Header("X-Call", "new")); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -493,7 +494,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return objectMetadataResponse(202, ""), nil
 		})
-		_, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, input, factory, func(o *objects.MetadataOpts) error { retained = o; input["Book"] = "changed"; return nil }, func(*objects.MetadataOpts) error { retained.Headers["X-Trace"] = "retained"; return nil })
+		_, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, input, factory, request.Custom(func(o *objects.MetadataOpts) error { retained = o; input["Book"] = "changed"; return nil }), request.Custom(func(*objects.MetadataOpts) error { retained.Headers["X-Trace"] = "retained"; return nil }))
 		if err != nil || calls != 2 {
 			t.Fatalf("snapshot err=%v HTTP=%d", err, calls)
 		}
@@ -511,13 +512,13 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return objectMetadataResponse(202, ""), nil
 		})
-		if _, err := objects.New(client).DeleteMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, keys, func(*objects.MetadataOpts) error { keys[0] = "Keep"; return nil }); err != nil || calls != 2 {
+		if _, err := objects.New(client).DeleteMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, keys, request.Custom(func(*objects.MetadataOpts) error { keys[0] = "Keep"; return nil })); err != nil || calls != 2 {
 			t.Fatalf("delete snapshot err=%v HTTP=%d", err, calls)
 		}
 		cause := errors.New("callback cause")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		calls = 0
-		result, err := objects.New(client).SetMetadata(ctx, objectMetadataContainer, objectMetadataKey, nil, func(*objects.MetadataOpts) error { cancel(cause); client.Endpoint += "changed"; return cause })
+		result, err := objects.New(client).SetMetadata(ctx, objectMetadataContainer, objectMetadataKey, nil, request.Custom(func(*objects.MetadataOpts) error { cancel(cause); client.Endpoint += "changed"; return cause }))
 		if result != nil || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatalf("joined preflight=%+v err=%v HTTP=%d", result, err, calls)
 		}
@@ -938,11 +939,11 @@ func TestObjectMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "Content-Type": "source/type"}
 		provider := client.ProviderClient
-		result, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, objects.WithMetadataHeader("X-Only-Write", "option"), func(*objects.MetadataOpts) error {
+		result, err := objects.New(client).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, request.Header("X-Only-Write", "option"), request.Custom(func(*objects.MetadataOpts) error {
 			client.MoreHeaders["X-Source"] = "after callback"
 			provider.SetToken("read-token")
 			return nil
-		})
+		}))
 		if err != nil || result == nil || calls != 2 || client.MoreHeaders["X-Source"] != "during read" || client.MoreHeaders["Content-Type"] != "source/type" || client.ProviderClient != provider {
 			t.Fatalf("result=%+v err=%v HTTP=%d source=%v", result, err, calls, client.MoreHeaders)
 		}
@@ -960,14 +961,14 @@ func TestObjectMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		} {
 			calls = 0
 			local := objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return objectMetadataResponse(200, ""), nil })
-			result, err := objects.New(local).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, func(*objects.MetadataOpts) error { mutate(local); return nil })
+			result, err := objects.New(local).SetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, nil, request.Custom(func(*objects.MetadataOpts) error { mutate(local); return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("source guard=%+v err=%v HTTP=%d", result, err, calls)
 			}
 		}
 		for _, local := range []*gophercloud.ServiceClient{nil, {Type: "object-store", Endpoint: objectMetadataBase}} {
 			callbacks := 0
-			result, err := objects.New(local).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, func(*objects.GetMetadataOpts) error { callbacks++; return nil })
+			result, err := objects.New(local).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, request.Custom(func(*objects.GetMetadataOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 				t.Fatalf("missing source=%+v err=%v callbacks=%d", result, err, callbacks)
 			}

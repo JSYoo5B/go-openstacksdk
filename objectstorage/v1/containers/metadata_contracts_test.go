@@ -264,7 +264,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 	t.Run("context source and callback causes", func(t *testing.T) {
 		calls, callbacks := 0, 0
 		client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return containerMetadataResponse(204, ""), nil })
-		option := func(o *containers.GetMetadataOpts) error { callbacks++; return nil }
+		option := request.Custom(func(o *containers.GetMetadataOpts) error { callbacks++; return nil })
 		var nilAPI *containers.API
 		for _, api := range []*containers.API{nilAPI, containers.New(nil), containers.New(&gophercloud.ServiceClient{})} {
 			if result, err := api.GetMetadata(context.Background(), containerMetadataName, option); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
@@ -290,7 +290,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 		}
 		ctx, cancel = context.WithCancelCause(context.Background())
 		optionCause := errors.New("callback failed")
-		if _, err := containers.New(client).GetMetadata(ctx, containerMetadataName, func(*containers.GetMetadataOpts) error { cancel(cause); return optionCause }); !errors.Is(err, optionCause) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
+		if _, err := containers.New(client).GetMetadata(ctx, containerMetadataName, request.Custom(func(*containers.GetMetadataOpts) error { cancel(cause); return optionCause })); !errors.Is(err, optionCause) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
 			t.Fatalf("joined callback error=%v", err)
 		}
 		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, nil); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
@@ -303,7 +303,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 		api := containers.New(client)
 		callbacks := 0
 		for _, name := range []string{"", ".", "..", "a/b", "a\\b", "a\n", "a\t", "a\x7f", string([]byte{255})} {
-			result, err := api.GetMetadata(context.Background(), name, func(*containers.GetMetadataOpts) error { callbacks++; return nil })
+			result, err := api.GetMetadata(context.Background(), name, request.Custom(func(*containers.GetMetadataOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 				t.Fatalf("name=%q result=%+v err=%v callbacks=%d", name, result, err, callbacks)
 			}
@@ -342,7 +342,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 				t.Fatalf("source header %s err=%v", key, err)
 			}
 			client.MoreHeaders = nil
-			if _, err := api.SetMetadata(context.Background(), containerMetadataName, nil, containers.WithMetadataHeader(key, "owned")); !errors.Is(err, resource.ErrInvalidOption) {
+			if _, err := api.SetMetadata(context.Background(), containerMetadataName, nil, request.Header(key, "owned")); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatalf("option header %s err=%v", key, err)
 			}
 		}
@@ -371,12 +371,12 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, getHeaders, getFull, func(o *containers.GetMetadataOpts) error {
+		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, getHeaders, getFull, request.Custom(func(o *containers.GetMetadataOpts) error {
 			if o.Headers["x-trace"] != "initial" || o.Newest == nil || *o.Newest {
 				t.Errorf("factory snapshot=%+v", o)
 			}
 			return nil
-		}, containers.WithGetMetadataHeader("X-Trace", "final")); err != nil {
+		}), request.Header("X-Trace", "final")); err != nil {
 			t.Fatal(err)
 		}
 		payload := map[string]string{"Book": "before callback"}
@@ -387,13 +387,13 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		if _, err := containers.New(client).SetMetadata(context.Background(), containerMetadataName, payload, mutationHeaders, mutationFull, func(o *containers.MetadataOpts) error {
+		if _, err := containers.New(client).SetMetadata(context.Background(), containerMetadataName, payload, mutationHeaders, mutationFull, request.Custom(func(o *containers.MetadataOpts) error {
 			if o.Headers["x-trace"] != "initial" {
 				t.Errorf("mutation factory snapshot=%+v", o)
 			}
 			payload["Book"] = "after callback"
 			return nil
-		}, containers.WithMetadataHeader("X-Trace", "final")); err != nil {
+		}), request.Header("X-Trace", "final")); err != nil {
 			t.Fatal(err)
 		}
 		keys := []string{"Book"}
@@ -404,7 +404,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		if _, err := containers.New(client).DeleteMetadata(context.Background(), containerMetadataName, keys, func(*containers.MetadataOpts) error { keys[0] = "Mutated"; return nil }); err != nil || calls != 3 {
+		if _, err := containers.New(client).DeleteMetadata(context.Background(), containerMetadataName, keys, request.Custom(func(*containers.MetadataOpts) error { keys[0] = "Mutated"; return nil })); err != nil || calls != 3 {
 			t.Fatalf("err=%v calls=%d", err, calls)
 		}
 	})
@@ -418,15 +418,15 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		_, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, containers.WithGetMetadataHeader("X-Discarded", "old"), func(o *containers.GetMetadataOpts) error {
+		_, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, request.Header("X-Discarded", "old"), request.Custom(func(o *containers.GetMetadataOpts) error {
 			callbacks++
 			*o = containers.GetMetadataOpts{Headers: retained, Newest: &pointer}
 			return nil
-		}, func(o *containers.GetMetadataOpts) error {
+		}), request.Custom(func(o *containers.GetMetadataOpts) error {
 			callbacks++
 			retained["X-Trace"], pointer = "stale alias", true
 			return nil
-		})
+		}))
 		if err != nil || callbacks != 2 {
 			t.Fatalf("err=%v callbacks=%d", err, callbacks)
 		}
@@ -436,7 +436,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, containers.WithGetMetadataNewest(true), containers.WithGetMetadataHeader("X-Discarded", "old"), containers.WithGetMetadataOpts(containers.GetMetadataOpts{})); err != nil {
+		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, containers.WithGetMetadataNewest(true), request.Header("X-Discarded", "old"), containers.WithGetMetadataOpts(containers.GetMetadataOpts{})); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -669,11 +669,11 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		})
 		original := client.ProviderClient
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "X-Trace": "source", "Accept": "source/accept", "Content-Type": "source/type"}
-		_, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, containers.WithGetMetadataHeader("X-Trace", "option"), func(*containers.GetMetadataOpts) error {
+		_, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, request.Header("X-Trace", "option"), request.Custom(func(*containers.GetMetadataOpts) error {
 			client.MoreHeaders["X-Source"] = "later"
 			original.SetToken("latest-token")
 			return nil
-		})
+		}))
 		if err != nil || client.MoreHeaders["X-Trace"] != "source" || client.ProviderClient != original {
 			t.Fatalf("err=%v source=%v", err, client.MoreHeaders)
 		}
@@ -698,7 +698,7 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		} {
 			calls := 0
 			client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return containerMetadataResponse(204, ""), nil })
-			result, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, func(*containers.GetMetadataOpts) error { mutate(client); return nil })
+			result, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, request.Custom(func(*containers.GetMetadataOpts) error { mutate(client); return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("result=%+v err=%v HTTP=%d", result, err, calls)
 			}
@@ -714,7 +714,7 @@ func TestContainerMetadataContractsSourceAndNativePolicy(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			client.Endpoint, client.ResourceBase, client.Microversion = tc.endpoint, tc.base, tc.version
-			result, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, func(*containers.GetMetadataOpts) error { callbacks++; return nil })
+			result, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, request.Custom(func(*containers.GetMetadataOpts) error { callbacks++; return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 				t.Fatalf("source=%+v result=%+v err=%v calls=%d callbacks=%d", tc, result, err, calls, callbacks)
 			}

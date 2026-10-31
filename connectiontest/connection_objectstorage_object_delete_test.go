@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -95,12 +96,12 @@ func TestConnectionObjectDeleteSharesClientAndOwnsPhases(t *testing.T) {
 	option := objects.WithDeleteObjectHeaders(headers)
 	headers["X-Call"] = "caller mutation"
 	callbacks := 0
-	result, err := service.Objects.DeleteObject(ctx, container, object, option, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), func(o *objects.DeleteObjectOpts) error {
+	result, err := service.Objects.DeleteObject(ctx, container, object, option, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), request.Custom(func(o *objects.DeleteObjectOpts) error {
 		callbacks++
 		source.MoreHeaders["X-Source"] = "callback change"
 		provider.SetToken("swift-1")
 		return nil
-	})
+	}))
 	if err != nil || result == nil || result.Discovery == nil || result.Deletion == nil || result.Discovery.StatusCode != 200 || result.Deletion.StatusCode != 200 || string(result.Discovery.Body) != "head-opaque" || string(result.Deletion.Body) != bulk || result.StaticLargeObject == nil || !*result.StaticLargeObject || result.IgnoredMissing || result.Bulk == nil || result.Bulk.NumberDeleted != 2 || result.Bulk.NumberNotFound != 1 || string(result.Bulk.Body["plugin"]) != "9007199254740993" || calls != 2 || callbacks != 1 {
 		t.Fatal(result, err, calls, callbacks)
 	}

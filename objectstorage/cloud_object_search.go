@@ -138,7 +138,7 @@ func (c *Cloud) SearchObjects(ctx context.Context, container string, options ...
 	}
 	result := &ObjectSearchResult{}
 	rows := []json.RawMessage{}
-	for record, err := range objects.New(c.client).ListRecords(ctx, container, configure) {
+	for record, err := range objects.New(c.client).ListRecords(ctx, container, request.Custom(configure)) {
 		if record != nil {
 			result.LastPage = copyObjectSearchRecord(record)
 		}

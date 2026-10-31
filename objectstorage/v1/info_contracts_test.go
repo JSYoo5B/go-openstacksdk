@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -136,17 +137,17 @@ func TestObjectInfoContractsOptionsAndSource(t *testing.T) {
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		var retained *v1.GetInfoOpts
-		got, err := v1.New(client).GetInfo(context.Background(), v1.WithGetInfoHeader("X-Discarded", "yes"), full, overlay, v1.WithGetInfoHeader("X-Call", "final"), func(cfg *v1.GetInfoOpts) error {
+		got, err := v1.New(client).GetInfo(context.Background(), request.Header("X-Discarded", "yes"), full, overlay, request.Header("X-Call", "final"), request.Custom(func(cfg *v1.GetInfoOpts) error {
 			callbacks++
 			retained = cfg
 			client.MoreHeaders["X-Source"] = "valid later value"
 			client.SetToken("token-two")
 			return nil
-		}, func(*v1.GetInfoOpts) error {
+		}), request.Custom(func(*v1.GetInfoOpts) error {
 			callbacks++
 			retained.Headers["X-Call"] = "late retained mutation"
 			return nil
-		})
+		}))
 		if err != nil || got == nil || callbacks != 2 || client.MoreHeaders["X-Source"] != "valid later value" {
 			t.Fatalf("info=%+v err=%v callbacks=%d", got, err, callbacks)
 		}
@@ -193,7 +194,7 @@ func TestObjectInfoContractsOptionsAndSource(t *testing.T) {
 			calls := 0
 			client := infoContractClient(func(*http.Request) (*http.Response, error) { calls++; return infoContractWire(200, `{}`), nil })
 			service := v1.New(client)
-			got, err := service.GetInfo(context.Background(), func(*v1.GetInfoOpts) error { mutate(service, client); return nil })
+			got, err := service.GetInfo(context.Background(), request.Custom(func(*v1.GetInfoOpts) error { mutate(service, client); return nil }))
 			if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("info=%+v err=%v calls=%d", got, err, calls)
 			}

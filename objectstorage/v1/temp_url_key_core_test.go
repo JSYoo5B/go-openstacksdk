@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeobjects "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
@@ -237,14 +238,14 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 				c := tempURLKeyTestClient()
 				tc.change(c)
 				callbacks := 0
-				result, err := New(c).GetTempURLKey(context.Background(), func(*GetTempURLKeyOpts) error { callbacks++; return nil })
+				result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(*GetTempURLKeyOpts) error { callbacks++; return nil }))
 				if result != nil || err == nil || callbacks != 0 {
 					t.Fatal(result, err, callbacks)
 				}
 			})
 		}
 		callbacks := 0
-		option := func(*GetTempURLKeyOpts) error { callbacks++; return nil }
+		option := request.Custom(func(*GetTempURLKeyOpts) error { callbacks++; return nil })
 		var nilService *Service
 		for _, s := range []*Service{nilService, &Service{}, New(tempURLKeyTestClient())} {
 			ctx := context.Background()
@@ -275,7 +276,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 		cause, optionErr := errors.New("cancel"), errors.New("option")
 		ctx, cancel := context.WithCancelCause(context.Background())
 		defer cancel(nil)
-		result, err := s.GetTempURLKey(ctx, func(*GetTempURLKeyOpts) error { s.Accounts = nil; cancel(cause); return optionErr })
+		result, err := s.GetTempURLKey(ctx, request.Custom(func(*GetTempURLKeyOpts) error { s.Accounts = nil; cancel(cause); return optionErr }))
 		if result != nil {
 			t.Fatal("invented proof", result)
 		}
@@ -365,7 +366,7 @@ func TestTempURLKeyCoreCapturedHeadersAndNativeSigner(t *testing.T) {
 			}
 			return tempURLKeyTestWire(r, 204, h, b), nil
 		})
-		result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"), WithGetTempURLKeyHeader("X-Call", "owned"), WithGetTempURLKeyNewest(false))
+		result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"), request.Header("X-Call", "owned"), WithGetTempURLKeyNewest(false))
 		if err != nil || result == nil || string(result.Key) != "key" || !result.Secondary || result.FromContainer || calls != 2 || c.MoreHeaders["X-Source"] != "new valid value" {
 			t.Fatal(result, err, calls, c.MoreHeaders)
 		}

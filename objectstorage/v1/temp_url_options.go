@@ -1,6 +1,11 @@
 package v1
 
-import "time"
+import (
+	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // GenerateTempURLOpts owns signing inputs and preferences for any metadata reads.
 type GenerateTempURLOpts struct {
@@ -14,51 +19,57 @@ type GenerateTempURLOpts struct {
 	ISO8601   bool
 	IPRange   string
 }
-type GenerateTempURLOption func(*GenerateTempURLOpts) error
+
+// GenerateTempURLOption is one option of GenerateTempURL: the
+// WithGenerateTempURL* options, request.Header (validated and merged like a
+// one-entry WithGenerateTempURLHeaders) or request.Custom over
+// *GenerateTempURLOpts. Other shared calls, including request.Headers (the
+// WithGenerateTempURLHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type GenerateTempURLOption = request.GetCall
+
+var generateTempURLCalls = calls.Spec[GenerateTempURLOpts]{Header: calls.MergeHeader[GenerateTempURLOpts](WithGenerateTempURLHeaders)}
 
 func WithGenerateTempURLOpts(value GenerateTempURLOpts) GenerateTempURLOption {
 	snapshot := cloneGenerateTempURLOpts(value)
-	return func(cfg *GenerateTempURLOpts) error { *cfg = cloneGenerateTempURLOpts(snapshot); return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { *cfg = cloneGenerateTempURLOpts(snapshot); return nil })
 }
 func WithGenerateTempURLKey(value []byte) GenerateTempURLOption {
 	snapshot := cloneSigningKey(value)
-	return func(cfg *GenerateTempURLOpts) error { cfg.Key = cloneSigningKey(snapshot); return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Key = cloneSigningKey(snapshot); return nil })
 }
 func WithGenerateTempURLDigest(value TempURLDigest) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.Digest = value; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Digest = value; return nil })
 }
 func WithGenerateTempURLTimestamp(value time.Time) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Timestamp = &owned; return nil }
-}
-func WithGenerateTempURLHeader(key, value string) GenerateTempURLOption {
-	return WithGenerateTempURLHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Timestamp = &owned; return nil })
 }
 func WithGenerateTempURLHeaders(values map[string]string) GenerateTempURLOption {
 	snapshot := cloneTempURLKeyHeaders(values)
-	return func(cfg *GenerateTempURLOpts) error {
+	return request.Custom(func(cfg *GenerateTempURLOpts) error {
 		if cfg.Headers == nil {
 			cfg.Headers = make(map[string]string)
 		}
 		return mergeTempURLKeyHeaders(cfg.Headers, snapshot)
-	}
+	})
 }
 func WithGenerateTempURLNewest(value bool) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Newest = &owned; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
 func WithoutGenerateTempURLNewest() GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.Newest = nil; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Newest = nil; return nil })
 }
 func WithGenerateTempURLAbsolute(value bool) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.Absolute = value; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Absolute = value; return nil })
 }
 func WithGenerateTempURLPrefix(value bool) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.Prefix = value; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Prefix = value; return nil })
 }
 func WithGenerateTempURLISO8601(value bool) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.ISO8601 = value; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.ISO8601 = value; return nil })
 }
 func WithGenerateTempURLIPRange(value string) GenerateTempURLOption {
-	return func(cfg *GenerateTempURLOpts) error { cfg.IPRange = value; return nil }
+	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.IPRange = value; return nil })
 }
 
 func cloneGenerateTempURLOpts(value GenerateTempURLOpts) GenerateTempURLOpts {
@@ -76,7 +87,7 @@ func cloneGenerateTempURLOpts(value GenerateTempURLOpts) GenerateTempURLOpts {
 }
 func applyGenerateTempURLOptions(options []GenerateTempURLOption) (GenerateTempURLOpts, error) {
 	cfg := cloneGenerateTempURLOpts(GenerateTempURLOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, generateTempURLCalls) {
 		if option == nil {
 			return cfg, tempURLKeyInvalid("nil signing option")
 		}

@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,12 +34,12 @@ func TestObjectStaleOptionsSnapshotsAndReplacement(t *testing.T) {
 	})
 	for n := 0; n < 2; n++ {
 		c.MoreHeaders["X-Source"] = "captured"
-		result, err := New(c).IsObjectStale(context.Background(), "box", "key", "unread explicit file", full, func(cfg *IsObjectStaleOpts) error {
+		result, err := New(c).IsObjectStale(context.Background(), "box", "key", "unread explicit file", full, request.Custom(func(cfg *IsObjectStaleOpts) error {
 			callbacks++
 			retained = cfg
 			c.MoreHeaders["X-Source"] = "valid later source"
 			return nil
-		}, WithIsObjectStaleHeader("X-Call", "overlay"))
+		}), request.Header("X-Call", "overlay"))
 		if err != nil || result == nil || result.Stale == nil || *result.Stale || result.MD5 != md {
 			t.Fatal(result, err)
 		}
@@ -48,8 +49,8 @@ func TestObjectStaleOptionsSnapshotsAndReplacement(t *testing.T) {
 	}
 	p := createUploadPrepared(t, c)
 	for _, options := range [][]IsObjectStaleOption{
-		{WithIsObjectStaleHeader("X-Call", "first"), WithIsObjectStaleHeaders(map[string]string{"x-call": "last"}), WithIsObjectStaleMD5(md), WithIsObjectStaleSHA256(strings.Repeat("B", 64)), WithIsObjectStaleMD5(""), WithIsObjectStaleSHA256("")},
-		{WithIsObjectStaleHeader("X-Call", "discard"), WithIsObjectStaleMD5(md), WithIsObjectStaleOpts(IsObjectStaleOpts{})},
+		{request.Header("X-Call", "first"), WithIsObjectStaleHeaders(map[string]string{"x-call": "last"}), WithIsObjectStaleMD5(md), WithIsObjectStaleSHA256(strings.Repeat("B", 64)), WithIsObjectStaleMD5(""), WithIsObjectStaleSHA256("")},
+		{request.Header("X-Call", "discard"), WithIsObjectStaleMD5(md), WithIsObjectStaleOpts(IsObjectStaleOpts{})},
 	} {
 		cfg, err := p.applyStaleOptions(context.Background(), options)
 		if err != nil || cfg.MD5 != "" || cfg.SHA256 != "" {
@@ -67,30 +68,30 @@ func TestObjectStaleOptionsPreflightAndCauses(t *testing.T) {
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 	for _, filename := range []string{"", "bad\x00file", "bad\xfffile"} {
 		callbacks := 0
-		result, err := New(c).IsObjectStale(context.Background(), "box", "key", filename, func(*IsObjectStaleOpts) error { callbacks++; return nil })
+		result, err := New(c).IsObjectStale(context.Background(), "box", "key", filename, request.Custom(func(*IsObjectStaleOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
 	}
-	for _, option := range []IsObjectStaleOption{nil, WithIsObjectStaleMD5("bad"), WithIsObjectStaleSHA256(strings.Repeat("g", 64)), WithIsObjectStaleHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), WithIsObjectStaleHeader("Cookie", "auth"), WithIsObjectStaleHeader("X-Service-Token", "auth"), WithIsObjectStaleHeader("ETag", "owned"), WithIsObjectStaleHeader("Content-Length", "9"), WithIsObjectStaleHeader("X-Object-Meta-Tag", "owned")} {
+	for _, option := range []IsObjectStaleOption{nil, WithIsObjectStaleMD5("bad"), WithIsObjectStaleSHA256(strings.Repeat("g", 64)), WithIsObjectStaleHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("ETag", "owned"), request.Header("Content-Length", "9"), request.Header("X-Object-Meta-Tag", "owned")} {
 		if result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit missing", option); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err)
 		}
 	}
 	callbacks := 0
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
-		if result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit", func(*IsObjectStaleOpts) error { callbacks++; return nil }); result != nil || err == nil || callbacks != 0 {
+		if result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit", request.Custom(func(*IsObjectStaleOpts) error { callbacks++; return nil })); result != nil || err == nil || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
 	}
 	cause := errors.New("stale callback cause")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	canceled := errors.New("stale canceled")
-	result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit", func(*IsObjectStaleOpts) error {
+	result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit", request.Custom(func(*IsObjectStaleOpts) error {
 		c.Endpoint = "http://changed.invalid/v1/a/"
 		cancel(canceled)
 		return cause
-	})
+	}))
 	if result != nil || !errors.Is(err, cause) || !errors.Is(err, canceled) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal("stale callback causes lost", result, err, calls)
 	}
@@ -131,7 +132,7 @@ func TestObjectStaleOptionsNativeSnapshotAndProof(t *testing.T) {
 		}
 		return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-X-Sdk-Md5": {md}}), nil
 	})
-	result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit unread", WithIsObjectStaleMD5(md), WithIsObjectStaleHeader("X-Call", "owned"), func(*IsObjectStaleOpts) error { callbacks++; return nil })
+	result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit unread", WithIsObjectStaleMD5(md), request.Header("X-Call", "owned"), request.Custom(func(*IsObjectStaleOpts) error { callbacks++; return nil }))
 	if err != nil || result == nil || result.Stale == nil || *result.Stale || calls != 2 || retries != 1 || callbacks != 1 {
 		t.Fatal(result, err, calls, retries, callbacks)
 	}

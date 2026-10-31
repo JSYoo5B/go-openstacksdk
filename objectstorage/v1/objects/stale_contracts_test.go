@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -35,7 +36,7 @@ func TestIsObjectStaleContractsLazyFilesAndLiteralHEAD(t *testing.T) {
 			client.ResourceBase = objectMetadataBase
 			client.Endpoint = "https://swift.invalid/catalogue/v1/AUTH_else/"
 			filename := filepath.Join(t.TempDir(), "does not exist")
-			result, err := objects.New(client).IsObjectStale(context.Background(), objectMetadataContainer, objectMetadataKey, filename, objects.WithIsObjectStaleMD5(md), objects.WithIsObjectStaleHeader("X-Check", "explicit"))
+			result, err := objects.New(client).IsObjectStale(context.Background(), objectMetadataContainer, objectMetadataKey, filename, objects.WithIsObjectStaleMD5(md), request.Header("X-Check", "explicit"))
 			if err != nil || result == nil || result.Discovery == nil || result.Discovery.StatusCode != status || string(result.Discovery.Body) != "head-proof" || result.Stale == nil || *result.Stale != (status == 404) || calls != 1 {
 				t.Fatalf("result=%+v err=%v HTTP=%d", result, err, calls)
 			}
@@ -197,11 +198,11 @@ func TestIsObjectStaleContractsDirtyMissingAndLiveGuards(t *testing.T) {
 			hooks++
 			return nil
 		}
-		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), factory, objects.WithIsObjectStaleMD5(md), func(*objects.IsObjectStaleOpts) error {
+		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), factory, objects.WithIsObjectStaleMD5(md), request.Custom(func(*objects.IsObjectStaleOpts) error {
 			callbacks++
 			client.MoreHeaders["X-Source"] = "valid drift"
 			return nil
-		})
+		}))
 		if err != nil || result == nil || result.Stale == nil || *result.Stale || calls != 2 || hooks != 1 || callbacks != 1 || result.Discovery.StatusCode != 204 {
 			t.Fatalf("result=%+v err=%v calls=%d hooks=%d callbacks=%d", result, err, calls, hooks, callbacks)
 		}
@@ -214,7 +215,7 @@ func TestIsObjectStaleContractsDirtyMissingAndLiveGuards(t *testing.T) {
 			t.Fatalf("result=%+v err=%v", result, err)
 		}
 		client.MoreHeaders = map[string]string{"X-Source": "bad\nvalue"}
-		result, err := api.IsObjectStale(context.Background(), "c", "o", "explicit", func(*objects.IsObjectStaleOpts) error { callbacks++; return nil })
+		result, err := api.IsObjectStale(context.Background(), "c", "o", "explicit", request.Custom(func(*objects.IsObjectStaleOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatalf("result=%+v err=%v calls=%d callbacks=%d", result, err, calls, callbacks)
 		}

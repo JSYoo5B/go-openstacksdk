@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -68,7 +69,7 @@ func TestObjectDeleteContractsRoutesAndSelection(t *testing.T) {
 		}))
 		defer server.Close()
 		client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{HTTPClient: *server.Client()}, Type: "object-store", Endpoint: server.URL + "/catalog/v1/A/", ResourceBase: server.URL + "/reverse/a%2Fb/v1/A/"}
-		result, err := objects.New(client).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), objects.WithDeleteObjectHeader("X-Call", "owned"))
+		result, err := objects.New(client).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), request.Header("X-Call", "owned"))
 		if err != nil || result == nil || result.Discovery == nil || result.Deletion == nil || result.Discovery.StatusCode != 200 || result.Deletion.StatusCode != 200 || result.StaticLargeObject == nil || !*result.StaticLargeObject || result.Bulk == nil || calls.Load() != 2 {
 			t.Fatalf("result=%+v err=%v calls=%d", result, err, calls.Load())
 		}
@@ -159,7 +160,7 @@ func TestObjectDeleteContractsBulkOutcomes(t *testing.T) {
 		client := objectMetadataClient(func(*http.Request) (*http.Response, error) {
 			return deleteContractWire(200, " \r\n\r\n"+deleteContractBulkOK), nil
 		})
-		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), objects.WithDeleteObjectIgnoreMissing(false))
+		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), request.IgnoreMissing(false))
 		if err != nil || result == nil || result.Bulk == nil || result.Bulk.ResponseCode != 200 || result.Bulk.NumberDeleted != 2 || result.Bulk.NumberNotFound != 1 || result.IgnoredMissing || result.Bulk.CreatedAt != nil || result.Bulk.Links != nil || string(result.Bulk.Body["plugin"]) != `{"precise":9007199254740993}` {
 			t.Fatalf("result=%+v err=%v", result, err)
 		}
@@ -250,7 +251,7 @@ func TestObjectDeleteContractsOptionsAndSnapshots(t *testing.T) {
 			return deleteContractWire(204, "ack"), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
-		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), objects.WithDeleteObjectHeader("X-Discarded", "yes"), full, objects.WithDeleteObjectHeader("X-Call", "final"), func(cfg *objects.DeleteObjectOpts) error { callbacks++; retained = cfg; return nil })
+		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), request.Header("X-Discarded", "yes"), full, request.Header("X-Call", "final"), request.Custom(func(cfg *objects.DeleteObjectOpts) error { callbacks++; retained = cfg; return nil }))
 		if err != nil || result == nil || result.Discovery == nil || result.StaticLargeObject == nil || *result.StaticLargeObject || calls != 2 || callbacks != 1 {
 			t.Fatalf("result=%+v err=%v calls=%d callbacks=%d", result, err, calls, callbacks)
 		}
@@ -308,7 +309,7 @@ func TestObjectDeleteContractsMissingEvidence(t *testing.T) {
 				})
 				options := []objects.DeleteObjectOption{}
 				if strict {
-					options = append(options, objects.WithDeleteObjectIgnoreMissing(false))
+					options = append(options, request.IgnoreMissing(false))
 				}
 				result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", options...)
 				if strict {
@@ -455,10 +456,10 @@ func TestObjectDeleteContractsPhaseErrorsAndGuards(t *testing.T) {
 			api := objects.New(client)
 			options := []objects.DeleteObjectOption{}
 			if duringCallback {
-				options = append(options, func(*objects.DeleteObjectOpts) error {
+				options = append(options, request.Custom(func(*objects.DeleteObjectOpts) error {
 					client.ProviderClient = &gophercloud.ProviderClient{}
 					return nil
-				}, func(*objects.DeleteObjectOpts) error { later++; return nil })
+				}), request.Custom(func(*objects.DeleteObjectOpts) error { later++; return nil }))
 			}
 			result, err := api.DeleteObject(context.Background(), "c", "o", options...)
 			deleteContractNoPhase(t, result)
@@ -545,7 +546,7 @@ func TestObjectDeleteContractsNativePolicy(t *testing.T) {
 			client.SetToken("fresh-token")
 			return nil
 		}
-		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), func(*objects.DeleteObjectOpts) error { callbacks++; return nil })
+		result, err := objects.New(client).DeleteObject(context.Background(), "c", "o", objects.WithDeleteObjectStaticLargeObject(true), request.Custom(func(*objects.DeleteObjectOpts) error { callbacks++; return nil }))
 		if err != nil || result == nil || result.Bulk == nil || calls != 2 || hooks != 1 || callbacks != 1 || client.ProviderClient != provider || client.MoreHeaders["Accept"] != "text/plain" {
 			t.Fatalf("result=%+v err=%v calls=%d hooks=%d callbacks=%d", result, err, calls, hooks, callbacks)
 		}

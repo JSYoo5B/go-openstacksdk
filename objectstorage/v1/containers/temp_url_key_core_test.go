@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -76,20 +77,20 @@ func TestContainerTempURLKeyCorePreflightAndCallbackCause(t *testing.T) {
 		c := containerMetadataClient("http://cloud.invalid/v1/AUTH_x/")
 		calls, callbacks := 0, 0
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; t.Fatal("invalid key sent"); return nil, nil })
-		result, err := New(c).SetTempURLKey(context.Background(), "백업 %2F?#", key, func(*SetTempURLKeyOpts) error { callbacks++; return nil })
+		result, err := New(c).SetTempURLKey(context.Background(), "백업 %2F?#", key, request.Custom(func(*SetTempURLKeyOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 			t.Fatalf("key preflight failed %#v %v %d/%d", result, err, calls, callbacks)
 		}
 	}
 	c := containerMetadataClient("http://cloud.invalid/v1/AUTH_x/")
 	callbacks := 0
-	if result, err := New(c).SetTempURLKey(nil, "백업 %2F?#", "key", func(*SetTempURLKeyOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+	if result, err := New(c).SetTempURLKey(nil, "백업 %2F?#", "key", request.Custom(func(*SetTempURLKeyOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 		t.Fatal(result, err, callbacks)
 	}
 	cause, optionErr := errors.New("cancel cause"), errors.New("callback cause")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
-	result, err := New(c).SetTempURLKey(ctx, "백업 %2F?#", "key", func(*SetTempURLKeyOpts) error { c.Endpoint += "changed/"; cancel(cause); return optionErr })
+	result, err := New(c).SetTempURLKey(ctx, "백업 %2F?#", "key", request.Custom(func(*SetTempURLKeyOpts) error { c.Endpoint += "changed/"; cancel(cause); return optionErr }))
 	for _, expected := range []error{optionErr, cause, context.Canceled, resource.ErrInvalidOption} {
 		if !errors.Is(err, expected) {
 			t.Fatalf("lost cause %v: %v", expected, err)

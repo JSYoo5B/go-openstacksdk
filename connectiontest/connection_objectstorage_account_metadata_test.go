@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -91,11 +92,11 @@ func TestConnectionAccountMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://outside.test/ignored/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
-	get, err := service.Accounts.GetMetadata(ctx, accounts.WithGetMetadataNewest(false), func(o *accounts.GetMetadataOpts) error {
+	get, err := service.Accounts.GetMetadata(ctx, accounts.WithGetMetadataNewest(false), request.Custom(func(o *accounts.GetMetadataOpts) error {
 		source.MoreHeaders["X-Source"] = "callback"
 		provider.SetToken("swift-1")
 		return nil
-	})
+	}))
 	if err != nil || get == nil || get.Metadata == nil || *get.Metadata.BytesUsed != 9007199254740995 || *get.Metadata.ObjectCount != 0 || get.Metadata.ContainerCount != nil || get.Metadata.Timestamp == nil || *get.Metadata.Timestamp != "" || get.Metadata.Values["owner"] != "observed" || get.Metadata.Values["temp-url-key"] != "passive-key" || get.StatusCode != 204 || string(get.Body) != "opaque" || calls != 1 {
 		t.Fatal(get, err, calls)
 	}
@@ -107,11 +108,11 @@ func TestConnectionAccountMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	headers := map[string]string{"X-Call": "owned"}
 	option := accounts.WithMetadataHeaders(headers)
 	headers["X-Call"] = "changed"
-	set, err := service.Accounts.SetMetadata(ctx, values, option, func(o *accounts.MetadataOpts) error {
+	set, err := service.Accounts.SetMetadata(ctx, values, option, request.Custom(func(o *accounts.MetadataOpts) error {
 		values["Owner"] = "late"
 		source.MoreHeaders["X-Source"] = "callback"
 		return nil
-	})
+	}))
 	if err != nil || set == nil || set.StatusCode != 204 || string(set.Body) != "opaque" || calls != 2 {
 		t.Fatal(set, err, calls)
 	}

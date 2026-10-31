@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -42,7 +43,7 @@ func TestContainerMetadataOptionsFactorySnapshots(t *testing.T) {
 		}
 		return containerMetadataWire(r, 204, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
-	if _, err := New(c).SetMetadata(context.Background(), containerMetadataName, metadata, func(*MetadataOpts) error { metadata["Key"] = "changed"; return nil }); err != nil {
+	if _, err := New(c).SetMetadata(context.Background(), containerMetadataName, metadata, request.Custom(func(*MetadataOpts) error { metadata["Key"] = "changed"; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
@@ -51,21 +52,21 @@ func TestContainerMetadataOptionsFactorySnapshots(t *testing.T) {
 		}
 		return containerMetadataWire(r, 204, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
-	if _, err := New(c).DeleteMetadata(context.Background(), containerMetadataName, keys, func(*MetadataOpts) error { keys[0] = "changed"; return nil }); err != nil {
+	if _, err := New(c).DeleteMetadata(context.Background(), containerMetadataName, keys, request.Custom(func(*MetadataOpts) error { keys[0] = "changed"; return nil })); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestContainerMetadataOptionsReplacementAndNewest(t *testing.T) {
 	for _, mixed := range []string{"X-Call", "x-CaLl"} {
-		get, err := applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataOpts(GetMetadataOpts{Headers: map[string]string{"x-call": "old"}}), WithGetMetadataHeader(mixed, "new")})
+		get, err := applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataOpts(GetMetadataOpts{Headers: map[string]string{"x-call": "old"}}), request.Header(mixed, "new")})
 		if err != nil {
 			t.Fatal(err)
 		}
 		if _, err := validateMetadataHeaders(get.Headers); err != nil || len(get.Headers) != 1 || get.Headers["X-Call"] != "new" {
 			t.Fatalf("Get singular overwrite %#v %v", get.Headers, err)
 		}
-		mutation, err := applyMetadataOptions([]MetadataOption{WithMetadataOpts(MetadataOpts{Headers: map[string]string{"x-call": "old"}}), WithMetadataHeader(mixed, "new")})
+		mutation, err := applyMetadataOptions([]MetadataOption{WithMetadataOpts(MetadataOpts{Headers: map[string]string{"x-call": "old"}}), request.Header(mixed, "new")})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -73,7 +74,7 @@ func TestContainerMetadataOptionsReplacementAndNewest(t *testing.T) {
 			t.Fatalf("mutation singular overwrite %#v %v", mutation.Headers, err)
 		}
 	}
-	cfg, err := applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(true), WithGetMetadataHeader("X-Trace", "one"), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"x-trace": "two"}), WithGetMetadataHeader("X-Trace", "three")})
+	cfg, err := applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(true), request.Header("X-Trace", "one"), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"x-trace": "two"}), request.Header("X-Trace", "three")})
 	if err != nil || cfg.Newest != nil || cfg.Headers["X-Trace"] != "three" {
 		t.Fatalf("replace/last wins %+v %v", cfg, err)
 	}
@@ -81,7 +82,7 @@ func TestContainerMetadataOptionsReplacementAndNewest(t *testing.T) {
 	if err != nil || cfg.Newest != nil {
 		t.Fatalf("clear %+v %v", cfg, err)
 	}
-	m, err := applyMetadataOptions([]MetadataOption{WithMetadataHeader("X-Old", "one"), WithMetadataOpts(MetadataOpts{}), WithMetadataHeaders(map[string]string{"X-Trace": "new"})})
+	m, err := applyMetadataOptions([]MetadataOption{request.Header("X-Old", "one"), WithMetadataOpts(MetadataOpts{}), WithMetadataHeaders(map[string]string{"X-Trace": "new"})})
 	if err != nil || len(m.Headers) != 1 || m.Headers["X-Trace"] != "new" {
 		t.Fatalf("mutation replace %+v %v", m, err)
 	}
@@ -96,7 +97,7 @@ func TestContainerMetadataOptionsRetainedCallbacksAndCauses(t *testing.T) {
 	var first *GetMetadataOpts
 	var last *GetMetadataOpts
 	calls := 0
-	cfg, err := applyGetMetadataOptions([]GetMetadataOption{func(p *GetMetadataOpts) error {
+	cfg, err := applyGetMetadataOptions([]GetMetadataOption{request.Custom(func(p *GetMetadataOpts) error {
 		calls++
 		if p.Headers == nil {
 			t.Fatal("uninitialized headers")
@@ -106,14 +107,14 @@ func TestContainerMetadataOptionsRetainedCallbacksAndCauses(t *testing.T) {
 		p.Newest = &value
 		first = p
 		return nil
-	}, func(p *GetMetadataOpts) error {
+	}), request.Custom(func(p *GetMetadataOpts) error {
 		calls++
 		first.Headers["X-Trace"] = "retained"
 		*first.Newest = true
 		first.Headers = nil
 		last = p
 		return nil
-	}})
+	})})
 	last.Headers["X-Trace"] = "late"
 	*last.Newest = true
 	if err != nil || calls != 2 || cfg.Headers["X-Trace"] != "owned" || cfg.Newest == nil || *cfg.Newest {
@@ -124,7 +125,7 @@ func TestContainerMetadataOptionsRetainedCallbacksAndCauses(t *testing.T) {
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("cancel")
 	optionErr := errors.New("option")
-	_, err = a.GetMetadata(ctx, containerMetadataName, func(*GetMetadataOpts) error { cancel(cause); return optionErr })
+	_, err = a.GetMetadata(ctx, containerMetadataName, request.Custom(func(*GetMetadataOpts) error { cancel(cause); return optionErr }))
 	if !errors.Is(err, optionErr) || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) {
 		t.Fatalf("joined causes %v", err)
 	}

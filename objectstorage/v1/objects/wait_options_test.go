@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -50,7 +51,7 @@ func TestObjectWaitOptionsSnapshots(t *testing.T) {
 			}}
 			return objectMetadataWire(r, 200, http.Header{"X-State": {state}}, body), nil
 		})
-		result, err := New(c).WaitForStatus(context.Background(), "box", "key", "READY", full, func(cfg *ObjectWaitOpts) error { optionCalls++; retained = cfg; return nil }, WithObjectWaitHeader("X-Call", "overlay"))
+		result, err := New(c).WaitForStatus(context.Background(), "box", "key", "READY", full, request.Custom(func(cfg *ObjectWaitOpts) error { optionCalls++; retained = cfg; return nil }), request.Header("X-Call", "overlay"))
 		if err != nil || result == nil || !result.Complete || result.Polls != 2 || calls != 2 || result.Status == nil || *result.Status != "READY" {
 			t.Fatal("retained callback/factory aliased waiter", result, err, calls)
 		}
@@ -119,7 +120,7 @@ func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 	zero, negative := time.Duration(0), -time.Second
 	for _, option := range []ObjectWaitOption{
 		nil, WithObjectWaitPollInterval(0), WithObjectWaitPollInterval(-1), WithObjectWaitTimeout(0), WithObjectWaitTimeout(-1), WithObjectWaitOpts(ObjectWaitOpts{Interval: &zero}), WithObjectWaitOpts(ObjectWaitOpts{Timeout: &negative}),
-		WithObjectWaitHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), WithObjectWaitHeader("Range", "bytes=0-0"), WithObjectWaitHeader("if-match", "value"), WithObjectWaitHeader("If-Unmodified-Since", "date"), WithObjectWaitHeader("X-Newest", "true"), WithObjectWaitHeader("Cookie", "auth"), WithObjectWaitHeader("Content-Length", "9"),
+		WithObjectWaitHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), request.Header("Range", "bytes=0-0"), request.Header("if-match", "value"), request.Header("If-Unmodified-Since", "date"), request.Header("X-Newest", "true"), request.Header("Cookie", "auth"), request.Header("Content-Length", "9"),
 		WithObjectWaitStatusAttribute("nested.status"), WithObjectWaitStatusHeader("X-State bad"), WithObjectWaitFailureStates("bad\u0085"), WithObjectWaitOpts(ObjectWaitOpts{StatusAttribute: "name", StatusHeader: "X-State"}),
 	} {
 		result, err := New(c).WaitForDelete(context.Background(), "box", "key", option)
@@ -130,7 +131,7 @@ func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 	for _, headers := range []map[string]string{{"Range": "bytes=0-0"}, {"If-None-Match": "*"}, {"X-Newest": "true"}} {
 		c.MoreHeaders = headers
 		callbacks := 0
-		result, err := New(c).WaitForDelete(context.Background(), "box", "key", func(*ObjectWaitOpts) error { callbacks++; return nil })
+		result, err := New(c).WaitForDelete(context.Background(), "box", "key", request.Custom(func(*ObjectWaitOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("source preflight ran callback", result, err, callbacks)
 		}
@@ -138,25 +139,25 @@ func TestObjectWaitOptionsPreflightAndCauses(t *testing.T) {
 	}
 	for _, target := range []string{"bad\xff", "bad\u0085"} {
 		callbacks := 0
-		result, err := New(c).WaitForStatus(context.Background(), "box", "key", target, func(*ObjectWaitOpts) error { callbacks++; return nil })
+		result, err := New(c).WaitForStatus(context.Background(), "box", "key", target, request.Custom(func(*ObjectWaitOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
 	}
 	for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 		callbacks := 0
-		result, err := New(c).WaitForDelete(ctx, "box", "key", func(*ObjectWaitOpts) error { callbacks++; return nil })
+		result, err := New(c).WaitForDelete(ctx, "box", "key", request.Custom(func(*ObjectWaitOpts) error { callbacks++; return nil }))
 		if result != nil || err == nil || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, canceled := errors.New("option cause"), errors.New("option canceled")
-	result, err := New(c).WaitForDelete(ctx, "box", "key", func(*ObjectWaitOpts) error {
+	result, err := New(c).WaitForDelete(ctx, "box", "key", request.Custom(func(*ObjectWaitOpts) error {
 		c.MoreHeaders = map[string]string{"If-Match": "foreign"}
 		cancel(canceled)
 		return cause
-	})
+	}))
 	if result != nil || !errors.Is(err, cause) || !errors.Is(err, canceled) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal("preflight causes lost", result, err, calls)
 	}

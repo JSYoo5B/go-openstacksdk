@@ -14,11 +14,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectStaticLargeObject`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectVersionID`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest`
@@ -73,6 +73,7 @@ import (
     "fmt"
 
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -122,9 +123,9 @@ func deleteObjects(ctx context.Context, api *objects.API, versionID string) erro
             StaticLargeObject: &knownSLO, IgnoreMissing: &allowMissing, Newest: &newest,
         }),
         objects.WithDeleteObjectHeaders(map[string]string{"X-Trace-Label": "object-delete"}),
-        objects.WithDeleteObjectHeader("X-Request-Label", "auto"),
+        request.Header("X-Request-Label", "auto"),
         objects.WithoutDeleteObjectStaticLargeObject(),
-        objects.WithDeleteObjectIgnoreMissing(false),
+        request.IgnoreMissing(false),
         objects.WithoutDeleteObjectIgnoreMissing(),
         objects.WithDeleteObjectVersionID(versionID),
         objects.WithDeleteObjectNewest(true),
@@ -140,7 +141,7 @@ func deleteObjects(ctx context.Context, api *objects.API, versionID string) erro
 
     result, err = api.DeleteObject(ctx, "backups", "manifest",
         objects.WithDeleteObjectStaticLargeObject(true),
-        objects.WithDeleteObjectIgnoreMissing(false),
+        request.IgnoreMissing(false),
     )
     showDelete(result)
     if err != nil { showDeleteError(err) }

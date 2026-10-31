@@ -13,6 +13,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -99,16 +100,16 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 	headers := map[string]string{"X-Call": "form"}
 	formOption := swift.WithGenerateFormSignatureHeaders(headers)
 	headers["X-Call"] = "caller mutation"
-	form, err := service.GenerateFormSignature(ctx, container, input, formOption, swift.WithGenerateFormSignatureNewest(false), swift.WithGenerateFormSignatureTimestamp(stamp), func(o *swift.GenerateFormSignatureOpts) error {
+	form, err := service.GenerateFormSignature(ctx, container, input, formOption, swift.WithGenerateFormSignatureNewest(false), swift.WithGenerateFormSignatureTimestamp(stamp), request.Custom(func(o *swift.GenerateFormSignatureOpts) error {
 		source.MoreHeaders["X-Source"] = "callback mutation"
 		provider.SetToken("token-1")
 		return nil
-	})
+	}))
 	if err != nil || form == nil || form.Discovery == nil || form.Discovery.Container == nil || form.Discovery.Account == nil || form.Discovery.FromContainer || !form.Discovery.Secondary || string(form.Discovery.Key) != "account-secondary" || calls != 2 {
 		t.Fatal(form, err, calls)
 	}
 	source.ResourceBase = "invalid unused base"
-	generated, err := service.GenerateTempURL(ctx, path, 1700000060, "GET", swift.WithGenerateTempURLAbsolute(true), swift.WithGenerateTempURLTimestamp(stamp), swift.WithGenerateTempURLHeader("X-Call", "url"))
+	generated, err := service.GenerateTempURL(ctx, path, 1700000060, "GET", swift.WithGenerateTempURLAbsolute(true), swift.WithGenerateTempURLTimestamp(stamp), request.Header("X-Call", "url"))
 	if err != nil || generated == nil || generated.Discovery == nil || generated.Discovery.Container != nil || generated.Discovery.Account == nil || generated.Discovery.Secondary || string(generated.Discovery.Key) != "account-only" || calls != 3 {
 		t.Fatal(generated, err, calls)
 	}

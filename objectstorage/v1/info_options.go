@@ -3,28 +3,36 @@ package v1
 import (
 	"context"
 	"net/http"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type GetInfoOpts struct {
 	Headers map[string]string
 }
-type GetInfoOption func(*GetInfoOpts) error
+
+// GetInfoOption is one option of GetInfo: the WithGetInfo* options,
+// request.Header (validated and merged like a one-entry WithGetInfoHeaders)
+// or request.Custom over *GetInfoOpts. Other shared calls, including
+// request.Headers (the WithGetInfoHeaders map merges instead of replacing),
+// fail with resource.ErrInvalidOption before HTTP.
+type GetInfoOption = request.GetCall
+
+var getInfoCalls = calls.Spec[GetInfoOpts]{Header: calls.MergeHeader[GetInfoOpts](WithGetInfoHeaders)}
 
 func WithGetInfoOpts(value GetInfoOpts) GetInfoOption {
 	snapshot := cloneGetInfoOpts(value)
-	return func(cfg *GetInfoOpts) error { *cfg = cloneGetInfoOpts(snapshot); return nil }
-}
-func WithGetInfoHeader(key, value string) GetInfoOption {
-	return WithGetInfoHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *GetInfoOpts) error { *cfg = cloneGetInfoOpts(snapshot); return nil })
 }
 func WithGetInfoHeaders(values map[string]string) GetInfoOption {
 	snapshot := cloneTempURLKeyHeaders(values)
-	return func(cfg *GetInfoOpts) error {
+	return request.Custom(func(cfg *GetInfoOpts) error {
 		if cfg.Headers == nil {
 			cfg.Headers = make(map[string]string)
 		}
 		return mergeInfoHeaders(cfg.Headers, snapshot)
-	}
+	})
 }
 
 // ObjectSegmentSizeOpts distinguishes the default 1 GiB request from explicit
@@ -33,29 +41,35 @@ type ObjectSegmentSizeOpts struct {
 	Headers map[string]string
 	Size    *int64
 }
-type ObjectSegmentSizeOption func(*ObjectSegmentSizeOpts) error
+
+// ObjectSegmentSizeOption is one option of GetObjectSegmentSize: the
+// WithObjectSegmentSize* options, request.Header (validated and merged like a
+// one-entry WithObjectSegmentSizeHeaders) or request.Custom over
+// *ObjectSegmentSizeOpts. Other shared calls, including request.Headers (the
+// WithObjectSegmentSizeHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type ObjectSegmentSizeOption = request.GetCall
+
+var objectSegmentSizeCalls = calls.Spec[ObjectSegmentSizeOpts]{Header: calls.MergeHeader[ObjectSegmentSizeOpts](WithObjectSegmentSizeHeaders)}
 
 func WithObjectSegmentSizeOpts(value ObjectSegmentSizeOpts) ObjectSegmentSizeOption {
 	snapshot := cloneObjectSegmentSizeOpts(value)
-	return func(cfg *ObjectSegmentSizeOpts) error { *cfg = cloneObjectSegmentSizeOpts(snapshot); return nil }
-}
-func WithObjectSegmentSizeHeader(key, value string) ObjectSegmentSizeOption {
-	return WithObjectSegmentSizeHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { *cfg = cloneObjectSegmentSizeOpts(snapshot); return nil })
 }
 func WithObjectSegmentSizeHeaders(values map[string]string) ObjectSegmentSizeOption {
 	snapshot := cloneTempURLKeyHeaders(values)
-	return func(cfg *ObjectSegmentSizeOpts) error {
+	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error {
 		if cfg.Headers == nil {
 			cfg.Headers = make(map[string]string)
 		}
 		return mergeInfoHeaders(cfg.Headers, snapshot)
-	}
+	})
 }
 func WithObjectSegmentSize(value int64) ObjectSegmentSizeOption {
-	return func(cfg *ObjectSegmentSizeOpts) error { owned := value; cfg.Size = &owned; return nil }
+	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { owned := value; cfg.Size = &owned; return nil })
 }
 func WithoutObjectSegmentSize() ObjectSegmentSizeOption {
-	return func(cfg *ObjectSegmentSizeOpts) error { cfg.Size = nil; return nil }
+	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { cfg.Size = nil; return nil })
 }
 
 func cloneGetInfoOpts(value GetInfoOpts) GetInfoOpts {
@@ -88,7 +102,7 @@ func mergeInfoHeaders(dst, values map[string]string) error {
 
 func (p *preparedInfo) applyGetInfoOptions(ctx context.Context, options []GetInfoOption) (GetInfoOpts, error) {
 	cfg := cloneGetInfoOpts(GetInfoOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, getInfoCalls) {
 		if err := p.guard(ctx); err != nil {
 			return cfg, err
 		}
@@ -106,7 +120,7 @@ func (p *preparedInfo) applyGetInfoOptions(ctx context.Context, options []GetInf
 }
 func (p *preparedInfo) applySegmentOptions(ctx context.Context, options []ObjectSegmentSizeOption) (ObjectSegmentSizeOpts, error) {
 	cfg := cloneObjectSegmentSizeOpts(ObjectSegmentSizeOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, objectSegmentSizeCalls) {
 		if err := p.guard(ctx); err != nil {
 			return cfg, err
 		}

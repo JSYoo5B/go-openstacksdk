@@ -13,6 +13,7 @@ import (
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -100,11 +101,11 @@ func TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow(t *testing.T) 
 	headers := map[string]string{"X-Call": "owned"}
 	option := accounts.WithSetTempURLKeyOpts(accounts.SetTempURLKeyOpts{Headers: headers})
 	headers["X-Call"] = "changed after factory"
-	account, err := service.Accounts.SetTempURLKey(ctx, "primary literal", option, func(o *accounts.SetTempURLKeyOpts) error {
+	account, err := service.Accounts.SetTempURLKey(ctx, "primary literal", option, request.Custom(func(o *accounts.SetTempURLKeyOpts) error {
 		source.MoreHeaders["X-Source"] = "callback"
 		provider.SetToken("token-1")
 		return nil
-	})
+	}))
 	if err != nil || account == nil || account.StatusCode != 204 || calls != 1 {
 		t.Fatal(account, err, calls)
 	}
@@ -116,7 +117,7 @@ func TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow(t *testing.T) 
 	if err != nil || selected == nil || string(selected.Key) != "보조 key" || !selected.Secondary || !selected.FromContainer || selected.Container == nil || selected.Account != nil || calls != 3 {
 		t.Fatal(selected, err, calls)
 	}
-	fallback, err := service.GetTempURLKey(ctx, swift.WithGetTempURLKeyOpts(swift.GetTempURLKeyOpts{Container: name}), swift.WithGetTempURLKeyHeader("X-Call", "fallback"), swift.WithGetTempURLKeyNewest(false))
+	fallback, err := service.GetTempURLKey(ctx, swift.WithGetTempURLKeyOpts(swift.GetTempURLKeyOpts{Container: name}), request.Header("X-Call", "fallback"), swift.WithGetTempURLKeyNewest(false))
 	if err != nil || fallback == nil || string(fallback.Key) != "account-secondary" || !fallback.Secondary || fallback.FromContainer || fallback.Container == nil || fallback.Account == nil || calls != 5 {
 		t.Fatal(fallback, err, calls)
 	}

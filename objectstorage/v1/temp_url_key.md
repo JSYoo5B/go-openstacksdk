@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary`
 
@@ -46,7 +46,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeySecondary`
 
@@ -79,7 +79,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyContainer`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGetTempURLKeyNewest`
@@ -133,6 +133,7 @@ import (
     objectstorage "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, accountSecret, containerSecret string) error {
@@ -141,7 +142,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         accounts.WithSetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "account-key"}),
-        accounts.WithSetTempURLKeyHeader("X-Request-Label", "account"),
+        request.Header("X-Request-Label", "account"),
         accounts.WithSetTempURLKeySecondary(false),
     }
     accountAck, err := service.Accounts.SetTempURLKey(ctx, accountSecret, accountOptions...)
@@ -153,7 +154,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
         containers.WithSetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "container-key"}),
-        containers.WithSetTempURLKeyHeader("X-Request-Label", "container"),
+        request.Header("X-Request-Label", "container"),
         containers.WithSetTempURLKeySecondary(true),
     }
     containerAck, err := service.Containers.SetTempURLKey(ctx, name, containerSecret, containerOptions...)
@@ -166,7 +167,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
         }),
         objectstorage.WithGetTempURLKeyContainer(name),
         objectstorage.WithGetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "key-discovery"}),
-        objectstorage.WithGetTempURLKeyHeader("X-Request-Label", "read"),
+        request.Header("X-Request-Label", "read"),
         objectstorage.WithGetTempURLKeyNewest(true),
         objectstorage.WithoutGetTempURLKeyNewest(),
         objectstorage.WithGetTempURLKeyNewest(false),

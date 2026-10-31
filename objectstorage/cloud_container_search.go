@@ -13,6 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudlocation"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -142,7 +143,7 @@ func (c *Cloud) SearchContainers(ctx context.Context, options ...ContainerSearch
 	}
 	result := &ContainerSearchResult{}
 	rows := []json.RawMessage{}
-	for record, err := range c.containers.ListRecords(ctx, configure) {
+	for record, err := range c.containers.ListRecords(ctx, request.Custom(configure)) {
 		if record != nil {
 			result.LastPage = copyContainerSearchRecord(record)
 		}

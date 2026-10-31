@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -56,7 +57,7 @@ func TestObjectWaitContractsLiteralHEADAndDeletion(t *testing.T) {
 	provider.UseTokenLock()
 	provider.SetToken("wait-token")
 	client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "object-store", Endpoint: server.URL + "/catalogue/v1/AUTH_other/", ResourceBase: server.URL + "/reverse/a%20b/v1/AUTH_wait/"}
-	result, err := objects.New(client).WaitForDelete(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithObjectWaitHeader("X-Wait", "literal"), objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
+	result, err := objects.New(client).WaitForDelete(context.Background(), objectMetadataContainer, objectMetadataKey, request.Header("X-Wait", "literal"), objects.WithObjectWaitPollInterval(time.Millisecond), objects.WithObjectWaitProgressCallback(func(value int) error { progress = append(progress, value); return nil }))
 	if err != nil || result == nil || !result.Complete || !result.Deleted || result.Status != nil || result.Polls != 3 || result.Last == nil || len(result.Last.Attempts) != 1 || calls.Load() != 3 || !reflect.DeepEqual(progress, []int{0, 0}) {
 		t.Fatalf("result=%+v err=%v calls=%d progress=%v", result, err, calls.Load(), progress)
 	}
@@ -362,11 +363,11 @@ func TestObjectWaitContractsNativeReplaySnapshotsAndLiveGuards(t *testing.T) {
 			client.SetToken("retry-token")
 			return nil
 		}
-		result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", factory, func(*objects.ObjectWaitOpts) error {
+		result, err := objects.New(client).WaitForDelete(context.Background(), "c", "o", factory, request.Custom(func(*objects.ObjectWaitOpts) error {
 			optionCalls++
 			client.MoreHeaders["X-Source"] = "valid drift"
 			return nil
-		})
+		}))
 		objectWaitExternalLast(t, result, 1, 404, "clean missing")
 		if err != nil || !result.Complete || !result.Deleted || calls != 2 || retries != 1 || optionCalls != 1 || len(result.Last.Attempts) != 2 || result.Last.Attempts[0].Response.StatusCode != 503 || string(result.Last.Attempts[0].Response.Body) != "retry proof" || result.Last.Attempts[0].Error == nil {
 			t.Fatalf("result=%+v err=%v calls=%d retries=%d options=%d", result, err, calls, retries, optionCalls)

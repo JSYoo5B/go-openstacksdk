@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -24,14 +25,14 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 		newest = true
 		var retained *GetTempURLKeyOpts
 		callbacks, calls := 0, 0
-		option := func(cfg *GetTempURLKeyOpts) error {
+		option := request.Custom(func(cfg *GetTempURLKeyOpts) error {
 			callbacks++
 			if cfg.Headers["x-trace"] != "factory" || cfg.Newest == nil || *cfg.Newest {
 				t.Fatal("factory snapshot aliases", cfg)
 			}
 			retained = cfg
 			return nil
-		}
+		})
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls++
 			if r.Header.Get("X-Trace") != "owned" || len(r.Header.Values("X-Trace")) != 1 || r.Header.Get("X-Newest") != "false" {
@@ -50,11 +51,11 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 			}
 			return tempURLKeyTestWire(r, 204, h, b), nil
 		})
-		first, err := New(c).GetTempURLKey(context.Background(), full, option, WithGetTempURLKeyHeader("X-Trace", "owned"))
+		first, err := New(c).GetTempURLKey(context.Background(), full, option, request.Header("X-Trace", "owned"))
 		if err != nil || first == nil || string(first.Key) != "selected" {
 			t.Fatal(first, err)
 		}
-		second, err := New(c).GetTempURLKey(context.Background(), full, option, WithGetTempURLKeyHeader("X-Trace", "owned"))
+		second, err := New(c).GetTempURLKey(context.Background(), full, option, request.Header("X-Trace", "owned"))
 		if err != nil || second == nil || string(second.Key) != "selected" || callbacks != 2 || calls != 4 {
 			t.Fatal(second, err, callbacks, calls)
 		}
@@ -146,7 +147,7 @@ func TestTempURLKeyOptionsParallelReuseAndPreflight(t *testing.T) {
 	}
 	c.MoreHeaders = map[string]string{"X-Newest": "true"}
 	callbacks := 0
-	if result, err := New(c).GetTempURLKey(context.Background(), func(*GetTempURLKeyOpts) error { callbacks++; return nil }); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
+	if result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(*GetTempURLKeyOpts) error { callbacks++; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 		t.Fatal("source preflight after callback", result, err, callbacks)
 	}
 	if calls.Load() != 12 {

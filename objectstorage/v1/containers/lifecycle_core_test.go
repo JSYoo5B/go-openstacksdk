@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -82,7 +83,7 @@ func TestContainerLifecycleCoreWireIdentity(t *testing.T) {
 	client.Endpoint, client.ResourceBase = server.URL+"/endpoint/v1/AUTH_account/", server.URL+"/reverse%20prefix/v1/AUTH_account/"
 	client.MoreHeaders = map[string]string{"X-Source": "captured"}
 	for _, code := range []int{201, 202} {
-		r, err := a.CreateContainer(context.Background(), "대% ?#", WithCreateContainerMetadata(map[string]string{"Keep": "literal", "Remove": ""}), WithCreateContainerHeader("X-Container-Read", ".r:*"))
+		r, err := a.CreateContainer(context.Background(), "대% ?#", WithCreateContainerMetadata(map[string]string{"Keep": "literal", "Remove": ""}), request.Header("X-Container-Read", ".r:*"))
 		if err != nil || r == nil || r.StatusCode != code || string(r.Body) != "opaque" || r.IgnoredMissing {
 			t.Fatalf("PUT%d: %+v %v", code, r, err)
 		}
@@ -110,7 +111,7 @@ func TestContainerLifecycleCoreStrictStatusesAndMissing(t *testing.T) {
 			if tc.create {
 				r, err = a.CreateContainer(context.Background(), "name")
 			} else if tc.strict {
-				r, err = a.DeleteContainer(context.Background(), "name", WithDeleteContainerIgnoreMissing(false))
+				r, err = a.DeleteContainer(context.Background(), "name", request.IgnoreMissing(false))
 			} else {
 				r, err = a.DeleteContainer(context.Background(), "name")
 			}
@@ -137,7 +138,7 @@ func TestContainerLifecycleCoreCompletePreflight(t *testing.T) {
 	a, client := lifecycleAPI(lifecycleStatic(201, "", &calls))
 	for _, name := range []string{"", "a/b", ".", "..", "a\\b", "a\n", "a\x7f", string([]byte{255})} {
 		callbacks := 0
-		_, err := a.CreateContainer(context.Background(), name, func(*CreateContainerOpts) error { callbacks++; return nil })
+		_, err := a.CreateContainer(context.Background(), name, request.Custom(func(*CreateContainerOpts) error { callbacks++; return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatalf("name%q err%v callbacks%d", name, err, callbacks)
 		}
@@ -219,11 +220,11 @@ func TestContainerLifecycleCoreSourceAndContext(t *testing.T) {
 	optionCause, cancelCause := errors.New("option failed"), errors.New("option canceled")
 	ctx, cancel := context.WithCancelCause(context.Background())
 	defer cancel(nil)
-	_, err := a.CreateContainer(ctx, "name", func(*CreateContainerOpts) error {
+	_, err := a.CreateContainer(ctx, "name", request.Custom(func(*CreateContainerOpts) error {
 		client.Microversion = "changed"
 		cancel(cancelCause)
 		return optionCause
-	})
+	}))
 	for _, cause := range []error{optionCause, cancelCause, context.Canceled, resource.ErrInvalidOption} {
 		if !errors.Is(err, cause) {
 			t.Fatalf("lost%v: %v", cause, err)

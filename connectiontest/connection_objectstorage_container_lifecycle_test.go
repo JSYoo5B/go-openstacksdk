@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -72,13 +73,13 @@ func TestConnectionContainerLifecycleSharesClientAndPreservesNative(t *testing.T
 	option := containers.WithCreateContainerMetadata(values)
 	values["Owner"] = "changed after factory"
 	created, err := service.Containers.CreateContainer(ctx, name, option,
-		containers.WithCreateContainerHeader("X-Call", "owned"),
-		containers.WithCreateContainerHeader("X-Container-Read", ".r:*"),
-		func(o *containers.CreateContainerOpts) error {
+		request.Header("X-Call", "owned"),
+		request.Header("X-Container-Read", ".r:*"),
+		request.Custom(func(o *containers.CreateContainerOpts) error {
 			source.MoreHeaders["X-Source"] = "callback"
 			provider.SetToken("swift-1")
 			return nil
-		})
+		}))
 	if err != nil || created == nil || created.StatusCode != 201 || created.IgnoredMissing || string(created.Body) != "opaque" || calls != 1 {
 		t.Fatal(created, err, calls)
 	}
@@ -90,7 +91,7 @@ func TestConnectionContainerLifecycleSharesClientAndPreservesNative(t *testing.T
 	if err != nil || missing == nil || missing.StatusCode != 404 || !missing.IgnoredMissing || string(missing.Body) != "opaque" || calls != 3 {
 		t.Fatal(missing, err, calls)
 	}
-	strict, err := service.Containers.DeleteContainer(ctx, name, containers.WithDeleteContainerIgnoreMissing(false))
+	strict, err := service.Containers.DeleteContainer(ctx, name, request.IgnoreMissing(false))
 	var native gophercloud.ErrUnexpectedResponseCode
 	if strict != nil || !errors.As(err, &native) || native.Actual != 404 || string(native.Body) != "opaque" || calls != 4 {
 		t.Fatal(strict, err, calls)
@@ -123,10 +124,10 @@ func TestConnectionContainerLifecycleSharesClientAndPreservesNative(t *testing.T
 	if _, err := service.Containers.Delete(ctx, name); err != nil || calls != 7 {
 		t.Fatal("native Delete202 compatibility", err, calls)
 	}
-	blocked, err := service.Containers.CreateContainer(ctx, name, func(o *containers.CreateContainerOpts) error {
+	blocked, err := service.Containers.CreateContainer(ctx, name, request.Custom(func(o *containers.CreateContainerOpts) error {
 		source.ResourceBase = "https://cloud.test/changed/"
 		return nil
-	})
+	}))
 	if blocked != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 7 {
 		t.Fatal("source changed before HTTP", blocked, err, calls)
 	}

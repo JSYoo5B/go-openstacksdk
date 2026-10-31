@@ -188,7 +188,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 	t.Run("context source and callback causes", func(t *testing.T) {
 		calls, callbacks := 0, 0
 		client := accountMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return accountMetadataResponse(204, ""), nil })
-		option := func(o *accounts.GetMetadataOpts) error { callbacks++; return nil }
+		option := request.Custom(func(o *accounts.GetMetadataOpts) error { callbacks++; return nil })
 		var nilAPI *accounts.API
 		for _, api := range []*accounts.API{nilAPI, accounts.New(nil), accounts.New(&gophercloud.ServiceClient{})} {
 			if result, err := api.GetMetadata(context.Background(), option); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
@@ -214,7 +214,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 		}
 		ctx, cancel = context.WithCancelCause(context.Background())
 		optionCause := errors.New("callback failed")
-		if _, err := accounts.New(client).GetMetadata(ctx, func(*accounts.GetMetadataOpts) error { cancel(cause); return optionCause }); !errors.Is(err, optionCause) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
+		if _, err := accounts.New(client).GetMetadata(ctx, request.Custom(func(*accounts.GetMetadataOpts) error { cancel(cause); return optionCause })); !errors.Is(err, optionCause) || !errors.Is(err, cause) || !errors.Is(err, context.Canceled) {
 			t.Fatalf("joined callback error=%v", err)
 		}
 		if _, err := accounts.New(client).GetMetadata(context.Background(), nil); !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
@@ -241,7 +241,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 				t.Fatalf("source header %s err=%v", key, err)
 			}
 			client.MoreHeaders = nil
-			if _, err := api.SetMetadata(context.Background(), nil, accounts.WithMetadataHeader(key, "owned")); !errors.Is(err, resource.ErrInvalidOption) {
+			if _, err := api.SetMetadata(context.Background(), nil, request.Header(key, "owned")); !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatalf("option header %s err=%v", key, err)
 			}
 		}
@@ -270,12 +270,12 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		if _, err := accounts.New(client).GetMetadata(context.Background(), getHeaders, getFull, func(o *accounts.GetMetadataOpts) error {
+		if _, err := accounts.New(client).GetMetadata(context.Background(), getHeaders, getFull, request.Custom(func(o *accounts.GetMetadataOpts) error {
 			if o.Headers["x-trace"] != "initial" || o.Newest == nil || *o.Newest {
 				t.Errorf("factory snapshot=%+v", o)
 			}
 			return nil
-		}, accounts.WithGetMetadataHeader("X-Trace", "final")); err != nil {
+		}), request.Header("X-Trace", "final")); err != nil {
 			t.Fatal(err)
 		}
 		payload := map[string]string{"Book": "before callback"}
@@ -286,13 +286,13 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		if _, err := accounts.New(client).SetMetadata(context.Background(), payload, mutationHeaders, mutationFull, func(o *accounts.MetadataOpts) error {
+		if _, err := accounts.New(client).SetMetadata(context.Background(), payload, mutationHeaders, mutationFull, request.Custom(func(o *accounts.MetadataOpts) error {
 			if o.Headers["x-trace"] != "initial" {
 				t.Errorf("mutation factory snapshot=%+v", o)
 			}
 			payload["Book"] = "after callback"
 			return nil
-		}, accounts.WithMetadataHeader("X-Trace", "final")); err != nil {
+		}), request.Header("X-Trace", "final")); err != nil {
 			t.Fatal(err)
 		}
 		keys := []string{"Book"}
@@ -303,7 +303,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		if _, err := accounts.New(client).DeleteMetadata(context.Background(), keys, func(*accounts.MetadataOpts) error { keys[0] = "Mutated"; return nil }); err != nil || calls != 3 {
+		if _, err := accounts.New(client).DeleteMetadata(context.Background(), keys, request.Custom(func(*accounts.MetadataOpts) error { keys[0] = "Mutated"; return nil })); err != nil || calls != 3 {
 			t.Fatalf("err=%v calls=%d", err, calls)
 		}
 	})
@@ -317,15 +317,15 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		_, err := accounts.New(client).GetMetadata(context.Background(), accounts.WithGetMetadataHeader("X-Discarded", "old"), func(o *accounts.GetMetadataOpts) error {
+		_, err := accounts.New(client).GetMetadata(context.Background(), request.Header("X-Discarded", "old"), request.Custom(func(o *accounts.GetMetadataOpts) error {
 			callbacks++
 			*o = accounts.GetMetadataOpts{Headers: retained, Newest: &pointer}
 			return nil
-		}, func(o *accounts.GetMetadataOpts) error {
+		}), request.Custom(func(o *accounts.GetMetadataOpts) error {
 			callbacks++
 			retained["X-Trace"], pointer = "stale alias", true
 			return nil
-		})
+		}))
 		if err != nil || callbacks != 2 {
 			t.Fatalf("err=%v callbacks=%d", err, callbacks)
 		}
@@ -335,7 +335,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		if _, err := accounts.New(client).GetMetadata(context.Background(), accounts.WithGetMetadataNewest(true), accounts.WithGetMetadataHeader("X-Discarded", "old"), accounts.WithGetMetadataOpts(accounts.GetMetadataOpts{})); err != nil {
+		if _, err := accounts.New(client).GetMetadata(context.Background(), accounts.WithGetMetadataNewest(true), request.Header("X-Discarded", "old"), accounts.WithGetMetadataOpts(accounts.GetMetadataOpts{})); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -528,12 +528,12 @@ func TestAccountMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		})
 		original := client.ProviderClient
 		client.MoreHeaders = map[string]string{"X-Source": "captured", "X-Trace": "source", "Accept": "source/accept", "Content-Type": "source/type"}
-		_, err := accounts.New(client).GetMetadata(context.Background(), accounts.WithGetMetadataHeader("X-Trace", "option"), func(*accounts.GetMetadataOpts) error {
+		_, err := accounts.New(client).GetMetadata(context.Background(), request.Header("X-Trace", "option"), request.Custom(func(*accounts.GetMetadataOpts) error {
 			client.MoreHeaders["X-Source"] = "later"
 			client.ResourceBase = "https://wrong.invalid/no-authority"
 			original.SetToken("latest-token")
 			return nil
-		})
+		}))
 		if err != nil || client.MoreHeaders["X-Trace"] != "source" || client.ProviderClient != original {
 			t.Fatalf("err=%v source=%v", err, client.MoreHeaders)
 		}
@@ -548,7 +548,7 @@ func TestAccountMetadataContractsSourceAndNativePolicy(t *testing.T) {
 		} {
 			calls := 0
 			client := accountMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return accountMetadataResponse(204, ""), nil })
-			result, err := accounts.New(client).GetMetadata(context.Background(), func(*accounts.GetMetadataOpts) error { mutate(client); return nil })
+			result, err := accounts.New(client).GetMetadata(context.Background(), request.Custom(func(*accounts.GetMetadataOpts) error { mutate(client); return nil }))
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("result=%+v err=%v HTTP=%d", result, err, calls)
 			}

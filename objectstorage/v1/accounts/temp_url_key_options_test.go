@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -28,16 +29,16 @@ func TestAccountTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 		}
 		return accountMetadataWire(r, 204, http.Header{}, io.NopCloser(strings.NewReader(""))), nil
 	})
-	option := func(cfg *SetTempURLKeyOpts) error {
+	option := request.Custom(func(cfg *SetTempURLKeyOpts) error {
 		if cfg.Headers["x-trace"] != "factory" {
 			t.Fatal("factory aliases", cfg.Headers)
 		}
 		cfg.Headers["X-Added"] = "yes"
 		retained = cfg
 		return nil
-	}
+	})
 	for i := 0; i < 2; i++ {
-		if _, err := New(c).SetTempURLKey(context.Background(), "key", full, option, WithSetTempURLKeyHeader("X-Trace", "owned")); err != nil {
+		if _, err := New(c).SetTempURLKey(context.Background(), "key", full, option, request.Header("X-Trace", "owned")); err != nil {
 			t.Fatal(err)
 		}
 		retained.Headers["x-trace"] = "retained"

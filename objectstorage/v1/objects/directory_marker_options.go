@@ -3,23 +3,32 @@ package objects
 import (
 	"context"
 	"strings"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type DirectoryMarkerOpts struct {
 	Headers, Metadata map[string]string
 }
-type DirectoryMarkerOption func(*DirectoryMarkerOpts) error
+
+// DirectoryMarkerOption is one option of CreateDirectoryMarkerObject: the
+// WithDirectoryMarker* options, request.Header (validated and merged like a
+// one-entry WithDirectoryMarkerHeaders) or request.Custom over
+// *DirectoryMarkerOpts. Other shared calls, including request.Headers (the
+// WithDirectoryMarkerHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type DirectoryMarkerOption = request.WriteCall
+
+var directoryMarkerCalls = calls.Spec[DirectoryMarkerOpts]{Header: calls.MergeHeader[DirectoryMarkerOpts](WithDirectoryMarkerHeaders)}
 
 func WithDirectoryMarkerOpts(value DirectoryMarkerOpts) DirectoryMarkerOption {
 	snapshot := cloneDirectoryMarkerOpts(value)
-	return func(cfg *DirectoryMarkerOpts) error { *cfg = cloneDirectoryMarkerOpts(snapshot); return nil }
-}
-func WithDirectoryMarkerHeader(key, value string) DirectoryMarkerOption {
-	return WithDirectoryMarkerHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *DirectoryMarkerOpts) error { *cfg = cloneDirectoryMarkerOpts(snapshot); return nil })
 }
 func WithDirectoryMarkerHeaders(values map[string]string) DirectoryMarkerOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *DirectoryMarkerOpts) error {
+	return request.Custom(func(cfg *DirectoryMarkerOpts) error {
 		if _, err := validateDirectoryMarkerHeaders(snapshot); err != nil {
 			return err
 		}
@@ -27,11 +36,11 @@ func WithDirectoryMarkerHeaders(values map[string]string) DirectoryMarkerOption 
 			cfg.Headers = make(map[string]string)
 		}
 		return mergeMetadataHeaders(cfg.Headers, snapshot)
-	}
+	})
 }
 func WithDirectoryMarkerMetadata(values map[string]string) DirectoryMarkerOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *DirectoryMarkerOpts) error {
+	return request.Custom(func(cfg *DirectoryMarkerOpts) error {
 		owned, err := metadataInput(snapshot)()
 		if err != nil {
 			return err
@@ -48,7 +57,7 @@ func WithDirectoryMarkerMetadata(values map[string]string) DirectoryMarkerOption
 			cfg.Metadata[key] = value
 		}
 		return nil
-	}
+	})
 }
 func WithDirectoryMarkerMetadataValue(key, value string) DirectoryMarkerOption {
 	return WithDirectoryMarkerMetadata(map[string]string{key: value})
@@ -75,7 +84,7 @@ func directoryMarkerHeaderPolicy(values map[string]string) error {
 }
 func (p *preparedCreateObject) applyDirectoryMarkerOptions(ctx context.Context, options []DirectoryMarkerOption) (DirectoryMarkerOpts, error) {
 	cfg := DirectoryMarkerOpts{}
-	for _, option := range options {
+	for _, option := range calls.Translate(options, directoryMarkerCalls) {
 		if err := p.guard(ctx); err != nil {
 			return cfg, err
 		}

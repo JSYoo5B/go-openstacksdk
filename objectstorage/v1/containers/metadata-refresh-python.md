@@ -14,12 +14,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeader`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders`
 
 - Set is one bodyless POST with exactly one X-Container-Meta prefix and strict actual204, returning opaque acknowledgement without automatic HEAD, submitted-state projection, container creation or clear-all. Nil/empty maps still POST and empty values remove only the specified keys.
@@ -55,7 +54,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadataKeys`
 

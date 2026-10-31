@@ -151,16 +151,16 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.RawClient`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListLimit`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMarker`
+- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListFormat`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxPages`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListSinglePage`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The container Collection preserves native Swift marker pagination, prefix/explicit-limit query and typed count/byte fields while applying controls before local exact-name filtering.
   Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`.
@@ -215,20 +215,20 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListSinglePage`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The fixed-container listing preserves escaped opaque container names, marker query, object metadata and delimiter subdirectory rows without HEAD; subdirectory rows count toward the raw cap.
   Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSwiftSubdirectoryConsumesRawCap`.
 - Pinned Object MRO projection owns six Body, 28 Header, updated_at aka and null SDK location; ordered canonical/wire aliases, alternate name ID, untyped RawMessage metadata, container URI from call, unknowns and subdir retained in Wire, actual page receipt cloned independently. No object HEAD or synthetic metadata observation.
   Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsDefaultRequestAndProjection`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection`.
 - GET escaped fixed container with format=json and operation Accept JSON; Object query mapping client alias wins wire alias, unknown queries discarded before Marshaler/DTO JSON validation, declared canonical Body filters remain local, no transport-wrapper counting. CPython loaded integer/float/bool recursive equality and float truthiness are explicit shared policy opt-ins. Empty dictionary filter matches every truthy scalar/list/mapping; falsey actual is excluded and nonempty dictionary against truthy nonmapping remains a real page error, including recursive empty filters.
-  Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType`.
+  Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType`.
 - Default full lazy pagination uses raw consumed count against X-Container-Object-Count, last raw row ID/name marker, truthy-limit continuation, falsey limit sent once, source body next and RFC Link interoperability, fixed origin/container/filters and SDK cycle/page bounds. Consumer changes cannot alter raw marker; raw cap includes rejected rows; empty page ends.
   Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCountAndMarkerContinuation`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectCloudListObjectsPrefixAndCountPaging`.
 - Named cloud list_objects delegates same owned Source-shaped listing; prefix absent/explicit-empty/selected value remain distinct, full_listing is ignored by pinned Python and does not disable paging. Go iterator is collected by caller.
@@ -238,7 +238,7 @@ Go API:
 - Mixed physical Read/Close/sticky restored source/custom cancellation faults on 200/203/401/404/429/498/503 preserve whole actual receipt, one HTTP and one Close and zero willing caller retry/reauth/backoff callbacks. Native pointer ErrUnableToReauthenticate ErrOriginal and ErrReauth are retained separately. Clean native retry/reauth/backoff preserve fixed route/headers/conditions/selected version and live token.
   Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsPhysicalFaultsPreserveReceiptNative401AndStopHooks`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsCleanRetriesPreserveRouteHeadersAndLiveToken`.
 - Owned concrete options clone raw bytes/maps/pointers and callback resets; invalid/reserved/unsupported Source controls fail before Marshaler/HTTP, nil Headers reset composes safely, repeated iterator consumption is independent, consumer break avoids continuation and custom cancellation during yield preserves page proof.
-  Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation`.
+  Tests: `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection`, `objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation`.
 
 Python/Go differences:
 

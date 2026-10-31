@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
@@ -72,7 +72,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
@@ -120,7 +120,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
@@ -175,6 +175,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.Time, version string) error {
@@ -185,7 +186,7 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 			IfUnmodifiedSince: &asOf,
 		}),
 		objects.WithObjectReadHeaders(map[string]string{"X-Audit": "read"}),
-		objects.WithObjectReadHeader("X-Audit", "read-final"),
+		request.Header("X-Audit", "read-final"),
 		objects.WithObjectReadNewest(false),
 		objects.WithObjectReadBufferSize(32 * 1024),
 	}

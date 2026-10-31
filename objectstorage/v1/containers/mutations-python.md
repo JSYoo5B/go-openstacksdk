@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.CreateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeaders`
 
 - One bodyless literal-route PUT accepts only actual201/202, returns opaque ContainerResponse, and performs no lookup/HEAD/implicit refresh.
@@ -48,9 +48,9 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteIgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - One bodyless DELETE uses the literal container route without lookup, accountHEAD, emptiness probe, objectpurge, wait or cleanup; actual204 returns owned opaque response.
   Tests: `objectstorage/v1/containers/lifecycle_core_test.go:TestContainerLifecycleCoreWireIdentity`, `objectstorage/v1/containers/lifecycle_contracts_test.go:TestContainerLifecycleContractsWireAndIdentity`, `connectiontest/connection_objectstorage_container_lifecycle_test.go:TestConnectionContainerLifecycleSharesClientAndPreservesNative`.
@@ -102,6 +102,7 @@ import (
 
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -115,7 +116,7 @@ func main() {
         "is_content_type_detected": false,
         "history_location": "",
         "metadata": map[string]any{"owner": "team", "disabled": false},
-    }, containers.WithRecordCreateHeader("X-Client-Request-Id", "create-assets"))
+    }, request.Header("X-Client-Request-Id", "create-assets"))
     if err != nil { log.Fatal(err) }
     fmt.Printf("PUT status=%d name=%s observed_metadata=%v\n",
         created.StatusCode, created.Resource.Body["name"], created.Metadata)
@@ -126,7 +127,7 @@ func main() {
 
     // To reproduce ignore_missing=False, select the concrete option explicitly.
     _, err = swift.Containers.DeleteRecord(ctx, "assets",
-        containers.WithRecordDeleteIgnoreMissing(false))
+        request.IgnoreMissing(false))
     if err != nil { fmt.Println("strict deletion:", err) }
 }
 ```

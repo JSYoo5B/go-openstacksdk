@@ -17,6 +17,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -115,7 +116,7 @@ func TestPythonContainerListQueryClassificationAndOptionOwnership(t *testing.T) 
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			api, calls := containerListAPI(t, func(*http.Request) *http.Response { return containerMetadataResponse(200, "[]") })
-			_, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListQuery("prefix", tc.raw), containers.WithRecordListQuery("end_marker", make(chan int)), containers.WithRecordListQuery("full_listing", false), containers.WithRecordListQuery("unknown", make(chan int))))
+			_, _, err := collectContainerList(api.ListRecords(context.Background(), request.Query("prefix", tc.raw), request.Query("end_marker", make(chan int)), request.Query("full_listing", false), request.Query("unknown", make(chan int))))
 			if err != nil || len(*calls) != 1 || !reflect.DeepEqual((*calls)[0].query["prefix"], tc.want) || len((*calls)[0].query) > 1 {
 				t.Fatal(err, *calls, tc.want)
 			}
@@ -157,7 +158,7 @@ func TestPythonContainerListLocalEqualityAndDictionaryShortCircuit(t *testing.T)
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			api, calls := containerListAPI(t, func(*http.Request) *http.Response { return containerMetadataResponse(200, tc.body) })
-			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListQuery(tc.key, tc.filter)))
+			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), request.Query(tc.key, tc.filter)))
 			if len(values) != tc.want || len(*calls) != 1 || (err != nil) != tc.failure {
 				t.Fatal(err, values, *calls)
 			}
@@ -171,7 +172,7 @@ func TestPythonContainerListOrderedLocalPredicatesAvoidLaterMappingFault(t *test
 	body := `[{"name":"different","id":"truthy scalar"}]`
 	for _, reverse := range []bool{false, true} {
 		api, calls := containerListAPI(t, func(*http.Request) *http.Response { return containerMetadataResponse(200, body) })
-		options := []containers.RecordListOption{containers.WithRecordListQuery("name", "wanted"), containers.WithRecordListQuery("id", map[string]any{"child": true})}
+		options := []containers.RecordListOption{request.Query("name", "wanted"), request.Query("id", map[string]any{"child": true})}
 		if reverse {
 			options[0], options[1] = options[1], options[0]
 		}
@@ -202,7 +203,7 @@ func TestPythonContainerListCountPagingUsesRawRowsAndRetainedMarker(t *testing.T
 		return response
 	})
 	var values []*containers.ContainerRecord
-	for value, err := range api.ListRecords(context.Background(), containers.WithRecordListPrefix("fixed"), containers.WithRecordListQuery("count", 1)) {
+	for value, err := range api.ListRecords(context.Background(), containers.WithRecordListPrefix("fixed"), request.Query("count", 1)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -233,7 +234,7 @@ func TestPythonContainerListLimitTruthinessAndIgnoredFullListing(t *testing.T) {
 					return containerMetadataResponse(200, "[]")
 				}
 			})
-			values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListQuery("limit", tc.value), containers.WithRecordListQuery("full_listing", false), containers.WithRecordListQuery("end_marker", "a")))
+			values, _, err := collectContainerList(api.ListRecords(context.Background(), request.Query("limit", tc.value), request.Query("full_listing", false), request.Query("end_marker", "a")))
 			if err != nil || len(*calls) != tc.requests || len(values) != (tc.requests+1)/2 || (*calls)[0].query.Get("limit") != tc.want {
 				t.Fatal(err, values, *calls)
 			}
@@ -251,7 +252,7 @@ func TestPythonContainerListLimitTruthinessAndIgnoredFullListing(t *testing.T) {
 			r.Header.Set("X-Account-Container-Count", "invalid")
 			return r
 		})
-		values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListLimit(2)))
+		values, _, err := collectContainerList(api.ListRecords(context.Background(), request.Limit(2)))
 		if err != nil || len(values) != 0 || len(*calls) != 1 {
 			t.Fatal(err, values, *calls)
 		}
@@ -295,7 +296,7 @@ func TestPythonContainerListAdvertisedContinuationAndAccountGuards(t *testing.T)
 				r.Header.Set("Link", link)
 				return r
 			})
-			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListPrefix("held"), containers.WithRecordListMarker("first"), containers.WithRecordListLimit(2)))
+			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListPrefix("held"), request.Marker("first"), request.Limit(2)))
 			if err == nil || len(values) != 1 || len(*calls) != 1 {
 				t.Fatal(err, values, *calls)
 			}
@@ -305,7 +306,7 @@ func TestPythonContainerListAdvertisedContinuationAndAccountGuards(t *testing.T)
 }
 func TestPythonContainerListRawCapsAndPageBoundsStopBeforeUnusedRows(t *testing.T) {
 	for _, options := range [][]containers.RecordListOption{
-		{containers.WithRecordListMaxItems(1)}, {containers.WithRecordListSinglePage(true)},
+		{request.MaxItems(1)}, {request.Paginated(false)},
 	} {
 		body := `[{"name":"a"}]`
 		api, calls := containerListAPI(t, func(*http.Request) *http.Response {
@@ -320,7 +321,7 @@ func TestPythonContainerListRawCapsAndPageBoundsStopBeforeUnusedRows(t *testing.
 	}
 	body := `[{"name":"skip"},null]`
 	api, calls := containerListAPI(t, func(*http.Request) *http.Response { return containerMetadataResponse(200, body) })
-	values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListMaxItems(1), containers.WithRecordListQuery("name", "wanted")))
+	values, _, err := collectContainerList(api.ListRecords(context.Background(), request.MaxItems(1), request.Query("name", "wanted")))
 	if err != nil || len(values) != 0 || len(*calls) != 1 || (*calls)[0].query.Get("limit") != "1" {
 		t.Fatal(err, values, *calls)
 	}
@@ -506,7 +507,7 @@ func TestPythonContainerListRetryHeaderOwnershipAndActualReceipt(t *testing.T) {
 			api.RawClient().SetToken("fresh")
 			return nil
 		}
-		_, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListMicroversion("1.3")))
+		_, _, err := collectContainerList(api.ListRecords(context.Background(), request.Microversion("1.3")))
 		if err != nil || len(*calls) != 2 || (*calls)[0].header.Get("OpenStack-API-Version") != "object-store 1.3" || (*calls)[1].header.Get("OpenStack-API-Version") != "object-store 1.3" || (*calls)[0].header.Get("X-Auth-Token") != "test-token" || (*calls)[1].header.Get("X-Auth-Token") != "fresh" || (*calls)[1].header.Get("X-Retry-Probe") != "ordinary" || api.RawClient().Microversion != "1.2" || api.RawClient().Type != "" || api.RawClient().MoreHeaders["openstack-api-version"] != "object-store 1.2" {
 			t.Fatal(err, *calls, api.RawClient())
 		}
@@ -514,7 +515,7 @@ func TestPythonContainerListRetryHeaderOwnershipAndActualReceipt(t *testing.T) {
 }
 func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *testing.T) {
 	for _, option := range []containers.RecordListOption{
-		nil, containers.WithRecordListLimit(-1), containers.WithRecordListMaxItems(-1), containers.WithRecordListMaxPages(-1), containers.WithRecordListHeaders(map[string]string{"Authorization": "bad"}), containers.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "object-store 1.2"}), containers.WithRecordListPrefix("bad\xff"), containers.WithRecordListQuery("prefix", json.RawMessage("bad")), containers.WithRecordListQuery("paginated", false),
+		nil, request.Limit(-1), request.MaxItems(-1), containers.WithRecordListMaxPages(-1), containers.WithRecordListHeaders(map[string]string{"Authorization": "bad"}), containers.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "object-store 1.2"}), containers.WithRecordListPrefix("bad\xff"), request.Query("prefix", json.RawMessage("bad")), request.Query("paginated", false),
 	} {
 		api, calls := containerListAPI(t, func(*http.Request) *http.Response { t.Fatal("preflight sent HTTP"); return nil })
 		_, receipt, err := collectContainerList(api.ListRecords(context.Background(), option))
@@ -532,7 +533,7 @@ func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *t
 	}
 	cause := errors.New("option canceled")
 	ctx, cancel := context.WithCancelCause(context.Background())
-	_, receipt, err := collectContainerList(api.ListRecords(ctx, func(*containers.RecordListOpts) error { cancel(cause); return nil }))
+	_, receipt, err := collectContainerList(api.ListRecords(ctx, request.Custom(func(*containers.RecordListOpts) error { cancel(cause); return nil })))
 	if !errors.Is(err, cause) || receipt != nil || len(*calls) != 0 {
 		t.Fatal(err, receipt, *calls)
 	}
@@ -544,7 +545,7 @@ func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *t
 		retained.Headers["X-Probe"] = "changed"
 		return containerMetadataResponse(200, `[{"name":"wanted"}]`)
 	})
-	values, _, err := collectContainerList(api.ListRecords(ctx, containers.WithRecordListPrefix("fixed"), containers.WithRecordListQuery("name", "wanted"), containers.WithRecordListHeaders(map[string]string{"X-Probe": "fixed"}), func(cfg *containers.RecordListOpts) error { retained = cfg; return nil }))
+	values, _, err := collectContainerList(api.ListRecords(ctx, containers.WithRecordListPrefix("fixed"), request.Query("name", "wanted"), containers.WithRecordListHeaders(map[string]string{"X-Probe": "fixed"}), request.Custom(func(cfg *containers.RecordListOpts) error { retained = cfg; return nil })))
 	if err != nil || len(values) != 1 || (*calls)[0].query.Get("prefix") != "fixed" || (*calls)[0].header.Get("X-Probe") != "fixed" {
 		t.Fatal(err, values, *calls)
 	}
@@ -609,7 +610,7 @@ func TestPythonContainerListPublicFixtureWireAndSourceCapture(t *testing.T) {
 		t.Fatal(err, values, requests)
 	}
 	original := client.ResourceBase
-	_, receipt, err := collectContainerList(api.ListRecords(context.Background(), func(*containers.RecordListOpts) error { client.ResourceBase = cloud.Server.URL + "/other/"; return nil }))
+	_, receipt, err := collectContainerList(api.ListRecords(context.Background(), request.Custom(func(*containers.RecordListOpts) error { client.ResourceBase = cloud.Server.URL + "/other/"; return nil })))
 	client.ResourceBase = original
 	if !errors.Is(err, resource.ErrInvalidOption) || receipt != nil || requests != 2 {
 		t.Fatal(err, receipt, requests)
@@ -667,7 +668,7 @@ func TestPythonContainerListOperationAcceptAndConditionalRetryOwnership(t *testi
 func TestPythonContainerListExactDecimalEqualityPolicy(t *testing.T) {
 	body := `[{"name":"large","count":9007199254740992}]`
 	api, calls := containerListAPI(t, func(*http.Request) *http.Response { return containerMetadataResponse(200, body) })
-	values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListQuery("count", json.RawMessage("9007199254740993.0"))))
+	values, _, err := collectContainerList(api.ListRecords(context.Background(), request.Query("count", json.RawMessage("9007199254740993.0"))))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("shared exact-decimal policy rounded raw filter", err, values, *calls)
 	}

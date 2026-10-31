@@ -12,6 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -103,11 +104,11 @@ func TestConnectionContainerMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://cloud.test/other%25/v1/AUTH_account%25/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
-	get, err := service.Containers.GetMetadata(ctx, name, containers.WithGetMetadataNewest(false), func(o *containers.GetMetadataOpts) error {
+	get, err := service.Containers.GetMetadata(ctx, name, containers.WithGetMetadataNewest(false), request.Custom(func(o *containers.GetMetadataOpts) error {
 		source.MoreHeaders["X-Source"] = "callback"
 		provider.SetToken("swift-1")
 		return nil
-	})
+	}))
 	if err != nil || get == nil || get.Metadata == nil || get.Metadata.BytesUsed == nil || get.Metadata.ObjectCount == nil || *get.Metadata.BytesUsed != 9007199254740995 || *get.Metadata.ObjectCount != 0 || get.Metadata.LastModified == nil || *get.Metadata.LastModified != "literal PUT date" || get.Metadata.Timestamp == nil || *get.Metadata.Timestamp != "" || get.Metadata.Values["owner"] != "observed" || get.Metadata.Values["temp-url-key"] != "passive-key" || get.StatusCode != 204 || string(get.Body) != "opaque" || calls != 1 {
 		t.Fatal(get, err, calls)
 	}
@@ -119,11 +120,11 @@ func TestConnectionContainerMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	headers := map[string]string{"X-Call": "owned", "X-Container-Sync-Key": ""}
 	option := containers.WithMetadataHeaders(headers)
 	headers["X-Call"] = "changed"
-	set, err := service.Containers.SetMetadata(ctx, name, values, option, func(o *containers.MetadataOpts) error {
+	set, err := service.Containers.SetMetadata(ctx, name, values, option, request.Custom(func(o *containers.MetadataOpts) error {
 		values["Owner"] = "late"
 		source.MoreHeaders["X-Source"] = "callback"
 		return nil
-	})
+	}))
 	if err != nil || set == nil || set.StatusCode != 204 || string(set.Body) != "opaque" || calls != 2 {
 		t.Fatal(set, err, calls)
 	}

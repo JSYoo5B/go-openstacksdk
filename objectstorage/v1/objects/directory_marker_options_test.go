@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -35,7 +36,7 @@ func TestDirectoryMarkerOptionsFactoryAndCallbackSnapshots(t *testing.T) {
 			}}
 			return objectMetadataWire(r, 201, http.Header{}, body), nil
 		})
-		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), "box", "key", full, pluralHeaders, pluralMetadata, func(cfg *DirectoryMarkerOpts) error { callbacks++; retained = cfg; return nil }, WithDirectoryMarkerHeader("X-Call", "overlay"), WithDirectoryMarkerMetadataValue("tag", "overlay"))
+		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), "box", "key", full, pluralHeaders, pluralMetadata, request.Custom(func(cfg *DirectoryMarkerOpts) error { callbacks++; retained = cfg; return nil }), request.Header("X-Call", "overlay"), WithDirectoryMarkerMetadataValue("tag", "overlay"))
 		if err != nil || result == nil || result.Ordinary.Acknowledgement == nil {
 			t.Fatal("retained maps changed completed operation", result, err)
 		}
@@ -68,7 +69,7 @@ func TestDirectoryMarkerOptionsReplacementAndOverlay(t *testing.T) {
 			return objectMetadataOK(r, 201, http.Header{}), nil
 		})
 		options := []DirectoryMarkerOption{
-			WithDirectoryMarkerHeader("X-Drop", "earlier"), WithDirectoryMarkerMetadataValue("Drop", "earlier"),
+			request.Header("X-Drop", "earlier"), WithDirectoryMarkerMetadataValue("Drop", "earlier"),
 			WithDirectoryMarkerOpts(DirectoryMarkerOpts{Headers: map[string]string{"x-keep": "first"}, Metadata: map[string]string{"TAG": "first"}}),
 			WithDirectoryMarkerHeaders(map[string]string{"X-Keep": "last"}), WithDirectoryMarkerMetadata(map[string]string{"tag": "last"}),
 		}
@@ -89,12 +90,12 @@ func TestDirectoryMarkerOptionsPreflightAndJoinedCauses(t *testing.T) {
 	for _, option := range []DirectoryMarkerOption{
 		nil,
 		WithDirectoryMarkerOpts(DirectoryMarkerOpts{Headers: map[string]string{"Content-Type": "one", "content-type": "two"}}),
-		WithDirectoryMarkerHeader("Content-Type", "bad\nmedia"),
-		WithDirectoryMarkerHeader("X-Detect-Content-Type", "false"),
-		WithDirectoryMarkerHeader("Content-Length", "0"),
-		WithDirectoryMarkerHeader("Cookie", "auth"),
-		WithDirectoryMarkerHeader("X-Object-Meta-Tag", "raw metadata"),
-		WithDirectoryMarkerHeader("X-Object-Manifest", "other/prefix"),
+		request.Header("Content-Type", "bad\nmedia"),
+		request.Header("X-Detect-Content-Type", "false"),
+		request.Header("Content-Length", "0"),
+		request.Header("Cookie", "auth"),
+		request.Header("X-Object-Meta-Tag", "raw metadata"),
+		request.Header("X-Object-Manifest", "other/prefix"),
 		WithDirectoryMarkerMetadataValue("X-Object-Meta-Tag", "prefixed"),
 		WithDirectoryMarkerOpts(DirectoryMarkerOpts{Metadata: map[string]string{"Tag": "one", "tag": "two"}}),
 	} {
@@ -106,7 +107,7 @@ func TestDirectoryMarkerOptionsPreflightAndJoinedCauses(t *testing.T) {
 	for _, headers := range []map[string]string{{"Content-Type": "one", "content-type": "two"}, {"Content-Type": "bad\nmedia"}, {"x-detect-content-type": "false"}} {
 		c.MoreHeaders = headers
 		callbacks := 0
-		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), "box", "key", func(*DirectoryMarkerOpts) error { callbacks++; return nil })
+		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), "box", "key", request.Custom(func(*DirectoryMarkerOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("invalid original source ran callback", result, err, callbacks)
 		}
@@ -114,24 +115,24 @@ func TestDirectoryMarkerOptionsPreflightAndJoinedCauses(t *testing.T) {
 	c.MoreHeaders = nil
 	for _, names := range [][2]string{{"", "key"}, {"box", ""}, {"box", "folder/../key"}} {
 		callbacks := 0
-		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), names[0], names[1], func(*DirectoryMarkerOpts) error { callbacks++; return nil })
+		result, err := New(c).CreateDirectoryMarkerObject(context.Background(), names[0], names[1], request.Custom(func(*DirectoryMarkerOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal("invalid target ran callback", result, err, callbacks)
 		}
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause, canceled := errors.New("marker option cause"), errors.New("marker option canceled")
-	result, err := New(c).CreateDirectoryMarkerObject(ctx, "box", "key", func(*DirectoryMarkerOpts) error {
+	result, err := New(c).CreateDirectoryMarkerObject(ctx, "box", "key", request.Custom(func(*DirectoryMarkerOpts) error {
 		c.MoreHeaders = map[string]string{"X-Detect-Content-Type": "true"}
 		cancel(canceled)
 		return cause
-	})
+	}))
 	if result != nil || !errors.Is(err, cause) || !errors.Is(err, canceled) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal("callback/context/source causes lost", result, err, calls)
 	}
 	c.MoreHeaders = nil
 	callbacks := 0
-	result, err = New(c).CreateDirectoryMarkerObject(ctx, "box", "key", func(*DirectoryMarkerOpts) error { callbacks++; return nil })
+	result, err = New(c).CreateDirectoryMarkerObject(ctx, "box", "key", request.Custom(func(*DirectoryMarkerOpts) error { callbacks++; return nil }))
 	if result != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, canceled) || callbacks != 0 || calls != 0 {
 		t.Fatal("canceled source ran callback", result, err, callbacks, calls)
 	}
@@ -156,7 +157,7 @@ func TestDirectoryMarkerOptionsParallelReuse(t *testing.T) {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
-			result, err := api.CreateDirectoryMarkerObject(context.Background(), "box", "key", option, func(*DirectoryMarkerOpts) error { callbacks.Add(1); return nil })
+			result, err := api.CreateDirectoryMarkerObject(context.Background(), "box", "key", option, request.Custom(func(*DirectoryMarkerOpts) error { callbacks.Add(1); return nil }))
 			if err != nil || result == nil || result.Ordinary.Acknowledgement == nil || len(result.Ordinary.Attempts) != 1 {
 				t.Errorf("parallel marker %+v %v", result, err)
 				return

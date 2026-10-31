@@ -11,6 +11,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -55,11 +56,11 @@ func TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow(t *testing.T) {
 	infoOption := swift.WithGetInfoHeaders(headers)
 	segmentOption := swift.WithObjectSegmentSizeHeaders(headers)
 	headers["X-Call"] = "mutated caller"
-	info, err := service.GetInfo(ctx, infoOption, func(o *swift.GetInfoOpts) error {
+	info, err := service.GetInfo(ctx, infoOption, request.Custom(func(o *swift.GetInfoOpts) error {
 		source.MoreHeaders["X-Source"] = "callback change"
 		provider.SetToken("token-1")
 		return nil
-	})
+	}))
 	if err != nil || info == nil || info.StatusCode != 200 || info.Header.Get("X-Proof") != "1" || string(info.Swift["max_file_size"]) != "100" || string(info.Body["plugin"]) != `{"precise":9007199254740993}` {
 		t.Fatal(info, err)
 	}

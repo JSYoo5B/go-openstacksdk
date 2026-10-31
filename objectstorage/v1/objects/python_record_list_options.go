@@ -6,6 +6,9 @@ import (
 	"maps"
 	"slices"
 	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordListOpts owns the query and control inputs of the named Source
@@ -25,8 +28,54 @@ type RecordListOpts struct {
 	queryOrder         []string
 }
 
-// RecordListOption configures ListRecords.
-type RecordListOption func(*RecordListOpts) error
+// RecordListOption is one option of ListRecords: the WithRecordList* options,
+// request.Query (one Source **query value as a JSON keyword), request.Limit,
+// request.Marker, request.Microversion, request.MaxItems, request.Paginated
+// (false reads only the first page) or request.Custom over *RecordListOpts.
+// Other shared calls, including request.Header and request.Headers (use
+// WithRecordListHeaders, which merges), fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query:        calls.JSONQuery(objectListKeyword),
+	Microversion: calls.Pointer(func(cfg *RecordListOpts) **string { return &cfg.Microversion }),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     calls.Pointer(func(cfg *RecordListOpts) **int { return &cfg.Limit }),
+		Marker:    calls.Pointer(func(cfg *RecordListOpts) **string { return &cfg.Marker }),
+		MaxItems:  calls.Value(func(cfg *RecordListOpts) *int { return &cfg.MaxItems }),
+		Paginated: func(cfg *RecordListOpts, paginated bool) error { cfg.SinglePage = !paginated; return nil },
+	},
+}
+
+// objectListKeyword applies one request.Query call as a Source **query value.
+// Server keys (limit, marker, prefix, temp_url_sig, temp_url_expires,
+// filename, multipart_manifest or multipart-manifest, symlink) are sent;
+// declared Body attributes (id, name, _hash, _bytes, _last_modified,
+// _content_type) become local filters; unknown keys are ignored, with their
+// value's marshal error, like Source allow_unknown_params.
+func objectListKeyword(cfg *RecordListOpts, key string, raw json.RawMessage, err error) error {
+	if err := objectListReservedQuery(key); err != nil {
+		return err
+	}
+	if !objectListServerKey(key) && !objectListBodyKey(key) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !utf8.Valid(raw) {
+		return metadataInvalid("object list query must encode UTF-8 JSON")
+	}
+	if cfg.Query == nil {
+		cfg.Query = make(map[string]json.RawMessage)
+	}
+	if !slices.Contains(cfg.queryOrder, key) {
+		cfg.queryOrder = append(cfg.queryOrder, key)
+	}
+	cfg.Query[key] = bytes.Clone(raw)
+	return nil
+}
 
 func copyObjectListOpts(cfg RecordListOpts) RecordListOpts {
 	cfg.Query = cloneObjectListFields(cfg.Query)
@@ -51,73 +100,27 @@ func copyObjectListOpts(cfg RecordListOpts) RecordListOpts {
 // WithRecordListOpts replaces the whole option state with an owned copy.
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyObjectListOpts(value)
-	return func(cfg *RecordListOpts) error { *cfg = copyObjectListOpts(owned); return nil }
-}
-
-// WithRecordListQuery adds one Source **query value. Server keys (limit,
-// marker, prefix, temp_url_sig, temp_url_expires, filename,
-// multipart_manifest or multipart-manifest, symlink) are sent; declared Body
-// attributes (id, name, _hash, _bytes, _last_modified, _content_type) become
-// local filters; unknown keys are ignored like Source allow_unknown_params.
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if err := objectListReservedQuery(key); err != nil {
-		return func(*RecordListOpts) error { return err }
-	}
-	if !objectListServerKey(key) && !objectListBodyKey(key) {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := objectListJSON(value)
-	return func(cfg *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if cfg.Query == nil {
-			cfg.Query = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(cfg.queryOrder, key) {
-			cfg.queryOrder = append(cfg.queryOrder, key)
-		}
-		cfg.Query[key] = bytes.Clone(raw)
-		return nil
-	}
+	return request.Custom(func(cfg *RecordListOpts) error { *cfg = copyObjectListOpts(owned); return nil })
 }
 
 // WithRecordListHeaders adds Resource.list method headers. They override the
 // operation Accept default exactly like Source headers_final.
 func WithRecordListHeaders(value map[string]string) RecordListOption {
 	owned := maps.Clone(value)
-	return func(cfg *RecordListOpts) error {
+	return request.Custom(func(cfg *RecordListOpts) error {
 		headers, err := objectListHeaders(owned, false, "")
 		if err != nil {
 			return err
 		}
 		maps.Copy(cfg.Headers, headers)
 		return nil
-	}
-}
-func WithRecordListLimit(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Limit = &owned; return nil }
-}
-func WithRecordListMarker(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Marker = &owned; return nil }
+	})
 }
 func WithRecordListPrefix(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil }
-}
-func WithRecordListMicroversion(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Microversion = &owned; return nil }
-}
-func WithRecordListMaxItems(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.MaxItems = value; return nil }
+	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil })
 }
 func WithRecordListMaxPages(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil }
-}
-
-// WithRecordListSinglePage is an explicit Go control. The pinned objects proxy
-// fixes paginated=True, so Python itself has no first-page-only form.
-func WithRecordListSinglePage(value bool) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.SinglePage = value; return nil }
+	return request.Custom(func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil })
 }
 
 // objectListQueryMapping is Object._query_mapping (client name to server name),
@@ -156,16 +159,6 @@ func objectListReservedQuery(key string) error {
 		return metadataInvalid("Source %q control is not supported by object ListRecords", key)
 	}
 	return nil
-}
-func objectListJSON(value any) (json.RawMessage, error) {
-	encoded, err := json.Marshal(value)
-	if err != nil {
-		return nil, err
-	}
-	if !utf8.Valid(encoded) {
-		return nil, metadataInvalid("object list query must encode UTF-8 JSON")
-	}
-	return json.RawMessage(bytes.Clone(encoded)), nil
 }
 func cloneObjectListFields(values map[string]json.RawMessage) map[string]json.RawMessage {
 	if values == nil {

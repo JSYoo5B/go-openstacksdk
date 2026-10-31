@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -88,7 +89,7 @@ func TestTempURLCorePreflightAndTimeBoundaries(t *testing.T) {
 		c := tempURLKeyTestClient()
 		c.MoreHeaders = map[string]string{"X-K": "bad"}
 		callbacks := 0
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/a/c/o", 1, "GET", func(*GenerateTempURLOpts) error { callbacks++; return nil })
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/a/c/o", 1, "GET", request.Custom(func(*GenerateTempURLOpts) error { callbacks++; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || callbacks != 0 {
 			t.Fatal(result, err, callbacks)
 		}

@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -199,7 +200,7 @@ func TestInfoCoreCallbackAndWireGuards(t *testing.T) {
 		cause := errors.New("callback cause")
 		later, calls := 0, 0
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, cause })
-		result, err := New(c).GetInfo(context.Background(), func(*GetInfoOpts) error { c.ResourceBase = "changed"; return cause }, func(*GetInfoOpts) error { later++; return nil })
+		result, err := New(c).GetInfo(context.Background(), request.Custom(func(*GetInfoOpts) error { c.ResourceBase = "changed"; return cause }), request.Custom(func(*GetInfoOpts) error { later++; return nil }))
 		if result != nil || !errors.Is(err, cause) || !errors.Is(err, resource.ErrInvalidOption) || later != 0 || calls != 0 {
 			t.Fatal(result, err, later, calls)
 		}

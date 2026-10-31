@@ -10327,16 +10327,16 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.RawClient",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListLimit",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMarker",
+        "github.com/JSYoo5B/go-openstacksdk/request.Limit",
+        "github.com/JSYoo5B/go-openstacksdk/request.Marker",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListFormat",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxPages",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListSinglePage"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -10366,7 +10366,7 @@
           ]
         },
         {
-          "behavior": "Shared Python scalar/number/bool equality and recursive _dict_filter preserve truthy-scalar empty predicate, missing nested None and meaningful mapping-get faults. WithRecordListQuery preserves top-level option order and raw nested JSON preserves ordered short-circuit; no swallowed scalar AttributeError is turned into absence.",
+          "behavior": "Shared Python scalar/number/bool equality and recursive _dict_filter preserve truthy-scalar empty predicate, missing nested None and meaningful mapping-get faults. request.Query preserves top-level option order and raw nested JSON preserves ordered short-circuit; no swallowed scalar AttributeError is turned into absence.",
           "tests": [
             "objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListLocalEqualityAndDictionaryShortCircuit",
             "objectstorage/v1/containers/python_list_contracts_test.go:TestPythonContainerListOrderedLocalPredicatesAvoidLaterMappingFault"
@@ -10463,13 +10463,13 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListSinglePage"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -10496,7 +10496,7 @@
           "behavior": "GET escaped fixed container with format=json and operation Accept JSON; Object query mapping client alias wins wire alias, unknown queries discarded before Marshaler/DTO JSON validation, declared canonical Body filters remain local, no transport-wrapper counting. CPython loaded integer/float/bool recursive equality and float truthiness are explicit shared policy opt-ins. Empty dictionary filter matches every truthy scalar/list/mapping; falsey actual is excluded and nonempty dictionary against truthy nonmapping remains a real page error, including recursive empty filters.",
           "tests": [
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters",
-            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType"
           ]
@@ -10532,7 +10532,7 @@
         {
           "behavior": "Owned concrete options clone raw bytes/maps/pointers and callback resets; invalid/reserved/unsupported Source controls fail before Marshaler/HTTP, nil Headers reset composes safely, repeated iterator consumption is independent, consumer break avoids continuation and custom cancellation during yield preserves page proof.",
           "tests": [
-            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation"
           ]
@@ -31178,7 +31178,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.GetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithoutGetMetadataNewest"
@@ -31265,7 +31265,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetMetadataAndRefresh"
       ],
@@ -31359,7 +31359,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.DeleteMetadataKeys"
       ],
@@ -31441,7 +31441,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.GetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithoutGetMetadataNewest"
@@ -31528,12 +31528,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeader",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders"
       ],
       "contracts": [
@@ -31640,7 +31639,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteMetadataKeys"
       ],
@@ -31724,7 +31723,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutGetMetadataNewest",
@@ -31823,7 +31822,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.SetMetadataFromFresh"
       ],
@@ -31964,7 +31963,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteMetadataAndRefresh"
       ],
@@ -32081,7 +32080,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.CreateRecord",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordCreateHeaders"
       ],
       "contracts": [
@@ -32179,9 +32178,9 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.DeleteRecord",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordDeleteIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -32273,7 +32272,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.API.SetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary"
       ],
@@ -32342,7 +32341,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeySecondary"
       ],
@@ -32412,7 +32411,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyContainer",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGetTempURLKeyNewest"
@@ -32511,7 +32510,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureDigest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureTimestamp",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateFormSignatureNewest"
@@ -32598,7 +32597,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLDigest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLTimestamp",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateTempURLNewest",
@@ -32693,7 +32692,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest",
@@ -32815,7 +32814,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest",
@@ -32907,7 +32906,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest",
@@ -33002,7 +33001,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetInfo",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetInfoHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Info.UnmarshalJSON"
       ],
@@ -33086,7 +33085,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetObjectSegmentSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutObjectSegmentSize"
@@ -33182,11 +33181,11 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectStaticLargeObject",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectVersionID",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest",
@@ -33310,7 +33309,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadataValue",
@@ -33480,7 +33479,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.IsObjectStale",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleMD5",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleSHA256"
@@ -33571,7 +33570,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForDelete",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout",
@@ -33668,7 +33667,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.WaitForStatus",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectWaitTimeout",
@@ -33814,7 +33813,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateDirectoryMarkerObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadataValue"
@@ -113410,13 +113409,13 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.Collection.List",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListQuery",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListSinglePage"
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -113430,7 +113429,7 @@
           "behavior": "GET escaped fixed container with format=json and operation Accept JSON; Object query mapping client alias wins wire alias, unknown queries discarded before Marshaler/DTO JSON validation, declared canonical Body filters remain local, no transport-wrapper counting. CPython loaded integer/float/bool recursive equality and float truthiness are explicit shared policy opt-ins. Empty dictionary filter matches every truthy scalar/list/mapping; falsey actual is excluded and nonempty dictionary against truthy nonmapping remains a real page error, including recursive empty filters.",
           "tests": [
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters",
-            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTruthiness",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType"
           ]
@@ -113466,7 +113465,7 @@
         {
           "behavior": "Owned concrete options clone raw bytes/maps/pointers and callback resets; invalid/reserved/unsupported Source controls fail before Marshaler/HTTP, nil Headers reset composes safely, repeated iterator consumption is independent, consumer break avoids continuation and custom cancellation during yield preserves page proof.",
           "tests": [
-            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded",
+            "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection",
             "objectstorage/v1/objects/python_record_list_test.go:TestPythonObjectListRecordsIteratorReuseConsumerBreakAndCancellation"
           ]

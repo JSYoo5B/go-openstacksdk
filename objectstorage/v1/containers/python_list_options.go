@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"maps"
 	"slices"
+	"unicode/utf8"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 // RecordListOpts owns named containers query/control inputs. Unknown Source
@@ -21,7 +25,52 @@ type RecordListOpts struct {
 	SinglePage         bool
 	queryOrder         []string
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords: the WithRecordList* options,
+// request.Query (one Source **query value as a JSON keyword), request.Limit,
+// request.Marker, request.Microversion, request.MaxItems, request.Paginated
+// (false reads only the first page) or request.Custom over *RecordListOpts.
+// Other shared calls, including request.Header and request.Headers (use
+// WithRecordListHeaders, which merges), fail with resource.ErrInvalidOption
+// before HTTP.
+type RecordListOption = request.ListCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Query:        calls.JSONQuery(listRecordKeyword),
+	Microversion: calls.Pointer(func(cfg *RecordListOpts) **string { return &cfg.Microversion }),
+	Paging: calls.Paging[RecordListOpts]{
+		Limit:     calls.Pointer(func(cfg *RecordListOpts) **int { return &cfg.Limit }),
+		Marker:    calls.Pointer(func(cfg *RecordListOpts) **string { return &cfg.Marker }),
+		MaxItems:  calls.Value(func(cfg *RecordListOpts) *int { return &cfg.MaxItems }),
+		Paginated: func(cfg *RecordListOpts, paginated bool) error { cfg.SinglePage = !paginated; return nil },
+	},
+}
+
+// listRecordKeyword applies one request.Query call as a Source **query value.
+// Source ignores unknown parameters, with their value's marshal error, before
+// Requests encodes their values.
+func listRecordKeyword(cfg *RecordListOpts, key string, raw json.RawMessage, err error) error {
+	if key == "paginated" {
+		return metadataInvalid("named Source containers fixes paginated=True")
+	}
+	if !listRecordServerKey(key) && !listRecordBodyKey(key) {
+		return nil
+	}
+	if err != nil {
+		return err
+	}
+	if !utf8.Valid(raw) {
+		return metadataInvalid("container attrs must encode UTF-8 JSON")
+	}
+	if cfg.Query == nil {
+		cfg.Query = make(map[string]json.RawMessage)
+	}
+	if !slices.Contains(cfg.queryOrder, key) {
+		cfg.queryOrder = append(cfg.queryOrder, key)
+	}
+	cfg.Query[key] = bytes.Clone(raw)
+	return nil
+}
 
 func copyListRecordOpts(cfg RecordListOpts) RecordListOpts {
 	cfg.Query = cloneRecordFields(cfg.Query)
@@ -44,69 +93,29 @@ func copyListRecordOpts(cfg RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyListRecordOpts(value)
-	return func(cfg *RecordListOpts) error { *cfg = copyListRecordOpts(owned); return nil }
-}
-func WithRecordListQuery(key string, value any) RecordListOption {
-	if key == "paginated" {
-		return func(*RecordListOpts) error { return metadataInvalid("named Source containers fixes paginated=True") }
-	}
-	// Source ignores unknown parameters before Requests encodes their values.
-	if !listRecordServerKey(key) && !listRecordBodyKey(key) {
-		return func(*RecordListOpts) error { return nil }
-	}
-	raw, err := recordJSON(value)
-	return func(cfg *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if cfg.Query == nil {
-			cfg.Query = make(map[string]json.RawMessage)
-		}
-		if !slices.Contains(cfg.queryOrder, key) {
-			cfg.queryOrder = append(cfg.queryOrder, key)
-		}
-		cfg.Query[key] = bytes.Clone(raw)
-		return nil
-	}
+	return request.Custom(func(cfg *RecordListOpts) error { *cfg = copyListRecordOpts(owned); return nil })
 }
 func WithRecordListHeaders(value map[string]string) RecordListOption {
 	owned := maps.Clone(value)
-	return func(cfg *RecordListOpts) error {
+	return request.Custom(func(cfg *RecordListOpts) error {
 		headers, err := listRecordHeaders(owned, false, "")
 		if err != nil {
 			return err
 		}
 		maps.Copy(cfg.Headers, headers)
 		return nil
-	}
-}
-func WithRecordListLimit(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Limit = &owned; return nil }
-}
-func WithRecordListMarker(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Marker = &owned; return nil }
+	})
 }
 func WithRecordListPrefix(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil }
+	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil })
 }
 func WithRecordListFormat(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Format = &owned; return nil }
-}
-func WithRecordListMicroversion(value string) RecordListOption {
-	return func(cfg *RecordListOpts) error { owned := value; cfg.Microversion = &owned; return nil }
-}
-func WithRecordListMaxItems(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.MaxItems = value; return nil }
+	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Format = &owned; return nil })
 }
 func WithRecordListMaxPages(value int) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil }
+	return request.Custom(func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil })
 }
 
-// WithRecordListSinglePage is an explicit Go control. Source named containers
-// fixes paginated=True; full_listing=False is an ignored query, not this control.
-func WithRecordListSinglePage(value bool) RecordListOption {
-	return func(cfg *RecordListOpts) error { cfg.SinglePage = value; return nil }
-}
 func listRecordServerKey(key string) bool {
 	return key == "prefix" || key == "format" || key == "limit" || key == "marker"
 }

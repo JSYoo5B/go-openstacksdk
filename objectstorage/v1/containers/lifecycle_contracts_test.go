@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	swift "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1"
@@ -209,9 +210,9 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 				api := containers.New(client)
 				var err error
 				if create {
-					_, err = api.CreateContainer(context.Background(), name, func(*containers.CreateContainerOpts) error { callbacks++; return nil })
+					_, err = api.CreateContainer(context.Background(), name, request.Custom(func(*containers.CreateContainerOpts) error { callbacks++; return nil }))
 				} else {
-					_, err = api.DeleteContainer(context.Background(), name, func(*containers.DeleteContainerOpts) error { callbacks++; return nil })
+					_, err = api.DeleteContainer(context.Background(), name, request.Custom(func(*containers.DeleteContainerOpts) error { callbacks++; return nil }))
 				}
 				if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 0 {
 					t.Fatalf("name=%q create=%t err=%v calls=%d callbacks=%d", name, create, err, calls, callbacks)
@@ -247,7 +248,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			tc.change(client)
-			_, err := containers.New(client).CreateContainer(context.Background(), containerMetadataName, func(*containers.CreateContainerOpts) error { callbacks++; return nil })
+			_, err := containers.New(client).CreateContainer(context.Background(), containerMetadataName, request.Custom(func(*containers.CreateContainerOpts) error { callbacks++; return nil }))
 			want := resource.ErrInvalidOption
 			if tc.name == "wrong service" {
 				want = resource.ErrUnsupported
@@ -263,7 +264,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 		for _, ctx := range []context.Context{nil, func() context.Context { ctx, cancel := context.WithCancel(context.Background()); cancel(); return ctx }()} {
 			calls, callbacks := 0, 0
 			client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-			_, err := containers.New(client).DeleteContainer(ctx, containerMetadataName, func(*containers.DeleteContainerOpts) error { callbacks++; return nil })
+			_, err := containers.New(client).DeleteContainer(ctx, containerMetadataName, request.Custom(func(*containers.DeleteContainerOpts) error { callbacks++; return nil }))
 			if err == nil || calls != 0 || callbacks != 0 {
 				t.Fatalf("context err=%v calls=%d callbacks=%d", err, calls, callbacks)
 			}
@@ -286,7 +287,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 				if source {
 					client.MoreHeaders = map[string]string{key: "value"}
 				} else {
-					options = []containers.DeleteContainerOption{containers.WithDeleteContainerHeader(key, "value")}
+					options = []containers.DeleteContainerOption{request.Header(key, "value")}
 				}
 				if result, err := containers.New(client).DeleteContainer(context.Background(), containerMetadataName, options...); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 					t.Fatalf("key=%s source=%t result=%+v err=%v calls=%d", key, source, result, err, calls)
@@ -333,14 +334,14 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 			return containerMetadataResponse(201, ""), nil
 		})
 		result, err := containers.New(client).CreateContainer(context.Background(), containerMetadataName, full, set,
-			func(o *containers.CreateContainerOpts) error { callbacks++; retained = o; return nil },
-			func(*containers.CreateContainerOpts) error {
+			request.Custom(func(o *containers.CreateContainerOpts) error { callbacks++; retained = o; return nil }),
+			request.Custom(func(*containers.CreateContainerOpts) error {
 				callbacks++
 				retained.Headers["X-Call"] = "retained mutation"
 				retained.Metadata["Book"] = "retained mutation"
 				return nil
-			},
-			containers.WithCreateContainerHeaders(map[string]string{"x-call": "plural", "X-Plural": "plural"}), containers.WithCreateContainerHeader("X-Call", "final"))
+			}),
+			containers.WithCreateContainerHeaders(map[string]string{"x-call": "plural", "X-Plural": "plural"}), request.Header("X-Call", "final"))
 		if err != nil || result == nil || calls != 1 || callbacks != 2 {
 			t.Fatalf("result=%+v err=%v calls=%d callbacks=%d", result, err, calls, callbacks)
 		}
@@ -356,7 +357,7 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(404, "missing"), nil
 		})
-		result, err = containers.New(client).DeleteContainer(context.Background(), containerMetadataName, containers.WithDeleteContainerIgnoreMissing(false), deleteFull, containers.WithDeleteContainerHeaders(map[string]string{"x-call": "plural"}), containers.WithDeleteContainerHeader("X-Call", "final"))
+		result, err = containers.New(client).DeleteContainer(context.Background(), containerMetadataName, request.IgnoreMissing(false), deleteFull, containers.WithDeleteContainerHeaders(map[string]string{"x-call": "plural"}), request.Header("X-Call", "final"))
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -389,12 +390,12 @@ func TestContainerLifecycleContractsPreflightAndOptions(t *testing.T) {
 		defer cancel(nil)
 		calls, callbacks := 0, 0
 		client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-		_, err := containers.New(client).CreateContainer(ctx, containerMetadataName, func(*containers.CreateContainerOpts) error {
+		_, err := containers.New(client).CreateContainer(ctx, containerMetadataName, request.Custom(func(*containers.CreateContainerOpts) error {
 			callbacks++
 			client.Endpoint = "https://swift.invalid/drift/"
 			cancel(cause)
 			return cause
-		})
+		}))
 		if !errors.Is(err, cause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || callbacks != 1 {
 			t.Fatalf("err=%v calls=%d callbacks=%d", err, calls, callbacks)
 		}
@@ -731,7 +732,7 @@ func TestContainerLifecycleContractsSourceAndNativePolicy(t *testing.T) {
 		for _, change := range []func(*gophercloud.ServiceClient){func(c *gophercloud.ServiceClient) { c.Endpoint += "drift/" }, func(c *gophercloud.ServiceClient) { c.ResourceBase = "https://swift.invalid/new/" }, func(c *gophercloud.ServiceClient) { c.Type = "compute" }, func(c *gophercloud.ServiceClient) { c.Microversion = "changed" }, func(c *gophercloud.ServiceClient) { c.ProviderClient = &gophercloud.ProviderClient{} }} {
 			calls := 0
 			client := containerMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-			result, err := containers.New(client).DeleteContainer(context.Background(), containerMetadataName, func(*containers.DeleteContainerOpts) error { change(client); return nil })
+			result, err := containers.New(client).DeleteContainer(context.Background(), containerMetadataName, request.Custom(func(*containers.DeleteContainerOpts) error { change(client); return nil }))
 			if result != nil || err == nil || calls != 0 {
 				t.Fatalf("preflight result=%+v err=%v calls=%d", result, err, calls)
 			}
@@ -792,11 +793,11 @@ func TestContainerLifecycleContractsSourceAndNativePolicy(t *testing.T) {
 		original["X-Source"] = "captured"
 		client.MoreHeaders = original
 		result, err := containers.New(client).CreateContainer(context.Background(), containerMetadataName,
-			func(*containers.CreateContainerOpts) error {
+			request.Custom(func(*containers.CreateContainerOpts) error {
 				client.SetToken("latest")
 				client.MoreHeaders["X-Source"] = "changed after capture"
 				return nil
-			},
+			}),
 			containers.WithCreateContainerHeaders(map[string]string{"X-Call": "option", "Content-Type": "option/type"}), containers.WithCreateContainerMetadata(map[string]string{"Book": "metadata"}))
 		if err != nil || result == nil || calls != 1 || original["x-call"] != "source" || original["Content-Type"] != "source/type" || original["X-Source"] != "changed after capture" {
 			t.Fatalf("result=%+v err=%v source=%v calls=%d", result, err, original, calls)

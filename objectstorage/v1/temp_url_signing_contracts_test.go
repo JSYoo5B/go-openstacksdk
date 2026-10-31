@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/swauth"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 	nativeobjects "github.com/gophercloud/gophercloud/v2/openstack/objectstorage/v1/objects"
@@ -192,7 +193,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 					return tempKeyWire(204, "opaque-phase", headers), nil
 				})
 				result, err := v1.New(client).GenerateFormSignature(context.Background(), tempKeyName, signingInput(),
-					v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureHeaders(map[string]string{"x-call": "initial"}), v1.WithGenerateFormSignatureHeader("X-Call", "final"), v1.WithGenerateFormSignatureNewest(false))
+					v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureHeaders(map[string]string{"x-call": "initial"}), request.Header("X-Call", "final"), v1.WithGenerateFormSignatureNewest(false))
 				if err != nil || result == nil || result.Discovery == nil || string(result.Discovery.Key) != tc.key || result.Discovery.FromContainer != tc.from || result.Discovery.Secondary != tc.secondary || calls != tc.calls {
 					t.Fatalf("result=%+v err=%v calls=%d", result, err, calls)
 				}
@@ -217,7 +218,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 		})
 		client.ResourceBase = "unused and invalid"
 		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET",
-			v1.WithGenerateTempURLTimestamp(signingInstant), v1.WithGenerateTempURLHeader("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), v1.WithGenerateTempURLNewest(true), v1.WithoutGenerateTempURLNewest())
+			v1.WithGenerateTempURLTimestamp(signingInstant), request.Header("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), v1.WithGenerateTempURLNewest(true), v1.WithoutGenerateTempURLNewest())
 		signingTempOK(t, result, err, "b8c34dc228e9eb17451dae9cc7c5a870dea377a9")
 		if calls != 1 || result.Discovery.Container != nil || result.Discovery.Account == nil || !result.Discovery.Secondary || result.Discovery.FromContainer {
 			t.Fatalf("discovery=%+v calls=%d", result.Discovery, calls)
@@ -301,8 +302,8 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 		calls := 0
 		result, err := v1.New(signingClientNoHTTP(t)).GenerateTempURL(context.Background(), signingPath, 60, "GET",
 			v1.WithGenerateTempURLDigest(v1.TempURLDigestSHA512), v1.WithGenerateTempURLPrefix(true), full,
-			func(cfg *v1.GenerateTempURLOpts) error { calls++; retained = cfg; return nil },
-			func(cfg *v1.GenerateTempURLOpts) error {
+			request.Custom(func(cfg *v1.GenerateTempURLOpts) error { calls++; retained = cfg; return nil }),
+			request.Custom(func(cfg *v1.GenerateTempURLOpts) error {
 				calls++
 				retained.Key[0] = 'Y'
 				retained.Headers["x-call"] = "retained"
@@ -312,7 +313,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 					t.Errorf("snapshot=%+v", cfg)
 				}
 				return nil
-			})
+			}))
 		signingTempOK(t, result, err, signingDefaultMAC)
 		if calls != 2 {
 			t.Fatalf("callbacks=%d", calls)
@@ -326,7 +327,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 		formHeaders["X-Call"] = "external"
 		var first *v1.GenerateFormSignatureOpts
 		form, err := v1.New(signingClientNoHTTP(t)).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureDigest(v1.TempURLDigestSHA512), formFull,
-			func(cfg *v1.GenerateFormSignatureOpts) error { first = cfg; return nil }, func(cfg *v1.GenerateFormSignatureOpts) error {
+			request.Custom(func(cfg *v1.GenerateFormSignatureOpts) error { first = cfg; return nil }), request.Custom(func(cfg *v1.GenerateFormSignatureOpts) error {
 				first.Key[0] = 'Q'
 				first.Headers["X-Call"] = "alias"
 				*first.Timestamp = time.Unix(4, 0)
@@ -334,7 +335,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 					t.Errorf("form snapshot=%+v", cfg)
 				}
 				return nil
-			})
+			}))
 		if err != nil || form == nil || form.Digest != v1.TempURLDigestSHA1 || form.Expires != 1700000060 {
 			t.Fatalf("form=%+v err=%v", form, err)
 		}
@@ -459,7 +460,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 				return e
 			}},
 			{"reserved header", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLHeader("X-Auth-Token", "caller"))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Header("X-Auth-Token", "caller"))
 				return e
 			}},
 			{"invalid form container", func(s *v1.Service) error {
@@ -529,7 +530,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 	})
 	t.Run("source and context validated before callback", func(t *testing.T) {
 		calls := 0
-		cb := func(cfg *v1.GenerateTempURLOpts) error { calls++; return nil }
+		cb := request.Custom(func(cfg *v1.GenerateTempURLOpts) error { calls++; return nil })
 		result, err := v1.New(signingClientNoHTTP(t)).GenerateTempURL(nil, signingPath, 60, "GET", cb)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 			t.Fatalf("nilctx result=%+v err=%v callbacks=%d", result, err, calls)
@@ -550,10 +551,10 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 		}
 		callbackErr := errors.New("callback stopped")
 		client = signingClientNoHTTP(t)
-		result, err = v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", func(cfg *v1.GenerateTempURLOpts) error {
+		result, err = v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(cfg *v1.GenerateTempURLOpts) error {
 			client.Endpoint = "https://changed.invalid/v1/a/"
 			return callbackErr
-		})
+		}))
 		if result != nil || !errors.Is(err, callbackErr) || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatalf("callback result=%+v err=%v", result, err)
 		}

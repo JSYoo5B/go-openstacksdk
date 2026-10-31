@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -132,20 +133,20 @@ func TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters(t *testing.T)
 	}{
 		{"server mapping and ignored unknown keys", []objects.RecordListOption{
 			objects.WithRecordListPrefix("logs/"),
-			objects.WithRecordListQuery("multipart-manifest", "put"),
-			objects.WithRecordListQuery("multipart_manifest", "get"),
-			objects.WithRecordListQuery("symlink", "get"),
-			objects.WithRecordListQuery("temp_url_sig", "s"),
-			objects.WithRecordListQuery("temp_url_expires", 10),
-			objects.WithRecordListQuery("filename", "f"),
-			objects.WithRecordListQuery("delimiter", "/"),
-			objects.WithRecordListQuery("end_marker", "z"),
-			objects.WithRecordListQuery("allow_unknown_params", true),
+			request.Query("multipart-manifest", "put"),
+			request.Query("multipart_manifest", "get"),
+			request.Query("symlink", "get"),
+			request.Query("temp_url_sig", "s"),
+			request.Query("temp_url_expires", 10),
+			request.Query("filename", "f"),
+			request.Query("delimiter", "/"),
+			request.Query("end_marker", "z"),
+			request.Query("allow_unknown_params", true),
 		}, "filename=f&format=json&multipart-manifest=get&prefix=logs%2F&symlink=get&temp_url_expires=10&temp_url_sig=s", []string{`"a"`, `"b"`, `"c"`}},
-		{"bytes filter is local", []objects.RecordListOption{objects.WithRecordListQuery("_bytes", 5)}, "format=json", []string{`"a"`, `"b"`}},
-		{"name and content type filters", []objects.RecordListOption{objects.WithRecordListQuery("_content_type", "text/plain"), objects.WithRecordListQuery("name", "c")}, "format=json", []string{`"c"`}},
-		{"id filter uses name", []objects.RecordListOption{objects.WithRecordListQuery("id", "b")}, "format=json", []string{`"b"`}},
-		{"header attribute names are not filters", []objects.RecordListOption{objects.WithRecordListQuery("content_type", "nope"), objects.WithRecordListQuery("hash", "x")}, "format=json", []string{`"a"`, `"b"`, `"c"`}},
+		{"bytes filter is local", []objects.RecordListOption{request.Query("_bytes", 5)}, "format=json", []string{`"a"`, `"b"`}},
+		{"name and content type filters", []objects.RecordListOption{request.Query("_content_type", "text/plain"), request.Query("name", "c")}, "format=json", []string{`"c"`}},
+		{"id filter uses name", []objects.RecordListOption{request.Query("id", "b")}, "format=json", []string{`"b"`}},
+		{"header attribute names are not filters", []objects.RecordListOption{request.Query("content_type", "nope"), request.Query("hash", "x")}, "format=json", []string{`"a"`, `"b"`, `"c"`}},
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			api, calls := pythonObjectAPI(t, func(call pythonObjectCall, w http.ResponseWriter) {
@@ -167,7 +168,7 @@ func TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters(t *testing.T)
 		api, calls := pythonObjectAPI(t, func(call pythonObjectCall, w http.ResponseWriter) {
 			testcloud.JSON(w, 200, `[]`)
 		})
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListHeaders(map[string]string{"X-Newest": "true", "Accept": "application/json; q=1"}), objects.WithRecordListMicroversion("1.0"))
+		result := pythonObjectListCollect(api, "box", objects.WithRecordListHeaders(map[string]string{"X-Newest": "true", "Accept": "application/json; q=1"}), request.Microversion("1.0"))
 		if result.err != nil || len(result.records) != 0 {
 			t.Fatal(result)
 		}
@@ -181,7 +182,7 @@ func TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters(t *testing.T)
 			api, calls := pythonObjectAPI(t, func(call pythonObjectCall, w http.ResponseWriter) {
 				testcloud.JSON(w, 200, `[]`)
 			})
-			result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery(key, "x"))
+			result := pythonObjectListCollect(api, "box", request.Query(key, "x"))
 			var operation *resource.OperationError
 			if !errors.As(result.err, &operation) || operation.Operation != "ListRecords" || operation.Resource != "objects" || !errors.Is(result.err, resource.ErrInvalidOption) || len(calls()) != 0 {
 				t.Fatal(key, result.err, calls())
@@ -213,9 +214,9 @@ func TestPythonObjectListRecordsCountAndMarkerContinuation(t *testing.T) {
 	}{
 		{"count header follows last name", "3", nil, []string{"format=json", "format=json&marker=b"}},
 		{"count equal to consumed rows stops", "2", nil, []string{"format=json"}},
-		{"truthy limit fallback until empty page", "", []objects.RecordListOption{objects.WithRecordListLimit(2)}, []string{"format=json&limit=2", "format=json&limit=2&marker=b", "format=json&limit=2&marker=c"}},
+		{"truthy limit fallback until empty page", "", []objects.RecordListOption{request.Limit(2)}, []string{"format=json&limit=2", "format=json&limit=2&marker=b", "format=json&limit=2&marker=c"}},
 		{"prefix is kept on continuation", "3", []objects.RecordListOption{objects.WithRecordListPrefix("p")}, []string{"format=json&prefix=p", "format=json&marker=b&prefix=p"}},
-		{"falsey limit is sent once and not restored", "3", []objects.RecordListOption{objects.WithRecordListLimit(0)}, []string{"format=json&limit=0", "format=json&marker=b"}},
+		{"falsey limit is sent once and not restored", "3", []objects.RecordListOption{request.Limit(0)}, []string{"format=json&limit=0", "format=json&marker=b"}},
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			api, calls := pythonObjectAPI(t, func(call pythonObjectCall, w http.ResponseWriter) {
@@ -242,7 +243,7 @@ func TestPythonObjectListRecordsCountAndMarkerContinuation(t *testing.T) {
 			w.Header().Set("X-Container-Object-Count", "3")
 			testcloud.JSON(w, 200, pages[call.query])
 		})
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery("name", "c"))
+		result := pythonObjectListCollect(api, "box", request.Query("name", "c"))
 		if result.err != nil || !pythonObjectListEqual(pythonObjectListNames(t, result.records), []string{`"c"`}) {
 			t.Fatal(result)
 		}
@@ -305,7 +306,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	}
 	t.Run("max items fills a falsey limit and stops at the raw cap", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListMaxItems(2))
+		result := pythonObjectListCollect(api, "box", request.MaxItems(2))
 		if result.err != nil || !pythonObjectListEqual(pythonObjectListNames(t, result.records), []string{`"a"`, `"b"`}) {
 			t.Fatal(result)
 		}
@@ -315,7 +316,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	})
 	t.Run("explicit limit wins over max items", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListMaxItems(2), objects.WithRecordListLimit(3))
+		result := pythonObjectListCollect(api, "box", request.MaxItems(2), request.Limit(3))
 		if result.err != nil || len(result.records) != 2 {
 			t.Fatal(result)
 		}
@@ -325,7 +326,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	})
 	t.Run("single page skips continuation", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListSinglePage(true))
+		result := pythonObjectListCollect(api, "box", request.Paginated(false))
 		if result.err != nil || len(result.records) != 3 || len(calls()) != 1 {
 			t.Fatal(result, calls())
 		}
@@ -341,7 +342,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	})
 	t.Run("negative controls fail before HTTP", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		for _, option := range []objects.RecordListOption{objects.WithRecordListMaxItems(-1), objects.WithRecordListMaxPages(-1), objects.WithRecordListLimit(-1), nil} {
+		for _, option := range []objects.RecordListOption{request.MaxItems(-1), objects.WithRecordListMaxPages(-1), request.Limit(-1), nil} {
 			result := pythonObjectListCollect(api, "box", option)
 			if !errors.Is(result.err, resource.ErrInvalidOption) || result.records[0] != nil {
 				t.Fatal(result)
@@ -471,13 +472,16 @@ type pythonObjectListMarshaler struct {
 
 func (v pythonObjectListMarshaler) MarshalJSON() ([]byte, error) { *v.calls++; return nil, v.cause }
 
-func TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTOValuesAreDiscarded(t *testing.T) {
+// request.Query marshals its value once when the call is constructed, so the
+// marshaler runs for every call; reserved controls still fail by presence and
+// discard that marshal error, and unknown keys discard it silently.
+func TestPythonObjectListRecordsReservedControlsDiscardMarshalErrorsAndUnknownDTOValuesAreDiscarded(t *testing.T) {
 	api, calls := pythonObjectAPI(t, func(_ pythonObjectCall, w http.ResponseWriter) { testcloud.JSON(w, 200, `[]`) })
 	marshals := 0
 	cause := errors.New("must not marshal unsupported controls")
-	for _, key := range []string{"container", "paginated", "format", "headers", "microversion", "max_items", "base_path", "jmespath_filters", "session", "cls", "self", "resource_type", "__conflicting_attrs"} {
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery(key, pythonObjectListMarshaler{&marshals, cause}))
-		if !errors.Is(result.err, resource.ErrInvalidOption) || errors.Is(result.err, cause) || marshals != 0 || len(calls()) != 0 {
+	for i, key := range []string{"container", "paginated", "format", "headers", "microversion", "max_items", "base_path", "jmespath_filters", "session", "cls", "self", "resource_type", "__conflicting_attrs"} {
+		result := pythonObjectListCollect(api, "box", request.Query(key, pythonObjectListMarshaler{&marshals, cause}))
+		if !errors.Is(result.err, resource.ErrInvalidOption) || errors.Is(result.err, cause) || marshals != i+1 || len(calls()) != 0 {
 			t.Fatal(key, result.err, marshals, calls())
 		}
 		result = pythonObjectListCollect(api, "box", objects.WithRecordListOpts(objects.RecordListOpts{Query: map[string]json.RawMessage{key: json.RawMessage(`bad`)}}))
@@ -485,12 +489,13 @@ func TestPythonObjectListRecordsReservedControlsRejectBeforeMarshalAndUnknownDTO
 			t.Fatal(key, result.err, calls())
 		}
 	}
-	result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery("delimiter", pythonObjectListMarshaler{&marshals, cause}), objects.WithRecordListOpts(objects.RecordListOpts{Query: map[string]json.RawMessage{"unknown": json.RawMessage(`bad`)}}))
-	if result.err != nil || marshals != 0 || len(calls()) != 1 || calls()[0].query != "format=json" {
+	marshals = 0
+	result := pythonObjectListCollect(api, "box", request.Query("delimiter", pythonObjectListMarshaler{&marshals, cause}), objects.WithRecordListOpts(objects.RecordListOpts{Query: map[string]json.RawMessage{"unknown": json.RawMessage(`bad`)}}))
+	if result.err != nil || marshals != 1 || len(calls()) != 1 || calls()[0].query != "format=json" {
 		t.Fatal(result.err, marshals, calls())
 	}
-	result = pythonObjectListCollect(api, "box", objects.WithRecordListQuery("name", pythonObjectListMarshaler{&marshals, cause}))
-	if !errors.Is(result.err, cause) || marshals != 1 || len(calls()) != 1 {
+	result = pythonObjectListCollect(api, "box", request.Query("name", pythonObjectListMarshaler{&marshals, cause}))
+	if !errors.Is(result.err, cause) || marshals != 2 || len(calls()) != 1 {
 		t.Fatal(result.err, marshals, calls())
 	}
 }
@@ -527,7 +532,7 @@ func TestPythonObjectListRecordsOwnedOptionsNilHeaderResetAndImmutableProjection
 	if string(record.Metadata["X-Object-Meta-Owner"]) != `{"nested":[1,null]}` {
 		t.Fatal("metadata aliases envelope")
 	}
-	result = pythonObjectListCollect(api, "box", func(cfg *objects.RecordListOpts) error { *cfg = objects.RecordListOpts{}; return nil }, objects.WithRecordListHeaders(map[string]string{"X-Trace": "after nil"}))
+	result = pythonObjectListCollect(api, "box", request.Custom(func(cfg *objects.RecordListOpts) error { *cfg = objects.RecordListOpts{}; return nil }), objects.WithRecordListHeaders(map[string]string{"X-Trace": "after nil"}))
 	if result.err != nil || calls()[1].header.Get("X-Trace") != "after nil" {
 		t.Fatal(result.err, calls())
 	}
@@ -542,7 +547,7 @@ func TestPythonObjectListRecordsLocalFiltersUseLoadedFloatsAndDeclaredHeaderTrut
 		{false, []string{`"zero"`}}, {json.RawMessage(`9007199254740992`), []string{`"rounded"`}}, {json.RawMessage(`9007199254740993`), []string{`"precise"`}},
 	} {
 		api, _ := pythonObjectAPI(t, func(_ pythonObjectCall, w http.ResponseWriter) { testcloud.JSON(w, 200, page) })
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery("_hash", tc.value))
+		result := pythonObjectListCollect(api, "box", request.Query("_hash", tc.value))
 		if result.err != nil || !pythonObjectListEqual(pythonObjectListNames(t, result.records), tc.names) {
 			t.Fatal(result.err, result.records, tc.names)
 		}
@@ -694,7 +699,7 @@ func TestPythonObjectListRecordsCleanRetriesPreserveRouteHeadersAndLiveToken(t *
 			case "backoff":
 				client.ProviderClient.RetryBackoffFunc = func(context.Context, *gophercloud.ErrUnexpectedResponseCode, error, uint) error { renew(); return nil }
 			}
-			result := pythonObjectListCollect(objects.New(client), "box", objects.WithRecordListPrefix("owned"), objects.WithRecordListMicroversion("1.2"), objects.WithRecordListHeaders(map[string]string{"Accept": "custom/json", "If-Match": "owned"}))
+			result := pythonObjectListCollect(objects.New(client), "box", objects.WithRecordListPrefix("owned"), request.Microversion("1.2"), objects.WithRecordListHeaders(map[string]string{"Accept": "custom/json", "If-Match": "owned"}))
 			if result.err != nil || requests != 2 || hooks != 1 || len(result.records) != 1 || string(result.records[0].Resource.Body["name"]) != `"result"` {
 				t.Fatal(result.err, requests, hooks, result.records)
 			}
@@ -752,7 +757,7 @@ func TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType(t *t
 		{map[string]any{"nested": map[string]any{}}, nil, true},
 	} {
 		api, _ := pythonObjectAPI(t, func(_ pythonObjectCall, w http.ResponseWriter) { testcloud.JSON(w, 200, page) })
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery("_hash", tc.filter))
+		result := pythonObjectListCollect(api, "box", request.Query("_hash", tc.filter))
 		if tc.failed {
 			var proof *resource.ResponseError
 			if result.err == nil || !errors.As(result.err, &proof) || proof.StatusCode != 200 || string(proof.Body) != page {
@@ -764,7 +769,7 @@ func TestPythonObjectListRecordsEmptyDictionaryFilterMatchesEveryTruthyType(t *t
 	}
 	nested := `[{"name":"keep","hash":{"nested":"keep"}},{"name":"empty","hash":{"nested":""}}]`
 	api, _ := pythonObjectAPI(t, func(_ pythonObjectCall, w http.ResponseWriter) { testcloud.JSON(w, 200, nested) })
-	result := pythonObjectListCollect(api, "box", objects.WithRecordListQuery("_hash", map[string]any{"nested": map[string]any{}}))
+	result := pythonObjectListCollect(api, "box", request.Query("_hash", map[string]any{"nested": map[string]any{}}))
 	if result.err != nil || !pythonObjectListEqual(pythonObjectListNames(t, result.records), []string{`"keep"`}) {
 		t.Fatal(result.err, result.records)
 	}

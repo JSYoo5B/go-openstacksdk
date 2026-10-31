@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateDirectoryMarkerObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDirectoryMarkerMetadataValue`
@@ -71,6 +71,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -113,7 +114,7 @@ func markerExample(ctx context.Context, conn *sdk.Connection) {
             Headers: map[string]string{"X-Client": "directory-marker"},
             Metadata: map[string]string{"Owner": "sdk"},
         }),
-        objects.WithDirectoryMarkerHeader("X-Trace", "initial"),
+        request.Header("X-Trace", "initial"),
         objects.WithDirectoryMarkerHeaders(map[string]string{"x-trace": "marker"}),
         objects.WithDirectoryMarkerMetadata(map[string]string{"Purpose": "web-listing"}),
         objects.WithDirectoryMarkerMetadataValue("Build", "2026-10-04"),

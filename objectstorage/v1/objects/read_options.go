@@ -1,6 +1,11 @@
 package objects
 
-import "time"
+import (
+	"time"
+
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+)
 
 // ObjectReadOpts owns ordinary headers and explicit GET inputs. Range and
 // conditional strings are literal header values; their semantics belong to
@@ -15,97 +20,101 @@ type ObjectReadOpts struct {
 	BufferSize                         int
 }
 
-type ObjectReadOption func(*ObjectReadOpts) error
+// ObjectReadOption is one option of GetObject, DownloadObject and
+// StreamObject: the WithObjectRead* options, request.Header (validated and
+// merged like a one-entry WithObjectReadHeaders) or request.Custom over
+// *ObjectReadOpts. Other shared calls, including request.Headers (the
+// WithObjectReadHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type ObjectReadOption = request.GetCall
+
+var objectReadCalls = calls.Spec[ObjectReadOpts]{Header: calls.MergeHeader[ObjectReadOpts](WithObjectReadHeaders)}
 
 func WithObjectReadOpts(value ObjectReadOpts) ObjectReadOption {
 	snapshot := cloneObjectReadOpts(value)
-	return func(cfg *ObjectReadOpts) error {
+	return request.Custom(func(cfg *ObjectReadOpts) error {
 		*cfg = cloneObjectReadOpts(snapshot)
 		return nil
-	}
-}
-
-func WithObjectReadHeader(key, value string) ObjectReadOption {
-	return WithObjectReadHeaders(map[string]string{key: value})
+	})
 }
 
 func WithObjectReadHeaders(values map[string]string) ObjectReadOption {
 	snapshot := cloneMetadataHeaders(values)
-	return func(cfg *ObjectReadOpts) error {
+	return request.Custom(func(cfg *ObjectReadOpts) error {
 		owned, err := validateObjectReadHeaders(snapshot)
 		if err != nil {
 			return err
 		}
 		return mergeMetadataHeaders(cfg.Headers, owned)
-	}
+	})
 }
 
 func WithObjectReadNewest(value bool) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error {
+	return request.Custom(func(cfg *ObjectReadOpts) error {
 		owned := value
 		cfg.Newest = &owned
 		return nil
-	}
+	})
 }
 
 func WithoutObjectReadNewest() ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.Newest = nil; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Newest = nil; return nil })
 }
 
 func WithObjectReadIfMatch(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.IfMatch = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfMatch = value; return nil })
 }
 
 func WithObjectReadIfNoneMatch(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.IfNoneMatch = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfNoneMatch = value; return nil })
 }
 
 func WithObjectReadIfModifiedSince(value time.Time) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error {
+	return request.Custom(func(cfg *ObjectReadOpts) error {
 		owned := value
 		cfg.IfModifiedSince = &owned
 		return nil
-	}
+	})
 }
 
 func WithoutObjectReadIfModifiedSince() ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.IfModifiedSince = nil; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfModifiedSince = nil; return nil })
 }
 
 func WithObjectReadIfUnmodifiedSince(value time.Time) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error {
+	return request.Custom(func(cfg *ObjectReadOpts) error {
 		owned := value
 		cfg.IfUnmodifiedSince = &owned
 		return nil
-	}
+	})
 }
 
 func WithoutObjectReadIfUnmodifiedSince() ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.IfUnmodifiedSince = nil; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfUnmodifiedSince = nil; return nil })
 }
 
 func WithObjectReadRange(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.Range = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Range = value; return nil })
 }
 
 func WithObjectReadFilename(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.Filename = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Filename = value; return nil })
 }
 
 func WithObjectReadMultipartManifest(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.MultipartManifest = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.MultipartManifest = value; return nil })
 }
 
 func WithObjectReadSymlink(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.Symlink = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Symlink = value; return nil })
 }
 
 func WithObjectReadVersionID(value string) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.VersionID = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.VersionID = value; return nil })
 }
 
 func WithObjectReadBufferSize(value int) ObjectReadOption {
-	return func(cfg *ObjectReadOpts) error { cfg.BufferSize = value; return nil }
+	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.BufferSize = value; return nil })
 }
 
 func cloneObjectReadOpts(value ObjectReadOpts) ObjectReadOpts {
@@ -127,7 +136,7 @@ func cloneObjectReadOpts(value ObjectReadOpts) ObjectReadOpts {
 
 func applyObjectReadOptions(options []ObjectReadOption) (ObjectReadOpts, error) {
 	cfg := cloneObjectReadOpts(ObjectReadOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, objectReadCalls) {
 		if option == nil {
 			return cfg, metadataInvalid("nil object read option")
 		}

@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -162,21 +163,27 @@ type MetadataRefreshOpts struct {
 	Headers map[string]string
 	Refresh *bool
 }
-type MetadataRefreshOption func(*MetadataRefreshOpts) error
+
+// MetadataRefreshOption is one option of SetMetadataAndRefresh: the
+// WithMetadataRefresh* options, request.Header (validated and merged like a
+// one-entry WithMetadataRefreshHeaders) or request.Custom over
+// *MetadataRefreshOpts. Other shared calls, including request.Headers (the
+// WithMetadataRefreshHeaders map merges instead of replacing), fail with
+// resource.ErrInvalidOption before HTTP.
+type MetadataRefreshOption = request.WriteCall
+
+var metadataRefreshCalls = calls.Spec[MetadataRefreshOpts]{Header: calls.MergeHeader[MetadataRefreshOpts](WithMetadataRefreshHeaders)}
 
 func WithMetadataRefresh(value bool) MetadataRefreshOption {
-	return func(cfg *MetadataRefreshOpts) error { owned := value; cfg.Refresh = &owned; return nil }
+	return request.Custom(func(cfg *MetadataRefreshOpts) error { owned := value; cfg.Refresh = &owned; return nil })
 }
 func WithMetadataRefreshOpts(value MetadataRefreshOpts) MetadataRefreshOption {
 	snapshot := cloneMetadataRefreshOpts(value)
-	return func(cfg *MetadataRefreshOpts) error { *cfg = cloneMetadataRefreshOpts(snapshot); return nil }
-}
-func WithMetadataRefreshHeader(key, value string) MetadataRefreshOption {
-	return WithMetadataRefreshHeaders(map[string]string{key: value})
+	return request.Custom(func(cfg *MetadataRefreshOpts) error { *cfg = cloneMetadataRefreshOpts(snapshot); return nil })
 }
 func WithMetadataRefreshHeaders(headers map[string]string) MetadataRefreshOption {
 	snapshot := cloneMetadataHeaders(headers)
-	return func(cfg *MetadataRefreshOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) }
+	return request.Custom(func(cfg *MetadataRefreshOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) })
 }
 func cloneMetadataRefreshOpts(value MetadataRefreshOpts) MetadataRefreshOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)
@@ -188,7 +195,7 @@ func cloneMetadataRefreshOpts(value MetadataRefreshOpts) MetadataRefreshOpts {
 }
 func applyMetadataRefreshOptions(options []MetadataRefreshOption) (MetadataRefreshOpts, error) {
 	cfg := cloneMetadataRefreshOpts(MetadataRefreshOpts{})
-	for _, option := range options {
+	for _, option := range calls.Translate(options, metadataRefreshCalls) {
 		if option == nil {
 			return cfg, metadataInvalid("nil refresh metadata option")
 		}

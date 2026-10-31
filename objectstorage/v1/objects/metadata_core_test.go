@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -113,7 +114,7 @@ func TestObjectMetadataCoreRoutesAndMerge(t *testing.T) {
 	c.ResourceBase = s.URL + "/reverse%20proxy/v1/AUTH_a/"
 	c.MoreHeaders = map[string]string{"Content-Type": "application/source", "X-Source": "owned"}
 	a := New(c)
-	get, err := a.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataName, WithGetMetadataNewest(false), WithGetMetadataHeader("X-Call", "get"))
+	get, err := a.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataName, WithGetMetadataNewest(false), request.Header("X-Call", "get"))
 	if err != nil || get.Metadata.Values["keep"] != "untouched" || *get.Metadata.LastModified != "not a time" {
 		t.Fatalf("GET %#v %v", get, err)
 	}
