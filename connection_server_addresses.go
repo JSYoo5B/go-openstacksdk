@@ -2,10 +2,12 @@ package openstack
 
 import (
 	"context"
+	"errors"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/network"
+
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -94,4 +96,73 @@ func (c *Connection) EnsureServerFloatingIP(ctx context.Context, input compute.A
 		return nil, invalid("connection is required")
 	}
 	return c.addressFacade().EnsureServerFloatingIP(ctx, input, options...)
+}
+
+// AddIPsToServer provides standalone pool/list/automatic assignment with lazy
+// services, async attachment and a single 60-second budget by default.
+func (c *Connection) AddIPsToServer(ctx context.Context, input compute.AutomaticFloatingIPRequest, options ...compute.ServerIPOption) (*compute.AutomaticServerIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().AddIPsToServer(ctx, input, options...)
+}
+
+// AddIPList attaches positional addresses in order. Empty is a no-op and cannot
+// fall through to automatic allocation; Compute discovery remains lazy.
+func (c *Connection) AddIPList(ctx context.Context, server *compute.Server, addresses []string, options ...compute.ServerIPOption) (*compute.AutomaticServerIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().AddIPList(ctx, server, addresses, options...)
+}
+
+// GetActiveServer checks supplied metadata and keeps known branches free of
+// endpoint discovery. Needed Neutron assignment obtains only lazy services.
+func (c *Connection) GetActiveServer(ctx context.Context, input compute.AutomaticFloatingIPRequest, options ...compute.ServerReadyOption) (*compute.AutomaticServerIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().GetActiveServer(ctx, input, options...)
+}
+
+// WaitForServer validates policy before obtaining a raw Compute endpoint. The
+// library supplies lazy service bindings and conditional floating-IP behavior.
+func (c *Connection) WaitForServer(ctx context.Context, input compute.AutomaticFloatingIPRequest, options ...compute.ServerReadyOption) (*compute.AutomaticServerIPResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	return c.addressFacade().WaitForServer(ctx, input, options...)
+}
+
+// CreateWithAutomaticFloatingIP discovers Compute lazily, then delegates all
+// creation, readiness and automatic-address policy to the owned service lane.
+func (c *Connection) CreateWithAutomaticFloatingIP(ctx context.Context, request compute.CreateServerRequest, options compute.AutomaticServerCreateOptions) (*compute.AutomaticServerCreateResult, error) {
+	if ctx == nil {
+		return nil, invalid("context is required")
+	}
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	service, err := c.Compute(ctx)
+	if err != nil {
+		return nil, errors.Join(err, ctx.Err(), context.Cause(ctx))
+	}
+	return service.CreateWithAutomaticFloatingIP(ctx, request, options)
+}
+
+// CreateRefreshedServer is Python's cloud create_server with wait=False on
+// the Connection-owned Compute service: POST, one GET, the ERROR fault check
+// and interface expansion with Connection-configured address policy.
+func (c *Connection) CreateRefreshedServer(ctx context.Context, request compute.CreateServerRequest, serverOptions []compute.CreateServerOption, addressOptions ...compute.ServerAddressOption) (*compute.RefreshedServerCreateResult, error) {
+	if c == nil {
+		return nil, invalid("connection is required")
+	}
+	if ctx == nil {
+		return nil, invalid("context is required")
+	}
+	service, err := c.Compute(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.CreateRefreshedServer(ctx, request, serverOptions, addressOptions...)
 }

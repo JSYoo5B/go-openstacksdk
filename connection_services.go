@@ -5,7 +5,11 @@ import (
 	"crypto/rand"
 	"errors"
 	"fmt"
+	"net/url"
 	"strings"
+
+	accelerator "github.com/JSYoo5B/go-openstacksdk/accelerator/v2"
+	imageapi "github.com/JSYoo5B/go-openstacksdk/image/v2"
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/gophercloud/gophercloud/v2/openstack"
@@ -48,6 +52,7 @@ const (
 )
 
 type clientFactory func(*gophercloud.ProviderClient, gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
+
 type serviceDefinition struct {
 	version           string
 	microversionMajor string
@@ -197,4 +202,164 @@ func newMessagingClientID() string {
 	bytes[6] = (bytes[6] & 15) | 64
 	bytes[8] = (bytes[8] & 63) | 128
 	return fmt.Sprintf("%x-%x-%x-%x-%x", bytes[:4], bytes[4:6], bytes[6:8], bytes[8:10], bytes[10:])
+}
+
+type customService struct {
+	factory  ServiceFactory
+	endpoint string
+}
+
+// ServiceFactory builds a Gophercloud client for a custom service from a
+// provider whose endpoint locator selects the catalog or override endpoint.
+type ServiceFactory func(provider *gophercloud.ProviderClient, options gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error)
+
+// AddService registers a custom service on this Connection only, so that
+// CustomServiceClient can build its client lazily from the shared provider with
+// the Connection's region and interface. The name must be new: built-in
+// services cannot be replaced and a registration cannot be changed. An optional
+// endpoint (absolute HTTP(S) URL passed to the factory through the provider's
+// locator) replaces the catalog lookup. Registration performs no request.
+// Unlike Python, which attaches the description to the Connection class for the
+// whole process, nothing outside this Connection and its later derived
+// Connections is affected.
+func (c *Connection) AddService(service Service, factory ServiceFactory, endpoint ...string) error {
+	if c == nil || c.provider == nil {
+		return invalid("Connection is required")
+	}
+	if strings.TrimSpace(string(service)) == "" || factory == nil {
+		return invalid("service name and factory are required")
+	}
+	if _, builtin := serviceDefinitions[service]; builtin {
+		return invalid("service %q is built in", service)
+	}
+	if len(endpoint) > 1 {
+		return invalid("at most one endpoint override")
+	}
+	override := ""
+	if len(endpoint) == 1 {
+		check := connectionOptions{endpoints: make(map[Service]string)}
+		if err := WithEndpoint(Compute, endpoint[0])(&check); err != nil {
+			return err
+		}
+		override = endpoint[0]
+	}
+	c.misc.mu.Lock()
+	defer c.misc.mu.Unlock()
+	if _, exists := c.misc.custom[service]; exists {
+		return invalid("service %q is already registered", service)
+	}
+	if c.misc.custom == nil {
+		c.misc.custom = make(map[Service]*customService)
+	}
+	c.misc.custom[service] = &customService{factory: factory, endpoint: override}
+	return nil
+}
+
+// CustomServiceClient returns the cached client of a service registered with
+// AddService, building it on first use. The client shares the provider and
+// carries the global request ID of a GlobalRequest Connection.
+func (c *Connection) CustomServiceClient(ctx context.Context, service Service) (*gophercloud.ServiceClient, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	c.misc.mu.Lock()
+	defer c.misc.mu.Unlock()
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if client := c.misc.clients[service]; client != nil {
+		return client, nil
+	}
+	custom := c.misc.custom[service]
+	if custom == nil {
+		return nil, unsupported(string(service), "unregistered custom service")
+	}
+	provider := c.provider
+	if custom.endpoint != "" {
+		endpoint := custom.endpoint
+		provider = &gophercloud.ProviderClient{EndpointLocator: func(gophercloud.EndpointOpts) (string, error) { return endpoint, nil }}
+	} else if provider.EndpointLocator == nil {
+		return nil, invalid("provider has no endpoint locator; register %q with an endpoint", service)
+	}
+	client, err := custom.factory(provider, c.endpointOptions)
+	if err != nil {
+		return nil, fmt.Errorf("connect %s: %w", service, err)
+	}
+	if client == nil {
+		return nil, invalid("service factory for %q returned no client", service)
+	}
+	client.ProviderClient = c.provider
+	c.misc.decorate(client)
+	if c.misc.clients == nil {
+		c.misc.clients = make(map[Service]*gophercloud.ServiceClient)
+	}
+	c.misc.clients[service] = client
+	return client, nil
+}
+
+// AcceleratorV2 returns a cached Cyborg client sharing authentication and HTTP
+// policies with the Connection. Explicit endpoints may include the v2 suffix.
+func (c *Connection) AcceleratorV2(ctx context.Context) (*accelerator.Service, error) {
+	return cachedService(ctx, c, Accelerator, "v2", accelerator.New)
+}
+
+func (c *Connection) Accelerator(ctx context.Context) (*accelerator.Service, error) {
+	return c.AcceleratorV2(ctx)
+}
+
+func newAcceleratorV2(provider *gophercloud.ProviderClient, options gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	options.ApplyDefaults("accelerator")
+	endpoint, err := provider.EndpointLocator(options)
+	if err != nil {
+		return nil, err
+	}
+	endpoint = strings.TrimSuffix(strings.TrimRight(endpoint, "/"), "/v2")
+	return &gophercloud.ServiceClient{ProviderClient: provider, Type: "accelerator", Endpoint: gophercloud.NormalizeURL(endpoint + "/v2")}, nil
+}
+
+func newClusteringV1(provider *gophercloud.ProviderClient, options gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	return newSDKOwnedV1(provider, options, Clustering)
+}
+
+func newInstanceHAV1(provider *gophercloud.ProviderClient, options gophercloud.EndpointOpts) (*gophercloud.ServiceClient, error) {
+	return newSDKOwnedV1(provider, options, InstanceHA)
+}
+
+// Preserve a catalog's version/project suffix and reverse-proxy prefix. Senlin
+// also publishes unversioned catalog endpoints, which need the v1 resource root.
+func newSDKOwnedV1(provider *gophercloud.ProviderClient, options gophercloud.EndpointOpts, service Service) (*gophercloud.ServiceClient, error) {
+	options.ApplyDefaults(string(service))
+	endpoint, err := provider.EndpointLocator(options)
+	if err != nil {
+		return nil, err
+	}
+	u, err := url.Parse(endpoint)
+	if err != nil || u.Host == "" || u.User != nil || u.Opaque != "" || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "https" && u.Scheme != "http") {
+		return nil, invalid("%s endpoint must be an absolute HTTP(S) URL without credentials, query or fragment", service)
+	}
+	parts := strings.Split(strings.TrimRight(u.EscapedPath(), "/"), "/")
+	index := len(parts) - 1
+	if index > 0 && !discoveryPathVersion.MatchString(parts[index]) && discoveryPathVersion.MatchString(parts[index-1]) {
+		index--
+	}
+	if discoveryPathVersion.MatchString(parts[index]) {
+		version := parts[index]
+		if version != "v1" && !strings.HasPrefix(version, "v1.") {
+			return nil, unsupported(string(service), "endpoint version "+version)
+		}
+	} else {
+		u.RawPath = strings.TrimRight(u.EscapedPath(), "/") + "/v1"
+		u.Path, err = url.PathUnescape(u.RawPath)
+		if err != nil {
+			return nil, err
+		}
+		endpoint = u.String()
+	}
+	return &gophercloud.ServiceClient{ProviderClient: provider, Type: string(service), Endpoint: gophercloud.NormalizeURL(endpoint)}, nil
+}
+
+// The versioned and high-level image entry points share Connection facts as
+// well as their authenticated service client.
+func (c *Connection) newImageV2Service(client *gophercloud.ServiceClient) *imageapi.Service {
+	return imageapi.NewWithDependencies(client, imageapi.Dependencies{CloudLocation: c.CurrentLocation})
 }

@@ -2,12 +2,19 @@ package openstack
 
 import (
 	"context"
+	"fmt"
+
+	blocklimits "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
 	blockquotas "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
+	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
+	"github.com/JSYoo5B/go-openstacksdk/compute/v2/limits"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
 	infraquotas "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
 	dnsquotas "github.com/JSYoo5B/go-openstacksdk/dns/v2/quotas"
 	loadbalancerquotas "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2/quotas"
 	networkquotas "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	filequotas "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
 )
@@ -236,4 +243,103 @@ func (c *Connection) CurrentContainerInfraProjectQuotas(ctx context.Context) (*i
 		return nil, err
 	}
 	return service.Quotas.CurrentProject(ctx)
+}
+
+// ProjectLimits resolves a Nova limits project once and fixes its tenant query.
+func (c *Connection) ProjectLimits(ctx context.Context, project resource.Ref) (*limits.ProjectLimitsScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.ComputeV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Limits.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Limits.InProject(ctx, project, limits.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentProjectLimits uses the recorded Keystone project for Nova limits.
+func (c *Connection) CurrentProjectLimits(ctx context.Context) (*limits.ProjectLimitsScope, error) {
+	service, err := c.ComputeV2(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Limits.CurrentProject(ctx)
+}
+
+// BlockStorageProjectLimits fixes Cinder's project query. API3.39 or later is
+// required; configuring that version remains the caller's connection choice.
+func (c *Connection) BlockStorageProjectLimits(ctx context.Context, project resource.Ref) (*blocklimits.ProjectLimitsScope, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := project.Validate(); err != nil {
+		return nil, err
+	}
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !project.IsName() {
+		return service.Limits.InProject(ctx, project)
+	}
+	identity, err := c.IdentityV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Limits.InProject(ctx, project, blocklimits.WithIdentityClient(identity.RawClient()))
+}
+
+// CurrentBlockStorageProjectLimits fixes the recorded Cinder project query.
+func (c *Connection) CurrentBlockStorageProjectLimits(ctx context.Context) (*blocklimits.ProjectLimitsScope, error) {
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Limits.CurrentProject(ctx)
+}
+
+// VolumeMetadata fixes Cinder v3 metadata to one volume ID or exact name.
+// The scope shares the Connection's authenticated Block Storage client.
+func (c *Connection) VolumeMetadata(ctx context.Context, ref resource.Ref) (*volumes.MetadataScope, error) {
+	if err := c.validateMetadataScope(ctx, ref); err != nil {
+		return nil, request.Wrap("VolumeMetadata", "block storage", err)
+	}
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Volumes.MetadataIn(ctx, ref)
+}
+
+// SnapshotMetadata fixes Cinder v3 metadata to one snapshot ID or exact name.
+// Explicit IDs require no Snapshot lookup or Keystone project discovery.
+func (c *Connection) SnapshotMetadata(ctx context.Context, ref resource.Ref) (*snapshots.MetadataScope, error) {
+	if err := c.validateMetadataScope(ctx, ref); err != nil {
+		return nil, request.Wrap("SnapshotMetadata", "block storage", err)
+	}
+	service, err := c.BlockStorageV3(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return service.Snapshots.MetadataIn(ctx, ref)
+}
+
+func (c *Connection) validateMetadataScope(ctx context.Context, ref resource.Ref) error {
+	if err := ctx.Err(); err != nil {
+		return err
+	}
+	if c == nil {
+		return fmt.Errorf("%w: Connection is required", resource.ErrInvalidOption)
+	}
+	return ref.Validate()
 }
