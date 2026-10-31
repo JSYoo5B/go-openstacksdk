@@ -75,7 +75,7 @@ func newR2CloudNetFixture(t *testing.T, source compute.FloatingIPSource, handle 
 		t.Error("unexpected service", opts.Type)
 		return "", errors.New("unexpected service")
 	}
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		var raw []byte
 		if r.Body != nil {
 			raw, _ = io.ReadAll(r.Body)
@@ -90,7 +90,7 @@ func newR2CloudNetFixture(t *testing.T, source compute.FloatingIPSource, handle 
 			return nil, errors.New("unexpected request")
 		}
 		return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-	})
+	}))
 	options := append([]sdk.ConnectionOption{sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source))}, extra...)
 	conn, err := sdk.FromProvider(cloud.Provider, options...)
 	if err != nil {

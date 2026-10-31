@@ -3,13 +3,12 @@ package openstack_test
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -38,7 +37,7 @@ func TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive(t *testi
 		"schemas/metadefs/tags",
 	}
 	var wireHeader http.Header
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(paths) {
 			t.Fatalf("unexpected schema continuation: %s", r.URL)
 		}
@@ -47,7 +46,7 @@ func TestConnectionImageSchemasShareNativeClientAndKeepDiscoveryPassive(t *testi
 		}
 		wireHeader = http.Header{"X-Proof": {fmt.Sprintf("schema-%d", calls)}, "Link": {`<https://foreign.test/next>; rel="next"`}}
 		calls++
-		return &http.Response{StatusCode: 200, Header: wireHeader, Body: io.NopCloser(strings.NewReader(raw))}, nil
+		return testcloud.Response(200, raw, wireHeader), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"))
 	if err != nil {

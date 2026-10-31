@@ -41,7 +41,7 @@ func newConnectionNovaIP(t *testing.T, source compute.FloatingIPSource) (*testcl
 		}
 		return cloud.Server.URL + "/compute/", nil
 	}
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		state.tokens = append(state.tokens, r.Header.Get("X-Auth-Token"))
 		if r.Header.Get("X-OpenStack-Nova-API-Version") != "2.35" {
 			t.Error("legacy version changed", r.Header)
@@ -89,7 +89,7 @@ func newConnectionNovaIP(t *testing.T, source compute.FloatingIPSource) (*testcl
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: func() error { return state.afterAction(address) }}
 		}
 		return &http.Response{StatusCode: code, Header: http.Header{"X-Facade-Proof": {proof}}, Body: reader, Request: r}, nil
-	})
+	}))
 	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source), compute.WithAddressReachability(false)))
 	if err != nil {
 		t.Fatal(err)

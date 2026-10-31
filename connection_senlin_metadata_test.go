@@ -199,12 +199,6 @@ func TestConnectionSenlinMetadataAcceptedFailuresKeepOriginalEvidence(t *testing
 	}
 }
 
-type connectionMetadataTransport func(*http.Request) (*http.Response, error)
-
-func (f connectionMetadataTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	return f(request)
-}
-
 func TestConnectionSenlinMetadataNoOpAndSourceRecheck(t *testing.T) {
 	for _, mode := range []string{"empty-keys", "option-changed-type", "read-changed-type", "read-conflicting-version", "canceled"} {
 		t.Run(mode, func(t *testing.T) {
@@ -226,7 +220,7 @@ func TestConnectionSenlinMetadataNoOpAndSourceRecheck(t *testing.T) {
 				if transport == nil {
 					transport = http.DefaultTransport
 				}
-				cloud.Provider.HTTPClient.Transport = connectionMetadataTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := transport.RoundTrip(r)
 					if err == nil && r.Method == http.MethodGet {
 						if mode == "read-changed-type" {
@@ -236,7 +230,7 @@ func TestConnectionSenlinMetadataNoOpAndSourceRecheck(t *testing.T) {
 						}
 					}
 					return response, err
-				})
+				}))
 			}
 			ctx := context.Background()
 			var result *clusters.MetadataResult

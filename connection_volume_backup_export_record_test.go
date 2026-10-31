@@ -272,7 +272,7 @@ func TestConnectionBackupExportRecordAcceptedOpaqueIOOwnsCurrentProofAndAllCause
 				retries.Add(1)
 				return errors.New("accepted export IO must not enter native retry")
 			}
-			cloud.Provider.HTTPClient.Transport = backupConnectionTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				backupConnectionWire(t, r, backupConnectionPath+"backups/literal/export_record", "test-token", "3.80")
 				if r.URL.RawQuery != "" {
@@ -288,7 +288,7 @@ func TestConnectionBackupExportRecordAcceptedOpaqueIOOwnsCurrentProofAndAllCause
 					}
 				}
 				return &http.Response{StatusCode: 203, Header: http.Header{"Content-Type": {"application/octet-stream"}, "X-Actual": {"opaque-export"}}, Body: fault, Request: r}, nil
-			})
+			}))
 			result, err := conn.ExportVolumeBackupRecord(ctx, blockstorage.ExportVolumeBackupRecordRequest{BackupID: "literal"})
 			var physical *resource.ResponseError
 			if result == nil || result.BackupID != "literal" || result.Value != nil || result.Exported == nil || !errors.As(err, &physical) || !errors.Is(err, readErr) || !errors.Is(err, closeErr) || physical.StatusCode != 203 || !bytes.Equal(physical.Body, body) || physical.Header.Get("X-Actual") != "opaque-export" || result.Exported.StatusCode != 203 || !bytes.Equal(result.Exported.Body, body) || result.Exported.Header.Get("X-Actual") != "opaque-export" || requests.Load() != 1 || retries.Load() != 0 {

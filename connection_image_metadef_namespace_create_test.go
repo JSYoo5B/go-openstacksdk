@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -43,7 +44,7 @@ func TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput(t *
 		}
 		return value
 	}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(expected) {
 			t.Fatalf("unexpected child/cleanup request: %s %s", r.Method, r.URL)
 		}
@@ -67,7 +68,7 @@ func TestConnectionImageMetadefNamespaceNestedCreateSharesClientAndOwnsInput(t *
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("nested-%d", calls))
-		return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {fmt.Sprint(calls)}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(code, body, http.Header{"X-Proof": {fmt.Sprint(calls)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint))
 	if err != nil {

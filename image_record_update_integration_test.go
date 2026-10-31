@@ -12,6 +12,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -29,7 +30,7 @@ func TestConnectionOwnedImageUpdateSharesBindingSourceAndCleanLifecycle(t *testi
 	provider.UseTokenLock()
 	provider.SetToken("first")
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.URL.String() != endpoint+"images/"+url.PathEscape(id) || req.URL.RawQuery != "" || req.Header.Get("X-Source") != "shared" || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
 			t.Fatal(req.Method, req.URL, req.Header)

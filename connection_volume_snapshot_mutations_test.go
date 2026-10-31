@@ -650,12 +650,6 @@ func TestConnectionSnapshotMutationsDescriptorAndDeleteRejectionRetainTheirOwnPh
 	}
 }
 
-type snapshotMutationConnectionTransport func(*http.Request) (*http.Response, error)
-
-func (f snapshotMutationConnectionTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
-
 type snapshotMutationConnectionFaultBody struct {
 	reader                   *strings.Reader
 	readErr, closeErr, cause error
@@ -689,7 +683,7 @@ func TestConnectionSnapshotMutationsAcceptedIOFailuresJoinReadCloseAndCallerCaus
 			if family == "delete" {
 				body = "opaque-delete"
 			}
-			cloud.Provider.HTTPClient.Transport = snapshotMutationConnectionTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				method, path := "POST", snapshotConnectionPath+"snapshots"
 				var responseBody io.ReadCloser = &snapshotMutationConnectionFaultBody{reader: strings.NewReader(body), readErr: readErr, closeErr: closeErr, cancel: cancel, cause: cause}
@@ -703,7 +697,7 @@ func TestConnectionSnapshotMutationsAcceptedIOFailuresJoinReadCloseAndCallerCaus
 				}
 				snapshotMutationConnectionWire(t, r, method, path, "test-token")
 				return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"accepted-IO"}}, Body: responseBody, Request: r}, nil
-			})
+			}))
 			conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.BlockStorage, "3.60"))
 			if err != nil {
 				t.Fatal(err)

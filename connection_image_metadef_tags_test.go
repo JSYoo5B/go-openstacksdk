@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	tag "github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -29,7 +30,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 	bodies := []string{row, row, row, `{"tags":[{"name":"one"},{"name":"two"}]}`, `{"tags":[` + row + `,null],"next":"https://foreign.test/unused"}`, `{"tags":[{"name":"raw-page1"}]}`, `{"tags":[{"name":"raw-page2"}]}`, `{"tags":[]}`, "opaque child", "opaque collection", "strict missing", "strict bulk missing", `{"tags":[]}`, `{"tags":[{"name":"appended"}]}`}
 	var client *gophercloud.ServiceClient
 	calls, retries := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(methods) {
 			t.Fatalf("unexpected request %s", r.URL)
@@ -86,7 +87,7 @@ func TestConnectionImageMetadefTagsShareClientAndPaging(t *testing.T) {
 		calls++
 		provider.SetToken(fmt.Sprintf("tag-%d", calls))
 		client.MoreHeaders = map[string]string{"X-Source": fmt.Sprintf("source-%d", calls)}
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("tag-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("tag-%d", index)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", prefix))
 	if err != nil {

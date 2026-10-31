@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -38,13 +37,13 @@ func TestConnectionImageSchemaRecordsShareClientAndRetainBareLocation(t *testing
 			calls, callbacks := 0, 0
 			var actualHeader http.Header
 			const raw = `{"id":false,"name":[1,null],"additionalProperties":{"n":900719925474099312345},"properties":{"nullable":null},"required":[false,{},1],"location":{"server":"foreign"},"project_id":"foreign-project","availability_zone":"foreign-zone","$ref":"https://foreign.test/ref"}`
-			provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+			provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Method != http.MethodGet || req.URL.String() != "https://cloud.test/reverse/glance/v2/schemas/"+tc.path || req.Body != nil || req.URL.RawQuery != "" || req.Header.Get("X-Source") != "shared" || req.Header.Get("X-Call") != "owned" || req.Header.Get("X-Auth-Token") != "after-options" || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
 					t.Fatal(req.Method, req.URL, req.Header, req.Body)
 				}
 				actualHeader = http.Header{"X-Connection-Proof": {fmt.Sprint(calls)}, "Content-Type": {"text/plain"}, "Link": {`<https://foreign.test/next>; rel="next"`}}
-				return &http.Response{StatusCode: 201, Header: actualHeader, Body: io.NopCloser(strings.NewReader(raw))}, nil
+				return testcloud.Response(201, raw, actualHeader), nil
 			})
 			conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"), sdk.WithCloudLocation(facts))
 			if err != nil {

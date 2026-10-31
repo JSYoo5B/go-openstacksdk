@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,7 +29,7 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 	paths := []string{"images?member_status=all", "images", "images", "images/ubuntu", "images/a"}
 	bodies := []string{page, page, page, `{"id":"a","name":"ubuntu","status":"active"}`, `{"id":"a","name":"ubuntu","status":"active"}`}
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		if calls >= len(paths) {
 			t.Fatal("unexpected request", req.URL)
 		}
@@ -40,7 +39,7 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("image-%d", calls))
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(200, bodies[index], http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
 	if err != nil {

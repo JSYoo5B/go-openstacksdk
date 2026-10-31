@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -27,7 +28,7 @@ func TestConnectionImageUpdateFacadeOwnsPatchAndResponse(t *testing.T) {
 	const actual = `{"id":"actual-id","name":"actual-name","min_disk":0,"protected":false,"tags":[],"x-number":9007199254740995}`
 	calls := 0
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		path, sourceHeader := endpoint+"images/"+url.PathEscape(id), fmt.Sprintf("source-%d", n)

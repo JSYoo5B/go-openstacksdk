@@ -4,14 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -42,7 +41,7 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 			namespaceSecond := `{"namespaces":[{"namespace":"OS::Next","protected":0,"resource_type_associations":[{"name":"raw"}],"tags":null}],"next":null}`
 			bodies := []string{objectFirst, objectSecond, namespaceFirst, namespaceSecond}
 			codes := []int{203, 200, 201, 206}
-			provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+			provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				if calls >= len(bodies) {
 					t.Fatalf("extra request %s", req.URL)
 				}
@@ -71,7 +70,7 @@ func TestConnectionImageMetadefRecordListsShareLocationAndPaging(t *testing.T) {
 				}
 				calls++
 				provider.SetToken(fmt.Sprintf("record-%d", calls))
-				return &http.Response{StatusCode: codes[index], Header: header, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+				return testcloud.Response(codes[index], bodies[index], header), nil
 			})
 			conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
 			if err != nil {

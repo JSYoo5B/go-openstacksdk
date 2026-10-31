@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
@@ -25,7 +26,7 @@ func TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow(t *testing.T) 
 	const target = "https://cloud.test/data%25/v1/AUTH_account%25/%EB%B0%B1%EC%97%85%20%252F%3F%23"
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		method, url := http.MethodHead, endpoint

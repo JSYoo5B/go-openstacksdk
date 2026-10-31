@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestConnectionOwnedImageActionsPreserveRecordAndSeparateReceipts(t *testing
 	provider.SetToken("action-0")
 	calls := 0
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		paths := []string{"images/" + url.PathEscape(id), "images/" + url.PathEscape(id) + "/actions/deactivate", "images/" + url.PathEscape(id) + "/actions/reactivate"}
 		if index >= len(paths) || req.URL.String() != endpoint+paths[index] || req.URL.RawQuery != "" || req.Body != nil || req.Header.Get("X-Source") != fmt.Sprintf("source-%d", index) || req.Header.Get("X-Auth-Token") != fmt.Sprintf("action-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" || req.Header.Get("X-Call") != "record-action" {

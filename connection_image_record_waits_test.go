@@ -12,6 +12,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -37,7 +38,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 		`{"message":"missing"}`,
 	}
 	codes := []int{200, 203, 206, 201, 404}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(bodies) {
 			t.Fatal("unexpected request", req.URL)

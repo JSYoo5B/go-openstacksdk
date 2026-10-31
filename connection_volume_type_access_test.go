@@ -428,7 +428,7 @@ func TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellation
 					payload = []byte(`{"volume_type_access":[{"project_id":"project"}]}`)
 				}
 				calls, callbacks := 0, 0
-				cloud.Provider.HTTPClient.Transport = connectionReadRoundTripper(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
 						if r.Method != http.MethodGet || r.URL.Path != "/connection-access/v3/project/types/type" || r.URL.RawQuery != "is_public=none" {
@@ -457,7 +457,7 @@ func TestConnectionVolumeTypeAccessSecondStageProofSurvivesReadCloseCancellation
 						stream.readError, stream.closeError = readError, closeError
 					}
 					return &http.Response{StatusCode: 203, Header: http.Header{"X-Current": {"actual"}}, Body: stream, Request: r}, nil
-				})
+				}))
 				result, err := connectionAccessContractCall(ctx, conn, operation, "type", "project", func(*blockstorage.VolumeTypeReadOpts) error { callbacks++; return nil })
 				if err == nil || calls != 2 || callbacks != 1 {
 					t.Fatal(result, err, calls, callbacks)

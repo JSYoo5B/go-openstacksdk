@@ -11,6 +11,7 @@ import (
 	"time"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -27,7 +28,7 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 	stamp := time.Unix(1700000000, 0)
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		target := endpoint

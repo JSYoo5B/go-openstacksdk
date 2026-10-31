@@ -177,7 +177,7 @@ func TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof(t *testing.T) {
 	closeCause := errors.New("physical stream close")
 	body := &connectionObjectReadBody{Reader: strings.NewReader("abcd"), closeErr: closeCause}
 	requests := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		requests++
 		return &http.Response{Request: r, StatusCode: 200, Header: http.Header{"X-Proof": {"actual-cleanup"}}, Body: body, ContentLength: 4}, nil
 	})

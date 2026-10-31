@@ -2,15 +2,14 @@ package openstack_test
 
 import (
 	"context"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 )
 
 func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {
@@ -18,7 +17,7 @@ func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {
 	provider.UseTokenLock()
 	provider.SetToken("first-project-token")
 	var calls int
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		wantToken, wantHeader := "first-project-token", "versioned"
 		if calls == 2 {
@@ -28,7 +27,7 @@ func TestConnectionImageUsageSharesServiceInfoAndCurrentProject(t *testing.T) {
 			t.Fatalf("unexpected request %d: %s %s headers=%v body=%v", calls, r.Method, r.URL, r.Header, r.Body)
 		}
 		body := `{"usage":{"image_size_total":{"limit":9007199254740993,"usage":0,"vendor":{"precise":9007199254740995}}},"vendor":9007199254740997}`
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(200, body, http.Header{"X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/image/v2/"))
 	if err != nil {

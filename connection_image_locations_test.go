@@ -3,7 +3,6 @@ package openstack_test
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -12,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -21,7 +21,7 @@ func TestConnectionImageLocationsShareNativeClientAndPreservePassiveData(t *test
 	provider.SetToken("location-0")
 	const locationURL = "cinder://backend/image%2Fdata?key=value#fragment"
 	var calls int
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.URL.String() != "https://cloud.test/reverse/glance/v2/images/fixed/locations" || r.Header.Get("X-Source") != "shared" || r.Header.Get("X-Call") != "locations" {
 			t.Fatalf("request=%s %s headers=%v", r.Method, r.URL, r.Header)
 		}
@@ -38,12 +38,12 @@ func TestConnectionImageLocationsShareNativeClientAndPreservePassiveData(t *test
 			if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.URL != locationURL || len(body.ValidationData) != 2 || body.ValidationData["os_hash_algo"] != "sha256" || body.ValidationData["os_hash_value"] != "AB CD" {
 				t.Fatalf("submitted body=%+v err=%v", body, err)
 			}
-			return &http.Response{StatusCode: 202, Header: http.Header{"X-Proof": {"accepted"}}, Body: io.NopCloser(strings.NewReader("opaque acceptance"))}, nil
+			return testcloud.Response(202, "opaque acceptance", http.Header{"X-Proof": {"accepted"}}), nil
 		case 2:
 			if r.Method != http.MethodGet || r.Header.Get("X-Auth-Token") != "location-1" || r.Body != nil {
 				t.Fatalf("get request=%+v", r)
 			}
-			return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"listed"}}, Body: io.NopCloser(strings.NewReader(`[{"url":"cinder://backend/image%2Fdata?key=value#fragment","metadata":{"store":"backend","precise":9007199254740993},"id":"passive-only"}]`))}, nil
+			return testcloud.Response(200, `[{"url":"cinder://backend/image%2Fdata?key=value#fragment","metadata":{"store":"backend","precise":9007199254740993},"id":"passive-only"}]`, http.Header{"X-Proof": {"listed"}}), nil
 		default:
 			t.Fatalf("unexpected continuation or metadata request %d", calls)
 			return nil, nil

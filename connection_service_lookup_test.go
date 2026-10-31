@@ -34,7 +34,7 @@ func TestServiceLookupFailureAsUnavailableMapsHasServiceFalse(t *testing.T) {
 			return "", sentinel
 		}
 		f := &r2CloudNetFixture{handle: handle}
-		cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			var raw []byte
 			if r.Body != nil {
 				raw, _ = io.ReadAll(r.Body)
@@ -52,7 +52,7 @@ func TestServiceLookupFailureAsUnavailableMapsHasServiceFalse(t *testing.T) {
 				return nil, errors.New("unexpected request")
 			}
 			return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
-		})
+		}))
 		conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(compute.FloatingIPNeutron)), sdk.WithServiceLookupFailureAsUnavailable(enabled))
 		if err != nil {
 			t.Fatal(err)

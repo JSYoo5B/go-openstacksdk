@@ -2,28 +2,23 @@ package openstack_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type serviceInfoTransport func(*http.Request) (*http.Response, error)
-
-func (f serviceInfoTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 func TestConnectionImageServiceInfoSharesClientPrefixAndLiveAuthentication(t *testing.T) {
 	var calls int
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.Method != http.MethodGet || r.Header.Get("X-Auth-Token") != "updated" || r.Header.Get("X-Source") != "captured" || r.URL.Host != "cloud.test" || r.Body != nil {
 			t.Fatalf("request=%s %s headers=%v body=%v", r.Method, r.URL, r.Header, r.Body)
@@ -39,7 +34,7 @@ func TestConnectionImageServiceInfoSharesClientPrefixAndLiveAuthentication(t *te
 		default:
 			t.Fatalf("unexpected discovery request: %s", r.URL)
 		}
-		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}, "X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(200, body, http.Header{"Content-Type": {"application/json"}, "X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/image/v2/"))
 	if err != nil {

@@ -53,7 +53,7 @@ func connectionDispatchFixture(t *testing.T) (*testcloud.Cloud, *sdk.Connection,
 		return cloud.Server.URL + "/compute/", nil
 	}
 	base := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		var body string
 		proof := ""
 		switch {
@@ -111,7 +111,7 @@ func connectionDispatchFixture(t *testing.T) (*testcloud.Cloud, *sdk.Connection,
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: state.mutate}
 		}
 		return &http.Response{StatusCode: 200, Header: http.Header{"X-Facade-Proof": {proof}}, Body: reader, Request: r}, nil
-	})
+	}))
 	return cloud, conn, state, raw.Load
 }
 

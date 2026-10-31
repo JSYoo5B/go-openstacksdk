@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestConnectionOwnedImageMemberFamilySharesSourceLocationAndActualReceipts(t
 	paths := []string{"images/parent/members", "images/parent/members/returned-add", "images/parent/members/returned-get", "images/parent/members/returned-get"}
 	bodies := []string{`{"member":"returned-add","created_at":false}`, `{"member":"returned-get","status":[null,false],"image_id":"foreign","location":{"foreign":true}}`, "opaque update", "opaque\xff"}
 	codes := []int{201, 203, 202, 299}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(methods) || req.Method != methods[index] || req.URL.String() != endpoint+paths[index] || req.URL.RawQuery != "" || req.Header.Get("X-Source") != "shared" || req.Header.Get("X-Auth-Token") != fmt.Sprintf("token-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" || req.Header.Get("X-Call") != "member-family" {
 			t.Fatal(index, req.Method, req.URL, req.Header)

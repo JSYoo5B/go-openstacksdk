@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -23,7 +24,7 @@ func TestConnectionAccountMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	const endpoint = "https://cloud.test/reverse/swift/v1/AUTH_account%25/"
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		method := http.MethodHead

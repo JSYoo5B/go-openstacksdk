@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,7 +31,7 @@ func TestConnectionOwnedImageStageSharesSourceAndRetainsBorrowedDataThroughPrope
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index > 5 || req.Header.Get("X-Auth-Token") != fmt.Sprintf("stage-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
 			t.Fatal(index, req.Method, req.URL, req.Header)

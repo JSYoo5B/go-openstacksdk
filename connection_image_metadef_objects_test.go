@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	obj "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -30,7 +31,7 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 	codes := []int{201, 200, 200, 200, 200, 204, 204, 404, 404}
 	bodies := []string{row, row, row, `{"objects":[` + row + `,null],"next":[false]}`, `{"objects":[` + row + `,{"name":"","properties":{},"required":[]}],"next":{"url":"https://foreign.test/unused"}}`, "opaque child acknowledgement", "opaque collection acknowledgement", "hidden or missing", "strict collection missing"}
 	calls, retries := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(methods) {
 			t.Fatalf("unexpected request %s", r.URL)
 		}
@@ -64,7 +65,7 @@ func TestConnectionImageMetadefObjectsShareClientAndFixedScope(t *testing.T) {
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("object-%d", calls))
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("object-%d", index)}, "Link": {`<https://foreign.test/next>; rel="next"`}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("object-%d", index)}, "Link": {`<https://foreign.test/next>; rel="next"`}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", prefix))
 	if err != nil {

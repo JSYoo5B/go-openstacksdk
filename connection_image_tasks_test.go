@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -26,7 +27,7 @@ func TestConnectionImageTaskFacadeSharesClientAndOwnsInput(t *testing.T) {
 	const accepted = `{"id":"server-id","type":"future","status":"pending","input":{"n":9007199254740993},"result":{},"self":"https://foreign.test/task"}`
 	calls := 0
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		wantMethod, wantPath := http.MethodGet, endpoint+"tasks"
@@ -77,7 +78,7 @@ func TestConnectionImageTaskFacadeSharesClientAndOwnsInput(t *testing.T) {
 		}
 		provider.SetToken(fmt.Sprintf("task-%d", calls))
 		source.MoreHeaders["X-Source"] = fmt.Sprintf("source-%d", calls)
-		return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {fmt.Sprint(n)}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(code, body, http.Header{"X-Proof": {fmt.Sprint(n)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint))
 	if err != nil {

@@ -12,6 +12,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +29,7 @@ func cloudCreateConnection(t *testing.T, routes []cloudCreateRoute, calls *int) 
 	provider := &gophercloud.ProviderClient{}
 	provider.UseTokenLock()
 	provider.SetToken("token")
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := *calls
 		*calls++
 		route := req.Method + " " + req.URL.String()
@@ -99,7 +100,7 @@ func TestConnectionCloudImageCreateBranchesAndWait(t *testing.T) {
 		provider := &gophercloud.ProviderClient{}
 		provider.UseTokenLock()
 		provider.SetToken("token")
-		provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+		provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 			calls++
 			route := req.Method + " " + req.URL.String()
 			reply := func(code int, body string) (*http.Response, error) {
@@ -151,7 +152,7 @@ func TestConnectionCloudImageCreateVolumeBodyAndPreflight(t *testing.T) {
 	provider.UseTokenLock()
 	provider.SetToken("token")
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.Method+" "+req.URL.String() != cloudCreateVolume {
 			t.Fatal(req.URL)

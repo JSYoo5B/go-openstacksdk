@@ -42,7 +42,7 @@ func floatingQueryFixture(t *testing.T, source compute.FloatingIPSource) (*testc
 		}
 		return cloud.Server.URL + "/query-" + o.Type + "/", nil
 	}
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if r.Method != "GET" {
 			t.Error("query mutation", r.Method, r.URL)
 		}
@@ -62,7 +62,7 @@ func floatingQueryFixture(t *testing.T, source compute.FloatingIPSource) (*testc
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: state.afterClose}
 		}
 		return &http.Response{StatusCode: code, Body: reader, Header: http.Header{"X-Query-Proof": {r.URL.Path}, "If-Match": {"actual-tag"}}, Request: r}, nil
-	})
+	}))
 	name := "scope-name"
 	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source)), sdk.WithCloudLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"scope"`), Name: &name}}))
 	if err != nil {

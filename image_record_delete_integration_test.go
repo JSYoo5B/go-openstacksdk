@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -38,7 +39,7 @@ func TestConnectionOwnedImageDeletionSeparatesWholeRecordFromStoreAcknowledgemen
 	methods := []string{http.MethodGet, http.MethodDelete, http.MethodDelete, http.MethodDelete}
 	paths := []string{"images/" + url.PathEscape(id), "images/" + url.PathEscape(id), "stores/" + url.PathEscape(storeID) + "/" + url.PathEscape(id), "images/literal"}
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(methods) || req.Method != methods[index] || req.URL.String() != endpoint+paths[index] || req.URL.RawQuery != "" || req.Body != nil || req.Header.Get("X-Source") != fmt.Sprintf("source-%d", index) || req.Header.Get("X-Auth-Token") != fmt.Sprintf("delete-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" || req.Header.Get("X-Call") != "delete-record" {
 			t.Fatal(index, req.Method, req.URL, req.Header, req.Body)

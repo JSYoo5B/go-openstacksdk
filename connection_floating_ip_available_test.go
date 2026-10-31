@@ -50,7 +50,7 @@ func connectionAvailableFixture(t *testing.T, source compute.FloatingIPSource) (
 		}
 		return cloud.Server.URL + "/compute/", nil
 	}
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		state.events = append(state.events, r.Method+" "+r.URL.Path)
 		deadline, _ := r.Context().Deadline()
 		state.deadlines = append(state.deadlines, deadline)
@@ -127,7 +127,7 @@ func connectionAvailableFixture(t *testing.T, source compute.FloatingIPSource) (
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: func() error { return state.afterPost(path) }}
 		}
 		return &http.Response{StatusCode: code, Body: reader, Header: http.Header{"X-Available-Proof": {r.URL.Path}}, Request: r}, nil
-	})
+	}))
 	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source)))
 	if err != nil {
 		t.Fatal(err)

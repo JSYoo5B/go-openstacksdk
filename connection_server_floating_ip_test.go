@@ -216,10 +216,6 @@ func TestConnectionServerFloatingIPOrdersWaitsAndPreservesPartialResults(t *test
 	}
 }
 
-type serverWorkflowTransport func(*http.Request) (*http.Response, error)
-
-func (f serverWorkflowTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) {
 	for _, scenario := range []string{"success", "IP deadline", "parent deadline", "unlimited", "limit restored"} {
 		t.Run(scenario, func(t *testing.T) {
@@ -235,7 +231,7 @@ func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) 
 			}
 			var mutex sync.Mutex
 			var deadlines []time.Time
-			cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				deadline, set := r.Context().Deadline()
 				if set != (scenario != "unlimited") {
 					t.Error("unexpected deadline presence", scenario, r.URL)
@@ -244,7 +240,7 @@ func TestConnectionServerFloatingIPUsesOneDeadlineAcrossBothWaits(t *testing.T) 
 				deadlines = append(deadlines, deadline)
 				mutex.Unlock()
 				return base.RoundTrip(r)
-			})
+			}))
 			ctx := context.Background()
 			limit := time.Second
 			if scenario == "IP deadline" {

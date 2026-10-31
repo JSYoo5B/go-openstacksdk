@@ -173,14 +173,14 @@ func TestConnectionReadyLazyComputeGuardSurvivesReadinessAndIPStages(t *testing.
 			}
 			if scenario == "accepted close" {
 				base := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := base.RoundTrip(r)
 					if err == nil && r.URL.Path == "/compute/servers/server" {
 						response.Header.Set("X-Lazy-Proof", "accepted")
 						response.Body = readyConnectionCloseBody{ReadCloser: response.Body, close: func() error { change(); return nil }}
 					}
 					return response, err
-				})
+				}))
 			}
 			if scenario == "retry" {
 				cloud.Provider.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {

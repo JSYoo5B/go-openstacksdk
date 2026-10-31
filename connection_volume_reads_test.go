@@ -424,10 +424,6 @@ func TestConnectionVolumeReadsRecordedScopeFailurePrecedesGetterAndOwnedOverride
 	}
 }
 
-type connectionReadRoundTripper func(*http.Request) (*http.Response, error)
-
-func (f connectionReadRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type connectionReadBody struct {
 	content               []byte
 	readError, closeError error
@@ -468,7 +464,7 @@ func TestConnectionVolumeReadsAcceptedProofSurvivesReadCloseCancellationAndSourc
 					target = "/connection-reads/v3/project/volumes/detail"
 				}
 				calls := 0
-				cloud.Provider.HTTPClient.Transport = connectionReadRoundTripper(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls++
 					if r.Method != http.MethodGet || r.URL.Path != target || r.URL.RawQuery != "" {
 						t.Error(r.Method, r.URL)
@@ -482,7 +478,7 @@ func TestConnectionVolumeReadsAcceptedProofSurvivesReadCloseCancellationAndSourc
 						content.close = func() { client.Endpoint = cloud.Server.URL + "/changed/v3/project/" }
 					}
 					return &http.Response{StatusCode: 200, Status: "200 OK", Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}}, Body: content, Request: r}, nil
-				})
+				}))
 				count := 0
 				result, err := connectionReadCall(ctx, conn, operation, func(*blockstorage.VolumeReadOpts) error { count++; return nil })
 				if result == nil || err == nil || result.value != nil || result.volume != nil || result.volumes != nil || result.exists != nil || count != 1 || calls != 1 {

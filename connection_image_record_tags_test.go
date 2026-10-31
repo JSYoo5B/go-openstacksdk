@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -36,7 +37,7 @@ func TestConnectionImageRecordTagsShareOwnedSourceAndMutationReceipts(t *testing
 	codes := []int{203, 299, 206, 201}
 	methods := []string{http.MethodGet, http.MethodPut, http.MethodDelete, http.MethodPut}
 	paths := []string{"images/" + url.PathEscape(identity), "images/" + url.PathEscape(identity) + "/tags/" + url.PathEscape(tag), "images/" + url.PathEscape(identity) + "/tags/" + url.PathEscape(tag), "images/literal/tags/new"}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(bodies) {
 			t.Fatal("unexpected HTTP request", req.URL)

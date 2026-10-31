@@ -13,6 +13,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -215,7 +216,7 @@ func TestAvailableIPNeutronListFailuresNeverAllocateMatchingPrefix(t *testing.T)
 			})
 			if strings.HasPrefix(mode, "inner ") {
 				next := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := next.RoundTrip(r)
 					if err == nil && response != nil && r.URL.Path == "/compute/os-floating-ips" {
 						response.Body = readyConnectionCloseBody{ReadCloser: response.Body, close: func() error {
@@ -235,7 +236,7 @@ func TestAvailableIPNeutronListFailuresNeverAllocateMatchingPrefix(t *testing.T)
 						}}
 					}
 					return response, err
-				})
+				}))
 			}
 			result, err := conn.AvailableFloatingIP(ctx, connectionAvailableRequest(), compute.WithAvailableIPTimeout(time.Second), compute.WithAvailableIPNetworkOptions(network.WithAvailableProject("owner")))
 			want := []string{"GET /network/v2.0/networks", "GET /network/v2.0/subnets", "GET /network/v2.0/floatingips"}
@@ -298,7 +299,7 @@ func TestAvailableIPNeutronFreshPortSeedsAndAcceptedFailures(t *testing.T) {
 			})
 			if mode == "close" || mode == "source" || mode == "cancel" {
 				next := cloud.Provider.HTTPClient.Transport
-				cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					response, err := next.RoundTrip(r)
 					if err == nil && response != nil && r.Method == "POST" && r.URL.Path == "/network/v2.0/floatingips" {
 						response.Body = readyConnectionCloseBody{ReadCloser: response.Body, close: func() error {
@@ -318,7 +319,7 @@ func TestAvailableIPNeutronFreshPortSeedsAndAcceptedFailures(t *testing.T) {
 						}}
 					}
 					return response, err
-				})
+				}))
 			}
 			input := connectionAvailableRequest()
 			input.Server = resource.ID("server")

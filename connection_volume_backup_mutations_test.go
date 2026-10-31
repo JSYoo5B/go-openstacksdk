@@ -24,8 +24,6 @@ type backupMutationConnectionOutcome struct {
 	delete *blockstorage.DeleteVolumeBackupResult
 }
 
-type backupMutationConnectionTransport func(*http.Request) (*http.Response, error)
-
 type backupMutationConnectionFaultBody struct {
 	reader                   *strings.Reader
 	readErr, closeErr, cause error
@@ -569,10 +567,6 @@ func TestConnectionBackupMutationsNonemptyPreflightAndGetterFailuresKeepOperatio
 	}
 }
 
-func (f backupMutationConnectionTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	return f(r)
-}
-
 func (b *backupMutationConnectionFaultBody) Read(p []byte) (int, error) {
 	n, err := b.reader.Read(p)
 	if err == io.EOF {
@@ -601,7 +595,7 @@ func TestConnectionBackupMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause(
 			if family == "delete" {
 				body = "opaque-delete"
 			}
-			cloud.Provider.HTTPClient.Transport = backupMutationConnectionTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				method, path := "POST", backupConnectionPath+"backups"
 				var responseBody io.ReadCloser = &backupMutationConnectionFaultBody{reader: strings.NewReader(body), readErr: readErr, closeErr: closeErr, cancel: cancel, cause: cause}
@@ -615,7 +609,7 @@ func TestConnectionBackupMutationsAcceptedIOFailuresJoinReadCloseAndCallerCause(
 				}
 				backupMutationConnectionWire(t, r, method, path, "test-token")
 				return &http.Response{StatusCode: status, Header: http.Header{"X-Actual": {"accepted-IO"}}, Body: responseBody, Request: r}, nil
-			})
+			}))
 			conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.BlockStorage, "3.60"))
 			if err != nil {
 				t.Fatal(err)

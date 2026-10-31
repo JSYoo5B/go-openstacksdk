@@ -33,7 +33,7 @@ func availableViewReply(t *testing.T, cloud *testcloud.Cloud, reply func(*http.R
 func availableReply(t *testing.T, cloud *testcloud.Cloud, reply func(*http.Request) (int, string, bool)) {
 	t.Helper()
 	next := cloud.Provider.HTTPClient.Transport
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		response, err := next.RoundTrip(r)
 		if err != nil || response == nil {
 			return response, err
@@ -48,7 +48,7 @@ func availableReply(t *testing.T, cloud *testcloud.Cloud, reply func(*http.Reque
 			}
 		}
 		return response, nil
-	})
+	}))
 }
 
 func availableViewLocation(t *testing.T, record *compute.FloatingIPRecord) resource.CloudLocation {

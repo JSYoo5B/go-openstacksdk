@@ -373,7 +373,7 @@ func TestConnectionImportVolumeBackupExecutionErrorsKeepOnlyActualStageProof(t *
 			if stage == "descriptor failure" {
 				reply = `{"backup":{"id":"actual","object_count":"²","unknown":false}}`
 			}
-			cloud.Provider.HTTPClient.Transport = backupConnectionTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				call := calls.Add(1)
 				if stage == "later discovery native rejection" {
 					path := "/backup-connection/v3/"
@@ -399,7 +399,7 @@ func TestConnectionImportVolumeBackupExecutionErrorsKeepOnlyActualStageProof(t *
 					body.onClose = func() { source.Microversion = "3.61"; cancel(cause) }
 				}
 				return &http.Response{StatusCode: code, Header: http.Header{"X-Proof": {"current"}}, Body: body, Request: r}, nil
-			})
+			}))
 			result, err := conn.ImportVolumeBackup(ctx, blockstorage.ImportVolumeBackupRequest{BackupService: "driver", BackupURL: "record"})
 			if result == nil || err == nil || result.Value != nil {
 				t.Fatal(result, err)

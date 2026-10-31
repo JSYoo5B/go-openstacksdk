@@ -683,10 +683,6 @@ func TestConnectionVolumeBackupSelectionErrorRetainsBackupIdentityWithoutChangin
 	}
 }
 
-type backupConnectionTransport func(*http.Request) (*http.Response, error)
-
-func (f backupConnectionTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 type backupConnectionFaultBody struct {
 	reader            *strings.Reader
 	readErr, closeErr error
@@ -732,7 +728,7 @@ func TestConnectionVolumeBackupAcceptedIOJoinsReadCloseCancellationAndSourceDrif
 					body = `{"backup":{"id":"item"}}`
 					path = backupConnectionPath + "backups/item"
 				}
-				cloud.Provider.HTTPClient.Transport = backupConnectionTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					backupConnectionWire(t, r, path, "test-token", "")
 					fault := &backupConnectionFaultBody{reader: strings.NewReader(body)}
@@ -760,7 +756,7 @@ func TestConnectionVolumeBackupAcceptedIOJoinsReadCloseCancellationAndSourceDrif
 						fault.readErr = io.EOF
 					}
 					return &http.Response{StatusCode: 203, Header: http.Header{"Content-Type": {"application/json"}, "X-Actual": {"current-backup"}}, Body: fault, Request: r}, nil
-				})
+				}))
 				out, err := backupConnectionCall(ctx, conn, operation, "item", nil, nil)
 				var physical *resource.ResponseError
 				if out == nil || out.value != nil || out.rows != nil || out.selected != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &physical) || physical.StatusCode != 203 || physical.Header.Get("X-Actual") != "current-backup" || !bytes.Equal(physical.Body, []byte(body)) || requests.Load() != 1 {
@@ -807,7 +803,7 @@ func TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMe
 				cause := errors.New("backup later request cancellation")
 				first := `{"backups":[{"id":"first"}],"next":"?marker=next"}`
 				var members, pages atomic.Int32
-				cloud.Provider.HTTPClient.Transport = backupConnectionTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.URL.Path == backupConnectionPath+"backups/item" {
 						members.Add(1)
 						return &http.Response{StatusCode: 404, Header: http.Header{"Content-Type": {"application/json"}, "X-Member": {"rejected"}}, Body: io.NopCloser(strings.NewReader(`{"error":"missing"}`)), Request: r}, nil
@@ -831,7 +827,7 @@ func TestConnectionVolumeBackupLaterFailureRetainsPagesWithoutBorrowingEarlierMe
 						return nil, ctx.Err()
 					}
 					return &http.Response{StatusCode: 403, Header: http.Header{"Content-Type": {"application/json"}, "X-Rejected": {"second403"}}, Body: io.NopCloser(strings.NewReader(`{"error":"forbidden"}`)), Request: r}, nil
-				})
+				}))
 				identity := ""
 				if operation == "GetVolumeBackup" {
 					identity = "item"

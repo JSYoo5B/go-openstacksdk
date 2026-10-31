@@ -2,15 +2,14 @@ package openstack_test
 
 import (
 	"context"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/gophercloud/gophercloud/v2"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -22,14 +21,14 @@ func TestConnectionImageMutationsShareClientAndKeepAcknowledgements(t *testing.T
 	methods := []string{http.MethodPut, http.MethodDelete, http.MethodPost, http.MethodPost}
 	tokens := []string{"live-0", "live-1", "live-2", "live-3"}
 	paths := []string{"images/fixed/tags/literal%252F", "images/fixed/tags/literal%252F", "images/fixed/actions/deactivate", "images/fixed/actions/reactivate"}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(methods) || r.Method != methods[calls] || r.URL.String() != "https://cloud.test/reverse/glance/v2/"+paths[calls] || r.Body != nil || r.Header.Get("X-Auth-Token") != tokens[calls] || r.Header.Get("X-Source") != "shared" || r.Header.Get("X-Call") != "mutation" {
 			t.Fatalf("request=%d %s %s headers=%v body=%v", calls, r.Method, r.URL, r.Header, r.Body)
 		}
 		calls++
 		// A synthetic transport retains opaque acknowledgement bytes that an
 		// actual HTTP connection would suppress for a bodyless 204 response.
-		return &http.Response{StatusCode: 204, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader("opaque acknowledgement"))}, nil
+		return testcloud.Response(204, "opaque acknowledgement", http.Header{"X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"))
 	if err != nil {

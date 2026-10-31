@@ -39,7 +39,7 @@ func floatingCreateFixture(t *testing.T, source compute.FloatingIPSource) (*test
 		}
 		return cloud.Server.URL + "/create-" + o.Type + "/", nil
 	}
-	cloud.Provider.HTTPClient.Transport = serverWorkflowTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		state.events = append(state.events, r.Method+" "+r.URL.Path)
 		var body []byte
 		var err error
@@ -64,7 +64,7 @@ func floatingCreateFixture(t *testing.T, source compute.FloatingIPSource) (*test
 			reader = readyConnectionCloseBody{ReadCloser: reader, close: func() error { return state.afterClose(r) }}
 		}
 		return &http.Response{StatusCode: code, Body: reader, Header: http.Header{"X-Create-Proof": {r.Method + " " + r.URL.Path}}, Request: r}, nil
-	})
+	}))
 	conn, err := sdk.FromProvider(cloud.Provider, sdk.WithMicroversion(sdk.Compute, "2.35"), sdk.WithServerAddressPolicy(compute.WithFloatingIPSource(source)), sdk.WithCloudLocation(resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"scope"`)}}))
 	if err != nil {
 		t.Fatal(err)

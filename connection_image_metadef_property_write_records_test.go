@@ -6,11 +6,11 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +28,7 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 	provider.UseTokenLock()
 	provider.SetToken("initial")
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.URL.RawQuery != "" || req.Header.Get("X-Auth-Token") != "live" || req.Header.Get("X-Option") != "owned" {
 			t.Fatal("unexpected property write request", req.Method, req.URL, req.Header)
@@ -52,7 +52,7 @@ func TestConnectionImageMetadefPropertyWritesShareLocationAndFreshState(t *testi
 		if req.URL.String() != path || !reflect.DeepEqual(decoded, want) {
 			t.Fatal("owned raw payload or fixed route changed", req.URL, string(payload))
 		}
-		return &http.Response{StatusCode: 202, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(202, body, http.Header{"X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
 	if err != nil {

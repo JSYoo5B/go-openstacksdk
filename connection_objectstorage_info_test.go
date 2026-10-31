@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	swift "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -22,7 +23,7 @@ func TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow(t *testing.T) {
 	const target = "https://cloud.test/proxy%25/info"
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		expectedSource := "initial"
 		if calls > 1 {

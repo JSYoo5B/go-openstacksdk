@@ -14,6 +14,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -25,7 +26,7 @@ func TestConnectionImageAssociatedTasksSharesClientAndResolvesName(t *testing.T)
 	const id = "이미지% ?#"
 	calls := 0
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		path := endpoint + "images/" + url.PathEscape(id) + "/tasks"

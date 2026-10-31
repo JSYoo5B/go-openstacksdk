@@ -3,13 +3,13 @@ package openstack_test
 import (
 	"context"
 	"fmt"
-	"io"
 	"net/http"
 	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -29,7 +29,7 @@ func TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements(t *testi
 		`["https://foreign.test/node/%2F?key=literal#fragment",""]`, "opaque clean",
 		`{"total_files_pruned":9007199254740993,"total_bytes_pruned":0,"links":42}`, "missing entry",
 	}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(paths) {
 			t.Fatalf("unexpected continuation: %s", r.URL)
 		}
@@ -42,7 +42,7 @@ func TestConnectionImageCacheSharesClientDefaultsAndPassiveMeasurements(t *testi
 		}
 		n := calls
 		calls++
-		return &http.Response{StatusCode: codes[n], Header: http.Header{"X-Proof": {fmt.Sprintf("cache-%d", n)}, "Link": {`<https://foreign.test/next>; rel="next"`}}, Body: io.NopCloser(strings.NewReader(bodies[n]))}, nil
+		return testcloud.Response(codes[n], bodies[n], http.Header{"X-Proof": {fmt.Sprintf("cache-%d", n)}, "Link": {`<https://foreign.test/next>; rel="next"`}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"))
 	if err != nil {

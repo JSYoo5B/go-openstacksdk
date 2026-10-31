@@ -6,11 +6,11 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	types "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -32,7 +32,7 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 		retries++
 		return nil
 	}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if req.URL.RawQuery != "" || req.Header.Get("X-Auth-Token") != "live" || req.Header.Get("X-Option") != "owned" {
 			t.Fatal("unexpected association mutation", req.Method, req.URL, req.Header)
@@ -68,7 +68,7 @@ func TestConnectionImageMetadefAssociationMutationsShareLocationAndIdentity(t *t
 		default:
 			t.Fatal(req.Method)
 		}
-		return &http.Response{StatusCode: status, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(status, body, http.Header{"X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
 	if err != nil {

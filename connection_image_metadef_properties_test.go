@@ -8,11 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	prop "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -28,7 +28,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 	codes := []int{201, 200, 200, 200, 200, 204, 204, 404, 404}
 	bodies := []string{row, row, row, `{"properties":{"wire-key":` + row + `,"unused":null},"next":false}`, `{"properties":{"wire-key":` + row + `,"second":{"type":"string"}},"next":"https://foreign.test/unused"}`, "opaque child", "opaque collection", "hidden or missing", "strict missing"}
 	calls, retries := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(methods) {
 			t.Fatalf("unexpected request %s", r.URL)
 		}
@@ -63,7 +63,7 @@ func TestConnectionImageMetadefPropertiesShareClientAndFixedScope(t *testing.T) 
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("property-%d", calls))
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("property-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("property-%d", index)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", prefix))
 	if err != nil {

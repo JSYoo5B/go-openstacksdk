@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -51,7 +52,7 @@ func TestConnectionObjectReadSharesClientAndOwnsTransfer(t *testing.T) {
 	}
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		if n >= len(bodies) {

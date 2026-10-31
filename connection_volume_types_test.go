@@ -539,7 +539,7 @@ func TestConnectionVolumeTypesAcceptedProofSurvivesReadCloseCancellationAndSourc
 					path += "/type"
 				}
 				calls, callbacks := 0, 0
-				cloud.Provider.HTTPClient.Transport = connectionReadRoundTripper(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls++
 					if r.URL.Path != path {
 						t.Error(r.URL)
@@ -556,7 +556,7 @@ func TestConnectionVolumeTypesAcceptedProofSurvivesReadCloseCancellationAndSourc
 						stream.closeError = closeError
 					}
 					return &http.Response{StatusCode: 200, Header: http.Header{"X-Accepted-Type": {"retained"}}, Body: stream, Request: r}, nil
-				})
+				}))
 				read, search := connectionTypeContractOptions(func() error { callbacks++; return nil })
 				result, err := connectionTypeContractCall(ctx, conn, operation, "type", read, search)
 				if err == nil || result == nil || result.value != nil || result.selected != nil || len(result.types) != 0 || calls != 1 || callbacks != 1 {

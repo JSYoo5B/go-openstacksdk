@@ -8,11 +8,11 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	rt "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefresourcetypes"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -30,7 +30,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 	bodies := []string{`{"resource_types":[` + row + `,null],"next":"https://foreign.test/unused"}`, `{"resource_types":[` + row + `]}`, `{"name":"passive-name","prefix":"","properties_target":"image\n","created_at":"literal-date"}`, `{"resource_type_associations":[{"name":"one"},null],"next":"https://foreign.test/unused"}`, `{"resource_type_associations":[{"name":"repeat"},{"name":"repeat"}]}`, "opaque removed association", "hidden or missing association", "strict missing", `{}`}
 	var client *gophercloud.ServiceClient
 	calls, retries := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		index := calls
 		if index >= len(methods) {
 			t.Fatalf("unexpected request %s", r.URL)
@@ -63,7 +63,7 @@ func TestConnectionImageMetadefResourceTypesShareClientAndScopes(t *testing.T) {
 		calls++
 		provider.SetToken(fmt.Sprintf("types-%d", calls))
 		client.MoreHeaders = map[string]string{"X-Source": fmt.Sprintf("source-%d", calls)}
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("types-%d", index)}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("types-%d", index)}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", prefix))
 	if err != nil {

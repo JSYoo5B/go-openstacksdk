@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -36,7 +37,7 @@ func TestConnectionSwiftDirectoryMarkerOwnsMediaAndFreshCapture(t *testing.T) {
 	container, name := "백업 %2F?#", "folder/마커 %2F?#"
 	target := source.ResourceBase + url.PathEscape(container) + "/" + url.PathEscape(name)
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		var body []byte
 		var readErr error

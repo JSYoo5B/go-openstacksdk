@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +29,7 @@ func TestConnectionOwnedImageImportSharesSourceAndPreservesBorrowedData(t *testi
 	provider.SetToken("import-0")
 	calls := 0
 	reader := strings.NewReader("binary")
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		if index > 9 || req.Header.Get("X-Auth-Token") != fmt.Sprintf("import-%d", index) || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
 			t.Fatal(index, req.Method, req.URL, req.Header)

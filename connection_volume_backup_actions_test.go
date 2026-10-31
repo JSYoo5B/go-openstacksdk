@@ -479,12 +479,12 @@ func TestConnectionBackupProxyActionAcceptedIOKeepsActualAppliedAndJoinedSourceC
 				retries.Add(1)
 				return errors.New("accepted action cannot retry")
 			}
-			cloud.Provider.HTTPClient.Transport = backupConnectionTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				requests.Add(1)
 				backupProxyActionConnectionWire(t, r, family, "test-token", "3.60", "new")
 				fault := &backupConnectionFaultBody{reader: strings.NewReader(string(body)), readErr: readCause, closeErr: closeCause, onClose: func() { source.Microversion = "3.61"; cancel(cancelCause) }}
 				return &http.Response{StatusCode: 203, Header: http.Header{"X-Proof": {"actual facade"}}, Body: fault, Request: r}, nil
-			})
+			}))
 			out, err := backupProxyActionConnectionCall(ctx, conn, family)
 			var accepted *resource.ResponseError
 			if out == nil || out.applied == nil || out.value != nil || out.completed || out.restore != nil && out.restore.Backup != nil || !errors.As(err, &accepted) || !errors.Is(err, readCause) || !errors.Is(err, closeCause) || !errors.Is(err, cancelCause) || !errors.Is(err, context.Canceled) || !errors.Is(err, resource.ErrInvalidOption) || accepted.StatusCode != 203 || !bytes.Equal(accepted.Body, body) || accepted.Header.Get("X-Proof") != "actual facade" || out.applied.StatusCode != 203 || !bytes.Equal(out.applied.Body, body) || out.applied.Header.Get("X-Proof") != "actual facade" || requests.Load() != 1 || retries.Load() != 0 {

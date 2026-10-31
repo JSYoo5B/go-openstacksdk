@@ -11,6 +11,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -18,7 +19,7 @@ import (
 func TestConnectionOwnedImageCreateComposesPolicyAndKeepsSwiftLazy(t *testing.T) {
 	provider := &gophercloud.ProviderClient{}
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(request *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 		index := calls
 		calls++
 		if index == 0 {

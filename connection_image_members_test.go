@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -24,7 +24,7 @@ func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {
 	codes := []int{200, 200, 200, 200, 200, 200, 204, 404, 404}
 	const member = `{"member_id":"passive-other","image_id":"passive-parent","status":"future-status","schema":"https://foreign.test/member","created_at":"2026-10-03T09:01:02.12345678901+09:00","updated_at":null,"links":42,"precision":9007199254740993}`
 	bodies := []string{member, member, member, member, `{"members":[` + member + `,null],"next":"https://foreign.test/next","schema":42}`, `{"members":[` + member + `,{"member_id":"","created_at":null,"updated_at":"unparsed","status":null}],"next":"https://foreign.test/next"}`, "opaque deletion", "missing member", "missing member"}
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(paths) {
 			t.Fatalf("unexpected continuation %s", r.URL)
 		}
@@ -45,7 +45,7 @@ func TestConnectionImageMembersShareClientAndConcreteDefaults(t *testing.T) {
 		}
 		n := calls
 		calls++
-		return &http.Response{StatusCode: codes[n], Header: http.Header{"X-Proof": {fmt.Sprintf("member-%d", n)}, "Link": {`<https://foreign.test/next>; rel="next"`}}, Body: io.NopCloser(strings.NewReader(bodies[n]))}, nil
+		return testcloud.Response(codes[n], bodies[n], http.Header{"X-Proof": {fmt.Sprintf("member-%d", n)}, "Link": {`<https://foreign.test/next>; rel="next"`}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"))
 	if err != nil {

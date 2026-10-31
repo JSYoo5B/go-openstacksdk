@@ -285,7 +285,7 @@ func TestConnectionGetVolumeIDAcceptedProofSurvivesReadCloseCancellationAndSourc
 			cause, readError, closeError := errors.New("member ID canceled"), errors.New("member ID read failed"), errors.New("member ID Close failed")
 			body := []byte(`{"volume":{"id":"response-id"}}`)
 			calls := 0
-			cloud.Provider.HTTPClient.Transport = connectionReadRoundTripper(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
 				if r.Method != http.MethodGet || r.URL.Path != "/connection-volume-id/v3/project/volumes/volume" || r.URL.RawQuery != "" {
 					t.Error(r.Method, r.URL)
@@ -298,7 +298,7 @@ func TestConnectionGetVolumeIDAcceptedProofSurvivesReadCloseCancellationAndSourc
 					stream.close = func() { cinder.RawClient().Endpoint = cloud.Server.URL + "/changed/v3/project/" }
 				}
 				return &http.Response{StatusCode: 200, Status: "200 OK", Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual-member"}}, Body: stream, Request: r}, nil
-			})
+			}))
 			callbacks := 0
 			result, err := conn.GetVolumeID(ctx, blockstorage.GetVolumeIDRequest{NameOrID: "volume"}, func(*blockstorage.VolumeReadOpts) error { callbacks++; return nil })
 			if result == nil || err == nil || result.ID != nil || result.Value != nil || result.Volume != nil || result.Observed == nil || len(result.Pages) != 0 || callbacks != 1 || calls != 1 {

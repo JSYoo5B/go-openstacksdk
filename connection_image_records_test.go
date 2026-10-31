@@ -4,13 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -37,7 +36,7 @@ func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.
 	codes := []int{203, 206, 201, 403, 200, 206}
 	paths := []string{"images/get", "images", "images?marker=tail", "images/hidden", "images?name=hidden", "images?os_hidden=True"}
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		if calls >= len(bodies) {
 			t.Fatal("unexpected request", req.URL)
 		}
@@ -47,7 +46,7 @@ func TestConnectionImageRecordsShareSourceLocationAndHiddenDiscovery(t *testing.
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("image-%d", calls))
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}, "Openstack-Image-Import-Methods": {"web-download, glance-direct"}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("response-%d", index)}, "Openstack-Image-Import-Methods": {"web-download, glance-direct"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", base), sdk.WithCloudLocation(facts))
 	if err != nil {

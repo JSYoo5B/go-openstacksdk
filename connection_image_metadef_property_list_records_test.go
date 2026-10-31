@@ -3,13 +3,12 @@ package openstack_test
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/metadefproperties"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -27,12 +26,12 @@ func TestConnectionImageMetadefPropertyListsShareOwnedLocationAndFiniteRoutes(t 
 	provider.UseTokenLock()
 	provider.SetToken("initial")
 	calls, callbacks := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if calls > 2 || req.Method != http.MethodGet || req.URL.String() != endpoint+"metadefs/namespaces/OS::Nova/properties" || req.Body != nil || req.Header.Get("X-Auth-Token") != "live" || req.Header.Get("X-Option") != "owned" {
 			t.Fatal("unexpected property list request", req.Method, req.URL, req.Header)
 		}
-		return &http.Response{StatusCode: 203, Header: http.Header{"X-Proof": {"actual"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(203, body, http.Header{"X-Proof": {"actual"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
 	if err != nil {

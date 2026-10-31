@@ -8,11 +8,11 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	ns "github.com/JSYoo5B/go-openstacksdk/image/v2/metadefnamespaces"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -33,7 +33,7 @@ func TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults(t *testing
 	nextQuery.Set("marker", "OS::Page::Two")
 	bodies := []string{row, row, row, `{"namespaces":[` + row + `,null],"next":"https://foreign.test/unused"}`, `{"namespaces":[` + row + `],"next":"/v2/metadefs/namespaces?` + nextQuery.Encode() + `"}`, `{"namespaces":[{"namespace":"","protected":null,"created_at":null}],"next":null}`, "opaque acknowledgement", "hidden or missing"}
 	calls, retries := 0, 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		if calls >= len(methods) {
 			t.Fatalf("unexpected request %s", r.URL)
 		}
@@ -75,7 +75,7 @@ func TestConnectionImageMetadefNamespacesShareClientAndPagingDefaults(t *testing
 		}
 		calls++
 		provider.SetToken(fmt.Sprintf("namespace-%d", calls))
-		return &http.Response{StatusCode: codes[index], Header: http.Header{"X-Proof": {fmt.Sprintf("namespace-%d", index)}, "Link": {`<https://foreign.test/next>; rel="next"`}}, Body: io.NopCloser(strings.NewReader(bodies[index]))}, nil
+		return testcloud.Response(codes[index], bodies[index], http.Header{"X-Proof": {fmt.Sprintf("namespace-%d", index)}, "Link": {`<https://foreign.test/next>; rel="next"`}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", "https://cloud.test/reverse/glance/v2/"))
 	if err != nil {

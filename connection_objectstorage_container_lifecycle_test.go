@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -25,7 +26,7 @@ func TestConnectionContainerLifecycleSharesClientAndPreservesNative(t *testing.T
 	const target = "https://cloud.test/other%25/v1/AUTH_account%25/%EB%B0%B1%EC%97%85%20%252F%3F%23"
 	var source *gophercloud.ServiceClient
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		method := http.MethodDelete
@@ -104,7 +105,7 @@ func TestConnectionContainerLifecycleSharesClientAndPreservesNative(t *testing.T
 		t.Fatal("response evidence aliases across calls")
 	}
 	// Keep the broader native status policy available without parsing dates here.
-	provider.HTTPClient.Transport = serviceInfoTransport(func(r *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		n := calls
 		calls++
 		if r.URL.String() != target || n == 5 && r.Method != http.MethodPut || n == 6 && r.Method != http.MethodDelete {

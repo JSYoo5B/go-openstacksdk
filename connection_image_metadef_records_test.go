@@ -3,12 +3,11 @@ package openstack_test
 import (
 	"context"
 	"encoding/json"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -23,7 +22,7 @@ func TestConnectionImageMetadefRecordsShareClientAndCurrentLocation(t *testing.T
 	}
 	provider := &gophercloud.ProviderClient{}
 	calls := 0
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		path, body := "metadefs/resource_types", `{"resource_types":[{"name":"global"}]}`
 		if calls == 2 {
@@ -32,7 +31,7 @@ func TestConnectionImageMetadefRecordsShareClientAndCurrentLocation(t *testing.T
 		if calls > 3 || req.Method != http.MethodGet || req.URL.String() != endpoint+path || req.Body != nil {
 			t.Fatal("unexpected request", req.Method, req.URL)
 		}
-		return &http.Response{StatusCode: 200, Header: http.Header{"X-Proof": {"owned"}}, Body: io.NopCloser(strings.NewReader(body))}, nil
+		return testcloud.Response(200, body, http.Header{"X-Proof": {"owned"}}), nil
 	})
 	conn, err := sdk.FromProvider(provider, sdk.WithEndpointFor(sdk.Image, "v2", endpoint), sdk.WithCloudLocation(facts))
 	if err != nil {

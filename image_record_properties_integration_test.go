@@ -13,6 +13,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +29,7 @@ func TestConnectionOwnedImagePropertiesSharesSourceResolverAndCommit(t *testing.
 	provider.SetToken("property-0")
 	calls := 0
 	var source *gophercloud.ServiceClient
-	provider.HTTPClient.Transport = serviceInfoTransport(func(req *http.Request) (*http.Response, error) {
+	provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		index := calls
 		expected := []string{endpoint + "images/" + url.PathEscape(id), endpoint + "images", endpoint + "images?marker=second", endpoint + "images/" + url.PathEscape(id)}
 		sourceHeader := "source-1"

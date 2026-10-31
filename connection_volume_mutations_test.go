@@ -493,7 +493,7 @@ func TestConnectionVolumeMutationsAcceptedAndRejectedSecondStageProofStaysDistin
 					payload = []byte{0xff, 0x00, 'a'}
 				}
 				calls, callbacks := 0, 0
-				cloud.Provider.HTTPClient.Transport = connectionReadRoundTripper(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					calls++
 					if calls == 1 {
 						if r.Method != http.MethodGet || r.URL.Path != "/connection-mutations/v3/project/volumes/volume" || r.URL.RawQuery != "" {
@@ -522,7 +522,7 @@ func TestConnectionVolumeMutationsAcceptedAndRejectedSecondStageProofStaysDistin
 						stream.readError, stream.closeError = readError, closeError
 					}
 					return &http.Response{StatusCode: 203, Header: http.Header{"X-Mutation": {"actual"}}, Body: stream, Request: r}, nil
-				})
+				}))
 				update, boot := connectionMutationContractOptions(func() error { callbacks++; return nil })
 				result, err := connectionMutationContractCall(ctx, conn, operation, "volume", update, boot)
 				if err == nil || calls != 2 || callbacks != 1 {
