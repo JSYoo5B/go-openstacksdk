@@ -18,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeTaskTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTaskTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeTaskWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeTaskCall struct{ method, path, query, body string }
@@ -37,7 +27,7 @@ type nativeTaskCall struct{ method, path, query, body string }
 func nativeTaskAPI(t *testing.T, calls *[]nativeTaskCall, reply func(*http.Request) *http.Response) *tasks.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeTaskTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +35,7 @@ func nativeTaskAPI(t *testing.T, calls *[]nativeTaskCall, reply func(*http.Reque
 		}
 		*calls = append(*calls, nativeTaskCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("image", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/glance/v2/"
 	return tasks.New(client)

@@ -53,7 +53,7 @@ func TestNativeImageCreateBodyPropertiesExtensionsAndProjection(t *testing.T) {
 			client := nativeUpdateClient(cloud)
 			client.MoreHeaders = map[string]string{"X-Source": "direct"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				raw, _ := io.ReadAll(req.Body)
 				// Native map bodies marshal with sorted keys; raw extension bytes stay exact.
@@ -66,7 +66,7 @@ func TestNativeImageCreateBodyPropertiesExtensionsAndProjection(t *testing.T) {
 				wire := nativeDeleteWire(201, io.NopCloser(strings.NewReader(`{"id":"fixed","name":"n","status":"queued","size":null,"hw_vendor":"x"}`)))
 				wire.Header.Set("OpenStack-image-import-methods", "glance-direct")
 				return wire, nil
-			})
+			}))
 			got, err := images.New(client).Create(context.Background(), test.opts, test.options...)
 			if err != nil || calls.Load() != 1 || got.ID != "fixed" || got.Status != "queued" || got.SizeBytes != 0 || !reflect.DeepEqual(got.Properties, map[string]any{"hw_vendor": "x"}) || !reflect.DeepEqual(got.OpenStackImageImportMethods, []string{"glance-direct"}) {
 				t.Fatal(got, err, calls.Load())
@@ -79,10 +79,10 @@ func TestNativeImageCreatePreflightAndStrictStatus(t *testing.T) {
 	cloud := testcloud.New(t)
 	var calls atomic.Int32
 	code := 201
-	cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		return nativeDeleteWire(code, io.NopCloser(strings.NewReader(`{"id":"fixed"}`))), nil
-	})
+	}))
 	api := images.New(nativeUpdateClient(cloud))
 	for name, call := range map[string]func() error{
 		"missing required name": func() error { _, err := api.Create(context.Background(), images.CreateOpts{}); return err },

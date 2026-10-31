@@ -10,17 +10,14 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonCreateTaskTransport func(*http.Request) (*http.Response, error)
-
-func (f pythonCreateTaskTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func pythonCreateTaskService(t *testing.T, bodies *[]string, status int, reply string) *image.Service {
 	t.Helper()
-	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: pythonCreateTaskTransport(func(req *http.Request) (*http.Response, error) {
+	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		if req.Method != http.MethodPost || req.URL.Path != "/glance/v2/tasks" {
 			t.Errorf("%s %s", req.Method, req.URL)
 		}

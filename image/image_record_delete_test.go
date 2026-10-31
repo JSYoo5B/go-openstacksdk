@@ -15,6 +15,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -96,7 +97,7 @@ func TestDeleteImageRecordLiteralWholeAndStoreRoutesOwnOpaqueAcknowledgements(t 
 
 func TestDeleteImageRecordProjectsPrivateBodyAndPreservesFetchedReceipt(t *testing.T) {
 	const fetched = `{"id":"fixed","protected":"false","size":"04","tags":"one","properties":{"exact":900719925474099312345}}`
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls, locations := 0, 0
 	cloud := "before"
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
@@ -205,7 +206,7 @@ func TestDeleteImageRecordKeepsPendingChangesForExplicitSubsequentCommit(t *test
 }
 
 func TestDeleteImageRecordStoreOnlyExtractsIdentitiesBeforeProjection(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
@@ -284,7 +285,7 @@ func TestDeleteImageRecordStoreSelectorsAndFactorySnapshots(t *testing.T) {
 func TestDeleteImageRecordSourceOptionsLocationAndChildSnapshots(t *testing.T) {
 	for _, storeMode := range []bool{false, true} {
 		t.Run(fmt.Sprintf("store=%v", storeMode), func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, callbacks, locations := 0, 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			seed := imageRecordUpdateFetched(t, New(client), `{"id":"fixed","name":"seed"}`, &handler)

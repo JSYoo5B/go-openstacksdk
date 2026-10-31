@@ -17,23 +17,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeDataTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeDataTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
-type nativeDataBody struct {
-	io.Reader
-	closes atomic.Int32
-}
-
-func (body *nativeDataBody) Close() error { body.closes.Add(1); return nil }
-
 func nativeDataClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
 	client := cloud.Client("image", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/reverse/glance/v2/"
@@ -67,14 +50,14 @@ func TestNativeImageDataUploadAndStage(t *testing.T) {
 			cloud := testcloud.New(t)
 			code := 204
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDataTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				raw, _ := io.ReadAll(req.Body)
 				if req.Method != http.MethodPut || req.URL.Path != "/reverse/glance/v2/images/a/b/"+test.suffix || string(raw) != "payload" || req.Header.Get("Content-Type") != "application/octet-stream" || req.Header.Get("X-Source") != "direct" {
 					t.Error(req.Method, req.URL, string(raw), req.Header)
 				}
-				return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader("opaque")), Header: http.Header{"X-Data-Proof": {"actual"}}}, nil
-			})
+				return testcloud.Response(code, "opaque", http.Header{"X-Data-Proof": {"actual"}}), nil
+			}))
 			api := imagedata.New(nativeDataClient(cloud))
 			if err := test.call(api, context.Background(), "a/b", strings.NewReader("payload")); err != nil || calls.Load() != 1 {
 				t.Fatal(err, calls.Load())
@@ -97,25 +80,25 @@ func TestNativeImageDataUploadAndStage(t *testing.T) {
 func TestNativeImageDataDownloadOwnershipAndStatus(t *testing.T) {
 	cloud := testcloud.New(t)
 	code := 200
-	var body *nativeDataBody
-	cloud.Provider.HTTPClient.Transport = nativeDataTransport(func(req *http.Request) (*http.Response, error) {
+	var body *testcloud.Body
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		if req.Method != http.MethodGet || req.URL.Path != "/reverse/glance/v2/images/img/file" || req.Header.Get("X-Source") != "direct" {
 			t.Error(req.Method, req.URL, req.Header)
 		}
-		body = &nativeDataBody{Reader: strings.NewReader("binary\xff")}
-		return &http.Response{StatusCode: code, Body: body, Header: http.Header{"Content-Md5": {"x"}}}, nil
-	})
+		body = &testcloud.Body{Data: "binary\xff"}
+		return testcloud.StreamResponse(code, body, http.Header{"Content-Md5": {"x"}}), nil
+	}))
 	api := imagedata.New(nativeDataClient(cloud))
 	download, err := api.Download(context.Background(), "img")
 	if err != nil || download == nil || download.Header != download.Body {
 		t.Fatal(download, err)
 	}
 	data, err := io.ReadAll(download)
-	if err != nil || string(data) != "binary\xff" || body.closes.Load() != 0 {
-		t.Fatal(string(data), err, body.closes.Load())
+	if err != nil || string(data) != "binary\xff" || body.Closes() != 0 {
+		t.Fatal(string(data), err, body.Closes())
 	}
-	if err := download.Close(); err != nil || body.closes.Load() != 1 {
-		t.Fatal(err, body.closes.Load())
+	if err := download.Close(); err != nil || body.Closes() != 1 {
+		t.Fatal(err, body.Closes())
 	}
 	for _, status := range []int{204, 206, 404} {
 		t.Run(fmt.Sprint(status), func(t *testing.T) {

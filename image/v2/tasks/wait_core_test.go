@@ -10,22 +10,19 @@ import (
 	"testing"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type taskWaitTestTransport func(*http.Request) (*http.Response, error)
-
-func (f taskWaitTestTransport) RoundTrip(req *http.Request) (*http.Response, error) { return f(req) }
-
-func taskWaitTestAPI(transport taskWaitTestTransport) *API {
+func taskWaitTestAPI(transport testcloud.RoundTripperFunc) *API {
 	provider := &gophercloud.ProviderClient{TokenID: "initial", HTTPClient: http.Client{Transport: transport}}
 	provider.UseTokenLock()
 	return New(&gophercloud.ServiceClient{ProviderClient: provider, Endpoint: "https://glance.example/v2/", ResourceBase: "https://glance.example/reverse/image/v2/", Type: "image", MoreHeaders: map[string]string{"X-Proof": "source"}})
 }
 
 func taskWaitTestHTTP(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Actual": {"evidence"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Actual": {"evidence"}})
 }
 
 func TestTaskWaitCoreOneBudgetRawRecreationFixedRoutesAndLiveToken(t *testing.T) {

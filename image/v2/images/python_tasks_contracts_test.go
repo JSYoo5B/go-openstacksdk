@@ -28,7 +28,7 @@ func imageTasksAPI(t *testing.T, calls *[]imageTasksCall, reply func(*http.Reque
 	cloud := testcloud.New(t)
 	client := nativeUpdateClient(cloud)
 	client.Microversion = "2.16"
-	cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -36,7 +36,7 @@ func imageTasksAPI(t *testing.T, calls *[]imageTasksCall, reply func(*http.Reque
 		}
 		*calls = append(*calls, imageTasksCall{req.Method, req.URL.Path, req.URL.RawQuery, raw, req.Header.Get("OpenStack-API-Version")})
 		return reply(req), nil
-	})
+	}))
 	return images.New(client), cloud
 }
 func imageTasksWire(code int, body string) *http.Response {
@@ -323,10 +323,10 @@ func TestPythonImageTasksRecordsLazySnapshotsReusableAndConcurrent(t *testing.T)
 		t.Fatal(applied, calls, header)
 	}
 	var attempts atomic.Int64
-	cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		attempts.Add(1)
 		return imageTasksWire(200, `{"tasks":[{"image_id":"parent","input":{"x":false}}]}`), nil
-	})
+	}))
 	shared := images.WithTaskRecordsHeaders(map[string]string{"X-Trace": "owned"})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {
@@ -609,15 +609,15 @@ func TestPythonImageTasksRecordsPhysicalProofAndStickySource(t *testing.T) {
 				readCause, closeCause, cancelCause := errors.New("read"), errors.New("close"), errors.New("cancel")
 				ctx, cancel := context.WithCancelCause(context.Background())
 				defer cancel(nil)
-				physical := &nativeDeleteBody{data: []byte(body)}
+				physical := &testcloud.Body{Data: body}
 				switch lane {
 				case "read":
-					physical.readErr = readCause
+					physical.ReadErr = readCause
 				case "close":
-					physical.closeErr = closeCause
+					physical.CloseErr = closeCause
 				case "read+close":
-					physical.readErr = readCause
-					physical.closeErr = closeCause
+					physical.ReadErr = readCause
+					physical.CloseErr = closeCause
 				}
 				hook := &imageTasksHookBody{ReadCloser: physical}
 				api, _ := imageTasksAPI(t, &calls, func(*http.Request) *http.Response {
@@ -635,8 +635,8 @@ func TestPythonImageTasksRecordsPhysicalProofAndStickySource(t *testing.T) {
 				}
 				rows, err := api.AllTaskRecords(ctx, "parent")
 				api.RawClient().ResourceBase = original
-				if rows != nil || err == nil || len(calls) != 1 || physical.closes.Load() != 1 {
-					t.Fatal(rows, err, calls, physical.closes.Load())
+				if rows != nil || err == nil || len(calls) != 1 || physical.Closes() != 1 {
+					t.Fatal(rows, err, calls, physical.Closes())
 				}
 				if code < 400 {
 					var proof *resource.ResponseError

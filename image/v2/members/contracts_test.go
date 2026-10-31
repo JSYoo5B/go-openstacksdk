@@ -18,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type memberTransport func(*http.Request) (*http.Response, error)
-
-func (transport memberTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func memberWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Member-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Member-Proof": {"actual"}})
 }
 
 func memberClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -60,7 +50,7 @@ func TestNativeImageMembersRoutesBodiesAndDecode(t *testing.T) {
 	client := memberClient(cloud)
 	type exchange struct{ method, path, body string }
 	var seen []exchange
-	cloud.Provider.HTTPClient.Transport = memberTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -79,7 +69,7 @@ func TestNativeImageMembersRoutesBodiesAndDecode(t *testing.T) {
 			}
 		}
 		return memberWire(200, memberRow), nil
-	})
+	}))
 	api := members.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -151,10 +141,10 @@ func TestNativeImageMembersStrictStatusesAndPreflight(t *testing.T) {
 			t.Run(fmt.Sprintf("%s/%d", call.name, code), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				var requests atomic.Int32
-				cloud.Provider.HTTPClient.Transport = memberTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					requests.Add(1)
 					return memberWire(code, memberRow), nil
-				})
+				}))
 				err := call.call(members.New(memberClient(cloud)))
 				memberOperation(t, err, call.name)
 				var native gophercloud.ErrUnexpectedResponseCode
@@ -167,9 +157,9 @@ func TestNativeImageMembersStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("List rejection and empty single page", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		code := 403
-		cloud.Provider.HTTPClient.Transport = memberTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			return memberWire(code, `{"members":[]}`), nil
-		})
+		}))
 		api := members.New(memberClient(cloud))
 		for _, err := range api.List(ctx, "img") {
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -190,10 +180,10 @@ func TestNativeImageMembersStrictStatusesAndPreflight(t *testing.T) {
 	t.Run("Update extension collision and nil option", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var requests atomic.Int32
-		cloud.Provider.HTTPClient.Transport = memberTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			requests.Add(1)
 			return memberWire(200, memberRow), nil
-		})
+		}))
 		api := members.New(memberClient(cloud))
 		for _, option := range []members.UpdateOption{members.WithUpdateField("status", "x"), nil} {
 			_, err := api.Update(ctx, "img", "p", members.UpdateOpts{Status: "accepted"}, option)

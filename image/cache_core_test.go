@@ -41,13 +41,13 @@ func TestImageCacheCoreFixedRoutesAndActualEvidence(t *testing.T) {
 			calls := 0
 			body := &deleteCoreBody{reader: strings.NewReader(test.body)}
 			headers := http.Header{"X-Proof": {"before"}}
-			client := deleteCoreClient(deleteCoreTransport(func(request *http.Request) (*http.Response, error) {
+			client := deleteCoreClient(func(request *http.Request) (*http.Response, error) {
 				calls++
 				if request.Method != test.method || request.URL.EscapedPath() != "/reverse/glance/v2/"+test.path || request.URL.RawQuery != "" || request.Body != nil || request.Header.Get(cacheTargetHeader) != "" {
 					t.Fatal(request.Method, request.URL, request.Body, request.Header)
 				}
 				return deleteCoreHTTP(test.status, body, headers), nil
-			}))
+			})
 			value, err := test.call(New(client))
 			if err != nil || cacheCoreNil(value) || calls != 1 || body.closes != 1 {
 				t.Fatal(value, err, calls, body.closes)
@@ -82,13 +82,13 @@ func TestImageCacheCoreFixedRoutesAndActualEvidence(t *testing.T) {
 	}
 	for _, target := range []CacheTarget{CacheBoth, CacheOnly, QueueOnly} {
 		t.Run(fmt.Sprint("target", target), func(t *testing.T) {
-			client := deleteCoreClient(deleteCoreTransport(func(r *http.Request) (*http.Response, error) {
+			client := deleteCoreClient(func(r *http.Request) (*http.Response, error) {
 				expected := map[CacheTarget]string{CacheBoth: "", CacheOnly: "cache", QueueOnly: "queue"}[target]
 				if r.Header.Get(cacheTargetHeader) != expected {
 					t.Fatal(r.Header)
 				}
 				return deleteCoreHTTP(204, io.NopCloser(strings.NewReader("")), nil), nil
-			}))
+			})
 			value, err := New(client).ClearCache(context.Background(), WithClearCacheTarget(target))
 			if err != nil || value.Target == nil || *value.Target != target {
 				t.Fatal(value, err)
@@ -100,9 +100,9 @@ func TestImageCacheCoreFixedRoutesAndActualEvidence(t *testing.T) {
 func TestImageCacheCoreCanonicalPrecisionAndIndependentMetadata(t *testing.T) {
 	text := `{"cached_images":[{"image_id":"","hits":-1,"size":9223372036854775807,"last_accessed":1.234567890123456789e+40,"last_modified":-0.0,"links":false,"created_at":{},"updated_at":42,"extension":9999999999999999999999},{"image_id":null,"hits":null,"size":null,"last_accessed":null,"last_modified":null}],"queued_images":["z","a","z"],"links":"passive","created_at":false,"next":"https://other.test","extension":0.1234567890123456789}`
 	headers := http.Header{"X-Proof": {"wire"}}
-	client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) {
+	client := deleteCoreClient(func(*http.Request) (*http.Response, error) {
 		return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(text)), headers), nil
-	}))
+	})
 	value, err := New(client).GetImageCache(context.Background())
 	if err != nil || len(value.CachedImages) != 2 || !reflect.DeepEqual(value.QueuedImages, []string{"z", "a", "z"}) {
 		t.Fatal(value, err)
@@ -153,9 +153,9 @@ func TestImageCacheCoreMalformedModelsRetainAcceptedProof(t *testing.T) {
 		for i, text := range group.bodies {
 			t.Run(fmt.Sprintf("%s/%d", group.name, i), func(t *testing.T) {
 				body := &deleteCoreBody{reader: strings.NewReader(text)}
-				client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) {
+				client := deleteCoreClient(func(*http.Request) (*http.Response, error) {
 					return deleteCoreHTTP(200, body, http.Header{"X-Proof": {"raw"}}), nil
-				}))
+				})
 				value, err := group.call(New(client))
 				var proof *resource.ResponseError
 				if !cacheCoreNil(value) || !errors.As(err, &proof) || proof.StatusCode != 200 || string(proof.Body) != text || proof.Header.Get("X-Proof") != "raw" || body.closes != 1 {
@@ -183,7 +183,7 @@ func TestImageCacheCoreCompletePreflightAndOwnedTargetHeader(t *testing.T) {
 	for _, test := range cacheCoreCalls(context.Background()) {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
-			client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") }))
+			client := deleteCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			client.MoreHeaders = map[string]string{"x-image-cache-clear-target": ""}
 			value, err := test.call(New(client))
 			if !cacheCoreNil(value) || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
@@ -196,14 +196,14 @@ func TestImageCacheCoreCompletePreflightAndOwnedTargetHeader(t *testing.T) {
 			calls := 0
 			cause := errors.New("lookup failure")
 			var client *gophercloud.ServiceClient
-			client = deleteCoreClient(deleteCoreTransport(func(r *http.Request) (*http.Response, error) {
+			client = deleteCoreClient(func(r *http.Request) (*http.Response, error) {
 				calls++
 				client.MoreHeaders["X-IMAGE-CACHE-CLEAR-TARGET"] = "queue"
 				if bad == "name-failure" {
 					return nil, cause
 				}
 				return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"images":[{"id":"id","name":"wanted"}]}`)), nil), nil
-			}))
+			})
 			client.MoreHeaders = map[string]string{}
 			ref := resource.Name("wanted")
 			var options []CacheOption
@@ -220,7 +220,7 @@ func TestImageCacheCoreCompletePreflightAndOwnedTargetHeader(t *testing.T) {
 			}
 		})
 	}
-	client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP"); return nil, nil }))
+	client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP"); return nil, nil })
 	callbacks := 0
 	client.Type = "compute"
 	if value, err := New(client).CleanCache(context.Background(), func(*CacheOpts) error { callbacks++; return nil }); value != nil || !errors.Is(err, resource.ErrUnsupported) || callbacks != 0 {
@@ -260,7 +260,7 @@ func TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy(t *testing.T) {
 				cancel(ctxCause)
 				return len("partial\xff"), readErr
 			}), closeErr: closeErr}
-			client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) { return deleteCoreHTTP(test.status, body, header), nil }))
+			client := deleteCoreClient(func(*http.Request) (*http.Response, error) { return deleteCoreHTTP(test.status, body, header), nil })
 			client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				t.Fatal("accepted replay")
 				return nil
@@ -299,9 +299,9 @@ func TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy(t *testing.T) {
 			if mode == "cancel" {
 				body.reader = deleteCoreReader(func(p []byte) (int, error) { cancel(cause); return 0, io.EOF })
 			}
-			client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) {
+			client := deleteCoreClient(func(*http.Request) (*http.Response, error) {
 				return deleteCoreHTTP(404, body, http.Header{"X-Proof": {"404"}}), nil
-			}))
+			})
 			client.ProviderClient.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				hooks++
 				return cause
@@ -331,10 +331,10 @@ func TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy(t *testing.T) {
 		})
 	}
 	calls := 0
-	client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) {
+	client := deleteCoreClient(func(*http.Request) (*http.Response, error) {
 		calls++
 		return deleteCoreHTTP(200, io.NopCloser(strings.NewReader(`{"images":[]}`)), nil), nil
-	}))
+	})
 	if value, err := New(client).CacheDeleteImage(context.Background(), resource.Name("absent")); value != nil || !errors.Is(err, resource.ErrNotFound) || calls != 1 {
 		t.Fatal(value, err, calls)
 	}
@@ -343,13 +343,13 @@ func TestImageCacheCoreAcknowledgementFailuresAndMissingPolicy(t *testing.T) {
 func TestImageCacheCoreCapturedSourceAndPrebodyGuards(t *testing.T) {
 	calls := 0
 	var client *gophercloud.ServiceClient
-	client = deleteCoreClient(deleteCoreTransport(func(r *http.Request) (*http.Response, error) {
+	client = deleteCoreClient(func(r *http.Request) (*http.Response, error) {
 		calls++
 		if r.URL.EscapedPath() != "/reverse/glance/v2/cache/id" || r.Header.Get("X-Extra") != "captured" || r.Header.Get("X-Auth-Token") != "live" {
 			t.Fatal(r.URL, r.Header)
 		}
 		return deleteCoreHTTP(202, io.NopCloser(strings.NewReader("")), nil), nil
-	}))
+	})
 	client.MoreHeaders = map[string]string{"X-Extra": "captured"}
 	value, err := New(client).QueueImage(context.Background(), resource.ID("id"), func(*CacheOpts) error {
 		client.ResourceBase = "https://example.test/changed/v2/"
@@ -365,13 +365,13 @@ func TestImageCacheCoreCapturedSourceAndPrebodyGuards(t *testing.T) {
 			calls := 0
 			closeErr := errors.New("close unexpected")
 			body := &deleteCoreBody{reader: strings.NewReader("unexpected"), closeErr: closeErr}
-			client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) {
+			client := deleteCoreClient(func(*http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					return deleteCoreHTTP(503, io.NopCloser(strings.NewReader("retry")), nil), nil
 				}
 				return deleteCoreHTTP(202, body, nil), nil
-			}))
+			})
 			client.ProviderClient.RetryFunc = func(_ context.Context, _ string, _ string, opts *gophercloud.RequestOpts, _ error, _ uint) error {
 				switch mutation {
 				case "keep":

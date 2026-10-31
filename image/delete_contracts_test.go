@@ -22,16 +22,6 @@ import (
 
 const deletePrefix = "/reverse/glance/v2/"
 
-type deleteTransport func(*http.Request) (*http.Response, error)
-
-func (f deleteTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type deleteBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -48,10 +38,10 @@ func (b *deleteBody) Close() error {
 }
 
 func deleteWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"X-Request-Id": {"actual-delete"}, "X-Wire-Status": {fmt.Sprint(code)},
 		"Content-Type": {"application/json"},
-	}, Body: body}
+	})
 }
 
 type deleteReadFailure struct {
@@ -112,13 +102,13 @@ func TestDeleteImageWholeAndStoreRoutesAndEvidence(t *testing.T) {
 				wantPath = deletePrefix + "stores/fast/fixed"
 				options = []image.DeleteImageOption{image.WithDeleteImageStore(store)}
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodDelete || r.URL.Path != wantPath || r.URL.RawQuery != "" || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Auth-Token") != "current-token" || r.Header.Get("OpenStack-API-Version") != "image 2.10" || r.Body != nil {
 					t.Error(r.Method, r.URL, r.Header, r.Body)
 				}
 				return wire, nil
-			})
+			}))
 			v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), options...)
 			if err != nil || v == nil || v.ImageID != "fixed" || v.StoreID != store || v.StatusCode != 204 || !bytes.Equal(v.Body, payload) || v.Header.Get("X-Request-Id") != "actual-delete" || v.Header.Get("Location") == "" || calls.Load() != 1 || body.closes.Load() != 1 {
 				t.Fatal(v, err, calls.Load(), body.closes.Load())
@@ -137,10 +127,10 @@ func TestDeleteImageCompletePreflight(t *testing.T) {
 		t.Run(fmt.Sprintf("invalid store %q", value), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return deleteWire(500, io.NopCloser(strings.NewReader("unexpected"))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.Name("needle"), image.WithDeleteImageStore(value))
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 				t.Fatal(v, err, calls.Load())
@@ -152,10 +142,10 @@ func TestDeleteImageCompletePreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("image", deletePrefix)
 			var calls, callbacks atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return deleteWire(500, io.NopCloser(strings.NewReader("unexpected"))), nil
-			})
+			}))
 			ctx, ref := context.Background(), resource.ID("fixed")
 			want := error(resource.ErrInvalidOption)
 			var options []image.DeleteImageOption
@@ -246,14 +236,14 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 		var retained *image.DeleteImageOpts
 		var calls, callbacks atomic.Int32
 		body := &deleteBody{Reader: strings.NewReader("missing")}
-		cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			*retained.StoreID, *retained.IgnoreMissing = "late", true
 			if r.Method != http.MethodDelete || r.URL.Path != deletePrefix+"stores/fast/fixed" || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Auth-Token") != "live-after-options" {
 				t.Error(r.Method, r.URL, r.Header)
 			}
 			return deleteWire(404, body), nil
-		})
+		}))
 		options := []image.DeleteImageOption{bulk, func(o *image.DeleteImageOpts) error {
 			callbacks.Add(1)
 			retained = o
@@ -285,13 +275,13 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 				code = 404
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodDelete || r.URL.Path != path {
 					t.Error(r.Method, r.URL)
 				}
 				return deleteWire(code, io.NopCloser(strings.NewReader("raw"))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"), options...)
 			if calls.Load() != 1 || mode == "last explicit false wins" && (!errors.Is(err, resource.ErrNotFound) || v != nil) || mode == "empty bulk resets store and ignore" && (err != nil || v != nil) || mode == "bulk replaces invalid store" && (err != nil || v == nil || v.StoreID != "fast") {
 				t.Fatal(v, err, calls.Load())
@@ -304,7 +294,7 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 			client := cloud.Client("image", deletePrefix)
 			client.MoreHeaders = map[string]string{"X-Source": "captured"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if !strings.HasPrefix(r.URL.Path, deletePrefix) || r.Header.Get("X-Source") != "captured" {
 					t.Error("source changes retargeted request", r.URL, r.Header)
@@ -326,7 +316,7 @@ func TestDeleteImagePreparedSnapshotsAndSource(t *testing.T) {
 				}
 				cloud.Provider.SetToken("after-list")
 				return deleteWire(200, io.NopCloser(strings.NewReader(`{"images":[{"id":"fixed","name":"needle"}]}`))), nil
-			})
+			}))
 			v, err := image.New(client).DeleteImage(context.Background(), resource.Name("needle"))
 			if change == "valid prefix and headers" {
 				if err != nil || v == nil || calls.Load() != 2 {
@@ -361,7 +351,7 @@ func TestDeleteImageExactNameResolutionAndFailures(t *testing.T) {
 			} else if mode == "one exact match across all pages" {
 				options = []image.DeleteImageOption{image.WithDeleteImageStore("fast")}
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				sequence = append(sequence, r.Method+" "+r.URL.Path+"?"+r.URL.RawQuery)
 				if r.Method == http.MethodDelete {
 					if r.URL.Path != deletePrefix+"stores/fast/fixed" || r.URL.RawQuery != "" {
@@ -413,7 +403,7 @@ func TestDeleteImageExactNameResolutionAndFailures(t *testing.T) {
 				}
 				bodies = append(bodies, body)
 				return deleteWire(code, body), nil
-			})
+			}))
 			v, err := image.New(client).DeleteImage(ctx, resource.Name("needle"), options...)
 			switch mode {
 			case "one exact match across all pages":
@@ -466,13 +456,13 @@ func TestDeleteImageNotFoundPolicyAndClassification(t *testing.T) {
 					path = deletePrefix + "stores/fast/fixed"
 					options = append(options, image.WithDeleteImageStore(store))
 				}
-				cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if r.Method != http.MethodDelete || r.URL.Path != path {
 						t.Error(r.Method, r.URL)
 					}
 					return wire, nil
-				})
+				}))
 				v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), options...)
 				if v != nil || calls.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {
 					t.Fatal(v, err, calls.Load(), retries.Load(), body.closes.Load())
@@ -519,7 +509,7 @@ func TestDeleteImageNotFoundPolicyAndClassification(t *testing.T) {
 				retries.Add(1)
 				return errors.New("replay")
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return deleteWire(404, body), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return deleteWire(404, body), nil }))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(ctx, resource.ID("fixed"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			var missing *resource.NotFoundError
@@ -569,7 +559,7 @@ func TestDeleteImageAcceptedProofAndCancellation(t *testing.T) {
 				retries.Add(1)
 				return errors.New("must not replay accepted DELETE")
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return wire, nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return wire, nil }))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(ctx, resource.ID("fixed"), image.WithDeleteImageStore("fast"))
 			var proof *resource.ResponseError
 			if v == nil || v.ImageID != "fixed" || v.StoreID != "fast" || v.StatusCode != 204 || string(v.Body) != wantBody || v.Header.Get("X-Request-Id") != "actual-delete" || !errors.As(err, &proof) || proof.StatusCode != 204 || string(proof.Body) != wantBody || proof.Header.Get("X-Request-Id") != "actual-delete" || calls.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {
@@ -599,11 +589,11 @@ func TestDeleteImageAcceptedProofAndCancellation(t *testing.T) {
 			}
 			var body *deleteBody
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				body = &deleteBody{Reader: &deleteContextReader{ctx: r.Context(), prefix: []byte("accepted prefix")}}
 				return deleteWire(204, body), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(ctx, resource.ID("fixed"))
 			var proof *resource.ResponseError
 			if !errors.Is(err, context.DeadlineExceeded) || v == nil || v.StatusCode != 204 || string(v.Body) != "accepted prefix" || !errors.As(err, &proof) || proof.StatusCode != 204 || string(proof.Body) != "accepted prefix" || calls.Load() != 1 || body == nil || body.closes.Load() != 1 {
@@ -641,7 +631,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				client.MoreHeaders = map[string]string{"X-Source": "later"}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := int(calls.Add(1)) - 1
 				codes := []int{401, backoffCode, 503, 204}
 				tokens := []string{"initial", "reauth", "backoff", "retry"}
@@ -654,7 +644,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				body := &deleteBody{Reader: strings.NewReader(fmt.Sprint(codes[n]))}
 				bodies = append(bodies, body)
 				return deleteWire(codes[n], body), nil
-			})
+			}))
 			v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"), image.WithDeleteImageStore("fast"))
 			if err != nil || v == nil || v.StatusCode != 204 || string(v.Body) != "204" || calls.Load() != 4 || reauth.Load() != 1 || backoff.Load() != 1 || retries.Load() != 1 || cloud.Provider.ReauthFunc == nil || cloud.Provider.RetryBackoffFunc == nil || cloud.Provider.RetryFunc == nil {
 				t.Fatal(v, err, calls.Load(), reauth.Load(), backoff.Load(), retries.Load())
@@ -688,7 +678,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				if r.Method != http.MethodDelete || r.URL.Path != deletePrefix+"images/fixed" || r.URL.RawQuery != "" || r.Body != nil {
 					t.Error("retry changed deletion request", r.Method, r.URL, r.Body)
 				}
@@ -696,7 +686,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 					return deleteWire(503, body), nil
 				}
 				return deleteWire(204, io.NopCloser(strings.NewReader("unexpected replay"))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &native) || native.Actual != 503 || string(native.Body) != "prebody failure" || native.ResponseHeader.Get("X-Request-Id") != "actual-delete" || calls.Load() != 1 || callbacks.Load() != 1 || body.closes.Load() != 1 {
@@ -726,7 +716,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 					return errors.Join(cause, deleteNative404("retry://not-wire"))
 				}
 			}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if mode == "transport nested404" {
 					return nil, errors.Join(cause, deleteNative404(r.URL.String()))
@@ -740,7 +730,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				body := &deleteBody{Reader: strings.NewReader(fmt.Sprint(code))}
 				bodies = append(bodies, body)
 				return deleteWire(code, body), nil
-			})
+			}))
 			v, err := image.New(client).DeleteImage(context.Background(), resource.ID("fixed"))
 			if v != nil || err == nil {
 				t.Fatal(v, err, calls.Load(), callbacks.Load())
@@ -771,7 +761,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 			var calls, redirects atomic.Int32
 			cloud.Provider.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects.Add(1); return nil }
 			body := &deleteBody{Reader: strings.NewReader("redirect proof")}
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodDelete || r.URL.Path != deletePrefix+"images/fixed" {
 					t.Error(r.Method, r.URL)
@@ -779,7 +769,7 @@ func TestDeleteImageProviderHooksAndRedirects(t *testing.T) {
 				wire := deleteWire(code, body)
 				wire.Header.Set("Location", "https://foreign.invalid/redirected")
 				return wire, nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"))
 			if v != nil || !gophercloud.ResponseCodeIs(err, code) || calls.Load() != 1 || redirects.Load() != 0 || body.closes.Load() != 1 {
 				t.Fatal(v, err, calls.Load(), redirects.Load(), body.closes.Load())
@@ -797,13 +787,13 @@ func TestDeleteImageNativeDeleteCompatibility(t *testing.T) {
 			cloud := testcloud.New(t)
 			body := &deleteBody{Reader: strings.NewReader("server-owned error or unexpected acknowledgement")}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodDelete || r.URL.Path != deletePrefix+"stores/fast/fixed" {
 					t.Error(r.Method, r.URL)
 				}
 				return deleteWire(code, body), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", deletePrefix)).DeleteImage(context.Background(), resource.ID("fixed"), image.WithDeleteImageStore("fast"))
 			var native gophercloud.ErrUnexpectedResponseCode
 			if v != nil || !errors.As(err, &native) || native.Actual != code || string(native.Body) != "server-owned error or unexpected acknowledgement" || native.ResponseHeader.Get("X-Request-Id") != "actual-delete" || calls.Load() != 1 || body.closes.Load() != 1 {
@@ -818,13 +808,13 @@ func TestDeleteImageNativeDeleteCompatibility(t *testing.T) {
 				client := cloud.Client("image", deletePrefix)
 				body := &deleteBody{Reader: strings.NewReader("native raw bytes")}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = deleteTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if r.Method != http.MethodDelete || r.URL.Path != deletePrefix+"images/fixed" {
 						t.Error(r.Method, r.URL)
 					}
 					return deleteWire(code, body), nil
-				})
+				}))
 				var err error
 				switch mode {
 				case "native Delete":

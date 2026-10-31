@@ -9,14 +9,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type infoTransport func(*http.Request) (*http.Response, error)
-
-func (value infoTransport) RoundTrip(req *http.Request) (*http.Response, error) { return value(req) }
 
 type infoReader func([]byte) (int, error)
 
@@ -31,7 +28,7 @@ type infoBody struct {
 func (value *infoBody) Read(buffer []byte) (int, error) { return value.reader.Read(buffer) }
 func (value *infoBody) Close() error                    { value.closes++; return value.closeErr }
 
-func infoClient(transport infoTransport) *gophercloud.ServiceClient {
+func infoClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
 	provider.UseTokenLock()
 	provider.SetToken("before")

@@ -24,16 +24,6 @@ import (
 
 const usagePrefix = "/reverse/usage/glance/v2/"
 
-type usageTransport func(*http.Request) (*http.Response, error)
-
-func (f usageTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type usageBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -54,9 +44,9 @@ type usageReader func([]byte) (int, error)
 func (f usageReader) Read(p []byte) (int, error) { return f(p) }
 
 func usageWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"Content-Type": {"application/json"}, "X-Request-Id": {"actual-usage"},
-	}, Body: body}
+	})
 }
 
 func usageClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -92,13 +82,13 @@ func TestServiceInfoUsageDefaultRouteAndPassiveModels(t *testing.T) {
 			body := &usageBody{Reader: strings.NewReader(raw)}
 			wire := usageWire(200, body)
 			wire.Header.Set("Location", "https://foreign.invalid/not-a-quota-target")
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodGet || r.URL.Path != usagePrefix+"info/usage" || r.URL.RawQuery != "" || r.Body != nil || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "ordinary" || r.Header.Get("X-Auth-Token") != "latest" || r.Header.Get("OpenStack-API-Version") != "image 2.10" {
 					t.Error(r.Method, r.URL, r.Header, r.Body)
 				}
 				return wire, nil
-			})
+			}))
 			api := serviceinfo.New(client)
 			value, err := api.GetUsageInfo(context.Background(), serviceinfo.WithGetUsageInfoHeader("X-Option", "ordinary"))
 			if err != nil || value == nil || value.Usage == nil || value.StatusCode != 200 || value.Header.Get("X-Request-Id") != "actual-usage" || value.Header.Get("Location") == "" || string(value.Body["usage"]) == "" || api.RawClient() != client || calls.Load() != 1 || body.closes.Load() != 1 {
@@ -136,9 +126,9 @@ func TestServiceInfoUsageCanonicalPresenceAndSchemaFailures(t *testing.T) {
 	t.Run("canonical presence precision and case decoys", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		raw := `{"usage":{"missing":{},"null":{"limit":null,"usage":null},"zero":{"limit":0,"usage":0,"LIMIT":"decoy","Usage":true},"bounds":{"limit":-9223372036854775808,"usage":9223372036854775807},"precise":{"usage":9007199254740993}},"Usage":12,"quota":{"usage":false}}`
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 			return usageWire(200, io.NopCloser(strings.NewReader(raw))), nil
-		})
+		}))
 		value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 		if err != nil || value == nil || len(value.Usage) != 5 {
 			t.Fatal(value, err)
@@ -165,10 +155,10 @@ func TestServiceInfoUsageCanonicalPresenceAndSchemaFailures(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			body := &usageBody{Reader: strings.NewReader(raw)}
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return usageWire(200, body), nil
-			})
+			}))
 			value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 			if value != nil || err == nil || calls.Load() != 1 || body.closes.Load() != 1 {
 				t.Fatal(value, err, calls.Load(), body.closes.Load())
@@ -211,10 +201,10 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 				client.Microversion = "2.10\ninvalid"
 			}
 			var calls, callbacks atomic.Int32
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nil, errors.New("preflight reached HTTP")
-			})
+			}))
 			value, err := api.GetUsageInfo(ctx, func(*request.Config[serviceinfo.GetUsageInfoOpts]) error { callbacks.Add(1); return nil })
 			if value != nil || !errors.Is(err, want) || mode == "canceled" && !errors.Is(err, cause) || calls.Load() != 0 || callbacks.Load() != 0 {
 				t.Fatal(value, err, calls.Load(), callbacks.Load())
@@ -225,10 +215,10 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 		t.Run(mode, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nil, errors.New("option reached HTTP")
-			})
+			}))
 			cause := errors.New("usage callback")
 			want := error(resource.ErrInvalidOption)
 			option := serviceinfo.GetUsageInfoOption(func(c *request.Config[serviceinfo.GetUsageInfoOpts]) error {
@@ -280,14 +270,14 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 			}
 			return nil
 		}}
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			retained.Headers["X-Option"] = "late"
 			if r.Header.Get("X-Option") != "prepared" {
 				t.Error(r.Header)
 			}
 			return usageWire(200, io.NopCloser(strings.NewReader(`{"usage":{}}`))), nil
-		})
+		}))
 		value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background(), options...)
 		if err != nil || value == nil || calls.Load() != 1 || callbacks.Load() != 2 {
 			t.Fatal(value, err, calls.Load(), callbacks.Load())
@@ -296,13 +286,13 @@ func TestServiceInfoUsageCompletePreflightAndPreparedOptions(t *testing.T) {
 	t.Run("ordinary header options reusable in parallel", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.Path != usagePrefix+"info/usage" || r.URL.RawQuery != "" || r.Body != nil || r.Header.Get("X-Option") != "reusable" {
 				t.Error(r.URL, r.Header, r.Body)
 			}
 			return usageWire(200, io.NopCloser(strings.NewReader(`{"usage":{}}`))), nil
-		})
+		}))
 		api := serviceinfo.New(usageClient(cloud))
 		option := serviceinfo.WithGetUsageInfoHeader("X-Option", "reusable")
 		var workers sync.WaitGroup
@@ -352,7 +342,7 @@ func TestServiceInfoUsageAcceptedFailuresAndStrictStatuses(t *testing.T) {
 				retries.Add(1)
 				return errors.New("accepted replay")
 			}
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return wire, nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return wire, nil }))
 			value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(ctx)
 			if value != nil || strings.Contains(mode, "read") && !errors.Is(err, readCause) || strings.Contains(mode, "close") && !errors.Is(err, closeCause) || strings.Contains(mode, "cancel") && (!errors.Is(err, context.Canceled) || !errors.Is(err, cancelCause)) || calls.Load() != 1 || retries.Load() != 0 || body.closes.Load() != 1 {
 				t.Fatal(value, err, calls.Load(), retries.Load(), body.closes.Load())
@@ -365,13 +355,13 @@ func TestServiceInfoUsageAcceptedFailuresAndStrictStatuses(t *testing.T) {
 			cloud := testcloud.New(t)
 			body := &usageBody{Reader: strings.NewReader("native usage rejection")}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodGet || r.URL.Path != usagePrefix+"info/usage" || r.URL.RawQuery != "" {
 					t.Error("usage rejection invoked fallback", r.Method, r.URL)
 				}
 				return usageWire(code, body), nil
-			})
+			}))
 			value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 			var native gophercloud.ErrUnexpectedResponseCode
 			var accepted *resource.ResponseError
@@ -384,7 +374,7 @@ func TestServiceInfoUsageAcceptedFailuresAndStrictStatuses(t *testing.T) {
 		cloud := testcloud.New(t)
 		cause := errors.Join(errors.New("usage transport"), gophercloud.ErrUnexpectedResponseCode{Method: "GET", URL: "https://foreign.invalid/decoy", Actual: 404})
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, cause })
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return nil, cause }))
 		value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 		if value != nil || !errors.Is(err, cause) || calls.Load() != 1 {
 			t.Fatal(value, err, calls.Load())
@@ -393,7 +383,7 @@ func TestServiceInfoUsageAcceptedFailuresAndStrictStatuses(t *testing.T) {
 	t.Run("prior discovery and native Get stay callable", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			raw := `{"usage":{}}`
 			switch r.URL.Path {
@@ -406,7 +396,7 @@ func TestServiceInfoUsageAcceptedFailuresAndStrictStatuses(t *testing.T) {
 				t.Error(r.URL)
 			}
 			return usageWire(200, io.NopCloser(strings.NewReader(raw))), nil
-		})
+		}))
 		client := usageClient(cloud)
 		api := serviceinfo.New(client)
 		usage, usageErr := api.GetUsageInfo(context.Background())
@@ -426,13 +416,13 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 			client := usageClient(cloud)
 			client.MoreHeaders = map[string]string{"X-Source": "captured"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.URL.Path != usagePrefix+"info/usage" || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Auth-Token") != "after-callback" {
 					t.Error("callback changed captured scope", r.URL, r.Header)
 				}
 				return usageWire(200, io.NopCloser(strings.NewReader(`{"usage":{}}`))), nil
-			})
+			}))
 			value, err := serviceinfo.New(client).GetUsageInfo(context.Background(), func(*request.Config[serviceinfo.GetUsageInfoOpts]) error {
 				switch change {
 				case "valid prefix headers token":
@@ -483,7 +473,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 			return nil
 		}
 		originalRetry := reflect.ValueOf(cloud.Provider.RetryFunc).Pointer()
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := int(calls.Add(1)) - 1
 			codes, tokens := []int{401, 429, 503, 200}, []string{"initial", "reauth", "backoff", "retry"}
 			if n >= len(codes) {
@@ -495,7 +485,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 			body := &usageBody{Reader: strings.NewReader(`{"usage":{}}`)}
 			bodies = append(bodies, body)
 			return usageWire(codes[n], body), nil
-		})
+		}))
 		value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 		if err != nil || value == nil || calls.Load() != 4 || reauth.Load() != 1 || backoff.Load() != 1 || retry.Load() != 1 || reflect.ValueOf(cloud.Provider.RetryFunc).Pointer() != originalRetry {
 			t.Fatal(value, err, calls.Load(), reauth.Load(), backoff.Load(), retry.Load())
@@ -529,7 +519,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				if r.Body != nil || r.URL.Path != usagePrefix+"info/usage" || r.URL.RawQuery != "" {
 					t.Error(r.Body, r.URL)
 				}
@@ -542,7 +532,7 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				bodies = append(bodies, body)
 				return usageWire(code, body), nil
-			})
+			}))
 			value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 			wantCode, wantCalls, wantBody := 503, int32(1), "original503"
 			if change == "OkCodes" {
@@ -570,10 +560,10 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 		var calls, reauthCalls atomic.Int32
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauthCalls.Add(1); return cause }
 		body := &usageBody{Reader: strings.NewReader("unauthorized")}
-		cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return usageWire(401, body), nil
-		})
+		}))
 		value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 		var reauth *gophercloud.ErrUnableToReauthenticate
 		if value != nil || !errors.As(err, &reauth) || !errors.Is(reauth.ErrReauth, cause) || !gophercloud.ResponseCodeIs(reauth.ErrOriginal, 401) || calls.Load() != 1 || reauthCalls.Load() != 1 || body.closes.Load() != 1 {
@@ -587,12 +577,12 @@ func TestServiceInfoUsageProviderSourceAndRetryBoundaries(t *testing.T) {
 			body := &usageBody{Reader: strings.NewReader("redirect evidence")}
 			cloud.Provider.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { policies.Add(1); return nil }
 			originalPolicy := reflect.ValueOf(cloud.Provider.HTTPClient.CheckRedirect).Pointer()
-			cloud.Provider.HTTPClient.Transport = usageTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				wire := usageWire(code, body)
 				wire.Header.Set("Location", "https://foreign.invalid/usage?project_id=other")
 				return wire, nil
-			})
+			}))
 			value, err := serviceinfo.New(usageClient(cloud)).GetUsageInfo(context.Background())
 			if value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 1 || policies.Load() != 1 || body.closes.Load() != 1 || reflect.ValueOf(cloud.Provider.HTTPClient.CheckRedirect).Pointer() != originalPolicy {
 				t.Fatal(value, err, calls.Load(), policies.Load(), body.closes.Load())

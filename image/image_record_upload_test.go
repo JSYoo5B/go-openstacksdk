@@ -15,6 +15,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -318,7 +319,7 @@ func TestImageRecordUploadInvalidMetadataSyntaxPreservesConstructorDirtyIDAndLat
 	for _, raw := range []string{"", "not JSON", `{"broken":`} {
 		t.Run(raw, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			handler = func(req *http.Request) (*http.Response, error) {

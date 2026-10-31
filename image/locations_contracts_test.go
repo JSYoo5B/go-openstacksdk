@@ -26,16 +26,6 @@ const locationsPrefix = "/reverse/locations/glance/v2/"
 const locationsBase = "https://glance.invalid" + locationsPrefix
 const locationsURL = "cinder://store/object1?literal=%2F#fragment"
 
-type locationsTransport func(*http.Request) (*http.Response, error)
-
-func (f locationsTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type locationsBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -56,13 +46,13 @@ type locationsReader func([]byte) (int, error)
 func (f locationsReader) Read(p []byte) (int, error) { return f(p) }
 
 func locationsWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"Content-Type": {"application/json"}, "X-Request-Id": {"actual-locations"},
-	}, Body: body}
+	})
 }
 
-func locationsClient(transport locationsTransport) *gophercloud.ServiceClient {
-	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
+func locationsClient(transport func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(transport)}}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: provider, Type: "image", Endpoint: locationsBase}
@@ -484,7 +474,7 @@ func TestImageLocationsPreparedOptionsAndExactNames(t *testing.T) {
 				var bodies []*locationsBody
 				client := locationsClient(nil)
 				client.MoreHeaders = map[string]string{"X-Source": "captured"}
-				client.HTTPClient.Transport = locationsTransport(func(r *http.Request) (*http.Response, error) {
+				client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "prepared" {
 						t.Error("captured options lost", r.Header)
@@ -710,7 +700,7 @@ func TestImageLocationsProviderHooksAndExistingCompatibility(t *testing.T) {
 				return nil
 			}
 			originalRetry := reflect.ValueOf(client.RetryFunc).Pointer()
-			client.HTTPClient.Transport = locationsTransport(func(r *http.Request) (*http.Response, error) {
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := int(calls.Add(1)) - 1
 				codes, tokens := []int{401, 429, 503, 200}, []string{"initial", "reauth", "backoff", "retry"}
 				if add {

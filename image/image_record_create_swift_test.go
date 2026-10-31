@@ -14,12 +14,13 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func imageCreateTaskServices(t *testing.T, transport taskCoreTransport) (*Service, *objectapi.Service, *int) {
+func imageCreateTaskServices(t *testing.T, transport testcloud.RoundTripperFunc) (*Service, *objectapi.Service, *int) {
 	t.Helper()
 	client := taskCoreClient(transport)
 	swiftClient := &gophercloud.ServiceClient{ProviderClient: client.ProviderClient, Endpoint: "https://swift.example/v1/AUTH_project/", Type: "object-store"}

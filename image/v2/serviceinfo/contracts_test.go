@@ -23,16 +23,6 @@ import (
 
 const infoPrefix = "/reverse/glance/v2/"
 
-type infoTransport func(*http.Request) (*http.Response, error)
-
-func (f infoTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type infoBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -60,9 +50,9 @@ func (b *infoReadFailure) Read(p []byte) (int, error) {
 }
 
 func infoWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"Content-Type": {"application/json"}, "X-Request-Id": {"actual-info"},
-	}, Body: body}
+	})
 }
 
 func infoClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -100,13 +90,13 @@ func TestServiceInfoDefaultRoutesAndEvidence(t *testing.T) {
 			body := &infoBody{Reader: strings.NewReader(raw)}
 			wire := infoWire(200, body)
 			wire.Header.Set("Location", "https://foreign.invalid/not-a-resource")
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodGet || r.URL.Path != path || r.URL.RawQuery != "" || r.Body != nil || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "ordinary" || r.Header.Get("X-Auth-Token") != "live-token" || r.Header.Get("OpenStack-API-Version") != "image 2.10" {
 					t.Error(r.Method, r.URL, r.Header, r.Body)
 				}
 				return wire, nil
-			})
+			}))
 			api := serviceinfo.New(client)
 			if api.RawClient() != client {
 				t.Fatal("API changed original client")
@@ -154,9 +144,9 @@ func TestServiceInfoCanonicalModelsAndPresence(t *testing.T) {
 	t.Run("store exact flags optional values and raw precision", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		raw := `{"stores":[{"id":"fixed","ID":12,"description":"canonical","Description":12,"default":"false","is_default":true,"DEFAULT":12,"read-only":"true","Read-Only":12,"type":"rbd","TYPE":12,"weight":0,"WEIGHT":"decoy","properties":{"large":9223372036854775808,"fraction":1.000000000000000000001},"unknown":{"future":true}},{"id":null,"description":null,"default":null,"read-only":null,"type":null,"weight":null,"properties":null},{"id":"omitted"},{"id":"empty","default":false,"read-only":true,"type":"","weight":-3,"properties":{}}]}`
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 			return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
-		})
+		}))
 		v, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background())
 		if err != nil || len(v) != 4 || v[0].ID != "fixed" || v[0].Description != "canonical" || v[0].IsDefault == nil || *v[0].IsDefault || v[0].ReadOnly == nil || !*v[0].ReadOnly || v[0].Type == nil || *v[0].Type != "rbd" || v[0].Weight == nil || *v[0].Weight != 0 || string(v[0].Properties["large"]) != "9223372036854775808" || string(v[0].Properties["fraction"]) != "1.000000000000000000001" || string(v[0].Body["ID"]) != "12" || string(v[0].Body["is_default"]) != "true" || string(v[0].Body["unknown"]) != `{"future":true}` {
 			t.Fatal(v, err)
@@ -171,9 +161,9 @@ func TestServiceInfoCanonicalModelsAndPresence(t *testing.T) {
 	for _, raw := range []string{`{}`, `{"import-methods":null}`, `{"Import-Methods":17}`, `{"import":{"import-methods":{"value":["decoy"]}}}`, `{"import-methods":{}}`, `{"import-methods":{"description":null,"type":null,"value":null}}`, `{"import-methods":{"description":"available","Description":12,"type":"array","Type":12,"value":[],"Value":12,"future":{"large":9223372036854775808}}}`} {
 		t.Run("import presence "+raw, func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
-			})
+			}))
 			v, err := serviceinfo.New(infoClient(cloud)).GetImportInfo(context.Background())
 			if err != nil || v == nil || v.StatusCode != 200 {
 				t.Fatal(v, err)
@@ -198,7 +188,7 @@ func TestServiceInfoCanonicalModelsAndPresence(t *testing.T) {
 		t.Run("invalid stores "+raw, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			body := &infoBody{Reader: strings.NewReader(raw)}
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) { return infoWire(200, body), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { return infoWire(200, body), nil }))
 			v, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background())
 			if v != nil || err == nil || body.closes.Load() != 1 {
 				t.Fatal(v, err, body.closes.Load())
@@ -209,9 +199,9 @@ func TestServiceInfoCanonicalModelsAndPresence(t *testing.T) {
 	for _, raw := range []string{"null", "[]", `{"import-methods":1}`, `{"import-methods":{"description":1}}`, `{"import-methods":{"type":[]}}`, `{"import-methods":{"value":{}}}`, `{"import-methods":{"value":[1]}}`, string([]byte("{\"unknown\":\"\xff\"}"))} {
 		t.Run("invalid import "+raw, func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 				return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
-			})
+			}))
 			v, err := serviceinfo.New(infoClient(cloud)).GetImportInfo(context.Background())
 			if v != nil || err == nil {
 				t.Fatal(v, err)
@@ -227,7 +217,7 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := infoClient(cloud)
 			var calls, callbacks atomic.Int32
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil }))
 			ctx := context.Background()
 			cause := errors.New("preflight cancellation")
 			want := error(resource.ErrInvalidOption)
@@ -272,7 +262,7 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := infoClient(cloud)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil })
+			cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil }))
 			cause := errors.New("option failed")
 			want := error(resource.ErrInvalidOption)
 			var option serviceinfo.ListStoresOption
@@ -320,7 +310,7 @@ func TestServiceInfoCompletePreflight(t *testing.T) {
 	for _, option := range []serviceinfo.GetImportInfoOption{nil, request.WithField[serviceinfo.GetImportInfoOpts]("unexpected", true), request.WithQuery[serviceinfo.GetImportInfoOpts]("id", "not-supported"), request.WithArgument[serviceinfo.GetImportInfoOpts]("microversion", "2.10"), serviceinfo.WithGetImportInfoHeader("X-Auth-Token", "override")} {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil })
+		cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(500, http.NoBody), nil }))
 		v, err := serviceinfo.New(infoClient(cloud)).GetImportInfo(context.Background(), option)
 		if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(v, err, calls.Load())
@@ -359,14 +349,14 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 		if calls.Load() != 0 || first.Load() != 0 || second.Load() != 0 {
 			t.Fatal("list was not lazy")
 		}
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			retained.Query["vendor:mode"][0], retained.Headers["X-Option"] = "late", "late"
 			if r.URL.Path != infoPrefix+"info/stores/detail" || r.URL.Query().Get("vendor:mode") != "original" || r.URL.Query().Has("details") || r.URL.Query().Has("paginated") || r.Header.Get("X-Option") != "original" {
 				t.Error(r.URL, r.Header)
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"fixed"}],"next":"https://foreign.invalid/unused"}`))), nil
-		})
+		}))
 		for iteration := 0; iteration < 2; iteration++ {
 			count := 0
 			for store, err := range list {
@@ -386,13 +376,13 @@ func TestServiceInfoPreparedOptionsAndLazyParallelReuse(t *testing.T) {
 	t.Run("standard options and list can be reused in parallel", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls, callbacks atomic.Int32
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.Path != infoPrefix+"info/stores" || r.URL.Query().Has("limit") || r.URL.Query().Has("marker") || r.URL.Query().Get("name") != "wire-only" || r.Header.Get("X-Option") != "ordinary" {
 				t.Error(r.URL, r.Header)
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"unfiltered","name":"different"},{"id":12}],"next":"https://foreign.invalid/unused"}`))), nil
-		})
+		}))
 		options := []serviceinfo.ListStoresOption{serviceinfo.WithListStoresDetails(true), serviceinfo.WithListStoresOptions(serviceinfo.ListStoresOpts{MaxItems: 1}), serviceinfo.WithListStoresQuery("name", "wire-only"), serviceinfo.WithListStoresHeader("X-Option", "ordinary"), func(*request.Config[serviceinfo.ListStoresOpts]) error { callbacks.Add(1); return nil }}
 		list := serviceinfo.New(infoClient(cloud)).ListStores(context.Background(), options...)
 		var workers sync.WaitGroup
@@ -443,7 +433,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 			if test.emptyID {
 				raw = `{"stores":[{"id":"first"},{"id":"","ID":"decoy"}]}`
 			}
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				if calls.Add(1) != 1 {
 					t.Error("fixed configured store set invented another request", r.URL)
 				}
@@ -460,7 +450,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 				// Actual Glance returns its entire configured set regardless of
 				// limit/marker and advertises no continuation for this response.
 				return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
-			})
+			}))
 			values, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background(), serviceinfo.WithListStoresOptions(test.options))
 			if err != nil || len(values) != 2 || values[0].ID != "first" || calls.Load() != 1 {
 				t.Fatal(values, err, calls.Load())
@@ -478,7 +468,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 		t.Run("advertised "+representation, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if r.URL.Path != infoPrefix+"info/stores" || r.URL.Query().Get("vendor") != "a&b" {
 					t.Error(r.URL)
@@ -500,7 +490,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 					wire.Header.Set("Link", `<?marker=second>; rel="next"`)
 				}
 				return wire, nil
-			})
+			}))
 			v, err := serviceinfo.New(infoClient(cloud)).AllStores(context.Background(), serviceinfo.WithListStoresQuery("vendor", "a&b"))
 			if err != nil || len(v) != 2 || v[0].ID != "first" || v[1].ID != "second" || calls.Load() != 2 {
 				t.Fatal(v, err, calls.Load())
@@ -534,7 +524,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 				raw = `{"stores":[{"id":"first"}],"next":"https://foreign.invalid/unused"}`
 				options = []serviceinfo.ListStoresOption{serviceinfo.WithListStoresPaginated(false)}
 			}
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if !strings.HasPrefix(r.URL.Path, infoPrefix) {
 					t.Error("unsafe continuation reached HTTP", r.URL)
@@ -546,7 +536,7 @@ func TestServiceInfoPaginationCapsAndRawMarkers(t *testing.T) {
 					return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":12}]}`))), nil
 				}
 				return infoWire(200, io.NopCloser(strings.NewReader(raw))), nil
-			})
+			}))
 			api := serviceinfo.New(infoClient(cloud))
 			v, err := api.AllStores(context.Background(), options...)
 			if mode == "malformed unused row" || mode == "first page only" {
@@ -609,7 +599,7 @@ func TestServiceInfoAcceptedFailuresAndNativeCompatibility(t *testing.T) {
 					retries.Add(1)
 					return errors.New("accepted replay")
 				}
-				cloud.Provider.HTTPClient.Transport = infoTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(200, body), nil })
+				cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return infoWire(200, body), nil }))
 				api := serviceinfo.New(infoClient(cloud))
 				var err error
 				if phase == "stores" {
@@ -638,7 +628,7 @@ func TestServiceInfoAcceptedFailuresAndNativeCompatibility(t *testing.T) {
 				cloud := testcloud.New(t)
 				body := &infoBody{Reader: strings.NewReader("native error proof")}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					want := infoPrefix + "info/stores/detail"
 					if phase == "import" {
@@ -648,7 +638,7 @@ func TestServiceInfoAcceptedFailuresAndNativeCompatibility(t *testing.T) {
 						t.Error("fallback occurred", r.URL)
 					}
 					return infoWire(code, body), nil
-				})
+				}))
 				api := serviceinfo.New(infoClient(cloud))
 				var err error
 				if phase == "details" {
@@ -674,13 +664,13 @@ func TestServiceInfoAcceptedFailuresAndNativeCompatibility(t *testing.T) {
 	t.Run("native ImageImport.Get ABI and route remain", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.Method != http.MethodGet || r.URL.Path != infoPrefix+"info/import" || r.URL.RawQuery != "" {
 				t.Error(r.Method, r.URL)
 			}
 			return infoWire(200, io.NopCloser(strings.NewReader(`{"import-methods":{"description":"native","type":"array","value":["web-download"]}}`))), nil
-		})
+		}))
 		v, err := nativeimport.New(infoClient(cloud)).Get(context.Background())
 		if err != nil || v == nil || v.ImportMethods.Description != "native" || !reflect.DeepEqual(v.ImportMethods.Value, []string{"web-download"}) || calls.Load() != 1 {
 			t.Fatal(v, err, calls.Load())
@@ -695,7 +685,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 			client := infoClient(cloud)
 			client.MoreHeaders = map[string]string{"X-Source": "captured"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				if r.URL.Path != infoPrefix+"info/stores" || r.Header.Get("X-Source") != "captured" {
 					t.Error("source change retargeted request", r.URL, r.Header)
@@ -717,7 +707,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				cloud.Provider.SetToken("after-page")
 				return infoWire(200, io.NopCloser(strings.NewReader(`{"stores":[{"id":"first"}],"next":"?marker=second"}`))), nil
-			})
+			}))
 			v, err := serviceinfo.New(client).AllStores(context.Background())
 			if change == "valid prefix and headers" {
 				if err != nil || len(v) != 2 || calls.Load() != 2 {
@@ -753,7 +743,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 			cloud.Provider.SetToken("retry")
 			return nil
 		}
-		cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := int(calls.Add(1)) - 1
 			codes, tokens := []int{401, 429, 503, 200}, []string{"initial", "reauth", "backoff", "retry"}
 			if n >= len(codes) {
@@ -765,7 +755,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 			body := &infoBody{Reader: strings.NewReader(`{"import-methods":{"value":[]}}`)}
 			bodies = append(bodies, body)
 			return infoWire(codes[n], body), nil
-		})
+		}))
 		v, err := serviceinfo.New(infoClient(cloud)).GetImportInfo(context.Background())
 		if err != nil || v == nil || v.ImportMethods == nil || v.ImportMethods.Value == nil || calls.Load() != 4 || reauth.Load() != 1 || backoff.Load() != 1 || retry.Load() != 1 {
 			t.Fatal(v, err, calls.Load(), reauth.Load(), backoff.Load(), retry.Load())
@@ -797,7 +787,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 				}
 				return nil
 			}
-			cloud.Provider.HTTPClient.Transport = infoTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				if r.Body != nil || r.URL.Path != infoPrefix+"info/import" {
 					t.Error(r.Body, r.URL)
 				}
@@ -808,7 +798,7 @@ func TestServiceInfoProviderSourceAndRetryBoundaries(t *testing.T) {
 				body := &infoBody{Reader: strings.NewReader("native prebody evidence")}
 				bodies = append(bodies, body)
 				return infoWire(code, body), nil
-			})
+			}))
 			v, err := serviceinfo.New(infoClient(cloud)).GetImportInfo(context.Background())
 			var native gophercloud.ErrUnexpectedResponseCode
 			wantCode, wantCalls := 503, int32(1)

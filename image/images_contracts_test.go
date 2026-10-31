@@ -302,7 +302,7 @@ func TestImageContractsPagingAndConsumption(t *testing.T) {
 		c.MoreHeaders = map[string]string{"X-Source": "first"}
 		var calls atomic.Int32
 		initial := url.Values{"name": {"line\n"}, "limit": {"4"}, "tag": {"first", "second", "first"}, "sort_key": {"name", "size"}, "sort_dir": {"asc", "desc"}, "x-property": {"one", "two"}}
-		c.ProviderClient.HTTPClient.Transport = taskContractsTransport(func(r *http.Request) (*http.Response, error) {
+		c.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := calls.Add(1)
 			want := initial.Encode()
 			wantHeader, wantToken := "first", "initial"
@@ -553,7 +553,7 @@ func TestImageContractsConcreteQueriesAndSource(t *testing.T) {
 		getValue := image.GetImageOpts{Headers: map[string]string{"X-Get": "owned"}}
 		getFull := image.WithGetImageOpts(getValue)
 		getValue.Headers["X-Get"] = "changed"
-		c.HTTPClient.Transport = taskContractsTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Get") != "owned" || r.Header.Get("X-Discard") != "" {
 				t.Error(r.Header)
 			}

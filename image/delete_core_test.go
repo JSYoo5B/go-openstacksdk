@@ -12,19 +12,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type deleteCoreTransport func(*http.Request) (*http.Response, error)
-
-func (value deleteCoreTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	response, err := value(request)
-	if response != nil && response.Request == nil {
-		response.Request = request
-	}
-	return response, err
-}
 
 type deleteCoreBody struct {
 	reader   io.Reader
@@ -39,8 +30,8 @@ type deleteCoreReader func([]byte) (int, error)
 
 func (value deleteCoreReader) Read(buffer []byte) (int, error) { return value(buffer) }
 
-func deleteCoreClient(transport deleteCoreTransport) *gophercloud.ServiceClient {
-	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
+func deleteCoreClient(transport func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(transport)}}
 	provider.UseTokenLock()
 	provider.SetToken("before")
 	return &gophercloud.ServiceClient{ProviderClient: provider, Type: "image", Endpoint: "https://example.test/catalog/", ResourceBase: "https://example.test/reverse/glance/v2/"}
@@ -53,7 +44,7 @@ func deleteCoreHTTP(status int, body io.ReadCloser, headers http.Header) *http.R
 	if headers.Get("Content-Type") == "" {
 		headers.Set("Content-Type", "application/json")
 	}
-	return &http.Response{StatusCode: status, Body: body, Header: headers}
+	return testcloud.StreamResponse(status, body, headers)
 }
 
 func TestDeleteCoreFixedScopeAndOwnedAcknowledgement(t *testing.T) {

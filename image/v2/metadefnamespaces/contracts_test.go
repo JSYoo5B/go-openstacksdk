@@ -28,16 +28,6 @@ const namespaceCollection = "metadefs/namespaces"
 const namespaceObject = `{"namespace":"response::identity","display_name":"display","protected":false,"created_at":"literal-date","self":"https://passive.invalid/entity","schema":"https://passive.invalid/schema"}`
 const namespaceList = `{"namespaces":[` + namespaceObject + `],"first":"https://passive.invalid/first","schema":42}`
 
-type namespaceTransport func(*http.Request) (*http.Response, error)
-
-func (f namespaceTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
-
 type namespaceBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -57,10 +47,10 @@ type namespaceReader func([]byte) (int, error)
 
 func (f namespaceReader) Read(p []byte) (int, error) { return f(p) }
 func namespaceWire(code int, b io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-namespace"}}, Body: b}
+	return testcloud.StreamResponse(code, b, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-namespace"}})
 }
-func namespaceClient(f namespaceTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func namespaceClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: namespaceBase}
@@ -450,7 +440,7 @@ func TestMetadefNamespacesAdvertisedPagingAndControls(t *testing.T) {
 			var calls atomic.Int32
 			var bodies []*namespaceBody
 			client := namespaceClient(nil)
-			client.HTTPClient.Transport = namespaceTransport(func(r *http.Request) (*http.Response, error) {
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				n := calls.Add(1)
 				want := initial
 				if n == 2 {
@@ -976,7 +966,7 @@ func TestMetadefNamespacesOwnedPreparationAndSource(t *testing.T) {
 		client := namespaceClient(nil)
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
 		var calls atomic.Int32
-		client.HTTPClient.Transport = namespaceTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.Header.Get("X-Source") != "before" || r.Header.Get("X-Auth-Token") != "live" {
 				t.Error(r.Header)
@@ -1253,7 +1243,7 @@ func TestMetadefNamespacesResponseOwnershipAndNativeHooks(t *testing.T) {
 			return e
 		}
 		originalProvider, originalRetry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
-		client.HTTPClient.Transport = namespaceTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 201}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

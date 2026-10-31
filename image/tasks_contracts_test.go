@@ -28,16 +28,6 @@ const taskContractsType = "future/type\n"
 const taskContractsObject = `{"id":"response-id","type":"future/type","status":"future/status","input":{"number":9007199254740993,"nested":{"value":1e1000}},"result":{},"owner":"owner","message":"","self":"https://passive.invalid/task","schema":"https://passive.invalid/schema","image_id":"image","request_id":"request","user_id":"user","created_at":"literal-created","updated_at":"literal-updated","expires_at":"literal-expiry","links":17,"x-number":9007199254740995}`
 const taskContractsList = `{"tasks":[` + taskContractsObject + `],"first":"https://passive.invalid/first","schema":42}`
 
-type taskContractsTransport func(*http.Request) (*http.Response, error)
-
-func (f taskContractsTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, err := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, err
-}
-
 type taskContractsBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -57,10 +47,10 @@ type taskContractsReader func([]byte) (int, error)
 
 func (f taskContractsReader) Read(p []byte) (int, error) { return f(p) }
 func taskContractsWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-task"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-task"}})
 }
-func taskContractsClient(f taskContractsTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func taskContractsClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: taskContractsBase}

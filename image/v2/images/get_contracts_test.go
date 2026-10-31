@@ -52,7 +52,7 @@ func TestNativeImageGetRoutesHeadersAndNativeProjection(t *testing.T) {
 			client.Microversion = "2.10"
 			client.MoreHeaders = map[string]string{"X-Source": "direct"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if req.Method != http.MethodGet || req.URL.Path != test.path || req.URL.RawQuery != test.query || req.Body != nil || req.Header.Get("Accept") != "application/json" || req.Header.Get("X-Source") != "direct" || req.Header.Get("X-Auth-Token") != "test-token" || req.Header.Get("OpenStack-API-Version") != "image 2.10" {
 					t.Error(req.Method, req.URL, req.Header)
@@ -62,7 +62,7 @@ func TestNativeImageGetRoutesHeadersAndNativeProjection(t *testing.T) {
 				// Pinned UnmarshalJSON trims the whole value, then drops empty comma fields.
 				wire.Header.Set("OpenStack-image-store-ids", " a,,b ")
 				return wire, nil
-			})
+			}))
 			api := images.New(client)
 			if api.RawClient() != client {
 				t.Fatal("native client identity changed")
@@ -82,9 +82,9 @@ func TestNativeImageGetRoutesHeadersAndNativeProjection(t *testing.T) {
 	}
 	t.Run("null size is zero", func(t *testing.T) {
 		cloud := testcloud.New(t)
-		cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			return nativeDeleteWire(200, io.NopCloser(strings.NewReader(`{"id":"fixed","size":null}`))), nil
-		})
+		}))
 		got, err := images.New(nativeUpdateClient(cloud)).Get(context.Background(), "fixed")
 		if err != nil || got.SizeBytes != 0 || len(got.Properties) != 0 || got.OpenStackImageImportMethods != nil {
 			t.Fatal(got, err)
@@ -97,10 +97,10 @@ func TestNativeImageGetStrictStatusAndDecodeErrors(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nativeDeleteWire(code, io.NopCloser(strings.NewReader(`{"id":"fixed"}`))), nil
-			})
+			}))
 			got, err := images.New(nativeUpdateClient(cloud)).Get(context.Background(), "fixed")
 			operation := nativeGetOperation(t, err)
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -122,9 +122,9 @@ func TestNativeImageGetStrictStatusAndDecodeErrors(t *testing.T) {
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				return nativeDeleteWire(200, io.NopCloser(strings.NewReader(test.body))), nil
-			})
+			}))
 			got, err := images.New(nativeUpdateClient(cloud)).Get(context.Background(), "fixed")
 			nativeGetOperation(t, err)
 			if err == nil || test.partial != (got != nil && got.ID == "fixed") {

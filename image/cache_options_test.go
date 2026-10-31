@@ -79,14 +79,14 @@ func TestImageCacheOptionsOwnPointersCallbacksAndSlices(t *testing.T) {
 		retained = config
 		return nil
 	}
-	client := deleteCoreClient(deleteCoreTransport(func(r *http.Request) (*http.Response, error) {
+	client := deleteCoreClient(func(r *http.Request) (*http.Response, error) {
 		retained.Headers["X-A"] = "transport"
 		*retained.IgnoreMissing = true
 		if r.Header.Get("X-A") != "owned" {
 			t.Fatal(r.Header)
 		}
 		return deleteCoreHTTP(204, io.NopCloser(strings.NewReader("")), nil), nil
-	}))
+	})
 	value, err := New(client).CacheDeleteImage(context.Background(), resource.ID("id"), options...)
 	if value == nil || err != nil || secondCalls != 1 {
 		t.Fatal(value, err, secondCalls)
@@ -109,7 +109,7 @@ func TestImageCacheOptionsOwnPointersCallbacksAndSlices(t *testing.T) {
 		t.Fatal(cleared, err)
 	}
 	cause := errors.New("option cause")
-	client = deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP after option error"); return nil, nil }))
+	client = deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP after option error"); return nil, nil })
 	if value, err := New(client).CleanCache(context.Background(), func(*CacheOpts) error { return cause }); value != nil || !errors.Is(err, cause) {
 		t.Fatal(value, err)
 	}
@@ -141,7 +141,7 @@ func TestImageCacheOptionsProtectedHeadersAndCompleteDefaults(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, target := range []CacheTarget{3, 255} {
-		client := deleteCoreClient(deleteCoreTransport(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP invalid target"); return nil, nil }))
+		client := deleteCoreClient(func(*http.Request) (*http.Response, error) { t.Fatal("HTTP invalid target"); return nil, nil })
 		if value, err := New(client).ClearCache(context.Background(), WithClearCacheTarget(target)); value != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(value, err)
 		}

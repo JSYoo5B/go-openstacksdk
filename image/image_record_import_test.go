@@ -14,11 +14,12 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func imageRecordImportFetched(t *testing.T, service *Service, handler *taskCoreTransport) *ImageRecord {
+func imageRecordImportFetched(t *testing.T, service *Service, handler *testcloud.RoundTripperFunc) *ImageRecord {
 	t.Helper()
 	return imageRecordUpdateFetched(t, service, `{"id":"fixed","status":"queued","container_format":"bare","disk_format":"qcow2","name":"before","size":"04","protected":"false","vendor":{"precise":900719925474099312345}}`, handler)
 }
@@ -43,7 +44,7 @@ func imageRecordImportPayload(t *testing.T, request *http.Request, want string) 
 	}
 	return got
 }
-func imageRecordImportStoreRecords(t *testing.T, client *gophercloud.ServiceClient, handler *taskCoreTransport, rows string, count int) []*serviceinfo.StoreRecord {
+func imageRecordImportStoreRecords(t *testing.T, client *gophercloud.ServiceClient, handler *testcloud.RoundTripperFunc, rows string, count int) []*serviceinfo.StoreRecord {
 	t.Helper()
 	*handler = func(req *http.Request) (*http.Response, error) {
 		if req.Method != http.MethodGet || req.URL.EscapedPath() != "/reverse/glance/v2/info/stores" {
@@ -77,7 +78,7 @@ func TestImageRecordImportOpaqueAcceptedResponsesKeepPreparedRecordAndIndependen
 		t.Run(fmt.Sprint(test.code), func(t *testing.T) {
 			calls, locations := 0, 0
 			cloud := "initial"
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{Cloud: &cloud}, nil }})
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -151,7 +152,7 @@ func TestImageRecordImportFormatsUseRawPythonTruthinessWithoutStatusOrAllowList(
 		for _, raw := range []string{"", `null`, `false`, `0`, `""`, `[]`, `{}`} {
 			t.Run(field+"="+raw, func(t *testing.T) {
 				calls := 0
-				var handler taskCoreTransport
+				var handler testcloud.RoundTripperFunc
 				client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 				service := New(client)
 				seed := imageRecordImportFetched(t, service, &handler)
@@ -171,7 +172,7 @@ func TestImageRecordImportFormatsUseRawPythonTruthinessWithoutStatusOrAllowList(
 	for _, raw := range []string{`true`, `1`, `" "`, `[null]`, `{"future":true}`} {
 		t.Run("truthy formats="+raw, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -193,7 +194,7 @@ func TestImageRecordImportMethodPreservesOmittedNullUnknownAndAdminBranchValues(
 	for _, raw := range []string{"", `null`, `""`, `"future-method"`, `false`, `17`, `[null]`, `{"future":true}`, `"web-download"`, `"glance-download"`, `"copy-image"`} {
 		t.Run("method="+raw, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -216,7 +217,7 @@ func TestImageRecordImportMethodPreservesOmittedNullUnknownAndAdminBranchValues(
 	}
 	t.Run("helper nil explicitly sends null", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordImportFetched(t, service, &handler)
@@ -235,7 +236,7 @@ func TestImageRecordImportURIUsesTruthyDomainAndExactWebDownloadGuard(t *testing
 	for _, raw := range []string{`null`, `false`, `0`, `""`, `[]`, `{}`} {
 		t.Run("falsey URI="+raw, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -252,7 +253,7 @@ func TestImageRecordImportURIUsesTruthyDomainAndExactWebDownloadGuard(t *testing
 	for _, raw := range []string{`"not-a-URL"`, `true`, `1`, `[null]`, `{"future":true}`} {
 		t.Run("truthy web URI="+raw, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -269,7 +270,7 @@ func TestImageRecordImportURIUsesTruthyDomainAndExactWebDownloadGuard(t *testing
 	for _, method := range []any{"Web-download", "", nil, map[string]any{"name": "web-download"}} {
 		t.Run(fmt.Sprintf("wrong method=%v", method), func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -293,7 +294,7 @@ func TestImageRecordImportRemoteTupleRequiresAllThreeTruthyValuesUnderAnyMethod(
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -317,7 +318,7 @@ func TestImageRecordImportSingularStoreEmitsBodyAndCompatibilityHeaderAndRemoves
 	for _, mode := range []string{"literal", "empty literal", "SDK private Record", "no typed selection", "plural only"} {
 		t.Run(mode, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			var selector ImageRecordImportStore
 			if mode == "SDK private Record" {
@@ -379,7 +380,7 @@ func TestImageRecordImportSingularStoreEmitsBodyAndCompatibilityHeaderAndRemoves
 
 func TestImageRecordImportPluralStoreConstructorsPreserveRawIDsOrderDuplicatesAndMissingNull(t *testing.T) {
 	calls := 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	records := imageRecordImportStoreRecords(t, client, &handler, `[{"id":"SDK"},{"id":null},{"name":"not alternate ID"},{"id":900719925474099312345}]`, 4)
 	records[0].Resource.Body["id"] = json.RawMessage(`"public decoy"`)
@@ -410,7 +411,7 @@ func TestImageRecordImportPluralStoreConstructorsPreserveRawIDsOrderDuplicatesAn
 
 func TestImageRecordImportStoreSelectorsRejectConflictsUnsafeHeadersAndConstructorControls(t *testing.T) {
 	calls := 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	records := imageRecordImportStoreRecords(t, client, &handler, `[{"id":null},{"id":17},{"id":"safe"}]`, 3)
 	service := New(client)
@@ -457,7 +458,7 @@ func TestImageRecordImportFlagsPreserveFalseyPresenceAndRejectTruthyStoreConflic
 		for _, raw := range []string{`null`, `false`, `0`, `""`, `[]`, `{}`, `"truthy"`} {
 			t.Run(field+"="+raw, func(t *testing.T) {
 				calls := 0
-				var handler taskCoreTransport
+				var handler testcloud.RoundTripperFunc
 				client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 				service := New(client)
 				seed := imageRecordImportFetched(t, service, &handler)
@@ -483,7 +484,7 @@ func TestImageRecordImportFlagsPreserveFalseyPresenceAndRejectTruthyStoreConflic
 	for _, mode := range []string{"truthy singular", "truthy plural", "singular plus plural", "false singular allowed", "empty plural omitted"} {
 		t.Run(mode, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -536,7 +537,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 	for repeat := 0; repeat < 2; repeat++ {
 		t.Run(fmt.Sprintf("reused=%d", repeat), func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -555,7 +556,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 	}
 	t.Run("full opts replaces every namespace and selection", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordImportFetched(t, service, &handler)
@@ -580,7 +581,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 	})
 	t.Run("plural helper replacement and ordinary canonical last value", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordImportFetched(t, service, &handler)
@@ -600,7 +601,7 @@ func TestImageRecordImportExtensionAndFullOptionsFactoriesAreSnapshotsAndReusabl
 
 func TestImageRecordImportCapturesPrivateImageStoreOptionsAndLocationBeforeCallbacks(t *testing.T) {
 	calls, callbacks, locations := 0, 0, 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	stores := imageRecordImportStoreRecords(t, client, &handler, `[{"id":"captured store"}]`, 1)
 	service := New(client)
@@ -653,7 +654,7 @@ func TestImageRecordImportCapturesPrivateImageStoreOptionsAndLocationBeforeCallb
 
 func TestImageRecordImportPreflightRejectsUnsafeSelectorsDescriptorsJSONAndProtectedNamespaces(t *testing.T) {
 	calls := 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	seed := imageRecordImportFetched(t, service, &handler)
@@ -749,7 +750,7 @@ func TestImageRecordImportOptionAndNestedMarshalerGuardsStopLaterWorkWithCauses(
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls, callbacks, later := 0, 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -798,7 +799,7 @@ func TestImageRecordImportOptionAndNestedMarshalerGuardsStopLaterWorkWithCauses(
 
 func TestImageRecordImportAcknowledgementDoesNotCleanPendingBodyOrDiscardBorrowedData(t *testing.T) {
 	calls := 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	fetched := imageRecordImportFetched(t, service, &handler)
@@ -845,7 +846,7 @@ func TestImageRecordImportAcceptedPhysicalFailuresRetainOnlyActualPartialAcknowl
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls, retries := 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -906,7 +907,7 @@ func TestImageRecordImportNativeRejectionsPreserveErrorEvidenceAndNeverAcknowled
 	for _, code := range []int{400, 403, 404, 500, 599} {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			calls, retries := 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -933,7 +934,7 @@ func TestImageRecordImportNativeRetryFreezesBodyTargetStoreHeadersAndKeepsLiveAu
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls, retries := 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordImportFetched(t, service, &handler)
@@ -1043,7 +1044,7 @@ func TestImageRecordImportNativeRetryFreezesBodyTargetStoreHeadersAndKeepsLiveAu
 
 func TestImageRecordImportSafeReauthenticationRetriesOnlyCapturedJSONSubmission(t *testing.T) {
 	calls, reauth := 0, 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	seed := imageRecordImportFetched(t, service, &handler)

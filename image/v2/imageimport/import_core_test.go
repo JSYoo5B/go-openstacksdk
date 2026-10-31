@@ -156,20 +156,16 @@ func TestImportCorePreflightAndSourceBeforeEveryPhase(t *testing.T) {
 		t.Fatalf("preflight HTTP count %d", calls.Load())
 	}
 	client.MoreHeaders = nil
-	client.ProviderClient.HTTPClient.Transport = importCoreTransport(func(req *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		client.Type = "other"
-		return &http.Response{StatusCode: 200, Header: make(http.Header), Body: io.NopCloser(strings.NewReader(`{"container_format":"bare","disk_format":"raw"}`))}, nil
+		return testcloud.Response(200, `{"container_format":"bare","disk_format":"raw"}`, make(http.Header)), nil
 	})
 	result, err := api.ImportImage(context.Background(), resource.ID("id"))
 	if result != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 1 {
 		t.Fatalf("source change continued to POST: %#v, %v, %d", result, err, calls.Load())
 	}
 }
-
-type importCoreTransport func(*http.Request) (*http.Response, error)
-
-func (run importCoreTransport) RoundTrip(req *http.Request) (*http.Response, error) { return run(req) }
 
 type importCoreReadFailure struct{ cause error }
 
@@ -184,7 +180,7 @@ func TestImportCoreAcceptedReadFailureAndNativeErrors(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var calls int
 			client := &gophercloud.ServiceClient{Type: "image", Endpoint: "https://example.invalid/reverse/v2/", ProviderClient: &gophercloud.ProviderClient{TokenID: "live"}}
-			client.ProviderClient.HTTPClient.Transport = importCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.URL.Path != "/reverse/v2/images/id/import" || req.Header.Get("X-Auth-Token") != "live" {
 					t.Errorf("route/token %s %#v", req.URL, req.Header)
@@ -193,7 +189,7 @@ func TestImportCoreAcceptedReadFailureAndNativeErrors(t *testing.T) {
 				if code == 202 {
 					body = importCoreReadFailure{readCause}
 				}
-				return &http.Response{StatusCode: code, Header: http.Header{"X-Evidence": {"actual"}}, Body: body}, nil
+				return testcloud.StreamResponse(code, body, http.Header{"X-Evidence": {"actual"}}), nil
 			})
 			seed := &images.Image{ID: "id", ContainerFormat: "bare", DiskFormat: "raw"}
 			result, err := New(client).ImportKnownImage(context.Background(), seed)
@@ -222,7 +218,7 @@ func TestImportCoreCanceledNativeErrorsPreserveBothCauses(t *testing.T) {
 			client := &gophercloud.ServiceClient{Type: "image", Endpoint: "https://example.invalid/v2/", ProviderClient: &gophercloud.ProviderClient{}}
 			native := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Body: []byte("real404"), ResponseHeader: http.Header{"X-Native": {"actual"}}}
 			var calls int
-			client.ProviderClient.HTTPClient.Transport = importCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				cancel()
 				return nil, native

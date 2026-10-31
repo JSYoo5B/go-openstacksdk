@@ -190,12 +190,6 @@ func TestCreateImportCanonicalFailureRetainsAcceptedCreationAndStage(t *testing.
 	}
 }
 
-type createImportTransport func(*http.Request) (*http.Response, error)
-
-func (value createImportTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	return value(request)
-}
-
 func TestCreateImportOptionalWaitUsesPreparedDefaultBudgetAndFixedID(t *testing.T) {
 	cloud := testcloud.New(t)
 	client := cloud.Client("image", "/v2")
@@ -205,7 +199,7 @@ func TestCreateImportOptionalWaitUsesPreparedDefaultBudgetAndFixedID(t *testing.
 	if transport == nil {
 		transport = http.DefaultTransport
 	}
-	client.ProviderClient.HTTPClient.Transport = createImportTransport(func(request *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(request *http.Request) (*http.Response, error) {
 		if request.Method == http.MethodGet && gets.Load() == 1 {
 			deadline, ok := request.Context().Deadline()
 			if !ok {

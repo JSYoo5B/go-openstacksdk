@@ -14,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -50,7 +51,7 @@ func imageRecordUpdateCheck(t *testing.T, got []imageRecordUpdateWirePatch, want
 	}
 }
 
-func imageRecordUpdateFetched(t *testing.T, service *Service, raw string, handler *taskCoreTransport) *ImageRecord {
+func imageRecordUpdateFetched(t *testing.T, service *Service, raw string, handler *testcloud.RoundTripperFunc) *ImageRecord {
 	t.Helper()
 	*handler = func(req *http.Request) (*http.Response, error) {
 		if req.Method != http.MethodGet {
@@ -142,7 +143,7 @@ func TestImageRecordUpdateNoopUsesRawPresenceAndPythonEquality(t *testing.T) {
 		{"recursive bool numeric equality", `{"id":"fixed","properties":{"nested":[true,{"n":false}],"decimal":1.0}}`, map[string]any{"properties": json.RawMessage(`{"decimal":1,"nested":[1,{"n":0}]}`)}, "properties", `{"decimal":1.0,"nested":[true,{"n":false}]}`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -202,7 +203,7 @@ func TestImageRecordUpdateMissingNullAndGetterConversionsCreateRawChanges(t *tes
 		{"nullable value replaces present value", `{"id":"fixed","name":"before"}`, `[{"op":"replace","path":"/name","value":null}]`, map[string]any{"name": nil}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 			seed := imageRecordUpdateFetched(t, service, test.seed, &handler)
@@ -238,7 +239,7 @@ func TestImageRecordUpdatePropertyReplacementFlatteningAndPointerEscapes(t *test
 		{"truthy list properties remain dirty with empty diff", `{"id":"fixed"}`, `[]`, "fixed", map[string]any{"properties": []string{"ignored by flattening"}}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 			seed := imageRecordUpdateFetched(t, service, test.seed, &handler)
@@ -309,7 +310,7 @@ func TestImageRecordUpdateReusesPendingInvalidJSONGetWithoutSyntheticDefaults(t 
 }
 
 func TestImageRecordUpdateConsumesPlainImportMethodsWithoutBodyCommit(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls := 0
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 	seed := imageRecordUpdateFetched(t, service, `{"id":"fixed","name":"before"}`, &handler)
@@ -337,7 +338,7 @@ func TestImageRecordUpdateConsumesPlainImportMethodsWithoutBodyCommit(t *testing
 }
 
 func TestImageRecordUpdateIDOnlyRetargetAndPrivateOriginal(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls := 0
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 	seed := imageRecordUpdateFetched(t, service, `{"id":"fixed","name":"before"}`, &handler)
@@ -417,7 +418,7 @@ func TestImageRecordUpdateValidResponseCleansAndInvalidSyntaxKeepsPending(t *tes
 		})
 	}
 	t.Run("sticky dirty survives returning to original", func(t *testing.T) {
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		calls := 0
 		service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 		seed := imageRecordUpdateFetched(t, service, `{"id":"fixed","name":"before"}`, &handler)
@@ -758,7 +759,7 @@ func TestImageRecordUpdateReadCloseStickyGuardAndRejectionProof(t *testing.T) {
 // Equal maps with distinct byte slices establish independence of the retained
 // pending body, original snapshot and public projected view across retries.
 func TestImageRecordUpdatePendingRecordsDoNotAliasInputsOrReceipts(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { return handler(req) }))
 	seed := imageRecordUpdateFetched(t, service, `{"id":"fixed","name":"before","properties":{"nested":{"exact":900719925474099312345}}}`, &handler)
 	before := cloneImageRecord(seed)

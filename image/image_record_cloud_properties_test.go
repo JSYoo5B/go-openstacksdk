@@ -7,11 +7,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func TestCloudImagePropertiesSelectsImageOrNameOrIDAndDelegates(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)

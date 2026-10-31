@@ -52,16 +52,6 @@ func schemasGetters() []schemasGetter {
 	}
 }
 
-type schemasTransport func(*http.Request) (*http.Response, error)
-
-func (f schemasTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type schemasBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -82,13 +72,13 @@ type schemasReader func([]byte) (int, error)
 func (f schemasReader) Read(p []byte) (int, error) { return f(p) }
 
 func schemasWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"Content-Type": {"application/json"}, "X-Request-Id": {"actual-schema"},
-	}, Body: body}
+	})
 }
 
-func schemasClient(transport schemasTransport) *gophercloud.ServiceClient {
-	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
+func schemasClient(transport func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(transport)}}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: provider, Type: "image", Endpoint: schemasBase}
@@ -567,7 +557,7 @@ func TestImageSchemasProviderHooksAndNativeCompatibility(t *testing.T) {
 			return original
 		}
 		originalRetry, originalProvider := reflect.ValueOf(client.RetryFunc).Pointer(), client.ProviderClient
-		client.HTTPClient.Transport = schemasTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := int(calls.Add(1)) - 1
 			codes, tokens := []int{401, 429, 503, 0, 200}, []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}
 			if n >= len(codes) {

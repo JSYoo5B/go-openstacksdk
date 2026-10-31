@@ -30,16 +30,6 @@ const propertyPayload = `{"name":"CPU Limits","title":"","type":"number"}`
 const propertyJSON = `{"name":"foreign response name","type":"number","title":"server title","description":"server description","minimum":9007199254740993,"maximum":1e400,"default":null,"readonly":false,"items":{"type":"string"},"created_at":"literal-date","self":"https://passive.invalid/entity","schema":"https://passive.invalid/schema"}`
 const propertyListJSON = `{"properties":{"quota:cpu":` + propertyJSON + `},"next":42,"schema":false}`
 
-type propertyTransport func(*http.Request) (*http.Response, error)
-
-func (f propertyTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
-
 type propertyBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -59,10 +49,10 @@ type propertyReader func([]byte) (int, error)
 
 func (f propertyReader) Read(p []byte) (int, error) { return f(p) }
 func propertyWire(status int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-property"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-property"}})
 }
-func propertyClient(f propertyTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func propertyClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: propertyBase}
@@ -1051,7 +1041,7 @@ func TestMetadefPropertiesOwnedPreparationAndSource(t *testing.T) {
 		client := propertyClient(nil)
 		client.MoreHeaders = map[string]string{"X-Source": "at scope"}
 		scope := propertyScope(t, client, propertyParent)
-		client.HTTPClient.Transport = propertyTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := calls.Add(1)
 			expected := []string{"first", "second", "third"}[n-1]
 			if r.Header.Get("X-Source") != expected || r.Header.Get("X-Auth-Token") != expected {
@@ -1311,7 +1301,7 @@ func TestMetadefPropertiesResponseOwnershipAndNativeHooks(t *testing.T) {
 		}
 		originalProvider, originalRetry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
 		scope := propertyScope(t, client, propertyParent)
-		client.HTTPClient.Transport = propertyTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 201}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

@@ -16,44 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeDeleteTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeDeleteTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
-type nativeDeleteBody struct {
-	data              []byte
-	readErr, closeErr error
-	reads, closes     atomic.Int32
-}
-
-func (body *nativeDeleteBody) Read(target []byte) (int, error) {
-	body.reads.Add(1)
-	if len(body.data) > 0 {
-		n := copy(target, body.data)
-		body.data = body.data[n:]
-		if len(body.data) == 0 && body.readErr != nil {
-			return n, body.readErr
-		}
-		return n, nil
-	}
-	if body.readErr != nil {
-		return 0, body.readErr
-	}
-	return 0, io.EOF
-}
-func (body *nativeDeleteBody) Close() error {
-	body.closes.Add(1)
-	return body.closeErr
-}
 func nativeDeleteWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Body: body,
-		Header: http.Header{"X-Native-Delete-Proof": {"actual"}, "Content-Type": {"application/json"}}}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Native-Delete-Proof": {"actual"}, "Content-Type": {"application/json"}})
 }
 func nativeDeleteOperation(t *testing.T, err error) *resource.OperationError {
 	t.Helper()
@@ -95,21 +59,21 @@ func TestNativeImageDeleteRoutesHeadersAndOpaqueAcceptedBodies(t *testing.T) {
 					version = "image configured"
 					client.MoreHeaders["OpenStack-API-Version"] = version
 				}
-				body := &nativeDeleteBody{data: []byte{0xff, '{', 'b', 'a', 'd'}}
+				body := &testcloud.Body{Data: "\xff{bad"}
 				var calls atomic.Int32
-				cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+				cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 					calls.Add(1)
 					if req.Method != http.MethodDelete || req.URL.Path != test.path || req.URL.RawQuery != test.query || req.Body != nil || req.ContentLength != 0 || req.Header.Get("Content-Type") != "" || req.Header.Get("Accept") != "application/json" || req.Header.Get("X-Source") != "direct" || req.Header.Get("X-Auth-Token") != "test-token" || req.Header.Get("OpenStack-API-Version") != version {
 						t.Error(req.Method, req.URL, req.Header, req.Body, req.ContentLength)
 					}
 					return nativeDeleteWire(code, body), nil
-				})
+				}))
 				api := images.New(client)
 				if api.RawClient() != client {
 					t.Fatal("native client identity changed")
 				}
-				if err := api.Delete(context.Background(), test.id); err != nil || calls.Load() != 1 || body.reads.Load() == 0 || body.closes.Load() != 1 {
-					t.Fatal(err, calls.Load(), body.reads.Load(), body.closes.Load())
+				if err := api.Delete(context.Background(), test.id); err != nil || calls.Load() != 1 || body.Reads() == 0 || body.Closes() != 1 {
+					t.Fatal(err, calls.Load(), body.Reads(), body.Closes())
 				}
 			})
 		}
@@ -121,17 +85,17 @@ func TestNativeImageDeleteStrictStatusEvidenceAndErrResult(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := nativeUpdateClient(cloud)
-			body := &nativeDeleteBody{data: []byte("native rejection bytes")}
+			body := &testcloud.Body{Data: "native rejection bytes"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return nativeDeleteWire(code, body), nil
-			})
+			}))
 			err := images.New(client).Delete(context.Background(), "fixed")
 			operation := nativeDeleteOperation(t, err)
 			var native gophercloud.ErrUnexpectedResponseCode
-			if !errors.As(err, &native) || native.Actual != code || native.Method != http.MethodDelete || native.URL != cloud.Server.URL+nativeUpdatePath || !reflect.DeepEqual(native.Expected, []int{202, 204}) || native.ResponseHeader.Get("X-Native-Delete-Proof") != "actual" || calls.Load() != 1 || body.closes.Load() != 1 {
-				t.Fatal(err, native, calls.Load(), body.closes.Load())
+			if !errors.As(err, &native) || native.Actual != code || native.Method != http.MethodDelete || native.URL != cloud.Server.URL+nativeUpdatePath || !reflect.DeepEqual(native.Expected, []int{202, 204}) || native.ResponseHeader.Get("X-Native-Delete-Proof") != "actual" || calls.Load() != 1 || body.Closes() != 1 {
+				t.Fatal(err, native, calls.Load(), body.Closes())
 			}
 			if _, direct := operation.Cause.(gophercloud.ErrUnexpectedResponseCode); !direct {
 				t.Fatal("native cause replaced", operation.Cause)
@@ -272,21 +236,21 @@ func TestNativeImageDeleteTransportAndBodyErrorsRemainNative(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := nativeUpdateClient(cloud)
 			readMarker, closeMarker, transportMarker := errors.New("native body read"), errors.New("native body Close"), errors.New("native transport")
-			body := &nativeDeleteBody{data: []byte("partial proof")}
+			body := &testcloud.Body{Data: "partial proof"}
 			if test.read {
-				body.readErr = readMarker
+				body.ReadErr = readMarker
 			}
 			if test.close {
-				body.closeErr = closeMarker
+				body.CloseErr = closeMarker
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeDeleteTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if test.transport {
 					return nil, transportMarker
 				}
 				return nativeDeleteWire(test.code, body), nil
-			})
+			}))
 			hooks := 0
 			if test.wantReadCause {
 				client.RetryFunc = func(_ context.Context, _, _ string, _ *gophercloud.RequestOpts, _ error, _ uint) error {
@@ -314,8 +278,8 @@ func TestNativeImageDeleteTransportAndBodyErrorsRemainNative(t *testing.T) {
 			if errors.Is(err, closeMarker) || (!test.wantReadCause && errors.Is(err, readMarker)) || calls.Load() != 1 || hooks != 0 {
 				t.Fatal(err, calls.Load(), hooks)
 			}
-			if !test.transport && body.closes.Load() != 1 {
-				t.Fatal("native disposal changed", body.closes.Load())
+			if !test.transport && body.Closes() != 1 {
+				t.Fatal("native disposal changed", body.Closes())
 			}
 			if err != nil {
 				nativeDeleteOperation(t, err)

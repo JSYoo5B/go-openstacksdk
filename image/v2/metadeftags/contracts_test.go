@@ -248,16 +248,6 @@ func TestMetadefTagsOwnedPreparationAndSource(t *testing.T) {
 	})
 }
 
-type tagTransport func(*http.Request) (*http.Response, error)
-
-func (f tagTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
-
 type tagBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -277,10 +267,10 @@ type tagReader func([]byte) (int, error)
 
 func (f tagReader) Read(p []byte) (int, error) { return f(p) }
 func tagWire(status int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"actual-tag"}, "Content-Type": {"application/json"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"actual-tag"}, "Content-Type": {"application/json"}})
 }
-func tagClient(f tagTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func tagClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: tagBase}
@@ -594,7 +584,7 @@ func TestMetadefTagsResponseOwnershipAndNativeHooks(t *testing.T) {
 			var hooks atomic.Int32
 			cause := errors.New("strict404 hook")
 			rejected := &tagBody{Reader: strings.NewReader("actual404")}
-			client.HTTPClient.Transport = tagTransport(func(*http.Request) (*http.Response, error) { calls.Add(1); return tagWire(404, rejected), nil })
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(*http.Request) (*http.Response, error) { calls.Add(1); return tagWire(404, rejected), nil })
 			client.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				hooks.Add(1)
 				return cause
@@ -693,7 +683,7 @@ func TestMetadefTagsResponseOwnershipAndNativeHooks(t *testing.T) {
 		}
 		provider, retry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
 		s := tagScope(t, client, tagParent)
-		client.HTTPClient.Transport = tagTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 201}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

@@ -13,13 +13,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type taskCoreTransport func(*http.Request) (*http.Response, error)
-
-func (f taskCoreTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type taskCoreBody struct {
 	reader   io.Reader
@@ -47,7 +44,7 @@ func (r *taskCoreReader) Read(p []byte) (int, error) {
 	}
 	return copy(p, r.body), r.err
 }
-func taskCoreClient(f taskCoreTransport) *gophercloud.ServiceClient {
+func taskCoreClient(f testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
 	provider.UseTokenLock()
 	provider.SetToken("first-token")

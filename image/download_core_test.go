@@ -13,15 +13,10 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type downloadCoreTransport func(*http.Request) (*http.Response, error)
-
-func (value downloadCoreTransport) RoundTrip(request *http.Request) (*http.Response, error) {
-	return value(request)
-}
 
 type downloadCoreBody struct {
 	reader   io.Reader
@@ -32,7 +27,7 @@ type downloadCoreBody struct {
 func (value *downloadCoreBody) Read(buffer []byte) (int, error) { return value.reader.Read(buffer) }
 func (value *downloadCoreBody) Close() error                    { value.closes++; return value.closeErr }
 
-func downloadCoreClient(transport downloadCoreTransport) *gophercloud.ServiceClient {
+func downloadCoreClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
 	provider.UseTokenLock()
 	provider.SetToken("before")
@@ -40,7 +35,7 @@ func downloadCoreClient(transport downloadCoreTransport) *gophercloud.ServiceCli
 }
 
 func downloadCoreHTTP(status int, body io.ReadCloser, headers http.Header) *http.Response {
-	return &http.Response{StatusCode: status, Body: body, Header: headers}
+	return testcloud.StreamResponse(status, body, headers)
 }
 
 type downloadCoreWriter struct {

@@ -29,16 +29,6 @@ const objectCollection = "metadefs/namespaces/" + objectParent + "/objects"
 const objectJSON = `{"name":"foreign response name","description":"server description","properties":{"quota:cpu":{"type":"integer","maximum":9007199254740993}},"required":["quota:cpu"],"created_at":"literal-date","self":"https://passive.invalid/entity","schema":"https://passive.invalid/schema"}`
 const objectListJSON = `{"objects":[` + objectJSON + `],"next":42,"schema":false}`
 
-type objectTransport func(*http.Request) (*http.Response, error)
-
-func (f objectTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
-
 type objectBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -58,10 +48,10 @@ type objectReader func([]byte) (int, error)
 
 func (f objectReader) Read(p []byte) (int, error) { return f(p) }
 func objectWire(status int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-object"}}, Body: body}
+	return testcloud.StreamResponse(status, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-object"}})
 }
-func objectClient(f objectTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func objectClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: objectBase}
@@ -921,7 +911,7 @@ func TestMetadefObjectsOwnedPreparationAndSource(t *testing.T) {
 		scope := objectScope(t, client, objectParent)
 		client.MoreHeaders["X-Source"] = "first"
 		client.SetToken("first-token")
-		client.HTTPClient.Transport = objectTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := calls.Add(1)
 			headers, tokens := []string{"first", "second", "third"}, []string{"first-token", "second-token", "third-token"}
 			if n > 3 || r.Header.Get("X-Source") != headers[n-1] || r.Header.Get("X-Auth-Token") != tokens[n-1] || r.URL.String() != objectBase+objectCollection+"/"+url.PathEscape(objectName) {
@@ -1177,7 +1167,7 @@ func TestMetadefObjectsResponseOwnershipAndNativeHooks(t *testing.T) {
 		}
 		originalProvider, originalRetry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
 		scope := objectScope(t, client, objectParent)
-		client.HTTPClient.Transport = objectTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 201}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -524,7 +525,7 @@ func TestImageRecordCreateUploadRestoredSourceFailureNeverUsesDetachedCleanup(t 
 	var client = taskCoreClient(nil)
 	clientEndpoint = client.Endpoint
 	reader := &taskCoreReader{body: "payload", action: func() { client.Endpoint = "https://foreign.example/" }}
-	client.HTTPClient.Transport = taskCoreTransport(func(req *http.Request) (*http.Response, error) {
+	client.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		if calls == 1 {
 			return imageCreateUploadSeed(req, ""), nil

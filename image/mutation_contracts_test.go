@@ -25,16 +25,6 @@ import (
 const mutationPrefix = "/reverse/mutations/glance/v2/"
 const mutationBase = "https://glance.invalid" + mutationPrefix
 
-type mutationTransport func(*http.Request) (*http.Response, error)
-
-func (f mutationTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	wire, err := f(r)
-	if wire != nil && wire.Request == nil {
-		wire.Request = r
-	}
-	return wire, err
-}
-
 type mutationBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -55,13 +45,13 @@ type mutationReader func([]byte) (int, error)
 func (f mutationReader) Read(p []byte) (int, error) { return f(p) }
 
 func mutationWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{
+	return testcloud.StreamResponse(code, body, http.Header{
 		"Content-Type": {"application/json"}, "X-Request-Id": {"actual-mutation"},
-	}, Body: body}
+	})
 }
 
-func mutationClient(transport mutationTransport) *gophercloud.ServiceClient {
-	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: transport}}
+func mutationClient(transport func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	provider := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(transport)}}
 	provider.UseTokenLock()
 	provider.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: provider, Type: "image", Endpoint: mutationBase}
@@ -353,7 +343,7 @@ func TestImageMutationsExactNameResolutionAndFailures(t *testing.T) {
 			var sequence []string
 			var bodies []*mutationBody
 			client := mutationClient(nil)
-			client.HTTPClient.Transport = mutationTransport(func(r *http.Request) (*http.Response, error) {
+			client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				sequence = append(sequence, r.Method+" "+r.URL.String())
 				if r.Header.Get("X-Option") != "lookup-and-mutation" {
 					t.Error("prepared lookup header lost", r.Header)
@@ -681,7 +671,7 @@ func TestImageMutationsProviderHooksAndNativeCompatibility(t *testing.T) {
 			return nil
 		}
 		originalRetry := reflect.ValueOf(client.RetryFunc).Pointer()
-		client.HTTPClient.Transport = mutationTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			n := int(calls.Add(1)) - 1
 			codes, tokens := []int{401, 429, 503, 204}, []string{"initial", "reauth", "backoff", "retry"}
 			if n >= len(codes) {
@@ -708,7 +698,7 @@ func TestImageMutationsProviderHooksAndNativeCompatibility(t *testing.T) {
 		cause := errors.New("prebody transport failure")
 		var calls, retries atomic.Int32
 		client := mutationClient(nil)
-		client.HTTPClient.Transport = mutationTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			if r.Method != http.MethodPut || r.URL.String() != mutationBase+"images/fixed/tags/literal" || r.Body != nil {
 				t.Error(r.Method, r.URL, r.Body)
 			}

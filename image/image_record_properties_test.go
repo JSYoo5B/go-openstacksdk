@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -33,7 +34,7 @@ func TestImageRecordPropertiesBooleanUsesCanonicalComparisonAndCachedSeed(t *tes
 		{"wire alias compares missing but delegated value is unchanged", `{"id":"fixed","protected":false}`, []ImageRecordPropertiesOption{WithImageRecordProperty("protected", false)}, true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, locations := 0, 0
 			cloud := "fetch location"
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
@@ -89,7 +90,7 @@ func TestImageRecordPropertiesCachedCopyShapeBoundaries(t *testing.T) {
 		{"nonempty list fails full keyword expansion", `[1]`, nil, true, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -136,7 +137,7 @@ func TestImageRecordPropertiesCachedCopyShapeBoundaries(t *testing.T) {
 func TestImageRecordPropertiesResolveOrderedAliasesAfterCompleteLists(t *testing.T) {
 	for _, mode := range []string{"ordered JSON aliases", "upsert retains first key position"} {
 		t.Run(mode, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -206,7 +207,7 @@ func TestImageRecordPropertiesFalsyAliasesAndRawMetaSkipResolution(t *testing.T)
 		{"meta kernel is raw and unresolved", "kernel", `{"literal":true}`, `{"literal":true}`, true, true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -240,7 +241,7 @@ func TestImageRecordPropertiesResolverMissingAndLateFailuresAreTerminal(t *testi
 			marker := errors.New("resolver handling cause")
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -324,7 +325,7 @@ func TestImageRecordPropertiesResolverMissingAndLateFailuresAreTerminal(t *testi
 func TestImageRecordPropertiesRespectInitialProjectionResolverCopyConversionOrder(t *testing.T) {
 	for _, mode := range []string{"literal lookup before missing copy", "lookup rejection before missing copy", "initial descriptor before lookup", "conversion before meta override"} {
 		t.Run(mode, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -390,7 +391,7 @@ func TestImageRecordPropertiesIntegerConversionIsHelperInt(t *testing.T) {
 		{"nonfinite float overflow fails", "size", `1e400`, "", true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -415,7 +416,7 @@ func TestImageRecordPropertiesIntegerConversionIsHelperInt(t *testing.T) {
 }
 
 func TestImageRecordPropertiesRawValuesPythonStringsAndMetaLast(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls := 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
@@ -453,7 +454,7 @@ func TestImageRecordPropertiesRetainCachedKeysAndDelegateDeclaredPromotion(t *te
 		{"explicit properties and retained extras use packing precedence", `{"id":"fixed","keep":7}`, `[{"op":"add","path":"/added","value":"raw"},{"op":"add","path":"/replaced","value":1}]`, `{"properties":{"keep":7,"added":"raw","replaced":1}}`, []ImageRecordPropertiesOption{WithImageRecordPropertiesMetaJSON(json.RawMessage(`{"properties":{"replaced":1},"added":"raw"}`))}, "id", `"fixed"`},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -480,7 +481,7 @@ func TestImageRecordPropertiesRetainCachedKeysAndDelegateDeclaredPromotion(t *te
 func TestImageRecordPropertiesBooleanControlsPendingCommitAndRetargeting(t *testing.T) {
 	for _, cached := range []bool{false, true} {
 		t.Run(fmt.Sprintf("pending cached=%v", cached), func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -521,7 +522,7 @@ func TestImageRecordPropertiesBooleanControlsPendingCommitAndRetargeting(t *test
 		})
 	}
 	t.Run("sticky dirty state can submit empty PATCH", func(t *testing.T) {
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		calls := 0
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
@@ -563,7 +564,7 @@ func TestImageRecordPropertiesBooleanControlsPendingCommitAndRetargeting(t *test
 	for _, immediate := range []bool{false, true} {
 		t.Run(fmt.Sprintf("meta ID immediate=%v", immediate), func(t *testing.T) {
 			const nextID = "new /한:%?\\target"
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -612,7 +613,7 @@ func TestImageRecordPropertiesSharedAcceptedTranslationAndPendingResponses(t *te
 		{"nonUTF8 response", "opaque\xff", 203, true, false},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, retries := 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -686,7 +687,7 @@ func TestImageRecordPropertiesAcceptedHandlingErrorsReturnFalsePartialReceiptWit
 				}
 				return nil
 			})
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, retries := 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -746,7 +747,7 @@ func TestImageRecordPropertiesNativeRejectionsAndRetryOwnership(t *testing.T) {
 	for _, mode := range []string{"400", "403", "404", "599", "ordinary retry", "header ownership", "body ownership", "source retry", "hook cause", "expanded OkCodes"} {
 		t.Run(mode, func(t *testing.T) {
 			marker := errors.New("property retry cause")
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, retries := 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -834,7 +835,7 @@ func TestImageRecordPropertiesNativeRejectionsAndRetryOwnership(t *testing.T) {
 func TestImageRecordPropertiesConcreteFactoriesOwnValuesAndReplacementOrder(t *testing.T) {
 	for _, mode := range []string{"single encodes once", "sorted bulk merges aliases", "JSON replaces kwargs", "MetaJSON replaces meta", "whole opts replace all"} {
 		t.Run(mode, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, marshals := 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -897,7 +898,7 @@ func TestImageRecordPropertiesConcreteFactoriesOwnValuesAndReplacementOrder(t *t
 	}
 	for _, raw := range []string{"null", "false", "0", `""`, "[]", "{}"} {
 		t.Run("falsy meta/"+raw, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 			seed := imageRecordUpdateFetched(t, service, `{"id":"fixed"}`, &handler)
@@ -918,7 +919,7 @@ func TestImageRecordPropertiesConcreteFactoriesOwnValuesAndReplacementOrder(t *t
 		if marshals != 1 {
 			t.Fatal(marshals)
 		}
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 		seed := imageRecordUpdateFetched(t, service, `{"id":"fixed"}`, &handler)
 		handler = func(req *http.Request) (*http.Response, error) {
@@ -933,7 +934,7 @@ func TestImageRecordPropertiesConcreteFactoriesOwnValuesAndReplacementOrder(t *t
 }
 
 func TestImageRecordPropertiesSnapshotsCoverDiscoveryAndCommitWithoutRecapture(t *testing.T) {
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	calls, locations, callbacks := 0, 0, 0
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	seed := imageRecordUpdateFetched(t, New(client), `{"id":"fixed","cached":7}`, &handler)
@@ -997,7 +998,7 @@ func TestImageRecordPropertiesSnapshotsCoverDiscoveryAndCommitWithoutRecapture(t
 func TestImageRecordPropertiesControlsParserAndIdentityFailBeforePatch(t *testing.T) {
 	for _, key := range []string{"image", "self", "resource_type", "value", "base_path", "microversion", "connection", "_synchronized"} {
 		t.Run("bound control/"+key, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 			seed := imageRecordUpdateFetched(t, service, `{"id":"fixed"}`, &handler)
@@ -1012,7 +1013,7 @@ func TestImageRecordPropertiesControlsParserAndIdentityFailBeforePatch(t *testin
 		})
 	}
 	t.Run("raw meta ID cannot hide behind replacement equality", func(t *testing.T) {
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		calls := 0
 		service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 		seed := imageRecordUpdateFetched(t, service, `{"id":"�"}`, &handler)
@@ -1073,7 +1074,7 @@ func TestImageRecordPropertiesOptionAndContextGuardsStopLaterCallbacks(t *testin
 				}
 				return nil
 			})
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, callbacks, later := 0, 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			seed := imageRecordUpdateFetched(t, New(client), `{"id":"fixed"}`, &handler)
@@ -1133,7 +1134,7 @@ func TestImageRecordPropertiesOptionAndContextGuardsStopLaterCallbacks(t *testin
 func TestImageRecordPropertiesCompleteListFailuresPrecedeNumericAliasSelection(t *testing.T) {
 	for _, lateFailure := range []bool{false, true} {
 		t.Run(fmt.Sprintf("late failure=%v", lateFailure), func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			service := New(taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) }))
 			seed := imageRecordUpdateFetched(t, service, `{"id":"fixed"}`, &handler)

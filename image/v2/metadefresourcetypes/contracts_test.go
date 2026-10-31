@@ -31,16 +31,6 @@ const rtJSON = `{"name":"server response","prefix":"hw_","properties_target":"im
 const rtGlobalJSON = `{"resource_types":[` + rtJSON + `],"next":"https://foreign.invalid/follow","links":false}`
 const rtListJSON = `{"resource_type_associations":[` + rtJSON + `],"next":"https://foreign.invalid/follow","links":false}`
 
-type rtTransport func(*http.Request) (*http.Response, error)
-
-func (f rtTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
-
 type rtBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -60,10 +50,10 @@ type rtReader func([]byte) (int, error)
 
 func (f rtReader) Read(p []byte) (int, error) { return f(p) }
 func rtWire(code int, b io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-resource-type"}}, Body: b}
+	return testcloud.StreamResponse(code, b, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-resource-type"}})
 }
-func rtClient(f rtTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func rtClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: rtBase}
@@ -1216,7 +1206,7 @@ func TestMetadefResourceTypesResponseOwnershipAndNativeHooks(t *testing.T) {
 		}
 		provider, hook := c.ProviderClient, reflect.ValueOf(c.RetryFunc).Pointer()
 		_, s := rtScope(t, c)
-		c.HTTPClient.Transport = rtTransport(func(r *http.Request) (*http.Response, error) {
+		c.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 201}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

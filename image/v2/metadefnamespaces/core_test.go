@@ -12,13 +12,10 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type namespaceCoreTransport func(*http.Request) (*http.Response, error)
-
-func (f namespaceCoreTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
 type namespaceCoreBody struct {
 	reader   io.Reader
@@ -47,7 +44,7 @@ func (r *namespaceCoreReader) Read(p []byte) (int, error) {
 	}
 	return n, nil
 }
-func namespaceCoreClient(transport namespaceCoreTransport) *gophercloud.ServiceClient {
+func namespaceCoreClient(transport testcloud.RoundTripperFunc) *gophercloud.ServiceClient {
 	return &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{TokenID: "before", HTTPClient: http.Client{Transport: transport}}, Type: "image", Endpoint: "https://example.test/catalog/", ResourceBase: "https://example.test/reverse/glance/v2/"}
 }
 func namespaceCoreHTTP(req *http.Request, status int, body io.ReadCloser) *http.Response {

@@ -50,10 +50,6 @@ type nonseekableUploadReader struct {
 func (r *nonseekableUploadReader) Read(p []byte) (int, error) { return r.reader.Read(p) }
 func (r *nonseekableUploadReader) Close() error               { r.closed.Add(1); return nil }
 
-type uploadRoundTripper func(*http.Request) (*http.Response, error)
-
-func (f uploadRoundTripper) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func uploadResponse(r *http.Request, status int, body string) *http.Response {
 	return &http.Response{StatusCode: status, Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}
 }
@@ -77,7 +73,7 @@ func TestUploadNeverReplaysPrefixOrRacesWithAsynchronousClose(t *testing.T) {
 					return nil
 				}
 				closeGate, closeDone := make(chan struct{}), make(chan struct{})
-				provider.HTTPClient.Transport = uploadRoundTripper(func(r *http.Request) (*http.Response, error) {
+				provider.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					if r.Method == http.MethodPost {
 						_ = r.Body.Close()
 						return uploadResponse(r, 201, `{"id":"created","status":"queued"}`), nil

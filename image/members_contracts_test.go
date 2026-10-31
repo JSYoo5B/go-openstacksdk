@@ -27,16 +27,6 @@ const memberContractBase = "https://glance.invalid" + memberContractPrefix
 const memberContractObject = `{"image_id":"response-parent","member_id":"response-member","status":"future","created_at":"literal-date","schema":"https://passive.invalid/schema"}`
 const memberContractList = `{"members":[` + memberContractObject + `],"next":"https://passive.invalid/next","schema":42}`
 
-type memberContractTransport func(*http.Request) (*http.Response, error)
-
-func (f memberContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
-
 type memberContractBody struct {
 	io.Reader
 	closes   atomic.Int32
@@ -56,10 +46,10 @@ type memberContractReader func([]byte) (int, error)
 
 func (f memberContractReader) Read(p []byte) (int, error) { return f(p) }
 func memberContractWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-member"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-member"}})
 }
-func memberContractClient(f memberContractTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func memberContractClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: memberContractBase}
@@ -225,7 +215,7 @@ func TestImageMembersFixedParentRoutesAndBodies(t *testing.T) {
 				var bodies []*memberContractBody
 				client := memberContractClient(nil)
 				client.MoreHeaders = map[string]string{"X-Source": "captured"}
-				client.HTTPClient.Transport = memberContractTransport(func(r *http.Request) (*http.Response, error) {
+				client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					requests = append(requests, r.Method+" "+r.URL.String())
 					if r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "owned" {
 						t.Error(r.Header)
@@ -675,7 +665,7 @@ func TestImageMembersOwnedOptionsAndPreflight(t *testing.T) {
 		client := memberContractClient(nil)
 		client.MoreHeaders = map[string]string{"X-Source": "before"}
 		var calls atomic.Int32
-		client.HTTPClient.Transport = memberContractTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.String() != memberContractBase+"images/parent/members/member" || r.Header.Get("X-Source") != "before" || r.Header.Get("X-Auth-Token") != "live" {
 				t.Error(r.URL, r.Header)
@@ -988,7 +978,7 @@ func TestImageMembersNativeHooksAndCompatibility(t *testing.T) {
 			return e
 		}
 		originalProvider, originalRetry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
-		client.HTTPClient.Transport = memberContractTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 200}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

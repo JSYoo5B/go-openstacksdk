@@ -25,15 +25,6 @@ const cacheContractPrefix = "/reverse/cache-management/glance/v2/"
 const cacheContractBase = "https://glance.invalid" + cacheContractPrefix
 
 // A synthetic transport permits opaque 204 bodies that net/http servers suppress.
-type cacheContractTransport func(*http.Request) (*http.Response, error)
-
-func (f cacheContractTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	v, e := f(r)
-	if v != nil && v.Request == nil {
-		v.Request = r
-	}
-	return v, e
-}
 
 type cacheContractBody struct {
 	io.Reader
@@ -54,10 +45,10 @@ type cacheContractReader func([]byte) (int, error)
 
 func (f cacheContractReader) Read(b []byte) (int, error) { return f(b) }
 func cacheContractWire(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-cache"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"actual-cache"}})
 }
-func cacheContractClient(f cacheContractTransport) *gophercloud.ServiceClient {
-	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: f}}
+func cacheContractClient(f func(*http.Request) (*http.Response, error)) *gophercloud.ServiceClient {
+	p := &gophercloud.ProviderClient{HTTPClient: http.Client{Transport: testcloud.LinkRequest(f)}}
 	p.UseTokenLock()
 	p.SetToken("initial")
 	return &gophercloud.ServiceClient{ProviderClient: p, Type: "image", Endpoint: cacheContractBase}
@@ -526,7 +517,7 @@ func TestImageCachePreparedOptionsAndLiveSource(t *testing.T) {
 		client := cacheContractClient(nil)
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		client.Microversion = "2.18"
-		client.HTTPClient.Transport = cacheContractTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.String() != cacheContractBase+"cache/fixed" || r.Method != "PUT" || r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "owned" || r.Header.Get("X-Extra") != "last" || r.Header.Get("X-Auth-Token") != "live" || r.Header.Get("OpenStack-API-Version") != "image 2.18" {
 				t.Error(r.URL, r.Header)
@@ -688,7 +679,7 @@ func TestImageCacheExactNameResolutionAndDirectIdentity(t *testing.T) {
 				var bodies []*cacheContractBody
 				client := cacheContractClient(nil)
 				client.MoreHeaders = map[string]string{"X-Source": "captured"}
-				client.HTTPClient.Transport = cacheContractTransport(func(r *http.Request) (*http.Response, error) {
+				client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 					requests = append(requests, r.Method+" "+r.URL.String())
 					if r.Header.Get("X-Source") != "captured" || r.Header.Get("X-Option") != "lookup-and-cache" {
 						t.Error(r.Header)
@@ -1063,7 +1054,7 @@ func TestImageCacheProviderHooksAndCauseSafeMissing(t *testing.T) {
 			return e
 		}
 		originalProvider, originalRetry := client.ProviderClient, reflect.ValueOf(client.RetryFunc).Pointer()
-		client.HTTPClient.Transport = cacheContractTransport(func(r *http.Request) (*http.Response, error) {
+		client.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 			i := int(calls.Add(1)) - 1
 			codes := []int{401, 429, 503, 0, 202}
 			tokens := []string{"initial", "reauth", "backoff", "retry503", "retrytransport"}

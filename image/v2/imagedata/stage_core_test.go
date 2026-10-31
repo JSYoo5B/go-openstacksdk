@@ -20,16 +20,12 @@ import (
 	nativeimages "github.com/gophercloud/gophercloud/v2/openstack/image/v2/images"
 )
 
-type stageCoreTransport func(*http.Request) (*http.Response, error)
-
-func (run stageCoreTransport) RoundTrip(req *http.Request) (*http.Response, error) { return run(req) }
-
 func stageCoreClient(transport http.RoundTripper) *gophercloud.ServiceClient {
 	return &gophercloud.ServiceClient{Type: "image", Endpoint: "https://example.invalid/v2/", ResourceBase: "https://example.invalid/reverse/v2/", ProviderClient: &gophercloud.ProviderClient{TokenID: "first", HTTPClient: http.Client{Transport: transport}}}
 }
 
 func stageCoreResponse(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Evidence": {fmt.Sprint(code)}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"X-Evidence": {fmt.Sprint(code)}})
 }
 
 type stageCoreReader struct {
@@ -56,7 +52,7 @@ func TestStageCoreKnownSnapshotBorrowedCursorAndHeaderPhases(t *testing.T) {
 			var captured *StageOpts
 			var calls int
 			var client *gophercloud.ServiceClient
-			client = stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client = stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if req.Header.Get("X-Note") != "initial" {
 					t.Errorf("lost header snapshot: %#v", req.Header)
@@ -128,7 +124,7 @@ func TestStageCoreFreshCanonicalQueuedAndWholeNativeDecode(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			var calls, puts int
 			reader := &stageCoreReader{input: strings.NewReader("data")}
-			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client := stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					return stageCoreResponse(200, test.body), nil
@@ -164,7 +160,7 @@ func TestStageCoreBinaryFailuresDoNotReplayOrRedirect(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			var requests, callbacks int
 			reader := &stageCoreReader{input: strings.NewReader("payload")}
-			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client := stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				requests++
 				prefix := make([]byte, 3)
 				_, _ = io.ReadFull(req.Body, prefix)
@@ -223,7 +219,7 @@ func TestStageCoreAcknowledgementAndFollowupFailureEvidence(t *testing.T) {
 	for _, mode := range []string{"stage-read", "get-read", "get-decode", "get-utf8", "get-native"} {
 		t.Run(mode, func(t *testing.T) {
 			var calls int
-			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client := stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					response := stageCoreResponse(204, "accepted-stage")
@@ -288,7 +284,7 @@ func TestStageCoreAcknowledgementAndFollowupFailureEvidence(t *testing.T) {
 
 func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 	var calls, optionCalls int
-	client := stageCoreClient(stageCoreTransport(func(*http.Request) (*http.Response, error) {
+	client := stageCoreClient(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 		calls++
 		return stageCoreResponse(200, `{"status":"queued"}`), nil
 	}))
@@ -338,7 +334,7 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 		t.Fatalf("preflight side effects HTTP%d options%d", calls, optionCalls)
 	}
 	client.MoreHeaders = nil
-	client.ProviderClient.HTTPClient.Transport = stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+	client.ProviderClient.HTTPClient.Transport = testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 		calls++
 		client.Type = "other"
 		return stageCoreResponse(200, `{"status":"queued"}`), nil
@@ -354,7 +350,7 @@ func TestStageCorePreflightSourceAndCustomCancellationCauses(t *testing.T) {
 			defer cancel(nil)
 			var requests int
 			native := gophercloud.ErrUnexpectedResponseCode{Actual: 404, Body: []byte("actual native"), ResponseHeader: http.Header{"X-Native": {"actual"}}}
-			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client := stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				requests++
 				if phase == "followup" && requests == 1 {
 					return stageCoreResponse(204, "actual-stage"), nil
@@ -412,7 +408,7 @@ func TestStageCoreGETHeaderProjectionMatchesNativeAndPreservesRawEvidence(t *tes
 			native.Header = test.headers.Clone()
 			want, nativeErr := native.Extract()
 			var calls int
-			client := stageCoreClient(stageCoreTransport(func(req *http.Request) (*http.Response, error) {
+			client := stageCoreClient(testcloud.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
 				calls++
 				if calls == 1 {
 					// Initial native extraction must also apply headers before its

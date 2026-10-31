@@ -28,11 +28,8 @@ import (
 // optional waiting and retaining failed side effects are documented Go policy.
 const createImportPrefix = "/reverse/glance/v2/"
 
-type createImportRoundTrip func(*http.Request) (*http.Response, error)
-
-func (f createImportRoundTrip) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func createImportHTTP(code int, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"Content-Type": {"application/json"}, "X-Evidence": {"actual"}})
 }
 func createImportJSON(id, status string) string {
 	return fmt.Sprintf(`{"id":%q,"name":"worker","status":%q,"disk_format":"qcow2","container_format":"bare","vendor":{"number":9007199254740993}}`, id, status)
@@ -160,7 +157,7 @@ func TestCreateAndImportDefaultDirectSequenceAndEvidence(t *testing.T) {
 		cloud := testcloud.New(t)
 		data := createImportData("payload")
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			switch {
 			case r.URL.Path == createImportPrefix+"images":
@@ -190,7 +187,7 @@ func TestCreateAndImportDefaultDirectSequenceAndEvidence(t *testing.T) {
 				}
 				return createImportHTTP(202, io.NopCloser(strings.NewReader(`{}`))), nil
 			}
-		})
+		}))
 		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: data}, image.WithCreateImportStage(imagedata.StageOpts{Size: new(int64)}))
 		if err != nil || v == nil || v.Imported == nil || calls.Load() != 4 || data.reads.Load() == 0 || data.closes.Load() != 0 || data.seeks.Load() != 0 || data.lengths.Load() != 0 {
 			t.Fatal(v, err, calls.Load(), data.reads.Load(), data.closes.Load(), data.seeks.Load(), data.lengths.Load())
@@ -314,10 +311,10 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 			if tc.name != "missing name" && tc.name != "missing direct reader" && tc.name != "typed nil reader" {
 				tc.input.Data = data
 			}
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return createImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), tc.input, tc.opts...)
 			want := error(resource.ErrInvalidOption)
 			if tc.name == "copy existing-only" || tc.name == "unknown fresh method" {
@@ -335,10 +332,10 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 			ctx := context.Background()
 			data := createImportData("payload")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return createImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			var opts []image.CreateImportOption
 			want := error(resource.ErrInvalidOption)
 			switch mode {
@@ -381,10 +378,10 @@ func TestCreateAndImportCompletePreflight(t *testing.T) {
 		cloud := testcloud.New(t)
 		data := createImportData("payload")
 		var calls, workflow, stage, importing atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(*http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return createImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: data},
 			func(*image.CreateImportOpts) error { workflow.Add(1); return nil },
 			image.WithCreateImportStageOptions(func(*imagedata.StageOpts) error { stage.Add(1); return nil }),
@@ -428,7 +425,7 @@ func TestCreateAndImportPreparedSnapshotsAndCallbacksOnce(t *testing.T) {
 		image.WithCreateImportStageOptions(func(o *imagedata.StageOpts) error { stageCallbacks.Add(1); retainedStage = o; return nil }),
 		image.WithCreateImportImportOptions(func(o *imageimport.ImportOpts) error { importCallbacks.Add(1); retainedImport = o; return nil }),
 	}
-	cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if workflowCallbacks.Load() != 1 || stageCallbacks.Load() != 1 || importCallbacks.Load() != 1 {
 			t.Error("callbacks deferred or repeated", workflowCallbacks.Load(), stageCallbacks.Load(), importCallbacks.Load())
@@ -465,7 +462,7 @@ func TestCreateAndImportPreparedSnapshotsAndCallbacksOnce(t *testing.T) {
 			}
 			return createImportHTTP(200, io.NopCloser(strings.NewReader(createImportJSON("decoy", "uploading")))), nil
 		}
-	})
+	}))
 	v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, options...)
 	if err != nil || v == nil || v.Imported == nil || calls.Load() != 4 || workflowCallbacks.Load() != 1 || stageCallbacks.Load() != 1 || importCallbacks.Load() != 1 {
 		t.Fatal(v, err, calls.Load(), workflowCallbacks.Load(), stageCallbacks.Load(), importCallbacks.Load())
@@ -473,7 +470,7 @@ func TestCreateAndImportPreparedSnapshotsAndCallbacksOnce(t *testing.T) {
 	t.Run("bulk replacement and concurrent reusable policy", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if r.URL.Path == createImportPrefix+"images" {
 				fields := createImportFields(t, r)
@@ -494,7 +491,7 @@ func TestCreateAndImportPreparedSnapshotsAndCallbacksOnce(t *testing.T) {
 			}
 			_, _ = io.Copy(io.Discard, r.Body)
 			return createImportHTTP(202, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		service := image.New(cloud.Client("image", createImportPrefix))
 		done := make(chan error, 2)
 		for range 2 {
@@ -561,10 +558,10 @@ func TestCreateAndImportRemoteModesAndSelectors(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			data := createImportData("payload")
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return createImportHTTP(500, io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			input := image.CreateAndImportRequest{Name: "worker"}
 			policy := image.CreateImportOpts{Import: imageimport.ImportOpts{Method: imageimport.WebDownloadMethod, URI: "https://source.invalid/image"}}
 			switch unused {
@@ -582,21 +579,6 @@ func TestCreateAndImportRemoteModesAndSelectors(t *testing.T) {
 		})
 	}
 }
-
-type createImportBrokenBody struct {
-	first []byte
-	cause error
-}
-
-func (r *createImportBrokenBody) Read(p []byte) (int, error) {
-	if len(r.first) > 0 {
-		n := copy(p, r.first)
-		r.first = r.first[n:]
-		return n, nil
-	}
-	return 0, r.cause
-}
-func (*createImportBrokenBody) Close() error { return nil }
 
 func TestCreateAndImportPartialProofAndTerminalFailures(t *testing.T) {
 	for _, tc := range []struct {
@@ -623,7 +605,7 @@ func TestCreateAndImportPartialProofAndTerminalFailures(t *testing.T) {
 				callbacks.Add(1)
 				return err
 			}
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				phase, code, body := "metadata", 200, createImportJSON("decoy", "uploading")
 				switch {
 				case r.URL.Path == createImportPrefix+"images":
@@ -653,7 +635,7 @@ func TestCreateAndImportPartialProofAndTerminalFailures(t *testing.T) {
 					}
 					if tc.outcome == "read" {
 						body = phase + "-prefix"
-						wire := createImportHTTP(code, &createImportBrokenBody{first: []byte(body), cause: cause})
+						wire := createImportHTTP(code, &testcloud.Body{Data: body, ReadErr: cause})
 						wire.Header.Set("X-Phase", phase)
 						return wire, nil
 					}
@@ -661,7 +643,7 @@ func TestCreateAndImportPartialProofAndTerminalFailures(t *testing.T) {
 				wire := createImportHTTP(code, io.NopCloser(strings.NewReader(body)))
 				wire.Header.Set("X-Phase", phase)
 				return wire, nil
-			})
+			}))
 			data := createImportData("payload")
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(ctx, image.CreateAndImportRequest{Name: "worker", Data: data})
 			if err == nil || data.closes.Load() != 0 || data.seeks.Load() != 0 {
@@ -753,14 +735,14 @@ func TestCreateAndImportPartialProofAndTerminalFailures(t *testing.T) {
 			cloud := testcloud.New(t)
 			data := createImportData("payload")
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodPost || r.URL.Path != createImportPrefix+"images" {
 					t.Error("invalid creation triggered later phase", r.Method, r.URL)
 				}
 				_, _ = io.Copy(io.Discard, r.Body)
 				return createImportHTTP(201, io.NopCloser(strings.NewReader(tc.body))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: data})
 			var proof *resource.ResponseError
 			if err == nil || !errors.As(err, &proof) || proof.StatusCode != 201 || string(proof.Body) != tc.body || proof.Header.Get("X-Evidence") != "actual" || v == nil || v.Created == nil || v.Created.StatusCode != 201 || string(v.Created.Body) != tc.body || v.Created.Image != nil || v.Staged != nil || v.Imported != nil || calls.Load() != 1 || data.reads.Load() != 0 {
@@ -820,7 +802,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 			})
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { wrong.Add(1); w.WriteHeader(500) })
 			transport := cloud.Provider.HTTPClient.Transport
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method == http.MethodGet && imports.Load() == 1 {
 					deadline, present := r.Context().Deadline()
 					if present != tc.deadline {
@@ -831,7 +813,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 					}
 				}
 				return transport.RoundTrip(r)
-			})
+			}))
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(tc.policy))
 			if !errors.Is(err, tc.want) || v == nil || v.ImageID != "created" || v.Created == nil || v.Staged == nil || v.Imported == nil || v.Imported.StatusCode != 202 || string(v.Imported.Body) != `{"accepted":true}` || wrong.Load() != 0 || gets.Load() != int32(1+len(tc.states)) {
 				t.Fatal(v, err, gets.Load(), wrong.Load())
@@ -865,7 +847,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 			if mode == "parent deadline" {
 				policy.Timeout = new(time.Duration)
 			}
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.Path == createImportPrefix+"images" {
 					_, _ = io.Copy(io.Discard, r.Body)
 					return createImportHTTP(201, io.NopCloser(strings.NewReader(createImportJSON("created", "queued")))), nil
@@ -886,7 +868,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 				}
 				<-r.Context().Done()
 				return nil, r.Context().Err()
-			})
+			}))
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(ctx, image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(policy))
 			want := error(context.DeadlineExceeded)
 			if mode == "caller canceled" {
@@ -903,7 +885,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 	t.Run("disabled wait replacement performs no extra GET", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		var gets atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.URL.Path == createImportPrefix+"images" {
 				_, _ = io.Copy(io.Discard, r.Body)
 				return createImportHTTP(201, io.NopCloser(strings.NewReader(createImportJSON("created", "queued")))), nil
@@ -918,7 +900,7 @@ func TestCreateAndImportExplicitWaitAndFailureRetention(t *testing.T) {
 			}
 			gets.Add(1)
 			return createImportHTTP(200, io.NopCloser(strings.NewReader(createImportJSON("created", "uploading")))), nil
-		})
+		}))
 		v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(image.CreateImportWaitOpts{}), image.WithoutCreateImportWait())
 		if err != nil || v == nil || v.Imported == nil || v.Ready != nil || gets.Load() != 1 {
 			t.Fatal(v, err, gets.Load())
@@ -937,13 +919,13 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 		var creates, puts, gets, imports, middleware, reauth, retries atomic.Int32
 		type contextKey struct{}
 		transport := cloud.Provider.HTTPClient.Transport
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			middleware.Add(1)
 			if r.Context().Value(contextKey{}) != "caller" || r.Header.Get("X-Source") != "captured" || r.Header.Get("OpenStack-API-Version") != "image 2.7" {
 				t.Error(r.Header, r.Context())
 			}
 			return transport.RoundTrip(r)
-		})
+		}))
 		cloud.Provider.ReauthFunc = func(context.Context) error { reauth.Add(1); cloud.Provider.SetToken("reauthenticated"); return nil }
 		cloud.Provider.RetryFunc = func(_ context.Context, method, target string, _ *gophercloud.RequestOpts, err error, _ uint) error {
 			retries.Add(1)
@@ -1021,7 +1003,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 			client := cloud.Client("image", createImportPrefix)
 			changedPhase := boundary.phase
 			var sequence createImportSequence
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				phase, code, body := "metadata", 200, createImportJSON("decoy", "uploading")
 				switch {
 				case r.URL.Path == createImportPrefix+"images":
@@ -1043,7 +1025,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 					}
 				}
 				return createImportHTTP(code, io.NopCloser(strings.NewReader(body))), nil
-			})
+			}))
 			v, err := image.New(client).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")}, image.WithCreateImportWait(image.CreateImportWaitOpts{}))
 			want := []string{"create"}
 			if changedPhase != "create" {
@@ -1069,7 +1051,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 		client := cloud.Client("image", createImportPrefix)
 		client.MoreHeaders = map[string]string{"X-Source": "captured"}
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if !strings.HasPrefix(r.URL.Path, createImportPrefix) || r.Header.Get("X-Source") != "captured" {
 				t.Error(r.URL.String(), r.Header)
@@ -1089,7 +1071,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 			}
 			_, _ = io.Copy(io.Discard, r.Body)
 			return createImportHTTP(202, io.NopCloser(strings.NewReader(`{}`))), nil
-		})
+		}))
 		v, err := image.New(client).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: strings.NewReader("payload")})
 		if err != nil || v == nil || v.Imported == nil || calls.Load() != 4 || client.ResourceBase != cloud.Server.URL+"/caller-changed/v2/" || client.MoreHeaders["X-Source"] != "later" {
 			t.Fatal(v, err, calls.Load(), client)
@@ -1116,7 +1098,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 			cloud.Provider.MaxBackoffRetries = 3
 			cloud.Provider.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects.Add(1); return nil }
 			closeGate, closeDone := make(chan struct{}), make(chan struct{})
-			cloud.Provider.HTTPClient.Transport = createImportRoundTrip(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.Method == http.MethodPost && r.URL.Path == createImportPrefix+"images" {
 					creates.Add(1)
 					_, _ = io.Copy(io.Discard, r.Body)
@@ -1142,7 +1124,7 @@ func TestCreateAndImportLiveProviderSourceBoundariesAndNativeIsolation(t *testin
 					wire.Header.Set("Location", cloud.Server.URL+"/redirected")
 				}
 				return wire, nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", createImportPrefix)).CreateAndImport(context.Background(), image.CreateAndImportRequest{Name: "worker", Data: data})
 			close(closeGate)
 			select {

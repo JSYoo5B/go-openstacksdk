@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -84,7 +85,7 @@ func TestImageRecordActionsProjectPrivateCurrentBodyAndPreserveFetchReceipts(t *
 	for _, action := range []string{"deactivate", "reactivate"} {
 		t.Run(action, func(t *testing.T) {
 			const fetched = `{"id":"fixed","status":"ACTIVE","protected":"false","size":"04","tags":"one","vendor":{"precise":900719925474099312345}}`
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, locations := 0, 0
 			cloud := "fetch location"
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
@@ -270,7 +271,7 @@ func TestImageRecordActionsRejectUnsafeSelectorsAndDescriptorInputsBeforeHTTP(t 
 	}
 	for _, field := range []string{"is_hw_vif_multiqueue_enabled", "instance_type_rxtx_factor"} {
 		t.Run("private descriptor/"+field, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls := 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
@@ -324,7 +325,7 @@ func TestImageRecordActionsRejectUnsafeSelectorsAndDescriptorInputsBeforeHTTP(t 
 func TestImageRecordActionsSnapshotInputsOptionsHeadersAndLocation(t *testing.T) {
 	for _, action := range []string{"deactivate", "reactivate"} {
 		t.Run(action, func(t *testing.T) {
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			calls, callbacks, locations := 0, 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			seed := imageRecordUpdateFetched(t, New(client), `{"id":"fixed","name":"captured seed"}`, &handler)

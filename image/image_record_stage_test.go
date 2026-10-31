@@ -16,6 +16,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -28,7 +29,7 @@ func imageRecordStageRead(t *testing.T, request *http.Request) string {
 	return imageUploadCoreRead(t, request)
 }
 
-func imageRecordStageFetched(t *testing.T, service *Service, handler *taskCoreTransport) *ImageRecord {
+func imageRecordStageFetched(t *testing.T, service *Service, handler *testcloud.RoundTripperFunc) *ImageRecord {
 	t.Helper()
 	return imageRecordUpdateFetched(t, service, `{"id":"fixed","status":"queued","name":"before","size":"04","protected":"false","vendor":{"precise":900719925474099312345}}`, handler)
 }
@@ -63,7 +64,7 @@ func TestImageRecordStageFixedRoutesAndOpaqueAcceptedReceipts(t *testing.T) {
 			id := "name-like /한:%?\\b"
 			rawID, _ := json.Marshal(id)
 			calls, redirects, callbacks := 0, 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			client.ProviderClient.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects++; return nil }
 			service := New(client)
@@ -152,7 +153,7 @@ func TestImageRecordStageRequiresExactQueuedBeforeAnyDataIO(t *testing.T) {
 	for _, raw := range []string{"", `null`, `"Queued"`, `"queued "`, `"active"`, `true`, `1`, `[]`, `{"queued":true}`} {
 		t.Run("status="+raw, func(t *testing.T) {
 			calls, options := 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -194,7 +195,7 @@ func TestImageRecordStageProjectsPrivateDescriptorsBeforeQueuedOrHTTP(t *testing
 	for _, field := range []string{"size", "instance_type_rxtx_factor", "is_hw_vif_multiqueue_enabled"} {
 		t.Run(field, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -212,7 +213,7 @@ func TestImageRecordStageProjectsPrivateDescriptorsBeforeQueuedOrHTTP(t *testing
 	}
 	t.Run("raw lone surrogate identity is never replacement-targeted", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordStageFetched(t, service, &handler)
@@ -228,7 +229,7 @@ func TestImageRecordStageInvalidFetchPreservesPendingBodyForLaterCommit(t *testi
 	for _, final := range []string{"", "not JSON"} {
 		t.Run("fetch="+final, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			fetched := imageRecordStageFetched(t, service, &handler)
@@ -279,7 +280,7 @@ func TestImageRecordStageInvalidFetchPreservesPendingBodyForLaterCommit(t *testi
 func TestImageRecordStageValidFetchOverlaysSeedAndCleansRawBody(t *testing.T) {
 	calls, locations := 0, 0
 	cloud := "initial"
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := NewWithDependencies(client, Dependencies{CloudLocation: func() (resource.CloudLocation, error) { locations++; return resource.CloudLocation{Cloud: &cloud}, nil }})
 	seed := imageRecordStageFetched(t, service, &handler)
@@ -331,7 +332,7 @@ func TestImageRecordStageValidFetchOverlaysSeedAndCleansRawBody(t *testing.T) {
 
 func TestImageRecordStageNilDataAndBorrowedFallbackPreserveCurrentCursor(t *testing.T) {
 	calls, put := 0, 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	seed := imageRecordStageFetched(t, service, &handler)
@@ -379,7 +380,7 @@ func TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor(t *testi
 	for _, mode := range []string{"default total", "plain reader", "explicit zero", "explicit negative", "inference off", "without size restores inference", "explicit overrides disabled", "inference enabled again", "full options replace"} {
 		t.Run(mode, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -457,7 +458,7 @@ func TestImageRecordStageSizeInferenceKeepsSeekFailuresAndESPIPEUnknown(t *testi
 	}{{"current error", 1, errors.New("current seek"), false}, {"end error", 2, errors.New("end seek"), false}, {"restore error", 3, errors.New("restore seek"), false}, {"current ESPIPE", 1, syscall.ESPIPE, true}, {"end ESPIPE", 2, syscall.ESPIPE, true}, {"restore ESPIPE", 3, syscall.ESPIPE, true}} {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -487,7 +488,7 @@ func TestImageRecordStageSizeInferenceKeepsSeekFailuresAndESPIPEUnknown(t *testi
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -523,7 +524,7 @@ func TestImageRecordStageFilenameAndBorrowedFileHaveSeparateLifetimes(t *testing
 				t.Fatal(err)
 			}
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -597,7 +598,7 @@ func TestImageRecordStageFilenameAndBorrowedFileHaveSeparateLifetimes(t *testing
 	}
 	t.Run("queued missing filename preserves open cause without PUT", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordStageFetched(t, service, &handler)
@@ -611,7 +612,7 @@ func TestImageRecordStageFilenameAndBorrowedFileHaveSeparateLifetimes(t *testing
 
 func TestImageRecordStageRejectsInvalidInputsAndOwnedHeadersBeforeIO(t *testing.T) {
 	calls := 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	seed := imageRecordStageFetched(t, service, &handler)
@@ -676,7 +677,7 @@ func TestImageRecordStageRejectsInvalidInputsAndOwnedHeadersBeforeIO(t *testing.
 
 func TestImageRecordStageCapturesRequestOptionsLocationAndOrdinaryHeadersOnce(t *testing.T) {
 	calls, callbacks, locations := 0, 0, 0
-	var handler taskCoreTransport
+	var handler testcloud.RoundTripperFunc
 	client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 	service := New(client)
 	seed := imageRecordStageFetched(t, service, &handler)
@@ -741,7 +742,7 @@ func TestImageRecordStageOptionsKeepBulkMergeFullReplacementAndGuardOwnership(t 
 	for _, mode := range []string{"bulk merge", "full replace", "cancel", "source", "binding", "outer", "callback cause"} {
 		t.Run(mode, func(t *testing.T) {
 			calls, callbacks, later := 0, 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -826,7 +827,7 @@ func TestImageRecordStageAcceptedPUTHandlingFailuresRetainOnlyActualStageReceipt
 				}
 				return nil
 			})
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -884,7 +885,7 @@ func TestImageRecordStageFinalFetchErrorsKeepBothPhaseEvidenceAndPendingSeed(t *
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls, retries := 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -965,7 +966,7 @@ func TestImageRecordStageBinaryRejectionsNeverReplayReauthenticateOrBackoff(t *t
 	for _, code := range []int{400, 401, 404, 429, 500, 599} {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			calls, retries, reauth, backoff := 0, 0, 0, 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -1009,7 +1010,7 @@ func TestImageRecordStageBorrowedReadErrorsAndTransportCausesStopFinalFetch(t *t
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			calls := 0
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -1064,7 +1065,7 @@ func TestImageRecordStageFinalFetchRetainsSafeNativeRetryFixedTargetAndLiveAuth(
 		t.Run(mode, func(t *testing.T) {
 			calls, retries := 0, 0
 			marker := errors.New("metadata retry")
-			var handler taskCoreTransport
+			var handler testcloud.RoundTripperFunc
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 			service := New(client)
 			seed := imageRecordStageFetched(t, service, &handler)
@@ -1141,7 +1142,7 @@ func TestImageRecordStageFinalFetchRetainsSafeNativeRetryFixedTargetAndLiveAuth(
 func TestImageRecordStageRejectedBodyCloseAndFinalFetchReauthKeepNativePolicy(t *testing.T) {
 	t.Run("rejected PUT Close cause joins native error", func(t *testing.T) {
 		calls := 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordStageFetched(t, service, &handler)
@@ -1156,7 +1157,7 @@ func TestImageRecordStageRejectedBodyCloseAndFinalFetchReauthKeepNativePolicy(t 
 	})
 	t.Run("final GET reauth retains stage evidence and fixed URL", func(t *testing.T) {
 		calls, reauth := 0, 0
-		var handler taskCoreTransport
+		var handler testcloud.RoundTripperFunc
 		client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return handler(req) })
 		service := New(client)
 		seed := imageRecordStageFetched(t, service, &handler)

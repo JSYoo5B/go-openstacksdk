@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"sync/atomic"
 	"testing"
 
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeImportTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeImportTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeImportWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Import-Proof": {"actual"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Import-Proof": {"actual"}})
 }
 
 func nativeImportClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -55,13 +44,13 @@ func TestNativeImageImportInfoGet(t *testing.T) {
 	client := nativeImportClient(cloud)
 	code := 200
 	var calls atomic.Int32
-	cloud.Provider.HTTPClient.Transport = nativeImportTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if req.Method != http.MethodGet || req.URL.Path != "/reverse/glance/v2/info/import" || req.URL.RawQuery != "" || req.Body != nil || req.Header.Get("Accept") != "application/json" || req.Header.Get("X-Source") != "direct" {
 			t.Error(req.Method, req.URL, req.Header)
 		}
 		return nativeImportWire(code, `{"import-methods":{"description":"d","type":"array","value":["glance-direct","web-download"]},"extra":1}`), nil
-	})
+	}))
 	api := imageimport.New(client)
 	if api.RawClient() != client {
 		t.Fatal("native client identity changed")
@@ -103,14 +92,14 @@ func TestNativeImageImportCreateBodyExtensionsAndStatus(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = nativeImportTransport(func(req *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				raw, _ := io.ReadAll(req.Body)
 				if req.Method != http.MethodPost || req.URL.Path != test.path || string(raw) != test.want || req.Header.Get("Content-Type") != "application/json" || req.Header.Get("X-Source") != "direct" {
 					t.Error(req.Method, req.URL, string(raw), req.Header)
 				}
 				return nativeImportWire(202, "opaque accepted bytes"), nil
-			})
+			}))
 			if err := imageimport.New(nativeImportClient(cloud)).Create(context.Background(), test.id, test.opts, test.options...); err != nil || calls.Load() != 1 {
 				t.Fatal(err, calls.Load())
 			}
@@ -120,10 +109,10 @@ func TestNativeImageImportCreateBodyExtensionsAndStatus(t *testing.T) {
 		cloud := testcloud.New(t)
 		code := 200
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = nativeImportTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			return nativeImportWire(code, `{}`), nil
-		})
+		}))
 		api := imageimport.New(nativeImportClient(cloud))
 		for _, option := range []imageimport.CreateOption{imageimport.WithCreateField("name", "x"), imageimport.WithCreateField("uri", "x"), nil} {
 			err := api.Create(context.Background(), "img", imageimport.CreateOpts{}, option)

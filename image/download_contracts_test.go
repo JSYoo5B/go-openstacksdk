@@ -33,12 +33,8 @@ import (
 // its writer branch with fixed routes, retained evidence and Go error chains.
 const downloadPrefix = "/reverse/glance/v2/"
 
-type downloadTransport func(*http.Request) (*http.Response, error)
-
-func (f downloadTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
-
 func downloadWire(code int, phase string, body io.ReadCloser) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"X-Phase": {phase}}, Body: body}
+	return testcloud.StreamResponse(code, body, http.Header{"X-Phase": {phase}})
 }
 
 func downloadMetadata(fields string) string {
@@ -134,7 +130,7 @@ func TestDownloadToDefaultSequenceAndEvidence(t *testing.T) {
 	sink := &downloadSink{}
 	_, _ = sink.Buffer.WriteString("prefix-")
 	var sequence []string
-	cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		sequence = append(sequence, r.Method+" "+r.URL.Path)
 		if r.Method != http.MethodGet || r.Header.Get("X-Source") != "captured" || r.URL.RawQuery != "" {
 			t.Error(r.Method, r.URL, r.Header)
@@ -151,7 +147,7 @@ func TestDownloadToDefaultSequenceAndEvidence(t *testing.T) {
 		wire := downloadWire(200, "file", body)
 		wire.Header.Set("Content-MD5", "header-decoy")
 		return wire, nil
-	})
+	}))
 	v, err := image.New(client).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 	if err != nil || v == nil || v.ImageID != "fixed" || v.Image == nil || v.Image.ID != "fixed" || v.Image.Status != "queued" || v.Metadata == nil || v.Metadata.StatusCode != 200 || string(v.Metadata.Body) != metadata || v.Metadata.Header.Get("X-Phase") != "metadata" || v.StatusCode != 200 || v.Header.Get("X-Phase") != "file" || v.Header.Get("Content-MD5") != "header-decoy" || v.BytesWritten != int64(len(payload)) || sink.String() != "prefix-"+payload || v.Checksum == nil || v.Checksum.Algorithm != "sha512" || v.Checksum.Expected != digest || v.Checksum.Actual != digest || !v.Checksum.Complete || !v.Checksum.Verified {
 		t.Fatal(v, err, sink.Len())
@@ -185,10 +181,10 @@ func TestDownloadToCompletePreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			sink := &downloadSink{}
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return downloadWire(500, "unexpected", io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink, tc.opts...)
 			if v != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 || sink.writes.Load() != 0 || sink.closes.Load() != 0 {
 				t.Fatal(v, err, calls.Load(), sink.writes.Load(), sink.closes.Load())
@@ -200,10 +196,10 @@ func TestDownloadToCompletePreflight(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := cloud.Client("image", downloadPrefix)
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return downloadWire(500, "unexpected", io.NopCloser(strings.NewReader(`{}`))), nil
-			})
+			}))
 			sink := &downloadSink{}
 			var output io.Writer = sink
 			ctx := context.Background()
@@ -255,14 +251,14 @@ func TestDownloadToCanonicalIdentityAndIntegrity(t *testing.T) {
 		t.Run(algorithm+" primary", func(t *testing.T) {
 			digest := downloadDigest(algorithm, payload)
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if strings.HasSuffix(r.URL.Path, "/file") {
 					wire := downloadWire(200, "file", io.NopCloser(strings.NewReader(payload)))
 					wire.Header.Set("Content-MD5", "ignored-header")
 					return wire, nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(fmt.Sprintf(`,"os_hash_algo":%q,"os_hash_value":%q,"checksum":"ignored-metadata"`, algorithm, digest))))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), &downloadSink{})
 			if err != nil || v == nil || v.Checksum == nil || v.Checksum.Algorithm != algorithm || v.Checksum.Expected != digest || v.Checksum.Actual != digest || !v.Checksum.Verified || !v.Checksum.Complete {
 				t.Fatal(v, err)
@@ -290,7 +286,7 @@ func TestDownloadToCanonicalIdentityAndIntegrity(t *testing.T) {
 			cloud := testcloud.New(t)
 			var files atomic.Int32
 			sink := &downloadSink{}
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if strings.HasSuffix(r.URL.Path, "/file") {
 					files.Add(1)
 					wire := downloadWire(200, "file", io.NopCloser(strings.NewReader(payload)))
@@ -298,7 +294,7 @@ func TestDownloadToCanonicalIdentityAndIntegrity(t *testing.T) {
 					return wire, nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(tc.fields)))), nil
-			})
+			}))
 			var opts []image.DownloadImageOption
 			if tc.disabled {
 				opts = append(opts, image.WithDownloadChecksumVerification(false))
@@ -335,10 +331,10 @@ func TestDownloadToCanonicalIdentityAndIntegrity(t *testing.T) {
 			cloud := testcloud.New(t)
 			var calls atomic.Int32
 			sink := &downloadSink{}
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(*http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(metadata))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 			var proof *resource.ResponseError
 			if v == nil || v.Metadata == nil || string(v.Metadata.Body) != metadata || !errors.As(err, &proof) || proof.StatusCode != 200 || calls.Load() != 1 || sink.writes.Load() != 0 || v.StatusCode != 0 {
@@ -385,7 +381,7 @@ func TestDownloadToPreparedSnapshotsAndPreferences(t *testing.T) {
 	var retained *image.DownloadImageOpts
 	var callbacks, calls atomic.Int32
 	body := &downloadBody{Reader: strings.NewReader("payload")}
-	cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		calls.Add(1)
 		if callbacks.Load() != 1 {
 			t.Error("option callback deferred or repeated", callbacks.Load())
@@ -404,7 +400,7 @@ func TestDownloadToPreparedSnapshotsAndPreferences(t *testing.T) {
 			t.Error("prefer leaked to metadata", r.URL.String())
 		}
 		return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(`,"os_hash_algo":"future-hash","os_hash_value":"wrong"`)))), nil
-	})
+	}))
 	sink := &downloadSink{}
 	v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink, image.WithDownloadChunkSize(-1), bulk, func(opts *image.DownloadImageOpts) error { callbacks.Add(1); retained = opts; return nil })
 	if err != nil || v == nil || v.Checksum != nil || sink.String() != "payload" || calls.Load() != 2 || callbacks.Load() != 1 || body.maxRead.Load() != 3 || sink.maxWrite.Load() > 3 {
@@ -416,7 +412,7 @@ func TestDownloadToPreparedSnapshotsAndPreferences(t *testing.T) {
 	} {
 		t.Run("replacement omits prefer", func(t *testing.T) {
 			cloud := testcloud.New(t)
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if r.URL.RawQuery != "" {
 					t.Error(r.URL.String())
 				}
@@ -424,7 +420,7 @@ func TestDownloadToPreparedSnapshotsAndPreferences(t *testing.T) {
 					return downloadWire(200, "file", io.NopCloser(strings.NewReader("payload"))), nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), &downloadSink{}, opts...)
 			if err != nil || v == nil || v.BytesWritten != 7 {
 				t.Fatal(v, err)
@@ -468,10 +464,10 @@ func TestDownloadToPartialTransferFailures(t *testing.T) {
 			if tc.read {
 				body.Reader = &downloadReadFailure{prefix: []byte(tc.metadata), cause: readCause}
 			}
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				return downloadWire(tc.code, "metadata", body), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 			if err == nil || calls.Load() != 1 || sink.writes.Load() != 0 || body.closes.Load() != 1 {
 				t.Fatal(v, err, calls.Load(), sink.writes.Load(), body.closes.Load())
@@ -501,13 +497,13 @@ func TestDownloadToPartialTransferFailures(t *testing.T) {
 			cloud := testcloud.New(t)
 			body := &downloadBody{Reader: strings.NewReader("actual rejected file body")}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if strings.HasSuffix(r.URL.Path, "/file") {
 					return downloadWire(code, "file", body), nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
-			})
+			}))
 			sink := &downloadSink{}
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -543,13 +539,13 @@ func TestDownloadToPartialTransferFailures(t *testing.T) {
 				}
 			}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if strings.HasSuffix(r.URL.Path, "/file") {
 					return downloadWire(200, "file", body), nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(fmt.Sprintf(`,"checksum":%q`, downloadDigest("md5", "payload")))))), nil
-			})
+			}))
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, image.WithDownloadChunkSize(3))
 			wantBytes := int64(3)
 			if strings.Contains(mode, "write") {
@@ -586,13 +582,13 @@ func TestDownloadToNoDataAndNativeCompatibility(t *testing.T) {
 		cloud := testcloud.New(t)
 		body := &downloadBody{Reader: strings.NewReader("ignored no-data response")}
 		var calls atomic.Int32
-		cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if strings.HasSuffix(r.URL.Path, "/file") {
 				return downloadWire(204, "file", body), nil
 			}
 			return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(`,"checksum":"unused"`)))), nil
-		})
+		}))
 		sink := &downloadSink{}
 		v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 		if err != nil || v == nil || v.Metadata == nil || v.StatusCode != 204 || v.Header.Get("X-Phase") != "file" || v.BytesWritten != 0 || v.Checksum != nil || sink.writes.Load() != 0 || body.closes.Load() != 1 || calls.Load() != 2 {
@@ -604,13 +600,13 @@ func TestDownloadToNoDataAndNativeCompatibility(t *testing.T) {
 			cloud := testcloud.New(t)
 			body := &downloadBody{Reader: strings.NewReader("raw-native")}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if r.Method != http.MethodGet || r.URL.Path != downloadPrefix+"images/fixed/file" || r.URL.RawQuery != "" {
 					t.Error("raw Download acquired workflow behavior", r.Method, r.URL)
 				}
 				return downloadWire(code, "raw-native", body), nil
-			})
+			}))
 			v, err := imagedata.New(cloud.Client("image", downloadPrefix)).Download(context.Background(), "fixed")
 			if code == 204 {
 				if v != nil || !gophercloud.ResponseCodeIs(err, 204) || body.closes.Load() < 1 || calls.Load() != 1 {
@@ -646,7 +642,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 			cloud.Provider.SetToken("retry-file")
 			return nil
 		}
-		cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if sink.writes.Load() != 0 {
 				t.Error("request replayed after writer bytes")
 			}
@@ -673,7 +669,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 				t.Error(r.Header)
 			}
 			return downloadWire(200, "file", body), nil
-		})
+		}))
 		v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 		if err != nil || v == nil || sink.String() != "payload" || metadataCalls.Load() != 2 || fileCalls.Load() != 2 || reauth.Load() != 1 || retries.Load() != 1 || body.closes.Load() != 1 || cloud.Provider.ReauthFunc == nil || cloud.Provider.RetryFunc == nil {
 			t.Fatal(v, err, metadataCalls.Load(), fileCalls.Load(), reauth.Load(), retries.Load(), body.closes.Load())
@@ -685,7 +681,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 			client := cloud.Client("image", downloadPrefix)
 			client.MoreHeaders = map[string]string{"X-Source": "captured"}
 			var calls atomic.Int32
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				calls.Add(1)
 				if !strings.HasPrefix(r.URL.Path, downloadPrefix) || r.Header.Get("X-Source") != "captured" {
 					t.Error("source change retargeted request", r.URL, r.Header)
@@ -703,7 +699,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 					client.Type = "compute"
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
-			})
+			}))
 			sink := &downloadSink{}
 			v, err := image.New(client).DownloadTo(context.Background(), resource.ID("fixed"), sink)
 			if change == "valid prefix and headers" {
@@ -726,7 +722,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 		var calls, redirects atomic.Int32
 		cloud.Provider.HTTPClient.CheckRedirect = func(*http.Request, []*http.Request) error { redirects.Add(1); return nil }
 		body := &downloadBody{Reader: strings.NewReader("redirect proof")}
-		cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			calls.Add(1)
 			if strings.HasSuffix(r.URL.Path, "/file") {
 				wire := downloadWire(303, "file", body)
@@ -734,7 +730,7 @@ func TestDownloadToProviderSourceAndRetryBoundaries(t *testing.T) {
 				return wire, nil
 			}
 			return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
-		})
+		}))
 		v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(context.Background(), resource.ID("fixed"), &downloadSink{})
 		if v == nil || v.Metadata == nil || v.StatusCode != 0 || !gophercloud.ResponseCodeIs(err, 303) || calls.Load() != 2 || redirects.Load() != 0 || body.closes.Load() != 1 {
 			t.Fatal(v, err, calls.Load(), redirects.Load(), body.closes.Load())
@@ -770,12 +766,12 @@ func TestDownloadToBorrowedWriterCancellationAndClose(t *testing.T) {
 		var signal, releasing sync.Once
 		t.Cleanup(func() { releasing.Do(func() { close(release) }) })
 		body := &downloadBody{Reader: strings.NewReader("payload")}
-		cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if strings.HasSuffix(r.URL.Path, "/file") {
 				return downloadWire(200, "file", body), nil
 			}
 			return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata(fmt.Sprintf(`,"checksum":%q`, downloadDigest("md5", "payload")))))), nil
-		})
+		}))
 		sink := &downloadSink{}
 		sink.onWrite = func(p []byte) (int, error) {
 			signal.Do(func() { close(started) })
@@ -823,13 +819,13 @@ func TestDownloadToBorrowedWriterCancellationAndClose(t *testing.T) {
 				cloud.Provider.HTTPClient.Timeout = 100 * time.Millisecond
 			}
 			var body *downloadBody
-			cloud.Provider.HTTPClient.Transport = downloadTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				if strings.HasSuffix(r.URL.Path, "/file") {
 					body = &downloadBody{Reader: &downloadContextReader{ctx: r.Context(), prefix: []byte("abc")}}
 					return downloadWire(200, "file", body), nil
 				}
 				return downloadWire(200, "metadata", io.NopCloser(strings.NewReader(downloadMetadata("")))), nil
-			})
+			}))
 			sink := &downloadSink{}
 			v, err := image.New(cloud.Client("image", downloadPrefix)).DownloadTo(ctx, resource.ID("fixed"), sink, image.WithDownloadChunkSize(3))
 			if !errors.Is(err, context.DeadlineExceeded) || v == nil || v.Metadata == nil || v.StatusCode != 200 || v.BytesWritten != 3 || sink.String() != "abc" || body == nil || body.closes.Load() != 1 || sink.closes.Load() != 0 {
