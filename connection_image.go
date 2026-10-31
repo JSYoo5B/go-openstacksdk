@@ -1,20 +1,14 @@
 package openstack
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
-	"fmt"
-	"math"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/image"
-	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
-	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudimage"
 	objectapi "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
+
+	"github.com/gophercloud/gophercloud/v2"
 )
 
 // WithImageCreatePolicy overrides merged cloud image settings with concrete SDK
@@ -30,24 +24,21 @@ func WithImageCreatePolicy(options ...image.ImageCreatePolicyOption) ConnectionO
 	}
 }
 
+func (c *Connection) cloudImageDependencies() cloudimage.Dependencies {
+	if c == nil {
+		return cloudimage.Dependencies{}
+	}
+	return cloudimage.Dependencies{
+		Image:         c.Image,
+		ObjectStorage: c.ObjectStorageV1,
+		Provider:      func() *gophercloud.ProviderClient { return c.provider },
+	}
+}
+
 // Only the configured Task branch resolves Swift. Source-only registration lets
 // the Glance operation observe later Swift binding changes without recursion.
 func (c *Connection) imageCreateSwiftService(ctx context.Context) (*objectapi.Service, error) {
-	service, err := c.ObjectStorageV1(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if service == nil || service.RawClient() == nil || service.Containers == nil || service.Objects == nil {
-		return nil, invalid("image task Swift service is required")
-	}
-	client, containers, objects, provider := service.RawClient(), service.Containers, service.Objects, c.provider
-	rest.RegisterOperationSource(ctx, func(context.Context) error {
-		if c.provider != provider || service.RawClient() != client || service.Containers != containers || service.Objects != objects || containers.RawClient() != client || objects.RawClient() != client {
-			return invalid("image task Swift service source changed")
-		}
-		return nil
-	})
-	return service, nil
+	return cloudimage.SwiftService(ctx, c.cloudImageDependencies())
 }
 
 // CloudImageCreateRequest mirrors Cloud create_image. An empty VolumeID uses
@@ -73,55 +64,6 @@ type CloudImageCreateResult struct {
 	Cleanup     *image.ImageRecordCloudDeleteResult
 }
 
-// cloudCreateTimeout converts Source timeout values used by iterate_timeout:
-// nil is the 3600 second default, null waits forever, numbers and Python bools
-// are seconds. Other JSON values raise TypeError in Python.
-func cloudCreateTimeout(raw json.RawMessage) (time.Duration, bool, error) {
-	if raw == nil {
-		return 3600 * time.Second, false, nil
-	}
-	switch trimmed := bytes.TrimSpace(raw); string(trimmed) {
-	case "null":
-		return 0, true, nil
-	case "true":
-		return time.Second, false, nil
-	case "false":
-		return 0, false, nil
-	}
-	var seconds float64
-	if err := json.Unmarshal(raw, &seconds); err != nil || math.IsNaN(seconds) {
-		return 0, false, fmt.Errorf("%w: Cloud image create timeout must be a number or null", resource.ErrInvalidOption)
-	}
-	if seconds > float64(math.MaxInt64)/float64(time.Second) {
-		return 0, true, nil
-	}
-	return time.Duration(seconds * float64(time.Second)), false, nil
-}
-
-// cloudCreateFormat applies the Cinder Proxy `if not value` default check to a
-// raw create option; truthy values must be strings for the typed volume action.
-func cloudCreateFormat(raw json.RawMessage, label string) (string, error) {
-	if raw == nil {
-		return "", nil
-	}
-	truthy, err := cloudfilter.PythonTruthy(raw)
-	if err != nil || !truthy {
-		return "", err
-	}
-	var value string
-	if err := json.Unmarshal(raw, &value); err != nil {
-		return "", fmt.Errorf("%w: Cloud volume image %s must be a string", resource.ErrInvalidOption, label)
-	}
-	return value, nil
-}
-
-func cloudCreateTruthy(raw json.RawMessage) (bool, error) {
-	if raw == nil {
-		return false, nil
-	}
-	return cloudfilter.PythonTruthy(raw)
-}
-
 // CreateCloudImageRecord implements Cloud create_image. Without a volume it
 // runs CreateImageRecord with the same options; with a volume it runs the
 // Cinder Proxy create_image using the allow_duplicates and format options.
@@ -129,112 +71,13 @@ func cloudCreateTruthy(raw json.RawMessage) (bool, error) {
 // a found status is neither queued nor saving. On timeout it runs Cloud
 // delete_image(id, wait=True) and returns the timeout with that cleanup.
 func (c *Connection) CreateCloudImageRecord(ctx context.Context, input CloudImageCreateRequest, options ...image.ImageRecordCreateOption) (*CloudImageCreateResult, error) {
-	const operation = "CreateCloudImageRecord"
-	fail := func(result *CloudImageCreateResult, err error) (*CloudImageCreateResult, error) {
-		if err != nil && ctx != nil && ctx.Err() != nil && !errors.Is(err, context.Cause(ctx)) {
-			err = errors.Join(err, context.Cause(ctx))
+	createVolume := func(ctx context.Context, input cloudimage.VolumeRequest) (*VolumeImageCreateResult, *image.ImageRecord, error) {
+		result, err := c.CreateVolumeImageRecord(ctx, VolumeImageCreateRequest(input))
+		if result == nil {
+			return nil, nil, err
 		}
-		return result, request.Wrap(operation, "image", err)
+		return result, result.Image, err
 	}
-	if ctx == nil {
-		return fail(nil, fmt.Errorf("%w: context is required", resource.ErrInvalidOption))
-	}
-	if input.PollInterval < 0 {
-		return fail(nil, fmt.Errorf("%w: Cloud image create poll interval must not be negative", resource.ErrInvalidOption))
-	}
-	policy, err := image.PrepareImageRecordCreateOptions(ctx, options...)
-	if err != nil {
-		return fail(nil, err)
-	}
-	wait, err := cloudCreateTruthy(policy.Wait)
-	if err != nil {
-		return fail(nil, err)
-	}
-	timeout, unlimited, err := cloudCreateTimeout(policy.Timeout)
-	if err != nil && wait {
-		return fail(nil, err)
-	}
-	service, err := c.Image(ctx)
-	if err != nil {
-		return fail(nil, err)
-	}
-	result := &CloudImageCreateResult{}
-	if input.VolumeID == "" {
-		result.Created, err = service.CreateImageRecord(ctx, input.Image, image.WithImageRecordCreateOpts(policy))
-		if result.Created != nil {
-			result.Image = result.Created.Record
-		}
-	} else {
-		request := VolumeImageCreateRequest{Name: input.Image.Name, VolumeID: input.VolumeID}
-		request.AllowDuplicates, err = cloudCreateTruthy(policy.AllowDuplicates)
-		if err == nil {
-			request.ContainerFormat, err = cloudCreateFormat(policy.ContainerFormat, "container format")
-		}
-		if err == nil {
-			request.DiskFormat, err = cloudCreateFormat(policy.DiskFormat, "disk format")
-		}
-		if err != nil {
-			return fail(nil, err)
-		}
-		result.Volume, err = c.CreateVolumeImageRecord(ctx, request)
-		if result.Volume != nil {
-			result.Image = result.Volume.Image
-		}
-	}
-	if err != nil {
-		return fail(result, err)
-	}
-	if !wait {
-		return result, nil
-	}
-	if result.Image == nil || result.Image.Resource == nil {
-		return fail(result, fmt.Errorf("%w: Cloud image create returned no image to wait for", resource.ErrInvalidOption))
-	}
-	var id string
-	if err := json.Unmarshal(result.Image.Resource.Body["id"], &id); err != nil || id == "" {
-		return fail(result, fmt.Errorf("%w: created image id must be a nonempty string", resource.ErrInvalidOption))
-	}
-	interval := input.PollInterval
-	if interval == 0 {
-		interval = 2 * time.Second
-	}
-	created := result.Image
-	deadline := time.Now().Add(timeout)
-	for {
-		if !unlimited && !time.Now().Before(deadline) {
-			break
-		}
-		result.WaitLookups++
-		found, err := service.GetCloudImageRecord(ctx, id)
-		if err != nil {
-			return fail(result, err)
-		}
-		if found.Image != nil {
-			result.WaitLast = found.Image
-			var status string
-			raw := found.Image.Resource.Body["status"]
-			isString := json.Unmarshal(raw, &status) == nil && !bytes.Equal(bytes.TrimSpace(raw), []byte("null"))
-			if !isString || status != "queued" && status != "saving" {
-				result.Image = found.Image
-				return result, nil
-			}
-		}
-		timer := time.NewTimer(interval)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return fail(result, context.Cause(ctx))
-		case <-timer.C:
-		}
-	}
-	timedOut := fmt.Errorf("%w: timeout waiting for the image %q to finish", context.DeadlineExceeded, id)
-	cleanupOptions := []image.ImageRecordCloudDeleteOption{image.WithImageRecordCloudDeleteWait(true)}
-	if input.PollInterval != 0 {
-		cleanupOptions = append(cleanupOptions, image.WithImageRecordCloudDeletePollInterval(input.PollInterval))
-	}
-	var cleanupErr error
-	result.Cleanup, cleanupErr = service.DeleteCloudImageRecord(ctx, id, cleanupOptions...)
-	result.Image = created
-	// Python raises the cleanup failure instead; Go keeps both causes.
-	return fail(result, errors.Join(timedOut, cleanupErr))
+	result, err := cloudimage.Create(ctx, c.cloudImageDependencies(), createVolume, cloudimage.CreateRequest(input), options...)
+	return (*CloudImageCreateResult)(result), err
 }
