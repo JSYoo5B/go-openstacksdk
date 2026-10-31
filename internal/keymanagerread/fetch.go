@@ -11,11 +11,11 @@ import (
 	"maps"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -34,7 +34,9 @@ type Record struct {
 }
 
 // Fetch accepts only an explicit executable ID. Returned HREFs never route HTTP.
-func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, kind string, ref resource.Ref, options ...request.Option[T]) (*Record, error) {
+// Options are request.Header or request.Custom over *request.Config[T]; other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, kind string, ref resource.Ref, options ...request.GetCall) (*Record, error) {
 	if err := cloudread.Context(ctx); err != nil {
 		return nil, err
 	}
@@ -58,7 +60,7 @@ func Fetch[T any](ctx context.Context, client *gophercloud.ServiceClient, kind s
 	guard := func(ctx context.Context) error {
 		return errors.Join(source.Guard(ctx), rest.CheckOperationGuard(ctx))
 	}
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, calls.Spec[request.Config[T]]{Header: calls.ConfigHeader[T]})
 	guarded := make([]request.Option[T], len(owned))
 	for i, option := range owned {
 		apply := option

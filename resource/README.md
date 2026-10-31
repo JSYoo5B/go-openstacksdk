@@ -1213,11 +1213,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary Secrets.Resources.List/All classify the complete pinned Secret declaration through SDK-owned WithFilter/WithFilters: twelve canonical query attributes, thirteen accepted canonical/wire names, and all twelve declared non-query Body properties. algorithm becomes alg; bits/created/updated/expiration stay server queries while bit_length/created_at/updated_at/expires_at compare original row values. Both the generated leaf and cached Connection.KeyManagerV1 facade use the same descriptor without caller builders or predicates.
   Tests: `api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireQueryDescriptor`, `api/keymanager_secret_list_filters_test.go:TestKeyManagerSecretListFiltersEntireRawBodyDescriptor`, `connectiontest/connection_keymanager_secret_filters_test.go:TestConnectionKeyManagerSecretFiltersSharedFacadeAndRawProperties`.
@@ -1298,11 +1298,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary Containers.Resources.List/All classify the entire pinned Container declaration through SDK-owned WithFilter/WithFilters: inherited limit and marker are the two canonical and accepted query names, and all ten non-query Body properties are supported. name is a local original-row condition, not a semantic server query; native ListOpts.Name, raw name queries and the existing WithName hint remain separate. Both the generated leaf and cached Connection.KeyManagerV1 facade use this descriptor without caller builders or predicates.
   Tests: `api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersEntireDescriptor`, `api/keymanager_container_list_filters_test.go:TestKeyManagerContainerListFiltersLocalNameAndQueryIsolation`, `connectiontest/connection_keymanager_container_filters_test.go:TestConnectionKeyManagerContainerFiltersSharedFacadeAndLocalName`.
@@ -1382,11 +1382,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListMicroversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Ordinary Orders.Resources.List/All classify the complete pinned declaration through SDK-owned WithFilter/WithFilters: inherited limit and marker are the two canonical and accepted query names, and all fourteen non-query Body properties are supported. Inherited top-level name is local and never inferred from Meta.Name; meta compares original response JSON. Both the generated leaf and cached Connection.KeyManagerV1 facade use the same descriptor without caller builders or predicates.
   Tests: `api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersEntireDescriptor`, `api/keymanager_order_list_filters_test.go:TestKeyManagerOrderListFiltersPassiveIdentityAndRawName`, `connectiontest/connection_keymanager_order_filters_test.go:TestConnectionKeyManagerOrderFiltersSharedFacadeAndDistinctReferences`.

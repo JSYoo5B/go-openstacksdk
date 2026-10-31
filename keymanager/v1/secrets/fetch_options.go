@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -16,7 +17,13 @@ type FetchOpts struct {
 	ContentType *string
 }
 
-type FetchOption = request.Option[FetchOpts]
+// FetchOption is one option of Fetch: WithFetchOptions, WithFetchPayload,
+// WithFetchContentType, request.Header or request.Custom over
+// *request.Config[FetchOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FetchOption = request.GetCall
+
+var fetchCalls = calls.Spec[request.Config[FetchOpts]]{Header: calls.ConfigHeader[FetchOpts]}
 
 func copyFetchOptions(value FetchOpts) FetchOpts {
 	if value.Payload != nil {
@@ -32,27 +39,24 @@ func copyFetchOptions(value FetchOpts) FetchOpts {
 
 func WithFetchOptions(value FetchOpts) FetchOption {
 	owned := copyFetchOptions(value)
-	return func(config *request.Config[FetchOpts]) error {
+	return request.Custom(func(config *request.Config[FetchOpts]) error {
 		config.Options = copyFetchOptions(owned)
 		return nil
-	}
+	})
 }
 func WithFetchPayload(value bool) FetchOption {
-	return func(config *request.Config[FetchOpts]) error {
+	return request.Custom(func(config *request.Config[FetchOpts]) error {
 		owned := value
 		config.Options.Payload = &owned
 		return nil
-	}
+	})
 }
 func WithFetchContentType(value string) FetchOption {
-	return func(config *request.Config[FetchOpts]) error {
+	return request.Custom(func(config *request.Config[FetchOpts]) error {
 		owned := value
 		config.Options.ContentType = &owned
 		return nil
-	}
-}
-func WithFetchHeader(key, value string) FetchOption {
-	return request.WithHeader[FetchOpts](key, value)
+	})
 }
 
 func validateFetchHeaders(headers map[string]string) error {

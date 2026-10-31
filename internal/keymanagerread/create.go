@@ -12,6 +12,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -22,7 +23,12 @@ import (
 // CreateRecordOpts has source-shaped attributes and no inferred server defaults.
 // Unknown semantic attributes are discarded; explicit field extensions are separate.
 type CreateRecordOpts struct{ Attributes map[string]any }
-type CreateRecordOption = request.Option[CreateRecordOpts]
+
+// CreateRecordOption is one option of CreateRecord: the package helpers,
+// request.Field, request.Header or request.Custom over
+// *request.Config[CreateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type CreateRecordOption = request.WriteCall
 
 // CreatedRecord separates seeded source attributes from the actual POST response.
 // No returned reference grants authority to route another request.
@@ -41,7 +47,7 @@ func WithCreateRecordOptions(kind string, value CreateRecordOpts) CreateRecordOp
 // when the helper is made and independently decoded for every application.
 func WithCreateRecordAttributes(kind string, value map[string]any) CreateRecordOption {
 	frozen, prior := snapshotCreateAttributes(kind, value)
-	return func(config *request.Config[CreateRecordOpts]) error {
+	return request.Custom(func(config *request.Config[CreateRecordOpts]) error {
 		if prior != nil {
 			return prior
 		}
@@ -51,13 +57,13 @@ func WithCreateRecordAttributes(kind string, value map[string]any) CreateRecordO
 		}
 		config.Options.Attributes = owned
 		return nil
-	}
+	})
 }
 
 // WithCreateRecordAttribute uses the last individually selected canonical value.
 func WithCreateRecordAttribute(kind, key string, value any) CreateRecordOption {
 	frozen, prior := snapshotCreateAttributes(kind, map[string]any{key: value})
-	return func(config *request.Config[CreateRecordOpts]) error {
+	return request.Custom(func(config *request.Config[CreateRecordOpts]) error {
 		if prior != nil {
 			return prior
 		}
@@ -72,29 +78,29 @@ func WithCreateRecordAttribute(kind, key string, value any) CreateRecordOption {
 			config.Options.Attributes[field] = value
 		}
 		return nil
-	}
+	})
 }
 
-// WithCreateRecordField sends an explicit extension without replacing a declared
-// Body field or its client-side alias, including omitted core attributes.
-func WithCreateRecordField(kind, key string, value any) CreateRecordOption {
-	apply := request.WithField[CreateRecordOpts](key, value)
-	return func(config *request.Config[CreateRecordOpts]) error {
-		if _, err := createAttributeMap(kind); err != nil {
-			return err
-		}
-		if createFieldReserved(kind, key) {
-			return invalid("creation extension conflicts with a declared resource attribute")
-		}
-		if config.Fields == nil {
-			config.Fields = make(map[string]json.RawMessage)
-		}
-		return apply(config)
+// createRecordSpec translates the shared calls of CreateRecord. request.Field
+// sends an explicit extension without replacing a declared Body field or its
+// client-side alias, including omitted core attributes; request.Header adds one
+// header. Other shared controls are unsupported.
+func createRecordSpec(kind string) calls.Spec[request.Config[CreateRecordOpts]] {
+	return calls.Spec[request.Config[CreateRecordOpts]]{
+		Header: calls.ConfigHeader[CreateRecordOpts],
+		Field: func(config *request.Config[CreateRecordOpts], entry request.CallEntry) error {
+			if _, err := createAttributeMap(kind); err != nil {
+				return err
+			}
+			if createFieldReserved(kind, entry.Key) {
+				return invalid("creation extension conflicts with a declared resource attribute")
+			}
+			if config.Fields == nil {
+				config.Fields = make(map[string]json.RawMessage)
+			}
+			return calls.ConfigField(config, entry)
+		},
 	}
-}
-
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return request.WithHeader[CreateRecordOpts](key, value)
 }
 
 // CreateRecord makes one guarded flat POST and never performs a metadata or
@@ -111,8 +117,8 @@ func CreateRecord(ctx context.Context, client *gophercloud.ServiceClient, kind s
 		return nil, err
 	}
 	guard := func(ctx context.Context) error { return errors.Join(source.Guard(ctx), rest.CheckOperationGuard(ctx)) }
-	owned := slices.Clone(options)
-	guarded := make([]CreateRecordOption, len(owned))
+	owned := calls.Translate(options, createRecordSpec(kind))
+	guarded := make([]request.Option[CreateRecordOpts], len(owned))
 	for i, option := range owned {
 		apply := option
 		guarded[i] = func(config *request.Config[CreateRecordOpts]) error {

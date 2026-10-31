@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.New`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.Fetch`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithFetchHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.FetchedContainer.Ref`
 
 - Pinned _proxy.py:114-127 dispatches one Container metadata fetch. The concrete Fetch lane executes one fixed explicit-ID GET containers/{RequestID} with no body/query/list/name lookup under the fixture's provider policy. Foreign response refs are passive, and changing or nil-ing public Resources does not redirect or redefine this owned request; Name is rejected before HTTP.
@@ -35,7 +35,7 @@ Python/Go differences:
 - Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.
 - Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.
 - Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.
-- Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.
+- Context and request.Header are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.
 - Completion is restricted to python:key_manager/v1/get_container. Native Container Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence.
 
 ### `python:key_manager/v1/get_order`
@@ -46,7 +46,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.New`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.Fetch`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithFetchHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.FetchedOrder.Ref`
 
 - Pinned _proxy.py:220-231 dispatches one Order metadata fetch. The concrete Fetch lane executes one fixed explicit-ID GET orders/{RequestID} with no body/query/list/name lookup under the fixture's provider policy. Foreign response refs are passive, and changing or nil-ing public Resources does not redirect or redefine this owned request; Name is rejected before HTTP.
@@ -67,7 +67,7 @@ Python/Go differences:
 - Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.
 - Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.
 - Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.
-- Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.
+- Context and request.Header are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.
 - Completion is restricted to python:key_manager/v1/get_order. Native Order Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence.
 
 ## Usage examples

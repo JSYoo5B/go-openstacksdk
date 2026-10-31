@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -237,14 +238,14 @@ func TestPythonSecretFindRecordMissingStrictHTTPAndFallbackPolicies(t *testing.T
 		requests     int
 	}{
 		{"default missing", 404, 200, nil, false, 2},
-		{"strict logical missing", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordIgnoreMissing(false)}, true, 2},
+		{"strict logical missing", 404, 200, []secrets.FindRecordOption{request.IgnoreMissing(false)}, true, 2},
 		{"list404 never missing", 404, 404, nil, true, 2},
 		{"list403 never missing", 404, 403, nil, true, 2},
 		{"401 never fallback", 401, 200, nil, true, 1},
 		{"503 never fallback", 503, 200, nil, true, 1},
 		{"notfoundonly403", 403, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNotFoundOnly)}, true, 1},
 		{"never clean404", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNever)}, false, 1},
-		{"never strict404", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNever), secrets.WithFindRecordIgnoreMissing(false)}, true, 1},
+		{"never strict404", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNever), request.IgnoreMissing(false)}, true, 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -354,7 +355,7 @@ func TestPythonSecretFindRecordOptionsCaptureAndPreflight(t *testing.T) {
 		}
 		return secretFindRecordResponse(200, `{"secrets":[]}`), nil
 	}))
-	value, err := secrets.New(client).FindRecord(context.Background(), "s1", bulk, custom)
+	value, err := secrets.New(client).FindRecord(context.Background(), "s1", bulk, request.Custom(custom))
 	if value == nil || value.Resource != nil || value.Wire != nil || string(value.Envelope) != `{"secrets":[]}` || value.StatusCode != 200 || value.Header.Get("X-Receipt") != "actual" || !errors.Is(err, resource.ErrNotFound) || calls != 2 || applied != 1 {
 		t.Fatal(value, err, calls, applied)
 	}
@@ -365,11 +366,11 @@ func TestPythonSecretFindRecordOptionsCaptureAndPreflight(t *testing.T) {
 	}{
 		{"nil option", "s1", nil, false},
 		{"invalid fallback", "s1", secrets.WithFindRecordFallback(resource.FindFallbackPolicy(99)), false},
-		{"bad identity", "\x00", secrets.WithFindRecordIgnoreMissing(true), false},
+		{"bad identity", "\x00", request.IgnoreMissing(true), false},
 		{"unsafe never", "name with space", secrets.WithFindRecordFallback(resource.FindFallbackNever), false},
-		{"source replaced", "s1", func(*secrets.FindRecordOpts) error { client.ResourceBase = cloud.Server.URL + "/changed/"; return nil }, false},
-		{"callback error", "s1", func(*secrets.FindRecordOpts) error { return resource.ErrUnsupported }, false},
-		{"canceled callback", "s1", secrets.WithFindRecordIgnoreMissing(true), true},
+		{"source replaced", "s1", request.Custom(func(*secrets.FindRecordOpts) error { client.ResourceBase = cloud.Server.URL + "/changed/"; return nil }), false},
+		{"callback error", "s1", request.Custom(func(*secrets.FindRecordOpts) error { return resource.ErrUnsupported }), false},
+		{"canceled callback", "s1", request.IgnoreMissing(true), true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			client.ResourceBase = cloud.Server.URL + "/barbican/v1/"

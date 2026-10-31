@@ -122,7 +122,7 @@ func TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse(t *testing.T) {
 						client.MoreHeaders = map[string]string{"X-Source": "shared"}
 						client.Microversion = "1.0"
 						c.Provider.SetToken("live-create-token")
-						v, e := a.CreateRecord(context.Background(), containers.WithCreateRecordOptions(containers.CreateRecordOpts{Attributes: attrs}), containers.WithCreateRecordHeader("X-Call", "owned"))
+						v, e := a.CreateRecord(context.Background(), containers.WithCreateRecordOptions(containers.CreateRecordOpts{Attributes: attrs}), request.Header("X-Call", "owned"))
 						err = e
 						if v == nil {
 							t.Fatal(v, err)
@@ -134,7 +134,7 @@ func TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse(t *testing.T) {
 						client.MoreHeaders = map[string]string{"X-Source": "shared"}
 						client.Microversion = "1.0"
 						c.Provider.SetToken("live-create-token")
-						v, e := a.CreateRecord(context.Background(), orders.WithCreateRecordOptions(orders.CreateRecordOpts{Attributes: attrs}), orders.WithCreateRecordHeader("X-Call", "owned"))
+						v, e := a.CreateRecord(context.Background(), orders.WithCreateRecordOptions(orders.CreateRecordOpts{Attributes: attrs}), request.Header("X-Call", "owned"))
 						err = e
 						if v == nil {
 							t.Fatal(v, err)
@@ -146,7 +146,7 @@ func TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse(t *testing.T) {
 						client.MoreHeaders = map[string]string{"X-Source": "shared"}
 						client.Microversion = "1.0"
 						c.Provider.SetToken("live-create-token")
-						v, e := a.CreateRecord(context.Background(), secrets.WithCreateRecordOptions(secrets.CreateRecordOpts{Attributes: attrs}), secrets.WithCreateRecordHeader("X-Call", "owned"))
+						v, e := a.CreateRecord(context.Background(), secrets.WithCreateRecordOptions(secrets.CreateRecordOpts{Attributes: attrs}), request.Header("X-Call", "owned"))
 						err = e
 						if v == nil {
 							t.Fatal(v, err)
@@ -208,9 +208,9 @@ func TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof(t *testing
 	attrs := map[string]any{"name": "replaced", "type": nil, "secret_refs": refs, "created_at": "discarded-alias", "created": nil, "container_ref": "https://input.invalid/valid", "container_id": "relative/ignored"}
 	bulk := containers.WithCreateRecordAttributes(attrs)
 	vendor := map[string]any{"n": json.Number("9007199254740993")}
-	field := containers.WithCreateRecordField("vendor", vendor)
+	field := request.Field("vendor", vendor)
 	attrs["name"], nested["name"], vendor["n"], refs[0] = "caller-change", "caller-change", 0, nil
-	options := []containers.CreateRecordOption{containers.WithCreateRecordOptions(containers.CreateRecordOpts{Attributes: map[string]any{"name": "discarded", "consumers": []any{"discarded"}}}), field, containers.WithCreateRecordHeader("X-Call", "owned"), bulk, containers.WithCreateRecordAttribute("name", ""), containers.WithCreateRecordAttribute("updated_at", "first"), containers.WithCreateRecordAttribute("updated", "last"), containers.WithCreateRecordAttribute("ignored", func() {})}
+	options := []containers.CreateRecordOption{containers.WithCreateRecordOptions(containers.CreateRecordOpts{Attributes: map[string]any{"name": "discarded", "consumers": []any{"discarded"}}}), field, request.Header("X-Call", "owned"), bulk, containers.WithCreateRecordAttribute("name", ""), containers.WithCreateRecordAttribute("updated_at", "first"), containers.WithCreateRecordAttribute("updated", "last"), containers.WithCreateRecordAttribute("ignored", func() {})}
 	const response = `{"container_ref":"https://foreign.invalid/containers/raw%2Fid?x=1#fragment"}`
 	want := `{"container_ref":"https://input.invalid/valid","created":null,"name":"","secret_refs":[{"name":"original","secret_ref":"https://passive.invalid/s","vendor":9007199254740993}],"type":null,"updated":"last","vendor":{"n":9007199254740993}}`
 	c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -245,7 +245,7 @@ func TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof(t *testing
 		retained.Headers["X-Call"] = "late"
 		return base.RoundTrip(r)
 	}))
-	value, err := a.CreateRecord(context.Background(), append(append([]containers.CreateRecordOption(nil), options...), custom)...)
+	value, err := a.CreateRecord(context.Background(), append(append([]containers.CreateRecordOption(nil), options...), request.Custom(custom))...)
 	c.SetTransport(base)
 	if err != nil || value == nil || value.Resource == nil || value.Wire == nil || value.ContainerID == nil || *value.ContainerID != "raw%2Fid" || callbacks.Load() != 1 || calls.Load() != 1 {
 		t.Fatal(value, err, callbacks.Load(), calls.Load())
@@ -362,7 +362,7 @@ func TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate(t *
 			}
 			testcloud.JSON(w, 202, `{"order_ref":"https://foreign.invalid/orders/actual"}`)
 		})
-		value, err := orderListFixtures()[1].open(t, c).CreateRecord(context.Background(), orders.WithCreateRecordAttribute("meta", map[string]any{"n": json.Number("9007199254740993")}), orders.WithCreateRecordField("vendor", map[string]any{"proof": "owned"}))
+		value, err := orderListFixtures()[1].open(t, c).CreateRecord(context.Background(), orders.WithCreateRecordAttribute("meta", map[string]any{"n": json.Number("9007199254740993")}), request.Field("vendor", map[string]any{"proof": "owned"}))
 		if err != nil || value == nil || value.Resource == nil || value.Wire == nil || string(value.Resource.Body["meta"]) != `{"n":9007199254740993}` || string(value.Resource.Body["type"]) != "null" || calls.Load() != 1 {
 			t.Fatal(value, err, calls.Load())
 		}
@@ -490,28 +490,28 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 				case "nil option":
 					options = []containers.CreateRecordOption{nil}
 				case "known field":
-					options = []containers.CreateRecordOption{containers.WithCreateRecordField("container_ref", "https://input.invalid/id")}
+					options = []containers.CreateRecordOption{request.Field("container_ref", "https://input.invalid/id")}
 				case "known alias":
-					options = []containers.CreateRecordOption{containers.WithCreateRecordField("created_at", "input")}
+					options = []containers.CreateRecordOption{request.Field("created_at", "input")}
 				case "selected encoding":
 					options = []containers.CreateRecordOption{containers.WithCreateRecordAttribute("secret_refs", func() {})}
 				case "bad input ref":
 					options = []containers.CreateRecordOption{containers.WithCreateRecordAttribute("container_id", "relative/invalid")}
 				case "query":
-					options = []containers.CreateRecordOption{request.WithQuery[containers.CreateRecordOpts]("vendor", "query")}
+					options = []containers.CreateRecordOption{request.Custom(request.WithQuery[containers.CreateRecordOpts]("vendor", "query"))}
 				case "argument":
-					options = []containers.CreateRecordOption{func(config *request.Config[containers.CreateRecordOpts]) error {
+					options = []containers.CreateRecordOption{request.Custom(func(config *request.Config[containers.CreateRecordOpts]) error {
 						config.Arguments["base_path"] = "other"
 						return nil
-					}}
+					})}
 				case "cancel":
 					cancel(cause)
 					want = context.Canceled
 				case "option source":
-					options = []containers.CreateRecordOption{func(config *request.Config[containers.CreateRecordOpts]) error {
+					options = []containers.CreateRecordOption{request.Custom(func(config *request.Config[containers.CreateRecordOpts]) error {
 						client.ResourceBase = c.Server.URL + "/changed/v1/"
 						return nil
-					}, func(config *request.Config[containers.CreateRecordOpts]) error { later.Add(1); return nil }}
+					}), request.Custom(func(config *request.Config[containers.CreateRecordOpts]) error { later.Add(1); return nil })}
 				}
 				value, err := a.CreateRecord(ctx, options...)
 				if value != nil || !errors.Is(err, want) || calls.Load() != 0 || later.Load() != 0 {
@@ -642,7 +642,7 @@ func TestKeyManagerCreateRecordPreflightSourceContextAndNativeReplay(t *testing.
 				}
 				return nil
 			}
-			value, err := a.CreateRecord(context.Background(), containers.WithCreateRecordAttribute("name", "owned"), func(config *request.Config[containers.CreateRecordOpts]) error { callbacks.Add(1); return nil })
+			value, err := a.CreateRecord(context.Background(), containers.WithCreateRecordAttribute("name", "owned"), request.Custom(func(config *request.Config[containers.CreateRecordOpts]) error { callbacks.Add(1); return nil }))
 			if callbacks.Load() != 1 || retries.Load() != 1 {
 				t.Fatal("native resend reapplied user options", value, err, callbacks.Load(), retries.Load())
 			}

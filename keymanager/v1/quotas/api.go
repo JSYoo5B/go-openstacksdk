@@ -11,6 +11,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -34,7 +35,7 @@ func (a *API) Get(ctx context.Context, options ...GetOption) (*Quota, error) {
 	if err := validate(ctx, client); err != nil {
 		return nil, request.Wrap("Get", "quotas", err)
 	}
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = validateConfig(config)
 	}
@@ -90,7 +91,7 @@ func (s *ProjectScope) Get(ctx context.Context, options ...GetOption) (*Quota, e
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Get", "project_quotas", err)
 	}
-	config, err := request.Apply(GetOpts{}, options...)
+	config, err := calls.ApplyConfig(GetOpts{}, getCalls, options...)
 	if err == nil {
 		err = validateConfig(config)
 	}
@@ -106,7 +107,7 @@ func (s *ProjectScope) Update(ctx context.Context, opts UpdateOpts, options ...U
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Update", "project_quotas", err)
 	}
-	config, err := request.Apply(UpdateOpts{}, append([]UpdateOption{snapshot(opts)}, options...)...)
+	config, err := calls.ApplyConfig(UpdateOpts{}, updateCalls, append([]UpdateOption{request.Custom(snapshot(opts))}, options...)...)
 	if err == nil {
 		err = validateConfig(config)
 	}
@@ -139,7 +140,7 @@ func (s *ProjectScope) Delete(ctx context.Context, options ...DeleteOption) erro
 	if err := s.validate(ctx); err != nil {
 		return request.Wrap("Delete", "project_quotas", err)
 	}
-	config, err := request.Apply(DeleteOpts{}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{}, deleteCalls, options...)
 	if err == nil {
 		err = validateConfig(config)
 	}

@@ -83,7 +83,7 @@ func TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts(t *testing.T) 
 					api.RawClient().Microversion = "1.0"
 					api.Resources = nil // explicit-ID Fetch must use its owned engine
 					c.Provider.SetToken("owned-fetch-token")
-					value, fetchErr := api.Fetch(context.Background(), resource.ID("request-alpha"), containers.WithFetchHeader("X-Call", "operation"))
+					value, fetchErr := api.Fetch(context.Background(), resource.ID("request-alpha"), request.Header("X-Call", "operation"))
 					err = fetchErr
 					if value == nil || value.ContainerID == nil || *value.ContainerID != "passive-id" {
 						t.Fatal(value, err)
@@ -95,7 +95,7 @@ func TestKeyManagerOwnedMetadataFetchFixedTargetsAndOwnedReceipts(t *testing.T) 
 					api.RawClient().Microversion = "1.0"
 					api.Resources = nil
 					c.Provider.SetToken("owned-fetch-token")
-					value, fetchErr := api.Fetch(context.Background(), resource.ID("request-alpha"), orders.WithFetchHeader("X-Call", "operation"))
+					value, fetchErr := api.Fetch(context.Background(), resource.ID("request-alpha"), request.Header("X-Call", "operation"))
 					err = fetchErr
 					if value == nil || value.OrderID == nil || *value.OrderID != "passive-id" || value.SecretID == nil || *value.SecretID != "secret-passive" {
 						t.Fatal(value, err)
@@ -482,24 +482,24 @@ func TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries(t *testi
 		headers := map[string]string{"X-Shared": "initial"}
 		counts := [3]int{}
 		var options []orders.FetchOption
-		owned := orders.WithFetchHeader("X-Owned", "literal")
+		owned := request.WithHeader[orders.FetchOpts]("X-Owned", "literal")
 		options = []orders.FetchOption{
-			func(config *request.Config[orders.FetchOpts]) error {
+			request.Custom(func(config *request.Config[orders.FetchOpts]) error {
 				counts[0]++
 				config.Headers = headers
-				options[1] = func(*request.Config[orders.FetchOpts]) error {
+				options[1] = request.Custom(func(*request.Config[orders.FetchOpts]) error {
 					t.Error("caller replaced captured option")
 					return errors.New("poison")
-				}
+				})
 				return nil
-			},
-			func(config *request.Config[orders.FetchOpts]) error { counts[1]++; return owned(config) },
-			func(*request.Config[orders.FetchOpts]) error {
+			}),
+			request.Custom(func(config *request.Config[orders.FetchOpts]) error { counts[1]++; return owned(config) }),
+			request.Custom(func(*request.Config[orders.FetchOpts]) error {
 				counts[2]++
 				headers["X-Shared"] = "caller changed"
 				api.Resources = nil
 				return nil
-			},
+			}),
 		}
 		c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			calls.Add(1)
@@ -552,13 +552,13 @@ func TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries(t *testi
 			case "bad endpoint":
 				client.Endpoint = "https://bad.invalid/?query=not-route"
 			case "auth header":
-				options = []containers.FetchOption{containers.WithFetchHeader("X-Auth-Token", "not allowed")}
+				options = []containers.FetchOption{request.Header("X-Auth-Token", "not allowed")}
 			case "unsupported query":
-				options = []containers.FetchOption{request.WithQuery[containers.FetchOpts]("filter", "ignored")}
+				options = []containers.FetchOption{request.Custom(request.WithQuery[containers.FetchOpts]("filter", "ignored"))}
 			case "nil option":
 				options = []containers.FetchOption{nil}
 			default:
-				options = []containers.FetchOption{func(*request.Config[containers.FetchOpts]) error {
+				options = []containers.FetchOption{request.Custom(func(*request.Config[containers.FetchOpts]) error {
 					switch mode {
 					case "source before later option":
 						client.ResourceBase = c.Server.URL + "/changed/v1/"
@@ -571,7 +571,7 @@ func TestKeyManagerOwnedMetadataFetchPreparedOptionsAndSourceBoundaries(t *testi
 						want = context.Canceled
 					}
 					return nil
-				}, func(*request.Config[containers.FetchOpts]) error { later.Add(1); return nil }}
+				}), request.Custom(func(*request.Config[containers.FetchOpts]) error { later.Add(1); return nil })}
 			}
 			c.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { calls.Add(1); testcloud.JSON(w, 200, `{}`) })
 			value, err := api.Fetch(ctx, ref, options...)

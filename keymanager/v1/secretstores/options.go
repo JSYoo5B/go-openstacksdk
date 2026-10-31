@@ -6,13 +6,14 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 // ListOpts exposes the pinned SecretStore query names. Empty string fields are
-// omitted; WithListQuery can transmit an explicit empty value. GlobalDefault
+// omitted; request.Query can transmit an explicit empty value. GlobalDefault
 // preserves omitted versus false. MaxItems/Paginated are local controls.
 type ListOpts struct {
 	Limit             int
@@ -28,7 +29,22 @@ type ListOpts struct {
 	Paginated         *bool
 }
 
-type ListOption = request.Option[ListOpts]
+// ListOption is one option of List and All: WithListOptions,
+// WithListGlobalDefault, WithListFilter, WithListFilters, request.Query with a
+// string or []string value (a wire-only extension that overrides an
+// identically named typed query and does not enable Python Body filtering or
+// attribute aliases), request.MaxItems, request.Paginated or request.Custom
+// over *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[request.Config[ListOpts]]{
+	Query: calls.ConfigQuery[ListOpts],
+	Paging: calls.Paging[request.Config[ListOpts]]{
+		MaxItems:  calls.Value(func(c *request.Config[ListOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[ListOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func copyOptions(value ListOpts) ListOpts {
 	if value.GlobalDefault != nil {
@@ -45,38 +61,22 @@ func copyOptions(value ListOpts) ListOpts {
 // WithListOptions owns both pointer values at creation and on each application.
 func WithListOptions(value ListOpts) ListOption {
 	owned := copyOptions(value)
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = copyOptions(owned)
 		return nil
-	}
+	})
 }
 
 func WithListGlobalDefault(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		owned := value
 		config.Options.GlobalDefault = &owned
 		return nil
-	}
+	})
 }
-
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
-		return nil
-	}
-}
-
-// WithListQuery is a wire-only extension. It overrides an identically named
-// typed query and does not enable Python Body filtering or attribute aliases.
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
 
 func prepareList(options []ListOption) (url.Values, rest.ListControl, []resource.ListOption, error) {
-	config, err := request.Apply(ListOpts{}, options...)
+	config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, false, listFiltersArgument)
 	}

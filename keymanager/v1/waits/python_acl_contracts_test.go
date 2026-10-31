@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -30,7 +31,7 @@ func TestPythonKeymanagerACLWaitOwnsParentRouteAndSourceDictDefaults(t *testing.
 		}
 		return wire(203, body)
 	})
-	value, err := api.WaitForStatus(context.Background(), waits.SecretACL("fixed/id %2F"), str("https://foreign.invalid/acl/future"), waits.WithAttribute("acl_ref"), waits.WithHeader("X-Selected", "owned"), waits.WithMicroversion("1.1"))
+	value, err := api.WaitForStatus(context.Background(), waits.SecretACL("fixed/id %2F"), str("https://foreign.invalid/acl/future"), waits.WithAttribute("acl_ref"), request.Header("X-Selected", "owned"), request.Microversion("1.1"))
 	if err != nil || value == nil || value.Kind != "secret-acls" || value.RequestID != "fixed/id %2F" || value.StatusCode != 203 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "wait-proof" || len(*calls) != 1 || client.MoreHeaders != nil || client.Microversion != "" {
 		t.Fatal(err, value, *calls)
 	}
@@ -309,7 +310,7 @@ func TestPythonKeymanagerACLQuotaCleanRetryReauthPreservesStockRouteAndOwnedHead
 				if kind == "quota" {
 					target = waits.Quota()
 				}
-				value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithAttribute("name"), waits.WithHeader("X-Selected", "owned"), waits.WithMicroversion("1.1"))
+				value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithAttribute("name"), request.Header("X-Selected", "owned"), request.Microversion("1.1"))
 				wantRetry, wantReauth := 1, 0
 				if status == 401 {
 					wantRetry, wantReauth = 0, 1

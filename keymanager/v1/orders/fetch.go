@@ -13,9 +13,11 @@ import (
 
 // FetchOpts has no default query/name/wait policy. Headers are concrete options.
 type FetchOpts struct{}
-type FetchOption = request.Option[FetchOpts]
 
-func WithFetchHeader(key, value string) FetchOption { return request.WithHeader[FetchOpts](key, value) }
+// FetchOption is one option of Fetch: request.Header or request.Custom over
+// *request.Config[FetchOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type FetchOption = request.GetCall
 
 // FetchedOrder separates fixed request identity, normalized attributes and
 // actual nullable/extension fields. Passive references never redirect requests.
@@ -44,7 +46,7 @@ func (a *API) Fetch(ctx context.Context, ref resource.Ref, options ...FetchOptio
 	if a != nil {
 		client = a.client
 	}
-	record, err := keymanagerread.Fetch(ctx, client, "orders", ref, options...)
+	record, err := keymanagerread.Fetch[FetchOpts](ctx, client, "orders", ref, options...)
 	if record == nil {
 		return nil, request.Wrap("Fetch", "orders", err)
 	}

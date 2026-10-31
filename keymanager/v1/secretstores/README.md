@@ -17,13 +17,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListGlobalDefault`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListPaginated`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
+- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListFilters`
 
-- Pinned _proxy.py:361-373 delegates the optional **query to SecretStore Resource.list and returns a lazy generator. Go List/All performs GET secret-stores accepting HTTP200 with a secret_stores array. All nine declared query names (name, status, global_default, crypto_plugin, secret_store_plugin, created, updated, limit and marker) remain server conditions rather than extra local predicates. WithListFilter/WithListFilters discards unknown semantic names, preserves explicit false/empty/repeated scalar query values and keeps raw WithListQuery extensions independent. Typed and semantic value/slice snapshots, lazy iterator slice ownership, independent reuse and concurrent library-option reuse are exercised.
+- Pinned _proxy.py:361-373 delegates the optional **query to SecretStore Resource.list and returns a lazy generator. Go List/All performs GET secret-stores accepting HTTP200 with a secret_stores array. All nine declared query names (name, status, global_default, crypto_plugin, secret_store_plugin, created, updated, limit and marker) remain server conditions rather than extra local predicates. WithListFilter/WithListFilters discards unknown semantic names, preserves explicit false/empty/repeated scalar query values and keeps raw request.Query extensions independent. Typed and semantic value/slice snapshots, lazy iterator slice ownership, independent reuse and concurrent library-option reuse are exercised.
   Tests: `api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse`, `api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation`, `api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear`.
 - The five declared non-query Body attributes are evaluated from original fields: id prefers literal key presence including null/empty or otherwise the full original ref; created_at/updated_at select original created/updated text; secret_store_ref keeps the full ref; secret_store_id independently formats the last original path component even when literal id exists. Null/omission and empty remain distinct. Models retain canonical typed fields and raw row evidence without following foreign references; case-variant fields stay extensions and cannot replace canonical decoding. A selected empty-ref formatter fails once with ErrInvalidOption while a literal-id condition succeeds on that row; this local condition error does not synthesize a new HTTP ResponseError.
   Tests: `api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSingletonPathsModelsAndPassiveReferences`, `api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticBodyAttributesUseOriginalFields`.
@@ -40,7 +40,7 @@ Python/Go differences:
 
 - Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil while Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; case variants remain extensions. Python untyped field values and mutable Resource descriptor/default/seeded/dirty/cache state are broader and remain separate goal scope.
 - Go convenience ID prefers exact literal id including null/empty, otherwise extracts the final raw path component of an absolute secret_store_ref. Semantic id and marker instead use literal raw id or the full alternate ref; semantic secret_store_id formats the reference independently. Ref formatting preserves Unicode/space/percent spelling, excludes query/fragment and never causes HTTP. Go URL parsing differs from Python urlsplit at some malformed authorities/control normalization, and selected-only formatting differs from eager Python property/to_dict evaluation.
-- WithListFilter/WithListFilters maps the declared nine identity query names and five local Body attributes without caller builders or predicates; unknown semantic names are discarded. WithListQuery remains a separate explicit wire extension with repeated/empty values and overriding a same-key typed query. Later individual semantic assignments win; a bulk nil/empty replaces only semantic state. Same-key semantic and typed/raw query selections fail before HTTP rather than permissive dynamic merging.
+- WithListFilter/WithListFilters maps the declared nine identity query names and five local Body attributes without caller builders or predicates; unknown semantic names are discarded. request.Query remains a separate explicit wire extension with repeated/empty values and overriding a same-key typed query. Later individual semantic assignments win; a bulk nil/empty replaces only semantic state. Same-key semantic and typed/raw query selections fail before HTTP rather than permissive dynamic merging.
 - Semantic scalar arrays become repeated query values, booleans use lowercase text, numbers retain JSON text, and null/empty arrays retain selection presence without URL values. Query objects/nested arrays and selected non-JSON values are rejected. Local common JSON comparison preserves exact decimal numbers, original timestamps and null/missing semantics but distinguishes booleans from numbers, unlike Python True==1; returned rows still use the documented typed decoder.
 - Go accepts strict HTTP200 and a secret_stores array, while generic Python Resource.list accepts final status<400 and can wrap a non-list plural value. Decode/read model failures retain accepted HTTP evidence; selected local formatter failures preserve the condition cause without synthesizing ResponseError. Configured Provider authentication/reauthentication/native retry remains its own transport policy. Exact origin/path/filter/cycle guards and immediate cap/first-page termination are explicit Go policies; fixture proof does not establish live Barbican marker support.
 - SDK list controls require dedicated concrete options. Deprecated Proxy._list jmespath_filters and __conflicting_attrs recovery, optional GET request caching and inherited per-call session/resource_type/base_path/microversion/header/allow_unknown_params injection are separate common compatibility scope, not falsely implemented by the declared field classifier. The selected configured client/version is retained rather than replaced by an invented generic resource facade.
@@ -129,14 +129,15 @@ import (
 
 	"github.com/gophercloud/gophercloud/v2"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func ListNonDefaultBackends(ctx context.Context, client *gophercloud.ServiceClient) ([]*secretstores.SecretStore, error) {
 	return secretstores.New(client).All(ctx,
 		secretstores.WithListOptions(secretstores.ListOpts{Status: "ACTIVE", Limit: 10}),
 		secretstores.WithListGlobalDefault(false),
-		secretstores.WithListMaxItems(5),
-		secretstores.WithListPaginated(false),
+		request.MaxItems(5),
+		request.Paginated(false),
 	)
 }
 ```

@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -153,10 +154,10 @@ func TestPythonOrderUpdateRecordPreflightAndClientGuard(t *testing.T) {
 		})
 	}
 	api, _, calls := orderUpdateFixture(t, func(*http.Request) *http.Response { t.Error("unexpected HTTP"); return nativeOrderWire(200, `{}`) })
-	_, err := api.UpdateRecord(context.Background(), "o1", func(c *orders.UpdateRecordOpts) error {
+	_, err := api.UpdateRecord(context.Background(), "o1", request.Custom(func(c *orders.UpdateRecordOpts) error {
 		api.RawClient().ResourceBase = "https://changed.invalid/v1/"
 		return nil
-	})
+	}))
 	if err == nil || calls.Len() != 0 {
 		t.Fatal(err, orderUpdateCalls(calls))
 	}

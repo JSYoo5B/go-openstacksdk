@@ -12,6 +12,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -31,7 +32,7 @@ func TestPythonKeymanagerSecretStoreWaitLiteralRouteRawProjectionAndDefaults(t *
 		}
 		return wire(203, body)
 	})
-	value, err := api.WaitForStatus(context.Background(), waits.SecretStore("fixed/id %2F"), str("active"), waits.WithMicroversion("1.1"), waits.WithHeader("X-Selected", "owned"))
+	value, err := api.WaitForStatus(context.Background(), waits.SecretStore("fixed/id %2F"), str("active"), request.Microversion("1.1"), request.Header("X-Selected", "owned"))
 	if err != nil || value == nil || len(*calls) != 1 || value.RequestID != "fixed/id %2F" || value.Kind != "secret-stores" || value.StatusCode != 203 || string(value.Envelope) != body || value.Header.Get("X-Request-Id") != "wait-proof" || client.Microversion != "" || client.MoreHeaders != nil {
 		t.Fatal(err, value, *calls, client)
 	}
@@ -317,7 +318,7 @@ func TestPythonKeymanagerSecretStoreWaitCleanRetryReauthOwnHeadersAndLiveToken(t
 				return nil
 			}
 			client.ReauthFunc = func(context.Context) error { reauth++; client.SetToken("renewed"); return nil }
-			value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), waits.WithMicroversion("1.1"), waits.WithHeader("X-Selected", "owned"))
+			value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), request.Microversion("1.1"), request.Header("X-Selected", "owned"))
 			wantRetry, wantReauth := 1, 0
 			if status == 401 {
 				wantRetry, wantReauth = 0, 1

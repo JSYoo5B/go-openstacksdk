@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordBasePath`
 
 - Scalar ID/no recognized attrs performs no PUT/GET and keeps seed without HTTP receipt; id itself is not dirty.
@@ -51,8 +51,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordBasePath`
 
 - String-ID Order commit removes id from dirty state; unknown-only/no attributes makes no HTTP or receipt, while known null/false attributes send one unwrapped PUT. Alias option and response member order use the last canonical value; meta request JSON stays raw and descriptor view is projected separately.
@@ -80,8 +80,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordBasePath`
 
 - secrets.API.Update sends PUT secrets/{id} with the raw payload as body and UpdateOpts.ContentType as the Content-Type header, accepts only 204 and turns 200 into an error.
@@ -144,8 +144,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
@@ -245,8 +245,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL`

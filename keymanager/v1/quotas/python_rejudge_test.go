@@ -8,6 +8,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -60,7 +61,7 @@ func TestPythonRejudgeKeyManagerProjectQuotaDeleteRequest(t *testing.T) {
 	if err := scope.Delete(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if err := scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(false)); err == nil {
+	if err := scope.Delete(context.Background(), request.IgnoreMissing(false)); err == nil {
 		t.Fatal("ignore_missing=False must surface 404")
 	}
 	want := "DELETE /key-manager/v1/project-quotas/project-1 "

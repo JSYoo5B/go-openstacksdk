@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -23,9 +24,32 @@ type GetOpts struct{}
 type DeleteOpts struct {
 	IgnoreMissing *bool `json:"ignore_missing,omitempty"`
 }
-type GetOption = request.Option[GetOpts]
-type UpdateOption = request.Option[UpdateOpts]
-type DeleteOption = request.Option[DeleteOpts]
+
+// GetOption is one option of Get: request.Header or request.Custom over
+// *request.Config[GetOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type GetOption = request.GetCall
+
+// UpdateOption is one option of Update: WithUpdateOptions, WithUpdateSecrets,
+// WithUpdateOrders, WithUpdateContainers, WithUpdateConsumers, WithUpdateCAs,
+// request.Header or request.Custom over *request.Config[UpdateOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type UpdateOption = request.WriteCall
+
+// DeleteOption is one option of Delete: WithDeleteOptions,
+// request.IgnoreMissing (nil means true), request.Header or request.Custom
+// over *request.Config[DeleteOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var (
+	getCalls    = calls.Spec[request.Config[GetOpts]]{Header: calls.ConfigHeader[GetOpts]}
+	updateCalls = calls.Spec[request.Config[UpdateOpts]]{Header: calls.ConfigHeader[UpdateOpts]}
+	deleteCalls = calls.Spec[request.Config[DeleteOpts]]{
+		Header:        calls.ConfigHeader[DeleteOpts],
+		IgnoreMissing: calls.Pointer(func(c *request.Config[DeleteOpts]) **bool { return &c.Options.IgnoreMissing }),
+	}
+)
 
 func snapshot[T any](opts T) request.Option[T] {
 	encoded, err := json.Marshal(opts)
@@ -42,34 +66,20 @@ func snapshot[T any](opts T) request.Option[T] {
 	}
 }
 
-func WithUpdateOptions(opts UpdateOpts) UpdateOption { return snapshot(opts) }
-func WithDeleteOptions(opts DeleteOpts) DeleteOption { return snapshot(opts) }
+func WithUpdateOptions(opts UpdateOpts) UpdateOption { return request.Custom(snapshot(opts)) }
+func WithDeleteOptions(opts DeleteOpts) DeleteOption { return request.Custom(snapshot(opts)) }
 func WithUpdateSecrets(value int64) UpdateOption {
-	return func(c *request.Config[UpdateOpts]) error { c.Options.Secrets = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Secrets = request.Present(value); return nil })
 }
 func WithUpdateOrders(value int64) UpdateOption {
-	return func(c *request.Config[UpdateOpts]) error { c.Options.Orders = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Orders = request.Present(value); return nil })
 }
 func WithUpdateContainers(value int64) UpdateOption {
-	return func(c *request.Config[UpdateOpts]) error { c.Options.Containers = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Containers = request.Present(value); return nil })
 }
 func WithUpdateConsumers(value int64) UpdateOption {
-	return func(c *request.Config[UpdateOpts]) error { c.Options.Consumers = request.Present(value); return nil }
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Consumers = request.Present(value); return nil })
 }
 func WithUpdateCAs(value int64) UpdateOption {
-	return func(c *request.Config[UpdateOpts]) error { c.Options.CAs = request.Present(value); return nil }
-}
-func WithGetHeader(key, value string) GetOption { return request.WithHeader[GetOpts](key, value) }
-func WithUpdateHeader(key, value string) UpdateOption {
-	return request.WithHeader[UpdateOpts](key, value)
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
-}
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return func(c *request.Config[DeleteOpts]) error {
-		copied := value
-		c.Options.IgnoreMissing = &copied
-		return nil
-	}
+	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.CAs = request.Present(value); return nil })
 }

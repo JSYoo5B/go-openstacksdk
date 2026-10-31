@@ -11,9 +11,9 @@ openstacksdk `ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe` and Gophercloud v2.15.0.
 | `conn.key_manager.orders(**query)` | `service.Orders.ListRecords(ctx, options...)` |
 | `conn.key_manager.secrets(**query)` | `service.Secrets.ListRecords(ctx, options...)` |
 | `list(iterator)` | Each leaf's `AllRecords(ctx, options...)` |
-| keyword query or Body condition | Each leaf's `WithRecordListQuery(key, value)` |
-| `max_items=n`, `paginated=False` | `WithRecordListMaxItems(n)`, `WithRecordListPaginated(false)` |
-| `headers={...}`, `microversion=...` | `WithRecordListHeaders(...)`, `WithRecordListMicroversion(...)` |
+| keyword query or Body condition | `request.Query(key, value)` |
+| `max_items=n`, `paginated=False` | `request.MaxItems(n)`, `request.Paginated(false)` |
+| `headers={...}`, `microversion=...` | `request.Headers(...)`, `request.Microversion(...)` |
 | `item.to_dict()` | `json.MarshalIndent(item.Resource, "", "  ")` |
 | original response fields | `item.Wire`, `Envelope`, `Header`, `StatusCode` |
 
@@ -75,6 +75,7 @@ import (
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -91,21 +92,21 @@ func main() {
     if err != nil { log.Fatal(err) }
 
     containerOptions := []containers.RecordListOption{
-        containers.WithRecordListMaxItems(*maximum),
-        containers.WithRecordListPaginated(!*firstPage),
+        request.MaxItems(*maximum),
+        request.Paginated(!*firstPage),
     }
     orderOptions := []orders.RecordListOption{
-        orders.WithRecordListMaxItems(*maximum),
-        orders.WithRecordListPaginated(!*firstPage),
+        request.MaxItems(*maximum),
+        request.Paginated(!*firstPage),
     }
     secretOptions := []secrets.RecordListOption{
-        secrets.WithRecordListMaxItems(*maximum),
-        secrets.WithRecordListPaginated(!*firstPage),
+        request.MaxItems(*maximum),
+        request.Paginated(!*firstPage),
     }
     if *name != "" {
-        containerOptions = append(containerOptions, containers.WithRecordListQuery("name", *name))
-        orderOptions = append(orderOptions, orders.WithRecordListQuery("name", *name))
-        secretOptions = append(secretOptions, secrets.WithRecordListQuery("name", *name))
+        containerOptions = append(containerOptions, request.Query("name", *name))
+        orderOptions = append(orderOptions, request.Query("name", *name))
+        secretOptions = append(secretOptions, request.Query("name", *name))
     }
     for value, err := range service.Containers.ListRecords(ctx, containerOptions...) {
         if err != nil { log.Fatal(err) }
@@ -192,7 +193,7 @@ compare integer `9007199254740992` equal to `9007199254740993.0`; this Go iterat
 compares them differently. The difference is explicit and tested through the
 underlying `content_types` local condition. Unknown raw JSON values in
 `RecordListOpts.Query` are discarded without validation; selected values must
-be complete UTF-8 JSON. `WithRecordListQuery` itself accepts JSON-marshalable Go
+be complete UTF-8 JSON. `request.Query` itself accepts JSON-marshalable Go
 values and reports encoding failures. Raw inherited control names are rejected;
 use the concrete control/header/microversion options. Free `base_path`, deprecated
 JMESPath, conflicting-attrs overload, and mutable/cache/session replacement remain

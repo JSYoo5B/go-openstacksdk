@@ -35,8 +35,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
@@ -136,8 +136,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL`

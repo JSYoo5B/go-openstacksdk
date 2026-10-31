@@ -258,7 +258,7 @@ func TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse(t *testing.T
 		return nil
 	}
 	a := secretstores.New(secretStoresClient(cloud))
-	opts := []secretstores.ListOption{options, query}
+	opts := []secretstores.ListOption{options, request.Custom(query)}
 	seq := a.List(context.Background(), opts...)
 	opts[0] = secretstores.WithListGlobalDefault(true)
 	if calls.Load() != 0 {
@@ -278,10 +278,10 @@ func TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse(t *testing.T
 	// the custom option above deliberately retains its mutable Config for the
 	// separate sequential snapshot proof.
 	captured = nil
-	concurrent := []secretstores.ListOption{options, secretstores.WithListQuery("empty", ""), func(config *request.Config[secretstores.ListOpts]) error {
+	concurrent := []secretstores.ListOption{options, request.Query("empty", ""), request.Custom(func(config *request.Config[secretstores.ListOpts]) error {
 		config.Query["vendor"] = []string{"first", "second"}
 		return nil
-	}}
+	})}
 	var group sync.WaitGroup
 	for range 6 {
 		group.Add(1)
@@ -323,7 +323,7 @@ func TestKeyManagerSecretStoresMarkerFallbackUsesFullRawReference(t *testing.T) 
 				}
 				testcloud.JSON(w, 200, secretStorePage(rows, ""))
 			})
-			values, err := secretstores.New(secretStoresClient(cloud)).All(context.Background(), secretstores.WithListOptions(secretstores.ListOpts{Limit: 5}), secretstores.WithListQuery("vendor", "retained"))
+			values, err := secretstores.New(secretStoresClient(cloud)).All(context.Background(), secretstores.WithListOptions(secretstores.ListOpts{Limit: 5}), request.Query("vendor", "retained"))
 			secretStoreWantIDs(t, values, err, tc.id)
 			if calls.Load() != 2 {
 				t.Fatal("short-page fallback or empty-page stop changed", calls.Load())
@@ -358,11 +358,11 @@ func TestKeyManagerSecretStoresListControlsAndLazyRowEvidence(t *testing.T) {
 			case "default":
 				rows, next = row, ""
 			case "cap":
-				options, wantLimit = []secretstores.ListOption{secretstores.WithListMaxItems(1)}, "1"
+				options, wantLimit = []secretstores.ListOption{request.MaxItems(1)}, "1"
 			case "explicit-limit":
-				options, wantLimit = []secretstores.ListOption{secretstores.WithListOptions(secretstores.ListOpts{Limit: 9}), secretstores.WithListMaxItems(1)}, "9"
+				options, wantLimit = []secretstores.ListOption{secretstores.WithListOptions(secretstores.ListOpts{Limit: 9}), request.MaxItems(1)}, "9"
 			case "single":
-				rows, options = row, []secretstores.ListOption{secretstores.WithListPaginated(false)}
+				rows, options = row, []secretstores.ListOption{request.Paginated(false)}
 			case "break":
 				rows = row
 			case "empty":
@@ -371,7 +371,7 @@ func TestKeyManagerSecretStoresListControlsAndLazyRowEvidence(t *testing.T) {
 			body := secretStorePage(rows, next)
 			if mode == "malformed-page" {
 				body = `{"secret_stores":[` + row + `,`
-				options, wantLimit = []secretstores.ListOption{secretstores.WithListMaxItems(1)}, "1"
+				options, wantLimit = []secretstores.ListOption{request.MaxItems(1)}, "1"
 			}
 			cloud.Mux.HandleFunc("GET "+secretStoresPath, func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
@@ -470,7 +470,7 @@ func TestKeyManagerSecretStoresContinuationGuardsAndTerminalFailures(t *testing.
 					return response, err
 				}))
 			}
-			values, err := secretstores.New(client).All(ctx, secretstores.WithListQuery("vendor", "retained"))
+			values, err := secretstores.New(client).All(ctx, request.Query("vendor", "retained"))
 			wantCalls := int32(2)
 			switch mode {
 			case "next", "plural-links", "http-link":
@@ -546,10 +546,10 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 	}
 	before := calls.Load()
 	for _, options := range [][]secretstores.ListOption{
-		{nil}, {secretstores.WithListMaxItems(-1)}, {secretstores.WithListOptions(secretstores.ListOpts{Limit: -1})},
-		{secretstores.WithListQuery("max_items", "1")}, {secretstores.WithListQuery("Paginated", "false")},
-		{secretstores.WithListQuery("limit", "0")}, {secretstores.WithListQuery("marker", " ")},
-		{request.WithField[secretstores.ListOpts]("name", "body")}, {request.WithHeader[secretstores.ListOpts]("X-Extension", "header")},
+		{nil}, {request.MaxItems(-1)}, {secretstores.WithListOptions(secretstores.ListOpts{Limit: -1})},
+		{request.Query("max_items", "1")}, {request.Query("Paginated", "false")},
+		{request.Query("limit", "0")}, {request.Query("marker", " ")},
+		{request.Custom(request.WithField[secretstores.ListOpts]("name", "body"))}, {request.Custom(request.WithHeader[secretstores.ListOpts]("X-Extension", "header"))},
 	} {
 		seq := a.List(context.Background(), options...)
 		if calls.Load() != before {
@@ -585,7 +585,7 @@ func TestKeyManagerSecretStoresLiveSourcePreflightAndReadFailures(t *testing.T) 
 			t.Fatal(values, err, calls.Load())
 		}
 	}
-	if values, err := a.All(context.Background(), func(config *request.Config[secretstores.ListOpts]) error { client.Type = "network"; return nil }); values != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != before {
+	if values, err := a.All(context.Background(), request.Custom(func(config *request.Config[secretstores.ListOpts]) error { client.Type = "network"; return nil })); values != nil || !errors.Is(err, resource.ErrUnsupported) || calls.Load() != before {
 		t.Fatal("options changed source before unchecked HTTP", values, err)
 	}
 	client.Type = "key-manager"
@@ -725,7 +725,7 @@ func TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation(t *testin
 	plugins[0], fields["global_default"], fields["created_at"] = "caller-change", true, "caller-change"
 	delete(fields, "secret_store_id")
 	falseValue := false
-	options := []secretstores.ListOption{semantic, secretstores.WithListOptions(secretstores.ListOpts{Paginated: &falseValue}), secretstores.WithListQuery("created_at", "raw-wire-extension"), secretstores.WithListQuery("vendor", "kept")}
+	options := []secretstores.ListOption{semantic, secretstores.WithListOptions(secretstores.ListOpts{Paginated: &falseValue}), request.Query("created_at", "raw-wire-extension"), request.Query("vendor", "kept")}
 	a := secretstores.New(secretStoresClient(cloud))
 	seq := a.List(context.Background(), options...)
 	options[0] = secretstores.WithListFilters(map[string]any{"created_at": "caller-change"})
@@ -747,7 +747,7 @@ func TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation(t *testin
 		group.Add(1)
 		go func() {
 			defer group.Done()
-			values, err := a.All(context.Background(), semantic, secretstores.WithListPaginated(false), secretstores.WithListQuery("created_at", "raw-wire-extension"), secretstores.WithListQuery("vendor", "kept"))
+			values, err := a.All(context.Background(), semantic, request.Paginated(false), request.Query("created_at", "raw-wire-extension"), request.Query("vendor", "kept"))
 			if err != nil || len(values) != 1 || values[0].ID != "store-one" {
 				t.Error(values, err)
 			}
@@ -789,10 +789,10 @@ func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing
 		{"local-control", []secretstores.ListOption{secretstores.WithListFilter("max_items", 1)}, resource.ErrInvalidOption},
 		{"session-control", []secretstores.ListOption{secretstores.WithListFilter("session", true)}, resource.ErrUnsupported},
 		{"typed-limit-collision", []secretstores.ListOption{secretstores.WithListOptions(secretstores.ListOpts{Limit: 3}), secretstores.WithListFilter("limit", 3)}, resource.ErrInvalidOption},
-		{"raw-name-collision", []secretstores.ListOption{secretstores.WithListQuery("name", "same"), secretstores.WithListFilter("name", "same")}, resource.ErrInvalidOption},
-		{"null-query-presence-collision", []secretstores.ListOption{secretstores.WithListFilter("name", nil), secretstores.WithListQuery("name", "")}, resource.ErrInvalidOption},
+		{"raw-name-collision", []secretstores.ListOption{request.Query("name", "same"), secretstores.WithListFilter("name", "same")}, resource.ErrInvalidOption},
+		{"null-query-presence-collision", []secretstores.ListOption{secretstores.WithListFilter("name", nil), request.Query("name", "")}, resource.ErrInvalidOption},
 		{"selected-local-encoding-error", []secretstores.ListOption{secretstores.WithListFilter("created_at", func() {})}, resource.ErrInvalidOption},
-		{"options-cannot-replace-source", []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), func(config *request.Config[secretstores.ListOpts]) error { client.Endpoint += "changed/"; return nil }}, resource.ErrInvalidOption},
+		{"options-cannot-replace-source", []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), request.Custom(func(config *request.Config[secretstores.ListOpts]) error { client.Endpoint += "changed/"; return nil })}, resource.ErrInvalidOption},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			endpoint := client.Endpoint
@@ -829,10 +829,10 @@ func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing
 			if mode == "pre-cancel" {
 				cancel(cause)
 			} else {
-				options = append(options, func(config *request.Config[secretstores.ListOpts]) error {
+				options = append(options, request.Custom(func(config *request.Config[secretstores.ListOpts]) error {
 					cancel(cause)
 					return optionError
-				})
+				}))
 			}
 			values, err := a.All(ctx, options...)
 			if values != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || calls.Load() != 0 {
@@ -847,9 +847,9 @@ func TestKeyManagerSecretStoresSemanticLazyControlsCollisionsAndClear(t *testing
 		{secretstores.WithListFilters(map[string]any{"created_at": "keep", "location": func() {}, "vendor": json.RawMessage(`{]`)})},
 		{secretstores.WithListFilter("created_at", func() {}), secretstores.WithListFilter("session", true), secretstores.WithListFilters(map[string]any{"created_at": "keep"})},
 		{secretstores.WithListFilter("created_at", func() {}), secretstores.WithListFilter("created_at", "keep")},
-		{secretstores.WithListFilter("name", "ignored"), secretstores.WithListFilter("created_at", "not-kept"), secretstores.WithListFilters(nil), secretstores.WithListQuery("name", "raw")},
+		{secretstores.WithListFilter("name", "ignored"), secretstores.WithListFilter("created_at", "not-kept"), secretstores.WithListFilters(nil), request.Query("name", "raw")},
 	} {
-		options = append(options, secretstores.WithListQuery("vendor", "wire"))
+		options = append(options, request.Query("vendor", "wire"))
 		values, err := a.All(context.Background(), options...)
 		secretStoreWantIDs(t, values, err, "kept")
 	}
@@ -915,17 +915,17 @@ func TestKeyManagerSecretStoresSemanticRawCapAndContinuation(t *testing.T) {
 				}
 				testcloud.JSON(w, 200, secretStorePage(rows, next))
 			})
-			options := []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), secretstores.WithListQuery("vendor", "kept")}
+			options := []secretstores.ListOption{secretstores.WithListFilter("created_at", "keep"), request.Query("vendor", "kept")}
 			wantIDs, wantCalls := []string{"same-page", "later"}, int32(2)
 			switch mode {
 			case "cap-one":
-				options = append(options, secretstores.WithListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 				wantIDs, wantCalls = nil, 1
 			case "cap-two":
-				options = append(options, secretstores.WithListMaxItems(2))
+				options = append(options, request.MaxItems(2))
 				wantIDs, wantCalls = []string{"same-page"}, 1
 			case "single-page":
-				options = append(options, secretstores.WithListPaginated(false))
+				options = append(options, request.Paginated(false))
 				wantIDs, wantCalls = []string{"same-page"}, 1
 			case "filtered-marker":
 				options = append(options, secretstores.WithListOptions(secretstores.ListOpts{Limit: 9}))

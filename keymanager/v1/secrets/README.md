@@ -52,13 +52,14 @@ import (
 
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func fetchBinarySecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
     value, err := secrets.New(client).Fetch(ctx, resource.ID("secret-id"),
         secrets.WithFetchContentType("application/octet-stream"),
-        secrets.WithFetchHeader("X-Trace", "caller-trace"))
+        request.Header("X-Trace", "caller-trace"))
     // value may contain the successful metadata response even when err
     // describes a later selection, payload HTTP/read, or UTF-8 failure.
     return value, err
@@ -91,7 +92,7 @@ evidence. Metadata headers and payload headers remain separate.
 | `WithFetchOptions(FetchOpts)` | Snapshots the optional bool/string pointers at construction and application. |
 | `WithFetchContentType(string)` | Overrides automatic selection, including an explicit empty string. |
 | `WithFetchPayload(bool)` | Defaults to automatic retrieval; false requests only metadata. |
-| `WithFetchHeader(key, value)` | Adds an extra header to both requests, subject to service-header precedence. |
+| `request.Header(key, value)` | Adds an extra header to both requests, subject to service-header precedence. |
 
 Both requests require a configured `key-manager` client and share its provider,
 current authentication, HTTP transport, retry policy, and context. The SDK

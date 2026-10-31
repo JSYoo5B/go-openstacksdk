@@ -13,6 +13,13 @@ import (
 
 // CreateRecordOpts supplies declared source attributes, including explicit nulls.
 type CreateRecordOpts = keymanagerread.CreateRecordOpts
+
+// CreateRecordOption is one option of CreateRecord: WithCreateRecordOptions,
+// WithCreateRecordAttributes, WithCreateRecordAttribute, request.Field (an
+// explicit extension that cannot replace a declared attribute or its alias),
+// request.Header or request.Custom over
+// *request.Config[CreateRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type CreateRecordOption = keymanagerread.CreateRecordOption
 
 func WithCreateRecordOptions(value CreateRecordOpts) CreateRecordOption {
@@ -23,12 +30,6 @@ func WithCreateRecordAttributes(value map[string]any) CreateRecordOption {
 }
 func WithCreateRecordAttribute(key string, value any) CreateRecordOption {
 	return keymanagerread.WithCreateRecordAttribute("orders", key, value)
-}
-func WithCreateRecordField(key string, value any) CreateRecordOption {
-	return keymanagerread.WithCreateRecordField("orders", key, value)
-}
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return keymanagerread.WithCreateRecordHeader(key, value)
 }
 
 // CreatedOrder keeps seeded attributes separate from actual POST evidence.

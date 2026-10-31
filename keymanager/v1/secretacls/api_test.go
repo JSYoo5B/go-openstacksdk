@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -59,7 +60,7 @@ func TestSecretACLGetFollowsPythonFetch(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			var calls []aclCall
 			scope := aclScope(t, &calls, func(*http.Request) *http.Response { return aclWire(test.code, test.body) })
-			value, err := scope.Get(context.Background(), secretacls.WithHeader("X-Extra", "1"))
+			value, err := scope.Get(context.Background(), request.Header("X-Extra", "1"))
 			if err != nil || value.SecretID != "s1" || string(value.Read) != test.read || string(value.ACLRef) != test.ref || value.StatusCode != test.code || value.Header.Get("X-ACL-Proof") != "actual" {
 				t.Fatal(value, err)
 			}
@@ -98,7 +99,7 @@ func TestSecretACLSetAndUpdateCommitWithPut(t *testing.T) {
 				call = scope.Update
 			}
 			read := []byte(`{"users":["u"],"project-access":false}`)
-			value, err := call(context.Background(), secretacls.ACLInput{Read: read}, secretacls.WithHeader("X-Extra", "1"))
+			value, err := call(context.Background(), secretacls.ACLInput{Read: read}, request.Header("X-Extra", "1"))
 			if err != nil || string(value.Read) != string(read) || string(value.ACLRef) != `"https://kms/acl"` || value.StatusCode != 200 {
 				t.Fatal(value, err)
 			}
@@ -122,7 +123,7 @@ func TestSecretACLSetAndUpdateCommitWithPut(t *testing.T) {
 					t.Fatal(input, err)
 				}
 			}
-			if _, err := call(context.Background(), secretacls.ACLInput{Read: read}, secretacls.WithHeader("Content-Type", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 2 {
+			if _, err := call(context.Background(), secretacls.ACLInput{Read: read}, request.Header("Content-Type", "x")); !errors.Is(err, resource.ErrInvalidOption) || len(calls) != 2 {
 				t.Fatal(err, calls)
 			}
 		})
@@ -134,7 +135,7 @@ func TestSecretACLDeleteIgnoresMissingByDefault(t *testing.T) {
 	var calls []aclCall
 	scope := aclScope(t, &calls, func(*http.Request) *http.Response { return aclWire(int(code.Load()), "") })
 	code.Store(200)
-	value, err := scope.Delete(context.Background(), secretacls.WithDeleteHeader("X-Extra", "1"))
+	value, err := scope.Delete(context.Background(), request.Header("X-Extra", "1"))
 	if err != nil || value == nil || value.SecretID != "s1" || value.StatusCode != 200 || string(value.Read) != "null" {
 		t.Fatal(value, err)
 	}
@@ -142,7 +143,7 @@ func TestSecretACLDeleteIgnoresMissingByDefault(t *testing.T) {
 	if value, err := scope.Delete(context.Background()); value != nil || err != nil {
 		t.Fatal(value, err)
 	}
-	if value, err := scope.Delete(context.Background(), secretacls.WithDeleteIgnoreMissing(false)); value != nil || !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
+	if value, err := scope.Delete(context.Background(), request.IgnoreMissing(false)); value != nil || !gophercloud.ResponseCodeIs(err, http.StatusNotFound) {
 		t.Fatal(value, err)
 	}
 	code.Store(409)

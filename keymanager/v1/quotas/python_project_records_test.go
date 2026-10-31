@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -58,7 +59,7 @@ func TestPythonProjectQuotaRecordInvalidInputSourceAndCancellation(t *testing.T)
 		t.Fatal(err)
 	}
 	mutate := func(*quotas.RecordOpts) error { scope.RawClient().Endpoint = "https://foreign.invalid/"; return nil }
-	if _, err := scope.UpdateRecord(context.Background(), mutate); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.UpdateRecord(context.Background(), request.Custom(mutate)); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	ctx, cancel := context.WithCancelCause(context.Background())

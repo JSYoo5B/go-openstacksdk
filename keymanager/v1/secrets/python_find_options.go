@@ -1,6 +1,10 @@
 package secrets
 
-import "github.com/JSYoo5B/go-openstacksdk/resource"
+import (
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
+	"github.com/JSYoo5B/go-openstacksdk/request"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
+)
 
 // FindRecordOpts owns the finite find_secret controls. IgnoreMissing defaults
 // to true; Fallback defaults to compatible clean HTTP400/403/404 fallback.
@@ -10,7 +14,15 @@ type FindRecordOpts struct {
 	Fallback      resource.FindFallbackPolicy
 }
 
-type FindRecordOption func(*FindRecordOpts) error
+// FindRecordOption is one option of FindRecord: WithFindRecordOptions,
+// WithFindRecordFallback, request.IgnoreMissing or request.Custom over
+// *FindRecordOpts. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type FindRecordOption = request.FindCall
+
+var findRecordCalls = calls.Spec[FindRecordOpts]{
+	IgnoreMissing: calls.Pointer(func(c *FindRecordOpts) **bool { return &c.IgnoreMissing }),
+}
 
 func ownFindRecordOptions(value FindRecordOpts) FindRecordOpts {
 	if value.IgnoreMissing != nil {
@@ -22,21 +34,14 @@ func ownFindRecordOptions(value FindRecordOpts) FindRecordOpts {
 
 func WithFindRecordOptions(value FindRecordOpts) FindRecordOption {
 	snapshot := ownFindRecordOptions(value)
-	return func(options *FindRecordOpts) error {
+	return request.Custom(func(options *FindRecordOpts) error {
 		*options = ownFindRecordOptions(snapshot)
 		return nil
-	}
-}
-func WithFindRecordIgnoreMissing(value bool) FindRecordOption {
-	return func(options *FindRecordOpts) error {
-		copy := value
-		options.IgnoreMissing = &copy
-		return nil
-	}
+	})
 }
 func WithFindRecordFallback(value resource.FindFallbackPolicy) FindRecordOption {
-	return func(options *FindRecordOpts) error {
+	return request.Custom(func(options *FindRecordOpts) error {
 		options.Fallback = value
 		return nil
-	}
+	})
 }

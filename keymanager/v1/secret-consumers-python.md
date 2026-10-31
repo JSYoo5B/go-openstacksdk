@@ -71,6 +71,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -104,7 +105,7 @@ func main() {
     case "delete":
         result, err := keyManager.SecretConsumers.DeleteRecord(ctx, *secret,
             secretconsumers.WithDeleteRecordAttributes(attrs),
-            secretconsumers.WithDeleteRecordIgnoreMissing(!*strict))
+            request.IgnoreMissing(!*strict))
         if err != nil { log.Fatal(err) }
         if result == nil { log.Print("association absent"); return }
         log.Printf("DELETE status=%d actual_response=%s",
@@ -160,7 +161,7 @@ Delete returns the actual receipt as `DeletedConsumer`; its body remains bytes
 and is never parsed. Python returns None and calls `_translate_response` with
 `has_body=False`, so HTTP204, malformed JSON, and otherwise accepted nonobject
 bodies are successful. By default a clean native HTTP404 returns nil receipt
-and nil error. `WithDeleteRecordIgnoreMissing(false)` preserves that status.
+and nil error. `request.IgnoreMissing(false)` preserves that status.
 Transport, Read, Close, retry, source-change, context cancellation and custom
 cancellation causes cannot be suppressed as missing.
 
@@ -184,9 +185,9 @@ other JSON values compare recursively using Python boolean/number equality
 (True equals 1, False equals 0). Numbers stay exact in the Go JSON domain.
 The Resource projection does not promote unknown wire values to descriptors.
 
-`WithListRecordMaxItems` counts raw rows before local filtering and supplies
+`request.MaxItems` counts raw rows before local filtering and supplies
 an initial wire limit when the requested limit is absent or falsey.
-`WithListRecordPaginated(false)` reads one page. Iterators are lazy and reusable;
+`request.Paginated(false)` reads one page. Iterators are lazy and reusable;
 a break, cap or empty page prevents additional HTTP. AllRecords returns nil
 rows on a terminal failure. Invalid rows after a cap are not decoded.
 

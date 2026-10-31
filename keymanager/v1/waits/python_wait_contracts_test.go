@@ -17,6 +17,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -200,8 +201,8 @@ func TestPythonKeymanagerWaitOptionOwnershipAndPreflight(t *testing.T) {
 	}{
 		{waits.Target{}, nil, resource.ErrInvalidOption}, {waits.Secret(""), nil, resource.ErrInvalidOption}, {waits.Order("o"), []waits.Option{nil}, resource.ErrInvalidOption},
 		{waits.Container("c"), []waits.Option{waits.WithAttribute("unknown")}, resource.ErrUnsupported},
-		{waits.Order("o"), []waits.Option{waits.WithHeader("Authorization", "forged")}, resource.ErrInvalidOption},
-		{waits.Order("o"), []waits.Option{waits.WithMicroversion("bad\nversion")}, resource.ErrInvalidOption},
+		{waits.Order("o"), []waits.Option{request.Header("Authorization", "forged")}, resource.ErrInvalidOption},
+		{waits.Order("o"), []waits.Option{request.Microversion("bad\nversion")}, resource.ErrInvalidOption},
 		{waits.Order("o"), []waits.Option{waits.WithInterval(-time.Second)}, resource.ErrInvalidOption},
 		{waits.Order("o"), []waits.Option{waits.WithTimeout(0)}, context.DeadlineExceeded},
 	} {
@@ -232,7 +233,7 @@ func TestPythonKeymanagerWaitOptionOwnershipAndPreflight(t *testing.T) {
 		t.Fatal(value, err, *calls, client)
 	}
 	*calls = nil
-	_, err = api.WaitForStatus(context.Background(), waits.Order("o"), str("active"), func(*waits.Options) error { client.ResourceBase = client.Endpoint + "changed/"; return nil })
+	_, err = api.WaitForStatus(context.Background(), waits.Order("o"), str("active"), request.Custom(func(*waits.Options) error { client.ResourceBase = client.Endpoint + "changed/"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
 		t.Fatal(err, *calls)
 	}
@@ -550,7 +551,7 @@ func TestPythonKeymanagerWaitCleanNativeRetryPreservesSelectedPolicyAndLiveToken
 		client.ProviderClient.SetToken("live-token")
 		return nil
 	}
-	value, err := api.WaitForStatus(context.Background(), waits.Order("o"), str("active"), waits.WithMicroversion("1.1"), waits.WithHeader("X-Selected", "owned"))
+	value, err := api.WaitForStatus(context.Background(), waits.Order("o"), str("active"), request.Microversion("1.1"), request.Header("X-Selected", "owned"))
 	if err != nil || len(*calls) != 2 || value.StatusCode != 200 || client.Microversion != "" {
 		t.Fatal(value, err, *calls)
 	}

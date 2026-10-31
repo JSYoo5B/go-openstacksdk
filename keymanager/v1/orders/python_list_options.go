@@ -11,9 +11,11 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -27,7 +29,34 @@ type RecordListOpts struct {
 	MaxItems     int
 	Paginated    *bool
 }
-type RecordListOption func(*RecordListOpts) error
+
+// RecordListOption is one option of ListRecords and AllRecords:
+// WithRecordListOpts, request.Custom over *RecordListOpts, request.Query (a
+// Source keyword argument; the value is sent as JSON), request.Headers
+// (replaces the headers), request.Microversion, request.MaxItems or
+// request.Paginated. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP. Unknown query keywords are discarded, not promoted to wire
+// extensions or caller predicates.
+type RecordListOption = request.ListCall
+
+var recordListCalls = calls.Spec[RecordListOpts]{
+	Headers:      calls.Value(func(c *RecordListOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *RecordListOpts) **string { return &c.Microversion }),
+	Query: calls.JSONQuery(func(c *RecordListOpts, key string, raw json.RawMessage, err error) error {
+		if err != nil {
+			return err
+		}
+		if c.Query == nil {
+			c.Query = make(map[string]json.RawMessage)
+		}
+		c.Query[key] = raw
+		return nil
+	}),
+	Paging: calls.Paging[RecordListOpts]{
+		MaxItems:  calls.Value(func(c *RecordListOpts) *int { return &c.MaxItems }),
+		Paginated: calls.Pointer(func(c *RecordListOpts) **bool { return &c.Paginated }),
+	},
+}
 
 func ownRecordListOpts(value RecordListOpts) RecordListOpts {
 	value.Query = maps.Clone(value.Query)
@@ -47,38 +76,9 @@ func ownRecordListOpts(value RecordListOpts) RecordListOpts {
 }
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := ownRecordListOpts(value)
-	return func(c *RecordListOpts) error { *c = ownRecordListOpts(owned); return nil }
+	return request.Custom(func(c *RecordListOpts) error { *c = ownRecordListOpts(owned); return nil })
 }
 
-// WithRecordListQuery follows the finite Source query/Body declaration. Unknown
-// kwargs are discarded, not promoted to wire extensions or caller predicates.
-func WithRecordListQuery(key string, value any) RecordListOption {
-	raw, err := json.Marshal(value)
-	owned := bytes.Clone(raw)
-	return func(c *RecordListOpts) error {
-		if err != nil {
-			return err
-		}
-		if c.Query == nil {
-			c.Query = make(map[string]json.RawMessage)
-		}
-		c.Query[key] = bytes.Clone(owned)
-		return nil
-	}
-}
-func WithRecordListHeaders(values map[string]string) RecordListOption {
-	owned := maps.Clone(values)
-	return func(c *RecordListOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithRecordListMicroversion(value string) RecordListOption {
-	return func(c *RecordListOpts) error { x := value; c.Microversion = &x; return nil }
-}
-func WithRecordListMaxItems(value int) RecordListOption {
-	return func(c *RecordListOpts) error { c.MaxItems = value; return nil }
-}
-func WithRecordListPaginated(value bool) RecordListOption {
-	return func(c *RecordListOpts) error { x := value; c.Paginated = &x; return nil }
-}
 func recordListInvalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))
 }

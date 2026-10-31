@@ -82,7 +82,7 @@ func TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider(t *testin
 	if err != nil || len(operations) != 0 || scope.ProjectID() != projectID || scope.RawClient() != client || a.RawClient() != client {
 		t.Fatal(scope, err, operations)
 	}
-	value, err := a.Get(context.Background(), quotas.WithGetHeader("X-Trace", "read"))
+	value, err := a.Get(context.Background(), request.Header("X-Trace", "read"))
 	if err != nil || string(value.Secrets) != "9007199254740993" || string(value.Orders) != "null" || string(value.Consumers) != "0" || value.StatusCode != 200 || value.Header.Get("X-Request-ID") != "effective" || string(value.Data["Secrets"]) != `"shadow"` || string(value.Data["plugin"]) != `{"n":9007199254740995}` {
 		t.Fatal(value, err)
 	}
@@ -172,18 +172,18 @@ func TestKeyManagerQuotasInvalidOptionsAndScopePreflight(t *testing.T) {
 		}
 	}
 	for _, option := range []quotas.UpdateOption{
-		request.WithField[quotas.UpdateOpts]("unknown", 1), request.WithField[quotas.UpdateOpts]("secrets", 1), request.WithField[quotas.UpdateOpts]("Secrets", 1), request.WithField[quotas.UpdateOpts]("project_quotas", map[string]int{}),
-		request.WithQuery[quotas.UpdateOpts]("project_id", "other"), request.WithArgument[quotas.UpdateOpts]("parent", "other"), nil,
-		quotas.WithUpdateHeader("x-auth-token", "other"), quotas.WithUpdateHeader("Content-Type", "text/plain"), quotas.WithUpdateHeader("OpenStack-API-Version", "key-manager latest"), quotas.WithUpdateHeader("bad:key", "value"), quotas.WithUpdateHeader("X-Test", "line\nbreak"),
+		request.Custom(request.WithField[quotas.UpdateOpts]("unknown", 1)), request.Custom(request.WithField[quotas.UpdateOpts]("secrets", 1)), request.Custom(request.WithField[quotas.UpdateOpts]("Secrets", 1)), request.Custom(request.WithField[quotas.UpdateOpts]("project_quotas", map[string]int{})),
+		request.Custom(request.WithQuery[quotas.UpdateOpts]("project_id", "other")), request.Custom(request.WithArgument[quotas.UpdateOpts]("parent", "other")), nil,
+		request.Header("x-auth-token", "other"), request.Header("Content-Type", "text/plain"), request.Header("OpenStack-API-Version", "key-manager latest"), request.Header("bad:key", "value"), request.Header("X-Test", "line\nbreak"),
 	} {
 		if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := scope.Get(context.Background(), request.WithField[quotas.GetOpts]("secrets", 1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Get(context.Background(), request.Custom(request.WithField[quotas.GetOpts]("secrets", 1))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if err := scope.Delete(context.Background(), request.WithQuery[quotas.DeleteOpts]("ignore_missing", "true")); !errors.Is(err, resource.ErrInvalidOption) {
+	if err := scope.Delete(context.Background(), request.Custom(request.WithQuery[quotas.DeleteOpts]("ignore_missing", "true"))); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	for _, ref := range []resource.Ref{resource.Ref{}, resource.ID(".."), resource.ID("has/slash"), resource.ID("percent%20"), resource.ID("nul\x00"), resource.ID(string([]byte{0xff})), resource.Name("project")} {
@@ -245,7 +245,7 @@ func TestKeyManagerQuotasMissingDeleteAndNativeFailures(t *testing.T) {
 			} else if !gophercloud.ResponseCodeIs(err, code) {
 				t.Fatal(err)
 			}
-			err = scope.Delete(context.Background(), quotas.WithDeleteIgnoreMissing(false))
+			err = scope.Delete(context.Background(), request.IgnoreMissing(false))
 			if !gophercloud.ResponseCodeIs(err, code) {
 				t.Fatal("strict/native cause lost", err)
 			}
@@ -487,7 +487,7 @@ func TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation(t *testing.T) {
 	})
 	client := cloud.Client("key-manager", quotaPrefix)
 	scope := quotaScope(t, client, "project")
-	opts := []quotas.UpdateOption{quotas.WithUpdateCAs(4), quotas.WithUpdateConsumers(0), quotas.WithUpdateHeader("x-trace", "first"), quotas.WithUpdateHeader("X-Trace", "last")}
+	opts := []quotas.UpdateOption{quotas.WithUpdateCAs(4), quotas.WithUpdateConsumers(0), request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
 	var wg sync.WaitGroup
 	for i := 0; i < 4; i++ {
 		wg.Add(1)
@@ -519,7 +519,7 @@ func TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation(t *testing.T) {
 	if _, err := scope.Get(nil); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, func(c *request.Config[quotas.UpdateOpts]) error { client.Type = "compute"; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error { client.Type = "compute"; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 4 {

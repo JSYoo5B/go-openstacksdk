@@ -15131,15 +15131,15 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.API.All",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListGlobalDefault",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListPaginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListFilter",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListFilters"
       ],
       "contracts": [
         {
-          "behavior": "Pinned _proxy.py:361-373 delegates the optional **query to SecretStore Resource.list and returns a lazy generator. Go List/All performs GET secret-stores accepting HTTP200 with a secret_stores array. All nine declared query names (name, status, global_default, crypto_plugin, secret_store_plugin, created, updated, limit and marker) remain server conditions rather than extra local predicates. WithListFilter/WithListFilters discards unknown semantic names, preserves explicit false/empty/repeated scalar query values and keeps raw WithListQuery extensions independent. Typed and semantic value/slice snapshots, lazy iterator slice ownership, independent reuse and concurrent library-option reuse are exercised.",
+          "behavior": "Pinned _proxy.py:361-373 delegates the optional **query to SecretStore Resource.list and returns a lazy generator. Go List/All performs GET secret-stores accepting HTTP200 with a secret_stores array. All nine declared query names (name, status, global_default, crypto_plugin, secret_store_plugin, created, updated, limit and marker) remain server conditions rather than extra local predicates. WithListFilter/WithListFilters discards unknown semantic names, preserves explicit false/empty/repeated scalar query values and keeps raw request.Query extensions independent. Typed and semantic value/slice snapshots, lazy iterator slice ownership, independent reuse and concurrent library-option reuse are exercised.",
           "tests": [
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse",
             "api/keymanager_secretstores_test.go:TestKeyManagerSecretStoresSemanticQueryOwnershipAndBodySeparation",
@@ -15193,7 +15193,7 @@
       "differences": [
         "Go returns caller-owned SecretStore values with typed strings/boolean pointers and exact original Body/Header/StatusCode. Omitted and null pointer fields both become nil while Body preserves presence, null, unknown fields and precise extension numbers. Only exact canonical wire keys populate typed fields; case variants remain extensions. Python untyped field values and mutable Resource descriptor/default/seeded/dirty/cache state are broader and remain separate goal scope.",
         "Go convenience ID prefers exact literal id including null/empty, otherwise extracts the final raw path component of an absolute secret_store_ref. Semantic id and marker instead use literal raw id or the full alternate ref; semantic secret_store_id formats the reference independently. Ref formatting preserves Unicode/space/percent spelling, excludes query/fragment and never causes HTTP. Go URL parsing differs from Python urlsplit at some malformed authorities/control normalization, and selected-only formatting differs from eager Python property/to_dict evaluation.",
-        "WithListFilter/WithListFilters maps the declared nine identity query names and five local Body attributes without caller builders or predicates; unknown semantic names are discarded. WithListQuery remains a separate explicit wire extension with repeated/empty values and overriding a same-key typed query. Later individual semantic assignments win; a bulk nil/empty replaces only semantic state. Same-key semantic and typed/raw query selections fail before HTTP rather than permissive dynamic merging.",
+        "WithListFilter/WithListFilters maps the declared nine identity query names and five local Body attributes without caller builders or predicates; unknown semantic names are discarded. request.Query remains a separate explicit wire extension with repeated/empty values and overriding a same-key typed query. Later individual semantic assignments win; a bulk nil/empty replaces only semantic state. Same-key semantic and typed/raw query selections fail before HTTP rather than permissive dynamic merging.",
         "Semantic scalar arrays become repeated query values, booleans use lowercase text, numbers retain JSON text, and null/empty arrays retain selection presence without URL values. Query objects/nested arrays and selected non-JSON values are rejected. Local common JSON comparison preserves exact decimal numbers, original timestamps and null/missing semantics but distinguishes booleans from numbers, unlike Python True==1; returned rows still use the documented typed decoder.",
         "Go accepts strict HTTP200 and a secret_stores array, while generic Python Resource.list accepts final status<400 and can wrap a non-list plural value. Decode/read model failures retain accepted HTTP evidence; selected local formatter failures preserve the condition cause without synthesizing ResponseError. Configured Provider authentication/reauthentication/native retry remains its own transport policy. Exact origin/path/filter/cycle guards and immediate cap/first-page termination are explicit Go policies; fixture proof does not establish live Barbican marker support.",
         "SDK list controls require dedicated concrete options. Deprecated Proxy._list jmespath_filters and __conflicting_attrs recovery, optional GET request caching and inherited per-call session/resource_type/base_path/microversion/header/allow_unknown_params injection are separate common compatibility scope, not falsely implemented by the declared field classifier. The selected configured client/version is retained rather than replaced by an invented generic resource facade.",
@@ -15302,7 +15302,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.Get",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithGetHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -15340,7 +15340,7 @@
         "keymanager/v1/README.md"
       ],
       "differences": [
-        "Go maps the input-free public getter to API.Get(ctx), using a concrete context and configured authenticated key-manager client. WithGetHeader is an additional owned Go option; it does not introduce project lookup, body/query injection, a quota identifier or a new List/Find/Wait surface.",
+        "Go maps the input-free public getter to API.Get(ctx), using a concrete context and configured authenticated key-manager client. request.Header is an additional owned Go option; it does not introduce project lookup, body/query injection, a quota identifier or a new List/Find/Wait surface.",
         "Go deliberately requires the published HTTP200 success and a non-null quotas object envelope. Pinned Resource._translate_response at resource.py:1338-1399 unwraps quotas when present but can also consume a root object and suppresses JSON ValueError; exceptions.raise_from_response at exceptions.py:214-222 permits statuses below400. Go treats unexpected success status, wrong/missing envelope and malformed accepted JSON as errors with actual evidence rather than returning an empty or differently shaped resource.",
         "Go returns independently owned raw response fields, Body/Data and Header/StatusCode rather than a mutable Python Quota Resource with dynamic descriptors, cached state or seeded-instance merges. Omitted json.RawMessage is nil and JSON null is retained as null bytes; unknown/case-variant data and exact large JSON numbers remain observable.",
         "The named Python get_quota() exposes no per-call Resource.fetch session, adapter, base_path, microversion, params or skip_cache overload. Go retains its configured shared provider, source path, transport and live authentication; optional inherited GET cache and generic Resource/session lifecycle remain separately tracked SDK scope rather than incomplete declared getter inputs. No class-specific maximum-microversion negotiation is inferred from Quota.",
@@ -15357,7 +15357,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.Get",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.ProjectID",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithGetHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -15417,13 +15417,12 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateContainers",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateConsumers",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateCAs",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.GetRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordOpts",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordHeader",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordMicroversion"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -15492,8 +15491,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.Delete",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteOptions",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -15521,7 +15520,7 @@
           ]
         },
         {
-          "behavior": "Delete sends DELETE project-quotas/{project}; by default 204 and 404 both return nil like Python ignore_missing=True, and WithDeleteIgnoreMissing(false) surfaces the 404.",
+          "behavior": "Delete sends DELETE project-quotas/{project}; by default 204 and 404 both return nil like Python ignore_missing=True, and request.IgnoreMissing(false) surfaces the 404.",
           "tests": [
             "keymanager/v1/quotas/python_rejudge_test.go:TestPythonRejudgeKeyManagerProjectQuotaDeleteRequest"
           ]
@@ -15550,7 +15549,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithCreateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithCreateRecordAttributes",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithCreateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithCreateRecordHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -15648,8 +15647,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithDeleteRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithDeleteRecordAttributes",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithDeleteRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithDeleteRecordHeader",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithDeleteRecordIgnoreMissing"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing"
       ],
       "contracts": [
         {
@@ -15754,9 +15753,9 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.API.InSecretRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithListRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithListRecordQuery",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithListRecordMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithListRecordPaginated",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers.WithListRecordHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -16116,7 +16115,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFetchOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFetchPayload",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFetchContentType",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFetchHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -16190,7 +16189,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindFallback",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.FindRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFindRecordOptions",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFindRecordIgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithFindRecordFallback"
       ],
       "contracts": [
@@ -16350,11 +16349,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithRecordListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -16516,7 +16515,7 @@
         "Generation additionally requires an independently verified live Python checkout and recorded AST parser minor version. Manifest/accessor/formatter/source/native drift fails closed, and Subnet proof plus existing native identity capability tables remain independent.",
         "New concrete leaf ListRecords/AllRecords with existing owned metadata models supplement native typed List and Resources.List/All, whose generated/native semantics are unchanged. Complete finite read views are independent of actual raw proof, not mutable Python resource/session/dirty/cache/JMESPath/conflicting-attrs overload.",
         "Computed location stays null using the existing key-manager projectors; no connection/location I/O or guessed cloud/configured scope. Source canonical-versus-wire alias merge order differs from deterministic existing Go canonical-wire priority, and eager Go HREF parsing has documented Python urlsplit edge differences.",
-        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; WithRecordListQuery reports Go JSON encoding errors.",
+        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; request.Query reports Go JSON encoding errors.",
         "Source bool/number equality is retained for ordinary JSON values but shared EqualPythonJSON exact-decimal values deliberately differ from Python binary64 rounding. Source nonobject actual recursive-dict access can raise; Go returns nonmatch.",
         "Source has no initial offset query mapping for these models, even though stock/native Barbican supports it. Advertised offsets plus explicit-limit marker fallback use the root opt-in guarded shared pager: one cursor family per request, prior cursor dropped on transition and previously seen maximum offset retained. Origin/path/query/limit/cycles/negative cursor guards are explicit Go policy beyond permissive Source merging.",
         "Raw caps skip trailing unconsumed schema/HREF/constructor errors, unlike native whole-page typed extraction; capped first request supplies the Source limit hint. AllRecords returns nil rows on terminal error, iterator yields earlier rows with the terminal cause.",
@@ -16547,11 +16546,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithRecordListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -16705,7 +16704,7 @@
         "Source classification is guarded by an independently re-extracted live Python manifest plus native decoder/pager/type contracts. Python parser-version and source/native/manifest drift fail closed. The exact unused SecretRef builder signature is a compatibility guard, rather than a claim to map its implementation into ordinary listing.",
         "New concrete leaf ListRecords/AllRecords with existing owned metadata models supplement native typed List and Resources.List/All, whose generated/native semantics are unchanged. Complete finite read views are independent of actual raw proof, not mutable Python resource/session/dirty/cache/JMESPath/conflicting-attrs overload.",
         "Computed location stays null using the existing key-manager projectors; no connection/location I/O or guessed cloud/configured scope. Source canonical-versus-wire alias merge order differs from deterministic existing Go canonical-wire priority, and eager Go HREF parsing has documented Python urlsplit edge differences.",
-        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; WithRecordListQuery reports Go JSON encoding errors.",
+        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; request.Query reports Go JSON encoding errors.",
         "Source bool/number equality is retained for ordinary JSON values but shared EqualPythonJSON exact-decimal values deliberately differ from Python binary64 rounding. Source nonobject actual recursive-dict access can raise; Go returns nonmatch.",
         "Source has no initial offset query mapping for these models, even though stock/native Barbican supports it. Advertised offsets plus explicit-limit marker fallback use the root opt-in guarded shared pager: one cursor family per request, prior cursor dropped on transition and previously seen maximum offset retained. Origin/path/query/limit/cycles/negative cursor guards are explicit Go policy beyond permissive Source merging.",
         "Raw caps skip trailing unconsumed schema/HREF/constructor errors, unlike native whole-page typed extraction; capped first request supplies the Source limit hint. AllRecords returns nil rows on terminal error, iterator yields earlier rows with the terminal cause.",
@@ -16739,11 +16738,11 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.AllRecords",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListOpts",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListQuery",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListMicroversion",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListMaxItems",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithRecordListPaginated"
+        "github.com/JSYoo5B/go-openstacksdk/request.Query",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.MaxItems",
+        "github.com/JSYoo5B/go-openstacksdk/request.Paginated"
       ],
       "contracts": [
         {
@@ -16897,7 +16896,7 @@
         "Native typed List/Get/Create/Delete and explicit-ID policies remain independent of the semantic list lane. Raw status queries keep their previous suppression; semantic Body status is exact JSON while common WithStatus is case-insensitive. Source/native/manifest drift fails closed, without extending these list tests into unsupported update endpoint claims.",
         "New concrete leaf ListRecords/AllRecords with existing owned metadata models supplement native typed List and Resources.List/All, whose generated/native semantics are unchanged. Complete finite read views are independent of actual raw proof, not mutable Python resource/session/dirty/cache/JMESPath/conflicting-attrs overload.",
         "Computed location stays null using the existing key-manager projectors; no connection/location I/O or guessed cloud/configured scope. Source canonical-versus-wire alias merge order differs from deterministic existing Go canonical-wire priority, and eager Go HREF parsing has documented Python urlsplit edge differences.",
-        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; WithRecordListQuery reports Go JSON encoding errors.",
+        "Finite opts expose max-items/first-page/headers/microversion; free base-path and raw inherited control kwargs are rejected to preserve fixed routes rather than adding caller interface builders. Unknown recognized JSON-domain kwargs discard; request.Query reports Go JSON encoding errors.",
         "Source bool/number equality is retained for ordinary JSON values but shared EqualPythonJSON exact-decimal values deliberately differ from Python binary64 rounding. Source nonobject actual recursive-dict access can raise; Go returns nonmatch.",
         "Source has no initial offset query mapping for these models, even though stock/native Barbican supports it. Advertised offsets plus explicit-limit marker fallback use the root opt-in guarded shared pager: one cursor family per request, prior cursor dropped on transition and previously seen maximum offset retained. Origin/path/query/limit/cycles/negative cursor guards are explicit Go policy beyond permissive Source merging.",
         "Raw caps skip trailing unconsumed schema/HREF/constructor errors, unlike native whole-page typed extraction; capped first request supplies the Source limit hint. AllRecords returns nil rows on terminal error, iterator yields earlier rows with the terminal cause.",
@@ -48232,7 +48231,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.Fetch",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithFetchHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.FetchedContainer.Ref"
       ],
       "contracts": [
@@ -48285,7 +48284,7 @@
         "Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.",
         "Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.",
         "Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.",
-        "Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
+        "Context and request.Header are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
         "Completion is restricted to python:key_manager/v1/get_container. Native Container Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence."
       ],
       "remaining": []
@@ -48297,7 +48296,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.New",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.Fetch",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithFetchHeader",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.FetchedOrder.Ref"
       ],
       "contracts": [
@@ -48350,7 +48349,7 @@
         "Canonical wire keys, including present null, deterministically precede client attribute aliases in Go. Pinned Resource._consume_attrs follows input insertion order for conflicting aliases. The reused Go HREF parser is stricter than urllib.urlsplit for some authorities; the formatter still treats refs as passive strings and preserves percent spelling and trailing empty path components.",
         "Resource.Body.location is null. Pinned Proxy._get_resource at proxy.py:583-596 passes connection=conn to a new ID Resource, and Resource initialization at resource.py:838-839 may seed computed location from conn.current_location even without project_id/availability_zone. This concrete authenticated-ServiceClient getter does not synthesize that Connection location.",
         "Go accepts final HTTP200..399 object responses and preserves actual status, including the tested203 and302 without Location. Pinned exceptions.raise_from_response allows statuses below400 and generic Resource._translate_response can suppress JSON ValueError. Go deliberately returns an accepted ResponseError plus receipt for empty/malformed/non-object/non-UTF8 responses or formatter failures instead of returning a seed-only Resource.",
-        "Context and WithFetchHeader are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
+        "Context and request.Header are concrete Go inputs; no SDK timeout is added, and body/query/argument extensions are unsupported. Captured source guards and fixed requests retain the configured shared provider/live token and native retry/reauthentication policy. SDK composition errors do not introduce name fallback, deletion or resend. Generic session/cache negotiation and inherited lifecycle are tracked separately.",
         "Completion is restricted to python:key_manager/v1/get_order. Native Order Get/List/CRUD, Proxy list/Find/wait and Resource lifecycle/session declarations are not promoted by this named getter mapping. The six offline Go HTTP groups use existing common fixtures/testhelper/body fault adapters; they are not authenticated OpenStack or Python execution evidence."
       ],
       "remaining": []
@@ -48544,8 +48543,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordAttributes",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -48612,8 +48611,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordAttributes",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -48680,8 +48679,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordOptions",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordAttributes",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordField",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Field",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -51620,7 +51619,7 @@
       ],
       "contracts": [
         {
-          "behavior": "List serializes ListOpts including date filters and appends WithListQuery values, follows the body next link verbatim including a different path, stops on an empty secrets page and sends no further page after the caller stops.",
+          "behavior": "List serializes ListOpts including date filters and appends request.Query values, follows the body next link verbatim including a different path, stops on an empty secrets page and sends no further page after the caller stops.",
           "tests": [
             "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretListQueryPagingAndStop"
           ]
@@ -51646,7 +51645,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Create POSTs the omitempty CreateOpts body with Expiration formatted without zone and {} for zero options, merges non-core WithCreateField values, rejects core-field collisions and nil options before HTTP, and accepts only 201.",
+          "behavior": "Create POSTs the omitempty CreateOpts body with Expiration formatted without zone and {} for zero options, merges non-core request.Field values, rejects core-field collisions and nil options before HTTP, and accepts only 201.",
           "tests": [
             "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
             "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
@@ -51673,7 +51672,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Update PUTs the raw payload to secrets/{id} with ContentType/ContentEncoding headers and extra WithUpdateHeader headers, rejects core header collisions and nil options before HTTP, and accepts only 204.",
+          "behavior": "Update PUTs the raw payload to secrets/{id} with ContentType/ContentEncoding headers and extra request.Header headers, rejects core header collisions and nil options before HTTP, and accepts only 204.",
           "tests": [
             "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretGetCreateDeleteUpdateRoutesAndBodies",
             "keymanager/v1/secrets/native_contracts_test.go:TestNativeSecretStrictStatusesAndPreflight"
@@ -52428,7 +52427,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Get",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -52455,7 +52454,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Set",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -52482,7 +52481,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Update",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
@@ -52509,12 +52508,12 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.API.InSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.SecretScope.Delete",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithDeleteIgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretacls.WithDeleteHeader"
+        "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header"
       ],
       "contracts": [
         {
-          "behavior": "Delete sends DELETE secrets/{id}/acl, returns the seeded ACL with the response metadata for statuses below 400, returns nil,nil for a clean 404 by default, keeps the 404 with WithDeleteIgnoreMissing(false) and keeps other native errors.",
+          "behavior": "Delete sends DELETE secrets/{id}/acl, returns the seeded ACL with the response metadata for statuses below 400, returns nil,nil for a clean 404 by default, keeps the 404 with request.IgnoreMissing(false) and keeps other native errors.",
           "tests": [
             "keymanager/v1/secretacls/api_test.go:TestSecretACLDeleteIgnoresMissingByDefault"
           ]
@@ -71725,8 +71724,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordOpts",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordBasePath"
       ],
       "contracts": [
@@ -71795,8 +71794,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordOpts",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordBasePath"
       ],
       "contracts": [
@@ -71846,8 +71845,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.UpdateRecord",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordOpts",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordAttribute",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Headers",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordBasePath"
       ],
       "contracts": [
@@ -71951,8 +71950,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithFailures",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithAttribute",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
@@ -72159,8 +72158,8 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithProgressCallback",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithHeader",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithMicroversion",
+        "github.com/JSYoo5B/go-openstacksdk/request.Header",
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecretStore",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretACL",

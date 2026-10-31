@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Pinned _proxy.py:47-56 accepts optional **attrs and delegates Resource.new/create. CreateRecord selects the finite declared Container Body attributes, including inherited id, created_at/created, updated_at/updated, container_ref/container_id, name, type, status, secret_refs and consumers, maps aliases, discards unknown semantic values before JSON encoding and retains supplied null/empty/raw JSON values without inferred defaults. Concrete options own selected values, replace the semantic set with bulk options and apply individual values by canonical wire target; explicit extension fields and headers remain separate. Shared Container option evidence verifies canonical-wire precedence, nested/large-number snapshots, extension/header survival, callback-once preparation and concurrent reuse; each kind has its own nullable/body evidence.
   Tests: `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate`.
@@ -50,8 +50,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Pinned _proxy.py:158-167 accepts optional **attrs and delegates Resource.new/create. CreateRecord selects the finite declared Order Body attributes, including inherited id/name, created_at/created, updated_at/updated, creator_id, meta, type, status, sub_status/sub_status_message, order_ref/order_id and secret_ref/secret_id, maps aliases, discards unknown semantic values before JSON encoding and retains supplied null/empty/raw JSON values without inferred defaults. Concrete options own selected values, replace the semantic set with bulk options and apply individual values by canonical wire target; explicit extension fields and headers remain separate. Shared Container option evidence verifies canonical-wire precedence, nested/large-number snapshots, extension/header survival, callback-once preparation and concurrent reuse; each kind has its own nullable/body evidence.
   Tests: `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate`.
@@ -84,8 +84,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordField`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithCreateRecordHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Field`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Pinned _proxy.py:259-268 accepts optional **attrs and delegates Resource.new/create. CreateRecord selects the finite declared Secret Body attributes, including inherited id, created_at/created, updated_at/updated, expires_at/expiration, algorithm, bit_length, mode, name, secret_type, status, secret_ref/secret_id, content_types, payload and payload_content_type/payload_content_encoding, maps aliases, discards unknown semantic values before JSON encoding and retains supplied null/empty/raw JSON values without inferred defaults. Concrete options own selected values, replace the semantic set with bulk options and apply individual values by canonical wire target; explicit extension fields and headers remain separate. Shared Container option evidence verifies canonical-wire precedence, nested/large-number snapshots, extension/header survival, callback-once preparation and concurrent reuse; each kind has its own nullable/body evidence.
   Tests: `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordFlatBodiesSeedAndNullResponse`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordOwnedOptionsAliasesAndIndependentProof`, `api/keymanager_create_records_test.go:TestKeyManagerCreateRecordRequestTypesAndResourceDescriptorsAreSeparate`.

@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -33,24 +34,27 @@ func (a *API) RawClient() *gophercloud.ServiceClient {
 
 // Opts carries only Go extension headers; the Python helpers take no others.
 type Opts struct{}
-type Option = request.Option[Opts]
 
-func WithHeader(key, value string) Option { return request.WithHeader[Opts](key, value) }
+// Option is one option of Get, Set and Update: request.Header or
+// request.Custom over *request.Config[Opts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type Option = request.GetCall
 
 // DeleteOpts selects Python delete_secret_acl's ignore_missing (nil is true).
 type DeleteOpts struct{ IgnoreMissing *bool }
-type DeleteOption = request.Option[DeleteOpts]
 
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return func(config *request.Config[DeleteOpts]) error {
-		owned := value
-		config.Options.IgnoreMissing = &owned
-		return nil
+// DeleteOption is one option of Delete: request.IgnoreMissing,
+// request.Header or request.Custom over *request.Config[DeleteOpts]. Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var (
+	optionCalls = calls.Spec[request.Config[Opts]]{Header: calls.ConfigHeader[Opts]}
+	deleteCalls = calls.Spec[request.Config[DeleteOpts]]{
+		Header:        calls.ConfigHeader[DeleteOpts],
+		IgnoreMissing: calls.Pointer(func(c *request.Config[DeleteOpts]) **bool { return &c.Options.IgnoreMissing }),
 	}
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
-}
+)
 
 // SecretScope fixes the parent secret once; Python passes Resource._get_id.
 type SecretScope struct {
@@ -161,7 +165,7 @@ func (s *SecretScope) seed(response *rest.Response) *SecretACL {
 
 // Get implements get_secret_acl: Resource.fetch of secrets/{id}/acl.
 func (s *SecretScope) Get(ctx context.Context, options ...Option) (*SecretACL, error) {
-	config, err := request.Apply(Opts{}, options...)
+	config, err := calls.ApplyConfig(Opts{}, optionCalls, options...)
 	if err == nil {
 		err = errors.Join(validateHeaders(config.Headers), s.validate(ctx))
 	}
@@ -189,7 +193,7 @@ func (s *SecretScope) Update(ctx context.Context, input ACLInput, options ...Opt
 	return s.commit(ctx, "Update", input, options)
 }
 func (s *SecretScope) commit(ctx context.Context, operation string, input ACLInput, options []Option) (*SecretACL, error) {
-	config, err := request.Apply(Opts{}, options...)
+	config, err := calls.ApplyConfig(Opts{}, optionCalls, options...)
 	var body map[string]json.RawMessage
 	if err == nil {
 		body, err = input.body()
@@ -224,7 +228,7 @@ func (s *SecretScope) commit(ctx context.Context, operation string, input ACLInp
 // Delete implements delete_secret_acl. A clean native 404 returns nil,nil
 // unless IgnoreMissing is false; otherwise the seeded ACL keeps the response.
 func (s *SecretScope) Delete(ctx context.Context, options ...DeleteOption) (*SecretACL, error) {
-	config, err := request.Apply(DeleteOpts{}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{}, deleteCalls, options...)
 	if err == nil {
 		err = errors.Join(validateHeaders(config.Headers), s.validate(ctx))
 	}

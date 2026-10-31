@@ -78,7 +78,7 @@ func TestKeyManagerSecretConsumersFixedParentAndActualMutationResponses(t *testi
 		testcloud.JSON(w, 200, response)
 	})
 	input := secretconsumers.ConsumerOpts{Service: "load-balancer", ResourceType: "lbaas/loadbalancers", ResourceID: "caller/id?body-only"}
-	create, err := scope.Create(context.Background(), input, secretconsumers.WithCreateField("vendor", json.RawMessage(`{"n":9007199254740993}`)))
+	create, err := scope.Create(context.Background(), input, request.Field("vendor", json.RawMessage(`{"n":9007199254740993}`)))
 	if err != nil || create == nil || create.Name != "actual secret" || create.Status != "ACTIVE" || len(create.Consumers) != 1 || create.Consumers[0].ResourceID != "resource-alpha" || create.StatusCode != 200 || create.Header.Get("X-Request-ID") != "POST" || string(create.Body["bit_length"]) != "9007199254740993" || string(create.Consumers[0].Body["updated"]) != "null" {
 		t.Fatal(create, err)
 	}
@@ -121,7 +121,7 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 		testcloud.JSON(w, int(mode.Load()), `{"failure":"original"}`)
 	})
 	fields := map[string]any{"n": json.Number("9007199254740993")}
-	option := secretconsumers.WithCreateField("vendor", fields)
+	option := request.Field("vendor", fields)
 	fields["n"] = 0
 	var retained *request.Config[secretconsumers.ConsumerOpts]
 	custom := func(config *request.Config[secretconsumers.ConsumerOpts]) error {
@@ -135,7 +135,7 @@ func TestKeyManagerSecretConsumersMutationSnapshotsAndMissingPolicy(t *testing.T
 		retained.Fields["vendor"][0] = 'x'
 		return original.RoundTrip(r)
 	}))
-	if _, err := scope.Create(context.Background(), input, option, custom); err != nil {
+	if _, err := scope.Create(context.Background(), input, option, request.Custom(custom)); err != nil {
 		t.Fatal(err)
 	}
 	cloud.SetTransport(original)
@@ -335,7 +335,7 @@ func TestKeyManagerSecretConsumersOffsetPagingAndQueryOwnership(t *testing.T) {
 		config.Query["nil"] = nil
 		return nil
 	}
-	options := []secretconsumers.ListOption{secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 2, Offset: 1}), secretconsumers.WithListQuery("service", "wire-only"), secretconsumers.WithListQuery("empty", ""), custom}
+	options := []secretconsumers.ListOption{secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 2, Offset: 1}), request.Query("service", "wire-only"), request.Query("empty", ""), request.Custom(custom)}
 	sequence := scope.List(context.Background(), options...)
 	options[0] = nil
 	for run := 0; run < 2; run++ {
@@ -441,10 +441,10 @@ func TestKeyManagerSecretConsumersListControlsAndAcceptedRows(t *testing.T) {
 			}
 			var options []secretconsumers.ListOption
 			if mode == "cap" || mode == "malformed-json" {
-				options = append(options, secretconsumers.WithListMaxItems(1))
+				options = append(options, request.MaxItems(1))
 			}
 			if mode == "single" {
-				options = append(options, secretconsumers.WithListPaginated(false))
+				options = append(options, request.Paginated(false))
 			}
 			values, err := scope.All(context.Background(), options...)
 			if mode == "uncapped" || mode == "malformed-json" {
@@ -504,7 +504,7 @@ func TestKeyManagerSecretConsumersContinuationGuardsAndTerminalFailures(t *testi
 				}))
 			}
 			scope := secretConsumersScope(t, client)
-			options := []secretconsumers.ListOption{secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: 2}), secretconsumers.WithListQuery("vendor", "fixed")}
+			options := []secretconsumers.ListOption{secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: 2}), request.Query("vendor", "fixed")}
 			if mode == "cancel" {
 				var terminal error
 				for value, err := range scope.List(ctx, options...) {
@@ -581,8 +581,8 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 				if location == "source" {
 					client.MoreHeaders = headers
 				} else {
-					create = append(create, func(config *request.Config[secretconsumers.ConsumerOpts]) error { config.Headers = headers; return nil })
-					remove = append(remove, func(config *request.Config[secretconsumers.DeleteOpts]) error { config.Headers = headers; return nil })
+					create = append(create, request.Custom(func(config *request.Config[secretconsumers.ConsumerOpts]) error { config.Headers = headers; return nil }))
+					remove = append(remove, request.Custom(func(config *request.Config[secretconsumers.DeleteOpts]) error { config.Headers = headers; return nil }))
 				}
 				input := secretconsumers.ConsumerOpts{Service: "image", ResourceType: "image", ResourceID: "id"}
 				created, createErr := scope.Create(context.Background(), input, create...)
@@ -637,18 +637,18 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 		t.Fatal(values, err, calls.Load())
 	}
 	invalid := [][]secretconsumers.ListOption{
-		{nil}, {secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: -1})}, {secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: -1})}, {secretconsumers.WithListMaxItems(-1)},
-		{secretconsumers.WithListQuery("offset", "-1")}, {secretconsumers.WithListQuery("offset", "0"), func(c *request.Config[secretconsumers.ListOpts]) error {
+		{nil}, {secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: -1})}, {secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: -1})}, {request.MaxItems(-1)},
+		{request.Query("offset", "-1")}, {request.Query("offset", "0"), request.Custom(func(c *request.Config[secretconsumers.ListOpts]) error {
 			c.Query["offset"] = []string{"0", "1"}
 			return nil
-		}},
-		{secretconsumers.WithListQuery("marker", "invented")}, {secretconsumers.WithListQuery("limit", "0")}, {secretconsumers.WithListQuery("max_items", "1")},
-		{secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 2}), secretconsumers.WithListQuery("limit", "2")},
-		{secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: 1}), secretconsumers.WithListQuery("offset", "1")},
-		{func(c *request.Config[secretconsumers.ListOpts]) error {
+		})},
+		{request.Query("marker", "invented")}, {request.Query("limit", "0")}, {request.Query("max_items", "1")},
+		{secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 2}), request.Query("limit", "2")},
+		{secretconsumers.WithListOptions(secretconsumers.ListOpts{Offset: 1}), request.Query("offset", "1")},
+		{request.Custom(func(c *request.Config[secretconsumers.ListOpts]) error {
 			c.Headers["X-Unknown"] = "unsupported"
 			return nil
-		}},
+		})},
 	}
 	for i, options := range invalid {
 		sequence := scope.List(context.Background(), options...)
@@ -667,10 +667,10 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 		}
 	}
 	input := secretconsumers.ConsumerOpts{Service: "image", ResourceType: "image", ResourceID: "id"}
-	for _, option := range []secretconsumers.CreateOption{nil, secretconsumers.WithCreateField("SERVICE", "shadow"), secretconsumers.WithCreateField("secret_id", "other"), secretconsumers.WithCreateHeader("X-Auth-Token", "foreign"), secretconsumers.WithCreateField("vendor", json.RawMessage(`{`)), func(c *request.Config[secretconsumers.ConsumerOpts]) error {
+	for _, option := range []secretconsumers.CreateOption{nil, request.Field("SERVICE", "shadow"), request.Field("secret_id", "other"), request.Header("X-Auth-Token", "foreign"), request.Field("vendor", json.RawMessage(`{`)), request.Custom(func(c *request.Config[secretconsumers.ConsumerOpts]) error {
 		c.Query.Set("vendor", "unsupported")
 		return nil
-	}} {
+	})} {
 		if _, err := scope.Create(context.Background(), input, option); err == nil || calls.Load() != 2 {
 			t.Fatal(err, calls.Load())
 		}
@@ -703,7 +703,7 @@ func TestKeyManagerSecretConsumersLiveSourceAndLazyPreflight(t *testing.T) {
 			t.Fatal(id, err)
 		}
 	}
-	if _, err := scope.All(context.Background(), func(c *request.Config[secretconsumers.ListOpts]) error { client.Type = "compute"; return nil }); !errors.Is(err, resource.ErrUnsupported) {
+	if _, err := scope.All(context.Background(), request.Custom(func(c *request.Config[secretconsumers.ListOpts]) error { client.Type = "compute"; return nil })); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	client.Type = "key-manager"

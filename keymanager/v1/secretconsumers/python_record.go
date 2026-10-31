@@ -7,11 +7,11 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -85,7 +85,7 @@ func (a *API) DeleteRecord(ctx context.Context, secretID string, options ...Dele
 // discard/defaults and the seeded Resource returned when Barbican sends a full
 // Secret root. The native concrete Create surface retains its existing policy.
 func (s *SecretScope) CreateRecord(ctx context.Context, options ...CreateRecordOption) (*ConsumerRecord, error) {
-	response, attributes, err := s.mutateRecord(ctx, http.MethodPost, options)
+	response, attributes, err := s.mutateRecord(ctx, http.MethodPost, calls.Translate(options, createRecordCalls))
 	if response == nil {
 		return nil, request.Wrap("CreateRecord", kind, err)
 	}
@@ -118,7 +118,7 @@ func (s *SecretScope) CreateRecord(ctx context.Context, options ...CreateRecordO
 // be suppressed; rejected Read/Close/source/retry/cancel causes remain errors.
 // Successful bodies are passive bytes, including malformed JSON and HTTP204.
 func (s *SecretScope) DeleteRecord(ctx context.Context, options ...DeleteRecordOption) (*DeletedConsumer, error) {
-	response, _, err := s.mutateRecord(ctx, http.MethodDelete, options)
+	response, _, err := s.mutateRecord(ctx, http.MethodDelete, calls.Translate(options, deleteRecordCalls))
 	if response == nil {
 		return nil, request.Wrap("DeleteRecord", kind, err)
 	}
@@ -126,7 +126,7 @@ func (s *SecretScope) DeleteRecord(ctx context.Context, options ...DeleteRecordO
 	return result, request.Wrap("DeleteRecord", kind, err)
 }
 
-func (s *SecretScope) mutateRecord(ctx context.Context, method string, options []request.Option[RecordMutationOpts]) (*rest.Response, map[string]json.RawMessage, error) {
+func (s *SecretScope) mutateRecord(ctx context.Context, method string, options []func(*request.Config[RecordMutationOpts]) error) (*rest.Response, map[string]json.RawMessage, error) {
 	id := ""
 	if s != nil {
 		id = s.secretID
@@ -136,7 +136,7 @@ func (s *SecretScope) mutateRecord(ctx context.Context, method string, options [
 		return nil, nil, err
 	}
 	guard := recordGuard(source)
-	owned := slices.Clone(options)
+	owned := options
 	prepared := make([]request.Option[RecordMutationOpts], len(owned))
 	own := func(config *request.Config[RecordMutationOpts]) error {
 		fields, err := recordAttributes(config.Options.Attributes, false)

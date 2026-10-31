@@ -70,7 +70,7 @@ func TestKeyManagerSecretFetchCompositionFixedTargetsAndEvidence(t *testing.T) {
 		w.Header().Set("X-Request-ID", "payload-evidence")
 		_, _ = w.Write([]byte("secret text"))
 	})
-	value, err := api.Fetch(context.Background(), resource.ID("secret-alpha"), secrets.WithFetchHeader("X-Trace", "call"))
+	value, err := api.Fetch(context.Background(), resource.ID("secret-alpha"), request.Header("X-Trace", "call"))
 	if err != nil || value == nil || value.SecretID != "secret-alpha" || value.Name != "canonical" || value.Status != "ACTIVE" || value.SecretRef != foreign.Server.URL+"/secret/other" || value.StatusCode != 200 || value.Header.Get("X-Request-ID") != "metadata-evidence" || value.Payload == nil || value.Payload.Text == nil || *value.Payload.Text != "secret text" || value.Payload.Accept != "text/plain" || value.Payload.Header.Get("Content-Type") != "application/octet-stream" || value.Payload.Header.Get("X-Request-ID") != "payload-evidence" || value.Payload.StatusCode != 200 {
 		t.Fatal(value, err)
 	}
@@ -204,7 +204,7 @@ func TestKeyManagerSecretFetchOptionSnapshotsAndConcurrentReuse(t *testing.T) {
 		_, _ = w.Write([]byte("owned bytes"))
 	})
 	api := secrets.New(secretFetchClient(cloud))
-	options := []secrets.FetchOption{option, secrets.WithFetchHeader("X-Trace", "owned")}
+	options := []secrets.FetchOption{option, request.Header("X-Trace", "owned")}
 	var wg sync.WaitGroup
 	results := make(chan *secrets.FetchedSecret, 8)
 	for range 8 {
@@ -238,13 +238,13 @@ func TestKeyManagerSecretFetchNameLookupAndPreparedOwnership(t *testing.T) {
 	client := secretFetchClient(cloud)
 	var listCalls, metadataCalls, payloadCalls atomic.Int32
 	var retained *request.Config[secrets.FetchOpts]
-	option := secrets.FetchOption(func(config *request.Config[secrets.FetchOpts]) error {
+	option := secrets.FetchOption(request.Custom(func(config *request.Config[secrets.FetchOpts]) error {
 		contentType := "owned/type"
 		config.Options.ContentType = &contentType
 		config.Headers = map[string]string{"X-Trace": "owned"}
 		retained = config
 		return nil
-	})
+	}))
 	cloud.Mux.HandleFunc("/reverse/barbican/v1/secrets", func(w http.ResponseWriter, r *http.Request) {
 		listCalls.Add(1)
 		if r.URL.Query().Get("name") != "exact name" {
@@ -422,24 +422,24 @@ func TestKeyManagerSecretFetchSourceAndOptionPreflight(t *testing.T) {
 		change func(*gophercloud.ServiceClient)
 		option secrets.FetchOption
 	}{
-		{name: "Accept owned", option: secrets.WithFetchHeader("Accept", "other")},
-		{name: "auth owned", option: secrets.WithFetchHeader("X-Auth-Token", "other")},
+		{name: "Accept owned", option: request.Header("Accept", "other")},
+		{name: "auth owned", option: request.Header("X-Auth-Token", "other")},
 		{name: "source Accept owned", change: func(c *gophercloud.ServiceClient) { c.MoreHeaders = map[string]string{"Accept": "other"} }},
 		{name: "source case conflict", change: func(c *gophercloud.ServiceClient) {
 			c.MoreHeaders = map[string]string{"X-Trace": "one", "x-trace": "two"}
 		}},
-		{name: "option case conflict", option: func(c *request.Config[secrets.FetchOpts]) error {
+		{name: "option case conflict", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
 			c.Headers = map[string]string{"X-Trace": "one", "x-trace": "two"}
 			return nil
-		}},
-		{name: "query unsupported", option: func(c *request.Config[secrets.FetchOpts]) error { c.Query.Set("vendor", "value"); return nil }},
-		{name: "body unsupported", option: func(c *request.Config[secrets.FetchOpts]) error {
+		})},
+		{name: "query unsupported", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error { c.Query.Set("vendor", "value"); return nil })},
+		{name: "body unsupported", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
 			c.Fields["payload"] = json.RawMessage(`"value"`)
 			return nil
-		}},
-		{name: "argument unsupported", option: func(c *request.Config[secrets.FetchOpts]) error { c.Arguments["base_path"] = "other"; return nil }},
+		})},
+		{name: "argument unsupported", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error { c.Arguments["base_path"] = "other"; return nil })},
 		{name: "content type newline", option: secrets.WithFetchContentType("text/plain\r\nX-Other:value")},
-		{name: "option changes type", option: func(c *request.Config[secrets.FetchOpts]) error { return nil }, change: func(c *gophercloud.ServiceClient) { c.Type = "compute" }},
+		{name: "option changes type", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error { return nil }), change: func(c *gophercloud.ServiceClient) { c.Type = "compute" }},
 		{name: "provider nil", change: func(c *gophercloud.ServiceClient) { c.ProviderClient = nil }},
 	} {
 		t.Run(test.name, func(t *testing.T) {
@@ -492,10 +492,10 @@ func TestKeyManagerSecretFetchSourceAndOptionPreflight(t *testing.T) {
 			}
 			testcloud.JSON(w, 200, `{}`)
 		})
-		value, err := secrets.New(client).Fetch(context.Background(), resource.ID("secret-alpha"), func(config *request.Config[secrets.FetchOpts]) error {
+		value, err := secrets.New(client).Fetch(context.Background(), resource.ID("secret-alpha"), request.Custom(func(config *request.Config[secrets.FetchOpts]) error {
 			config.Headers = map[string]string{"X-Extra": "equal", "x-extra": "equal"}
 			return nil
-		})
+		}))
 		if err != nil || value == nil || count.Load() != 1 || len(client.MoreHeaders) != 2 {
 			t.Fatal(value, err, count.Load())
 		}
@@ -524,7 +524,7 @@ func TestKeyManagerSecretFetchSourceAndOptionPreflight(t *testing.T) {
 			t.Fatal(value, err, metadata.Load(), payload.Load())
 		}
 		client.Type = "key-manager"
-		value, err = api.Fetch(context.Background(), resource.ID("secret-alpha"), func(c *request.Config[secrets.FetchOpts]) error { client.Type = "compute"; return nil })
+		value, err = api.Fetch(context.Background(), resource.ID("secret-alpha"), request.Custom(func(c *request.Config[secrets.FetchOpts]) error { client.Type = "compute"; return nil }))
 		if value != nil || !errors.Is(err, resource.ErrUnsupported) || metadata.Load() != 1 {
 			t.Fatal(value, err, metadata.Load())
 		}

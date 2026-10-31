@@ -14,6 +14,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -132,7 +133,7 @@ func TestPythonSecretUpdateRecordOptionsSnapshotBasePathAndSelectedVersion(t *te
 	api, _, calls := secretUpdateFixture(t, func(req *http.Request) *http.Response { seen = req.Header.Clone(); return nativeSecretWire(204, "") })
 	var retained *secrets.UpdateRecordOpts
 	capture := func(c *secrets.UpdateRecordOpts) error { retained = c; return nil }
-	got, err := api.UpdateRecord(context.Background(), "id/with%", option, capture)
+	got, err := api.UpdateRecord(context.Background(), "id/with%", option, request.Custom(capture))
 	if err != nil || got.StatusCode != 204 || calls.Len() != 1 || secretUpdateCalls(calls)[0] != `PUT /barbican/v1/alternate/secrets/id%2Fwith%25 {"payload":"secret"}` || seen.Get("X-Trace") != "owned" || seen.Get("OpenStack-API-Version") != "key-manager 1.2" || api.RawClient().Microversion != "" {
 		t.Fatal(got, err, secretUpdateCalls(calls), seen)
 	}
@@ -169,9 +170,9 @@ func TestPythonSecretUpdateRecordPreflightAndConstructorCollisions(t *testing.T)
 			case "bad-base":
 				opts = append(opts, secrets.WithUpdateRecordBasePath("../escape"))
 			case "auth-header":
-				opts = append(opts, secrets.WithUpdateRecordHeaders(map[string]string{"Authorization": "foreign"}))
+				opts = append(opts, request.Headers(map[string]string{"Authorization": "foreign"}))
 			case "source":
-				opts = append(opts, func(*secrets.UpdateRecordOpts) error { api.RawClient().ResourceBase += "changed/"; return nil })
+				opts = append(opts, request.Custom(func(*secrets.UpdateRecordOpts) error { api.RawClient().ResourceBase += "changed/"; return nil }))
 			}
 			_, err := api.UpdateRecord(ctx, id, opts...)
 			if err == nil || calls.Len() != 0 {

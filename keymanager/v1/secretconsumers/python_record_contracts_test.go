@@ -155,15 +155,15 @@ func TestPythonConsumerRecordOptionsSnapshotAndSourcePreflight(t *testing.T) {
 	cases := []secretconsumers.CreateRecordOption{
 		nil,
 		secretconsumers.WithCreateRecordAttribute("service", make(chan int)),
-		secretconsumers.WithCreateRecordHeader("Content-Type", "text/plain"),
-		func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
+		request.Header("Content-Type", "text/plain"),
+		request.Custom(func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
 			config.Fields["secret_id"] = json.RawMessage(`"elsewhere"`)
 			return nil
-		},
-		func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
+		}),
+		request.Custom(func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
 			config.Query.Set("offset", "1")
 			return nil
-		},
+		}),
 	}
 	for _, option := range cases {
 		if _, err := api.CreateRecord(context.Background(), "s1", option); err == nil {
@@ -173,26 +173,26 @@ func TestPythonConsumerRecordOptionsSnapshotAndSourcePreflight(t *testing.T) {
 	// A callback can reset an unsupported carrier to nil. The next option
 	// must still reach SDK capability validation instead of panicking on Set.
 	_, nilQueryErr := api.CreateRecord(context.Background(), "s1",
-		func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
+		request.Custom(func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
 			config.Query = nil
 			return nil
-		}, request.WithQuery[secretconsumers.RecordMutationOpts]("offset", "1"))
+		}), request.Custom(request.WithQuery[secretconsumers.RecordMutationOpts]("offset", "1")))
 	if !errors.Is(nilQueryErr, resource.ErrInvalidOption) {
 		t.Fatal("nil raw Query escaped mutation preflight", nilQueryErr)
 	}
 	_, nilQueryErr = api.AllRecords(context.Background(), "s1",
-		func(config *request.Config[secretconsumers.ListRecordOpts]) error {
+		request.Custom(func(config *request.Config[secretconsumers.ListRecordOpts]) error {
 			config.Query = nil
 			return nil
-		}, request.WithQuery[secretconsumers.ListRecordOpts]("marker", "other"))
+		}), request.Custom(request.WithQuery[secretconsumers.ListRecordOpts]("marker", "other")))
 	if !errors.Is(nilQueryErr, resource.ErrInvalidOption) {
 		t.Fatal("nil raw Query escaped list preflight", nilQueryErr)
 	}
 	ownErr := errors.New("callback failure")
-	_, err := api.CreateRecord(context.Background(), "s1", func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
+	_, err := api.CreateRecord(context.Background(), "s1", request.Custom(func(config *request.Config[secretconsumers.RecordMutationOpts]) error {
 		client.ResourceBase = cloud.Server.URL + "/changed/"
 		return ownErr
-	})
+	}))
 	if !errors.Is(err, ownErr) || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
@@ -236,7 +236,7 @@ func TestPythonConsumerRecordDeleteMissingAndRetryPolicy(t *testing.T) {
 	if value, err := api.DeleteRecord(context.Background(), "s1", option); value != nil || err != nil {
 		t.Fatal(value, err)
 	}
-	if _, err := api.DeleteRecord(context.Background(), "s1", option, secretconsumers.WithDeleteRecordIgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
+	if _, err := api.DeleteRecord(context.Background(), "s1", option, request.IgnoreMissing(false)); !gophercloud.ResponseCodeIs(err, 404) {
 		t.Fatal(err)
 	}
 	cloud.Provider.RetryFunc = func(_ context.Context, _ string, _ string, _ *gophercloud.RequestOpts, original error, _ uint) error {
@@ -272,7 +272,7 @@ func TestPythonConsumerRecordListBodyFiltersDefaultsRawCapsAndReuse(t *testing.T
 	query["resource_type"].(map[string]any)["inner"].(map[string]any)["flag"] = false
 	client.MoreHeaders = map[string]string{"aCcEpT": "text/plain"}
 	api := secretconsumers.New(client)
-	seq := api.ListRecords(context.Background(), "s1", option, secretconsumers.WithListRecordMaxItems(2))
+	seq := api.ListRecords(context.Background(), "s1", option, request.MaxItems(2))
 	if calls != 0 {
 		t.Fatal("iterator is eager")
 	}

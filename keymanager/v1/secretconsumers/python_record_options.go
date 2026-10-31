@@ -9,6 +9,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
@@ -22,39 +23,45 @@ type RecordMutationOpts struct {
 }
 type CreateRecordOpts = RecordMutationOpts
 type DeleteRecordOpts = RecordMutationOpts
-type CreateRecordOption = request.Option[RecordMutationOpts]
-type DeleteRecordOption = request.Option[RecordMutationOpts]
+
+// CreateRecordOption is one option of CreateRecord: WithCreateRecordOptions,
+// WithCreateRecordAttributes, WithCreateRecordAttribute, request.Header or
+// request.Custom over *request.Config[RecordMutationOpts]. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
+type CreateRecordOption = request.WriteCall
+
+// DeleteRecordOption is one option of DeleteRecord: WithDeleteRecordOptions,
+// WithDeleteRecordAttributes, WithDeleteRecordAttribute, request.Header,
+// request.IgnoreMissing (nil means true) or request.Custom over
+// *request.Config[RecordMutationOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteRecordOption = request.DeleteCall
+
+var (
+	createRecordCalls = calls.Spec[request.Config[RecordMutationOpts]]{Header: calls.ConfigHeader[RecordMutationOpts]}
+	deleteRecordCalls = calls.Spec[request.Config[RecordMutationOpts]]{
+		Header:        calls.ConfigHeader[RecordMutationOpts],
+		IgnoreMissing: calls.Pointer(func(c *request.Config[RecordMutationOpts]) **bool { return &c.Options.IgnoreMissing }),
+	}
+)
 
 func WithCreateRecordOptions(value CreateRecordOpts) CreateRecordOption {
-	return mutationRecordOptions(value)
+	return request.Custom(mutationRecordOptions(value))
 }
 func WithDeleteRecordOptions(value DeleteRecordOpts) DeleteRecordOption {
-	return mutationRecordOptions(value)
+	return request.Custom(mutationRecordOptions(value))
 }
 func WithCreateRecordAttributes(value map[string]any) CreateRecordOption {
-	return mutationRecordOptions(RecordMutationOpts{Attributes: value})
+	return request.Custom(mutationRecordOptions(RecordMutationOpts{Attributes: value}))
 }
 func WithDeleteRecordAttributes(value map[string]any) DeleteRecordOption {
-	return mutationRecordOptions(RecordMutationOpts{Attributes: value})
+	return request.Custom(mutationRecordOptions(RecordMutationOpts{Attributes: value}))
 }
 func WithCreateRecordAttribute(key string, value any) CreateRecordOption {
-	return mutationRecordAttribute(key, value)
+	return request.Custom(mutationRecordAttribute(key, value))
 }
 func WithDeleteRecordAttribute(key string, value any) DeleteRecordOption {
-	return mutationRecordAttribute(key, value)
-}
-func WithCreateRecordHeader(key, value string) CreateRecordOption {
-	return request.WithHeader[RecordMutationOpts](key, value)
-}
-func WithDeleteRecordHeader(key, value string) DeleteRecordOption {
-	return request.WithHeader[RecordMutationOpts](key, value)
-}
-func WithDeleteRecordIgnoreMissing(value bool) DeleteRecordOption {
-	return func(config *request.Config[RecordMutationOpts]) error {
-		owned := value
-		config.Options.IgnoreMissing = &owned
-		return nil
-	}
+	return request.Custom(mutationRecordAttribute(key, value))
 }
 
 func mutationRecordOptions(value RecordMutationOpts) request.Option[RecordMutationOpts] {
@@ -106,9 +113,26 @@ type ListRecordOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type ListRecordOption = request.Option[ListRecordOpts]
+
+// ListRecordOption is one option of ListRecords and AllRecords:
+// WithListRecordOptions, WithListRecordQuery, request.Header,
+// request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListRecordOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListRecordOption = request.ListCall
+
+var listRecordCalls = calls.Spec[request.Config[ListRecordOpts]]{
+	Header: calls.ConfigHeader[ListRecordOpts],
+	Paging: calls.Paging[request.Config[ListRecordOpts]]{
+		MaxItems:  calls.Value(func(c *request.Config[ListRecordOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[ListRecordOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func WithListRecordOptions(value ListRecordOpts) ListRecordOption {
+	return request.Custom(listRecordOptions(value))
+}
+func listRecordOptions(value ListRecordOpts) request.Option[ListRecordOpts] {
 	fields, prior := recordAttributes(value.Query, true)
 	var paginated *bool
 	if value.Paginated != nil {
@@ -133,28 +157,15 @@ func WithListRecordOptions(value ListRecordOpts) ListRecordOption {
 	}
 }
 func WithListRecordQuery(value map[string]any) ListRecordOption {
-	option := WithListRecordOptions(ListRecordOpts{Query: value})
-	return func(config *request.Config[ListRecordOpts]) error {
+	option := listRecordOptions(ListRecordOpts{Query: value})
+	return request.Custom(func(config *request.Config[ListRecordOpts]) error {
 		keep := config.Options
 		if err := option(config); err != nil {
 			return err
 		}
 		config.Options.MaxItems, config.Options.Paginated = keep.MaxItems, keep.Paginated
 		return nil
-	}
-}
-func WithListRecordMaxItems(value int) ListRecordOption {
-	return func(config *request.Config[ListRecordOpts]) error { config.Options.MaxItems = value; return nil }
-}
-func WithListRecordPaginated(value bool) ListRecordOption {
-	return func(config *request.Config[ListRecordOpts]) error {
-		copied := value
-		config.Options.Paginated = &copied
-		return nil
-	}
-}
-func WithListRecordHeader(key, value string) ListRecordOption {
-	return request.WithHeader[ListRecordOpts](key, value)
+	})
 }
 
 func recordBodyField(key string) bool {

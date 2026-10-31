@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -97,7 +97,7 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 		return nil, wrap(resource.ErrUnsupported)
 	}
 	config := Options{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, optionCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

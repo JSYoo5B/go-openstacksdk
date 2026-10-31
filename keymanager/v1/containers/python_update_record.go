@@ -15,6 +15,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/keymanagerread"
@@ -35,7 +36,18 @@ type UpdateRecordOpts struct {
 	Microversion, BasePath *string
 	order                  []string
 }
-type UpdateRecordOption func(*UpdateRecordOpts) error
+
+// UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOpts,
+// WithUpdateRecordAttribute, WithUpdateRecordBasePath, request.Custom over
+// *UpdateRecordOpts, request.Headers (replaces the headers) or
+// request.Microversion. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
+type UpdateRecordOption = request.WriteCall
+
+var updateRecordCalls = calls.Spec[UpdateRecordOpts]{
+	Headers:      calls.Value(func(c *UpdateRecordOpts) *map[string]string { return &c.Headers }),
+	Microversion: calls.Pointer(func(c *UpdateRecordOpts) **string { return &c.Microversion }),
+}
 
 func copyUpdateRecordOpts(c UpdateRecordOpts) UpdateRecordOpts {
 	c.Attributes = maps.Clone(c.Attributes)
@@ -56,12 +68,12 @@ func copyUpdateRecordOpts(c UpdateRecordOpts) UpdateRecordOpts {
 }
 func WithUpdateRecordOpts(value UpdateRecordOpts) UpdateRecordOption {
 	owned := copyUpdateRecordOpts(value)
-	return func(c *UpdateRecordOpts) error { *c = copyUpdateRecordOpts(owned); return nil }
+	return request.Custom(func(c *UpdateRecordOpts) error { *c = copyUpdateRecordOpts(owned); return nil })
 }
 func WithUpdateRecordAttribute(key string, value any) UpdateRecordOption {
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *UpdateRecordOpts) error {
+	return request.Custom(func(c *UpdateRecordOpts) error {
 		if err != nil {
 			return err
 		}
@@ -73,17 +85,14 @@ func WithUpdateRecordAttribute(key string, value any) UpdateRecordOption {
 		}
 		c.Attributes[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
-func WithUpdateRecordHeaders(value map[string]string) UpdateRecordOption {
-	owned := maps.Clone(value)
-	return func(c *UpdateRecordOpts) error { c.Headers = maps.Clone(owned); return nil }
-}
-func WithUpdateRecordMicroversion(value string) UpdateRecordOption {
-	return func(c *UpdateRecordOpts) error { x := value; c.Microversion = &x; return nil }
-}
+
+// WithUpdateRecordBasePath sets the literal service-relative path of the PUT.
+// It is operation-specific: the shared BasePath call is not accepted by write
+// operations.
 func WithUpdateRecordBasePath(value string) UpdateRecordOption {
-	return func(c *UpdateRecordOpts) error { x := value; c.BasePath = &x; return nil }
+	return request.Custom(func(c *UpdateRecordOpts) error { x := value; c.BasePath = &x; return nil })
 }
 
 // UpdatedContainerRecord keeps request seed/body separate from an actual PUT
@@ -126,7 +135,7 @@ func (a *API) UpdateRecord(ctx context.Context, id string, options ...UpdateReco
 		return errors.Join(changed, source.Guard(c), rest.CheckOperationGuard(c))
 	}
 	config := UpdateRecordOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, updateRecordCalls) {
 		if err := guard(ctx); err != nil {
 			return nil, wrap(err)
 		}

@@ -10,10 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/keymanagerread"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -115,7 +117,20 @@ type Options struct {
 	Headers           map[string]string
 	Microversion      *string
 }
-type Option func(*Options) error
+
+// Option is one option of WaitForStatus and WaitForDelete: WithOptions,
+// WithInterval, WithTimeout, WithUnlimitedWait, WithFailures, WithAttribute,
+// WithProgressCallback, request.Custom over *Options, request.Header (adds one
+// header to every read) or request.Microversion. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type Option = request.GetCall
+
+var optionCalls = optionSpec()
+
+func optionSpec() calls.Spec[Options] {
+	header, _ := calls.HeaderMap(func(c *Options) *map[string]string { return &c.Headers })
+	return calls.Spec[Options]{Header: header, Microversion: calls.Pointer(func(c *Options) **string { return &c.Microversion })}
+}
 
 func ownOptions(o Options) Options {
 	if o.Interval != nil {
@@ -142,42 +157,32 @@ func ownOptions(o Options) Options {
 }
 func WithOptions(o Options) Option {
 	o = ownOptions(o)
-	return func(c *Options) error { *c = ownOptions(o); return nil }
+	return request.Custom(func(c *Options) error { *c = ownOptions(o); return nil })
 }
 func WithInterval(v time.Duration) Option {
-	return func(c *Options) error { c.Interval = &v; return nil }
+	return request.Custom(func(c *Options) error { c.Interval = &v; return nil })
 }
 func WithTimeout(v time.Duration) Option {
-	return func(c *Options) error { c.Timeout = &v; c.Unlimited = false; return nil }
+	return request.Custom(func(c *Options) error { c.Timeout = &v; c.Unlimited = false; return nil })
 }
 func WithUnlimitedWait() Option {
-	return func(c *Options) error { c.Unlimited = true; c.Timeout = nil; return nil }
+	return request.Custom(func(c *Options) error { c.Unlimited = true; c.Timeout = nil; return nil })
 }
 func WithFailures(v ...string) Option {
 	owned := append([]string{}, v...)
-	return func(c *Options) error { c.Failures = append([]string{}, owned...); return nil }
+	return request.Custom(func(c *Options) error { c.Failures = append([]string{}, owned...); return nil })
 }
-func WithAttribute(v string) Option { return func(c *Options) error { c.Attribute = &v; return nil } }
+func WithAttribute(v string) Option {
+	return request.Custom(func(c *Options) error { c.Attribute = &v; return nil })
+}
 func WithProgressCallback(v func(int) error) Option {
-	return func(c *Options) error {
+	return request.Custom(func(c *Options) error {
 		if v == nil {
 			return invalid("callback is required")
 		}
 		c.Callback = v
 		return nil
-	}
-}
-func WithHeader(k, v string) Option {
-	return func(c *Options) error {
-		if c.Headers == nil {
-			c.Headers = map[string]string{}
-		}
-		c.Headers[k] = v
-		return nil
-	}
-}
-func WithMicroversion(v string) Option {
-	return func(c *Options) error { c.Microversion = &v; return nil }
+	})
 }
 func invalid(v string) error { return fmt.Errorf("%w: %s", resource.ErrInvalidOption, v) }
 

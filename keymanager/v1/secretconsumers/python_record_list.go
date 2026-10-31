@@ -13,6 +13,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -31,7 +32,7 @@ func (a *API) AllRecords(ctx context.Context, secretID string, options ...ListRe
 // values before yield; MaxItems counts raw rows, including nonmatching rows.
 // The SDK owns headers, transport, fixed-parent continuation and cycle checks.
 func (s *SecretScope) ListRecords(ctx context.Context, options ...ListRecordOption) iter.Seq2[*ConsumerRecord, error] {
-	owned := slices.Clone(options)
+	owned := calls.Translate(options, listRecordCalls)
 	return func(yield func(*ConsumerRecord, error) bool) {
 		fail := func(err error) { yield(nil, request.Wrap("ListRecords", kind, err)) }
 		id := ""
@@ -61,7 +62,7 @@ func (s *SecretScope) ListRecords(ctx context.Context, options ...ListRecordOpti
 			ownRecordConfig(config)
 			return nil
 		}
-		prepared := make([]ListRecordOption, len(owned))
+		prepared := make([]request.Option[ListRecordOpts], len(owned))
 		for i, option := range owned {
 			apply := option
 			prepared[i] = func(config *request.Config[ListRecordOpts]) error {

@@ -16,8 +16,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordBasePath`
 
 - Scalar ID/no recognized attrs performs no PUT/GET and keeps seed without HTTP receipt; id itself is not dirty.

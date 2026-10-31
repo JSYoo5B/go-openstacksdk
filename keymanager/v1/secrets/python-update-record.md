@@ -17,8 +17,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordBasePath`
 
 - secrets.API.Update sends PUT secrets/{id} with the raw payload as body and UpdateOpts.ContentType as the Content-Type header, accepts only 204 and turns 200 into an error.

@@ -9,7 +9,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
-	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -70,7 +70,7 @@ func TestConnectionKeyManagerSecretFetchSharedClientAndLiveToken(t *testing.T) {
 	client.ResourceBase = cloud.Server.URL + "/reverse/barbican/v1/"
 	client.MoreHeaders = map[string]string{"X-SDK-Source": "shared"}
 	cloud.Provider.SetToken("metadata-token")
-	value, err := service.Secrets.Fetch(context.Background(), resource.ID("requested"), secrets.WithFetchHeader("X-Trace", "fetch"))
+	value, err := service.Secrets.Fetch(context.Background(), resource.ID("requested"), request.Header("X-Trace", "fetch"))
 	if err != nil || value == nil {
 		t.Fatal(value, err)
 	}

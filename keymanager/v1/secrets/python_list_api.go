@@ -6,9 +6,9 @@ import (
 	"errors"
 	"iter"
 	"net/http"
-	"slices"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 
@@ -52,7 +52,7 @@ func recordListMarker(value *resource.RawResource) (string, error) {
 // and counts raw rows before Body filtering. No member or payload GET is added.
 // Returned RequestID is empty: references are passive values, not fetch routes.
 func (a *API) ListRecords(ctx context.Context, options ...RecordListOption) iter.Seq2[*FoundSecretRecord, error] {
-	ownedOptions := slices.Clone(options)
+	ownedOptions := calls.Translate(options, recordListCalls)
 	return func(yield func(*FoundSecretRecord, error) bool) {
 		wrap := func(err error) error { return request.Wrap("ListRecords", "secrets", cloudread.ContextError(ctx, err)) }
 		fail := func(err error) { yield(nil, wrap(err)) }

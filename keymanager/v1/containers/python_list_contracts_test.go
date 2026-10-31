@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -103,7 +104,7 @@ func TestPythonContainerListRecordsQueryClassificationAndRawCap(t *testing.T) {
 		t.Fatal("wrong declared server query", requested)
 	}
 	*calls = nil
-	values, err = api.AllRecords(context.Background(), option, containers.WithRecordListMaxItems(1))
+	values, err = api.AllRecords(context.Background(), option, request.MaxItems(1))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("cap counted matches instead of raw rows", values, err, *calls)
 	}
@@ -118,7 +119,7 @@ func TestPythonContainerListRecordsConstructorControlsCapsAndSelf(t *testing.T) 
 			t.Run(key+"/"+raw, func(t *testing.T) {
 				body := `{"containers":[{"id":"first"},{"id":"second","` + key + `":` + raw + `}]}`
 				api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeContainerWire(200, body), nil })
-				values, err := api.AllRecords(context.Background(), containers.WithRecordListMaxItems(1))
+				values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 				if err != nil || len(values) != 1 || len(*calls) != 1 {
 					t.Fatal("cap consumed trailing collision", values, err, *calls)
 				}
@@ -142,7 +143,7 @@ func TestPythonContainerListRecordsConstructorControlsCapsAndSelf(t *testing.T) 
 func TestPythonContainerListRecordsRawCapsBeforeDescriptorAndLatePageErrors(t *testing.T) {
 	body := `{"containers":[{"id":"first"},{"id":"second","container_ref":"relative"}],"next":"?offset=2"}`
 	api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeContainerWire(200, body), nil })
-	values, err := api.AllRecords(context.Background(), containers.WithRecordListMaxItems(1))
+	values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(values, err, *calls)
 	}
@@ -192,14 +193,14 @@ func TestPythonContainerListRecordsOffsetBodyHTTPLinkAndMarkerPaging(t *testing.
 			})
 			var options []containers.RecordListOption
 			if mode == "marker-short" {
-				options = append(options, containers.WithRecordListQuery("limit", 2))
+				options = append(options, request.Query("limit", 2))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			if err != nil || len(values) != 1 || len(*calls) != 2 {
 				t.Fatal(values, err, *calls)
 			}
 			*calls = nil
-			values, err = api.AllRecords(context.Background(), append(options, containers.WithRecordListPaginated(false))...)
+			values, err = api.AllRecords(context.Background(), append(options, request.Paginated(false))...)
 			if err != nil || len(values) != 1 || len(*calls) != 1 {
 				t.Fatal(values, err, *calls)
 			}
@@ -234,7 +235,7 @@ func TestPythonContainerListRecordsContinuationScopeAndCycles(t *testing.T) {
 			api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeContainerWire(200, string(body)), nil })
 			options := []containers.RecordListOption{}
 			if next == "?marker=same" {
-				options = append(options, containers.WithRecordListQuery("marker", "same"))
+				options = append(options, request.Query("marker", "same"))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			var proof *resource.ResponseError
@@ -252,10 +253,10 @@ func TestPythonContainerListRecordsLazyOwnedHeadersVersionAndPreflight(t *testin
 		return nativeContainerWire(200, `{"containers":[]}`), nil
 	})
 	headers := map[string]string{"accept": "application/custom", "X-Selected": "owned"}
-	option := containers.WithRecordListHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Selected"] = "changed"
 	var callbacks int
-	stream := api.ListRecords(context.Background(), option, containers.WithRecordListMicroversion("1.1"), func(c *containers.RecordListOpts) error { callbacks++; return nil })
+	stream := api.ListRecords(context.Background(), option, request.Microversion("1.1"), request.Custom(func(c *containers.RecordListOpts) error { callbacks++; return nil }))
 	if len(*calls) != 0 || callbacks != 0 {
 		t.Fatal("eager iterator")
 	}
@@ -267,7 +268,7 @@ func TestPythonContainerListRecordsLazyOwnedHeadersVersionAndPreflight(t *testin
 	if len(*calls) != 1 || callbacks != 1 || api.RawClient().Microversion != "" {
 		t.Fatal(*calls, callbacks, api.RawClient())
 	}
-	for _, option := range []containers.RecordListOption{nil, containers.WithRecordListMaxItems(-1), containers.WithRecordListQuery("headers", nil), containers.WithRecordListQuery("limit", -1), containers.WithRecordListHeaders(map[string]string{"X-Auth-Token": "forbidden"})} {
+	for _, option := range []containers.RecordListOption{nil, request.MaxItems(-1), request.Query("headers", nil), request.Query("limit", -1), request.Headers(map[string]string{"X-Auth-Token": "forbidden"})} {
 		*calls = nil
 		values, err := api.AllRecords(context.Background(), option)
 		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -277,7 +278,7 @@ func TestPythonContainerListRecordsLazyOwnedHeadersVersionAndPreflight(t *testin
 	*calls = nil
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("option cancellation")
-	values, err := api.AllRecords(ctx, func(c *containers.RecordListOpts) error { cancel(cause); return nil })
+	values, err := api.AllRecords(ctx, request.Custom(func(c *containers.RecordListOpts) error { cancel(cause); return nil }))
 	if values != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
 		t.Fatal(values, err, *calls)
 	}

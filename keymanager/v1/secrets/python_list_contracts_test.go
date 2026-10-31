@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -106,7 +107,7 @@ func TestPythonSecretListRecordsQueryClassificationAndRawCap(t *testing.T) {
 		t.Fatal("wrong declared server query", requested)
 	}
 	*calls = nil
-	values, err = api.AllRecords(context.Background(), option, secrets.WithRecordListMaxItems(1))
+	values, err = api.AllRecords(context.Background(), option, request.MaxItems(1))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("cap counted matches instead of raw rows", values, err, *calls)
 	}
@@ -121,7 +122,7 @@ func TestPythonSecretListRecordsConstructorControlsCapsAndSelf(t *testing.T) {
 			t.Run(key+"/"+raw, func(t *testing.T) {
 				body := `{"secrets":[{"id":"first"},{"id":"second","` + key + `":` + raw + `}]}`
 				api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeSecretWire(200, body), nil })
-				values, err := api.AllRecords(context.Background(), secrets.WithRecordListMaxItems(1))
+				values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 				if err != nil || len(values) != 1 || len(*calls) != 1 {
 					t.Fatal("cap consumed trailing collision", values, err, *calls)
 				}
@@ -145,7 +146,7 @@ func TestPythonSecretListRecordsConstructorControlsCapsAndSelf(t *testing.T) {
 func TestPythonSecretListRecordsRawCapsBeforeDescriptorAndLatePageErrors(t *testing.T) {
 	body := `{"secrets":[{"id":"first"},{"id":"second","secret_ref":"relative"}],"next":"?offset=2"}`
 	api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeSecretWire(200, body), nil })
-	values, err := api.AllRecords(context.Background(), secrets.WithRecordListMaxItems(1))
+	values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(values, err, *calls)
 	}
@@ -195,14 +196,14 @@ func TestPythonSecretListRecordsOffsetBodyHTTPLinkAndMarkerPaging(t *testing.T) 
 			})
 			var options []secrets.RecordListOption
 			if mode == "marker-short" {
-				options = append(options, secrets.WithRecordListQuery("limit", 2))
+				options = append(options, request.Query("limit", 2))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			if err != nil || len(values) != 1 || len(*calls) != 2 {
 				t.Fatal(values, err, *calls)
 			}
 			*calls = nil
-			values, err = api.AllRecords(context.Background(), append(options, secrets.WithRecordListPaginated(false))...)
+			values, err = api.AllRecords(context.Background(), append(options, request.Paginated(false))...)
 			if err != nil || len(values) != 1 || len(*calls) != 1 {
 				t.Fatal(values, err, *calls)
 			}
@@ -237,7 +238,7 @@ func TestPythonSecretListRecordsContinuationScopeAndCycles(t *testing.T) {
 			api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeSecretWire(200, string(body)), nil })
 			options := []secrets.RecordListOption{}
 			if next == "?marker=same" {
-				options = append(options, secrets.WithRecordListQuery("marker", "same"))
+				options = append(options, request.Query("marker", "same"))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			var proof *resource.ResponseError
@@ -255,10 +256,10 @@ func TestPythonSecretListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T
 		return nativeSecretWire(200, `{"secrets":[]}`), nil
 	})
 	headers := map[string]string{"accept": "application/custom", "X-Selected": "owned"}
-	option := secrets.WithRecordListHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Selected"] = "changed"
 	var callbacks int
-	stream := api.ListRecords(context.Background(), option, secrets.WithRecordListMicroversion("1.1"), func(c *secrets.RecordListOpts) error { callbacks++; return nil })
+	stream := api.ListRecords(context.Background(), option, request.Microversion("1.1"), request.Custom(func(c *secrets.RecordListOpts) error { callbacks++; return nil }))
 	if len(*calls) != 0 || callbacks != 0 {
 		t.Fatal("eager iterator")
 	}
@@ -270,7 +271,7 @@ func TestPythonSecretListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T
 	if len(*calls) != 1 || callbacks != 1 || api.RawClient().Microversion != "" {
 		t.Fatal(*calls, callbacks, api.RawClient())
 	}
-	for _, option := range []secrets.RecordListOption{nil, secrets.WithRecordListMaxItems(-1), secrets.WithRecordListQuery("headers", nil), secrets.WithRecordListQuery("limit", -1), secrets.WithRecordListHeaders(map[string]string{"X-Auth-Token": "forbidden"})} {
+	for _, option := range []secrets.RecordListOption{nil, request.MaxItems(-1), request.Query("headers", nil), request.Query("limit", -1), request.Headers(map[string]string{"X-Auth-Token": "forbidden"})} {
 		*calls = nil
 		values, err := api.AllRecords(context.Background(), option)
 		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -280,7 +281,7 @@ func TestPythonSecretListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T
 	*calls = nil
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("option cancellation")
-	values, err := api.AllRecords(ctx, func(c *secrets.RecordListOpts) error { cancel(cause); return nil })
+	values, err := api.AllRecords(ctx, request.Custom(func(c *secrets.RecordListOpts) error { cancel(cause); return nil }))
 	if values != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
 		t.Fatal(values, err, *calls)
 	}
@@ -382,7 +383,7 @@ func TestPythonSecretListRecordsExactDecimalNumericBoundary(t *testing.T) {
 			api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) {
 				return nativeSecretWire(200, `{"secrets":[{"id":"s1","content_types":{"count":9007199254740992}}]}`), nil
 			})
-			values, err := api.AllRecords(context.Background(), secrets.WithRecordListQuery("content_types", json.RawMessage(filter)))
+			values, err := api.AllRecords(context.Background(), request.Query("content_types", json.RawMessage(filter)))
 			want := 0
 			if filter == `{"count":9007199254740992.0}` {
 				want = 1

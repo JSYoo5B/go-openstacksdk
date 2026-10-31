@@ -46,7 +46,7 @@ non-object body (or a non-object `read`) fails with the actual response as a
 with PUT; the pinned SDK never sends PATCH here. When `ACLInput` has neither
 `Read` nor `ACLRef`, nothing is dirty and the call returns the seeded ACL
 without HTTP, as Python does. `Read` must be a JSON object. `Delete` ignores a
-clean 404 by default (`nil, nil`); `WithDeleteIgnoreMissing(false)` keeps it.
-Headers from `WithHeader`/`WithDeleteHeader` are a Go extension; the SDK-owned
+clean 404 by default (`nil, nil`); `request.IgnoreMissing(false)` keeps it.
+Headers from `request.Header` are a Go extension; the SDK-owned
 authentication and content headers are rejected. The mutable Python Resource,
 its session and cache are not reproduced.

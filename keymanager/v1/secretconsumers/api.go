@@ -12,6 +12,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -118,7 +119,7 @@ func (s *SecretScope) Create(ctx context.Context, opts ConsumerOpts, options ...
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Create", kind, err)
 	}
-	config, err := request.Apply(opts, options...)
+	config, err := calls.ApplyConfig(opts, createCalls, options...)
 	var body []byte
 	if err == nil {
 		body, err = consumerBody(config, config.Options)
@@ -143,7 +144,7 @@ func (s *SecretScope) Delete(ctx context.Context, opts ConsumerOpts, options ...
 	if err := s.validate(ctx); err != nil {
 		return nil, request.Wrap("Delete", kind, err)
 	}
-	config, err := request.Apply(DeleteOpts{ConsumerOpts: opts}, options...)
+	config, err := calls.ApplyConfig(DeleteOpts{ConsumerOpts: opts}, deleteCalls, options...)
 	var body []byte
 	if err == nil {
 		body, err = consumerBody(config, config.Options.ConsumerOpts)

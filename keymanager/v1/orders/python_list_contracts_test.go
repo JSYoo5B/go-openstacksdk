@@ -13,6 +13,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -103,7 +104,7 @@ func TestPythonOrderListRecordsQueryClassificationAndRawCap(t *testing.T) {
 		t.Fatal("wrong declared server query", requested)
 	}
 	*calls = nil
-	values, err = api.AllRecords(context.Background(), option, orders.WithRecordListMaxItems(1))
+	values, err = api.AllRecords(context.Background(), option, request.MaxItems(1))
 	if err != nil || len(values) != 0 || len(*calls) != 1 {
 		t.Fatal("cap counted matches instead of raw rows", values, err, *calls)
 	}
@@ -118,7 +119,7 @@ func TestPythonOrderListRecordsConstructorControlsCapsAndSelf(t *testing.T) {
 			t.Run(key+"/"+raw, func(t *testing.T) {
 				body := `{"orders":[{"id":"first"},{"id":"second","` + key + `":` + raw + `}]}`
 				api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeOrderWire(200, body), nil })
-				values, err := api.AllRecords(context.Background(), orders.WithRecordListMaxItems(1))
+				values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 				if err != nil || len(values) != 1 || len(*calls) != 1 {
 					t.Fatal("cap consumed trailing collision", values, err, *calls)
 				}
@@ -142,7 +143,7 @@ func TestPythonOrderListRecordsConstructorControlsCapsAndSelf(t *testing.T) {
 func TestPythonOrderListRecordsRawCapsBeforeDescriptorAndLatePageErrors(t *testing.T) {
 	body := `{"orders":[{"id":"first"},{"id":"second","order_ref":"relative"}],"next":"?offset=2"}`
 	api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeOrderWire(200, body), nil })
-	values, err := api.AllRecords(context.Background(), orders.WithRecordListMaxItems(1))
+	values, err := api.AllRecords(context.Background(), request.MaxItems(1))
 	if err != nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(values, err, *calls)
 	}
@@ -192,14 +193,14 @@ func TestPythonOrderListRecordsOffsetBodyHTTPLinkAndMarkerPaging(t *testing.T) {
 			})
 			var options []orders.RecordListOption
 			if mode == "marker-short" {
-				options = append(options, orders.WithRecordListQuery("limit", 2))
+				options = append(options, request.Query("limit", 2))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			if err != nil || len(values) != 1 || len(*calls) != 2 {
 				t.Fatal(values, err, *calls)
 			}
 			*calls = nil
-			values, err = api.AllRecords(context.Background(), append(options, orders.WithRecordListPaginated(false))...)
+			values, err = api.AllRecords(context.Background(), append(options, request.Paginated(false))...)
 			if err != nil || len(values) != 1 || len(*calls) != 1 {
 				t.Fatal(values, err, *calls)
 			}
@@ -234,7 +235,7 @@ func TestPythonOrderListRecordsContinuationScopeAndCycles(t *testing.T) {
 			api, calls := recordListAPI(t, func(req *http.Request) (*http.Response, error) { return nativeOrderWire(200, string(body)), nil })
 			options := []orders.RecordListOption{}
 			if next == "?marker=same" {
-				options = append(options, orders.WithRecordListQuery("marker", "same"))
+				options = append(options, request.Query("marker", "same"))
 			}
 			values, err := api.AllRecords(context.Background(), options...)
 			var proof *resource.ResponseError
@@ -252,10 +253,10 @@ func TestPythonOrderListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T)
 		return nativeOrderWire(200, `{"orders":[]}`), nil
 	})
 	headers := map[string]string{"accept": "application/custom", "X-Selected": "owned"}
-	option := orders.WithRecordListHeaders(headers)
+	option := request.Headers(headers)
 	headers["X-Selected"] = "changed"
 	var callbacks int
-	stream := api.ListRecords(context.Background(), option, orders.WithRecordListMicroversion("1.1"), func(c *orders.RecordListOpts) error { callbacks++; return nil })
+	stream := api.ListRecords(context.Background(), option, request.Microversion("1.1"), request.Custom(func(c *orders.RecordListOpts) error { callbacks++; return nil }))
 	if len(*calls) != 0 || callbacks != 0 {
 		t.Fatal("eager iterator")
 	}
@@ -267,7 +268,7 @@ func TestPythonOrderListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T)
 	if len(*calls) != 1 || callbacks != 1 || api.RawClient().Microversion != "" {
 		t.Fatal(*calls, callbacks, api.RawClient())
 	}
-	for _, option := range []orders.RecordListOption{nil, orders.WithRecordListMaxItems(-1), orders.WithRecordListQuery("headers", nil), orders.WithRecordListQuery("limit", -1), orders.WithRecordListHeaders(map[string]string{"X-Auth-Token": "forbidden"})} {
+	for _, option := range []orders.RecordListOption{nil, request.MaxItems(-1), request.Query("headers", nil), request.Query("limit", -1), request.Headers(map[string]string{"X-Auth-Token": "forbidden"})} {
 		*calls = nil
 		values, err := api.AllRecords(context.Background(), option)
 		if values != nil || !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
@@ -277,7 +278,7 @@ func TestPythonOrderListRecordsLazyOwnedHeadersVersionAndPreflight(t *testing.T)
 	*calls = nil
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("option cancellation")
-	values, err := api.AllRecords(ctx, func(c *orders.RecordListOpts) error { cancel(cause); return nil })
+	values, err := api.AllRecords(ctx, request.Custom(func(c *orders.RecordListOpts) error { cancel(cause); return nil }))
 	if values != nil || !errors.Is(err, context.Canceled) || !errors.Is(err, cause) || len(*calls) != 0 {
 		t.Fatal(values, err, *calls)
 	}

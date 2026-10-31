@@ -13,6 +13,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -35,7 +36,7 @@ func (a *API) Fetch(ctx context.Context, ref resource.Ref, options ...FetchOptio
 	if err := ref.Validate(); err != nil {
 		return nil, wrap(err)
 	}
-	config, err := request.Apply(FetchOpts{}, options...)
+	config, err := calls.ApplyConfig(FetchOpts{}, fetchCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, false, true)
 	}

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.New`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Pinned _proxy.py:457 uses requires_id=False. The singleton GET quotas accepts only 200 with a non-null quotas object and uses the provider token current project; no project/name lookup or implicit token-project inference from configuration is submitted. Raw missing/null/large integer/extension/case-variant values and actual metadata are preserved.
   Tests: `api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider`, `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject`.
@@ -27,7 +27,7 @@ Go API:
 
 Python/Go differences:
 
-- Go maps the input-free public getter to API.Get(ctx), using a concrete context and configured authenticated key-manager client. WithGetHeader is an additional owned Go option; it does not introduce project lookup, body/query injection, a quota identifier or a new List/Find/Wait surface.
+- Go maps the input-free public getter to API.Get(ctx), using a concrete context and configured authenticated key-manager client. request.Header is an additional owned Go option; it does not introduce project lookup, body/query injection, a quota identifier or a new List/Find/Wait surface.
 - Go deliberately requires the published HTTP200 success and a non-null quotas object envelope. Pinned Resource._translate_response at resource.py:1338-1399 unwraps quotas when present but can also consume a root object and suppresses JSON ValueError; exceptions.raise_from_response at exceptions.py:214-222 permits statuses below400. Go treats unexpected success status, wrong/missing envelope and malformed accepted JSON as errors with actual evidence rather than returning an empty or differently shaped resource.
 - Go returns independently owned raw response fields, Body/Data and Header/StatusCode rather than a mutable Python Quota Resource with dynamic descriptors, cached state or seeded-instance merges. Omitted json.RawMessage is nil and JSON null is retained as null bytes; unknown/case-variant data and exact large JSON numbers remain observable.
 - The named Python get_quota() exposes no per-call Resource.fetch session, adapter, base_path, microversion, params or skip_cache overload. Go retains its configured shared provider, source path, transport and live authentication; optional inherited GET cache and generic Resource/session lifecycle remain separately tracked SDK scope rather than incomplete declared getter inputs. No class-specific maximum-microversion negotiation is inferred from Quota.
@@ -43,7 +43,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.ProjectID`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithGetHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Pinned _proxy.py:421 extracts the project ID. InProject constructs an explicit-ID scope with zero HTTP; GET project-quotas/{escaped id} accepts only 200 with a project_quotas object. Unicode/plus IDs are safely escaped, incidental response project/id values never retarget the scope, and the original ResourceBase/current provider token remain effective.
   Tests: `api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider`, `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject`.
@@ -77,13 +77,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateContainers`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateConsumers`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateCAs`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.GetRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordOpts`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordHeader`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithRecordMicroversion`
+- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
 - PUT project-quotas/{fixed escaped id} sends one project_quotas envelope, accepts only 204 and replaces overrides: omitted fields use server defaults, empty typed options sends an empty object, and explicit 0/-1/-2/large int64 values remain present. There is no read-modify-write or automatic follow-up GET and no response-ID/token-project retargeting.
   Tests: `api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider`, `api/keymanager_quotas_test.go:TestKeyManagerQuotasReplacementPresenceAndOwnedOptions`, `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject`.
@@ -114,8 +113,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.Delete`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteIgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithDeleteHeader`
+- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
+- `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - DELETE project-quotas/{fixed escaped id} accepts204, resets configured overrides and returns error-only without an extra GET or synthesized quota. Default ignoreMissing=true suppresses actual HTTP404 only; explicit false preserves native404, while403/409/503/unexpected200 remain errors. The fixed project is independent of response/token project.
   Tests: `api/keymanager_quotas_test.go:TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider`, `api/keymanager_quotas_test.go:TestKeyManagerQuotasMissingDeleteAndNativeFailures`, `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject`.
@@ -123,7 +122,7 @@ Go API:
   Tests: `api/keymanager_quotas_test.go:TestKeyManagerQuotasMissingDeleteAndNativeFailures`, `api/keymanager_quotas_test.go:TestKeyManagerQuotasInvalidOptionsAndScopePreflight`, `api/keymanager_quotas_test.go:TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation`.
 - Connection.KeyManagerV1/KeyManager caches the authenticated key-manager facade and exposes native Secrets plus SDK-owned SecretStores and Quotas on the same ServiceClient/Provider. ResourceBase, live token rotation and configured source headers remain effective; cancellation does not perform HTTP. The independent registry advertises the actual owned APIs without inventing native quota/secret-store operations or Resources CRUD/Find/Wait capabilities.
   Tests: `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject`, `connectiontest/connection_keymanager_sdk_owned_test.go:TestConnectionKeyManagerSDKOwnedCancellationAndStrictMissing`, `internal/cmd/sdkgen/keymanager_services_test.go:TestKeyManagerSDKOwnedRegistryAndActualCapabilities`.
-- Delete sends DELETE project-quotas/{project}; by default 204 and 404 both return nil like Python ignore_missing=True, and WithDeleteIgnoreMissing(false) surfaces the 404.
+- Delete sends DELETE project-quotas/{project}; by default 204 and 404 both return nil like Python ignore_missing=True, and request.IgnoreMissing(false) surfaces the 404.
   Tests: `keymanager/v1/quotas/python_rejudge_test.go:TestPythonRejudgeKeyManagerProjectQuotaDeleteRequest`.
 
 Python/Go differences:
@@ -230,11 +229,11 @@ func Configure(ctx context.Context, client *gophercloud.ServiceClient, projectID
     accepted, err := project.Update(ctx, quotas.UpdateOpts{
         Secrets: request.Present[int64](100),
     }, quotas.WithUpdateOrders(0), quotas.WithUpdateContainers(-1),
-        quotas.WithUpdateHeader("X-Request-ID", "quota-change"))
+        request.Header("X-Request-ID", "quota-change"))
     if err != nil { return err }
     fmt.Println(accepted.StatusCode, accepted.Header.Get("X-Request-ID"))
 
-    return project.Delete(ctx, quotas.WithDeleteIgnoreMissing(false))
+    return project.Delete(ctx, request.IgnoreMissing(false))
 }
 ```
 

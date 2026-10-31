@@ -57,6 +57,7 @@ import (
 
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -67,14 +68,14 @@ func Associations(ctx context.Context, client *gophercloud.ServiceClient, secret
     }
     return scope.All(ctx,
         secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 10, Offset: 0}),
-        secretconsumers.WithListMaxItems(25),
+        request.MaxItems(25),
     )
 }
 ```
 
-`Limit` and `Offset` request server paging. Zero omits the field and preserves server defaults of limit10/offset0; Go does not guess or enforce the server's maximum limit100. `WithListQuery` supplies explicit wire extensions, repeated values through an owned custom Config, and explicit empty values. Positive concrete limit/offset plus the same raw key is rejected even if the values agree. The server must validate extension queries; Go does not claim that arbitrary wire fields are supported by Barbican.
+`Limit` and `Offset` request server paging. Zero omits the field and preserves server defaults of limit10/offset0; Go does not guess or enforce the server's maximum limit100. `request.Query` supplies explicit wire extensions, repeated values (a `[]string` value), and explicit empty values. Positive concrete limit/offset plus the same raw key is rejected even if the values agree. The server must validate extension queries; Go does not claim that arbitrary wire fields are supported by Barbican.
 
-`List` is lazy and reusable. `WithListOptions` owns pointer values at creation and each application; the iterator owns the options slice. `MaxItems` is a local raw-row cap and emits no limit hint. `WithListPaginated(false)` reads one page. A consumer break, cap or empty page stops before continuation parsing or further HTTP. `All` discards partial rows on terminal errors.
+`List` is lazy and reusable. `WithListOptions` owns pointer values at creation and each application; the iterator owns the options slice. `MaxItems` is a local raw-row cap and emits no limit hint. `request.Paginated(false)` reads one page. A consumer break, cap or empty page stops before continuation parsing or further HTTP. `All` discards partial rows on terminal errors.
 
 Only advertised pagination is followed; there is no consumer UUID/ID marker or synthetic marker fallback. An advertised offset must increase on the same service origin and exact fixed-parent collection path. An omitted initial offset means0. The first continuation may introduce the server's positive limit when the caller omitted it; afterward that limit and other query values remain fixed. Changed parents/filters, backward offsets and cycles fail. These are explicit guarded Go policies. Accepted decode/read failures retain original whole-response body/header/status and never trigger a resend.
 

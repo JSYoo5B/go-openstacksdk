@@ -9,7 +9,7 @@ This guide compares openstacksdk commit
 | Python | Go |
 | --- | --- |
 | `find_secret(name_or_id)` | `Secrets.FindRecord(ctx, nameOrID)` |
-| `ignore_missing=False` | `secrets.WithFindRecordIgnoreMissing(false)` |
+| `ignore_missing=False` | `request.IgnoreMissing(false)` |
 | Generic Resource catch policy | SDK default clean HTTP400/403/404 fallback |
 | Explicit Go fallback policy | `secrets.WithFindRecordFallback(resource.FindFallbackNotFoundOnly)` or `FindFallbackNever` |
 | `secret.to_dict()` | `json.MarshalIndent(result.Resource, "", "  ")` |
@@ -61,7 +61,7 @@ import (
     "time"
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
     keyManager, err := conn.KeyManagerV1(ctx)
     if err != nil { log.Fatal(err) }
     secret, err := keyManager.Secrets.FindRecord(ctx, *identity,
-        secrets.WithFindRecordIgnoreMissing(!*strict))
+        request.IgnoreMissing(!*strict))
     if err != nil {
         // An optional returned receipt has Resource=nil on failure.
         // Inspect errors.As for native/accepted HTTP evidence as needed.

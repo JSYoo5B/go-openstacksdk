@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
@@ -20,37 +21,44 @@ type ConsumerOpts struct {
 	ResourceID   string `json:"resource_id"`
 }
 
-type CreateOption = request.Option[ConsumerOpts]
+// CreateOption is one option of Create: WithCreateOptions, request.Field (a
+// body extension; SDK-owned names are rejected), request.Header or
+// request.Custom over *request.Config[ConsumerOpts]. Other shared calls fail
+// with resource.ErrInvalidOption before HTTP.
+type CreateOption = request.WriteCall
 type DeleteOpts struct {
 	ConsumerOpts
 	IgnoreMissing *bool `json:"-"`
 }
-type DeleteOption = request.Option[DeleteOpts]
 
-func WithCreateOptions(value ConsumerOpts) CreateOption { return request.WithOptions(value) }
-func WithCreateField(key string, value any) CreateOption {
-	return request.WithField[ConsumerOpts](key, value)
-}
-func WithCreateHeader(key, value string) CreateOption {
-	return request.WithHeader[ConsumerOpts](key, value)
+// DeleteOption is one option of Delete: WithDeleteOptions, WithDeleteField,
+// request.IgnoreMissing (nil means true), request.Header or request.Custom
+// over *request.Config[DeleteOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type DeleteOption = request.DeleteCall
+
+var (
+	createCalls = calls.Spec[request.Config[ConsumerOpts]]{Field: calls.ConfigField[ConsumerOpts], Header: calls.ConfigHeader[ConsumerOpts]}
+	deleteCalls = calls.Spec[request.Config[DeleteOpts]]{
+		Header:        calls.ConfigHeader[DeleteOpts],
+		IgnoreMissing: calls.Pointer(func(c *request.Config[DeleteOpts]) **bool { return &c.Options.IgnoreMissing }),
+	}
+)
+
+func WithCreateOptions(value ConsumerOpts) CreateOption {
+	return request.Custom(request.WithOptions(value))
 }
 
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	owned := copyDelete(value)
-	return func(config *request.Config[DeleteOpts]) error { config.Options = copyDelete(owned); return nil }
+	return request.Custom(func(config *request.Config[DeleteOpts]) error { config.Options = copyDelete(owned); return nil })
 }
-func WithDeleteIgnoreMissing(value bool) DeleteOption {
-	return func(config *request.Config[DeleteOpts]) error {
-		owned := value
-		config.Options.IgnoreMissing = &owned
-		return nil
-	}
-}
+
+// WithDeleteField adds one JSON body attribute to the DELETE request. It is
+// operation-specific: the shared Field call is not accepted by delete
+// operations.
 func WithDeleteField(key string, value any) DeleteOption {
-	return request.WithField[DeleteOpts](key, value)
-}
-func WithDeleteHeader(key, value string) DeleteOption {
-	return request.WithHeader[DeleteOpts](key, value)
+	return request.Custom(request.WithField[DeleteOpts](key, value))
 }
 
 func copyDelete(value DeleteOpts) DeleteOpts {
@@ -93,7 +101,20 @@ type ListOpts struct {
 	MaxItems  int
 	Paginated *bool
 }
-type ListOption = request.Option[ListOpts]
+
+// ListOption is one option of List and All: WithListOptions, request.Query
+// with a string or []string value, request.MaxItems, request.Paginated or
+// request.Custom over *request.Config[ListOpts]. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
+type ListOption = request.ListCall
+
+var listCalls = calls.Spec[request.Config[ListOpts]]{
+	Query: calls.ConfigQuery[ListOpts],
+	Paging: calls.Paging[request.Config[ListOpts]]{
+		MaxItems:  calls.Value(func(c *request.Config[ListOpts]) *int { return &c.Options.MaxItems }),
+		Paginated: calls.Pointer(func(c *request.Config[ListOpts]) **bool { return &c.Options.Paginated }),
+	},
+}
 
 func copyList(value ListOpts) ListOpts {
 	if value.Paginated != nil {
@@ -104,22 +125,11 @@ func copyList(value ListOpts) ListOpts {
 }
 func WithListOptions(value ListOpts) ListOption {
 	owned := copyList(value)
-	return func(config *request.Config[ListOpts]) error { config.Options = copyList(owned); return nil }
-}
-func WithListQuery(key, value string) ListOption { return request.WithQuery[ListOpts](key, value) }
-func WithListMaxItems(value int) ListOption {
-	return func(config *request.Config[ListOpts]) error { config.Options.MaxItems = value; return nil }
-}
-func WithListPaginated(value bool) ListOption {
-	return func(config *request.Config[ListOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
-		return nil
-	}
+	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options = copyList(owned); return nil })
 }
 
 func prepareList(options []ListOption) (url.Values, rest.ListControl, error) {
-	config, err := request.Apply(ListOpts{}, options...)
+	config, err := calls.ApplyConfig(ListOpts{}, listCalls, options...)
 	if err == nil {
 		err = request.ValidateCapabilities(config, false, true, false)
 	}

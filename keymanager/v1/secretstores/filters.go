@@ -33,7 +33,7 @@ func capturedListFilters(arguments map[string]any) ([]resource.ListOption, error
 }
 
 func listFilterOption(option resource.ListOption) ListOption {
-	return func(config *request.Config[ListOpts]) error {
+	return request.Custom(func(config *request.Config[ListOpts]) error {
 		options, err := capturedListFilters(config.Arguments)
 		if err != nil {
 			return err
@@ -43,7 +43,7 @@ func listFilterOption(option resource.ListOption) ListOption {
 		}
 		config.Arguments[listFiltersArgument] = listFilterCapture{options: append(options, option)}
 		return nil
-	}
+	})
 }
 
 // WithListFilter adds a declared Python SecretStore attribute. Query attributes
@@ -55,7 +55,7 @@ func WithListFilter(field string, value any) ListOption {
 }
 
 // WithListFilters replaces the complete semantic filter set; nil/empty clears
-// it. Typed ListOpts and raw WithListQuery remain independent. A semantic query
+// it. Typed ListOpts and raw request.Query remain independent. A semantic query
 // conflicts with an existing typed/raw value for the same wire key, even if equal.
 func WithListFilters(values map[string]any) ListOption {
 	return listFilterOption(resource.WithFilters(values))

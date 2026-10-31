@@ -8,8 +8,8 @@ import (
 	"fmt"
 	"maps"
 	"net/http"
-	"slices"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/neutronfind"
 	"github.com/JSYoo5B/go-openstacksdk/request"
@@ -50,7 +50,19 @@ type RecordOpts struct {
 	Headers      map[string]string
 	Microversion *string
 }
-type RecordOption func(*RecordOpts) error
+
+// RecordOption is one option of GetRecord and UpdateRecord: WithRecordOpts,
+// WithRecordAttribute, request.Custom over *RecordOpts, request.Header (adds
+// one header) or request.Microversion. Other shared calls fail with
+// resource.ErrInvalidOption before HTTP. GetRecord rejects attributes.
+type RecordOption = request.GetCall
+
+var recordCalls = recordSpec()
+
+func recordSpec() calls.Spec[RecordOpts] {
+	header, _ := calls.HeaderMap(func(c *RecordOpts) *map[string]string { return &c.Headers })
+	return calls.Spec[RecordOpts]{Header: header, Microversion: calls.Pointer(func(c *RecordOpts) **string { return &c.Microversion })}
+}
 
 func cloneRecordOpts(v RecordOpts) RecordOpts {
 	v.Headers = maps.Clone(v.Headers)
@@ -66,19 +78,7 @@ func cloneRecordOpts(v RecordOpts) RecordOpts {
 }
 func WithRecordOpts(v RecordOpts) RecordOption {
 	owned := cloneRecordOpts(v)
-	return func(c *RecordOpts) error { *c = cloneRecordOpts(owned); return nil }
-}
-func WithRecordHeader(key, value string) RecordOption {
-	return func(c *RecordOpts) error {
-		if c.Headers == nil {
-			c.Headers = map[string]string{}
-		}
-		c.Headers[key] = value
-		return nil
-	}
-}
-func WithRecordMicroversion(value string) RecordOption {
-	return func(c *RecordOpts) error { x := value; c.Microversion = &x; return nil }
+	return request.Custom(func(c *RecordOpts) error { *c = cloneRecordOpts(owned); return nil })
 }
 func projectQuotaKnown(key string) bool {
 	switch key {
@@ -99,16 +99,16 @@ func recordReserved(key string) bool {
 // names are ignored before encoding; constructor collisions fail on application.
 func WithRecordAttribute(key string, value any) RecordOption {
 	if recordReserved(key) {
-		return func(*RecordOpts) error {
+		return request.Custom(func(*RecordOpts) error {
 			return fmt.Errorf("%w: %q collides with the seeded ProjectQuota constructor", resource.ErrInvalidOption, key)
-		}
+		})
 	}
 	if !projectQuotaKnown(key) {
-		return func(*RecordOpts) error { return nil }
+		return request.Custom(func(*RecordOpts) error { return nil })
 	}
 	raw, err := json.Marshal(value)
 	owned := bytes.Clone(raw)
-	return func(c *RecordOpts) error {
+	return request.Custom(func(c *RecordOpts) error {
 		if err != nil {
 			return err
 		}
@@ -117,7 +117,7 @@ func WithRecordAttribute(key string, value any) RecordOption {
 		}
 		c.Attributes[key] = bytes.Clone(owned)
 		return nil
-	}
+	})
 }
 func projectQuotaProfile() neutronfind.Profile {
 	fields := []neutronfind.Descriptor{}
@@ -147,7 +147,7 @@ func (s *ProjectScope) recordPolicy(ctx context.Context, options []RecordOption)
 		return nil, RecordOpts{}, "", err
 	}
 	cfg := RecordOpts{}
-	for _, apply := range slices.Clone(options) {
+	for _, apply := range calls.Translate(options, recordCalls) {
 		if apply == nil {
 			return nil, cfg, id, fmt.Errorf("%w: nil record option", resource.ErrInvalidOption)
 		}
