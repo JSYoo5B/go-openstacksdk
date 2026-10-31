@@ -4,19 +4,13 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
-	"fmt"
-	"os"
 	"slices"
 	"sync"
 
 	"github.com/JSYoo5B/go-openstacksdk/compute"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
-	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
-	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
+	"github.com/JSYoo5B/go-openstacksdk/internal/cloudinventory"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudserver"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-	"gopkg.in/yaml.v2"
 )
 
 // CloudNames returns the cloud names of the first clouds.yaml found, in file
@@ -29,33 +23,7 @@ func CloudNames(options ...ConnectionOption) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	locations := o.cloudFiles
-	if len(locations) == 0 {
-		if path := os.Getenv("OS_CLIENT_CONFIG_FILE"); path != "" {
-			locations = []string{path}
-		} else if locations, err = cloudconfig.SearchPaths("clouds.yaml"); err != nil {
-			return nil, err
-		}
-	}
-	data, _, err := cloudconfig.ReadFirstFile(locations)
-	if err != nil {
-		return nil, err
-	}
-	var document struct {
-		Clouds yaml.MapSlice `yaml:"clouds"`
-	}
-	if err := yaml.Unmarshal(data, &document); err != nil {
-		return nil, fmt.Errorf("parse clouds.yaml: %w", err)
-	}
-	names := make([]string, 0, len(document.Clouds))
-	for _, item := range document.Clouds {
-		name, ok := item.Key.(string)
-		if !ok {
-			return nil, invalid("cloud name %v is not a string", item.Key)
-		}
-		names = append(names, name)
-	}
-	return names, nil
+	return cloudinventory.CloudNames(o.cloudFiles)
 }
 
 // InventoryCloud is one member of an Inventory. Supply a ready Connection, or a
@@ -246,31 +214,49 @@ func applyInventoryOptions(options []InventoryOption) (InventoryOpts, error) {
 	return opts, nil
 }
 
-func (i *Inventory) listCloud(ctx context.Context, e *inventoryEntry, opts InventoryOpts) ([]InventoryHost, error) {
-	conn, err := e.connection(ctx)
-	if err != nil {
-		return nil, err
+// dependencies exposes the inventory clouds to the cloudinventory helpers;
+// Servers connects a lazy cloud on first use.
+func (i *Inventory) dependencies() cloudinventory.Dependencies {
+	names := make([]string, len(i.entries))
+	for index, entry := range i.entries {
+		names[index] = entry.name
 	}
-	// Python list_hosts calls cloud.list_servers(detailed=expand,
-	// all_projects=all_projects), which is Proxy.servers(all_projects=...)
-	// over GET /servers/detail followed by _expand_server for every row.
-	cfg := CloudServerReadOpts{
-		List:     []servers.RecordFindOption{servers.WithRecordFindAllProjects(opts.AllProjects)},
-		Bare:     opts.Expansion == InventoryExpandNone,
-		Detailed: opts.Expansion == InventoryExpandHostvars,
+	return cloudinventory.Dependencies{
+		Clouds: names,
+		Servers: func(ctx context.Context, index int) (cloudserver.Dependencies, error) {
+			conn, err := i.entries[index].connection(ctx)
+			if err != nil {
+				return cloudserver.Dependencies{}, err
+			}
+			return conn.cloudServerDependencies(), nil
+		},
 	}
-	if opts.Private {
-		cfg.Address = append(cfg.Address, compute.WithPrivateCloud(true))
+}
+
+func (o InventoryOpts) internal() cloudinventory.Opts {
+	return cloudinventory.Opts{AllProjects: o.AllProjects, ContinueOnFailed: o.ContinueOnFailed, Filters: o.Filters, Expansion: cloudinventory.Expansion(o.Expansion), Private: o.Private}
+}
+
+func inventoryHosts(hosts []cloudinventory.Host) []InventoryHost {
+	if hosts == nil {
+		return nil
 	}
-	results, err := cloudserver.ListExpanded(ctx, conn.cloudServerDependencies(), cfg)
-	if err != nil {
-		return nil, err
+	converted := make([]InventoryHost, len(hosts))
+	for index, host := range hosts {
+		converted[index] = InventoryHost(host)
 	}
-	hosts := make([]InventoryHost, len(results))
-	for index, result := range results {
-		hosts[index] = InventoryHost{Cloud: e.name, Server: result.Server, Record: result.Record, Interfaces: result.Interfaces, Hostvars: result.Hostvars}
+	return converted
+}
+
+func inventoryFailures(failures []cloudinventory.Failure) []InventoryFailure {
+	if failures == nil {
+		return nil
 	}
-	return hosts, nil
+	converted := make([]InventoryFailure, len(failures))
+	for index, failure := range failures {
+		converted[index] = InventoryFailure(failure)
+	}
+	return converted
 }
 
 // ListHosts lists the detailed servers of every cloud in order. Each server
@@ -287,25 +273,8 @@ func (i *Inventory) ListHosts(ctx context.Context, options ...InventoryOption) (
 	if i == nil {
 		return nil, invalid("inventory is required")
 	}
-	result := &InventoryHosts{}
-	for _, entry := range i.entries {
-		if err := ctx.Err(); err != nil {
-			return result, fmt.Errorf("list hosts: %w", err)
-		}
-		hosts, err := i.listCloud(ctx, entry, opts)
-		if err != nil {
-			if ctxErr := ctx.Err(); ctxErr != nil {
-				return result, fmt.Errorf("list hosts of %s: %w", entry.name, errors.Join(err, ctxErr))
-			}
-			if !opts.ContinueOnFailed {
-				return result, fmt.Errorf("list hosts of %s: %w", entry.name, err)
-			}
-			result.Failures = append(result.Failures, InventoryFailure{Cloud: entry.name, Err: err})
-			continue
-		}
-		result.Hosts = append(result.Hosts, hosts...)
-	}
-	return result, nil
+	listed, err := cloudinventory.ListHosts(ctx, i.dependencies(), opts.internal())
+	return &InventoryHosts{Hosts: inventoryHosts(listed.Hosts), Failures: inventoryFailures(listed.Failures)}, err
 }
 
 // InventorySearch is the result of SearchHosts. Expression is true when a
@@ -327,62 +296,38 @@ func (i *Inventory) SearchHosts(ctx context.Context, nameOrID string, options ..
 	if err != nil {
 		return nil, err
 	}
-	listed, err := i.ListHosts(ctx, options...)
+	if i == nil {
+		return nil, invalid("inventory is required")
+	}
+	found, err := cloudinventory.SearchHosts(ctx, i.dependencies(), nameOrID, opts.internal())
 	if err != nil {
 		return nil, err
 	}
-	rows := make([]json.RawMessage, len(listed.Hosts))
-	for index, host := range listed.Hosts {
-		if rows[index], err = InventoryHostView(host); err != nil {
-			return nil, fmt.Errorf("project server row: %w", err)
-		}
-	}
-	selected, err := cloudfilter.Select(rows, nameOrID, opts.Filters, nil)
-	if err != nil {
-		return nil, errors.Join(invalid("local host search"), err)
-	}
-	result := &InventorySearch{Value: bytes.Clone(selected.Value), Expression: selected.Expression, Failures: listed.Failures}
-	if !selected.Expression {
-		for _, index := range selected.Indices {
-			result.Hosts = append(result.Hosts, listed.Hosts[index])
-		}
-	}
-	return result, nil
+	return &InventorySearch{Value: found.Value, Expression: found.Expression, Hosts: inventoryHosts(found.Hosts), Failures: inventoryFailures(found.Failures)}, nil
 }
 
 // InventoryHostView is the JSON row SearchHosts filters: the hostvars
 // mapping when expanded with hostvars, else the server JSON with the
 // interface fields set over it, else the bare server JSON.
 func InventoryHostView(host InventoryHost) (json.RawMessage, error) {
-	if host.Hostvars != nil {
-		return json.Marshal(host.Hostvars)
-	}
-	if host.Interfaces == nil {
-		return json.Marshal(host.Server)
-	}
-	return CloudServerResultView(&CloudServerResult{Server: host.Server, Interfaces: host.Interfaces})
+	return cloudinventory.HostView(cloudinventory.Host(host))
 }
 
 // GetHost returns the single host selected by SearchHosts, nil when nothing
 // matches, and a resource.AmbiguousError when several do. A string filter that
 // yields an expression value instead of rows is rejected.
 func (i *Inventory) GetHost(ctx context.Context, nameOrID string, options ...InventoryOption) (*InventoryHost, error) {
-	found, err := i.SearchHosts(ctx, nameOrID, options...)
+	opts, err := applyInventoryOptions(options)
 	if err != nil {
 		return nil, err
 	}
-	if found.Expression {
-		return nil, invalid("a JMESPath filter result is not a host record")
+	if i == nil {
+		return nil, invalid("inventory is required")
 	}
-	switch len(found.Hosts) {
-	case 0:
-		return nil, nil
-	case 1:
-		return &found.Hosts[0], nil
+	host, err := cloudinventory.GetHost(ctx, i.dependencies(), nameOrID, opts.internal())
+	if host == nil || err != nil {
+		return nil, err
 	}
-	ids := make([]string, len(found.Hosts))
-	for index, host := range found.Hosts {
-		ids[index] = host.Server.ID
-	}
-	return nil, &resource.AmbiguousError{Resource: "hosts", Name: nameOrID, IDs: ids}
+	converted := InventoryHost(*host)
+	return &converted, nil
 }
