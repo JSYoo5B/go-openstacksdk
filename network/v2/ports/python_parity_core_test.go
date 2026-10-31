@@ -3,12 +3,10 @@ package ports_test
 import (
 	"context"
 	"errors"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"slices"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -18,26 +16,16 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type pythonParityCorePortTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonParityCorePortTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonParityCorePortCall struct{ method, path, query string }
 
 func pythonParityCorePortAPI(t *testing.T, calls *[]pythonParityCorePortCall, reply func(*http.Request) (int, string)) (*ports.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonParityCorePortTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonParityCorePortCall{req.Method, req.URL.Path, req.URL.RawQuery})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return ports.New(client), cloud

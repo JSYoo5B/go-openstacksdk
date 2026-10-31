@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -14,23 +13,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeVersionTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeVersionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeVersionAPI(t *testing.T, endpoint string, paths *[]string, code int, body func(*http.Request) string) *apiversions.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeVersionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*paths = append(*paths, req.Method+" "+req.URL.Path+"?"+req.URL.RawQuery)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body(req))), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body(req), http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", endpoint)
 	// The version calls derive their URL from Endpoint, never from ResourceBase.
 	client.ResourceBase = cloud.Server.URL + "/unused/"

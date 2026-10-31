@@ -4,9 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,16 +13,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type zoneTransport func(*http.Request) (*http.Response, error)
-
-func (f zoneTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func zoneWire(code int, raw string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(raw)), Header: http.Header{"X-Request-Id": {"zone-actual"}}}
+	return testcloud.Response(code, raw, http.Header{"X-Request-Id": {"zone-actual"}})
 }
-func zoneAPI(t *testing.T, reply zoneTransport) (*availabilityzones.API, *gophercloud.ServiceClient) {
+func zoneAPI(t *testing.T, reply testcloud.RoundTripperFunc) (*availabilityzones.API, *gophercloud.ServiceClient) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = reply
+	cloud.SetTransport(reply)
 	client := cloud.Client("network", "/neutron/v2.0/")
 	return availabilityzones.New(client), client
 }

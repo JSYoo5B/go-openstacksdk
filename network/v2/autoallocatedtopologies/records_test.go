@@ -16,16 +16,13 @@ import (
 	tokens3 "github.com/gophercloud/gophercloud/v2/openstack/identity/v3/tokens"
 )
 
-type topoTransport func(*http.Request) (*http.Response, error)
-
-func (f topoTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 func topoWire(code int, raw string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(raw)), Header: http.Header{"X-Request-Id": {"topology-actual"}}}
+	return testcloud.Response(code, raw, http.Header{"X-Request-Id": {"topology-actual"}})
 }
-func topoAPI(t *testing.T, reply topoTransport) (*autoallocatedtopologies.API, *gophercloud.ServiceClient) {
+func topoAPI(t *testing.T, reply testcloud.RoundTripperFunc) (*autoallocatedtopologies.API, *gophercloud.ServiceClient) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = reply
+	cloud.SetTransport(reply)
 	client := cloud.Client("network", "/neutron/v2.0/")
 	return autoallocatedtopologies.New(client), client
 }

@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -15,23 +14,13 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeExtensionTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeExtensionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeExtensionAPI(t *testing.T, paths *[]string, code int, body func(*http.Request) string) *extensions.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeExtensionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*paths = append(*paths, req.Method+" "+req.URL.Path)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body(req))), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body(req), http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return extensions.New(client)

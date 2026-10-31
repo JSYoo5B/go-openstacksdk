@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativePortTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativePortTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativePortWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativePortClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +37,7 @@ func nativePortOperation(t *testing.T, err error, operation string) {
 type nativePortCall struct{ method, path, query, body string }
 
 func nativePortRecorder(cloud *testcloud.Cloud, calls *[]nativePortCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativePortTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +45,7 @@ func nativePortRecorder(cloud *testcloud.Cloud, calls *[]nativePortCall, reply f
 		}
 		*calls = append(*calls, nativePortCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativePortRow = `{"id":"id-1","network_id":"n1","name":"p","status":"ACTIVE","mac_address":"fa:16:3e:00:00:01","fixed_ips":[{"subnet_id":"sn","ip_address":"10.0.0.5"}],"security_groups":["sg"],"created_at":"2026-10-10T01:02:03Z"}`

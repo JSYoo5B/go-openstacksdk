@@ -200,7 +200,7 @@ func TestExtensionFindFetchControlsPhysicalFaultsNeverFallback(t *testing.T) {
 			if mode == "cancel" {
 				transport.onClose = func() { cancel(cause) }
 			}
-			cloud.Provider.HTTPClient.Transport = transport
+			cloud.SetTransport(transport)
 			client := cloud.Client("network", "/catalog/")
 			client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 			row, err := extensions.New(client).FindRecord(ctx, "requested", extensions.WithRecordFindQuery("requires_id", false), extensions.WithRecordFindQuery("skip_cache", true), extensions.WithRecordFindQuery("error_message", "controlled extension lookup"))

@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/url"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -17,18 +16,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeNetworkTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeNetworkTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeNetworkWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 func nativeNetworkClient(cloud *testcloud.Cloud) *gophercloud.ServiceClient {
@@ -48,7 +37,7 @@ func nativeNetworkOperation(t *testing.T, err error, operation string) {
 type nativeNetworkCall struct{ method, path, query, body string }
 
 func nativeNetworkRecorder(cloud *testcloud.Cloud, calls *[]nativeNetworkCall, reply func(*http.Request) *http.Response) {
-	cloud.Provider.HTTPClient.Transport = nativeNetworkTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -56,7 +45,7 @@ func nativeNetworkRecorder(cloud *testcloud.Cloud, calls *[]nativeNetworkCall, r
 		}
 		*calls = append(*calls, nativeNetworkCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 }
 
 const nativeNetworkRow = `{"id":"id-1","name":"net","status":"ACTIVE","subnets":["sn"],"admin_state_up":true,"shared":true,"tags":["t"],"revision_number":3,"created_at":"2026-10-10T01:02:03Z"}`

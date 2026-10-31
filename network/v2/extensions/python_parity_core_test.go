@@ -2,10 +2,8 @@ package extensions_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -13,24 +11,14 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonParityCoreExtensionTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonParityCoreExtensionTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonParityCoreExtensionAPI(t *testing.T, calls *[]string, reply func(*http.Request) (int, string)) *extensions.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonParityCoreExtensionTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, req.Method+" "+req.URL.Path+"?"+req.URL.RawQuery)
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return extensions.New(client)
