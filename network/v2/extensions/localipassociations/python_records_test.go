@@ -16,16 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonLocalIPAssociationTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonLocalIPAssociationTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonLocalIPAssociationCall struct{ method, path, query, body, accept string }
 
 const pythonLocalIPAssociationBase = "/neutron/v2.0/local_ips/lip1/port_associations"
@@ -33,7 +23,7 @@ const pythonLocalIPAssociationBase = "/neutron/v2.0/local_ips/lip1/port_associat
 func pythonLocalIPAssociationAPI(t *testing.T, calls *[]pythonLocalIPAssociationCall, reply func(*http.Request) (int, string)) *localipassociations.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonLocalIPAssociationTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -41,8 +31,8 @@ func pythonLocalIPAssociationAPI(t *testing.T, calls *[]pythonLocalIPAssociation
 		}
 		*calls = append(*calls, pythonLocalIPAssociationCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return localipassociations.New(client)

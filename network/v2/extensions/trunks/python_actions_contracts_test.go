@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -181,10 +182,10 @@ func TestPythonTrunkActionsPhysicalAcceptedAndRejectedErrorsRetainProof(t *testi
 						body.onRead = func() { client.ResourceBase += "changed/" }
 						body.onClose = func() { client.ResourceBase = original }
 					}
-					cloud.Provider.HTTPClient.Transport = nativeTrunkTransport(func(*http.Request) (*http.Response, error) {
+					cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
 						attempts++
-						return &http.Response{StatusCode: status, Header: http.Header{"X-Request-Id": {"actual"}}, Body: body}, nil
-					})
+						return testcloud.StreamResponse(status, body, http.Header{"X-Request-Id": {"actual"}}), nil
+					}))
 					var record *trunks.TrunkActionRecord
 					var err error
 					if operation == "remove" {
@@ -253,7 +254,7 @@ func TestPythonTrunkActionsCleanSourceStatusPolicyAndEscapedID(t *testing.T) {
 	}
 	// The response fixture records decoded paths; physical URL escapes exactly once.
 	var escaped string
-	api.RawClient().ProviderClient.HTTPClient.Transport = nativeTrunkTransport(func(req *http.Request) (*http.Response, error) {
+	api.RawClient().ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		escaped = req.URL.EscapedPath()
 		return nativeTrunkWire(299, `{}`), nil
 	})

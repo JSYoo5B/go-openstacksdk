@@ -11,6 +11,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -612,13 +613,13 @@ func TestPythonTrunkListRecordConcurrentSnapshotsAndPaginationTruthiness(t *test
 	var calls []nativeTrunkCall
 	api, cloud := nativeTrunkAPI(t, &calls, func(*http.Request) *http.Response { t.Fatal("initial transport"); return nil })
 	var observed atomic.Int32
-	cloud.Provider.HTTPClient.Transport = nativeTrunkTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		observed.Add(1)
 		if req.URL.Query().Get("name") != "owned" || req.Header.Get("X-Trace") != "owned" {
 			t.Error(req)
 		}
 		return nativeTrunkWire(200, `{"trunks":[{"id":"one"}]}`), nil
-	})
+	}))
 	option := trunks.WithRecordListOpts(trunks.RecordListOpts{Query: map[string]json.RawMessage{"name": json.RawMessage(`"owned"`)}, Headers: map[string]string{"X-Trace": "owned"}})
 	var wg sync.WaitGroup
 	for i := 0; i < 8; i++ {

@@ -15,31 +15,23 @@ import (
 )
 
 type call struct{ method, path, query, body string }
-type transport func(*http.Request) (*http.Response, error)
 
-func (f transport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil && response.Request == nil {
-		response.Request = r
-	}
-	return response, err
-}
 func api(t *testing.T, calls *[]call, reply func(*http.Request) *http.Response) *sdk.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = transport(func(r *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 		var raw []byte
 		if r.Body != nil {
 			raw, _ = io.ReadAll(r.Body)
 		}
 		*calls = append(*calls, call{r.Method, r.URL.EscapedPath(), r.URL.RawQuery, string(raw)})
 		return reply(r), nil
-	})
+	}))
 	client := cloud.Client("network", "/v2.0/")
 	return sdk.New(client)
 }
 func wire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Header: http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"binding-proof"}}, Body: io.NopCloser(strings.NewReader(body))}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}, "X-Request-Id": {"binding-proof"}})
 }
 func field(t *testing.T, row *sdk.Record, key, want string) {
 	t.Helper()

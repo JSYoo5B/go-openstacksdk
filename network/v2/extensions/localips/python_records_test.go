@@ -16,16 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonLocalIPTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonLocalIPTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonLocalIPCall struct{ method, path, query, body, accept, ifMatch string }
 
 const pythonLocalIPBase = "/neutron/v2.0/local_ips"
@@ -33,7 +23,7 @@ const pythonLocalIPBase = "/neutron/v2.0/local_ips"
 func pythonLocalIPAPI(t *testing.T, calls *[]pythonLocalIPCall, reply func(*http.Request) (int, string)) *localips.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonLocalIPTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -41,8 +31,8 @@ func pythonLocalIPAPI(t *testing.T, calls *[]pythonLocalIPCall, reply func(*http
 		}
 		*calls = append(*calls, pythonLocalIPCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept"), req.Header.Get("If-Match")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return localips.New(client)

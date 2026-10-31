@@ -8,7 +8,6 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -16,16 +15,6 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
-
-type pythonSegmentRangeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonSegmentRangeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 type pythonSegmentRangeCall struct {
 	method, path, query, body string
@@ -35,7 +24,7 @@ type pythonSegmentRangeCall struct {
 func pythonSegmentRangeAPI(t *testing.T, calls *[]pythonSegmentRangeCall, reply func(*http.Request) (int, string)) *networksegmentranges.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonSegmentRangeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -43,8 +32,8 @@ func pythonSegmentRangeAPI(t *testing.T, calls *[]pythonSegmentRangeCall, reply 
 		}
 		*calls = append(*calls, pythonSegmentRangeCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Clone()})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return networksegmentranges.New(client)

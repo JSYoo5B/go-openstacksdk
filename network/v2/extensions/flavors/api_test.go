@@ -15,16 +15,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type flavorTransport func(*http.Request) (*http.Response, error)
-
-func (transport flavorTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type flavorCall struct{ method, path, query, body, accept string }
 
 const flavorBase = "/neutron/v2.0/flavors"
@@ -32,7 +22,7 @@ const flavorBase = "/neutron/v2.0/flavors"
 func flavorAPI(t *testing.T, calls *[]flavorCall, reply func(*http.Request) (int, string)) *flavors.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = flavorTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -40,8 +30,8 @@ func flavorAPI(t *testing.T, calls *[]flavorCall, reply func(*http.Request) (int
 		}
 		*calls = append(*calls, flavorCall{req.Method, req.URL.EscapedPath(), req.URL.RawQuery, raw, req.Header.Get("Accept")})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return flavors.New(client)

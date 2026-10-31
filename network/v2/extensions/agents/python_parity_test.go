@@ -15,18 +15,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonL3AgentTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonL3AgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func pythonL3AgentWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type pythonL3AgentCall struct{ method, path, query, body string }
@@ -45,7 +35,7 @@ func (r *pythonL3AgentRecorder) snapshot() []pythonL3AgentCall {
 func pythonL3AgentAPI(t *testing.T, recorder *pythonL3AgentRecorder, reply func(*http.Request) *http.Response) *agents.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonL3AgentTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -55,7 +45,7 @@ func pythonL3AgentAPI(t *testing.T, recorder *pythonL3AgentRecorder, reply func(
 		recorder.calls = append(recorder.calls, pythonL3AgentCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		recorder.mu.Unlock()
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return agents.New(client)

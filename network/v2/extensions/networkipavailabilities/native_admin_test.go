@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeIPAvailabilityTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeIPAvailabilityTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeIPAvailabilityWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeIPAvailabilityCall struct{ method, path, query, body string }
@@ -36,7 +26,7 @@ type nativeIPAvailabilityCall struct{ method, path, query, body string }
 func nativeIPAvailabilityAPI(t *testing.T, calls *[]nativeIPAvailabilityCall, reply func(*http.Request) *http.Response) (*networkipavailabilities.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeIPAvailabilityTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +34,7 @@ func nativeIPAvailabilityAPI(t *testing.T, calls *[]nativeIPAvailabilityCall, re
 		}
 		*calls = append(*calls, nativeIPAvailabilityCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return networkipavailabilities.New(client), cloud

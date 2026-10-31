@@ -9,7 +9,6 @@ import (
 	"net/url"
 	"reflect"
 	"slices"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
@@ -18,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativePoolTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativePoolTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativePoolWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativePoolCall struct{ method, path, query, body string }
@@ -37,7 +26,7 @@ type nativePoolCall struct{ method, path, query, body string }
 func nativePoolAPI(t *testing.T, calls *[]nativePoolCall, reply func(*http.Request) *http.Response) (*subnetpools.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativePoolTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +34,7 @@ func nativePoolAPI(t *testing.T, calls *[]nativePoolCall, reply func(*http.Reque
 		}
 		*calls = append(*calls, nativePoolCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return subnetpools.New(client), cloud

@@ -187,10 +187,10 @@ func TestPythonOwnedListPhysicalErrorsKeepNativeProofAndNoReplay(t *testing.T) {
 			client := cloud.Client("network", "/neutron/v2.0/")
 			calls, closed, retries := 0, 0, 0
 			readErr, closeErr := errors.New("list read"), errors.New("list close")
-			client.ProviderClient.HTTPClient.Transport = listRecordsTransport(func(r *http.Request) (*http.Response, error) {
+			cloud.SetTransport(testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				calls++
-				return &http.Response{StatusCode: code, Header: http.Header{"X-Request-Id": {"fault-proof"}}, Body: &listRecordsFaultBody{Reader: strings.NewReader(`{"bgpvpns":[{"id":"partial"}]}`), readErr: readErr, closeErr: closeErr, closed: &closed}}, nil
-			})
+				return testcloud.StreamResponse(code, &listRecordsFaultBody{Reader: strings.NewReader(`{"bgpvpns":[{"id":"partial"}]}`), readErr: readErr, closeErr: closeErr, closed: &closed}, http.Header{"X-Request-Id": {"fault-proof"}}), nil
+			}))
 			client.RetryFunc = func(context.Context, string, string, *gophercloud.RequestOpts, error, uint) error {
 				retries++
 				return nil
@@ -212,16 +212,6 @@ func TestPythonOwnedListPhysicalErrorsKeepNativeProofAndNoReplay(t *testing.T) {
 			}
 		})
 	}
-}
-
-type listRecordsTransport func(*http.Request) (*http.Response, error)
-
-func (f listRecordsTransport) RoundTrip(r *http.Request) (*http.Response, error) {
-	response, err := f(r)
-	if response != nil {
-		response.Request = r
-	}
-	return response, err
 }
 
 type listRecordsFaultBody struct {

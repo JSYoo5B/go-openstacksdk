@@ -2,7 +2,6 @@ package networkipavailabilities_test
 
 import (
 	"context"
-	"io"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -13,25 +12,15 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/networkipavailabilities"
 )
 
-type pythonParityCoreIPAvailabilityTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonParityCoreIPAvailabilityTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonParityCoreIPAvailabilityCall struct{ method, path, query string }
 
 func pythonParityCoreIPAvailabilityAPI(t *testing.T, calls *[]pythonParityCoreIPAvailabilityCall, reply func(*http.Request) string) (*networkipavailabilities.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonParityCoreIPAvailabilityTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		*calls = append(*calls, pythonParityCoreIPAvailabilityCall{req.Method, req.URL.Path, req.URL.RawQuery})
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(reply(req))), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, reply(req), http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return networkipavailabilities.New(client), cloud

@@ -18,18 +18,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeTrunkTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTrunkTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeTrunkWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeTrunkCall struct{ method, path, query, body string }
@@ -37,7 +27,7 @@ type nativeTrunkCall struct{ method, path, query, body string }
 func nativeTrunkAPI(t *testing.T, calls *[]nativeTrunkCall, reply func(*http.Request) *http.Response) (*trunks.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeTrunkTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -45,7 +35,7 @@ func nativeTrunkAPI(t *testing.T, calls *[]nativeTrunkCall, reply func(*http.Req
 		}
 		*calls = append(*calls, nativeTrunkCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return trunks.New(client), cloud

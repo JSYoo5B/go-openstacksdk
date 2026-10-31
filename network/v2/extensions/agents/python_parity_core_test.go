@@ -15,22 +15,12 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-type pythonParityCoreAgentTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonParityCoreAgentTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonParityCoreAgentCall struct{ method, path, query, body string }
 
 func pythonParityCoreAgentAPI(t *testing.T, calls *[]pythonParityCoreAgentCall, reply func(*http.Request) (int, string)) (*agents.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonParityCoreAgentTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -38,8 +28,8 @@ func pythonParityCoreAgentAPI(t *testing.T, calls *[]pythonParityCoreAgentCall, 
 		}
 		*calls = append(*calls, pythonParityCoreAgentCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return agents.New(client), cloud

@@ -190,13 +190,13 @@ func TestPythonTagsOrdinaryRetryHeadersAndLiveTokenKeepNativePolicy(t *testing.T
 	t.Run("live_token", func(t *testing.T) {
 		cloud := testcloud.New(t)
 		seen := []string{}
-		cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+		cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 			seen = append(seen, req.Header.Get("X-Auth-Token"))
 			if len(seen) == 1 {
 				return pythonTagWire(503, "original"), nil
 			}
 			return pythonTagWire(200, `{"tags":["actual"]}`), nil
-		})
+		}))
 		client := cloud.Client("network", "/neutron/v2.0/")
 		client.Microversion = "2.0"
 		cloud.Provider.RetryFunc = func(_ context.Context, _, _ string, o *gophercloud.RequestOpts, _ error, _ uint) error {

@@ -15,22 +15,12 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeTagTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeTagTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type nativeTagCall struct{ method, path, body string }
 
 func nativeTagAPI(t *testing.T, calls *[]nativeTagCall, reply func(*http.Request) (int, string)) *attributestags.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -38,8 +28,8 @@ func nativeTagAPI(t *testing.T, calls *[]nativeTagCall, reply func(*http.Request
 		}
 		*calls = append(*calls, nativeTagCall{req.Method, req.URL.Path, raw})
 		code, body := reply(req)
-		return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return attributestags.New(client)

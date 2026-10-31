@@ -16,16 +16,6 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type pythonRejudgeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRejudgeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 type pythonRejudgeCall struct{ method, path, query, body string }
 
 type pythonRejudgeReply struct {
@@ -38,7 +28,7 @@ const pythonRejudgeRoot = "/neutron/v2.0"
 func pythonRejudgeAPI(t *testing.T, calls *[]pythonRejudgeCall, replies map[string]pythonRejudgeReply) *quotas.API {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRejudgeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -50,8 +40,8 @@ func pythonRejudgeAPI(t *testing.T, calls *[]pythonRejudgeCall, replies map[stri
 		if !ok {
 			reply = pythonRejudgeReply{404, `{"NeutronError":{"type":"NotFound","message":"not found"}}`}
 		}
-		return &http.Response{StatusCode: reply.code, Body: io.NopCloser(strings.NewReader(reply.body)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(reply.code, reply.body, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + pythonRejudgeRoot + "/"
 	return quotas.New(client)

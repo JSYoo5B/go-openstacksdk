@@ -17,18 +17,8 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-type nativeBGPVPNTransport func(*http.Request) (*http.Response, error)
-
-func (transport nativeBGPVPNTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
-
 func nativeBGPVPNWire(code int, body string) *http.Response {
-	return &http.Response{StatusCode: code, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}}}
+	return testcloud.Response(code, body, http.Header{"Content-Type": {"application/json"}})
 }
 
 type nativeBGPVPNCall struct{ method, path, query, body string }
@@ -36,7 +26,7 @@ type nativeBGPVPNCall struct{ method, path, query, body string }
 func nativeBGPVPNAPI(t *testing.T, calls *[]nativeBGPVPNCall, reply func(*http.Request) *http.Response) (*bgpvpns.API, *testcloud.Cloud) {
 	t.Helper()
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = nativeBGPVPNTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		raw := ""
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -44,7 +34,7 @@ func nativeBGPVPNAPI(t *testing.T, calls *[]nativeBGPVPNCall, reply func(*http.R
 		}
 		*calls = append(*calls, nativeBGPVPNCall{req.Method, req.URL.Path, req.URL.RawQuery, raw})
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return bgpvpns.New(client), cloud
@@ -415,7 +405,7 @@ func TestNativeBGPVPNStatusesDecodeAndPreflight(t *testing.T) {
 		for name, list := range lists {
 			var calls []nativeBGPVPNCall
 			api, _ := nativeBGPVPNAPI(t, &calls, func(*http.Request) *http.Response {
-				return &http.Response{StatusCode: 204, Body: io.NopCloser(strings.NewReader("")), Header: http.Header{}}
+				return testcloud.Response(204, "", http.Header{})
 			})
 			errs := list(api)
 			if (name == "List") != (len(errs) == 0) || len(calls) != 1 {

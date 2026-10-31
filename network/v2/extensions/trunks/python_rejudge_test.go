@@ -6,22 +6,11 @@ import (
 	"io"
 	"net/http"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
 )
-
-type pythonRejudgeTransport func(*http.Request) (*http.Response, error)
-
-func (transport pythonRejudgeTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	response, err := transport(req)
-	if response != nil && response.Request == nil {
-		response.Request = req
-	}
-	return response, err
-}
 
 // update_trunk(trunk, **attrs) PUTs the passed attributes under their wire
 // names. Trunk does not inherit NetworkResource, so no If-Match is sent.
@@ -32,7 +21,7 @@ func TestPythonRejudgeTrunkUpdate(t *testing.T) {
 	}
 	var calls []call
 	cloud := testcloud.New(t)
-	cloud.Provider.HTTPClient.Transport = pythonRejudgeTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		var body any
 		if req.Body != nil {
 			data, _ := io.ReadAll(req.Body)
@@ -42,8 +31,8 @@ func TestPythonRejudgeTrunkUpdate(t *testing.T) {
 		}
 		calls = append(calls, call{req.Method, req.URL.Path, req.Header.Get("If-Match"), body})
 		reply := `{"trunk":{"id":"t-1","name":"t2","description":"","admin_state_up":false,"port_id":"p-1","status":"DOWN","sub_ports":[],"project_id":"proj","tenant_id":"proj","revision_number":4}}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(reply)), Header: http.Header{"Content-Type": {"application/json"}}}, nil
-	})
+		return testcloud.Response(200, reply, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	api := trunks.New(client)

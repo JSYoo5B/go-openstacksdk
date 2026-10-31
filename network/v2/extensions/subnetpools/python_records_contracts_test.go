@@ -14,6 +14,7 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
@@ -695,14 +696,14 @@ func TestPythonSubnetPoolRecordsOptionsSourceContextAndConcurrentOwnership(t *te
 	var concurrentCalls atomic.Int32
 	var unused []nativePoolCall
 	api, cloud := nativePoolAPI(t, &unused, func(*http.Request) *http.Response { panic("replaced transport") })
-	cloud.Provider.HTTPClient.Transport = nativePoolTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		concurrentCalls.Add(1)
 		body, err := io.ReadAll(req.Body)
 		if err != nil {
 			return nil, err
 		}
 		return nativePoolWire(200, string(body)), nil
-	})
+	}))
 	option := subnetpools.WithRecordAttribute("x_shared", []any{false, 0, nil})
 	values := make([]*subnetpools.SubnetPoolRecord, 8)
 	failures := make([]error, 8)

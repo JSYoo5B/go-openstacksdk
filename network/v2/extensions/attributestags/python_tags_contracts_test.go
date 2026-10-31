@@ -20,13 +20,13 @@ import (
 type pythonTagCall struct{ method, path, body, query string }
 
 func pythonTagWire(status int, body string) *http.Response {
-	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"Content-Type": {"application/json"}, "X-Tag-Proof": {"actual"}}}
+	return testcloud.Response(status, body, http.Header{"Content-Type": {"application/json"}, "X-Tag-Proof": {"actual"}})
 }
 func pythonTagCloud(t *testing.T, reply func(*http.Request) *http.Response) (*attributestags.API, *gophercloud.ServiceClient, *[]pythonTagCall) {
 	t.Helper()
 	cloud := testcloud.New(t)
 	calls := &[]pythonTagCall{}
-	cloud.Provider.HTTPClient.Transport = nativeTagTransport(func(req *http.Request) (*http.Response, error) {
+	cloud.SetTransport(testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
 		body := ""
 		if req.Body != nil {
 			raw, err := io.ReadAll(req.Body)
@@ -40,7 +40,7 @@ func pythonTagCloud(t *testing.T, reply func(*http.Request) *http.Response) (*at
 			t.Error(req.Header)
 		}
 		return reply(req), nil
-	})
+	}))
 	client := cloud.Client("network", "/catalog/unused/")
 	client.ResourceBase = cloud.Server.URL + "/neutron/v2.0/"
 	return attributestags.New(client), client, calls

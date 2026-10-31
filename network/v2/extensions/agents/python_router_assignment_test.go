@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
@@ -50,9 +51,9 @@ func TestPythonRouterAssignmentInvalidJSONAndPhysicalEvidence(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	fault := errors.New("router assignment body failed")
-	cloud.Provider.HTTPClient.Transport = pythonParityCoreAgentTransport(func(*http.Request) (*http.Response, error) {
-		return &http.Response{StatusCode: 200, Header: http.Header{"Content-Type": {"application/json"}}, Body: &routerAssignmentFault{Reader: strings.NewReader(`{"ok":true}`), cause: fault}}, nil
-	})
+	cloud.SetTransport(testcloud.LinkRequest(func(*http.Request) (*http.Response, error) {
+		return testcloud.StreamResponse(200, &routerAssignmentFault{Reader: strings.NewReader(`{"ok":true}`), cause: fault}, http.Header{"Content-Type": {"application/json"}}), nil
+	}))
 	_, err = api.UpdateRouterInAgent(context.Background(), "a", "r")
 	if !errors.Is(err, fault) || !errors.As(err, &proof) {
 		t.Fatal(err)
